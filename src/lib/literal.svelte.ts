@@ -12,8 +12,6 @@ export default class Literal {
     this.id = uuidv4();
     this.variable = variable;
     this.polarity = polarity;
-
-    $inspect(this.variable.isAssigned());
   }
 
   public getId() { return this.id; }

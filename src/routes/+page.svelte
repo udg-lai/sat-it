@@ -5,6 +5,7 @@
   import { Toggle } from 'flowbite-svelte';
 
   interface IdVariable { id: number, variable: Variable }
+  interface Interpretation { id: number, assigment: boolean }
   type RaWCNF = number[][]
   type CNF = Literal[][]
 
@@ -13,7 +14,22 @@
     [3, 1, 2]
   ]
 
-  const variables = new Set(
+  const I = [
+    {
+      id: 1,
+      assigment: true,
+    },
+    {
+      id: 2,
+      assigment: true,
+    },
+    {
+      id: 3,
+      assigment: false,
+    },
+  ]
+
+  const variables: Set<number> = new Set(
     rawCNF.flatMap((clause) => clause.map(literal => Math.abs(literal)))
   )
 
@@ -34,6 +50,15 @@
   const cnf: CNF = rawCNF.map((clause) => clause.map(newLiteral)) 
   const clause = cnf[0]
 
+  assign(I);
+
+  function assign(I: Interpretation[]) {
+    I.forEach(( {id, assigment} ) => {
+      console.log(id)
+      variablesMap.get(id)?.assign(assigment)
+    })
+  }
+
   function rawVariableToVariable(rvariable: number): Variable {
     if (rvariable < 0) throw "ERROR: raw numbers should be >= 0";
     const variable = new Variable(rvariable)
@@ -50,12 +75,6 @@
     return new Literal(variable, polarity);
   }
 
-  function onLiteralClicked(literal: Literal) {
-    console.log(literal)
-    toggleVariableState(literal.getVariable());
-    console.log(literal.evaluate());
-  }
-
   function toggleVariableState(variable: Variable) {
     if (variable.isAssigned())
       variable.negate()
@@ -68,8 +87,9 @@
 </script>
 
 <div>
-  {#each variablesMap as varRef}
-    <Toggle></Toggle>
+  {#each variablesMap as pair}
+    <span>{pair[0]} - {pair[1].evaluate()}</span>
+    <Toggle checked={pair[1].evaluate()}></Toggle>
   {/each}
 </div>
 

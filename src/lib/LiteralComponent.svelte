@@ -1,23 +1,20 @@
 <script lang="ts">
-  import {Variable} from '$lib/variable.ts';
+	import type Literal from './literal.svelte.ts';
 
   interface Props {
-    variable: Variable,
-    polarity: boolean
+    literal: Literal
   }
 
-  let {variable, polarity}: Props = $props();
+  let {literal}: Props = $props();
 
-  console.log(variable, polarity)
 </script>
 
 <div
   class="literal flex"
-  class:undefined={!variable.isAssigned()}
-  class:true={variable.isAssigned() && variable.getEval()()}
-  class:false={variable.isAssigned() && !variable.getEval()}>
+  class:undefined={true}
+  class:true={false}
+  class:false={false}>
   <span class="text-center align-middle">
-    {JSON.stringify(variable)} - Polarity: {polarity}
   </span>
 </div>
 
