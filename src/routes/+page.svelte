@@ -29,16 +29,20 @@
   ]
 
 
-  const variables: Set<number> = new Set(
+  const rawVariables: Set<number> = new Set(
     rawCNF.flatMap((clause) => clause.map(literal => Math.abs(literal)))
   )
 
-  const variablesMap = Array.from(variables).reduce((D, n) => {
+  const variablesMap: IdVariableMap = Array.from(rawVariables).reduce((D, n) => {
     D.set(n, rawVariableToVariable(n))
     return D;
   }, new IdVariableMap());
+  
+  const variables: Set<Variable> = new Set(
+    Array.from(variablesMap.values())
+  );
 
-  const II = new Interpretation(variables.size)
+  const II = new Interpretation(rawVariables.size)
 
   I.forEach(({ id, assigment }) => { II.set(variablesMap.get(id) as Variable, assigment)})
 
