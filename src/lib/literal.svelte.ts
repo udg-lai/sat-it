@@ -30,10 +30,17 @@ export default class Literal {
   }
 
   public isTrue(): boolean {
-    return this.evaluate();
+    return this.isDefined() && this.evaluate();
   }
 
   public isFalse(): boolean {
-    return !this.evaluate();
+    return this.isDefined() && !this.evaluate();
+  }
+
+  public toTeX(): string {
+    return [
+      this.polarity == 'Negative' ? `\\neg` : "",
+      this.getVariable().getId().toString()
+    ].join("")
   }
 }
