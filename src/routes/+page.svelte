@@ -3,6 +3,7 @@
   import LiteralComponent from '$lib/LiteralComponent.svelte';
   import Variable, {IdVariableMap} from '$lib/variable.svelte.ts';
   import { Toggle } from 'flowbite-svelte';
+	import { onMount } from 'svelte';
 
   interface IdVariable { id: number, variable: Variable }
   interface Interpretation { id: number, assigment: boolean }
@@ -11,7 +12,7 @@
 
   const rawCNF: RaWCNF = [
     [1, -2, 3],
-    [3, 1, 2]
+    [3, 1, -2]
   ]
 
   const I = [
@@ -47,14 +48,14 @@
     })
   )
 
-  const cnf: CNF = rawCNF.map((clause) => clause.map(newLiteral)) 
-  const clause = cnf[0]
+  const cnf: CNF = rawCNF.map((clause) => clause.map(newLiteral))
+  const clause = cnf[1]
 
   assign(I);
 
+
   function assign(I: Interpretation[]) {
-    I.forEach(( {id, assigment} ) => {
-      console.log(id)
+    I.forEach(( {id, assigment} : Interpretation ) => {
       variablesMap.get(id)?.assign(assigment)
     })
   }
@@ -67,9 +68,8 @@
 
   function newLiteral(literal: number): Literal {
     const variableId = Math.abs(literal)
-    if (!variablesMap.has(variableId)) 
+    if (!variablesMap.has(variableId))
       throw `ERROR: variable - ${variableId} - not found`;
-
     const variable = variablesMap.get(variableId) as Variable;
     const polarity = literal < 0 ? 'Negative' : 'Positive';
     return new Literal(variable, polarity);
@@ -87,15 +87,15 @@
 </script>
 
 <div>
-  {#each variablesMap as pair}
-    <span>{pair[0]} - {pair[1].evaluate()}</span>
-    <Toggle checked={pair[1].evaluate()}></Toggle>
+  {#each variablesMap as [id, variable] (id)}
+    <span>{id} - {variable.evaluate()}</span>
+    <Toggle bind:checked={variable.evaluation} ></Toggle>
   {/each}
 </div>
 
 
 <div class="flex flex-row">
-  {#each clause as literal}
+  {#each clause as literal (literal.id)}
     <LiteralComponent literal={literal}  />
   {/each}
 </div>
