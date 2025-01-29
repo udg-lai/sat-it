@@ -1,12 +1,10 @@
 <script lang="ts">
+	import { Interpretation } from '$lib/interpretation.svelte.ts';
 	import Literal from '$lib/literal.svelte.ts';
   import LiteralComponent from '$lib/LiteralComponent.svelte';
   import Variable, {IdVariableMap} from '$lib/variable.svelte.ts';
   import { Toggle } from 'flowbite-svelte';
-	import { onMount } from 'svelte';
 
-  interface IdVariable { id: number, variable: Variable }
-  interface Interpretation { id: number, assigment: boolean }
   type RaWCNF = number[][]
   type CNF = Literal[][]
 
@@ -30,6 +28,7 @@
     },
   ]
 
+
   const variables: Set<number> = new Set(
     rawCNF.flatMap((clause) => clause.map(literal => Math.abs(literal)))
   )
@@ -39,24 +38,18 @@
     return D;
   }, new IdVariableMap());
 
-  const variablesList: IdVariable[] = Array.from(
-    variablesMap.entries().map(([a, b]) => {
-      return {
-        'id': a,
-        'variable': b
-      }
-    })
-  )
+  const II = new Interpretation(variables.size)
+
+  I.forEach(({ id, assigment }) => { II.set(variablesMap.get(id) as Variable, assigment)})
 
   const cnf: CNF = rawCNF.map((clause) => clause.map(newLiteral))
   const clause = cnf[1]
 
-  assign(I);
+  assign(II);
 
-
-  function assign(I: Interpretation[]) {
-    I.forEach(( {id, assigment} : Interpretation ) => {
-      variablesMap.get(id)?.assign(assigment)
+  function assign(II: Interpretation) {
+    II.forEach((assigment, variable) => {
+      variable.assign(assigment)
     })
   }
 
@@ -74,15 +67,6 @@
     const polarity = literal < 0 ? 'Negative' : 'Positive';
     return new Literal(variable, polarity);
   }
-
-  function toggleVariableState(variable: Variable) {
-    if (variable.isAssigned())
-      variable.negate()
-    else
-      variable.assign(true);
-  }
-
-
 
 </script>
 
