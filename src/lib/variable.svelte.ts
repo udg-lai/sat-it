@@ -17,12 +17,12 @@ export default class Variable {
     return this.evaluation;
   }
 
-  public assign(evaluation: boolean) {
+  public assign(evaluation: boolean): void {
     this.evaluation = evaluation;
     this.assigned = true;
   }
 
-  public negate() {
+  public negate(): void {
     this.evaluation != this.evaluation;
   }
 }
