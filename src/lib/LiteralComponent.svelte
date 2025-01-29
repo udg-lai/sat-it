@@ -6,15 +6,16 @@
   }
 
   let {literal}: Props = $props();
-
 </script>
 
 <div
   class="literal flex"
-  class:undefined={true}
-  class:true={false}
-  class:false={false}>
+  class:undefined={!literal.isDefined()}
+  class:true={literal.isTrue()}
+  class:false={literal.isFalse()}>
   <span class="text-center align-middle">
+    {literal.polarity == 'Negative' ? "not" : ""}
+    {literal.variable.id}
   </span>
 </div>
 
@@ -31,11 +32,11 @@
     background-color: #e8daff;
   }
 
-  .true {
+  .false {
     background-color: #ffd7d9;
   }
 
-  .false {
+  .true {
     background-color: #bae6ff;
   }
 
