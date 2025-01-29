@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { Interpretation } from '$lib/interpretation.svelte.ts';
 	import Literal from '$lib/literal.svelte.ts';
-  import LiteralComponent from '$lib/LiteralComponent.svelte';
   import Variable, {IdVariableMap} from '$lib/variable.svelte.ts';
+	import ClauseVisualizerComponent from '$lib/visualizer/ClauseVisualizerComponent.svelte';
+	import InterpretationVisualizerComponent from '$lib/visualizer/InterpretationVisualizerComponent.svelte';
   import { Toggle } from 'flowbite-svelte';
 
   type RaWCNF = number[][]
@@ -75,15 +76,12 @@
 </script>
 
 <div>
-  {#each variablesMap as [id, variable] (id)}
-    <span>{id} - {variable.evaluate()}</span>
+  {#each variables as variable (variable.id)}
+    <span>{variable.id} - {variable.evaluate()}</span>
     <Toggle bind:checked={variable.evaluation} ></Toggle>
   {/each}
 </div>
 
 
-<div class="flex flex-row">
-  {#each clause as literal (literal.id)}
-    <LiteralComponent literal={literal}  />
-  {/each}
-</div>
+<InterpretationVisualizerComponent variables={variables}/>
+<ClauseVisualizerComponent clause={clause}/>
