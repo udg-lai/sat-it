@@ -18,10 +18,22 @@ export default class Literal {
   public getVariable() { return this.variable; }
   public getPolarity() { return this.polarity; }
 
+  public isDefined(): boolean {
+    return this.variable.isAssigned();
+  }
+
   public evaluate(): boolean {
     let evaluation = this.variable.evaluate();
     if (this.polarity === 'Negative')
       evaluation = !evaluation;
     return evaluation;
+  }
+
+  public isTrue(): boolean {
+    return this.evaluate();
+  }
+
+  public isFalse(): boolean {
+    return !this.evaluate();
   }
 }
