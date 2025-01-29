@@ -4,9 +4,9 @@ import { v4 as uuidv4 } from 'uuid';
 export type Polarity = 'Positive' | 'Negative';
 
 export default class Literal {
-  private id: string;
-  private variable:  Variable;
-  private polarity: Polarity;
+  id: string;
+  variable: Variable;
+  polarity: Polarity;
 
   constructor(variable: Variable, polarity: Polarity) {
     this.id = uuidv4();

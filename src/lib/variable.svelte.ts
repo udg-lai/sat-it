@@ -1,7 +1,7 @@
 export default class Variable {
-  private id: number;
-  private evaluation = $state(false);
-  private assigned = $state(false);
+  id: number;
+  evaluation = $state(false);
+  assigned = $state(false);
 
   constructor(id: number) {
     if (id < 0) throw "ERROR: variable ID should be >= 0";
