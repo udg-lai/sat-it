@@ -29,7 +29,7 @@ export default class Variable {
 
 
 export class IdVariableMap extends Map<number, Variable> {
-  constructor() { 
+  constructor() {
     super();
   }
 }

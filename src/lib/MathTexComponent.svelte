@@ -1,19 +1,20 @@
 <script lang="ts">
-    import { display } from "mathlifier";
+	import { display } from 'mathlifier';
 
-    interface Props { equation: string }
+	interface Props {
+		equation: string;
+	}
 
-    let {equation}: Props = $props()
+	let { equation }: Props = $props();
 </script>
 
 <span>
-    {@html display(equation)}
+	{@html display(equation)}
 </span>
 
-
 <style>
-    span {
-        display: table;
-        margin: 0 auto;
-    }
+	span {
+		display: table;
+		margin: 0 auto;
+	}
 </style>
