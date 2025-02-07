@@ -37,8 +37,7 @@
 		{
 			id: 3,
 			assigment: false
-		}
-		,
+		},
 		{
 			id: 4,
 			assigment: false
@@ -73,27 +72,29 @@
 		return new Literal(variable, polarity);
 	}
 
-	function logicResolution(c1: Literal[], c2: Literal[]):Literal[]{
-		const resolvedLiterals: Map<number,Literal> = new Map();
+	function logicResolution(c1: Literal[], c2: Literal[]): Literal[] {
+		const resolvedLiterals: Map<number, Literal> = new Map();
 		let foundComplementary = false;
 
-		c1.forEach(l1 => {
+		c1.forEach((l1) => {
 			//We need to do this as it follows as the ids of each literal are unique
-			resolvedLiterals.set(l1.variable.id * (l1.polarity === 'Negative' ? -1 : 1), new Literal(l1.variable, l1.polarity));
+			resolvedLiterals.set(
+				l1.variable.id * (l1.polarity === 'Negative' ? -1 : 1),
+				new Literal(l1.variable, l1.polarity)
+			);
 		});
 
-		c2.forEach(l2 =>{
+		c2.forEach((l2) => {
 			const key = l2.variable.id * (l2.polarity === 'Negative' ? -1 : 1);
-			if(resolvedLiterals.has(-key) && !foundComplementary) {
+			if (resolvedLiterals.has(-key) && !foundComplementary) {
 				//Found complementary, we delete it
 				resolvedLiterals.delete(-key);
 				foundComplementary = true;
-			}
-			else if(!resolvedLiterals.has(key)) {
+			} else if (!resolvedLiterals.has(key)) {
 				//In case the literals is not inside the resolved clause, we add it
 				resolvedLiterals.set(key, new Literal(l2.variable, l2.polarity));
 			}
-		})
+		});
 		return Array.from(resolvedLiterals.values());
 	}
 </script>
@@ -106,11 +107,14 @@
 </div>
 
 <InterpretationVisualizerComponent {variables} />
+
 {#each cnf as clause}
 	<ClauseVisualizerComponent {clause} />
 {/each}
 
-<p>Let's visualize the new clause created by applying logic resolution to the first and second clause of the cnf</p>
+<p>
+	Let's visualize the new clause created by applying logic resolution to the first and second clause
+	of the cnf
+</p>
 
-
-<ClauseVisualizerComponent clause = {logicResolution(cnf[0], cnf[1])}/>
+<ClauseVisualizerComponent clause={logicResolution(cnf[0], cnf[1])} />
