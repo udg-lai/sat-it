@@ -1,16 +1,17 @@
-<script lang="ts"></script>
+<script lang="ts">
+	import ToolsComponent from "./ToolsComponent.svelte";
+
+</script>
 
 <div class="grid-container">
-	<sidebar></sidebar>
-	<workspace class="grid-container">
+	<ToolsComponent isOpen={true} --width="max(200px, 20vw)" />
+	<workspace class="flex flex-col md:flex-row">
 		<trail></trail>
 		<play-area></play-area>
 	</workspace>
-
 </div>
 
 <style>
-
 	trail, play-area {
 		align-items: center;
 		justify-content: center;
@@ -27,11 +28,6 @@
 
 	workspace {
 		flex: auto;
-	}
-
-	sidebar {
-		width: 10vw;
-		background-color: brown;
 	}
 
 	.grid-container {
