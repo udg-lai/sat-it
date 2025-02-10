@@ -25,7 +25,7 @@
 	Array.from(rawVariables).forEach((v) => variablesMap.set(v, rawVariableToVariable(v)));
 
 	const variables: Set<Variable> = new Set(Array.from(variablesMap.values()));
-
+/*
 	const I = [
 		{
 			id: 1,
@@ -38,19 +38,15 @@
 		{
 			id: 3,
 			assigment: false
-		},
-		{
-			id: 4,
-			assigment: false
 		}
-	];
+	];*/
 
 	const II = new Interpretation(rawVariables.size);
-	I.forEach(({ id, assigment }) => II.set(variablesMap.get(id) as Variable, assigment));
+	//I.forEach(({ id, assigment }) => II.set(variablesMap.get(id) as Variable, assigment));
 
 	const cnf: CNF = new CNF(rawCNF.map((clause) => clause.map(newLiteral)));
 
-	assign(II);
+	//assign(II);
 
 	function assign(II: Interpretation) {
 		II.forEach((assigment, variable) => {
@@ -93,14 +89,18 @@
 		}
 		return Array.from(resolvedLiterals.values());
 	}
+	function decide(): void {
+		for(const [key, variable] of variablesMap) {
+			if(!variable.isAssigned()){
+				II.set(variable as Variable,true);
+				assign(II);
+				break;
+			}
+		}
+	}
 </script>
 
-<div class="flex flex-column justify-center mt-3">
-	{#each variables as variable (variable.id)}
-		<span>{variable.id} - {variable.evaluate()}</span>
-		<Toggle bind:checked={variable.evaluation} class="ml-1 mr-2"></Toggle>
-	{/each}
-</div>
+
 
 <InterpretationVisualizerComponent {variables} />
 <CnfVisualizerComponent {cnf}/>
@@ -109,3 +109,4 @@
 <ClauseVisualizerComponent clause={logicResolution(cnf.getClause(0), cnf.getClause(1))}/>
 
 <p>The cnf is <strong>{cnf.evaluate() ? "SAT" : "UNSAT"}</strong></p>
+<button on:click={decide}>Make Decision</button>

@@ -26,9 +26,14 @@ export default class CNF{
     for(const clause of this.clauses) {
       let clausSatisfied = false;
       for(const literal of clause) {
-        if(literal.evaluate()) {
-          clausSatisfied = true;
-          break;
+        try{
+          if(literal.evaluate()) {
+            clausSatisfied = true;
+            break;
+          }
+        }
+        catch {
+          
         }
       }
       if(!clausSatisfied) {
