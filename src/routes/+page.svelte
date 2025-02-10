@@ -3,12 +3,13 @@
 	import Literal from '$lib/literal.svelte.ts';
 	import LiteralComponent from '$lib/LiteralComponent.svelte';
 	import Variable, { IdVariableMap } from '$lib/variable.svelte.ts';
+	import CNF from '$lib/cnf.svelte.ts';
 	import ClauseVisualizerComponent from '$lib/visualizer/ClauseVisualizerComponent.svelte';
+	import CnfVisualizerComponent from '$lib/visualizer/CnfVisualizerComponent.svelte';
 	import InterpretationVisualizerComponent from '$lib/visualizer/InterpretationVisualizerComponent.svelte';
 	import { Toggle } from 'flowbite-svelte';
 
 	type RaWCNF = number[][];
-	type CNF = Literal[][];
 
 	const rawCNF: RaWCNF = [
 		[1, -2, 3, 4],
@@ -47,8 +48,7 @@
 	const II = new Interpretation(rawVariables.size);
 	I.forEach(({ id, assigment }) => II.set(variablesMap.get(id) as Variable, assigment));
 
-	const cnf: CNF = rawCNF.map((clause) => clause.map(newLiteral));
-	const clause = cnf[1];
+	const cnf: CNF = new CNF(rawCNF.map((clause) => clause.map(newLiteral)));
 
 	assign(II);
 
@@ -95,22 +95,17 @@
 	}
 </script>
 
-<div>
+<div class="flex flex-column justify-center mt-3">
 	{#each variables as variable (variable.id)}
 		<span>{variable.id} - {variable.evaluate()}</span>
-		<Toggle bind:checked={variable.evaluation}></Toggle>
+		<Toggle bind:checked={variable.evaluation} class="ml-1 mr-2"></Toggle>
 	{/each}
 </div>
 
 <InterpretationVisualizerComponent {variables} />
+<CnfVisualizerComponent {cnf}/>
 
-{#each cnf as clause}
-	<ClauseVisualizerComponent {clause} />
-{/each}
+<p>Let's visualize the new clause created by applying logic resolution to the first and second clause of the cnf</p>
+<ClauseVisualizerComponent clause={logicResolution(cnf.getClause(0), cnf.getClause(1))}/>
 
-<p>
-	Let's visualize the new clause created by applying logic resolution to the first and second clause
-	of the cnf
-</p>
-
-<ClauseVisualizerComponent clause={logicResolution(cnf[0], cnf[1])} />
+<p>The cnf is <strong>{cnf.evaluate() ? "SAT" : "UNSAT"}</strong></p>
