@@ -1,49 +1,57 @@
 <script lang="ts">
-    import { Button } from 'flowbite-svelte';
-    import { ArrowRightOutline, ArrowLeftOutline } from 'flowbite-svelte-icons';
+	import { Button } from 'flowbite-svelte';
+	import { ArrowRightOutline, ArrowLeftOutline } from 'flowbite-svelte-icons';
 
-    interface Props {
-        isOpen: boolean
-    }
+	interface Props {
+		hide: boolean;
+	}
 
-    let { isOpen }: Props = $props()
+	let { hide: hide }: Props = $props();
 
-    function onToggleBtn() {
-        isOpen = !isOpen
-    }
-
-    // your script goes here
+	function onToggleBtn() {
+		hide = !hide;
+	}
 </script>
 
-<div class="tools-container" class:hide={!isOpen}>
-    <div class="toggle-button">
-        <Button on:click={onToggleBtn}  pill={true} class="!p-2">
-            {#if isOpen}
-                <ArrowLeftOutline  class="w-5 h-5" />
-            {:else}
-                <ArrowRightOutline class="w-5 h-5" />
-            {/if}
-        </Button>
-    </div>
+<div class="tools-container">
+	<div class="options-tools" class:separator-options={!hide}>
+		<div class="toggle-button">
+			<Button on:click={onToggleBtn} pill={true} class="!p-2">
+				{#if hide}
+					<ArrowLeftOutline class="h-5 w-5" />
+				{:else}
+					<ArrowRightOutline class="h-5 w-5" />
+				{/if}
+			</Button>
+		</div>
+	</div>
+	<div class="tools" class:hide={hide}></div>
 </div>
 
 <style>
-    .tools-container {
-        width: var(--width);
-        height: 100%;
-		background-color: brown;
-        display: flex;
-        position: relative;
+	.options-tools {
+		width: 3rem;
+		padding: 0.5rem 0rem;
+		display: flex;
+		justify-content: center;
+	}
+    
+    .separator-options {
+        border-width: 0px 1px 0px 0px;
+        border-color: var(--border-color);
     }
 
-    .toggle-button {
-        position: absolute;
-        right: -18px;
-        top: 50%;
-    }
+	.tools {
+		width: var(--width);
+	}
 
-    .hide {
-        width: 0;
-    }
+	.tools-container {
+		height: 100%;
+		display: flex;
+		position: relative;
+	}
+
+	.hide {
+		width: 0;
+	}
 </style>
-

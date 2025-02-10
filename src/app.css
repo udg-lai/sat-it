@@ -2,10 +2,19 @@
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 
+:root {
+  --border-color: #c1c7cd;
+  --main-bg-color: #f2f4f8;
+  --main-font-color: #000000;
+  --min-width-tools: 200px;
+  --max-width-tools: 25vw;
+}
 
 html, body {
   height: 100%;
   width: 100%;
+  background-color: var(--main-bg-color);
+  color: var(--main-font-color);
 }
 
 body > div {
