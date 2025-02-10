@@ -43,4 +43,12 @@ export default class Literal {
       this.getVariable().getId().toString()
     ].join("")
   }
+
+  public toInt(): number {
+    return this.variable.id * (this.polarity === 'Negative' ? -1 : 1)  
+  }
+
+  public copy(): Literal {
+    return new Literal(this.variable, this.polarity)
+  }
 }
