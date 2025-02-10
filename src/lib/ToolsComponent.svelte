@@ -16,12 +16,28 @@
 <div class="tools-container">
 	<div class="options-tools" class:separator-options={!hide}>
 		<div class="toggle-button">
-			<Button on:click={onToggleBtn} pill={true} class="!p-2">
-				{#if hide}
-					<ArrowLeftOutline class="h-5 w-5" />
-				{:else}
-					<ArrowRightOutline class="h-5 w-5" />
-				{/if}
+			<Button outline on:click={onToggleBtn} class="!p-2">
+				<ArrowRightOutline class="h-5 w-5" />
+			</Button>
+		</div>
+		<div class="toggle-button">
+			<Button outline on:click={onToggleBtn} class="!p-2">
+				<ArrowRightOutline class="h-5 w-5" />
+			</Button>
+		</div>
+		<div class="toggle-button">
+			<Button outline on:click={onToggleBtn} class="!p-2">
+				<ArrowRightOutline class="h-5 w-5" />
+			</Button>
+		</div>
+		<div class="toggle-button">
+			<Button outline on:click={onToggleBtn} class="!p-2">
+				<ArrowRightOutline class="h-5 w-5" />
+			</Button>
+		</div>
+		<div class="toggle-button">
+			<Button outline on:click={onToggleBtn} class="!p-2">
+				<ArrowRightOutline class="h-5 w-5" />
 			</Button>
 		</div>
 	</div>
@@ -33,8 +49,13 @@
 		width: 3rem;
 		padding: 0.5rem 0rem;
 		display: flex;
-		justify-content: center;
+        flex-direction: column;
+		align-items: center;
 	}
+
+    .options-tools > .toggle-button:not(:last-child) {
+        margin-bottom: 1rem;
+    }
     
     .separator-options {
         border-width: 0px 1px 0px 0px;

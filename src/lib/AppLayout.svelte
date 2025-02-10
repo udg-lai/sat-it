@@ -11,7 +11,6 @@ import LogicResolutionComponent from "$lib/LogicResolutionComponent.svelte";
 			<ToolsComponent hide={false} --width="max(var(--min-width-tools), var(--max-width-tools))" />
 		</div>
 		<workspace class="flex flex-col md:flex-row">
-			<trail></trail>
 			<play-area>
 				<scrollable-area>
 					<LogicResolutionComponent />
