@@ -12,8 +12,8 @@
 	type RaWCNF = number[][];
 
 	const rawCNF: RaWCNF = [
-		[1, -2, 3, 4],
-		[3, 1, -2, -4]
+		[1, -2, 3],
+		[3, 1, -2]
 	];
 
 	const rawVariables: Set<number> = new Set(
@@ -25,28 +25,20 @@
 	Array.from(rawVariables).forEach((v) => variablesMap.set(v, rawVariableToVariable(v)));
 
 	const variables: Set<Variable> = new Set(Array.from(variablesMap.values()));
-/*
+
 	const I = [
 		{
 			id: 1,
-			assigment: true
-		},
-		{
-			id: 2,
-			assigment: true
-		},
-		{
-			id: 3,
 			assigment: false
 		}
-	];*/
+	];
 
 	const II = new Interpretation(rawVariables.size);
-	//I.forEach(({ id, assigment }) => II.set(variablesMap.get(id) as Variable, assigment));
+	I.forEach(({ id, assigment }) => II.set(variablesMap.get(id) as Variable, assigment));
 
 	const cnf: CNF = new CNF(rawCNF.map((clause) => clause.map(newLiteral)));
 
-	//assign(II);
+	assign(II);
 
 	function assign(II: Interpretation) {
 		II.forEach((assigment, variable) => {
@@ -108,5 +100,5 @@
 <p>Let's visualize the new clause created by applying logic resolution to the first and second clause of the cnf</p>
 <ClauseVisualizerComponent clause={logicResolution(cnf.getClause(0), cnf.getClause(1))}/>
 
-<p>The cnf is <strong>{cnf.evaluate() ? "SAT" : "UNSAT"}</strong></p>
-<button on:click={decide}>Make Decision</button>
+<p>The cnf is <strong>{cnf.evaluate()}</strong></p>
+<button class="bg-blue-500 text-white px-4 py-2 rounded" on:click={decide}>Make Decision</button>

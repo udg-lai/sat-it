@@ -21,26 +21,34 @@ export default class CNF{
     this.clauses.push(clause);
   }
 
-  public evaluate(): boolean {
-    let satisfiable: boolean = true;
-    for(const clause of this.clauses) {
-      let clausSatisfied = false;
-      for(const literal of clause) {
-        try{
-          if(literal.evaluate()) {
-            clausSatisfied = true;
-            break;
-          }
-        }
-        catch {
-          
+  public evaluate(): CNFState {
+    let satisfiable: CNFState = CNFState.SAT;
+    for (const clause of this.clauses) {
+      let clausSatisfied: boolean | null = false;
+      for (const literal of clause) {
+        if (literal.isDefined() && literal.evaluate()) {
+          clausSatisfied = true;
+          break;
+        } 
+        else if (!literal.isDefined()) {
+          clausSatisfied = null;
         }
       }
-      if(!clausSatisfied) {
-        satisfiable = false;
+      if (clausSatisfied === false) {
+        satisfiable = CNFState.UNSAT;
         break;
+      } 
+      else if (clausSatisfied === null && satisfiable === CNFState.SAT) {
+        satisfiable = CNFState.UNDETERMINED;
       }
     }
+  
     return satisfiable;
   }
+}
+
+export enum CNFState {
+  UNSAT = "UNSAT",
+  SAT = "SAT",
+  UNDETERMINED = "UNDETERMINED"
 }
