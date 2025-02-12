@@ -108,4 +108,4 @@
 <p>Let's visualize the new clause created by applying logic resolution to the first and second clause of the cnf</p>
 <ClauseVisualizerComponent clause={logicResolution(cnf.getClause(0), cnf.getClause(1))}/>
 
-<p>The cnf is <strong>{cnf.evaluate() ? "SAT" : "UNSAT"}</strong></p>
+<p>The cnf is <strong>{cnf.evaluate()}</strong></p>
