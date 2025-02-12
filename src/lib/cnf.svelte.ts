@@ -9,8 +9,8 @@ export default class CNF{
 
   public getClauses(): Literal[][] { return this.clauses; }
   public getClause(i: number): Literal[] {
-    if(i <= 0 && this.clauses.length < i){
-      throw "ERROR: unexpected asked clause";
+    if(i < 0 || i >= this.clauses.length){
+      throw "[ERROR]: accessing out of range for consulting a clause in the CNF";
     }
     else {
       return this.clauses[i];
