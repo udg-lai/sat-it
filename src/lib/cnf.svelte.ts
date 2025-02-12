@@ -1,62 +1,100 @@
 import Literal from "./literal.svelte.ts";
+import { v4 as uuidv4 } from 'uuid';
 
-export default class CNF{
-  clauses: Literal[][];
+export class Clause {
+  literals: Literal[] = []
+  id: string;
 
-  constructor(clauses:Literal[][]){
+  constructor(literals: Literal[]) {
+    this.id = uuidv4();
+    this.literals = literals;
+  }
+
+  public addLiteral(lit: Literal) {
+    this.literals.push(lit);
+  }
+
+  public removeLiteral(lit: Literal) {
+    this.literals = this.literals.filter(l => l.id != lit.id);
+  }
+
+  public eval(): Eval {
+    let state: Eval = Eval.UNDETERMINED
+    let i = 0;
+    let unsatCount = 0;
+    while (i < this.literals.length && state !== Eval.SAT) {
+      const lit: Literal = this.literals[i];
+      if (lit.isTrue()) state = Eval.SAT
+      else {
+        if (lit.isFalse())
+          unsatCount++;
+        i++;
+      }
+    }
+    if (state !== Eval.SAT) {
+      state = unsatCount == i ? Eval.UNSAT : Eval.UNDETERMINED
+    }
+    return state;
+  }
+
+  public isUndetermined(): boolean {
+    return this.eval() === Eval.UNDETERMINED;
+  }
+
+  public isSAT(): boolean {
+    return this.eval() === Eval.SAT
+  }
+
+  public isUnSAT(): boolean {
+    return this.eval() === Eval.UNSAT;
+  }
+
+  [Symbol.iterator]() {
+    return this.literals.values();
+  }
+
+  forEach(callback: (literal: Literal, index: number, array: Literal[]) => void, thisArg?: any): void {
+    this.literals.forEach(callback, thisArg);
+  }
+}
+
+export default class CNF {
+  clauses: Clause[];
+
+  constructor(clauses: Clause[]) {
     this.clauses = clauses;
   }
 
-  public getClauses(): Literal[][] { return this.clauses; }
-  public getClause(i: number): Literal[] {
-    if(i < 0 || i >= this.clauses.length){
+  public getClauses(): Clause[] { 
+    return this.clauses; 
+  }
+
+  public getClause(i: number): Clause {
+    if (i < 0 || i >= this.clauses.length) {
       throw "[ERROR]: accessing out of range for consulting a clause in the CNF";
     }
     else {
       return this.clauses[i];
     }
   }
-  
-  public addClause(clause:Literal[]): void {
+
+  public addClause(clause: Clause): void {
     this.clauses.push(clause);
   }
 
-  public evaluate(): CNFState {
-    let satisfiable: CNFState = CNFState.SAT;
-    let clauseIndex = 0;
-    
-    while (clauseIndex < this.clauses.length && (satisfiable === CNFState.SAT || satisfiable === CNFState.UNDETERMINED)) {
-      const clause = this.clauses[clauseIndex];
-      let clausSatisfied: boolean | null = false;
-      let literalIndex = 0;
-      
-      while (literalIndex < clause.length && (clausSatisfied === false || clausSatisfied === null)) {
-        const literal = clause[literalIndex];
-
-        if (literal.isDefined() && literal.evaluate()) {
-          clausSatisfied = true;
-        } 
-        else if (!literal.isDefined()) {
-          clausSatisfied = null;
-        }
-        literalIndex++;
-      }
-
-      if (clausSatisfied === false) {
-        satisfiable = CNFState.UNSAT;
-      } 
-      else if (clausSatisfied === null && satisfiable === CNFState.SAT) {
-        satisfiable = CNFState.UNDETERMINED;
-      }
-      
-      clauseIndex++;
+  public eval(): Eval {
+    let state: Eval = Eval.SAT;
+    let i = 0;
+    while (i < this.clauses.length && state === Eval.SAT) {
+      const clause: Clause = this.clauses[i];
+      state = clause.eval();
+      i++;
     }
-  
-    return satisfiable;
+    return state;
   }
 }
 
-export enum CNFState {
+export enum Eval {
   UNSAT = "UNSAT",
   SAT = "SAT",
   UNDETERMINED = "UNDETERMINED"
