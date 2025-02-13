@@ -1,9 +1,8 @@
 <script lang="ts">
 	import { Interpretation } from '$lib/interpretation.svelte.ts';
 	import Literal from '$lib/literal.svelte.ts';
-	import LiteralComponent from '$lib/LiteralComponent.svelte';
 	import Variable, { IdVariableMap } from '$lib/variable.svelte.ts';
-	import CNF from '$lib/cnf.svelte.ts';
+	import CNF, { Clause } from '$lib/cnf.svelte.ts';
 	import ClauseVisualizerComponent from '$lib/visualizer/ClauseVisualizerComponent.svelte';
 	import CnfVisualizerComponent from '$lib/visualizer/CnfVisualizerComponent.svelte';
 	import InterpretationVisualizerComponent from '$lib/visualizer/InterpretationVisualizerComponent.svelte';
@@ -48,7 +47,7 @@
 	const II = new Interpretation(rawVariables.size);
 	I.forEach(({ id, assigment }) => II.set(variablesMap.get(id) as Variable, assigment));
 
-	const cnf: CNF = new CNF(rawCNF.map((clause) => clause.map(newLiteral)));
+	const cnf: CNF = new CNF(rawCNF.map((literals) => newClause(literals)));
 
 	assign(II);
 
@@ -64,6 +63,10 @@
 		return variable;
 	}
 
+	function newClause(literals: number[]): Clause {
+		return new Clause(literals.map(newLiteral));
+	}
+
 	function newLiteral(literal: number): Literal {
 		const variableId = Math.abs(literal);
 		if (!variablesMap.has(variableId)) throw `ERROR: variable - ${variableId} - not found`;
@@ -72,7 +75,7 @@
 		return new Literal(variable, polarity);
 	}
 
-	function logicResolution(c1: Literal[], c2: Literal[]): Literal[] {
+	function logicResolution(c1: Clause, c2: Clause): Clause {
 		const resolvedLiterals: Map<number, Literal> = new Map();
 
 		//We need to do this as it follows as the ids of each literal are unique
@@ -91,7 +94,7 @@
 				resolvedLiterals.set(key, lit.copy());
 			}
 		}
-		return Array.from(resolvedLiterals.values());
+		return new Clause(Array.from(resolvedLiterals.values()));
 	}
 </script>
 
@@ -108,4 +111,4 @@
 <p>Let's visualize the new clause created by applying logic resolution to the first and second clause of the cnf</p>
 <ClauseVisualizerComponent clause={logicResolution(cnf.getClause(0), cnf.getClause(1))}/>
 
-<p>The cnf is <strong>{cnf.evaluate()}</strong></p>
+<p>The cnf is <strong>{cnf.eval()}</strong></p>

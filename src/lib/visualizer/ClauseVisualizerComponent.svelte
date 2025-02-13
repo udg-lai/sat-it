@@ -1,9 +1,9 @@
 <script lang="ts">
-	import type Literal from '$lib/literal.svelte.ts';
+	import type { Clause } from '$lib/cnf.svelte.ts';
 	import LiteralComponent from '$lib/LiteralComponent.svelte';
 
 	interface Props {
-		clause: Literal[];
+		clause: Clause;
 	}
 	let { clause }: Props = $props();
 </script>
