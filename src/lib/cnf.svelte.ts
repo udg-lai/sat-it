@@ -65,8 +65,8 @@ export default class CNF {
     this.clauses = clauses;
   }
 
-  public getClauses(): Clause[] { 
-    return this.clauses; 
+  public getClauses(): Clause[] {
+    return this.clauses;
   }
 
   public getClause(i: number): Clause {
@@ -83,13 +83,28 @@ export default class CNF {
   }
 
   public eval(): Eval {
-    let state: Eval = Eval.SAT;
+    // info: searches for un unsat clause to determine if
+    // the CNF is UNSAT, otherwise it takes into account how
+    // many clause have been satisfied to know if it is SAT or UNDETERMINED
+    let unsat = false;
+    let nSatisfied = 0;
     let i = 0;
-    while (i < this.clauses.length && state === Eval.SAT) {
+    while (i < this.clauses.length && !unsat) {
       const clause: Clause = this.clauses[i];
-      state = clause.eval();
-      i++;
+      let clauseEval: Eval = clause.eval()
+      unsat = clauseEval === Eval.UNSAT;
+      if (!unsat) {
+        let sat = clauseEval === Eval.SAT;
+        if (sat) nSatisfied++;
+        i++;
+      }
     }
+    const state: Eval =
+      unsat
+        ? Eval.UNSAT
+        : nSatisfied == i
+        ? Eval.SAT
+        : Eval.UNDETERMINED;
     return state;
   }
 }
