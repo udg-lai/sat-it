@@ -12,7 +12,8 @@
   --font-size: 11px;
 }
 
-html, body {
+html,
+body {
   height: 100%;
   width: 100%;
   background-color: var(--main-bg-color);
@@ -20,7 +21,16 @@ html, body {
   font-size: var(--font-size);
 }
 
-body > div {
+body>div {
   height: 100%;
   width: 100%;
+}
+
+.vertical-separator {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  border-width: 0px 1px 0px 0px;
+  border-color: var(--border-color);
 }

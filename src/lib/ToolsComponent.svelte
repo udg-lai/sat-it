@@ -14,7 +14,8 @@
 </script>
 
 <div class="tools-container">
-	<div class="options-tools" class:separator-options={!hide}>
+	<div class="options-tools">
+		<div class="vertical-separator"></div>
 		<div class="toggle-button">
 			<Button outline on:click={onToggleBtn} class="!p-2">
 				<ArrowRightOutline class="h-5 w-5" />
@@ -41,26 +42,21 @@
 			</Button>
 		</div>
 	</div>
-	<div class="tools" class:hide={hide}></div>
+	<div class="tools" class:hide></div>
 </div>
 
 <style>
 	.options-tools {
-		width: 3rem;
-		padding: 0.5rem 0rem;
+		position: relative;
+		padding: 1rem 1rem;
 		display: flex;
-        flex-direction: column;
+		flex-direction: column;
 		align-items: center;
 	}
 
-    .options-tools > .toggle-button:not(:last-child) {
-        margin-bottom: 1rem;
-    }
-    
-    .separator-options {
-        border-width: 0px 1px 0px 0px;
-        border-color: var(--border-color);
-    }
+	.options-tools > .toggle-button:not(:last-child) {
+		margin-bottom: 1rem;
+	}
 
 	.tools {
 		width: var(--width);
@@ -75,4 +71,5 @@
 	.hide {
 		width: 0;
 	}
+
 </style>

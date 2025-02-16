@@ -8,11 +8,12 @@
 <div class="view-container">
 	<div class="app-container">
 		<div class="tools-section z-10">
+			<div class="vertical-separator"></div>
 			<ToolsComponent hide={false} --width="max(var(--min-width-tools), var(--max-width-tools))" />
 		</div>
 		<workspace class="flex flex-col md:flex-row">
 			<play-area>
-				<ScrollableComponent component={logicResolution}/>
+				<ScrollableComponent component={logicResolution} />
 			</play-area>
 		</workspace>
 	</div>
@@ -21,8 +22,7 @@
 	</div>
 </div>
 
-
-{#snippet logicResolution(props?: {string: any})}
+{#snippet logicResolution(props?: { string: any })}
 	<LogicResolutionComponent />
 {/snippet}
 
@@ -60,12 +60,12 @@
 	}
 
 	.tools-section {
-		border-width: 0px 1px 0px 0px;
-		border-color: var(--border-color);
+		position: relative;
 	}
 
 	.footer-section {
 		border-width: 1px 0px 0px 0px;
 		border-color: var(--border-color);
 	}
+
 </style>
