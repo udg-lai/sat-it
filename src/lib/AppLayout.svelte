@@ -1,20 +1,18 @@
 <script lang="ts">
-	import FooterComponent from "$lib/FooterComponent.svelte";
-import LogicResolutionComponent from "$lib/LogicResolutionComponent.svelte";
-	import ToolsComponent from "$lib/ToolsComponent.svelte";
-
+	import FooterComponent from '$lib/FooterComponent.svelte';
+	import LogicResolutionComponent from '$lib/LogicResolutionComponent.svelte';
+	import ToolsComponent from '$lib/ToolsComponent.svelte';
+	import ScrollableComponent from '$lib/ScrollableComponent.svelte';
 </script>
 
 <div class="view-container">
 	<div class="app-container">
-		<div class="z-10 tools-section">
+		<div class="tools-section z-10">
 			<ToolsComponent hide={false} --width="max(var(--min-width-tools), var(--max-width-tools))" />
 		</div>
 		<workspace class="flex flex-col md:flex-row">
 			<play-area>
-				<scrollable-area>
-					<LogicResolutionComponent />
-				</scrollable-area>
+				<ScrollableComponent component={logicResolution}/>
 			</play-area>
 		</workspace>
 	</div>
@@ -24,11 +22,16 @@ import LogicResolutionComponent from "$lib/LogicResolutionComponent.svelte";
 </div>
 
 
+{#snippet logicResolution(props?: {string: any})}
+	<LogicResolutionComponent />
+{/snippet}
+
 <style>
-	trail, play-area {
+	trail,
+	play-area {
 		align-items: center;
 		justify-content: center;
-		padding: 1rem;
+		padding: var(--windows-padding);
 	}
 
 	trail {
@@ -38,14 +41,6 @@ import LogicResolutionComponent from "$lib/LogicResolutionComponent.svelte";
 	play-area {
 		flex: 2;
 		position: relative;
-	}
-
-	scrollable-area {
-		position: absolute;
-		height: 100%;
-		max-height: calc(100% - 2rem);
-		max-width: calc(100% - 2rem);
-		overflow: auto;
 	}
 
 	workspace {
@@ -65,12 +60,12 @@ import LogicResolutionComponent from "$lib/LogicResolutionComponent.svelte";
 	}
 
 	.tools-section {
-        border-width: 0px 1px 0px 0px;
-        border-color: var(--border-color);
+		border-width: 0px 1px 0px 0px;
+		border-color: var(--border-color);
 	}
 
 	.footer-section {
-    border-width: 1px 0px 0px 0px;
-    border-color: var(--border-color);
+		border-width: 1px 0px 0px 0px;
+		border-color: var(--border-color);
 	}
 </style>

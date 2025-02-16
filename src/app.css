@@ -8,6 +8,8 @@
   --main-font-color: #000000;
   --min-width-tools: 200px;
   --max-width-tools: 25vw;
+  --windows-padding: 0.5rem;
+  --font-size: 11px;
 }
 
 html, body {
@@ -15,6 +17,7 @@ html, body {
   width: 100%;
   background-color: var(--main-bg-color);
   color: var(--main-font-color);
+  font-size: var(--font-size);
 }
 
 body > div {
