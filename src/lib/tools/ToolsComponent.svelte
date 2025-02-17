@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { Button } from 'flowbite-svelte';
-	import { ArrowRightOutline, ArrowLeftOutline } from 'flowbite-svelte-icons';
+	import { ArrowRightOutline, ArrowLeftOutline, CodeBranchOutline } from 'flowbite-svelte-icons';
+	import Button from './Button.svelte';
 
 	interface Props {
 		hide: boolean;
@@ -17,29 +17,17 @@
 	<div class="options-tools">
 		<div class="vertical-separator"></div>
 		<div class="toggle-button">
-			<Button outline on:click={onToggleBtn} class="!p-2">
-				<ArrowRightOutline class="h-5 w-5" />
-			</Button>
+			<Button />
 		</div>
 		<div class="toggle-button">
-			<Button outline on:click={onToggleBtn} class="!p-2">
-				<ArrowRightOutline class="h-5 w-5" />
-			</Button>
+			<Button />
 		</div>
 		<div class="toggle-button">
-			<Button outline on:click={onToggleBtn} class="!p-2">
-				<ArrowRightOutline class="h-5 w-5" />
-			</Button>
+			<Button />
 		</div>
 		<div class="toggle-button">
-			<Button outline on:click={onToggleBtn} class="!p-2">
-				<ArrowRightOutline class="h-5 w-5" />
-			</Button>
 		</div>
 		<div class="toggle-button">
-			<Button outline on:click={onToggleBtn} class="!p-2">
-				<ArrowRightOutline class="h-5 w-5" />
-			</Button>
 		</div>
 	</div>
 	<div class="tools" class:hide></div>
@@ -68,8 +56,8 @@
 		position: relative;
 	}
 
+
 	.hide {
 		width: 0;
 	}
-
 </style>

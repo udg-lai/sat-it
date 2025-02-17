@@ -1,7 +1,7 @@
 <script lang="ts">
 	import FooterComponent from '$lib/FooterComponent.svelte';
 	import LogicResolutionComponent from '$lib/LogicResolutionComponent.svelte';
-	import ToolsComponent from '$lib/ToolsComponent.svelte';
+	import ToolsComponent from '$lib/tools/ToolsComponent.svelte';
 	import ScrollableComponent from '$lib/ScrollableComponent.svelte';
 </script>
 
