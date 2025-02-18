@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Interpretation } from '$lib/interpretation.svelte.ts';
+	import { Trail } from '$lib/trail.svelte.ts';
 	import Literal from '$lib/literal.svelte.ts';
 	import Variable, { IdVariableMap } from '$lib/variable.svelte.ts';
 	import CNF, { Clause } from '$lib/cnf.svelte.ts';
@@ -7,6 +7,7 @@
 	import CnfVisualizerComponent from '$lib/visualizer/CnfVisualizerComponent.svelte';
 	import InterpretationVisualizerComponent from '$lib/visualizer/InterpretationVisualizerComponent.svelte';
 	import { Toggle } from 'flowbite-svelte';
+	import DecisionVariable, { AssignmentReason } from '$lib/decisionVariable.svelte.ts';
 
 	type RaWCNF = number[][];
 
@@ -44,18 +45,15 @@
 		}
 	];
 
-	const II = new Interpretation(rawVariables.size);
-	I.forEach(({ id, assigment }) => II.set(variablesMap.get(id) as Variable, assigment));
+	const II = new Trail(rawVariables.size);
+	I.forEach(({ id, assigment }) => 
+		II.push(new DecisionVariable(variablesMap.get(id) as Variable,
+																 assigment,
+																 AssignmentReason.D))
+	);
 
 	const cnf: CNF = new CNF(rawCNF.map((literals) => newClause(literals)));
-
-	assign(II);
-
-	function assign(II: Interpretation) {
-		II.forEach((assigment, variable) => {
-			variable.assign(assigment);
-		});
-	}
+	II.assign();
 
 	function rawVariableToVariable(rvariable: number): Variable {
 		if (rvariable < 0) throw 'ERROR: raw numbers should be >= 0';
