@@ -30,18 +30,6 @@
 		{
 			id: 1,
 			assigment: true
-		},
-		{
-			id: 2,
-			assigment: true
-		},
-		{
-			id: 3,
-			assigment: false
-		},
-		{
-			id: 4,
-			assigment: false
 		}
 	];
 
@@ -94,14 +82,23 @@
 		}
 		return new Clause(Array.from(resolvedLiterals.values()));
 	}
-</script>
 
-<div class="flex flex-column justify-center mt-3">
-	{#each variables as variable (variable.id)}
-		<span>{variable.id} - {variable.evaluate()}</span>
-		<Toggle bind:checked={variable.evaluation} class="ml-1 mr-2"></Toggle>
-	{/each}
-</div>
+	function decide(){
+		let decision = false;
+		let iterator = variablesMap.entries();
+		let entry = iterator.next();
+		while(!decision && !entry.done){
+			const [id, variable] = entry.value;
+			if(!variable.assigned) {
+				II.push(new DecisionVariable(variablesMap.get(id) as Variable,true, AssignmentReason.D));
+				II.assign();
+				decision = true;
+			}
+			entry = iterator.next();
+		}
+	}
+
+</script>
 
 <InterpretationVisualizerComponent {variables} />
 <CnfVisualizerComponent {cnf}/>
@@ -110,3 +107,11 @@
 <ClauseVisualizerComponent clause={logicResolution(cnf.getClause(0), cnf.getClause(1))}/>
 
 <p>The cnf is <strong>{cnf.eval()}</strong></p>
+
+<button 
+  on:click={decide}
+  class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md transition duration-300 ease-in-out"
+>
+  Decide
+</button>
+
