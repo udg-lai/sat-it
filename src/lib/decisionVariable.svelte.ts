@@ -6,7 +6,7 @@ export enum AssignmentReason {
   K = "backtracking"
 }
 
-export default class DecsionVariable {
+export default class DecisionVariable {
   vairable: Variable;
   assignment: boolean;
   reason: AssignmentReason;
