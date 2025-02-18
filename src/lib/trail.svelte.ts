@@ -7,6 +7,7 @@ export class Trail {
     constructor(nVariables: number) {
         this.nVariables = nVariables;
     }
+    public getTrail():DecisionVariable[] { return this.trail; }
 
     public updateLimitOfVariables(nVariables: number): void {
         this.nVariables = nVariables;

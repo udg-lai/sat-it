@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Trail } from '$lib/trail.svelte.ts';
+	import TrailVisualizerComponent from '$lib/visualizer/TrailVisualizerComponent.svelte';
 	import Literal from '$lib/literal.svelte.ts';
 	import Variable, { IdVariableMap } from '$lib/variable.svelte.ts';
 	import CNF, { Clause } from '$lib/cnf.svelte.ts';
@@ -91,6 +92,7 @@
 			const [id, variable] = entry.value;
 			if(!variable.assigned) {
 				II.push(new DecisionVariable(variablesMap.get(id) as Variable,true, AssignmentReason.D));
+				console.log(II);
 				II.assign();
 				decision = true;
 			}
@@ -114,4 +116,6 @@
 >
   Decide
 </button>
+
+<TrailVisualizerComponent trail = {II}/>
 

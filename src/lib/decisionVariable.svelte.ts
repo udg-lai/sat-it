@@ -46,5 +46,12 @@ export default class DecisionVariable {
   public assign() {
     this.vairable.assign(this.assignment);
   }
+
+  public toTeX(): string {
+    return[
+      !this.assignment ? `\\neg` : "",
+      this.vairable.getId().toString()
+    ].join("")
+  }
   
 }
