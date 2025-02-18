@@ -24,13 +24,25 @@ export default class DecsionVariable {
   }
   public getVariable(): Variable { return this.vairable; }
   public getAssignemnt(): boolean { return this.assignment;}
-  public getReason(): AssignmentReason { return this.reason; }
   public getSource(): string { 
     if (this.source === "") {
       throw "ERROR: There is no source for the decision";
     } 
     return this.source;
   }
+
+  public isD(): boolean {
+    return this.reason === AssignmentReason.D;
+  }
+
+  public isUP(): boolean {
+    return this.reason === AssignmentReason.UP;
+  }
+
+  public isK(): boolean {
+    return this.reason === AssignmentReason.K;
+  }
+
   public assign() {
     this.vairable.assign(this.assignment);
   }
