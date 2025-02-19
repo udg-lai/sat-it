@@ -1,7 +1,7 @@
 import type DecisionVariable from "./decisionVariable.svelte.ts";
 
 export class Trail {
-    trail: DecisionVariable[] = [];
+    trail: DecisionVariable[] = $state([]);
     nVariables: number;
 
     constructor(nVariables: number) {

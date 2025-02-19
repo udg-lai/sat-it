@@ -43,8 +43,12 @@ export default class DecisionVariable {
     return this.reason === AssignmentReason.K;
   }
 
-  public assign() {
+  public assign(): void {
     this.vairable.assign(this.assignment);
+  }
+
+  public unassign(): void {
+    this.vairable.unassign();
   }
 
   public toTeX(): string {

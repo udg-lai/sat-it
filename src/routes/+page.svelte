@@ -30,7 +30,7 @@
 	const I = [
 		{
 			id: 1,
-			assigment: true
+			assigment: false
 		}
 	];
 
@@ -98,6 +98,24 @@
 			}
 			entry = iterator.next();
 		}
+		if(!decision) {
+			let backtrack = false;
+			let lastDecision = II.pop();
+			while(lastDecision != undefined && !backtrack) {
+				lastDecision.unassign();
+				if(lastDecision.isD()) {
+					II.push(new DecisionVariable(variablesMap.get(lastDecision.getVariable().getId()) as Variable,
+								  !lastDecision.getAssignemnt(), 
+									AssignmentReason.K));
+					II.assign();
+					backtrack = true;
+				}
+				else{
+					lastDecision = II.pop();
+				}
+			}
+
+		}
 	}
 
 </script>
@@ -118,4 +136,3 @@
 </button>
 
 <TrailVisualizerComponent trail = {II}/>
-

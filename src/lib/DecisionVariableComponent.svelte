@@ -8,25 +8,27 @@
   let {decision}: Props = $props();
 </script>
 
-<div
+<div class="trail"
   class:decide={decision.isD()}
   class:unit-propagation={decision.isUP()}
   class:backtrack={decision.isK()}
 >
-  <MathTexComponent equation={decision.toTeX()} />
+  <MathTexComponent equation={decision.toTeX()} /> &nbsp;&nbsp;&nbsp;
 </div>
 
 <style>
-
+  .trail {
+    font-size: 20px;
+  }
   .decide {
-    color: rgb(255, 184, 17);
+    color: #1434A4;
   }
 
   .unit-propagation {
-    color: #bae6ff;
+    color: #36454F;
   }
 
   .backtrack {
-    color: #ffd7d9;
+    color: #E4D00A;
   }
 </style>
