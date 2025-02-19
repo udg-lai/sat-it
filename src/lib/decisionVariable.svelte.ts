@@ -8,6 +8,7 @@ export enum AssignmentReason {
 
 export default class DecisionVariable {
   vairable: Variable;
+  decisionLevel: number;
   assignment: boolean;
   reason: AssignmentReason;
   source: string;
@@ -17,13 +18,15 @@ export default class DecisionVariable {
     - If UP: The source will be the id of the cluase that caused the propagation of the variable.
     - If K:  The sourece will be the id of the caluse that caused the conflict.
   */
-  constructor(variable:Variable, assignment:boolean, reason:AssignmentReason,  sourece: string = "") {
+  constructor(variable:Variable, decisionLevel:number , assignment:boolean, reason:AssignmentReason,  sourece: string = "") {
     this.vairable = variable;
+    this.decisionLevel = decisionLevel;
     this.assignment = assignment;
     this.reason = reason;
     this.source = sourece;
   }
   public getVariable(): Variable { return this.vairable; }
+  public getDL(): number { return this.decisionLevel; }
   public getAssignemnt(): boolean { return this.assignment;}
   public getSource(): string { 
     if (this.source === "") {

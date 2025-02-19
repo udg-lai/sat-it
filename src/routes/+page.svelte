@@ -11,6 +11,7 @@
 	import DecisionVariable, { AssignmentReason } from '$lib/decisionVariable.svelte.ts';
 
 	type RaWCNF = number[][];
+	let currentDL: number = 0;
 
 	const rawCNF: RaWCNF = [
 		[1, -2, 3, 4],
@@ -34,12 +35,14 @@
 		}
 	];
 
-	const II = new Trail(rawVariables.size);
-	I.forEach(({ id, assigment }) => 
+	const II = new Trail(rawVariables.size, 2);
+	I.forEach(({ id, assigment }) => {
 		II.push(new DecisionVariable(variablesMap.get(id) as Variable,
+																 ++currentDL,
 																 assigment,
-																 AssignmentReason.D))
-	);
+																 AssignmentReason.D));
+		console.log(currentDL);
+	});
 
 	const cnf: CNF = new CNF(rawCNF.map((literals) => newClause(literals)));
 	II.assign();
@@ -85,14 +88,14 @@
 	}
 
 	function decide(){
+		console.log("El nivell de deicisió inicial és " + II.getStartingDL());
 		let decision = false;
 		let iterator = variablesMap.entries();
 		let entry = iterator.next();
 		while(!decision && !entry.done){
 			const [id, variable] = entry.value;
 			if(!variable.assigned) {
-				II.push(new DecisionVariable(variablesMap.get(id) as Variable,true, AssignmentReason.D));
-				console.log(II);
+				II.push(new DecisionVariable(variablesMap.get(id) as Variable,++currentDL,true, AssignmentReason.D));
 				II.assign();
 				decision = true;
 			}
@@ -105,6 +108,7 @@
 				lastDecision.unassign();
 				if(lastDecision.isD()) {
 					II.push(new DecisionVariable(variablesMap.get(lastDecision.getVariable().getId()) as Variable,
+									--currentDL,
 								  !lastDecision.getAssignemnt(), 
 									AssignmentReason.K));
 					II.assign();
@@ -135,4 +139,5 @@
   Decide
 </button>
 
-<TrailVisualizerComponent trail = {II}/>
+<TrailVisualizerComponent 
+	trail = {II}/>

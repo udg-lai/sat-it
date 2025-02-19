@@ -10,6 +10,9 @@
 
 <div class="flex flex-row">
   {#each trail as decision}
-    <DecisionVariableComponent {decision}/>
+    <DecisionVariableComponent
+      decision = {decision}
+      startingDL = {trail.getStartingDL()}
+    />
   {/each}
 </div>
