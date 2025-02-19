@@ -11,10 +11,11 @@ export default class DecisionVariable {
   assignment: boolean;
   reason: AssignmentReason;
   source: string;
-  /* Source: This parametre will get the id of the clause that was the cause of the decision made:
-    - If D: An empty string will be assigned as it is a simple decision
-    - If UP: The source will be the id of the cluase that caused the propagation of the variable
-    - If K: The sourece will be the id of the caluse that caused the conflict.
+  /* Source: This parametre will get the id of the clause that caused the conflict. 
+             The value will be assigned deppending on the "resason" value:
+    - If D:  An empty string will be assigned as it is a simple decision
+    - If UP: The source will be the id of the cluase that caused the propagation of the variable.
+    - If K:  The sourece will be the id of the caluse that caused the conflict.
   */
   constructor(variable:Variable, assignment:boolean, reason:AssignmentReason,  sourece: string = "") {
     this.vairable = variable;
