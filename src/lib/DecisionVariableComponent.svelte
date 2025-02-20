@@ -4,13 +4,14 @@
 
   interface Props {
     decision: DecisionVariable;
-    startingDL: number;
+    startingWP: number;
+    currentWP: number;
   }
-  let {decision, startingDL}: Props = $props();
-  let previousDL = $derived(decision.getDL() < startingDL);
+  let {decision, startingWP, currentWP}: Props = $props();
+  let previousDL = $derived(currentWP < startingWP);
 </script>
 
-<div class="trail"
+<div class="trail "
   class:decide={decision.isD() && !previousDL}
   class:decidePDL={decision.isD() && previousDL}
 
@@ -20,19 +21,23 @@
   class:backtrack={decision.isK() && !previousDL}
   class:backtrackPDL={decision.isK() && previousDL}
 >
-  <MathTexComponent equation={decision.toTeX()} /> &nbsp;&nbsp;&nbsp;
+  <MathTexComponent equation={decision.toTeX()} />
 </div>
 
 <style>
   .trail {
+    display: flex;
+    align-items: center;
     font-size: 25px;
+    padding-right: 5px;
+    padding-left: 5px;
   }
   .decide {
     color: #1434A4;
   }
   
   .decidePDL {
-    color: #5d71b9;
+    color: #5d71b9ea;
   }
 
   .unit-propagation {
@@ -40,12 +45,12 @@
   }
 
   .unit-propagationPDL {
-    color: #888d90;
+    color: #888d90ea;
   }
 
   .backtrack {
-    color: #e5ce00;
+    color: #e7aa00;
   }
   .backtrackPDL {
-    color: rgb(183, 180, 129)  }
+    color: rgba(183, 180, 129, 0.905)  }
 </style>

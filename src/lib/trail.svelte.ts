@@ -1,20 +1,28 @@
 import type DecisionVariable from "./decisionVariable.svelte.ts";
 
 export class Trail {
-    trail: DecisionVariable[] = $state([]);
-    startingDL: number = 0;
-    /*startingDL (Starting DecisionLevel): This variable has 2 purposes:
+    private trail: DecisionVariable[] = $state([]);
+    private startingWP: number = $state(0);
+    /*startingWP (Starting WritePoint): This variable has the following purpose:
         1. To write the decisions of the trail with a brighter or shadier colour.
-        2. When going back, to know if those decisions have been made at this level.
+        2. When going back, to know if those decisions have been made in this trail.
     */
     nVariables: number;
 
-    constructor(nVariables: number, startingDL: number = 0) {
+    constructor(nVariables: number) {
         this.nVariables = nVariables;
-        this.startingDL = startingDL;
     }
+
+    public setStartignDL(): void {
+        this.startingWP = this.trail.length-1;
+    }
+
     public getTrail():DecisionVariable[] { return this.trail; }
-    public getStartingDL(): number { return this.startingDL; }
+    public getStartingWP(): number { return this.startingWP; }
+
+    public indexOf(decision :DecisionVariable): number {
+        return this.trail.indexOf(decision);
+    }
 
     public updateLimitOfVariables(nVariables: number): void {
         this.nVariables = nVariables;
@@ -37,15 +45,6 @@ export class Trail {
             decision.assign();
         })
     }
-    //This function may not be needed in a future.
-    public setStartignDL(): void {
-        this.startingDL = 0;
-        this.trail.forEach(decision => {
-            if(decision.isD()) {
-                this.startingDL++;
-            }            
-        });
-    }
 
     [Symbol.iterator]() {
         return this.trail.values();
@@ -54,5 +53,4 @@ export class Trail {
     forEach(callback: (decision: DecisionVariable, index: number, array: DecisionVariable[]) => void, thisArg?: any): void {
     this.trail.forEach(callback, thisArg);
     }
-
 }

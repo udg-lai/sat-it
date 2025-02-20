@@ -7,7 +7,6 @@
 	import ClauseVisualizerComponent from '$lib/visualizer/ClauseVisualizerComponent.svelte';
 	import CnfVisualizerComponent from '$lib/visualizer/CnfVisualizerComponent.svelte';
 	import InterpretationVisualizerComponent from '$lib/visualizer/InterpretationVisualizerComponent.svelte';
-	import { Toggle } from 'flowbite-svelte';
 	import DecisionVariable, { AssignmentReason } from '$lib/decisionVariable.svelte.ts';
 
 	type RaWCNF = number[][];
@@ -35,14 +34,14 @@
 		}
 	];
 
-	const II = new Trail(rawVariables.size, 2);
+	const II = new Trail(rawVariables.size);
 	I.forEach(({ id, assigment }) => {
 		II.push(new DecisionVariable(variablesMap.get(id) as Variable,
 																 ++currentDL,
 																 assigment,
 																 AssignmentReason.D));
-		console.log(currentDL);
 	});
+	II.setStartignDL();
 
 	const cnf: CNF = new CNF(rawCNF.map((literals) => newClause(literals)));
 	II.assign();
@@ -87,11 +86,12 @@
 		return new Clause(Array.from(resolvedLiterals.values()));
 	}
 
+	//This function is only used to see the different colours (just backtracking and decision) and to test the content. The final "decision" function logic won't be like this.
 	function decide(){
-		console.log("El nivell de deicisió inicial és " + II.getStartingDL());
 		let decision = false;
 		let iterator = variablesMap.entries();
 		let entry = iterator.next();
+
 		while(!decision && !entry.done){
 			const [id, variable] = entry.value;
 			if(!variable.assigned) {
@@ -101,6 +101,7 @@
 			}
 			entry = iterator.next();
 		}
+		
 		if(!decision) {
 			let backtrack = false;
 			let lastDecision = II.pop();
@@ -111,6 +112,7 @@
 									--currentDL,
 								  !lastDecision.getAssignemnt(), 
 									AssignmentReason.K));
+					II.setStartignDL();
 					II.assign();
 					backtrack = true;
 				}
@@ -139,5 +141,4 @@
   Decide
 </button>
 
-<TrailVisualizerComponent 
-	trail = {II}/>
+<TrailVisualizerComponent trail = {II}/>
