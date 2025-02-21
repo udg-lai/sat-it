@@ -8,6 +8,7 @@
 	import CnfVisualizerComponent from '$lib/visualizer/CnfVisualizerComponent.svelte';
 	import InterpretationVisualizerComponent from '$lib/visualizer/InterpretationVisualizerComponent.svelte';
 	import DecisionVariable, { AssignmentReason } from '$lib/decisionVariable.svelte.ts';
+	import { TrailCollection } from '$lib/trailCollection.svelte.ts';
 
 	type RaWCNF = number[][];
 	let currentDL: number = 0;
@@ -33,18 +34,17 @@
 			assigment: false
 		}
 	];
-
-	const II = new Trail(rawVariables.size);
+	const trailCollecion = new TrailCollection(rawVariables.size);
 	I.forEach(({ id, assigment }) => {
-		II.push(new DecisionVariable(variablesMap.get(id) as Variable,
-																 ++currentDL,
-																 assigment,
-																 AssignmentReason.D));
+		trailCollecion.pushDecision(new DecisionVariable(variablesMap.get(id) as Variable,
+																		++currentDL,
+																		assigment,
+																		AssignmentReason.D));
 	});
-	II.setStartignDL();
+	trailCollecion.setStartignWP_CT();
 
 	const cnf: CNF = new CNF(rawCNF.map((literals) => newClause(literals)));
-	II.assign();
+	trailCollecion.assign_CT();
 
 	function rawVariableToVariable(rvariable: number): Variable {
 		if (rvariable < 0) throw 'ERROR: raw numbers should be >= 0';
@@ -95,43 +95,41 @@
 		while(!decision && !entry.done){
 			const [id, variable] = entry.value;
 			if(!variable.assigned) {
-				II.push(new DecisionVariable(variablesMap.get(id) as Variable,++currentDL,true, AssignmentReason.D));
-				II.assign();
+				trailCollecion.pushDecision(new DecisionVariable(variablesMap.get(id) as Variable,++currentDL,true, AssignmentReason.D));
+				trailCollecion.assign_CT();
 				decision = true;
 			}
 			entry = iterator.next();
 		}
-		
+		//If we couldn't decide anything, we sopose we've found a conflict so we will create a new trail 
 		if(!decision) {
+			let conflictTrail: Trail = trailCollecion.getCurrentTrailCopy();
 			let backtrack = false;
-			let lastDecision = II.pop();
+			console.log(typeof(conflictTrail));
+			let lastDecision = conflictTrail.pop();
 			while(lastDecision != undefined && !backtrack) {
 				lastDecision.unassign();
 				if(lastDecision.isD()) {
-					II.push(new DecisionVariable(variablesMap.get(lastDecision.getVariable().getId()) as Variable,
+					conflictTrail.push(new DecisionVariable(variablesMap.get(lastDecision.getVariable().getId()) as Variable,
 									--currentDL,
 								  !lastDecision.getAssignemnt(), 
 									AssignmentReason.K));
-					II.setStartignDL();
-					II.assign();
+					conflictTrail.setStartignWP();
+					conflictTrail.assign();
+					trailCollecion.push(conflictTrail);
 					backtrack = true;
 				}
 				else{
-					lastDecision = II.pop();
+					lastDecision = conflictTrail.pop();
 				}
+			}
+			// We add a new trail to let us create more trails
+			if(!backtrack) {
+				trailCollecion.pushTrail(new Trail(rawVariables.size));
 			}
 
 		}
 	}
-
-	//TESTING
-	//-------------------------------------------------
-
-	let collection: Number [][] = [[1,2,3,4],[1,2,3,4]];
-	let last = $derived(collection.at(-1));
-	collection.push([4,3,2,1]);
-	last?.push(1,2,3,4);
-	console.log(collection);
 </script>
 
 <InterpretationVisualizerComponent {variables} />
@@ -148,8 +146,9 @@
 >
   Decide
 </button>
-
-<TrailVisualizerComponent trail = {II}/>
+{#each trailCollecion as trail}
+	<TrailVisualizerComponent {trail} />
+{/each}
 
 
 

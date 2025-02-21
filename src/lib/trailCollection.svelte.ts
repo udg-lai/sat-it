@@ -14,7 +14,10 @@ export class TrailCollection {
   get currentTrail(): Trail {
     return this.collection.at(-1) ?? new Trail(this.nVariables);
   }
-  public get curre() { return this.currentDL; }
+  public getCurrentDL() { return this.currentDL; }
+  public getCurrentTrailCopy(): Trail { 
+    return this.currentTrail.copy()
+  } 
   
   public push(trail:Trail): void {
     this.collection.push(trail);
@@ -42,6 +45,24 @@ export class TrailCollection {
 
   public complete(): boolean {
     return this.currentTrail.complete();
+  }
+
+  //Functions to acces those methodes from the current trail
+  public setStartignWP_CT(): void {
+    this.currentTrail.setStartignWP();
+  }
+
+  public assign_CT(): void {
+    this.currentTrail.assign();
+  }
+
+  // Functions to make this class iterbale
+  [Symbol.iterator]() {
+    return this.collection.values();
+  }
+
+  forEach(callback: (traiul: Trail, index: number, array: Trail[]) => void, thisArg?: any): void {
+      this.collection.forEach(callback, thisArg);
   }
 
   

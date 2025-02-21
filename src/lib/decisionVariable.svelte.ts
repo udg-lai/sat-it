@@ -25,6 +25,15 @@ export default class DecisionVariable {
     this.reason = reason;
     this.source = sourece;
   }
+  public clone(): DecisionVariable {
+    return new DecisionVariable(this.vairable, 
+                                this.decisionLevel, 
+                                this.assignment, 
+                                this.reason, 
+                                this.source); 
+  }
+
+
   public getVariable(): Variable { return this.vairable; }
   public getDL(): number { return this.decisionLevel; }
   public getAssignemnt(): boolean { return this.assignment;}

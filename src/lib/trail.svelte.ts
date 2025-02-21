@@ -13,7 +13,14 @@ export class Trail {
         this.nVariables = nVariables;
     }
 
-    public setStartignDL(): void {
+    public copy() {
+        const copy = new Trail(this.nVariables);
+        copy.trail = this.trail.map(decision => decision.clone());
+        copy.startingWP = this.startingWP;
+        return copy;
+    }
+
+    public setStartignWP(): void {
         this.startingWP = this.trail.length-1;
     }
 
