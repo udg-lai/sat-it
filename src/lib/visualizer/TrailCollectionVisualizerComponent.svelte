@@ -4,16 +4,22 @@
   import TrailVisualizerComponent from '$lib/visualizer/TrailVisualizerComponent.svelte';
   
   interface Props {
-    trailCollecion: TrailCollection;
+    trailCollection: TrailCollection;
+    visualizeTrails: boolean;
   }
-  let { trailCollecion }: Props = $props();
+  let { trailCollection, visualizeTrails }: Props = $props();
 </script>
 
 <div class="flex flex-col">
-  {#each trailCollecion as trail}
-    <p transition:slide >
-      <TrailVisualizerComponent {trail} />
-    </p>
-	  
-  {/each}
+  {#if visualizeTrails}
+    {#each trailCollection as trail}
+      <div transition:slide|global >
+        <TrailVisualizerComponent {trail} />
+      </div>
+    {/each}
+  {:else}
+    <div transition:slide|global >
+      <TrailVisualizerComponent trail = {trailCollection.getCurrentTrailCopy()} />
+    </div>
+  {/if}
 </div>
