@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { Trail } from '$lib/trail.svelte.ts';
 	import TrailVisualizerComponent from '$lib/visualizer/TrailVisualizerComponent.svelte';
+	import { TrailCollection } from '$lib/trailCollection.svelte.ts';
+	import TrailCollectionVisualizerComponent from '$lib/visualizer/TrailCollectionVisualizerComponent.svelte';
 	import Literal from '$lib/literal.svelte.ts';
 	import Variable, { IdVariableMap } from '$lib/variable.svelte.ts';
 	import CNF, { Clause } from '$lib/cnf.svelte.ts';
@@ -8,7 +10,6 @@
 	import CnfVisualizerComponent from '$lib/visualizer/CnfVisualizerComponent.svelte';
 	import InterpretationVisualizerComponent from '$lib/visualizer/InterpretationVisualizerComponent.svelte';
 	import DecisionVariable, { AssignmentReason } from '$lib/decisionVariable.svelte.ts';
-	import { TrailCollection } from '$lib/trailCollection.svelte.ts';
 
 	type RaWCNF = number[][];
 	let currentDL: number = 0;
@@ -146,9 +147,7 @@
 >
   Decide
 </button>
-{#each trailCollecion as trail}
-	<TrailVisualizerComponent {trail} />
-{/each}
 
+<TrailCollectionVisualizerComponent {trailCollecion} />
 
 
