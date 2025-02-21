@@ -13,12 +13,12 @@
 <div class="flex flex-col">
   {#if visualizeTrails}
     {#each trailCollection as trail}
-      <div transition:slide|global >
+      <div transition:slide|global>
         <TrailVisualizerComponent {trail} />
       </div>
     {/each}
   {:else}
-    <div transition:slide|global >
+    <div in:slide|global out:slide={{duration:1}}>
       <TrailVisualizerComponent trail = {trailCollection.getCurrentTrailCopy()} />
     </div>
   {/if}
