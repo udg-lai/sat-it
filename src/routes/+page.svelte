@@ -124,6 +124,14 @@
 		}
 	}
 
+	//TESTING
+	//-------------------------------------------------
+
+	let collection: Number [][] = [[1,2,3,4],[1,2,3,4]];
+	let last = $derived(collection.at(-1));
+	collection.push([4,3,2,1]);
+	last?.push(1,2,3,4);
+	console.log(collection);
 </script>
 
 <InterpretationVisualizerComponent {variables} />
@@ -142,3 +150,6 @@
 </button>
 
 <TrailVisualizerComponent trail = {II}/>
+
+
+
