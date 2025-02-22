@@ -18,35 +18,45 @@ export class Clause {
     this.literals = this.literals.filter(l => l.id != lit.id);
   }
 
-  public eval(): Eval {
-    let state: Eval = Eval.UNDETERMINED
+  public eval(): ClauseEval {
+    let state = ClauseEval.UNRESOLVED
     let i = 0;
     let unsatCount = 0;
-    while (i < this.literals.length && state !== Eval.SAT) {
+    while (i < this.literals.length && state !== ClauseEval.SAT) {
       const lit: Literal = this.literals[i];
-      if (lit.isTrue()) state = Eval.SAT
+      if (lit.isTrue())
+        state = ClauseEval.SAT
       else {
         if (lit.isFalse())
           unsatCount++;
         i++;
       }
     }
-    if (state !== Eval.SAT) {
-      state = unsatCount == i ? Eval.UNSAT : Eval.UNDETERMINED
+    if (state !== ClauseEval.SAT) {
+      state =
+        unsatCount == i
+          ? ClauseEval.UNSAT
+          : unsatCount == i - 1
+            ? ClauseEval.UNIT
+            : ClauseEval.UNRESOLVED
     }
     return state;
   }
 
   public isUndetermined(): boolean {
-    return this.eval() === Eval.UNDETERMINED;
+    return this.eval() === ClauseEval.UNRESOLVED;
   }
 
   public isSAT(): boolean {
-    return this.eval() === Eval.SAT
+    return this.eval() === ClauseEval.SAT
   }
 
   public isUnSAT(): boolean {
-    return this.eval() === Eval.UNSAT;
+    return this.eval() === ClauseEval.UNSAT;
+  }
+
+  public isUnit(): boolean {
+    return this.eval() === ClauseEval.UNIT;
   }
 
   [Symbol.iterator]() {
@@ -91,11 +101,12 @@ export default class CNF {
     let i = 0;
     while (i < this.clauses.length && !unsat) {
       const clause: Clause = this.clauses[i];
-      let clauseEval: Eval = clause.eval()
-      unsat = clauseEval === Eval.UNSAT;
+      let clauseEval: ClauseEval = clause.eval()
+      unsat = clauseEval === ClauseEval.UNSAT;
       if (!unsat) {
-        let sat = clauseEval === Eval.SAT;
-        if (sat) nSatisfied++;
+        let sat = clauseEval === ClauseEval.SAT;
+        if (sat)
+          nSatisfied++;
         i++;
       }
     }
@@ -103,14 +114,24 @@ export default class CNF {
       unsat
         ? Eval.UNSAT
         : nSatisfied == i
-        ? Eval.SAT
-        : Eval.UNDETERMINED;
+          ? Eval.SAT
+          : Eval.UNRESOLVED;
     return state;
+  }
+
+  public getUnitClauses(): Set<Clause> {
+    const S = new Set<Clause>()
+    for (const c of this.getClauses()) {
+      if (c.isUnit()) S.add(c)
+    }
+    return S;
   }
 }
 
 export enum Eval {
-  UNSAT = "UNSAT",
-  SAT = "SAT",
-  UNDETERMINED = "UNDETERMINED"
+  UNSAT, SAT, UNRESOLVED
+}
+
+export enum ClauseEval {
+  UNSAT, SAT, UNIT, UNRESOLVED
 }
