@@ -8,8 +8,6 @@
   --main-font-color: #121212;
   --secondary-font-color: #110b0ba8;
   --focus-border-color: var(--secondary-font-color);
-  --min-width-tools: 200px;
-  --max-width-tools: 25vw;
   --windows-padding: 0.5rem;
   --font-size: 11px;
 }

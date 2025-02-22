@@ -10,7 +10,7 @@
 </script>
 
 <button onclick={onClick} type="button" class="button-high-contrast !p-2">
-				<CodeBranchOutline class="h-10 w-10" />
+				<CodeBranchOutline class="h-10 w-10 cursor-pointer" />
 </button>
 
 <style>

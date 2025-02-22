@@ -1,0 +1,40 @@
+:root {
+    --min-width-tools: 200px;
+    --max-width-tools: 25vw;
+    --bar-width: 6rem;
+    --tools-width: max(var(--min-width-tools), var(--max-width-tools));
+}
+
+
+.options-tools {
+    width: var(--bar-width);
+    position: relative;
+    padding: 1rem 0rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.options-tools>.toggle-button:not(:last-child) {
+    margin-bottom: 1rem;
+}
+
+.tools-view {
+    width: var(--tools-width);
+}
+
+.hide-tools-view {
+    width: 0px !important;
+}
+
+.draggable-bar {
+    height: 100%;
+    width: 0.5rem;
+    background-color: black;
+}
+
+.tools-container {
+    height: 100%;
+    display: flex;
+    position: relative;
+}

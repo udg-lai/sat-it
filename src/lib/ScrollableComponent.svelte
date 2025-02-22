@@ -10,7 +10,7 @@
 	let { component, props }: Props = $props();
 </script>
 
-<scrollable-area>
+<scrollable-area class="scroll-smooth">
     {@render component(props)}
 </scrollable-area>
 
