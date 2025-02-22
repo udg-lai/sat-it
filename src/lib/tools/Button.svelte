@@ -1,9 +1,15 @@
 <script lang="ts">
 	import { CodeBranchOutline } from "flowbite-svelte-icons";
 
+  interface Props {
+    onClick?: () => void
+  }
+
+  let { onClick }: Props = $props();
+
 </script>
 
-<button type="button" class="button-high-contrast !p-2">
+<button onclick={onClick} type="button" class="button-high-contrast !p-2">
 				<CodeBranchOutline class="h-10 w-10" />
 </button>
 

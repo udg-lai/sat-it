@@ -27,15 +27,10 @@
 {/snippet}
 
 <style>
-	trail,
 	play-area {
 		align-items: center;
 		justify-content: center;
 		padding: var(--windows-padding);
-	}
-
-	trail {
-		flex: 1;
 	}
 
 	play-area {
