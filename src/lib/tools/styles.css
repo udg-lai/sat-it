@@ -1,7 +1,7 @@
 :root {
-    --min-width-tools: 200px;
-    --max-width-tools: 25vw;
-    --bar-width: 6rem;
+    --min-width-tools: 240px;
+    --max-width-tools: 30vw;
+    --bar-width: 66px;
     --tools-width: max(var(--min-width-tools), var(--max-width-tools));
 }
 
@@ -29,7 +29,16 @@
 
 .draggable-bar {
     height: 100%;
-    width: 0.5rem;
+    width: 0.3rem;
+    background-color: transparent;
+    transition: background-color 0.25s ease-in;
+}
+
+.draggable-bar:hover {
+    background-color: black;
+}
+
+.resizing {
     background-color: black;
 }
 

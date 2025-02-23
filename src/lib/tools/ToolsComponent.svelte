@@ -9,50 +9,72 @@
 
 	let { hide }: Props = $props();
 
-	let toolsView;
+	let toolsHTMLElement: HTMLElement;
+	let isResizing = $state(false);
 
 	onMount(() => {
-		toolsView = document.getElementById('tools-view');
-		console.log(toolsView);
+		const queryElement: HTMLElement | null = document.getElementById('tools-view');
+		if (queryElement) toolsHTMLElement = queryElement;
+		else console.error(`Tools view HTML element not found in the DOM`);
 	});
 
-	function resizeHandle(node) {
-		let isResizing = false;
+	function enableResizeCursor(): void {
+		document.body.style.cursor = 'col-resize';
+	}
 
-		const component = node.parentElement;
+	function disableResizeCursor(): void {
+		document.body.style.cursor = '';
+	}
 
-		function onMouseDown(event) {
-			console.log('mouse down');
+	function disableSelection() {
+		document.body.style.userSelect = 'none';
+	}
+
+	function enableSelection() {
+		document.body.style.userSelect = '';
+	}
+
+	function resizeHandle(htmlElement: HTMLElement) {
+		function onMouseDown() {
 			isResizing = true;
 			document.addEventListener('mousemove', onMouseMove);
 			document.addEventListener('mouseup', onMouseUp);
+			enableResizeCursor();
+			disableSelection();
 		}
 
-		function onMouseMove(event) {
+		function onMouseMove(event: MouseEvent) {
 			if (isResizing) {
-				console.log(event);
-				console.log('resizing');
-				// 	let newWidth = 100;
-				//	toolsView.style.width = `${newWidth}px`;
+				const barWidth = 66;
+				const minWidthTool = 240;
+				let newX = event.clientX;
+				if (newX < barWidth + minWidthTool / 2) {
+					toolsHTMLElement.style.width = '0px';
+				} else if (newX < barWidth + minWidthTool) {
+					toolsHTMLElement.style.width = `${minWidthTool}px`;
+				} else {
+					toolsHTMLElement.style.width = `calc(${newX}px - var(--bar-width))`;
+				}
 			}
 		}
 
 		function onMouseUp() {
-			console.log('mouse up');
 			isResizing = false;
 			document.removeEventListener('mousemove', onMouseMove);
 			document.removeEventListener('mouseup', onMouseUp);
+			disableResizeCursor();
+			enableSelection();
 		}
 
-		node.addEventListener('mousedown', onMouseDown);
-		node.addEventListener('mouseup', onMouseUp);
-		node.addEventListener('mousemove', onMouseMove);
+		htmlElement.addEventListener('mousedown', onMouseDown);
+		htmlElement.addEventListener('mouseup', onMouseUp);
+		htmlElement.addEventListener('mousemove', onMouseMove);
 
 		return {
 			destroy() {
-				node.removeEventListener('mousedown', onMouseDown);
-				node.removeEventListener('mouseup', onMouseUp);
-				node.removeEventListener('mousemove', onMouseMove);
+				htmlElement.removeEventListener('mousedown', onMouseDown);
+				htmlElement.removeEventListener('mouseup', onMouseUp);
+				htmlElement.removeEventListener('mousemove', onMouseMove);
 			}
 		};
 	}
@@ -80,8 +102,6 @@
 				views.set(view, true);
 				if (hide) hide = !hide;
 			}
-
-			console.log(hide);
 		}
 	}
 </script>
@@ -114,5 +134,5 @@
 			{/each}
 		{/if}
 	</div>
-	<div use:resizeHandle class="draggable-bar cursor-col-resize"></div>
+	<div use:resizeHandle class="draggable-bar cursor-col-resize" class:resizing={isResizing}></div>
 </div>
