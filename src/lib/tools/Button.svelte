@@ -1,16 +1,23 @@
 <script lang="ts">
-	import { CodeBranchOutline } from "flowbite-svelte-icons";
+	import DynamicRender from "$lib/DynamicRender.svelte";
+	import type { Component } from "svelte";
 
   interface Props {
-    onClick?: () => void
+    onClick?: () => void,
+    icon?: Component
   }
 
-  let { onClick }: Props = $props();
+  let { onClick, icon }: Props = $props();
+  const iconProps = {
+    class: "h-10 w-10 cursor-pointer"
+  }
 
 </script>
 
 <button onclick={onClick} type="button" class="button-high-contrast !p-2">
-				<CodeBranchOutline class="h-10 w-10 cursor-pointer" />
+  {#if icon}
+    <DynamicRender component={icon} props={iconProps} />
+  {/if}
 </button>
 
 <style>

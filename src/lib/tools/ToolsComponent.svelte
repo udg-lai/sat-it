@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import Button from './Button.svelte';
+	import { CodeBranchOutline, AngleRightOutline, BugOutline } from 'flowbite-svelte-icons';
 	import './styles.css';
 
 	interface Props {
@@ -110,13 +111,13 @@
 	<div class="options-tools">
 		<div class="vertical-separator"></div>
 		<div class="toggle-button">
-			<Button onClick={() => activateView('viewA')} />
+			<Button onClick={() => activateView('viewA')} icon={CodeBranchOutline} />
 		</div>
 		<div class="toggle-button">
-			<Button onClick={() => activateView('viewB')} />
+			<Button onClick={() => activateView('viewB')} icon={AngleRightOutline} />
 		</div>
 		<div class="toggle-button">
-			<Button onClick={() => activateView('viewC')} />
+			<Button onClick={() => activateView('viewC')} icon={BugOutline} />
 		</div>
 		<div class="toggle-button"></div>
 		<div class="toggle-button"></div>
