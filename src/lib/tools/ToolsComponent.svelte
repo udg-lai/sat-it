@@ -50,11 +50,14 @@
 				const minWidthTool = 240;
 				let newX = event.clientX;
 				if (newX < barWidth + minWidthTool / 2) {
-					toolsHTMLElement.style.width = '0px';
-				} else if (newX < barWidth + minWidthTool) {
-					toolsHTMLElement.style.width = `${minWidthTool}px`;
+					hide = true;
 				} else {
-					toolsHTMLElement.style.width = `calc(${newX}px - var(--bar-width))`;
+					hide = false;
+					if (newX < barWidth + minWidthTool) {
+						toolsHTMLElement.style.width = `${minWidthTool}px`;
+					} else {
+						toolsHTMLElement.style.width = `calc(${newX}px - var(--bar-width))`;
+					}
 				}
 			}
 		}
