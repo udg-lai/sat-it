@@ -18,29 +18,29 @@ export default class DecisionVariable {
     - If UP: The source will be the id of the cluase that caused the propagation of the variable.
     - If K:  The sourece will be the id of the caluse that caused the conflict.
   */
-  constructor(variable:Variable, decisionLevel:number , assignment:boolean, reason:AssignmentReason,  sourece: string = "") {
+  constructor(variable: Variable, decisionLevel: number, assignment: boolean, reason: AssignmentReason, sourece: string = "") {
     this.vairable = variable;
     this.decisionLevel = decisionLevel;
     this.assignment = assignment;
     this.reason = reason;
     this.source = sourece;
   }
-  public clone(): DecisionVariable {
-    return new DecisionVariable(this.vairable, 
-                                this.decisionLevel, 
-                                this.assignment, 
-                                this.reason, 
-                                this.source); 
+  public copy(): DecisionVariable {
+    return new DecisionVariable(this.vairable,
+      this.decisionLevel,
+      this.assignment,
+      this.reason,
+      this.source);
   }
 
 
   public getVariable(): Variable { return this.vairable; }
   public getDL(): number { return this.decisionLevel; }
-  public getAssignemnt(): boolean { return this.assignment;}
-  public getSource(): string { 
+  public getAssignemnt(): boolean { return this.assignment; }
+  public getSource(): string {
     if (this.source === "") {
       throw "ERROR: There is no source for the decision";
-    } 
+    }
     return this.source;
   }
 
@@ -65,10 +65,10 @@ export default class DecisionVariable {
   }
 
   public toTeX(): string {
-    return[
+    return [
       !this.assignment ? `\\neg` : "",
       this.vairable.getId().toString()
     ].join("")
   }
-  
+
 }
