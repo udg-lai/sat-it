@@ -1,14 +1,16 @@
 <script lang="ts">
-	import { Interpretation } from '$lib/interpretation.svelte.ts';
+	import { Trail } from '$lib/trail.svelte.ts';
+	import TrailVisualizerComponent from '$lib/visualizer/TrailVisualizerComponent.svelte';
 	import Literal from '$lib/literal.svelte.ts';
 	import Variable, { IdVariableMap } from '$lib/variable.svelte.ts';
 	import CNF, { Clause } from '$lib/cnf.svelte.ts';
 	import ClauseVisualizerComponent from '$lib/visualizer/ClauseVisualizerComponent.svelte';
 	import CnfVisualizerComponent from '$lib/visualizer/CnfVisualizerComponent.svelte';
 	import InterpretationVisualizerComponent from '$lib/visualizer/InterpretationVisualizerComponent.svelte';
-	import { Toggle } from 'flowbite-svelte';
+	import DecisionVariable, { AssignmentReason } from '$lib/decisionVariable.svelte.ts';
 
 	type RaWCNF = number[][];
+	let currentDL: number = 0;
 
 	const rawCNF: RaWCNF = [
 		[1, -2, 3, 4],
@@ -28,34 +30,21 @@
 	const I = [
 		{
 			id: 1,
-			assignment: true
-		},
-		{
-			id: 2,
-			assignment: true
-		},
-		{
-			id: 3,
-			assignment: false
-		},
-		{
-			id: 4,
-			assignment: false
+			assigment: false
 		}
 	];
 
-	const II = new Interpretation(rawVariables.size);
-	I.forEach(({ id, assignment }) => II.set(variablesMap.get(id) as Variable, assignment));
+	const II = new Trail(rawVariables.size);
+	I.forEach(({ id, assigment }) => {
+		II.push(new DecisionVariable(variablesMap.get(id) as Variable,
+																 ++currentDL,
+																 assigment,
+																 AssignmentReason.D));
+	});
+	II.setStartignDL();
 
 	const cnf: CNF = new CNF(rawCNF.map((literals) => newClause(literals)));
-
-	assign(II);
-
-	function assign(II: Interpretation) {
-		II.forEach((assignment, variable) => {
-			variable.assign(assignment);
-		});
-	}
+	II.assign();
 
 	function rawVariableToVariable(rvariable: number): Variable {
 		if (rvariable < 0) throw 'ERROR: raw numbers should be >= 0';
@@ -96,22 +85,60 @@
 		}
 		return new Clause(Array.from(resolvedLiterals.values()));
 	}
+
+	//This function is only used to see the different colours (just backtracking and decision) and to test the content. The final "decision" function logic won't be like this.
+	function decide(){
+		let decision = false;
+		let iterator = variablesMap.entries();
+		let entry = iterator.next();
+
+		while(!decision && !entry.done){
+			const [id, variable] = entry.value;
+			if(!variable.assigned) {
+				II.push(new DecisionVariable(variablesMap.get(id) as Variable,++currentDL,true, AssignmentReason.D));
+				II.assign();
+				decision = true;
+			}
+			entry = iterator.next();
+		}
+		
+		if(!decision) {
+			let backtrack = false;
+			let lastDecision = II.pop();
+			while(lastDecision != undefined && !backtrack) {
+				lastDecision.unassign();
+				if(lastDecision.isD()) {
+					II.push(new DecisionVariable(variablesMap.get(lastDecision.getVariable().getId()) as Variable,
+									--currentDL,
+								  !lastDecision.getAssignemnt(), 
+									AssignmentReason.K));
+					II.setStartignDL();
+					II.assign();
+					backtrack = true;
+				}
+				else{
+					lastDecision = II.pop();
+				}
+			}
+
+		}
+	}
+
 </script>
 
-<div class="flex-column mt-3 flex justify-center">
-	{#each variables as variable (variable.id)}
-		<span>{variable.id} - {variable.evaluate()}</span>
-		<Toggle bind:checked={variable.evaluation} class="ml-1 mr-2"></Toggle>
-	{/each}
-</div>
-
 <InterpretationVisualizerComponent {variables} />
-<CnfVisualizerComponent {cnf} />
+<CnfVisualizerComponent {cnf}/>
 
-<p>
-	Let's visualize the new clause created by applying logic resolution to the first and second clause
-	of the cnf
-</p>
-<ClauseVisualizerComponent clause={logicResolution(cnf.getClause(0), cnf.getClause(1))} />
+<p>Let's visualize the new clause created by applying logic resolution to the first and second clause of the cnf</p>
+<ClauseVisualizerComponent clause={logicResolution(cnf.getClause(0), cnf.getClause(1))}/>
 
 <p>The cnf is <strong>{cnf.eval()}</strong></p>
+
+<button 
+  on:click={decide}
+  class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md transition duration-300 ease-in-out"
+>
+  Decide
+</button>
+
+<TrailVisualizerComponent trail = {II}/>

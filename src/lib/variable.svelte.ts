@@ -22,6 +22,10 @@ export default class Variable {
     this.assigned = true;
   }
 
+  public unassign(): void {
+    this.assigned = false;
+  }
+
   public negate(): void {
     this.evaluation != this.evaluation;
   }
