@@ -14,20 +14,22 @@ export class TrailCollection {
   get currentTrail(): Trail {
     return this.collection.at(-1) ?? new Trail(this.nVariables);
   }
+
   public getCurrentDL() { return this.currentDL; }
-  public getCurrentTrailCopy(): Trail { 
+
+  public getCurrentTrailCopy(): Trail {
     return this.currentTrail.copy()
-  } 
-  
-  public push(trail:Trail): void {
+  }
+
+  public push(trail: Trail): void {
     this.collection.push(trail);
   }
 
-  public pop (): Trail | undefined {
+  public pop(): Trail | undefined {
     return this.collection.pop();
   }
 
-  public pushDecision(decision:DecisionVariable): void {
+  public pushDecision(decision: DecisionVariable): void {
     this.currentTrail.push(decision);
   }
 
@@ -62,8 +64,6 @@ export class TrailCollection {
   }
 
   forEach(callback: (traiul: Trail, index: number, array: Trail[]) => void, thisArg?: any): void {
-      this.collection.forEach(callback, thisArg);
+    this.collection.forEach(callback, thisArg);
   }
-
-  
 }

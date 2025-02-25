@@ -14,20 +14,21 @@ export class Trail {
     }
 
     public copy() {
-        const copy = new Trail(this.nVariables);
-        copy.trail = this.trail.map(decision => decision.clone());
-        copy.startingWP = this.startingWP;
-        return copy;
+        const newTrail = new Trail(this.nVariables);
+        newTrail.trail = this.trail.map(decision => decision.copy());
+        newTrail.startingWP = this.startingWP;
+        return newTrail;
     }
 
     public setStartignWP(): void {
-        this.startingWP = this.trail.length-1;
+        this.startingWP = this.trail.length - 1;
     }
 
-    public getTrail():DecisionVariable[] { return this.trail; }
+    public getTrail(): DecisionVariable[] { return this.trail; }
+
     public getStartingWP(): number { return this.startingWP; }
 
-    public indexOf(decision :DecisionVariable): number {
+    public indexOf(decision: DecisionVariable): number {
         return this.trail.indexOf(decision);
     }
 
@@ -58,6 +59,6 @@ export class Trail {
     }
 
     forEach(callback: (decision: DecisionVariable, index: number, array: DecisionVariable[]) => void, thisArg?: any): void {
-    this.trail.forEach(callback, thisArg);
+        this.trail.forEach(callback, thisArg);
     }
 }

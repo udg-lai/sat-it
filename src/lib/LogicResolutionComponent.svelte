@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { Trail } from '$lib/trail.svelte.ts';
-	import TrailVisualizerComponent from '$lib/visualizer/TrailVisualizerComponent.svelte';
 	import { TrailCollection } from '$lib/trailCollection.svelte.ts';
 	import TrailCollectionVisualizerComponent from '$lib/visualizer/TrailCollectionVisualizerComponent.svelte';
 	import Literal from '$lib/literal.svelte.ts';
@@ -38,10 +37,14 @@
 	];
 	const trailCollection = new TrailCollection(rawVariables.size);
 	I.forEach(({ id, assigment }) => {
-		trailCollection.pushDecision(new DecisionVariable(variablesMap.get(id) as Variable,
-																		++currentDL,
-																		assigment,
-																		AssignmentReason.D));
+		trailCollection.pushDecision(
+			new DecisionVariable(
+				variablesMap.get(id) as Variable,
+				++currentDL,
+				assigment,
+				AssignmentReason.D
+			)
+		);
 	});
 	trailCollection.setStartignWP_CT();
 
@@ -89,47 +92,56 @@
 	}
 
 	//This function is only used to see the different colours (just backtracking and decision) and to test the content. The final "decision" function logic won't be like this.
-	function decide(){
+	function decide() {
 		let decision = false;
 		let iterator = variablesMap.entries();
 		let entry = iterator.next();
 
-		while(!decision && !entry.done){
+		while (!decision && !entry.done) {
 			const [id, variable] = entry.value;
-			if(!variable.assigned) {
-				trailCollection.pushDecision(new DecisionVariable(variablesMap.get(id) as Variable,++currentDL,true, AssignmentReason.D));
+			if (!variable.assigned) {
+				trailCollection.pushDecision(
+					new DecisionVariable(
+						variablesMap.get(id) as Variable,
+						++currentDL,
+						true,
+						AssignmentReason.D
+					)
+				);
 				trailCollection.assign_CT();
 				decision = true;
 			}
 			entry = iterator.next();
 		}
-		//If we couldn't decide anything, we sopose we've found a conflict so we will create a new trail 
-		if(!decision) {
+		//If we couldn't decide anything, we sopose we've found a conflict so we will create a new trail
+		if (!decision) {
 			let conflictTrail: Trail = trailCollection.getCurrentTrailCopy();
 			let backtrack = false;
-			console.log(typeof(conflictTrail));
+			console.log(typeof conflictTrail);
 			let lastDecision = conflictTrail.pop();
-			while(lastDecision != undefined && !backtrack) {
+			while (lastDecision != undefined && !backtrack) {
 				lastDecision.unassign();
-				if(lastDecision.isD()) {
-					conflictTrail.push(new DecisionVariable(variablesMap.get(lastDecision.getVariable().getId()) as Variable,
-									--currentDL,
-								  !lastDecision.getAssignemnt(), 
-									AssignmentReason.K));
+				if (lastDecision.isD()) {
+					conflictTrail.push(
+						new DecisionVariable(
+							variablesMap.get(lastDecision.getVariable().getId()) as Variable,
+							--currentDL,
+							!lastDecision.getAssignemnt(),
+							AssignmentReason.K
+						)
+					);
 					conflictTrail.setStartignWP();
 					conflictTrail.assign();
 					trailCollection.push(conflictTrail);
 					backtrack = true;
-				}
-				else{
+				} else {
 					lastDecision = conflictTrail.pop();
 				}
 			}
 			// We add a new trail to let us create more trails
-			if(!backtrack) {
+			if (!backtrack) {
 				trailCollection.pushTrail(new Trail(rawVariables.size));
 			}
-
 		}
 	}
 	function flipVisualize() {
@@ -138,28 +150,27 @@
 </script>
 
 <InterpretationVisualizerComponent {variables} />
-<CnfVisualizerComponent {cnf}/>
+<CnfVisualizerComponent {cnf} />
 
-<p>Let's visualize the new clause created by applying logic resolution to the first and second clause of the cnf</p>
-<ClauseVisualizerComponent clause={logicResolution(cnf.getClause(0), cnf.getClause(1))}/>
+<p>
+	Let's visualize the new clause created by applying logic resolution to the first and second clause
+	of the cnf
+</p>
+<ClauseVisualizerComponent clause={logicResolution(cnf.getClause(0), cnf.getClause(1))} />
 
 <p>The cnf is <strong>{cnf.eval()}</strong></p>
 
-<button 
-  on:click={decide}
-  class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md transition duration-300 ease-in-out"
+<button
+	on:click={decide}
+	class="rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white shadow-md transition duration-300 ease-in-out hover:bg-blue-700"
 >
 	Decide
 </button>
-<button 
-  on:click={flipVisualize}
-  class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md transition duration-300 ease-in-out"
+<button
+	on:click={flipVisualize}
+	class="rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white shadow-md transition duration-300 ease-in-out hover:bg-blue-700"
 >
-  visualize
+	visualize
 </button>
 
-
-<TrailCollectionVisualizerComponent trailCollection = {trailCollection}
-																		visualizeTrails = {visualizeTrails} />
-
-
+<TrailCollectionVisualizerComponent {trailCollection} {visualizeTrails} />
