@@ -18,7 +18,7 @@
 	{#each trail as decision}
 		<DecisionVariableComponent
 			{decision}
-			startingWP={trail.getStartingWP()}
+			startingWP={trail.getFollowUpIndex()}
 			currentWP={trail.indexOf(decision)}
 		/>
 	{/each}

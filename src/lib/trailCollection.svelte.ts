@@ -4,7 +4,6 @@ import { Trail } from "./trail.svelte.ts";
 export class TrailCollection {
   private collection: Trail[] = $state([]);
   private nVariables: number;
-  private currentDL: number = 0;
 
   constructor(nVariables: number) {
     this.nVariables = nVariables;
@@ -18,10 +17,8 @@ export class TrailCollection {
       return this.collection[this.collection.length - 1];
   }
 
-  public getCurrentDL() { return this.currentDL; }
-
-  public getCurrentTrailCopy(): Trail {
-    return this.currentTrail.copy()
+  public getCurrentTrail(): Trail {
+    return this.currentTrail;
   }
 
   public push(trail: Trail): void {
@@ -38,10 +35,6 @@ export class TrailCollection {
 
   public popDecision(): DecisionVariable | undefined {
     return this.currentTrail.pop()
-  }
-
-  public complete(): boolean {
-    return this.currentTrail.complete();
   }
 
   //Functions to acces those methodes from the current trail

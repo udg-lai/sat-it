@@ -2,7 +2,8 @@ import type DecisionVariable from "./decisionVariable.svelte.ts";
 
 export class Trail {
     private trail: DecisionVariable[] = $state([]);
-    private startingWP: number = $state(0);
+    private currentDL: number = 0;
+    private followUPIndex: number = $state(0);
     /*startingWP (Starting WritePoint): This variable has the following purpose:
         1. To write the decisions of the trail with a brighter or shadier colour.
         2. When going back, to know if those decisions have been made in this trail.
@@ -16,17 +17,17 @@ export class Trail {
     public copy() {
         const newTrail = new Trail(this.nVariables);
         newTrail.trail = this.trail.map(decision => decision.copy());
-        newTrail.startingWP = this.startingWP;
+        newTrail.followUPIndex = this.followUPIndex;
         return newTrail;
     }
 
     public setStartignWP(): void {
-        this.startingWP = this.trail.length - 1;
+        this.followUPIndex = this.trail.length - 1;
     }
 
     public getTrail(): DecisionVariable[] { return this.trail; }
 
-    public getStartingWP(): number { return this.startingWP; }
+    public getFollowUpIndex(): number { return this.followUPIndex; }
 
     public indexOf(decision: DecisionVariable): number {
         return this.trail.indexOf(decision);
@@ -38,14 +39,13 @@ export class Trail {
 
     public push(decision: DecisionVariable) {
         this.trail.push(decision);
+        if (decision.isD()) this.currentDL++;
     }
 
     public pop(): DecisionVariable | undefined {
-        return this.trail.pop();
-    }
-
-    public complete(): boolean {
-        return this.trail.length == this.nVariables;
+        const returnValue = this.trail.pop()
+        if (returnValue?.isD()) this.currentDL--;
+        return returnValue;
     }
 
     public assign(): void {

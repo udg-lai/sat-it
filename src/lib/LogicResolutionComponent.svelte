@@ -11,7 +11,6 @@
 	import DecisionVariable, { AssignmentReason } from '$lib/decisionVariable.svelte.ts';
 
 	type RaWCNF = number[][];
-	let currentDL: number = 0;
 	let visualizeTrails = false;
 
 	const rawCNF: RaWCNF = [
@@ -40,7 +39,6 @@
 		trailCollection.pushDecision(
 			new DecisionVariable(
 				variablesMap.get(id) as Variable,
-				++currentDL,
 				assigment,
 				AssignmentReason.D
 			)
@@ -103,7 +101,6 @@
 				trailCollection.pushDecision(
 					new DecisionVariable(
 						variablesMap.get(id) as Variable,
-						++currentDL,
 						true,
 						AssignmentReason.D
 					)
@@ -115,7 +112,8 @@
 		}
 		//If we couldn't decide anything, we sopose we've found a conflict so we will create a new trail
 		if (!decision) {
-			let conflictTrail: Trail = trailCollection.getCurrentTrailCopy();
+			let conflictTrail: Trail = trailCollection.getCurrentTrail();
+			conflictTrail = conflictTrail.copy();
 			let backtrack = false;
 			let lastDecision = conflictTrail.pop();
 			while (lastDecision != undefined && !backtrack) {
@@ -124,8 +122,7 @@
 					conflictTrail.push(
 						new DecisionVariable(
 							variablesMap.get(lastDecision.getVariable().getId()) as Variable,
-							--currentDL,
-							!lastDecision.getAssignemnt(),
+							!lastDecision.getAssignment(),
 							AssignmentReason.K
 						)
 					);
@@ -146,6 +143,18 @@
 	function flipVisualize() {
 		visualizeTrails = !visualizeTrails;
 	}
+	function getCNFeval() {
+		switch (cnf.eval()) {
+			case 0:
+				return 'UNSAT';
+			case 1:
+				return 'SAT';
+			case 2:
+				return 'UNRESOLVED';
+			default:
+				throw 'ERROR';
+		}
+	}
 </script>
 
 <InterpretationVisualizerComponent {variables} />
@@ -157,7 +166,7 @@
 </p>
 <ClauseVisualizerComponent clause={logicResolution(cnf.getClause(0), cnf.getClause(1))} />
 
-<p>The cnf is <strong>{cnf.eval()}</strong></p>
+<p>The cnf is <strong>{getCNFeval()}</strong></p>
 
 <button
 	on:click={decide}
