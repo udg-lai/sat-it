@@ -140,7 +140,7 @@
 			}
 			// We add a new trail to let us create more trails
 			if (!backtrack) {
-				trailCollection.pushTrail(new Trail(rawVariables.size));
+				trailCollection.push(new Trail(rawVariables.size));
 			}
 		}
 	}
