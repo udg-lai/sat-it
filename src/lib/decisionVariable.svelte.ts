@@ -1,3 +1,4 @@
+import type { Maybe } from "./utility.ts";
 import type Variable from "./variable.svelte.ts";
 
 export enum AssignmentReason {
@@ -6,28 +7,32 @@ export enum AssignmentReason {
   K = "backtracking"
 }
 
+
 export default class DecisionVariable {
-  vairable: Variable;
+  variable: Variable;
   assignment: boolean;
   reason: AssignmentReason;
-  source: string;
+  source: Maybe<string>;
   /* Source: This parametre will get the id of the clause that was the cause of the decision made:
-    - If D: An empty string will be assigned as it is a simple decision
+    - If D: Undefined will be assigned as it is a simple decision
     - If UP: The source will be the id of the cluase that caused the propagation of the variable
     - If K: The sourece will be the id of the caluse that caused the conflict.
   */
-  constructor(variable:Variable, assignment:boolean, reason:AssignmentReason,  sourece: string = "") {
-    this.vairable = variable;
+  constructor(variable: Variable, assignment: boolean, reason: AssignmentReason, source: Maybe<string> = undefined) {
+    this.variable = variable;
     this.assignment = assignment;
     this.reason = reason;
-    this.source = sourece;
+    this.source = source;
   }
-  public getVariable(): Variable { return this.vairable; }
-  public getAssignemnt(): boolean { return this.assignment;}
-  public getSource(): string { 
-    if (this.source === "") {
+
+  public getVariable(): Variable { return this.variable; }
+
+  public getAssignemnt(): boolean { return this.assignment; }
+
+  public getSource(): string {
+    if (this.source === undefined) {
       throw "ERROR: There is no source for the decision";
-    } 
+    }
     return this.source;
   }
 
@@ -44,7 +49,6 @@ export default class DecisionVariable {
   }
 
   public assign() {
-    this.vairable.assign(this.assignment);
+    this.variable.assign(this.assignment);
   }
-  
 }
