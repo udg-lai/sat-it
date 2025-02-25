@@ -12,7 +12,10 @@ export class TrailCollection {
   }
 
   get currentTrail(): Trail {
-    return this.collection.at(-1) ?? new Trail(this.nVariables);
+    if (this.collection.length === 0)
+      throw "ERROR: empty trail collection";
+    else
+      return this.collection[this.collection.length - 1];
   }
 
   public getCurrentDL() { return this.currentDL; }
@@ -35,14 +38,6 @@ export class TrailCollection {
 
   public popDecision(): DecisionVariable | undefined {
     return this.currentTrail.pop()
-  }
-
-  public pushTrail(newTrail: Trail): void {
-    this.collection.push(newTrail);
-  }
-
-  public popTrail(): Trail | undefined {
-    return this.collection.pop();
   }
 
   public complete(): boolean {
