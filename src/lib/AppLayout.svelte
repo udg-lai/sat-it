@@ -9,7 +9,7 @@
 	<div class="app-container">
 		<div class="tools-section z-10">
 			<div class="vertical-separator"></div>
-			<ToolsComponent hide={false} />
+			<ToolsComponent hide={true} />
 		</div>
 		<workspace class="flex flex-col md:flex-row">
 			<play-area>
@@ -31,9 +31,6 @@
 		align-items: center;
 		justify-content: center;
 		padding: var(--windows-padding);
-	}
-
-	play-area {
 		flex: 2;
 		position: relative;
 	}
