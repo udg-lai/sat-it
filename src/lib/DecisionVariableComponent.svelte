@@ -8,17 +8,17 @@
 		currentWP: number;
 	}
 	let { decision, startingWP, currentWP }: Props = $props();
-	let previousDL = $derived(currentWP < startingWP);
+	let previousIndex = $derived(currentWP < startingWP);
 </script>
 
 <div
 	class="trail"
-	class:decide={decision.isD() && !previousDL}
-	class:decidePDL={decision.isD() && previousDL}
-	class:unit-propagation={decision.isUP() && !previousDL}
-	class:unit-propagationPDL={decision.isUP() && previousDL}
-	class:backtrack={decision.isK() && !previousDL}
-	class:backtrackPDL={decision.isK() && previousDL}
+	class:decide={decision.isD() && !previousIndex}
+	class:decidePrevious={decision.isD() && previousIndex}
+	class:unit-propagation={decision.isUP() && !previousIndex}
+	class:unit-propagationPrevious={decision.isUP() && previousIndex}
+	class:backtrack={decision.isK() && !previousIndex}
+	class:backtrackPrevious={decision.isK() && previousIndex}
 >
 	<MathTexComponent equation={decision.toTeX()} />
 </div>
@@ -32,25 +32,32 @@
 		padding-left: 5px;
 	}
 	.decide {
-		color: #1434a4;
+		color: var(--decide-color);
+		--decide-color: #1434a4;
 	}
 
-	.decidePDL {
-		color: #5d71b9ea;
+	.decidePrevious {
+		color: var(--decide-previous);
+		--decide-previous: #5d71b9ea;
+
 	}
 
 	.unit-propagation {
-		color: #36454f;
+		color: var(--unit-propagation-color);
+		--unit-propagation-color: #36454f
 	}
 
-	.unit-propagationPDL {
-		color: #888d90ea;
+	.unit-propagationPrevious{
+		color: var(--unit-propagationPrevious);
+		--unit-propagationPrevious: #888d90ea
 	}
 
 	.backtrack {
-		color: #e7aa00;
+		color: var(--backtrack-color);
+		--backtrack-color:#e7aa00;
 	}
-	.backtrackPDL {
-		color: rgba(183, 180, 129, 0.905);
+	.backtrackPrevious {
+		color: var(--backtracking-previous);
+		--backtracking-previous: rgba(183, 180, 129, 0.905);
 	}
 </style>
