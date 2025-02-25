@@ -117,7 +117,6 @@
 		if (!decision) {
 			let conflictTrail: Trail = trailCollection.getCurrentTrailCopy();
 			let backtrack = false;
-			console.log(typeof conflictTrail);
 			let lastDecision = conflictTrail.pop();
 			while (lastDecision != undefined && !backtrack) {
 				lastDecision.unassign();
