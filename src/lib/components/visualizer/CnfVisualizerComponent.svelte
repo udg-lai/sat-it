@@ -1,6 +1,6 @@
 <script lang="ts">
-  import CNF from '$lib/cnf.svelte.ts';
-  import ClauseVisualizerComponent from '$lib/visualizer/ClauseVisualizerComponent.svelte';
+  import CNF from '$lib/transversal/entities/CNF.svelte.ts';
+  import ClauseVisualizerComponent from '$lib/components/visualizer/ClauseVisualizerComponent.svelte';
   interface Props {
     cnf : CNF;
   }

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { slide } from 'svelte/transition';
-	import type { TrailCollection } from '$lib/trailCollection.svelte.ts';
-	import TrailVisualizerComponent from '$lib/visualizer/TrailVisualizerComponent.svelte';
+	import type { TrailCollection } from '$lib/TrailCollection.svelte.ts';
+	import TrailVisualizerComponent from '$lib/components/visualizer/TrailVisualizerComponent.svelte';
 
 	interface Props {
 		trailCollection: TrailCollection;
@@ -19,7 +19,7 @@
 		{/each}
 	{:else}
 		<div in:slide|global out:slide={{ duration: 1 }}>
-			<TrailVisualizerComponent trail={trailCollection.getCurrentTrail()} />
+			<TrailVisualizerComponent trail={trailCollection.last()} />
 		</div>
 	{/if}
 </div>

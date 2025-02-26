@@ -1,8 +1,8 @@
 <script lang="ts">
-	import FooterComponent from '$lib/FooterComponent.svelte';
-	import LogicResolutionComponent from '$lib/LogicResolutionComponent.svelte';
-	import ToolsComponent from '$lib/tools/ToolsComponent.svelte';
-	import ScrollableComponent from '$lib/ScrollableComponent.svelte';
+	import FooterComponent from '$lib/components/FooterComponent.svelte';
+	import LogicResolutionComponent from '$lib/components/LogicResolutionComponent.svelte';
+	import ToolsComponent from '$lib/components/tools/ToolsComponent.svelte';
+	import ScrollableComponent from '$lib/components/ScrollableComponent.svelte';
 </script>
 
 <div class="view-container">

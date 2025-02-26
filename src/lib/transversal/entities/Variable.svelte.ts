@@ -1,7 +1,7 @@
 export default class Variable {
   id: number;
-  assignment = $state(false);
-  assigned = $state(false);
+  assignment: boolean = false;
+  assigned: boolean = false;
 
   constructor(id: number) {
     if (id < 0) throw "ERROR: variable ID should be >= 0";
@@ -32,7 +32,10 @@ export default class Variable {
   }
 
   public copy(): Variable {
-    return structuredClone(this);
+    const newVariable = new Variable(this.id);
+    newVariable.assign = this.assign;
+    newVariable.assigned = this.assigned;
+    return newVariable;
   }
 }
 

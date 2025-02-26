@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { Trail } from '$lib/trail.svelte.ts';
-	import DecisionVariableComponent from '$lib/DecisionVariableComponent.svelte';
+	import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
+	import DecisionVariableComponent from '$lib/components/DecisionVariableComponent.svelte';
 
 	interface Props {
 		trail: Trail;

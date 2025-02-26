@@ -1,5 +1,5 @@
-import type { Maybe } from "./utility.ts";
-import type Variable from "./variable.svelte.ts";
+import type { Maybe } from "../utils/types.ts";
+import type Variable from "./Variable.svelte.ts";
 
 export enum AssignmentReason {
   D = "decision",
@@ -7,24 +7,29 @@ export enum AssignmentReason {
   K = "backtracking"
 }
 
-export default class DecisionVariable {
+export default class DecisionLiteral {
+  /**
+   * Any instance of the decision literal is evaluated to true
+   */
   variable: Variable;
   reason: AssignmentReason;
-  clauseUpId: Maybe<string>;
+  clauseUpId: Maybe<number>;
 
-  constructor(variable: Variable, reason: AssignmentReason, clauseUpId: Maybe<string> = undefined) {
+  constructor(variable: Variable, reason: AssignmentReason, clauseUpId: Maybe<number> = undefined) {
     this.variable = variable;
     this.reason = reason;
     this.clauseUpId = clauseUpId;
   }
 
-  public copy(): DecisionVariable {
-    return structuredClone(this)
+  public copy(): DecisionLiteral {
+    return new DecisionLiteral(this.variable,
+      this.reason,
+      this.clauseUpId);
   }
 
   public getVariable(): Variable { return this.variable; }
 
-  public getSource(): string {
+  public getSource(): number {
     if (this.clauseUpId === undefined) {
       throw "ERROR: There is no source for the decision";
     }

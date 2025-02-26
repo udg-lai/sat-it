@@ -1,5 +1,5 @@
 <script lang="ts">
-	import DynamicRender from "$lib/DynamicRender.svelte";
+	import DynamicRender from "$lib/components/DynamicRender.svelte";
 	import type { Component } from "svelte";
 
   interface Props {

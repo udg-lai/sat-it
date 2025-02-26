@@ -1,4 +1,4 @@
-import Literal from "./literal.svelte.ts";
+import Literal from "./Literal.svelte.ts";
 import { v4 as uuidv4 } from 'uuid';
 
 export class Clause {

@@ -1,14 +1,14 @@
 <script lang="ts">
-	import { Trail } from '$lib/trail.svelte.ts';
-	import { TrailCollection } from '$lib/trailCollection.svelte.ts';
-	import TrailCollectionVisualizerComponent from '$lib/visualizer/TrailCollectionVisualizerComponent.svelte';
-	import Literal from '$lib/literal.svelte.ts';
-	import Variable, { IdVariableMap } from '$lib/variable.svelte.ts';
-	import CNF, { Clause } from '$lib/cnf.svelte.ts';
-	import ClauseVisualizerComponent from '$lib/visualizer/ClauseVisualizerComponent.svelte';
-	import CnfVisualizerComponent from '$lib/visualizer/CnfVisualizerComponent.svelte';
-	import InterpretationVisualizerComponent from '$lib/visualizer/InterpretationVisualizerComponent.svelte';
-	import DecisionVariable, { AssignmentReason } from '$lib/decisionVariable.svelte.ts';
+	import { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
+	import { TrailCollection } from '$lib/transversal/entities/TrailCollection.svelte.ts';
+	import TrailCollectionVisualizerComponent from '$lib/components/visualizer/TrailCollectionVisualizerComponent.svelte';
+	import Literal from '$lib/transversal/entities/Literal.svelte.ts';
+	import Variable, { IdVariableMap } from '$lib/transversal/entities/Variable.svelte.ts';
+	import CNF, { Clause } from '$lib/transversal/entities/CNF.svelte.ts';
+	import ClauseVisualizerComponent from '$lib/components/visualizer/ClauseVisualizerComponent.svelte';
+	import CnfVisualizerComponent from '$lib/components/visualizer/CnfVisualizerComponent.svelte';
+	import InterpretationVisualizerComponent from '$lib/components/visualizer/InterpretationVisualizerComponent.svelte';
+	import DecisionLiteral, { AssignmentReason } from '$lib/transversal/entities/DecisionLiteral.svelte.ts';
 
 	type RaWCNF = number[][];
 	let visualizeTrails = false;
@@ -35,20 +35,16 @@
 		}
 	];
 
-	let trail: Trail = new Trail(rawVariables.size);
+	let actualTrail: Trail = new Trail(rawVariables.size);
 	I.forEach(({ id, assignment }) => {
-		const variable: Variable = (variablesMap.get(id) as Variable).copy()
+		const variable: Variable = (variablesMap.get(id) as Variable).copy();
 		variable.assign(assignment);
-		trail.push(
-			new DecisionVariable(variable, AssignmentReason.D),
-			true
-		);
+		actualTrail.push(new DecisionLiteral(variable, AssignmentReason.D));
 	});
 	const trailCollection = new TrailCollection();
-	trailCollection.push(trail);
+	trailCollection.push(actualTrail);
 
 	const cnf: CNF = new CNF(rawCNF.map((literals) => newClause(literals)));
-	trailCollection.assign_CT();
 
 	function rawVariableToVariable(rvariable: number): Variable {
 		if (rvariable < 0) throw 'ERROR: raw numbers should be >= 0';
@@ -90,56 +86,14 @@
 		return new Clause(Array.from(resolvedLiterals.values()));
 	}
 
-	//This function is only used to see the different colours (just backtracking and decision) and to test the content. The final "decision" function logic won't be like this.
 	function decide() {
-		let decision = false;
-		let iterator = variablesMap.entries();
-		let entry = iterator.next();
-
-		while (!decision && !entry.done) {
-			const [id, variable] = entry.value;
-			if (!variable.assigned) {
-				trailCollection.pushDecision(
-					new DecisionVariable(variablesMap.get(id) as Variable, true, AssignmentReason.D)
-				);
-				trailCollection.assign_CT();
-				decision = true;
-			}
-			entry = iterator.next();
-		}
-		//If we couldn't decide anything, we suppose we've found a conflict so we will create a new trail
-		if (!decision) {
-			let conflictTrail: Trail = trailCollection.getCurrentTrail();
-			conflictTrail = conflictTrail.copy();
-			let backtrack = false;
-			let lastDecision = conflictTrail.pop();
-			while (lastDecision != undefined && !backtrack) {
-				lastDecision.unassign();
-				if (lastDecision.isD()) {
-					conflictTrail.push(
-						new DecisionVariable(
-							variablesMap.get(lastDecision.getVariable().getId()) as Variable,
-							!lastDecision.getAssignment(),
-							AssignmentReason.K
-						)
-					);
-					conflictTrail.setStartignWP();
-					conflictTrail.assign();
-					trailCollection.push(conflictTrail);
-					backtrack = true;
-				} else {
-					lastDecision = conflictTrail.pop();
-				}
-			}
-			// We add a new trail to let us create more trails
-			if (!backtrack) {
-				trailCollection.push(new Trail(rawVariables.size));
-			}
-		}
+		// TODO: define decide procedure with new api
 	}
+
 	function flipVisualize() {
 		visualizeTrails = !visualizeTrails;
 	}
+
 	function getCNFeval() {
 		switch (cnf.eval()) {
 			case 0:
@@ -152,6 +106,9 @@
 				throw 'ERROR';
 		}
 	}
+
+	const clauseToShow = logicResolution(cnf.getClause(0), cnf.getClause(1))
+	console.log(clauseToShow)
 </script>
 
 <InterpretationVisualizerComponent {variables} />
@@ -161,7 +118,7 @@
 	Let's visualize the new clause created by applying logic resolution to the first and second clause
 	of the cnf
 </p>
-<ClauseVisualizerComponent clause={logicResolution(cnf.getClause(0), cnf.getClause(1))} />
+<ClauseVisualizerComponent clause={clauseToShow} />
 
 <p>The cnf is <strong>{getCNFeval()}</strong></p>
 

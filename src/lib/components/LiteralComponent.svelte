@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type Literal from './literal.svelte.ts';
-	import MathTexComponent from '$lib/MathTexComponent.svelte';
+	import type Literal from '$lib/transversal/entities/Literal.svelte.ts';
+	import MathTexComponent from '$lib/components/MathTexComponent.svelte';
 
   interface Props {
     literal: Literal

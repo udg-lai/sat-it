@@ -1,9 +1,9 @@
 <script lang="ts">
-	import type DecisionVariable from '$lib/decisionVariable.svelte.ts';
-	import MathTexComponent from '$lib/MathTexComponent.svelte';
+	import type DecisionLiteral from '$lib/transversal/entities/DecisionLiteral.svelte.ts';
+	import MathTexComponent from '$lib/components/MathTexComponent.svelte';
 
 	interface Props {
-		decision: DecisionVariable;
+		decision: DecisionLiteral;
 		startingWP: number;
 		currentWP: number;
 	}
