@@ -1,4 +1,4 @@
-import Variable from '$lib/variable.svelte.ts';
+import Variable from '$lib/transversal/entities/Variable.svelte.ts';
 import { v4 as uuidv4 } from 'uuid';
 
 export type Polarity = 'Positive' | 'Negative';
@@ -15,7 +15,9 @@ export default class Literal {
   }
 
   public getId() { return this.id; }
+
   public getVariable() { return this.variable; }
+
   public getPolarity() { return this.polarity; }
 
   public isDefined(): boolean {
@@ -23,7 +25,7 @@ export default class Literal {
   }
 
   public evaluate(): boolean {
-    let evaluation = this.variable.evaluate();
+    let evaluation = this.variable.getAssignment();
     if (this.polarity === 'Negative')
       evaluation = !evaluation;
     return evaluation;
@@ -45,7 +47,7 @@ export default class Literal {
   }
 
   public toInt(): number {
-    return this.variable.id * (this.polarity === 'Negative' ? -1 : 1)  
+    return this.variable.id * (this.polarity === 'Negative' ? -1 : 1)
   }
 
   public copy(): Literal {

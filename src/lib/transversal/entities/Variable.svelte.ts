@@ -1,7 +1,7 @@
 export default class Variable {
   id: number;
-  evaluation = $state(false);
-  assigned = $state(false);
+  assignment: boolean = false;
+  assigned: boolean = false;
 
   constructor(id: number) {
     if (id < 0) throw "ERROR: variable ID should be >= 0";
@@ -9,16 +9,17 @@ export default class Variable {
   }
 
   public getId(): number { return this.id; }
+
   public isAssigned(): boolean { return this.assigned; }
 
-  public evaluate(): boolean {
+  public getAssignment(): boolean {
     if (!this.isAssigned())
       throw "ERROR: variable not assigned yet";
-    return this.evaluation;
+    return this.assignment;
   }
 
   public assign(evaluation: boolean): void {
-    this.evaluation = evaluation;
+    this.assignment = evaluation;
     this.assigned = true;
   }
 
@@ -27,7 +28,14 @@ export default class Variable {
   }
 
   public negate(): void {
-    this.evaluation != this.evaluation;
+    this.assignment != this.assignment;
+  }
+
+  public copy(): Variable {
+    const newVariable = new Variable(this.id);
+    newVariable.assign = this.assign;
+    newVariable.assigned = this.assigned;
+    return newVariable;
   }
 }
 

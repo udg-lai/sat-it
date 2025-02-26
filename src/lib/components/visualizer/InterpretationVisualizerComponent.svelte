@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type Variable from "$lib/variable.svelte.ts";
+	import type Variable from "$lib/transversal/entities/Variable.svelte.ts";
 
     interface Props {
         variables: Set<Variable>
