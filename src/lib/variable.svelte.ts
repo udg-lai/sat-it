@@ -1,6 +1,6 @@
 export default class Variable {
   id: number;
-  evaluation = $state(false);
+  assignment = $state(false);
   assigned = $state(false);
 
   constructor(id: number) {
@@ -9,16 +9,17 @@ export default class Variable {
   }
 
   public getId(): number { return this.id; }
+
   public isAssigned(): boolean { return this.assigned; }
 
-  public evaluate(): boolean {
+  public getAssignment(): boolean {
     if (!this.isAssigned())
       throw "ERROR: variable not assigned yet";
-    return this.evaluation;
+    return this.assignment;
   }
 
   public assign(evaluation: boolean): void {
-    this.evaluation = evaluation;
+    this.assignment = evaluation;
     this.assigned = true;
   }
 
@@ -27,7 +28,11 @@ export default class Variable {
   }
 
   public negate(): void {
-    this.evaluation != this.evaluation;
+    this.assignment != this.assignment;
+  }
+
+  public copy(): Variable {
+    return structuredClone(this);
   }
 }
 

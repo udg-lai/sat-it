@@ -23,7 +23,7 @@ export default class Literal {
   }
 
   public evaluate(): boolean {
-    let evaluation = this.variable.evaluate();
+    let evaluation = this.variable.getAssignment();
     if (this.polarity === 'Negative')
       evaluation = !evaluation;
     return evaluation;
@@ -45,7 +45,7 @@ export default class Literal {
   }
 
   public toInt(): number {
-    return this.variable.id * (this.polarity === 'Negative' ? -1 : 1)  
+    return this.variable.id * (this.polarity === 'Negative' ? -1 : 1)
   }
 
   public copy(): Literal {

@@ -2,27 +2,16 @@ import type DecisionVariable from "./decisionVariable.svelte.ts";
 
 export class Trail {
     private trail: DecisionVariable[] = $state([]);
-    private currentDL: number = 0;
     private followUPIndex: number = $state(0);
-    /*startingWP (Starting WritePoint): This variable has the following purpose:
-        1. To write the decisions of the trail with a brighter or shadier colour.
-        2. When going back, to know if those decisions have been made in this trail.
-    */
-    nVariables: number;
+    private decisionLevel: number = 0;
+    private trailCapacity: number = 0;
 
     constructor(nVariables: number) {
-        this.nVariables = nVariables;
+        this.trailCapacity = nVariables;
     }
 
-    public copy() {
-        const newTrail = new Trail(this.nVariables);
-        newTrail.trail = this.trail.map(decision => decision.copy());
-        newTrail.followUPIndex = this.followUPIndex;
-        return newTrail;
-    }
-
-    public setStartignWP(): void {
-        this.followUPIndex = this.trail.length - 1;
+    public copy(): Trail {
+        return structuredClone(this);
     }
 
     public getTrail(): DecisionVariable[] { return this.trail; }
@@ -33,25 +22,20 @@ export class Trail {
         return this.trail.indexOf(decision);
     }
 
-    public updateLimitOfVariables(nVariables: number): void {
-        this.nVariables = nVariables;
-    }
-
-    public push(decision: DecisionVariable) {
-        this.trail.push(decision);
-        if (decision.isD()) this.currentDL++;
+    public push(decision: DecisionVariable, updateFollowUpIndex: boolean = false) {
+        if (this.trail.length == this.trailCapacity)
+            console.warn("[WARN]: skipped allocating decision as trail capacity is fulfilled")
+        else {
+            this.trail.push(decision);
+            if (decision.isD()) this.decisionLevel++;
+            if (updateFollowUpIndex) this.followUPIndex++;
+        }
     }
 
     public pop(): DecisionVariable | undefined {
         const returnValue = this.trail.pop()
-        if (returnValue?.isD()) this.currentDL--;
+        if (returnValue?.isD()) this.decisionLevel--;
         return returnValue;
-    }
-
-    public assign(): void {
-        this.trail.forEach(decision => {
-            decision.assign();
-        })
     }
 
     [Symbol.iterator]() {

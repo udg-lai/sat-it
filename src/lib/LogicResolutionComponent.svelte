@@ -31,20 +31,21 @@
 	const I = [
 		{
 			id: 1,
-			assigment: false
+			assignment: false
 		}
 	];
-	const trailCollection = new TrailCollection(rawVariables.size);
-	I.forEach(({ id, assigment }) => {
-		trailCollection.pushDecision(
-			new DecisionVariable(
-				variablesMap.get(id) as Variable,
-				assigment,
-				AssignmentReason.D
-			)
+
+	let trail: Trail = new Trail(rawVariables.size);
+	I.forEach(({ id, assignment }) => {
+		const variable: Variable = (variablesMap.get(id) as Variable).copy()
+		variable.assign(assignment);
+		trail.push(
+			new DecisionVariable(variable, AssignmentReason.D),
+			true
 		);
 	});
-	trailCollection.setStartignWP_CT();
+	const trailCollection = new TrailCollection();
+	trailCollection.push(trail);
 
 	const cnf: CNF = new CNF(rawCNF.map((literals) => newClause(literals)));
 	trailCollection.assign_CT();
@@ -99,18 +100,14 @@
 			const [id, variable] = entry.value;
 			if (!variable.assigned) {
 				trailCollection.pushDecision(
-					new DecisionVariable(
-						variablesMap.get(id) as Variable,
-						true,
-						AssignmentReason.D
-					)
+					new DecisionVariable(variablesMap.get(id) as Variable, true, AssignmentReason.D)
 				);
 				trailCollection.assign_CT();
 				decision = true;
 			}
 			entry = iterator.next();
 		}
-		//If we couldn't decide anything, we sopose we've found a conflict so we will create a new trail
+		//If we couldn't decide anything, we suppose we've found a conflict so we will create a new trail
 		if (!decision) {
 			let conflictTrail: Trail = trailCollection.getCurrentTrail();
 			conflictTrail = conflictTrail.copy();

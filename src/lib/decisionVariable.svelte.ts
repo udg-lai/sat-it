@@ -9,35 +9,26 @@ export enum AssignmentReason {
 
 export default class DecisionVariable {
   variable: Variable;
-  assignment: boolean;
   reason: AssignmentReason;
-  source: Maybe<string>;
-  /* Source: This parametre will get the id of the clause that was the cause of the decision made:
-    - If D: Undefined will be assigned as it is a simple decision
-    - If UP: The source will be the id of the cluase that caused the propagation of the variable
-    - If K: The sourece will be the id of the caluse that caused the conflict.
-  */
-  constructor(variable: Variable, assignment: boolean, reason: AssignmentReason, source: Maybe<string> = undefined) {
+  clauseUpId: Maybe<string>;
+
+  constructor(variable: Variable, reason: AssignmentReason, clauseUpId: Maybe<string> = undefined) {
     this.variable = variable;
-    this.assignment = assignment;
     this.reason = reason;
-    this.source = source;
+    this.clauseUpId = clauseUpId;
   }
+
   public copy(): DecisionVariable {
-    return new DecisionVariable(this.variable,
-      this.assignment,
-      this.reason,
-      this.source);
+    return structuredClone(this)
   }
+
   public getVariable(): Variable { return this.variable; }
 
-  public getAssignment(): boolean { return this.assignment; }
-
   public getSource(): string {
-    if (this.source === undefined) {
+    if (this.clauseUpId === undefined) {
       throw "ERROR: There is no source for the decision";
     }
-    return this.source;
+    return this.clauseUpId;
   }
 
   public isD(): boolean {
@@ -52,17 +43,13 @@ export default class DecisionVariable {
     return this.reason === AssignmentReason.K;
   }
 
-  public assign() {
-    this.variable.assign(this.assignment);
-  }
-
   public unassign(): void {
     this.variable.unassign();
   }
 
   public toTeX(): string {
     return [
-      !this.assignment ? `\\neg` : "",
+      !this.variable.getAssignment() ? `\\neg` : "",
       this.variable.getId().toString()
     ].join("")
   }
