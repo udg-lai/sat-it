@@ -6,8 +6,8 @@ export class Trail {
     private decisionLevel: number = 0;
     private trailCapacity: number = 0;
 
-    constructor(nVariables: number) {
-        this.trailCapacity = nVariables;
+    constructor(trailCapacity: number) {
+        this.trailCapacity = trailCapacity;
     }
 
     public copy(): Trail {
@@ -28,7 +28,7 @@ export class Trail {
         else {
             this.trail.push(decision);
             if (decision.isD()) this.decisionLevel++;
-            if (updateFollowUpIndex) this.followUPIndex++;
+            if (updateFollowUpIndex) this.followUPIndex = this.trail.length - 1;
         }
     }
 
