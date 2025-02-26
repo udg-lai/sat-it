@@ -38,18 +38,18 @@
 
 	.decidePrevious {
 		color: var(--decide-previous);
-		--decide-previous: #5d71b9ea;
+		--decide-previous: #1433a48e;
 
 	}
 
 	.unit-propagation {
 		color: var(--unit-propagation-color);
-		--unit-propagation-color: #36454f
+		--unit-propagation-color: #36454f;
 	}
 
 	.unit-propagationPrevious{
 		color: var(--unit-propagationPrevious);
-		--unit-propagationPrevious: #888d90ea
+		--unit-propagationPrevious: #36454f8e;
 	}
 
 	.backtrack {
@@ -58,6 +58,5 @@
 	}
 	.backtrackPrevious {
 		color: var(--backtracking-previous);
-		--backtracking-previous: rgba(183, 180, 129, 0.905);
-	}
+		--backtracking-previous: #e7a9008e;}
 </style>
