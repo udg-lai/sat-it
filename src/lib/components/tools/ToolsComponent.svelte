@@ -121,7 +121,7 @@
 				newViewRef.open = true;
 				if (hide) {
 					hide = false;
-					toolsHTMLElement.style.width = 'var(--max-width-tools)'
+					toolsHTMLElement.style.width = 'var(--max-width-tools)';
 				}
 			}
 		}
