@@ -1,4 +1,4 @@
-import type { Maybe } from "../utils/types.ts";
+import { isNothing, makeNothing, unwrapMaybe, type Maybe } from "$lib/transversal/utils/types/maybe.ts";
 import type Variable from "./Variable.svelte.ts";
 
 export enum AssignmentReason {
@@ -15,7 +15,7 @@ export default class DecisionLiteral {
   reason: AssignmentReason;
   clauseUpId: Maybe<number>;
 
-  constructor(variable: Variable, reason: AssignmentReason, clauseUpId: Maybe<number> = undefined) {
+  constructor(variable: Variable, reason: AssignmentReason, clauseUpId: Maybe<number> = makeNothing()) {
     this.variable = variable;
     this.reason = reason;
     this.clauseUpId = clauseUpId;
@@ -30,10 +30,10 @@ export default class DecisionLiteral {
   public getVariable(): Variable { return this.variable; }
 
   public getSource(): number {
-    if (this.clauseUpId === undefined) {
+    if (isNothing(this.clauseUpId)) {
       throw "ERROR: There is no source for the decision";
     }
-    return this.clauseUpId;
+    return unwrapMaybe(this.clauseUpId);
   }
 
   public isD(): boolean {
