@@ -22,13 +22,17 @@
 	width: var(--tools-width);
 }
 
+.open-tools-view {
+	width: var(--max-width-tools);
+}
+
 .hide-tools-view {
 	width: 0px !important;
 }
 
 .draggable-bar {
 	height: 100%;
-	width: 0.3rem;
+	width: 5px;
 	background-color: transparent;
 	transition: background-color 0.25s ease-in;
 }

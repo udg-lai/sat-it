@@ -119,7 +119,10 @@
 				views = views.map((v) => ({ ...v, open: false }));
 				const newViewRef = views[viewIndex];
 				newViewRef.open = true;
-				if (hide) hide = !hide;
+				if (hide) {
+					hide = false;
+					toolsHTMLElement.style.width = 'var(--max-width-tools)'
+				}
 			}
 		}
 	}
