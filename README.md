@@ -56,3 +56,7 @@ To publish your library to [npm](https://www.npmjs.com):
 ```bash
 npm publish
 ```
+
+## Automatically lint and run tests at commit
+
+We use `Husky`, get started [here](https://typicode.github.io/husky/get-started.html)

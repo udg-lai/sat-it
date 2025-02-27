@@ -3,35 +3,35 @@
 @import 'tailwindcss/utilities';
 
 :root {
-  --border-color: #c1c7cd;
-  --main-bg-color: #f2f4f8;
-  --main-font-color: #121212;
-  --secondary-font-color: #110b0ba8;
-  --focus-border-color: var(--secondary-font-color);
-  --windows-padding: 0.5rem;
-  --font-size: 11px;
+	--border-color: #c1c7cd;
+	--main-bg-color: #f2f4f8;
+	--main-font-color: #121212;
+	--secondary-font-color: #110b0ba8;
+	--focus-border-color: var(--secondary-font-color);
+	--windows-padding: 0.5rem;
+	--font-size: 11px;
 }
 
 html,
 body {
-  height: 100%;
-  width: 100%;
-  background-color: var(--main-bg-color);
-  color: var(--main-font-color);
-  font-size: var(--font-size);
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+	height: 100%;
+	width: 100%;
+	background-color: var(--main-bg-color);
+	color: var(--main-font-color);
+	font-size: var(--font-size);
+	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-body>div {
-  height: 100%;
-  width: 100%;
+body > div {
+	height: 100%;
+	width: 100%;
 }
 
 .vertical-separator {
-  position: absolute;
-  right: 0;
-  top: 0;
-  height: 100%;
-  border-width: 0px 1px 0px 0px;
-  border-color: var(--border-color);
+	position: absolute;
+	right: 0;
+	top: 0;
+	height: 100%;
+	border-width: 0px 1px 0px 0px;
+	border-color: var(--border-color);
 }

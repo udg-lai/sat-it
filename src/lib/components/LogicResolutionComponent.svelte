@@ -8,7 +8,9 @@
 	import ClauseVisualizerComponent from '$lib/components/visualizer/ClauseVisualizerComponent.svelte';
 	import CnfVisualizerComponent from '$lib/components/visualizer/CnfVisualizerComponent.svelte';
 	import InterpretationVisualizerComponent from '$lib/components/visualizer/InterpretationVisualizerComponent.svelte';
-	import DecisionLiteral, { AssignmentReason } from '$lib/transversal/entities/DecisionLiteral.svelte.ts';
+	import DecisionLiteral, {
+		AssignmentReason
+	} from '$lib/transversal/entities/DecisionLiteral.svelte.ts';
 
 	type RaWCNF = number[][];
 	let visualizeTrails = false;
@@ -107,8 +109,8 @@
 		}
 	}
 
-	const clauseToShow = logicResolution(cnf.getClause(0), cnf.getClause(1))
-	console.log(clauseToShow)
+	const clauseToShow = logicResolution(cnf.getClause(0), cnf.getClause(1));
+	console.log(clauseToShow);
 </script>
 
 <InterpretationVisualizerComponent {variables} />
