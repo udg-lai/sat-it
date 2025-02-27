@@ -39,22 +39,21 @@
 	.decidePrevious {
 		color: var(--decide-previous);
 		--decide-previous: #5d71b9ea;
-
 	}
 
 	.unit-propagation {
 		color: var(--unit-propagation-color);
-		--unit-propagation-color: #36454f
+		--unit-propagation-color: #36454f;
 	}
 
-	.unit-propagationPrevious{
+	.unit-propagationPrevious {
 		color: var(--unit-propagationPrevious);
-		--unit-propagationPrevious: #888d90ea
+		--unit-propagationPrevious: #888d90ea;
 	}
 
 	.backtrack {
 		color: var(--backtrack-color);
-		--backtrack-color:#e7aa00;
+		--backtrack-color: #e7aa00;
 	}
 	.backtrackPrevious {
 		color: var(--backtracking-previous);

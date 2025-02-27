@@ -1,15 +1,15 @@
 <script lang="ts">
-	import type Variable from "$lib/transversal/entities/Variable.svelte.ts";
+	import type Variable from '$lib/transversal/entities/Variable.svelte.ts';
 
-    interface Props {
-        variables: Set<Variable>
-    }
+	interface Props {
+		variables: Set<Variable>;
+	}
 
-    let {variables}: Props = $props();
+	let { variables }: Props = $props();
 </script>
 
 <div class="flex flex-row">
-  {#each variables as v (v.id)}
-    {v.id}
-  {/each}
+	{#each variables as v (v.id)}
+		{v.id}
+	{/each}
 </div>
