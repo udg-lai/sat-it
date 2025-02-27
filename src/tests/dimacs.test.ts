@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import parser from '$lib/transversal/utils/dimacs.ts';
+import parser, { type Summary } from '$lib/transversal/utils/dimacs.ts';
 
 
 const example01 = `
@@ -15,15 +15,27 @@ p cnf 5 3
 `
 
 const example02 = `
-p cnf 5 3
-1 -5 4 0
--1 5 3 4 0
+p cnf 4 5
+1 -2 4 0
+-1 2 3 4 0
 -3 -4 0
+-1 -2 0
+-1 -2 3 0
 `
 
 describe('dimacs parser', () => {
     it('example01', () => {
-        const summary = parser(example01)
+        const summary: Summary = parser(example01)
         expect(summary.comment).toBe(`\n\nstart with comments\n\nadios\n`);
-    });
+        expect(summary.varCount).toBe(5);
+        expect(summary.clauseCount).toBe(3);
+        expect(summary.claims).toStrictEqual([[1, -5, 4, 0], [-1, 5, 3, 4, 0], [-3, -4, 0]]);
+    })
+    it('example02', () => {
+        const summary: Summary = parser(example02)
+        expect(summary.comment).toBe("");
+        expect(summary.varCount).toBe(4);
+        expect(summary.clauseCount).toBe(5);
+        expect(summary.claims).toStrictEqual([[1, -2, 4, 0], [-1, 2, 3, 4, 0], [-3, -4, 0], [-1, -2, 0], [-1, -2, 3, 0]]);
+    })
 });
