@@ -30,4 +30,8 @@ export default class VariableCollection {
   }
 
   public restartCounter(): void { this.currentVariable = 0; }
+
+
+
+    
 }
