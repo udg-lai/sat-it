@@ -9,14 +9,13 @@ export default class VariableCollection {
     this.collection = new Array(nVariables).fill(null).map((_, index) => new Variable(index));
   }
 
-  public getcurrentVariable(): Maybe<Variable> {
-    let index: number = this.currentVariable;
+  public getCurrentVariable(): Maybe<Variable> {
     while (this.currentVariable < this.collection.length) {
-      if (this.collection[index].isAssigned()) {
-        return makeJust(this.collection[index]);
+      if (!this.collection[this.currentVariable].isAssigned()) {
+        return makeJust(this.collection[this.currentVariable++]);
       }
       else {
-        index = this.currentVariable++;
+        this.currentVariable++;
       }
     }
     return makeNothing();
