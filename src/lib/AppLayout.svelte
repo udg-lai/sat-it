@@ -22,7 +22,7 @@
 	</div>
 </div>
 
-{#snippet logicResolution(props?: { string: any })}
+{#snippet logicResolution()}
 	<LogicResolutionComponent />
 {/snippet}
 
@@ -59,5 +59,4 @@
 		border-width: 1px 0px 0px 0px;
 		border-color: var(--border-color);
 	}
-
 </style>
