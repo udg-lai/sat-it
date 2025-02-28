@@ -6,7 +6,7 @@ export default class VariableCollection {
 	private currentVariable: number = 0;
 
 	constructor(nVariables: number) {
-		this.collection = new Array(nVariables).fill(null).map((_, index) => new Variable(index));
+		this.collection = new Array(nVariables).fill(null).map((_, index) => new Variable(index+1));
 	}
 
 	public getCurrentVariableID(): Maybe<number> {
@@ -18,6 +18,14 @@ export default class VariableCollection {
 			}
 		}
 		return makeNothing();
+	}
+
+	public getVariableState(index: number): boolean {
+		if (index < 1 || this.collection.length < index)
+			throw '[ERROR]: Trying to obtain an out-of-range variable from the table';
+		else {
+			return this.collection[index - 1].getAssignment();
+		}
 	}
 
 	public assignVariable(index: number, evaluation: boolean): void {
