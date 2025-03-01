@@ -152,5 +152,5 @@
 			{/each}
 		{/if}
 	</div>
-	<div use:resizeHandle class="draggable-bar cursor-col-resize" class:resizing={isResizing}></div>
+	<div use:resizeHandle class="draggable-bar cursor-col-resize vertical-separator" class:resizing={isResizing}></div>
 </div>
