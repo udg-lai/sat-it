@@ -4,18 +4,20 @@
 	import TrailCollectionVisualizerComponent from '$lib/components/visualizer/TrailCollectionVisualizerComponent.svelte';
 	import Literal from '$lib/transversal/entities/Literal.svelte.ts';
 	import Variable, { IdVariableMap } from '$lib/transversal/entities/Variable.svelte.ts';
-	import CNF, { Clause } from '$lib/transversal/entities/CNF.svelte.ts';
+	import CNF from '$lib/transversal/entities/CNF.svelte.ts';
 	import ClauseVisualizerComponent from '$lib/components/visualizer/ClauseVisualizerComponent.svelte';
 	import CnfVisualizerComponent from '$lib/components/visualizer/CnfVisualizerComponent.svelte';
 	import InterpretationVisualizerComponent from '$lib/components/visualizer/InterpretationVisualizerComponent.svelte';
 	import DecisionLiteral, {
 		AssignmentReason
 	} from '$lib/transversal/entities/DecisionLiteral.svelte.ts';
+	import resolution from '$lib/transversal/algorithms/resolution.ts';
+	import Clause from '$lib/transversal/entities/Clause.ts';
 
-	type RaWCNF = number[][];
+	type RawCNF = number[][];
 	let visualizeTrails = false;
 
-	const rawCNF: RaWCNF = [
+	const rawCNF: RawCNF = [
 		[1, -2, 3, 4],
 		[3, 1, -2, -4]
 	];
@@ -66,28 +68,6 @@
 		return new Literal(variable, polarity);
 	}
 
-	function logicResolution(c1: Clause, c2: Clause): Clause {
-		const resolvedLiterals: Map<number, Literal> = new Map();
-
-		//We need to do this as it follows as the ids of each literal are unique
-		c1.forEach((lit: Literal) => resolvedLiterals.set(lit.toInt(), lit.copy()));
-
-		let foundComplementary = false;
-		for (const lit of c2) {
-			const key = lit.toInt();
-			// drops only the first complementary
-			if (resolvedLiterals.has(key * -1) && !foundComplementary) {
-				resolvedLiterals.delete(key * -1);
-				foundComplementary = true;
-			} // only adds if it does not exist the literal expressed as natural in the collection
-			else if (!resolvedLiterals.has(key)) {
-				//In case the literals is not inside the resolved clause, we add it
-				resolvedLiterals.set(key, lit.copy());
-			}
-		}
-		return new Clause(Array.from(resolvedLiterals.values()));
-	}
-
 	function decide() {
 		// TODO: define decide procedure with new api
 	}
@@ -109,8 +89,7 @@
 		}
 	}
 
-	const clauseToShow = logicResolution(cnf.getClause(0), cnf.getClause(1));
-	console.log(clauseToShow);
+	const clauseToShow = resolution(cnf.getClause(0), cnf.getClause(1));
 </script>
 
 <InterpretationVisualizerComponent {variables} />
