@@ -3,7 +3,7 @@
 	import { TrailCollection } from '$lib/transversal/entities/TrailCollection.svelte.ts';
 	import TrailCollectionVisualizerComponent from '$lib/components/visualizer/TrailCollectionVisualizerComponent.svelte';
 	import Literal from '$lib/transversal/entities/Literal.svelte.ts';
-	import Variable, { IdVariableMap } from '$lib/transversal/entities/Variable.svelte.ts';
+	import Variable from '$lib/transversal/entities/Variable.svelte.ts';
 	import CNF from '$lib/transversal/entities/CNF.svelte.ts';
 	import ClauseVisualizerComponent from '$lib/components/visualizer/ClauseVisualizerComponent.svelte';
 	import CnfVisualizerComponent from '$lib/components/visualizer/CnfVisualizerComponent.svelte';
@@ -13,6 +13,7 @@
 	} from '$lib/transversal/entities/DecisionLiteral.svelte.ts';
 	import resolution from '$lib/transversal/algorithms/resolution.ts';
 	import Clause from '$lib/transversal/entities/Clause.ts';
+	import VariablePoolBuilder from '$lib/transversal/entities/VariablePoolBuilder.ts';
 
 	type RawCNF = number[][];
 	let visualizeTrails = false;
@@ -27,10 +28,10 @@
 	);
 
 	// mapping { id } to variable type
-	const variablesMap = new IdVariableMap();
-	Array.from(rawVariables).forEach((v) => variablesMap.set(v, rawVariableToVariable(v)));
+	const variableMapping = VariablePoolBuilder.build('dummy');
+	Array.from(rawVariables).forEach((v) => variableMapping.set(v, rawVariableToVariable(v)));
 
-	const variables: Set<Variable> = new Set(Array.from(variablesMap.values()));
+	const variables: Set<Variable> = new Set(Array.from(variableMapping.values()));
 
 	const I = [
 		{
@@ -41,7 +42,7 @@
 
 	let actualTrail: Trail = new Trail(rawVariables.size);
 	I.forEach(({ id, assignment }) => {
-		const variable: Variable = (variablesMap.get(id) as Variable).copy();
+		const variable: Variable = (variableMapping.get(id) as Variable).copy();
 		variable.assign(assignment);
 		actualTrail.push(new DecisionLiteral(variable, AssignmentReason.D));
 	});
@@ -62,8 +63,8 @@
 
 	function newLiteral(literal: number): Literal {
 		const variableId = Math.abs(literal);
-		if (!variablesMap.has(variableId)) throw `ERROR: variable - ${variableId} - not found`;
-		const variable = variablesMap.get(variableId) as Variable;
+		if (!variableMapping.has(variableId)) throw `ERROR: variable - ${variableId} - not found`;
+		const variable = variableMapping.get(variableId) as Variable;
 		const polarity = literal < 0 ? 'Negative' : 'Positive';
 		return new Literal(variable, polarity);
 	}
@@ -89,7 +90,7 @@
 		}
 	}
 
-	const clauseToShow = resolution(cnf.getClause(0), cnf.getClause(1));
+	const resolutionClause = resolution(cnf.getClause(0), cnf.getClause(1));
 </script>
 
 <InterpretationVisualizerComponent {variables} />
@@ -99,7 +100,7 @@
 	Let's visualize the new clause created by applying logic resolution to the first and second clause
 	of the cnf
 </p>
-<ClauseVisualizerComponent clause={clauseToShow} />
+<ClauseVisualizerComponent clause={resolutionClause} />
 
 <p>The cnf is <strong>{getCNFeval()}</strong></p>
 

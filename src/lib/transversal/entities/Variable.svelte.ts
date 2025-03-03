@@ -47,9 +47,3 @@ export default class Variable implements Comparable<Variable> {
 		return this.id === other.id;
 	}
 }
-
-export class IdVariableMap extends Map<number, Variable> {
-	constructor() {
-		super();
-	}
-}
