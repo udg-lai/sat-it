@@ -6,7 +6,7 @@ export default class VariableCollection {
 	private currentVariable: number = 0;
 
 	constructor(nVariables: number) {
-		this.collection = new Array(nVariables).fill(null).map((_, index) => new Variable(index+1));
+		this.collection = new Array(nVariables).fill(null).map((_, index) => new Variable(index + 1));
 	}
 
 	public getCurrentVariableID(): Maybe<number> {
