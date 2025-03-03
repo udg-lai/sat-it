@@ -1,3 +1,7 @@
-npm run test && \
+#!/bin/sh
+
+set -e
+
 npm run format && \
-npm run lint \
+npm run lint && \
+npm run test
