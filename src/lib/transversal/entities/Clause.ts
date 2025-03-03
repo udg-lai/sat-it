@@ -65,7 +65,9 @@ class Clause implements Comparable<Clause> {
 	}
 
 	public equals(other: Clause): boolean {
-		return arraysEqual(this.literals, other.literals);
+		const c1 = this.literals.map(l => l.toInt())
+		const c2 = other.literals.map(l => l.toInt())
+		return arraysEqual(c1.sort(), c2.sort());
 	}
 
 	[Symbol.iterator]() {

@@ -52,7 +52,7 @@ export default class Literal implements Comparable<Literal> {
 	}
 
 	public equals(other: Literal): boolean {
-		return this.polarity === other.polarity && this.variable.equals(other.variable);
+		return this.toInt() === other.toInt();
 	}
 
 	public toInt(): number {
