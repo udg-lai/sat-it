@@ -56,6 +56,6 @@
 
 	.footer-section {
 		border-width: 1px 0px 0px 0px;
-		border-color: var(--border-color);
+		border-color:  var(--border-color);
 	}
 </style>
