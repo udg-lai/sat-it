@@ -46,9 +46,10 @@ export default class Literal implements Comparable<Literal> {
 	}
 
 	public toTeX(): string {
-		return [this.polarity == 'Negative' ? `\\neg` : '', this.getVariable().getId().toString()].join(
-			''
-		);
+		return [
+			this.polarity == 'Negative' ? `\\neg` : '',
+			this.getVariable().getInt().toString()
+		].join('');
 	}
 
 	public equals(other: Literal): boolean {

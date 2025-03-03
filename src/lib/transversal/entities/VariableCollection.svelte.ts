@@ -12,7 +12,7 @@ export default class VariableCollection {
 	public getNextId(): Maybe<number> {
 		while (this.currentVariable < this.collection.length) {
 			if (!this.collection[this.currentVariable].isAssigned()) {
-				return makeJust(this.collection[this.currentVariable++].getId());
+				return makeJust(this.collection[this.currentVariable++].getInt());
 			} else {
 				this.currentVariable++;
 			}

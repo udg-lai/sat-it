@@ -12,7 +12,7 @@ export enum AssignmentReason {
 	K = 'backtracking'
 }
 
-export default class DecisionLiteral {
+export default class DecisionVariable {
 	/**
 	 * Any instance of the decision literal is evaluated to true
 	 */
@@ -30,8 +30,8 @@ export default class DecisionLiteral {
 		this.clauseUpId = clauseUpId;
 	}
 
-	public copy(): DecisionLiteral {
-		return new DecisionLiteral(this.variable, this.reason, this.clauseUpId);
+	public copy(): DecisionVariable {
+		return new DecisionVariable(this.variable, this.reason, this.clauseUpId);
 	}
 
 	public getVariable(): Variable {
@@ -62,7 +62,7 @@ export default class DecisionLiteral {
 	}
 
 	public toTeX(): string {
-		return [!this.variable.getAssignment() ? `\\neg` : '', this.variable.getId().toString()].join(
+		return [!this.variable.getAssignment() ? `\\neg` : '', this.variable.getInt().toString()].join(
 			''
 		);
 	}
