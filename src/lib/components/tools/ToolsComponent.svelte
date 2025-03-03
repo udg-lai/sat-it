@@ -83,28 +83,46 @@
 		};
 	}
 
-	let views = $state(
-		new Map(
-			Object.entries({
-				viewA: false,
-				viewB: false,
-				viewC: false,
-				viewD: false
-			})
-		)
-	);
+	interface View {
+		name: string;
+		open: boolean;
+	}
+	let views: View[] = $state([
+		{
+			name: 'viewA',
+			open: true
+		},
+		{
+			name: 'viewB',
+			open: false
+		},
+		{
+			name: 'viewC',
+			open: false
+		},
+		{
+			name: 'viewD',
+			open: false
+		}
+	]);
 
 	function activateView(view: string): void {
-		if (!views.has(view)) {
+		const viewIndex = views.findIndex((v) => v.name === view);
+		const viewRef = viewIndex == -1 ? undefined : views[viewIndex];
+		if (viewIndex === undefined) {
 			console.warn(`Accessing to not defined view ${view}`);
 		} else {
-			const viewActive: boolean = views.get(view) as boolean;
-			if (viewActive) {
+			const viewIsOpen: boolean = viewRef?.open || false;
+			if (viewIsOpen) {
 				hide = !hide;
 			} else {
-				views = new Map<string, boolean>([...views].map(([k]) => [k, false]));
-				views.set(view, true);
-				if (hide) hide = !hide;
+				views = views.map((v) => ({ ...v, open: false }));
+				const newViewRef = views[viewIndex];
+				newViewRef.open = true;
+				if (hide) {
+					hide = false;
+					toolsHTMLElement.style.width = 'var(--max-width-tools)';
+				}
 			}
 		}
 	}
@@ -127,16 +145,12 @@
 	</div>
 	<div id="tools-view" class="tools-view" class:hide-tools-view={hide}>
 		{#if !hide}
-			{#each views as [view, visible] (view)}
-				{#if view === 'viewA' && visible}
-					<span>{view}</span>
-				{:else if view === 'viewB' && visible}
-					<span>{view}</span>
-				{:else if view === 'viewC' && visible}
-					<span>{view}</span>
+			{#each views as { name, open } (name)}
+				{#if open}
+					<h2>{name}</h2>
 				{/if}
 			{/each}
 		{/if}
 	</div>
-	<div use:resizeHandle class="draggable-bar cursor-col-resize" class:resizing={isResizing}></div>
+	<div use:resizeHandle class="draggable-bar cursor-col-resize vertical-separator" class:resizing={isResizing}></div>
 </div>
