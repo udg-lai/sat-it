@@ -33,7 +33,7 @@ if (isJust(id)) {
 collection.unassignVariable(1);
 collection.restartCounter();
 id = collection.getNextId();
-if(isJust(id)) {
+if (isJust(id)) {
 	collection.assignVariable(unwrapMaybe(id), false);
 }
 describe('variableCollection', () => {

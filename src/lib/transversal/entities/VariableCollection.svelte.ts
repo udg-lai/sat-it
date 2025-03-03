@@ -51,5 +51,7 @@ export default class VariableCollection {
 		this.currentVariable = 0;
 	}
 
-	private toIndex(id: number): number { return id - 1; }
+	private toIndex(id: number): number {
+		return id - 1;
+	}
 }
