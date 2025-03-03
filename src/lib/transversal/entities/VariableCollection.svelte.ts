@@ -9,7 +9,7 @@ export default class VariableCollection {
 		this.collection = new Array(nVariables).fill(null).map((_, index) => new Variable(index + 1));
 	}
 
-	public getCurrentVariableID(): Maybe<number> {
+	public getNextId(): Maybe<number> {
 		while (this.currentVariable < this.collection.length) {
 			if (!this.collection[this.currentVariable].isAssigned()) {
 				return makeJust(this.collection[this.currentVariable++].getId());
@@ -20,31 +20,36 @@ export default class VariableCollection {
 		return makeNothing();
 	}
 
-	public getVariableState(index: number): boolean {
-		if (index < 1 || this.collection.length < index)
+	public getVariableState(id: number): boolean {
+		const idx = this.toIndex(id);
+		if (idx < 0 || idx >= this.collection.length)
 			throw '[ERROR]: Trying to obtain an out-of-range variable from the table';
 		else {
-			return this.collection[index - 1].getAssignment();
+			return this.collection[idx].getAssignment();
 		}
 	}
 
-	public assignVariable(index: number, evaluation: boolean): void {
-		if (index < 1 || this.collection.length < index)
+	public assignVariable(id: number, evaluation: boolean): void {
+		const idx = this.toIndex(id);
+		if (idx < 0 || idx >= this.collection.length)
 			throw '[ERROR]: Trying to obtain an out-of-range variable from the table';
 		else {
-			this.collection[index - 1].assign(evaluation);
+			this.collection[idx].assign(evaluation);
 		}
 	}
 
-	public unassignVariable(index: number) {
-		if (index < 1 || this.collection.length < index)
+	public unassignVariable(id: number) {
+		const idx = this.toIndex(id);
+		if (idx < 0 || idx >= this.collection.length)
 			throw '[ERROR]: Trying to obtain an out-of-range variable from the table';
 		else {
-			this.collection[index - 1].unassign();
+			this.collection[idx].unassign();
 		}
 	}
 
 	public restartCounter(): void {
 		this.currentVariable = 0;
 	}
+
+	private toIndex(id: number): number { return id - 1; }
 }
