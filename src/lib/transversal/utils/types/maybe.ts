@@ -23,7 +23,7 @@ export const makeNothing = (): Nothing => ({ kind: 'nothing' });
 
 export type UnwrapMaybe = <T>(e: Maybe<T>) => NonNullable<T>;
 
-export const unwrapMaybe: UnwrapMaybe = <T>({ kind, value }: Maybe<T>) => {
+const unwrapMaybe: UnwrapMaybe = <T>({ kind, value }: Maybe<T>) => {
 	if (kind == 'nothing') {
 		throw new Error(`Attempted to unwrap a nothing value`);
 		/*

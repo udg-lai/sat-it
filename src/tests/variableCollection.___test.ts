@@ -1,5 +1,5 @@
 // import VariableCollection from '$lib/transversal/entities/VariableCollection.svelte.ts';
-// import { isJust, unwrapMaybe } from '$lib/transversal/utils/types/maybe.ts';
+// import { isJust, fromJust } from '$lib/transversal/utils/types/maybe.ts';
 // import { describe, it, expect } from 'vitest';
 
 // const collection: VariableCollection = new VariableCollection(10);
@@ -8,14 +8,14 @@
 // let id = collection.getNextVariable();
 // if (isJust(id)) {
 // 	//We give the assignment
-// 	collection.assignVariable(unwrapMaybe(id), true);
+// 	collection.assignVariable(fromJust(id), true);
 // }
 
 // //Then we call the following index
 // id = collection.getNextVariable();
 // if (isJust(id)) {
 // 	//We give the assignment
-// 	collection.assignVariable(unwrapMaybe(id), true);
+// 	collection.assignVariable(fromJust(id), true);
 // }
 
 // collection.assignVariable(3, false);
@@ -26,7 +26,7 @@
 // id = collection.getNextVariable();
 // if (isJust(id)) {
 // 	//We give the assignment
-// 	collection.assignVariable(unwrapMaybe(id), true);
+// 	collection.assignVariable(fromJust(id), true);
 // }
 
 // //Restart the counter
@@ -34,7 +34,7 @@
 // collection.restartCounter();
 // id = collection.getNextVariable();
 // if (isJust(id)) {
-// 	collection.assignVariable(unwrapMaybe(id), false);
+// 	collection.assignVariable(fromJust(id), false);
 // }
 // describe('variableCollection', () => {
 // 	it('test01', () => {
