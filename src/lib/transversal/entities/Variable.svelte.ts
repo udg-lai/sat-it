@@ -1,4 +1,6 @@
-export default class Variable {
+import type { Comparable } from '../utils/interfaces/Comparable.ts';
+
+export default class Variable implements Comparable<Variable> {
 	id: number;
 	assignment: boolean = false;
 	assigned: boolean = false;
@@ -39,6 +41,10 @@ export default class Variable {
 		newVariable.assign = this.assign;
 		newVariable.assigned = this.assigned;
 		return newVariable;
+	}
+
+	public equals(other: Variable): boolean {
+		return this.id === other.id;
 	}
 }
 

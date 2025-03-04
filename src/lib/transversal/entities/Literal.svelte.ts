@@ -1,9 +1,10 @@
 import Variable from '$lib/transversal/entities/Variable.svelte.ts';
 import { v4 as uuidv4 } from 'uuid';
+import type { Comparable } from '../utils/interfaces/Comparable.ts';
 
 export type Polarity = 'Positive' | 'Negative';
 
-export default class Literal {
+export default class Literal implements Comparable<Literal> {
 	id: string;
 	variable: Variable;
 	polarity: Polarity;
@@ -48,6 +49,10 @@ export default class Literal {
 		return [this.polarity == 'Negative' ? `\\neg` : '', this.getVariable().getId().toString()].join(
 			''
 		);
+	}
+
+	public equals(other: Literal): boolean {
+		return this.toInt() === other.toInt();
 	}
 
 	public toInt(): number {

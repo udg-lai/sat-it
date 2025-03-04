@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { Clause } from '$lib/transversal/entities/CNF.svelte.ts';
 	import LiteralComponent from '$lib/components/LiteralComponent.svelte';
+	import type Clause from '$lib/transversal/entities/Clause.ts';
 
 	interface Props {
 		clause: Clause;

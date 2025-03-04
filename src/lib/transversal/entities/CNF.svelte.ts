@@ -1,73 +1,5 @@
-import Literal from './Literal.svelte.ts';
-import { v4 as uuidv4 } from 'uuid';
-
-export class Clause {
-	literals: Literal[] = [];
-	id: string;
-
-	constructor(literals: Literal[]) {
-		this.id = uuidv4();
-		this.literals = literals;
-	}
-
-	public addLiteral(lit: Literal) {
-		this.literals.push(lit);
-	}
-
-	public removeLiteral(lit: Literal) {
-		this.literals = this.literals.filter((l) => l.id != lit.id);
-	}
-
-	public eval(): ClauseEval {
-		let state = ClauseEval.UNRESOLVED;
-		let i = 0;
-		let unsatCount = 0;
-		while (i < this.literals.length && state !== ClauseEval.SAT) {
-			const lit: Literal = this.literals[i];
-			if (lit.isTrue()) state = ClauseEval.SAT;
-			else {
-				if (lit.isFalse()) unsatCount++;
-				i++;
-			}
-		}
-		if (state !== ClauseEval.SAT) {
-			state =
-				unsatCount == i
-					? ClauseEval.UNSAT
-					: unsatCount == i - 1
-						? ClauseEval.UNIT
-						: ClauseEval.UNRESOLVED;
-		}
-		return state;
-	}
-
-	public isUndetermined(): boolean {
-		return this.eval() === ClauseEval.UNRESOLVED;
-	}
-
-	public isSAT(): boolean {
-		return this.eval() === ClauseEval.SAT;
-	}
-
-	public isUnSAT(): boolean {
-		return this.eval() === ClauseEval.UNSAT;
-	}
-
-	public isUnit(): boolean {
-		return this.eval() === ClauseEval.UNIT;
-	}
-
-	[Symbol.iterator]() {
-		return this.literals.values();
-	}
-
-	forEach(
-		callback: (literal: Literal, index: number, array: Literal[]) => void,
-		thisArg?: unknown
-	): void {
-		this.literals.forEach(callback, thisArg);
-	}
-}
+import type Clause from './Clause.ts';
+import { ClauseEval } from './Clause.ts';
 
 export default class CNF {
 	clauses: Clause[];
@@ -125,12 +57,5 @@ export default class CNF {
 export enum Eval {
 	UNSAT,
 	SAT,
-	UNRESOLVED
-}
-
-export enum ClauseEval {
-	UNSAT,
-	SAT,
-	UNIT,
 	UNRESOLVED
 }
