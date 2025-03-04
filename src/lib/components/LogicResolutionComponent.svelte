@@ -5,13 +5,13 @@
 	import { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
 	import { TrailCollection } from '$lib/transversal/entities/TrailCollection.svelte.ts';
 	import VariablePoolBuilder from '$lib/transversal/entities/VariablePoolBuilder.ts';
-	import { type VariablePool } from '$lib/transversal/utils/interfaces/VariablePool.ts';
+	import { type IVariablePool } from '$lib/transversal/utils/interfaces/IVariablePool.ts';
 	import { isJust, unwrapMaybe } from '$lib/transversal/utils/types/maybe.ts';
 
 	// let visualizeTrails = false;
 
 	const nVariables = 4;
-	const pool: VariablePool = VariablePoolBuilder.build('VariableCollection', nVariables);
+	const pool: IVariablePool = VariablePoolBuilder.build('VariablePool', nVariables);
 	let trail: Trail = new Trail(nVariables);
 
 	const I = [
@@ -40,6 +40,11 @@
 		}
 	}
 
+	const trailCollection = new TrailCollection();
+	trailCollection.push(trail.copy());
+
+	
+ /*
 	pool.dispose(1);
 	const maybeVariableId = pool.nextVariableToAssign();
 	if (isJust(maybeVariableId)) {
@@ -47,8 +52,11 @@
 		pool.persist(variableId, true);
 	}
 
-	const trailCollection = new TrailCollection();
-	trailCollection.push(trail);
+	
+ 
+	trail = new Trail(nVariables);
+	trail.push(new DecisionVariable(pool.get(1),AssignmentReason.D,));
+	*/
 
 	// function decide() {
 	// 	// TODO: define decide procedure with new api

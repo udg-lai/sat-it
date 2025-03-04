@@ -1,12 +1,12 @@
-import WipVariablePool from './WipVariablePool.ts';
-import { type VariablePool } from '../utils/interfaces/VariablePool.ts';
+import VariablePool from './VariablePool.ts';
+import { type IVariablePool } from '../utils/interfaces/IVariablePool.ts';
 
-export type PoolType = 'VariableCollection' | 'WipVariablePool';
+export type PoolType = 'VariableCollection' | 'VariablePool';
 
 class VariablePoolBuilder {
-	static build(type: PoolType, capacity: number): VariablePool {
+	static build(type: PoolType, capacity: number): IVariablePool {
 		console.log(`Creating default pool for ${type} pool type`);
-		return new WipVariablePool(capacity);
+		return new VariablePool(capacity);
 	}
 }
 export default VariablePoolBuilder;
