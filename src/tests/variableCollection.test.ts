@@ -1,18 +1,18 @@
-import VariableCollection from '$lib/transversal/entities/VariableCollection.svelte.ts';
+import VariablePool from '$lib/transversal/entities/VariablePool.ts';
 import { isJust, unwrapMaybe } from '$lib/transversal/utils/types/maybe.ts';
 import { describe, it, expect } from 'vitest';
 
-const collection: VariableCollection = new VariableCollection(10);
+const collection: VariablePool = new VariablePool(10);
 
 //First we get the variable that we want to give an assignment.
-let index = collection.getCurrentVariableID();
+let index = collection.nextVariableToAssign();
 if (isJust(index)) {
 	//We give the assignment
 	collection.assignVariable(unwrapMaybe(index), true);
 }
 
 //Then we call the following index
-index = collection.getCurrentVariableID();
+index = collection.nextVariableToAssign();
 if (isJust(index)) {
 	//We give the assignment
 	collection.assignVariable(unwrapMaybe(index), true);
@@ -23,7 +23,7 @@ collection.assignVariable(9, false);
 collection.assignVariable(10, true);
 
 //Now we get the following variable to be decided.
-index = collection.getCurrentVariableID();
+index = collection.nextVariableToAssign();
 
 if (isJust(index)) {
 	//We give the assignment
@@ -32,9 +32,8 @@ if (isJust(index)) {
 
 //Restart the counter
 collection.unassignVariable(1);
-collection.restartCounter();
-index = collection.getCurrentVariableID();
-if(isJust(index)) {
+index = collection.nextVariableToAssign();
+if (isJust(index)) {
 	collection.assignVariable(unwrapMaybe(index), false);
 }
 describe('variableCollection', () => {

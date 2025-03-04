@@ -1,7 +1,7 @@
 import { makeJust, makeNothing, type Maybe } from '../utils/types/maybe.ts';
 import Variable from './Variable.svelte.ts';
 
-export default class VariableCollection {
+export default class VariablePool {
 	private collection: Variable[];
 	private currentVariable: number = 0;
 
@@ -9,7 +9,7 @@ export default class VariableCollection {
 		this.collection = new Array(nVariables).fill(null).map((_, index) => new Variable(index + 1));
 	}
 
-	public getCurrentVariableID(): Maybe<number> {
+	public nextVariableToAssign(): Maybe<number> {
 		while (this.currentVariable < this.collection.length) {
 			if (!this.collection[this.currentVariable].isAssigned()) {
 				return makeJust(this.collection[this.currentVariable++].getId());
@@ -41,10 +41,10 @@ export default class VariableCollection {
 			throw '[ERROR]: Trying to obtain an out-of-range variable from the table';
 		else {
 			this.collection[index - 1].unassign();
+			//Code to update the index:
+			if (index - 1 < this.currentVariable) {
+				this.currentVariable = index - 1;
+			}
 		}
-	}
-
-	public restartCounter(): void {
-		this.currentVariable = 0;
 	}
 }
