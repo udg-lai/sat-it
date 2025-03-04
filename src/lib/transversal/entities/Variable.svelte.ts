@@ -5,9 +5,10 @@ export default class Variable implements Comparable<Variable> {
 	id: number;
 	assignment: Maybe<boolean> = makeNothing();
 
-	constructor(id: number) {
+	constructor(id: number, assignment: Maybe<boolean> = makeNothing()) {
 		if (id < 0) throw 'ERROR: variable ID should be >= 0';
 		this.id = id;
+		this.assignment = assignment;
 	}
 
 	public getInt(): number {
@@ -35,8 +36,7 @@ export default class Variable implements Comparable<Variable> {
 	}
 
 	public copy(): Variable {
-		const newVariable = new Variable(this.id);
-		newVariable.assign = this.assign;
+		const newVariable = new Variable(this.id, this.assignment);
 		return newVariable;
 	}
 

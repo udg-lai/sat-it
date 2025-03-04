@@ -34,3 +34,5 @@ export const unwrapMaybe: UnwrapMaybe = <T>({ kind, value }: Maybe<T>) => {
 	}
 	return value as NonNullable<T>;
 };
+
+export const fromJust = unwrapMaybe;
