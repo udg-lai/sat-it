@@ -18,8 +18,8 @@ class WipVariablePool implements VariablePool {
 	}
 
 	allAssigned(): boolean {
-		return this.pointer === this.poolCapacity;
-		// return this.collection.every(v => v.isAssigned());
+		// pointer is in the last index position
+		return this.pointer === this.poolCapacity - 1;
 	}
 
 	dispose(variable: number): void {
