@@ -18,7 +18,7 @@ class VariablePool implements IVariablePool {
 	}
 
 	allAssigned(): boolean {
-		return this.pointer === this.poolCapacity-1;
+		return this.pointer === this.poolCapacity - 1;
 		// return this.collection.every(v => v.isAssigned());
 	}
 

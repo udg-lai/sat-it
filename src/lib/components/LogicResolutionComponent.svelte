@@ -61,8 +61,7 @@
 	visualize
 </button>
 
-<TrailCollectionVisualizerComponent {trailCollection} {trail} {visualizeTrails} /> 
-
+<TrailCollectionVisualizerComponent {trailCollection} {trail} {visualizeTrails} />
 
 <!-- <InterpretationVisualizerComponent {variables} />
 <CnfVisualizerComponent {cnf} />

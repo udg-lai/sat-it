@@ -27,5 +27,4 @@
 			<TrailVisualizerComponent {trail} />
 		</div>
 	{/if}
-	
 </div>

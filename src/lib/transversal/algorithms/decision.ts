@@ -21,7 +21,7 @@ export default function decide(
 			throw '[Error]: No variables to decide';
 		}
 	} else {
-		trailCollection.push(trail.copy());   
+		trailCollection.push(trail.copy());
 		let backtrack = false;
 		let lastDecision = trail.pop();
 		while (!backtrack && lastDecision !== undefined) {
@@ -33,10 +33,13 @@ export default function decide(
 				const variable = pool.get(lastVariableId);
 				const dVariable = new DecisionVariable(variable, AssignmentReason.K);
 				trail.push(dVariable);
-        trail.updateFollowUpIndex();
+				trail.updateFollowUpIndex();
 			} else {
 				lastDecision = trail.pop();
 			}
+		}
+		if(!backtrack) {
+			trail.updateFollowUpIndex();
 		}
 	}
 }
