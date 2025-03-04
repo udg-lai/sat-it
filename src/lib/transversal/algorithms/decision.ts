@@ -4,7 +4,11 @@ import type { TrailCollection } from '../entities/TrailCollection.svelte.ts';
 import type { IVariablePool } from '../utils/interfaces/IVariablePool.ts';
 import { isJust, unwrapMaybe } from '../utils/types/maybe.ts';
 
-export default function decide(trailCollection: TrailCollection,trail: Trail,pool: IVariablePool): void {
+export default function decide(
+	trailCollection: TrailCollection,
+	trail: Trail,
+	pool: IVariablePool
+): void {
 	if (!pool.allAssigned()) {
 		const nextVariable = pool.nextVariableToAssign();
 		if (isJust(nextVariable)) {
@@ -34,7 +38,7 @@ export default function decide(trailCollection: TrailCollection,trail: Trail,poo
 				lastDecision = trail.pop();
 			}
 		}
-		if(!backtrack) {
+		if (!backtrack) {
 			trail.updateFollowUpIndex();
 		}
 	}
