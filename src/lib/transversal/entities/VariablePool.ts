@@ -18,8 +18,8 @@ class VariablePool implements IVariablePool {
 	}
 
 	allAssigned(): boolean {
+		// pointer is in the last index position
 		return this.pointer === this.poolCapacity - 1;
-		// return this.collection.every(v => v.isAssigned());
 	}
 
 	dispose(variable: number): void {
