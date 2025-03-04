@@ -62,7 +62,7 @@ export default class DecisionVariable {
 	}
 
 	public toTeX(): string {
-		return [!this.variable.getAssignment() ? `\\neg` : '', this.variable.getInt().toString()].join(
+		return [!unwrapMaybe(this.variable.getAssignment()) ? `\\neg` : '', this.variable.getInt().toString()].join(
 			''
 		);
 	}
