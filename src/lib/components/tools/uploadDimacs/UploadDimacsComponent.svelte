@@ -14,25 +14,19 @@
 		<span slot="header">List of problems</span>
 		<ul>
 			<li>
-				<p class="mb-2 text-gray-500 dark:text-gray-400">
-          problema 1
-				</p>
+				<p class="mb-2 text-gray-500 dark:text-gray-400">problema 1</p>
 				<button class="icon">
 					<EyeOutline />
 				</button>
 			</li>
 			<li>
-				<p class="mb-2 text-gray-500 dark:text-gray-400">
-          problema 2
-				</p>
+				<p class="mb-2 text-gray-500 dark:text-gray-400">problema 2</p>
 				<button class="icon">
 					<EyeOutline />
 				</button>
 			</li>
 			<li>
-				<p class="mb-2 text-gray-500 dark:text-gray-400">
-          problema 3
-				</p>
+				<p class="mb-2 text-gray-500 dark:text-gray-400">problema 3</p>
 				<button class="icon">
 					<EyeOutline />
 				</button>
