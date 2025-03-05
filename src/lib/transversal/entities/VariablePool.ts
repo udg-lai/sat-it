@@ -1,8 +1,8 @@
-import type { VariablePool } from '../utils/interfaces/VariablePool.ts';
+import type { IVariablePool } from '../utils/interfaces/IVariablePool.ts';
 import { makeJust, makeNothing, type Maybe } from '../utils/types/maybe.ts';
 import Variable from './Variable.svelte.ts';
 
-class WipVariablePool implements VariablePool {
+class VariablePool implements IVariablePool {
 	private collection: Variable[];
 	poolCapacity: number = 0;
 	pointer: number = 0;
@@ -83,4 +83,4 @@ class WipVariablePool implements VariablePool {
 	}
 }
 
-export default WipVariablePool;
+export default VariablePool;

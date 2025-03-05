@@ -1,7 +1,7 @@
 import {
 	isNothing,
 	makeNothing,
-	unwrapMaybe,
+	fromJust,
 	type Maybe
 } from '$lib/transversal/utils/types/maybe.ts';
 import type Variable from './Variable.svelte.ts';
@@ -42,7 +42,7 @@ export default class DecisionVariable {
 		if (isNothing(this.clauseUpId)) {
 			throw 'ERROR: There is no source for the decision';
 		}
-		return unwrapMaybe(this.clauseUpId);
+		return fromJust(this.clauseUpId);
 	}
 
 	public isD(): boolean {
@@ -62,8 +62,9 @@ export default class DecisionVariable {
 	}
 
 	public toTeX(): string {
-		return [!this.variable.getAssignment() ? `\\neg` : '', this.variable.getInt().toString()].join(
-			''
-		);
+		return [
+			!fromJust(this.variable.getAssignment()) ? `\\neg` : '',
+			this.variable.getInt().toString()
+		].join('');
 	}
 }
