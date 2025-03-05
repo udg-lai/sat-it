@@ -1,3 +1,23 @@
+
+
+ul li {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+	height: 4rem;
+	display: flex;
+	position: relative;
+}
+
+ul li p {
+	margin: 0px !important;
+}
+
+li .icon {
+	position: absolute;
+	right: 0;
+}
+
 .file-input-box {
 	display: flex;
 	justify-content: center;

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { AccordionItem, Accordion } from 'flowbite-svelte';
-	import { UploadOutline } from 'flowbite-svelte-icons';
+	import { EyeOutline, UploadOutline } from 'flowbite-svelte-icons';
 	import './styles.css';
 
 	function openFileInput(): void {
@@ -15,21 +15,27 @@
 		<ul>
 			<li>
 				<p class="mb-2 text-gray-500 dark:text-gray-400">
-					Lorem ipsum dolor sit amet, consectetur adipisicing elit. Illo ab necessitatibus sint
-					explicabo ...
+          problema 1
 				</p>
+				<button class="icon">
+					<EyeOutline />
+				</button>
 			</li>
 			<li>
 				<p class="mb-2 text-gray-500 dark:text-gray-400">
-					Lorem ipsum dolor sit amet, consectetur adipisicing elit. Illo ab necessitatibus sint
-					explicabo ...
+          problema 2
 				</p>
+				<button class="icon">
+					<EyeOutline />
+				</button>
 			</li>
 			<li>
 				<p class="mb-2 text-gray-500 dark:text-gray-400">
-					Lorem ipsum dolor sit amet, consectetur adipisicing elit. Illo ab necessitatibus sint
-					explicabo ...
+          problema 3
 				</p>
+				<button class="icon">
+					<EyeOutline />
+				</button>
 			</li>
 		</ul>
 	</AccordionItem>
