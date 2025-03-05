@@ -22,6 +22,20 @@ p cnf 4 5
 -1 -2 3 0
 `;
 
+const example03 = `
+c hola
+c
+p cnf 4 5
+1 -2 4 0
+-1 2 3 4 0
+-3 -4 0
+c
+-1 -2 0
+c start with comments
+-1 -2 3 0
+c bu
+`;
+
 describe('dimacs parser', () => {
 	it('example01', () => {
 		const summary: Summary = parser(example01);
@@ -37,6 +51,19 @@ describe('dimacs parser', () => {
 	it('example02', () => {
 		const summary: Summary = parser(example02);
 		expect(summary.comment).toBe('');
+		expect(summary.varCount).toBe(4);
+		expect(summary.clauseCount).toBe(5);
+		expect(summary.claims).toStrictEqual([
+			[1, -2, 4, 0],
+			[-1, 2, 3, 4, 0],
+			[-3, -4, 0],
+			[-1, -2, 0],
+			[-1, -2, 3, 0]
+		]);
+	});
+	it('example03', () => {
+		const summary: Summary = parser(example03);
+		expect(summary.comment).toBe(`hola\n\n\nstart with comments\nbu\n`);
 		expect(summary.varCount).toBe(4);
 		expect(summary.clauseCount).toBe(5);
 		expect(summary.claims).toStrictEqual([

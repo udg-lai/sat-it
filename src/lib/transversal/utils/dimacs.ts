@@ -1,4 +1,4 @@
-import { type ErrorMessage, type InfoMessage } from '$lib/transversal/utils/types/types.ts';
+import { type ErrorMessage} from '$lib/transversal/utils/types/types.ts';
 import {
 	isRight,
 	makeLeft,
@@ -23,51 +23,48 @@ export default function parser(input: string): Summary {
 		clauseCount: -1,
 		claims: []
 	};
-	const commentEither = parseComment(lines);
-	if (isRight(commentEither)) {
-		const right = unwrapEither(commentEither);
-		summary.comment = right.fst;
-		lines = lines.slice(right.snd);
-	}
-	const summaryEither = parseSummary(lines);
-	if (isRight(summaryEither)) {
-		const right = unwrapEither(summaryEither);
+	// comments
+	const comments = parseComment(lines);
+	summary.comment = comments.fst;
+	lines = comments.snd;
+	// summary
+	const eitherSummary = parseSummary(lines);
+	if (isRight(eitherSummary)) {
+		const right = unwrapEither(eitherSummary);
 		summary.varCount = right.fst;
 		summary.clauseCount = right.snd;
 		lines = lines.slice(1);
 	} else {
-		const msg = unwrapEither(summaryEither);
+		const msg = unwrapEither(eitherSummary);
 		throw new Error(msg);
 	}
-	const cnfEither = parseCNF(lines, summary.varCount, summary.clauseCount);
-	if (isRight(cnfEither)) {
-		const right = unwrapEither(cnfEither);
+	const eitherCNF = parseCNF(lines, summary.varCount, summary.clauseCount);
+	if (isRight(eitherCNF)) {
+		const right = unwrapEither(eitherCNF);
 		summary.claims = right;
 	} else {
-		const msg = unwrapEither(cnfEither);
+		const msg = unwrapEither(eitherCNF);
 		throw new Error(msg);
 	}
 	return summary;
 }
 
-function parseComment(lines: string[]): Either<InfoMessage, Tuple<string, number>> {
-	let idx = 0;
-	let endComment = false;
-	let comment = '';
-	while (!endComment && idx < lines.length) {
-		const line = lines[idx];
-		endComment = line.at(0) !== 'c';
-		if (!endComment) {
-			const lineContent = line.split(' ').slice(1).join(' ');
-			comment = comment.concat(lineContent, '\n');
-			idx = idx + 1;
+function parseComment(oLines: string[]): Tuple<string, string[]> {
+	const lines: string[] = [];
+	let comments = '';
+	let i = 0;
+	while (i < oLines.length) {
+		const line = oLines[i];
+		const commentLine = line.at(0) == 'c';
+		if (commentLine) {
+			const content = line.split(' ').slice(1).join(' ');
+			comments = comments.concat(content, '\n');
+		} else {
+			lines.push(oLines[i]);
 		}
+		i += 1;
 	}
-	if (comment == '') {
-		return makeLeft('[INFO]: no comment was found in the DIMACs file');
-	} else {
-		return makeRight(makeTuple(comment, idx));
-	}
+	return makeTuple(comments, lines);
 }
 
 function parseSummary(lines: string[]): Either<ErrorMessage, Tuple<number, number>> {
@@ -119,13 +116,15 @@ function parseCNF(
 			.split(' ')
 			.map((n) => parseInt(n))
 	);
-	const assertCNF = cnf.map((line, idx) => {
-		const assertClause = line.every((l) => Math.abs(l) <= varCount);
-		return makeTuple(assertClause, idx);
+	const assertCNF = cnf.map((line: number[], idx: number) => {
+		const literals = line.splice(0, -1);
+		const eos = line.at(-1);
+		const assert = literals.every((l) => Math.abs(l) <= varCount) && eos === 0;
+		return makeTuple(assert, idx);
 	});
 	const clauseError = assertCNF.find((c) => !c.fst);
 	if (clauseError) {
-		return makeLeft(`[ERROR]: wrong literal at clause line ${clauseError.snd}`);
+		return makeLeft(`[ERROR]: parser error at line: ${clauseError.snd}`);
 	}
 	return makeRight(cnf);
 }
