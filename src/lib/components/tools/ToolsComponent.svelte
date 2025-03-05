@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import Button from './Button.svelte';
-	import { CodeBranchOutline, AngleRightOutline, BugOutline } from 'flowbite-svelte-icons';
+	import UploadDimacsComponent from './uploadDimacs/UploadDimacsComponent.svelte';
+	import { AngleRightOutline, BugOutline, FileCirclePlusOutline } from 'flowbite-svelte-icons';
 	import './styles.css';
 
 	interface Props {
@@ -132,7 +133,7 @@
 	<div class="options-tools">
 		<div class="vertical-separator"></div>
 		<div class="toggle-button">
-			<Button onClick={() => activateView('viewA')} icon={CodeBranchOutline} />
+			<Button onClick={() => activateView('viewA')} icon={FileCirclePlusOutline} />
 		</div>
 		<div class="toggle-button">
 			<Button onClick={() => activateView('viewB')} icon={AngleRightOutline} />
@@ -145,11 +146,17 @@
 	</div>
 	<div id="tools-view" class="tools-view" class:hide-tools-view={hide}>
 		{#if !hide}
-			{#each views as { name, open } (name)}
-				{#if open}
-					<h2>{name}</h2>
-				{/if}
-			{/each}
+			<div class="tools-view-container">
+				{#each views as { name, open } (name)}
+					{#if open}
+						{#if name === 'viewA'}
+							<UploadDimacsComponent />
+						{:else}
+							<h2>{name}</h2>
+						{/if}
+					{/if}
+				{/each}
+			</div>
 		{/if}
 	</div>
 	<div
