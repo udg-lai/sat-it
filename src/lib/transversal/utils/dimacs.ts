@@ -1,4 +1,4 @@
-import { type ErrorMessage} from '$lib/transversal/utils/types/types.ts';
+import { type ErrorMessage } from '$lib/transversal/utils/types/types.ts';
 import {
 	isRight,
 	makeLeft,
