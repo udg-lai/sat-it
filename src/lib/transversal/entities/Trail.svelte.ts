@@ -1,7 +1,7 @@
-import type DecisionLiteral from '$lib/transversal/entities/DecisionLiteral.svelte.ts';
+import type DecisionVariable from '$lib/transversal/entities/DecisionLiteral.svelte.ts';
 
 export class Trail {
-	private trail: DecisionLiteral[] = $state([]);
+	private trail: DecisionVariable[] = $state([]);
 	private followUPIndex: number = $state(0);
 	private decisionLevel: number = 0;
 	private trailCapacity: number = 0;
@@ -17,7 +17,7 @@ export class Trail {
 		return newTrail;
 	}
 
-	public getTrail(): DecisionLiteral[] {
+	public getTrail(): DecisionVariable[] {
 		return this.trail;
 	}
 
@@ -29,7 +29,7 @@ export class Trail {
 		this.followUPIndex = this.trail.length - 1;
 	}
 
-	public push(decision: DecisionLiteral, updateFollowUpIndex: boolean = false) {
+	public push(decision: DecisionVariable, updateFollowUpIndex: boolean = false) {
 		if (this.trail.length == this.trailCapacity)
 			console.warn('[WARN]: skipped allocating decision as trail capacity is fulfilled');
 		else {
@@ -39,13 +39,13 @@ export class Trail {
 		}
 	}
 
-	public pop(): DecisionLiteral | undefined {
+	public pop(): DecisionVariable | undefined {
 		const returnValue = this.trail.pop();
 		if (returnValue?.isD()) this.decisionLevel--;
 		return returnValue;
 	}
 
-	public indexOf(decision: DecisionLiteral): number {
+	public indexOf(decision: DecisionVariable): number {
 		return this.trail.indexOf(decision);
 	}
 
@@ -54,7 +54,7 @@ export class Trail {
 	}
 
 	forEach(
-		callback: (decision: DecisionLiteral, index: number, array: DecisionLiteral[]) => void,
+		callback: (decision: DecisionVariable, index: number, array: DecisionVariable[]) => void,
 		thisArg?: unknown
 	): void {
 		this.trail.forEach(callback, thisArg);

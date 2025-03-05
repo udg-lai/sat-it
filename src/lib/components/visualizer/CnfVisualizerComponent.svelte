@@ -5,10 +5,12 @@
 		cnf: CNF;
 	}
 	let { cnf }: Props = $props();
+
+	let clauses = $state(cnf.getClauses());
 </script>
 
 <div>
-	{#each cnf.getClauses() as clause}
-		<ClauseVisualizerComponent {clause} />
+	{#each clauses as c}
+		<ClauseVisualizerComponent clause={c} />
 	{/each}
 </div>

@@ -1,9 +1,9 @@
 <script lang="ts">
-	import type DecisionLiteral from '$lib/transversal/entities/DecisionLiteral.svelte.ts';
+	import type DecisionVariable from '$lib/transversal/entities/DecisionLiteral.svelte.ts';
 	import MathTexComponent from '$lib/components/MathTexComponent.svelte';
 
 	interface Props {
-		decision: DecisionLiteral;
+		decision: DecisionVariable;
 		startingWP: number;
 		currentWP: number;
 	}
@@ -38,7 +38,7 @@
 
 	.decidePrevious {
 		color: var(--decide-previous);
-		--decide-previous: #5d71b9ea;
+		--decide-previous: #1433a48e;
 	}
 
 	.unit-propagation {
@@ -48,7 +48,7 @@
 
 	.unit-propagationPrevious {
 		color: var(--unit-propagationPrevious);
-		--unit-propagationPrevious: #888d90ea;
+		--unit-propagationPrevious: #36454f8e;
 	}
 
 	.backtrack {
@@ -57,6 +57,6 @@
 	}
 	.backtrackPrevious {
 		color: var(--backtracking-previous);
-		--backtracking-previous: rgba(183, 180, 129, 0.905);
+		--backtracking-previous: #e7a9007e;
 	}
 </style>

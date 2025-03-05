@@ -1,35 +1,34 @@
 import type { Comparable } from '../utils/interfaces/Comparable.ts';
+import { isJust, makeJust, makeNothing, type Maybe } from '../utils/types/maybe.ts';
 
 export default class Variable implements Comparable<Variable> {
 	id: number;
-	assignment: boolean = false;
-	assigned: boolean = false;
+	assignment: Maybe<boolean> = makeNothing();
 
-	constructor(id: number) {
+	constructor(id: number, assignment: Maybe<boolean> = makeNothing()) {
 		if (id < 0) throw 'ERROR: variable ID should be >= 0';
 		this.id = id;
+		this.assignment = assignment;
 	}
 
-	public getId(): number {
+	public getInt(): number {
 		return this.id;
 	}
 
 	public isAssigned(): boolean {
-		return this.assigned;
+		return isJust(this.assignment);
 	}
 
-	public getAssignment(): boolean {
-		if (!this.isAssigned()) throw 'ERROR: variable not assigned yet';
+	public getAssignment(): Maybe<boolean> {
 		return this.assignment;
 	}
 
 	public assign(evaluation: boolean): void {
-		this.assignment = evaluation;
-		this.assigned = true;
+		this.assignment = makeJust(evaluation);
 	}
 
 	public unassign(): void {
-		this.assigned = false;
+		this.assignment = makeNothing();
 	}
 
 	public negate(): void {
@@ -37,19 +36,11 @@ export default class Variable implements Comparable<Variable> {
 	}
 
 	public copy(): Variable {
-		const newVariable = new Variable(this.id);
-		newVariable.assign = this.assign;
-		newVariable.assigned = this.assigned;
+		const newVariable = new Variable(this.id, this.assignment);
 		return newVariable;
 	}
 
 	public equals(other: Variable): boolean {
 		return this.id === other.id;
-	}
-}
-
-export class IdVariableMap extends Map<number, Variable> {
-	constructor() {
-		super();
 	}
 }
