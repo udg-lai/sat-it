@@ -119,13 +119,20 @@ function parseCNF(
 			.split(' ')
 			.map((n) => parseInt(n))
 	);
-	const assertCNF = cnf.map((line: number[], idx: number) => {
+	const assertCNF: Maybe<ErrorMessage>[] = cnf.map((line: number[], idx: number) => {
 		const literals = line.splice(0, -1);
 		const eos = line.at(-1);
-		const assert = literals.every((l) => Math.abs(l) <= varCount) && eos === 0;
-		return makeTuple(assert, idx);
+		if (literals.length === 0) {
+			return makeJust(`[ERROR]: empty clause in list of clause at index: ${idx}`);
+		} else if (!literals.every((l) => Math.abs(l) <= varCount)) {
+			return makeJust(`[ERROR]: literal out of bounds in list of clause at index: ${idx}`);
+		} else if (eos !== 0) {
+			return makeJust(`[ERROR]: clause does not finish with the expected '0' at index ${idx}`);
+		} else {
+			return makeNothing();
+		}
 	});
-	const clauseError = assertCNF.find((c) => !c.fst);
+	const clauseError = assertCNF.find((c) => isJust(c));
 	if (clauseError) {
 		return makeLeft(fromJust(clauseError));
 	}
