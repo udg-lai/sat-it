@@ -54,7 +54,6 @@ c start with comments
 c bu
 `;
 
-
 // trivial true clause
 const example05 = `
 c hola
@@ -70,7 +69,6 @@ c start with comments
 -1 -2 3 0
 c bu
 `;
-
 
 describe('dimacs parser', () => {
 	it('example01', () => {

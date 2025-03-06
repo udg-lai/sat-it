@@ -16,9 +16,9 @@ export interface Summary {
 	varCount: number;
 	clauseCount: number;
 	claims: {
-		original: Claims,
-		simplified: Claims
-	}
+		original: Claims;
+		simplified: Claims;
+	};
 }
 
 export default function parser(input: string): Summary {
@@ -29,7 +29,7 @@ export default function parser(input: string): Summary {
 		clauseCount: -1,
 		claims: {
 			original: [],
-			simplified: [],
+			simplified: []
 		}
 	};
 	// comments
