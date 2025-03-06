@@ -15,7 +15,10 @@ export interface Summary {
 	comment: string;
 	varCount: number;
 	clauseCount: number;
-	claims: Claims;
+	claims: {
+		original: Claims,
+		simplified: Claims
+	}
 }
 
 export default function parser(input: string): Summary {
@@ -24,7 +27,10 @@ export default function parser(input: string): Summary {
 		comment: '',
 		varCount: -1,
 		clauseCount: -1,
-		claims: []
+		claims: {
+			original: [],
+			simplified: [],
+		}
 	};
 	// comments
 	const comments = parseComment(lines);
@@ -44,7 +50,8 @@ export default function parser(input: string): Summary {
 	const eitherCNF = parseCNF(lines, summary.varCount, summary.clauseCount);
 	if (isRight(eitherCNF)) {
 		const right = unwrapEither(eitherCNF);
-		summary.claims = right;
+		summary.claims.original = right.fst;
+		summary.claims.simplified = right.snd;
 	} else {
 		const msg = unwrapEither(eitherCNF);
 		throw new Error(msg);
@@ -85,7 +92,7 @@ function parseSummary(lines: string[]): Either<ErrorMessage, Tuple<number, numbe
 	}
 	if (cnf !== 'cnf') {
 		return makeLeft(
-			`[ERROR]: boolean formula expected to be represented in Conjuntive Normal From (CNF)`
+			`[ERROR]: boolean formula expected to be represented in Conjunctive Normal From (CNF)`
 		);
 	}
 	const varsCount = parseInt(vars);
@@ -113,14 +120,14 @@ function parseCNF(
 			`[ERROR]: number of CNF greater than the number of expected clauses ${clauseCount}`
 		);
 	}
-	const cnf: Claims = lines.map((line) =>
+	const originalClaim: Claims = lines.map((line) =>
 		line
 			.trim()
 			.split(' ')
 			.map((n) => parseInt(n))
 	);
-	const assertCNF: Maybe<ErrorMessage>[] = cnf.map((line: number[], idx: number) => {
-		const literals = line.splice(0, -1);
+	const assertClaim: Maybe<ErrorMessage>[] = originalClaim.map((line: number[], idx: number) => {
+		const literals = line.slice(0, -1);
 		const eos = line.at(-1);
 		if (literals.length === 0) {
 			return makeJust(`[ERROR]: empty clause in list of clause at index: ${idx}`);
@@ -132,12 +139,12 @@ function parseCNF(
 			return makeNothing();
 		}
 	});
-	const clauseError = assertCNF.find((c) => isJust(c));
+	const clauseError = assertClaim.find((c) => isJust(c));
 	if (clauseError) {
 		return makeLeft(fromJust(clauseError));
 	} else {
-		const cleanedCNF = cnf
-			.map((c) => c.splice(0, -1))
+		const simplifiedClaim = originalClaim
+			.map((c) => c.slice(0, -1))
 			.map((c) => new Set(c))
 			.filter((c: Set<number>) => {
 				let trivialTrue = false;
@@ -149,7 +156,7 @@ function parseCNF(
 				}
 				return !trivialTrue;
 			})
-			.map((s) => Array.from(s));
-		return makeRight(makeTuple(cnf, cleanedCNF));
+			.map((s) => [...Array.from(s), 0]);
+		return makeRight(makeTuple(originalClaim, simplifiedClaim));
 	}
 }
