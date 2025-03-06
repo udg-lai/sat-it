@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import Button from './Button.svelte';
 	import UploadDimacsComponent from './uploadDimacs/UploadDimacsComponent.svelte';
 	import { AngleRightOutline, BugOutline, FileCirclePlusOutline } from 'flowbite-svelte-icons';
@@ -11,14 +10,8 @@
 
 	let { hide }: Props = $props();
 
-	let toolsHTMLElement: HTMLElement;
+	let toolsViewRef: HTMLElement;
 	let isResizing = $state(false);
-
-	onMount(() => {
-		const queryElement: HTMLElement | null = document.getElementById('tools-view');
-		if (queryElement) toolsHTMLElement = queryElement;
-		else console.error(`Tools view HTML element not found in the DOM`);
-	});
 
 	function enableResizeCursor(): void {
 		document.body.style.cursor = 'col-resize';
@@ -55,9 +48,9 @@
 				} else {
 					hide = false;
 					if (newX < barWidth + minWidthTool) {
-						toolsHTMLElement.style.width = `${minWidthTool}px`;
+						toolsViewRef.style.width = `${minWidthTool}px`;
 					} else {
-						toolsHTMLElement.style.width = `calc(${newX}px - var(--bar-width))`;
+						toolsViewRef.style.width = `calc(${newX}px - var(--bar-width))`;
 					}
 				}
 			}
@@ -122,7 +115,7 @@
 				newViewRef.open = true;
 				if (hide) {
 					hide = false;
-					toolsHTMLElement.style.width = 'var(--max-width-tools)';
+					toolsViewRef.style.width = 'var(--max-width-tools)';
 				}
 			}
 		}
@@ -144,7 +137,7 @@
 		<div class="toggle-button"></div>
 		<div class="toggle-button"></div>
 	</div>
-	<div id="tools-view" class="tools-view" class:hide-tools-view={hide}>
+	<div bind:this={toolsViewRef} class="tools-view" class:hide-tools-view={hide}>
 		{#if !hide}
 			<div class="tools-view-container">
 				{#each views as { name, open } (name)}
