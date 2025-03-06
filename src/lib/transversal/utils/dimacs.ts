@@ -135,21 +135,21 @@ function parseCNF(
 	const clauseError = assertCNF.find((c) => isJust(c));
 	if (clauseError) {
 		return makeLeft(fromJust(clauseError));
-	}
-	else {
-		const cleanedCNF = cnf.map(c => c.splice(0, -1))
-			.map(c => new Set(c))
+	} else {
+		const cleanedCNF = cnf
+			.map((c) => c.splice(0, -1))
+			.map((c) => new Set(c))
 			.filter((c: Set<number>) => {
-				let trivialTrue = false
+				let trivialTrue = false;
 				for (const lit of c) {
-					if (c.has(lit * - 1)) {
-						trivialTrue = true
+					if (c.has(lit * -1)) {
+						trivialTrue = true;
 						break;
 					}
 				}
 				return !trivialTrue;
 			})
-			.map(s => Array.from(s))
+			.map((s) => Array.from(s));
 		return makeRight(makeTuple(cnf, cleanedCNF));
 	}
 }
