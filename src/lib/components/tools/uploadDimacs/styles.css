@@ -1,19 +1,23 @@
 ul li {
 	display: flex;
 	align-items: center;
-	gap: 1rem;
-	height: 4rem;
 	display: flex;
 	position: relative;
+	justify-content: space-between;
+	padding: 10px;
 }
 
 ul li p {
 	margin: 0px !important;
+	padding: 5px;
 }
 
-li .icon {
-	position: absolute;
-	right: 0;
+li button {
+	padding: 5px;
+}
+
+.toggle {
+	padding-left: 5px;
 }
 
 .file-input-box {
