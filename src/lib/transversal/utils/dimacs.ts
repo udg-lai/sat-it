@@ -7,12 +7,15 @@ import {
 	type Either
 } from '$lib/transversal/utils/types/either.ts';
 import { type Tuple, makeTuple } from './types/tuple.ts';
+import { fromJust, isJust, makeJust, makeNothing, type Maybe } from './types/maybe.ts';
+
+type Claims = number[][];
 
 export interface Summary {
 	comment: string;
 	varCount: number;
 	clauseCount: number;
-	claims: number[][];
+	claims: Claims;
 }
 
 export default function parser(input: string): Summary {
@@ -104,13 +107,13 @@ function parseCNF(
 	lines: string[],
 	varCount: number,
 	clauseCount: number
-): Either<ErrorMessage, number[][]> {
+): Either<ErrorMessage, Tuple<Claims, Claims>> {
 	if (lines.length > clauseCount) {
 		return makeLeft(
 			`[ERROR]: number of CNF greater than the number of expected clauses ${clauseCount}`
 		);
 	}
-	const cnf = lines.map((line) =>
+	const cnf: Claims = lines.map((line) =>
 		line
 			.trim()
 			.split(' ')
@@ -124,7 +127,22 @@ function parseCNF(
 	});
 	const clauseError = assertCNF.find((c) => !c.fst);
 	if (clauseError) {
-		return makeLeft(`[ERROR]: parser error at line: ${clauseError.snd}`);
+		return makeLeft(fromJust(clauseError));
 	}
-	return makeRight(cnf);
+	else {
+		const cleanedCNF = cnf.map(c => c.splice(0, -1))
+			.map(c => new Set(c))
+			.filter((c: Set<number>) => {
+				let trivialTrue = false
+				for (const lit of c) {
+					if (c.has(lit * - 1)) {
+						trivialTrue = true
+						break;
+					}
+				}
+				return !trivialTrue;
+			})
+			.map(s => Array.from(s))
+		return makeRight(makeTuple(cnf, cleanedCNF));
+	}
 }
