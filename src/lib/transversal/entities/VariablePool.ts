@@ -18,8 +18,8 @@ class VariablePool implements IVariablePool {
 	}
 
 	allAssigned(): boolean {
-		// pointer is in the last index position
-		return this.pointer === this.poolCapacity - 1;
+		// Edit: Now the pointer is allways looking at the variable that is going to be assigned
+		return this.pointer === this.poolCapacity;
 	}
 
 	dispose(variable: number): void {
@@ -29,8 +29,8 @@ class VariablePool implements IVariablePool {
 	}
 
 	persist(variable: number, assignment: boolean): void {
-		this.checkIndex(variable);
-		this.dispose(variable);
+		const variableIdx = this.checkIndex(variable);
+		if (this.pointer === variableIdx) this.pointer++;
 		this.assignVariable(variable, assignment);
 	}
 
