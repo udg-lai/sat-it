@@ -3,21 +3,14 @@
 	import { EyeOutline, TrashBinOutline, UploadOutline } from 'flowbite-svelte-icons';
 	import { Toggle } from 'flowbite-svelte';
 	import './styles.css';
-	import type { InstanceDimacs } from '$lib/instances/InstanceDimacs.ts';
 	import { getContext, hasContext } from 'svelte';
-	import type { Summary } from '$lib/transversal/utils/dimacs.ts';
-	import {
-		isNothing,
-		makeJust,
-		makeNothing,
-		type Maybe
-	} from '$lib/transversal/utils/types/maybe.ts';
-	import parser from '$lib/transversal/utils/dimacs.ts';
+	import type { DimacsInstance } from '$lib/dimacs/dimacs-instance.interface.ts';
+	import dimacsParser from '$lib/transversal/utils/parsers/dimacs.ts';
+	import { logError, logWarning } from '$lib/transversal/utils/utils.ts';
 
-	interface InteractivelyInstance extends InstanceDimacs {
+	interface InteractivelyInstance extends DimacsInstance {
 		removable: boolean;
 		active: boolean;
-		summary: Maybe<Summary>;
 	}
 
 	let instances: InteractivelyInstance[] = $state([]);
@@ -30,15 +23,13 @@
 		if (!hasContext(queryKey)) {
 			console.error(`should be problems already loaded`);
 		} else {
-			const preloadInstances = getContext(queryKey) as InstanceDimacs[];
+			const preloadInstances = getContext(queryKey) as DimacsInstance[];
 			const initInteractive = {
 				removable: false,
-				active: false,
-				summary: makeNothing()
+				active: false
 			};
 			instances = preloadInstances.map((e) => ({ ...e, ...initInteractive }));
 			instances[0].active = true;
-			instances[0].summary = makeJust(parser(instances[0].content));
 		}
 	}
 
@@ -49,34 +40,44 @@
 
 		for (const file of files) {
 			const reader = new FileReader();
+			const fileName = file.name;
 
 			reader.onload = (e: ProgressEvent<FileReader>) => {
-				console.log(`Content of ${file.name}:`, e.target?.result);
+				processFile(fileName, e.target?.result as string);
 			};
 
-			reader.onerror = (e) => {
-				console.error(`Error reading ${file.name}:`, e.target?.error);
+			reader.onerror = () => {
+				const title = `File ${fileName} could not be loaded`;
+				logError(title, title);
 			};
 
 			reader.readAsText(file);
 		}
 	}
 
-	function saveFile(problem: string, content: string): void {
-		const file = instances.find((p) => p.fileName === problem);
+	function processFile(fileName: string, content: string): void {
+		const file = instances.find((p) => p.fileName === fileName);
 		if (file) {
-			console.error(`Uploading file ${problem} once again`);
+			const title = 'duplicated dimacs instance';
+			const description = `Uploading file ${fileName} once again`;
+			logWarning(title, description);
 		} else {
-			instances = [
-				...instances,
-				{
-					fileName: problem,
-					content,
-					active: false,
-					removable: false,
-					summary: makeNothing()
-				}
-			];
+			try {
+				instances = [
+					...instances,
+					{
+						fileName,
+						content,
+						active: false,
+						removable: false,
+						summary: dimacsParser(content)
+					}
+				];
+			} catch (error) {
+				const title = `Instance ${fileName} contains an error`;
+				const description = (error as Error).message;
+				logError(title, description);
+			}
 		}
 	}
 
@@ -84,15 +85,16 @@
 		const turnOn = false;
 		instances = instances.map((e) => ({ ...e, ...{ active: turnOn } }));
 		instances[index].active = true;
-		if (isNothing(instances[index].summary)) {
-			instances[index].summary = makeJust(parser(instances[index].content));
-		}
-		console.log($state.snapshot(instances[index]));
+		setInstanceToCtx(instances[index]);
+	}
+
+	function setInstanceToCtx(instance: InteractivelyInstance) {
+		console.log('updating problem', instance);
 	}
 </script>
 
 <Accordion flush>
-	<AccordionItem open={true}>
+	<AccordionItem open={false}>
 		<span slot="header">Upload problem</span>
 		<div class="container">
 			<div class="file-input-box">
@@ -113,7 +115,7 @@
 			</div>
 		</div>
 	</AccordionItem>
-	<AccordionItem open={false}>
+	<AccordionItem open={true}>
 		<span slot="header">List of problems</span>
 		<ul>
 			{#each instances as item, i}
