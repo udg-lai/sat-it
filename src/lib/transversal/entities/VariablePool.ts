@@ -30,6 +30,7 @@ class VariablePool implements IVariablePool {
 
 	persist(variable: number, assignment: boolean): void {
 		const variableIdx = this.checkIndex(variable);
+		this.checkAssignment(variableIdx);
 		if (this.pointer === variableIdx) this.pointer++;
 		this.assignVariable(variable, assignment);
 	}
@@ -69,6 +70,12 @@ class VariablePool implements IVariablePool {
 	public unassignVariable(id: number) {
 		const idx = this.checkIndex(id);
 		this.collection[idx].unassign();
+	}
+
+	private checkAssignment(idx: number) {
+		if(this.collection[idx].isAssigned()) {
+			throw '[ERROR]: You can not reassign this variable in this trail';
+		}
 	}
 
 	private checkIndex(variableId: number): number {
