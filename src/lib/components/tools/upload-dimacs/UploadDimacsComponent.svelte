@@ -3,7 +3,6 @@
 	import { EyeOutline, TrashBinOutline, UploadOutline } from 'flowbite-svelte-icons';
 	import { Toggle } from 'flowbite-svelte';
 	import './styles.css';
-	import type { InstanceDimacs } from '$lib/instances/InstanceDimacs.ts';
 	import { getContext, hasContext } from 'svelte';
 	import type { Summary } from '$lib/transversal/utils/dimacs.ts';
 	import {
@@ -13,8 +12,10 @@
 		type Maybe
 	} from '$lib/transversal/utils/types/maybe.ts';
 	import parser from '$lib/transversal/utils/dimacs.ts';
+	import type { DimacsInstance } from '$lib/dimacs/dimacs-instance.interface.ts';
+	import { addToast } from '$lib/store/toasts.store.ts';
 
-	interface InteractivelyInstance extends InstanceDimacs {
+	interface InteractivelyInstance extends DimacsInstance {
 		removable: boolean;
 		active: boolean;
 		summary: Maybe<Summary>;
@@ -30,7 +31,7 @@
 		if (!hasContext(queryKey)) {
 			console.error(`should be problems already loaded`);
 		} else {
-			const preloadInstances = getContext(queryKey) as InstanceDimacs[];
+			const preloadInstances = getContext(queryKey) as DimacsInstance[];
 			const initInteractive = {
 				removable: false,
 				active: false,
@@ -85,14 +86,26 @@
 		instances = instances.map((e) => ({ ...e, ...{ active: turnOn } }));
 		instances[index].active = true;
 		if (isNothing(instances[index].summary)) {
-			instances[index].summary = makeJust(parser(instances[index].content));
+			try {
+				const summary = parser(instances[index].content);
+				instances[index].summary = makeJust(summary);
+			} catch (error) {
+				console.log(error);
+				addToast({
+					type: 'error',
+					message: `Could not load the instance ${instances[index].fileName}`
+				});
+			}
+			addToast({
+				type: 'info',
+				message: `Instance ${instances[index].fileName} loaded`
+			});
 		}
-		console.log($state.snapshot(instances[index]));
 	}
 </script>
 
 <Accordion flush>
-	<AccordionItem open={true}>
+	<AccordionItem open={false}>
 		<span slot="header">Upload problem</span>
 		<div class="container">
 			<div class="file-input-box">
@@ -113,7 +126,7 @@
 			</div>
 		</div>
 	</AccordionItem>
-	<AccordionItem open={false}>
+	<AccordionItem open={true}>
 		<span slot="header">List of problems</span>
 		<ul>
 			{#each instances as item, i}
