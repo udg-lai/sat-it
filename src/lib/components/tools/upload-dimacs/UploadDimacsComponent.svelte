@@ -31,7 +31,7 @@
 		}
 	}
 
-	function uploadFiles(e: Event) {
+	function uploadFiles() {
 		console.log(fileInputRef.files);
 
 		const files = fileInputRef.files || [];
@@ -69,7 +69,7 @@
 	}
 
 	function onToggleChange(index: number): void {
-		const turnOn = false
+		const turnOn = false;
 		instances = instances.map((e) => ({ ...e, ...{ active: turnOn } }));
 		instances[index].active = true;
 	}

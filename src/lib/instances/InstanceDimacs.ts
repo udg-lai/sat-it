@@ -1,5 +1,4 @@
-
 export interface InstanceDimacs {
-    fileName: string,
-    content: string
+	fileName: string;
+	content: string;
 }

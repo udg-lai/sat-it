@@ -1,5 +1,4 @@
-import type { InstanceDimacs } from "./InstanceDimacs.ts";
-
+import type { InstanceDimacs } from './InstanceDimacs.ts';
 
 const fileName = 'dummy.dimacs';
 

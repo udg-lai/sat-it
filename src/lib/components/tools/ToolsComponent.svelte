@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Button from './Button.svelte';
-	import UploadDimacsComponent from './uploadDimacs/UploadDimacsComponent.svelte';
+	import UploadDimacsComponent from './upload-dimacs/UploadDimacsComponent.svelte';
 	import { AngleRightOutline, BugOutline, FileCirclePlusOutline } from 'flowbite-svelte-icons';
 	import './styles.css';
 

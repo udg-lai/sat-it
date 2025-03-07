@@ -1,4 +1,4 @@
-const fileName = "NQueens4.dimacs"
+const fileName = 'NQueens4.dimacs';
 
 const content = `
 p cnf 60 128
@@ -129,7 +129,7 @@ p cnf 60 128
 -3 -20 0
 -3 -19 0
 1 0
--2 0`
+-2 0`;
 
 const instance: InstanceDimacs = { fileName, content };
 
