@@ -4,10 +4,7 @@ import type { TrailCollection } from '../entities/TrailCollection.svelte.ts';
 import { fromJust, isJust } from '../utils/types/maybe.ts';
 import { pool } from '$lib/store.ts';
 
-export default function decide(
-	trailCollection: TrailCollection,
-	trail: Trail,
-): void {
+export default function decide(trailCollection: TrailCollection, trail: Trail): void {
 	pool.update((currentPool) => {
 		if (!currentPool.allAssigned()) {
 			const nextVariable = currentPool.nextVariableToAssign();
@@ -42,6 +39,6 @@ export default function decide(
 				trail.updateFollowUpIndex();
 			}
 		}
-		return currentPool
+		return currentPool;
 	});
 }

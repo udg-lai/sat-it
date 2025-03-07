@@ -8,7 +8,7 @@
 	import { isJust, fromJust } from '$lib/transversal/utils/types/maybe.ts';
 	import TrailCollectionVisualizerComponent from './visualizer/TrailCollectionVisualizerComponent.svelte';
 	import decide from '$lib/transversal/algorithms/decision.ts';
-	import {pool} from '$lib/store.ts'
+	import { pool } from '$lib/store.ts';
 
 	const trailCollection = new TrailCollection();
 	let visualizeTrails = false;
@@ -43,8 +43,7 @@
 			}
 		}
 		return currentPool;
-	})
-	
+	});
 
 	function flipVisualize() {
 		visualizeTrails = !visualizeTrails;
