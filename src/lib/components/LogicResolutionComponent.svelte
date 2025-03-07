@@ -5,7 +5,6 @@
 	import { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
 	import { TrailCollection } from '$lib/transversal/entities/TrailCollection.svelte.ts';
 	import VariablePoolBuilder from '$lib/transversal/entities/VariablePoolBuilder.ts';
-	import { type IVariablePool } from '$lib/transversal/utils/interfaces/IVariablePool.ts';
 	import { isJust, fromJust } from '$lib/transversal/utils/types/maybe.ts';
 	import TrailCollectionVisualizerComponent from './visualizer/TrailCollectionVisualizerComponent.svelte';
 	import decide from '$lib/transversal/algorithms/decision.ts';

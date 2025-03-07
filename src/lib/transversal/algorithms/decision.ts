@@ -1,7 +1,6 @@
 import DecisionVariable, { AssignmentReason } from '../entities/DecisionLiteral.svelte.ts';
 import type { Trail } from '../entities/Trail.svelte.ts';
 import type { TrailCollection } from '../entities/TrailCollection.svelte.ts';
-import type { IVariablePool } from '../utils/interfaces/IVariablePool.ts';
 import { fromJust, isJust } from '../utils/types/maybe.ts';
 import { pool } from '$lib/store.ts';
 
