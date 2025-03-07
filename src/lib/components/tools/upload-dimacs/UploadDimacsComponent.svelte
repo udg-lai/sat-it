@@ -5,10 +5,19 @@
 	import './styles.css';
 	import type { InstanceDimacs } from '$lib/instances/InstanceDimacs.ts';
 	import { getContext, hasContext } from 'svelte';
+	import type { Summary } from '$lib/transversal/utils/dimacs.ts';
+	import {
+		isNothing,
+		makeJust,
+		makeNothing,
+		type Maybe
+	} from '$lib/transversal/utils/types/maybe.ts';
+	import parser from '$lib/transversal/utils/dimacs.ts';
 
 	interface InteractivelyInstance extends InstanceDimacs {
 		removable: boolean;
 		active: boolean;
+		summary: Maybe<Summary>;
 	}
 
 	let instances: InteractivelyInstance[] = $state([]);
@@ -24,10 +33,12 @@
 			const preloadInstances = getContext(queryKey) as InstanceDimacs[];
 			const initInteractive = {
 				removable: false,
-				active: false
+				active: false,
+				summary: makeNothing()
 			};
 			instances = preloadInstances.map((e) => ({ ...e, ...initInteractive }));
 			instances[0].active = true;
+			instances[0].summary = makeJust(parser(instances[0].content));
 		}
 	}
 
@@ -62,7 +73,8 @@
 					fileName: problem,
 					content,
 					active: false,
-					removable: false
+					removable: false,
+					summary: makeNothing()
 				}
 			];
 		}
@@ -72,6 +84,10 @@
 		const turnOn = false;
 		instances = instances.map((e) => ({ ...e, ...{ active: turnOn } }));
 		instances[index].active = true;
+		if (isNothing(instances[index].summary)) {
+			instances[index].summary = makeJust(parser(instances[index].content));
+		}
+		console.log($state.snapshot(instances[index]));
 	}
 </script>
 
