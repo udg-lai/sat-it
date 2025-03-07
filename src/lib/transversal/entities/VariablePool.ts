@@ -73,7 +73,7 @@ class VariablePool implements IVariablePool {
 	}
 
 	private checkAssignment(idx: number) {
-		if(this.collection[idx].isAssigned()) {
+		if (this.collection[idx].isAssigned()) {
 			throw '[ERROR]: You can not reassign this variable in this trail';
 		}
 	}
