@@ -42,7 +42,6 @@ export default function decide(
 				trail.updateFollowUpIndex();
 			}
 		}
-		console.log(currentPool);
 		return currentPool
 	});
 }
