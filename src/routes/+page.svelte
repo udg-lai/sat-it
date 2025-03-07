@@ -11,10 +11,17 @@
 	import { toasts } from '$lib/store/toasts.store.ts';
 	import type { DimacsInstance } from '$lib/dimacs/dimacs-instance.interface.ts';
 	import ToastComponent from '$lib/components/ToastComponent.svelte';
+	import { logError } from '$lib/transversal/utils/utils.ts';
 
 	function bootstrapInstances(): void {
-		const instances: DimacsInstance[] = [dummy, queens4, queens8];
-		setContext('preloadedInstances', instances);
+		try {
+			const instances: DimacsInstance[] = [dummy, queens4, queens8];
+			setContext('preloadedInstances', instances);
+		} catch (e) {
+			const title = 'Pre-loaded dimacs instance contains an error';
+			const description = (e as Error).message;
+			logError(title, description);
+		}
 	}
 
 	bootstrapInstances();
@@ -22,9 +29,11 @@
 
 <app>
 	{#if $toasts}
-		{#each $toasts as toast (toast.id)}
-			<ToastComponent {toast} />
-		{/each}
+		<div class="toasts">
+			{#each $toasts as toast (toast.id)}
+				<ToastComponent {toast} />
+			{/each}
+		</div>
 	{/if}
 
 	<main>

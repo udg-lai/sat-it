@@ -5,7 +5,8 @@ type ToastType = 'error' | 'warn' | 'info';
 export interface Toast {
 	id?: number;
 	type?: ToastType;
-	message: string;
+	title: string;
+	description?: string;
 	dismissible?: boolean;
 	timeout?: number;
 }
@@ -25,9 +26,10 @@ export const addToast = (toast: Toast) => {
 	const defaults: Toast = {
 		id,
 		type: 'info',
-		message: '<empty>',
+		title: '<empty>',
+		description: '<empty>',
 		dismissible: false,
-		timeout: 3000
+		timeout: 6000
 	};
 
 	// Push the toast to the top of the list of toasts

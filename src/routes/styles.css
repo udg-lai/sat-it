@@ -1,14 +1,11 @@
-toast {
+.toasts {
 	position: fixed;
-	top: 0;
-	left: 0;
-	right: 0;
-	width: 100%;
+	top: 10px;
+	right: 10px;
 	display: flex;
-	margin-top: 1rem;
-	justify-content: center;
 	flex-direction: column;
-	z-index: 1000;
+	gap: 10px; /* Ensures spacing between notifications */
+	z-index: var(--notification-z-index);
 }
 
 play-area {

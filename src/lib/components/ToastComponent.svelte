@@ -1,28 +1,63 @@
 <script lang="ts">
-	import { slide } from 'svelte/transition';
-	import { Toast } from 'flowbite-svelte';
-	import { type Toast as NotificationToast } from '$lib/store/toasts.store.ts';
-	import { FireOutline } from 'flowbite-svelte-icons';
+	import { dismissToast, type Toast as NotificationToast } from '$lib/store/toasts.store.ts';
+	import { CloseCircleOutline, ExclamationCircleOutline } from 'flowbite-svelte-icons';
 
 	interface Props {
 		toast: NotificationToast;
 	}
 
 	let { toast }: Props = $props();
+
+	function selfClose(): void {
+		if (toast.id) {
+			dismissToast(toast.id);
+		}
+	}
 </script>
 
-<div class="notification">
-	<Toast transition={slide} color="green" position="top-right">
-		<FireOutline
-			slot="icon"
-			class="h-6 w-6 bg-primary-100 text-primary-500 dark:bg-primary-800 dark:text-primary-200"
-		/>
-		{toast?.message}
-	</Toast>
+<div class="toast active">
+	{#if toast.type === 'error'}
+		<ExclamationCircleOutline color="red" slot="icon" class="h-8 w-8" />
+	{:else if toast.type === 'warn'}
+		<ExclamationCircleOutline color="orange" slot="icon" class="h-8 w-8" />
+	{:else}
+		<ExclamationCircleOutline color="blue" slot="icon" class="h-8 w-8" />
+	{/if}
+
+	<div class="flex items-center">
+		<div class="ms-3">
+			<h4 class="font-semibold text-gray-900">{toast.title}</h4>
+			<div class="font-normal">{toast.description}</div>
+		</div>
+	</div>
+	<button class="close" onclick={selfClose}>
+		<CloseCircleOutline />
+	</button>
 </div>
 
 <style>
-	.notification {
-		z-index: var(--notification-z-index);
+	.toast {
+		position: relative;
+		width: 320px;
+		border-radius: 12px;
+		background: #fff;
+		box-shadow: 0 6px 20px -5px rgba(0, 0, 0, 0.1);
+		display: flex;
+		overflow-x: hidden;
+		align-items: center;
+		transform: translateX(calc(100% + 30px));
+		transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.35);
+		padding: 1rem;
+	}
+
+	.toast.active {
+		transform: translateX(0%);
+	}
+	.toast .close {
+		position: absolute;
+		top: 10px;
+		right: 15px;
+		cursor: pointer;
+		opacity: 0.7;
 	}
 </style>
