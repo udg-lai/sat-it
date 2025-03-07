@@ -21,7 +21,9 @@
 	function fetchPreloadedInstances(): void {
 		const queryKey = 'preloadedInstances';
 		if (!hasContext(queryKey)) {
-			console.error(`should be problems already loaded`);
+			const title = 'Preloaded instances';
+			const description = 'None preloaded instance found';
+			logWarning(title, description);
 		} else {
 			const preloadInstances = getContext(queryKey) as DimacsInstance[];
 			const initInteractive = {

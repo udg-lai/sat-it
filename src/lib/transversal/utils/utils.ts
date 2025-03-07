@@ -1,7 +1,7 @@
 import { addToast } from '$lib/store/toasts.store.ts';
 
 export function logWarning(title: string, description: string): void {
-	console.error('title:\n', title, '\ndescription:\n', description);
+	console.info('title:\n', title, '\ndescription:\n', description);
 	addToast({
 		type: 'warn',
 		title: formatText(title),
