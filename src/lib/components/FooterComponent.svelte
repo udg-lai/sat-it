@@ -2,7 +2,7 @@
 </script>
 
 <div class="footer-container">
-	<p>EDU-SAIT &copy LAI</p>
+	<p>EDU-SAT-IT &copy LAI</p>
 </div>
 
 <style>
