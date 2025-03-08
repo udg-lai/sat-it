@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { AccordionItem, Accordion } from 'flowbite-svelte';
-	import { EyeOutline, TrashBinOutline, UploadOutline } from 'flowbite-svelte-icons';
+	import { EyeOutline, LockOutline, TrashBinOutline, UploadOutline } from 'flowbite-svelte-icons';
 	import { Toggle } from 'flowbite-svelte';
 	import './styles.css';
 	import { getContext, hasContext } from 'svelte';
@@ -73,7 +73,7 @@
 						content,
 						summary,
 						active: false,
-						removable: false
+						removable: true
 					}
 				];
 				const title = `File uploaded`;
@@ -127,8 +127,12 @@
 			{#each instances as item, i}
 				<li>
 					<div class="flex">
-						<button class="icon">
-							<TrashBinOutline />
+						<button class="icon not-removable" disabled={!item.removable}>
+							{#if item.removable}
+								<TrashBinOutline />
+							{:else}
+								<LockOutline />
+							{/if}
 						</button>
 						<p class="mb-2 text-gray-500 dark:text-gray-400">{item.fileName}</p>
 					</div>
@@ -136,7 +140,12 @@
 						<button class="icon">
 							<EyeOutline />
 						</button>
-						<Toggle onchange={() => onToggleChange(i)} checked={item.active} disabled={item.active} class="toggle" />
+						<Toggle
+							onchange={() => onToggleChange(i)}
+							checked={item.active}
+							disabled={item.active}
+							class="toggle"
+						/>
 					</div>
 				</li>
 			{/each}
