@@ -36,23 +36,17 @@
 	}
 
 	function uploadFiles() {
-		console.log(fileInputRef.files);
-
 		const files = fileInputRef.files || [];
-
 		for (const file of files) {
 			const reader = new FileReader();
 			const fileName = file.name;
-
 			reader.onload = (e: ProgressEvent<FileReader>) => {
 				processFile(fileName, e.target?.result as string);
 			};
-
 			reader.onerror = () => {
 				const title = `File ${fileName} could not be loaded`;
 				logError(title, title);
 			};
-
 			reader.readAsText(file);
 		}
 	}
