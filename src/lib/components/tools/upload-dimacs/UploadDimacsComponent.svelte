@@ -136,7 +136,7 @@
 						<button class="icon">
 							<EyeOutline />
 						</button>
-						<Toggle onchange={() => onToggleChange(i)} checked={item.active} class="toggle" />
+						<Toggle onchange={() => onToggleChange(i)} checked={item.active} disabled={item.active} class="toggle" />
 					</div>
 				</li>
 			{/each}
