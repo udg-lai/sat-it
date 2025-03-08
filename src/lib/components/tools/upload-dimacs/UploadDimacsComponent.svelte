@@ -6,7 +6,7 @@
 	import { getContext, hasContext } from 'svelte';
 	import type { DimacsInstance } from '$lib/dimacs/dimacs-instance.interface.ts';
 	import dimacsParser from '$lib/transversal/utils/parsers/dimacs.ts';
-	import { logError, logWarning } from '$lib/transversal/utils/utils.ts';
+	import { logError, logInfo, logWarning } from '$lib/transversal/utils/utils.ts';
 
 	interface InteractivelyInstance extends DimacsInstance {
 		removable: boolean;
@@ -60,21 +60,25 @@
 	function processFile(fileName: string, content: string): void {
 		const file = instances.find((p) => p.fileName === fileName);
 		if (file) {
-			const title = 'duplicated dimacs instance';
-			const description = `Uploading file ${fileName} once again`;
+			const title = 'Duplicated instance';
+			const description = `File ${fileName} already uplaoded`;
 			logWarning(title, description);
 		} else {
 			try {
+				const summary = dimacsParser(content);
 				instances = [
 					...instances,
 					{
 						fileName,
 						content,
+						summary,
 						active: false,
-						removable: false,
-						summary: dimacsParser(content)
+						removable: false
 					}
 				];
+				const title = `File uploaded`;
+				const description = `File ${fileName} parsed and ready to use`;
+				logInfo(title, description);
 			} catch (error) {
 				const title = `Instance ${fileName} contains an error`;
 				const description = (error as Error).message;
