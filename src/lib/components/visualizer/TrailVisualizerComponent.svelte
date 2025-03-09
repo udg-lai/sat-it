@@ -11,15 +11,19 @@
 <!--
   For each decision, we will send the following:
     - decision: The decision itself as we will need to know the id and the evaluation
-    - startingWP: To know the litterals that were not decided during this trail
+    - startingWP: To know the literals that were not decided during this trail
     - currentWP: The position in the array of the decision being written down.
 -->
 <div class="flex flex-row">
 	{#each trail as decision}
-		<DecisionVariableComponent
-			{decision}
-			startingWP={trail.getFollowUpIndex()}
-			currentWP={trail.indexOf(decision)}
-		/>
+		<div class="decision-variable">
+			<DecisionVariableComponent {decision} />
+		</div>
 	{/each}
 </div>
+
+<style>
+	.decision-variable {
+		padding: 0.25rem;
+	}
+</style>

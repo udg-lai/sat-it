@@ -1,30 +1,28 @@
 <script lang="ts">
-	import { slide } from 'svelte/transition';
 	import { TrailCollection } from '$lib/transversal/entities/TrailCollection.svelte.ts';
 	import TrailVisualizerComponent from '$lib/components/visualizer/TrailVisualizerComponent.svelte';
 	import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
 
 	interface Props {
-		trailCollection: TrailCollection;
-		trail: Trail;
-		visualizeTrails: boolean;
+		previousTrails: TrailCollection;
+		currentTrail: Trail;
+		collapse: boolean;
 	}
-	let { trailCollection, trail, visualizeTrails }: Props = $props();
+	let { previousTrails, currentTrail, collapse }: Props = $props();
+
+	let trails: Trail[] = $derived(
+		(collapse ? [currentTrail] : [...previousTrails, currentTrail]).reverse()
+	);
 </script>
 
-<div class="flex flex-col">
-	{#if visualizeTrails}
-		{#each trailCollection as trail}
-			<div transition:slide|global>
-				<TrailVisualizerComponent {trail} />
-			</div>
-		{/each}
-		<div transition:slide|global>
-			<TrailVisualizerComponent {trail} />
-		</div>
-	{:else}
-		<div in:slide|global out:slide={{ duration: 1 }}>
-			<TrailVisualizerComponent {trail} />
-		</div>
-	{/if}
+<div class="trail-visualizer flex flex-col">
+	{#each trails as trail}
+		<TrailVisualizerComponent {trail} />
+	{/each}
 </div>
+
+<style>
+	.trail-visualizer {
+		padding: 1rem;
+	}
+</style>

@@ -5,10 +5,8 @@
 
 	interface Props {
 		decision: DecisionVariable;
-		startingWP: number;
-		currentWP: number;
 	}
-	let { decision, startingWP, currentWP }: Props = $props();
+	let { decision }: Props = $props();
 	let decisionColor: string = $state('teal');
 
 	$effect(() => {
