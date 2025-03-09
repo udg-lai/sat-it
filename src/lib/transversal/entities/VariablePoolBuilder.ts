@@ -5,7 +5,6 @@ export type PoolType = 'VariableCollection' | 'VariablePool';
 
 class VariablePoolBuilder {
 	static build(type: PoolType, capacity: number): IVariablePool {
-		console.log(`Creating default pool for ${type} pool type`);
 		return new VariablePool(capacity);
 	}
 }

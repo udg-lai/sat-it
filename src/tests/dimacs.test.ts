@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import parser, { type Summary } from '$lib/transversal/utils/dimacs.ts';
+import dimacsParser, { type Summary } from '$lib/transversal/utils/parsers/dimacs.ts';
 
 const example01 = `
 c
@@ -72,7 +72,7 @@ c bu
 
 describe('dimacs parser', () => {
 	it('example01', () => {
-		const summary: Summary = parser(example01);
+		const summary: Summary = dimacsParser(example01);
 		expect(summary.comment).toBe(`\n\nstart with comments\n\nadios\n`);
 		expect(summary.varCount).toBe(5);
 		expect(summary.clauseCount).toBe(3);
@@ -83,7 +83,7 @@ describe('dimacs parser', () => {
 		]);
 	});
 	it('example02', () => {
-		const summary: Summary = parser(example02);
+		const summary: Summary = dimacsParser(example02);
 		expect(summary.comment).toBe('');
 		expect(summary.varCount).toBe(4);
 		expect(summary.clauseCount).toBe(5);
@@ -96,7 +96,7 @@ describe('dimacs parser', () => {
 		]);
 	});
 	it('example03', () => {
-		const summary: Summary = parser(example03);
+		const summary: Summary = dimacsParser(example03);
 		expect(summary.comment).toBe(`hola\n\n\nstart with comments\nbu\n`);
 		expect(summary.varCount).toBe(4);
 		expect(summary.clauseCount).toBe(6);
@@ -117,7 +117,7 @@ describe('dimacs parser', () => {
 		]);
 	});
 	it('example04', () => {
-		const summary: Summary = parser(example04);
+		const summary: Summary = dimacsParser(example04);
 		expect(summary.comment).toBe(`hola\n\n\nstart with comments\nbu\n`);
 		expect(summary.varCount).toBe(4);
 		expect(summary.clauseCount).toBe(6);
@@ -138,6 +138,6 @@ describe('dimacs parser', () => {
 		]);
 	});
 	it('example05', () => {
-		expect(() => parser(example05)).toThrowError();
+		expect(() => dimacsParser(example05)).toThrowError();
 	});
 });
