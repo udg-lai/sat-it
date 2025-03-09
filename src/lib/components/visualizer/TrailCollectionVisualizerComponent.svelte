@@ -15,14 +15,33 @@
 	);
 </script>
 
-<div class="trail-visualizer flex flex-col">
+
+
+<div class="trail-visualizer flex flex-row">
+	<div class="enumerator flex flex-col">
+
+	</div>
+	<div class="trails flex flex-col">
 	{#each trails as trail}
 		<TrailVisualizerComponent {trail} />
 	{/each}
+	</div>
 </div>
 
 <style>
+	.enumerator {
+		width: 5rem;
+		background-color: cadetblue;
+	}
+
+	.enumerator, .trails {
+		height: 100%;
+	}
+
 	.trail-visualizer {
 		padding: 1rem;
+		height: 50rem;
+		flex: 1;
+		overflow-y: scroll;
 	}
 </style>

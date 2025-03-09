@@ -14,16 +14,16 @@
     - startingWP: To know the literals that were not decided during this trail
     - currentWP: The position in the array of the decision being written down.
 -->
-<div class="flex flex-row">
+<div class="trail flex flex-row">
 	{#each trail as decision}
-		<div class="decision-variable">
-			<DecisionVariableComponent {decision} />
-		</div>
+		<DecisionVariableComponent {decision} />
 	{/each}
 </div>
 
 <style>
-	.decision-variable {
-		padding: 0.25rem;
+	.trail {
+		display: flex;
+		padding: 0.5rem;
+		gap: 0.5rem;
 	}
 </style>
