@@ -31,6 +31,8 @@ class VariablePool implements IVariablePool {
 	persist(variable: number, assignment: boolean): void {
 		const variableIdx = this.checkIndex(variable);
 		this.checkAssignment(variableIdx);
+		// updates the pointer if the user just selected the
+		// next variable to assign
 		if (this.pointer === variableIdx) this.pointer++;
 		this.assignVariable(variable, assignment);
 	}
