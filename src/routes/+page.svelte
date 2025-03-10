@@ -14,7 +14,7 @@
 
 <svelte:body oncontextmenu={disableContextMenu} />
 
-<app>
+<app class="chakra-petch-medium">
 	{#if $toasts}
 		<div class="toasts">
 			{#each $toasts as toast (toast.id)}
