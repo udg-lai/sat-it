@@ -4,28 +4,15 @@
 	import LogicResolutionComponent from '$lib/components/LogicResolutionComponent.svelte';
 	import ToolsComponent from '$lib/components/tools/ToolsComponent.svelte';
 	import ScrollableComponent from '$lib/components/ScrollableComponent.svelte';
-	import { setContext } from 'svelte';
-	import dummy from '$lib/dimacs/dummy.ts';
-	import queens8 from '$lib/dimacs/queens/queens8.ts';
-	import queens4 from '$lib/dimacs/queens/queens4.ts';
-	import { toasts } from '$lib/store/toasts.store.ts';
-	import type { DimacsInstance } from '$lib/dimacs/dimacs-instance.interface.ts';
 	import ToastComponent from '$lib/components/ToastComponent.svelte';
-	import { logError } from '$lib/transversal/utils/utils.ts';
-
-	function bootstrapInstances(): void {
-		try {
-			const instances: DimacsInstance[] = [dummy, queens4, queens8];
-			setContext('preloadedInstances', instances);
-		} catch (e) {
-			const title = 'Pre-loaded dimacs instance contains an error';
-			const description = (e as Error).message;
-			logError(title, description);
-		}
-	}
+	import { disableContextMenu } from '$lib/transversal/utils/utils.ts';
+	import { bootstrapInstances } from '$lib/transversal/utils/bootstrap.ts';
+	import { toasts } from '$lib/store/toasts.store.ts';
 
 	bootstrapInstances();
 </script>
+
+<svelte:body oncontextmenu={disableContextMenu} />
 
 <app>
 	{#if $toasts}

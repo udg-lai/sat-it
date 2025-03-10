@@ -12,7 +12,7 @@
 	import { getContext, hasContext } from 'svelte';
 	import type { DimacsInstance } from '$lib/dimacs/dimacs-instance.interface.ts';
 	import dimacsParser from '$lib/transversal/utils/parsers/dimacs.ts';
-	import { logError, logInfo, logWarning } from '$lib/transversal/utils/utils.ts';
+	import { logError, logInfo, logWarning } from '$lib/transversal/utils/logging.ts';
 
 	interface InteractivelyInstance extends DimacsInstance {
 		removable: boolean;
