@@ -13,6 +13,10 @@
 		decisionColor = decision.isD() ? 'teal' : 'red';
 	});
 
+	function onContextMenu(e: Event): void {
+		console.log(e);
+	}
+
 	// let previousIndex = $derived(currentWP < startingWP);
 </script>
 
