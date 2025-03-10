@@ -18,6 +18,10 @@
 	margin-bottom: 1rem;
 }
 
+.tools-view-container {
+	padding: 0rem 1rem;
+}
+
 .tools-view {
 	width: var(--tools-width);
 }

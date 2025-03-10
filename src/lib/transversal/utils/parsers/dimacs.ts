@@ -6,8 +6,8 @@ import {
 	unwrapEither,
 	type Either
 } from '$lib/transversal/utils/types/either.ts';
-import { type Tuple, makeTuple } from './types/tuple.ts';
-import { fromJust, isJust, makeJust, makeNothing, type Maybe } from './types/maybe.ts';
+import { type Tuple, makeTuple } from '$lib/transversal/utils/types/tuple.ts';
+import { fromJust, isJust, makeJust, makeNothing, type Maybe } from '$lib/transversal/utils/types/maybe.ts';
 
 type Claims = number[][];
 
@@ -21,7 +21,7 @@ export interface Summary {
 	};
 }
 
-export default function parser(input: string): Summary {
+export default function dimacsParser(input: string): Summary {
 	let lines: string[] = input.trim().split('\n');
 	const summary: Summary = {
 		comment: '',
@@ -79,32 +79,31 @@ function parseComment(oLines: string[]): Tuple<string, string[]> {
 
 function parseSummary(lines: string[]): Either<ErrorMessage, Tuple<number, number>> {
 	if (lines.length == 0) {
-		return makeLeft('[ERROR]: could not parser summary because lines are empty');
+		return makeLeft('could not parser summary because lines are empty');
 	}
-	const [summary] = lines;
+	if (lines.length === 0) {
+		return makeLeft('summary header not found');
+	}
+	const summary = lines[0];
 	const chunkSummary = summary.split(' ');
-	if (chunkSummary.length != 4) {
-		return makeLeft(`[ERROR]: summary header has more than four items ${summary}`);
+	if (chunkSummary.length !== 4) {
+		return makeLeft(`summary should have four entries`);
 	}
 	const [p, cnf, vars, clauses] = chunkSummary;
 	if (p !== 'p') {
-		return makeLeft(`[ERROR]: symbol '${p}', expected 'p'`);
+		return makeLeft(`symbol '${p}', expected 'p'`);
 	}
 	if (cnf !== 'cnf') {
-		return makeLeft(
-			`[ERROR]: boolean formula expected to be represented in Conjunctive Normal From (CNF)`
-		);
+		return makeLeft(`boolean formula expected to be represented in Conjunctive Normal From (CNF)`);
 	}
 	const varsCount = parseInt(vars);
 	if (Number.isNaN(varsCount)) {
-		return makeLeft(
-			`[ERROR]: could not parse expected variable count to number representation of ${vars}`
-		);
+		return makeLeft(`could not parse expected variable count to number representation of ${vars}`);
 	}
 	const clausesCount = parseInt(clauses);
 	if (Number.isNaN(clausesCount)) {
 		return makeLeft(
-			`[ERROR]: could not parse expected clauses count to number representation of ${clauses}`
+			`could not parse expected clauses count to number representation of ${clauses}`
 		);
 	}
 	return makeRight(makeTuple(varsCount, clausesCount));
@@ -116,9 +115,7 @@ function parseCNF(
 	clauseCount: number
 ): Either<ErrorMessage, Tuple<Claims, Claims>> {
 	if (lines.length > clauseCount) {
-		return makeLeft(
-			`[ERROR]: number of CNF greater than the number of expected clauses ${clauseCount}`
-		);
+		return makeLeft(`number of CNF greater than the number of expected clauses ${clauseCount}`);
 	}
 	const originalClaim: Claims = lines.map((line) =>
 		line
@@ -130,11 +127,11 @@ function parseCNF(
 		const literals = line.slice(0, -1);
 		const eos = line.at(-1);
 		if (literals.length === 0) {
-			return makeJust(`[ERROR]: empty clause in list of clause at index: ${idx}`);
+			return makeJust(`empty clause in list of clause at index: ${idx}`);
 		} else if (!literals.every((l) => Math.abs(l) <= varCount)) {
-			return makeJust(`[ERROR]: literal out of bounds in list of clause at index: ${idx}`);
+			return makeJust(`literal out of bounds in list of clause at index: ${idx}`);
 		} else if (eos !== 0) {
-			return makeJust(`[ERROR]: clause does not finish with the expected '0' at index ${idx}`);
+			return makeJust(`clause does not finish with the expected '0' at index ${idx}`);
 		} else {
 			return makeNothing();
 		}
