@@ -21,29 +21,29 @@
 	class:decide={decision.isD()}
 	class:backtrack={decision.isK()}
 >
-	<div class="decision-literal">
+	<button class="decision-literal-btn" oncontextmenu={onContextMenu}>
 		<Indicator placement="bottom-right" size="md" color={decisionColor} />
 		<MathTexComponent equation={decision.toTeX()} />
-	</div>
+	</button>
 </div>
 
 <style>
 	.decision-literal-wrapper {
 		background-color: #d3d3d357;
-		width: 4rem;
-		height: 4rem;
+		width: 42px;
+		height: 42px;
 		border-radius: 45%;
 		border-color: #424242;
 		border-width: 1px;
 	}
 
-	.decision-literal {
+	.decision-literal-btn {
 		width: 35px;
 		height: 35px;
 		position: relative;
 	}
 
-	.decision-literal,
+	.decision-literal-btn,
 	.decision-literal-wrapper {
 		display: flex;
 		align-items: center;

@@ -11,7 +11,8 @@
 	import decide from '$lib/transversal/algorithms/decision.ts';
 
 	const trailCollection = new TrailCollection();
-	let visualizeTrails = $state(false);
+	let collapse = $state(false);
+	let textCollapse = $derived(collapse ? 'Expand' : 'Collapse');
 
 	const nVariables = 4;
 	const pool: IVariablePool = VariablePoolBuilder.build('VariablePool', nVariables);
@@ -44,7 +45,7 @@
 	}
 
 	function flipVisualize() {
-		visualizeTrails = !visualizeTrails;
+		collapse = !collapse;
 	}
 </script>
 
@@ -58,13 +59,13 @@
 	onclick={flipVisualize}
 	class="rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white shadow-md transition duration-300 ease-in-out hover:bg-blue-700"
 >
-	visualize
+	{textCollapse}
 </button>
 
 <TrailCollectionVisualizerComponent
 	previousTrails={trailCollection}
 	currentTrail={trail}
-	collapse={visualizeTrails}
+	{collapse}
 />
 
 <!-- <InterpretationVisualizerComponent {variables} />

@@ -36,3 +36,9 @@ body > div {
 	border-width: 0px 1px 0px 0px;
 	border-color: var(--border-color);
 }
+
+.chakra-petch-medium {
+	font-family: 'Chakra Petch', sans-serif;
+	font-weight: 500;
+	font-style: normal;
+}
