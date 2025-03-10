@@ -16,7 +16,7 @@
 	span {
 		display: table;
 		margin: 0;
-		font-size: 18px;
+		font-size: 16px;
 		text-align: center;
 		vertical-align: center;
 	}

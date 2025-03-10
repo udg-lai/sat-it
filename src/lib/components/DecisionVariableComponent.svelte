@@ -42,8 +42,8 @@
 	}
 
 	.decision-literal-btn {
-		width: 35px;
-		height: 35px;
+		width: 33px;
+		height: 33px;
 		position: relative;
 	}
 
