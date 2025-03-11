@@ -126,13 +126,25 @@
 	<div class="options-tools">
 		<div class="vertical-separator"></div>
 		<div class="toggle-button">
-			<Button onClick={() => activateView('viewA')} icon={FileCirclePlusOutline} active={views.find(v => v.name === 'viewA')?.open}/>
+			<Button
+				onClick={() => activateView('viewA')}
+				icon={FileCirclePlusOutline}
+				active={views.find((v) => v.name === 'viewA')?.open}
+			/>
 		</div>
 		<div class="toggle-button">
-			<Button onClick={() => activateView('viewB')} icon={AngleRightOutline} active={views.find(v => v.name === 'viewB')?.open}/>
+			<Button
+				onClick={() => activateView('viewB')}
+				icon={AngleRightOutline}
+				active={views.find((v) => v.name === 'viewB')?.open}
+			/>
 		</div>
 		<div class="toggle-button">
-			<Button onClick={() => activateView('viewC')} icon={BugOutline} active={views.find(v => v.name === 'viewC')?.open}/>
+			<Button
+				onClick={() => activateView('viewC')}
+				icon={BugOutline}
+				active={views.find((v) => v.name === 'viewC')?.open}
+			/>
 		</div>
 		<div class="toggle-button"></div>
 		<div class="toggle-button"></div>

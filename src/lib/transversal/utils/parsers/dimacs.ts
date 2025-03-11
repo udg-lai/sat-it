@@ -7,7 +7,13 @@ import {
 	type Either
 } from '$lib/transversal/utils/types/either.ts';
 import { type Tuple, makeTuple } from '$lib/transversal/utils/types/tuple.ts';
-import { fromJust, isJust, makeJust, makeNothing, type Maybe } from '$lib/transversal/utils/types/maybe.ts';
+import {
+	fromJust,
+	isJust,
+	makeJust,
+	makeNothing,
+	type Maybe
+} from '$lib/transversal/utils/types/maybe.ts';
 
 type Claims = number[][];
 

@@ -14,7 +14,7 @@
 	};
 </script>
 
-<button onclick={onClick} type="button" class="button-high-contrast !p-2" class:active={active}>
+<button onclick={onClick} type="button" class="button-high-contrast !p-2" class:active>
 	{#if icon}
 		<DynamicRender component={icon} props={iconProps} />
 	{/if}
@@ -48,5 +48,6 @@
 
 	.button-high-contrast.active {
 		color: var(--main-font-color);
+		border-left: 2px solid var(--focus-border-color);
 	}
 </style>
