@@ -1,6 +1,12 @@
 <script lang="ts">
 	import { AccordionItem, Accordion } from 'flowbite-svelte';
-	import { DatabaseOutline, EyeOutline, LockOutline, TrashBinOutline, UploadOutline } from 'flowbite-svelte-icons';
+	import {
+		DatabaseOutline,
+		EyeOutline,
+		LockOutline,
+		TrashBinOutline,
+		UploadOutline
+	} from 'flowbite-svelte-icons';
 	import { Toggle } from 'flowbite-svelte';
 	import './styles.css';
 	import { getContext, hasContext } from 'svelte';

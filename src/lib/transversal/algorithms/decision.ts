@@ -26,7 +26,7 @@ export default function decide(trailCollection: TrailCollection, trail: Trail): 
 		let lastDecision = trail.pop();
 		while (!backtrack && lastDecision !== undefined) {
 			const lastVariable = lastDecision.getVariable();
-			disposeVariable(lastVariable.getInt())
+			disposeVariable(lastVariable.getInt());
 			if (lastDecision.isD()) {
 				backtrack = true;
 				persistVariable(lastVariable.getInt(), !fromJust(lastVariable.getAssignment()));

@@ -33,7 +33,7 @@
 			assignment: true
 		}
 	];
-	
+
 	const currentPool: IVariablePool = get(pool);
 
 	for (const { assignment } of I) {
@@ -46,7 +46,7 @@
 			trail.push(dVariable);
 		}
 	}
-	
+
 	function flipVisualize() {
 		visualizeTrails = !visualizeTrails;
 	}
