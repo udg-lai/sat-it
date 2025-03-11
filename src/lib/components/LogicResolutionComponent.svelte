@@ -8,7 +8,9 @@
 	import { isJust, fromJust } from '$lib/transversal/utils/types/maybe.ts';
 	import TrailCollectionVisualizerComponent from './visualizer/TrailCollectionVisualizerComponent.svelte';
 	import decide from '$lib/transversal/algorithms/decision.ts';
-	import { pool } from '$lib/store/store.ts';
+	import { pool, persistVariable } from '$lib/store/variablePool.store.ts';
+	import { get } from 'svelte/store';
+	import type { IVariablePool } from '$lib/transversal/utils/interfaces/IVariablePool.ts';
 
 	const trailCollection = new TrailCollection();
 	let visualizeTrails = false;
@@ -31,20 +33,20 @@
 			assignment: true
 		}
 	];
-	pool.update((currentPool) => {
-		for (const { assignment } of I) {
-			const maybeVariableId = currentPool.nextVariableToAssign();
-			if (isJust(maybeVariableId)) {
-				const variableId = fromJust(maybeVariableId);
-				currentPool.persist(variableId, assignment);
-				const variable = currentPool.get(variableId);
-				const dVariable = new DecisionVariable(variable, AssignmentReason.D);
-				trail.push(dVariable);
-			}
-		}
-		return currentPool;
-	});
+	
+	const currentPool: IVariablePool = get(pool);
 
+	for (const { assignment } of I) {
+		const maybeVariableId = currentPool.nextVariableToAssign();
+		if (isJust(maybeVariableId)) {
+			const variableId = fromJust(maybeVariableId);
+			persistVariable(variableId, assignment);
+			const variable = currentPool.get(variableId);
+			const dVariable = new DecisionVariable(variable, AssignmentReason.D);
+			trail.push(dVariable);
+		}
+	}
+	
 	function flipVisualize() {
 		visualizeTrails = !visualizeTrails;
 	}

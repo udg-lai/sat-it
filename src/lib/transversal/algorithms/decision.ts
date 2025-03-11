@@ -2,43 +2,44 @@ import DecisionVariable, { AssignmentReason } from '../entities/DecisionLiteral.
 import type { Trail } from '../entities/Trail.svelte.ts';
 import type { TrailCollection } from '../entities/TrailCollection.svelte.ts';
 import { fromJust, isJust } from '../utils/types/maybe.ts';
-import { pool } from '$lib/store/store.ts';
+import { pool, persistVariable, disposeVariable } from '$lib/store/variablePool.store.ts';
+import { get } from 'svelte/store';
+import type { IVariablePool } from '../utils/interfaces/IVariablePool.ts';
 
 export default function decide(trailCollection: TrailCollection, trail: Trail): void {
-	pool.update((currentPool) => {
-		if (!currentPool.allAssigned()) {
-			const nextVariable = currentPool.nextVariableToAssign();
-			if (isJust(nextVariable)) {
-				const variableId = fromJust(nextVariable);
-				currentPool.persist(variableId, true);
-				const variable = currentPool.get(variableId);
-				const dVariable = new DecisionVariable(variable, AssignmentReason.D);
-				trail.push(dVariable);
-			} else {
-				throw '[Error]: No variables to decide';
-			}
+	const currentPool: IVariablePool = get(pool);
+
+	if (!currentPool.allAssigned()) {
+		const nextVariable = currentPool.nextVariableToAssign();
+		if (isJust(nextVariable)) {
+			const variableId = fromJust(nextVariable);
+			persistVariable(variableId, true);
+			const variable = currentPool.get(variableId);
+			const dVariable = new DecisionVariable(variable, AssignmentReason.D);
+			trail.push(dVariable);
 		} else {
-			trailCollection.push(trail.copy());
-			let backtrack = false;
-			let lastDecision = trail.pop();
-			while (!backtrack && lastDecision !== undefined) {
-				const lastVariable = lastDecision.getVariable();
-				currentPool.dispose(lastVariable.getInt());
-				if (lastDecision.isD()) {
-					backtrack = true;
-					currentPool.persist(lastVariable.getInt(), !fromJust(lastVariable.getAssignment()));
-					const variable = currentPool.get(lastVariable.getInt());
-					const dVariable = new DecisionVariable(variable, AssignmentReason.K);
-					trail.push(dVariable);
-					trail.updateFollowUpIndex();
-				} else {
-					lastDecision = trail.pop();
-				}
-			}
-			if (!backtrack) {
+			throw '[Error]: No variables to decide';
+		}
+	} else {
+		trailCollection.push(trail.copy());
+		let backtrack = false;
+		let lastDecision = trail.pop();
+		while (!backtrack && lastDecision !== undefined) {
+			const lastVariable = lastDecision.getVariable();
+			disposeVariable(lastVariable.getInt())
+			if (lastDecision.isD()) {
+				backtrack = true;
+				persistVariable(lastVariable.getInt(), !fromJust(lastVariable.getAssignment()));
+				const variable = currentPool.get(lastVariable.getInt());
+				const dVariable = new DecisionVariable(variable, AssignmentReason.K);
+				trail.push(dVariable);
 				trail.updateFollowUpIndex();
+			} else {
+				lastDecision = trail.pop();
 			}
 		}
-		return currentPool;
-	});
+		if (!backtrack) {
+			trail.updateFollowUpIndex();
+		}
+	}
 }
