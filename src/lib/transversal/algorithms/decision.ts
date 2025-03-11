@@ -2,7 +2,7 @@ import DecisionVariable, { AssignmentReason } from '../entities/DecisionLiteral.
 import type { Trail } from '../entities/Trail.svelte.ts';
 import type { TrailCollection } from '../entities/TrailCollection.svelte.ts';
 import { fromJust, isJust } from '../utils/types/maybe.ts';
-import { pool } from '$lib/store.ts';
+import { pool } from '$lib/store/store.ts';
 
 export default function decide(trailCollection: TrailCollection, trail: Trail): void {
 	pool.update((currentPool) => {
