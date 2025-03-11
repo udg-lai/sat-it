@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { TrailCollection } from '$lib/transversal/entities/TrailCollection.svelte.ts';
-	import TrailVisualizerComponent from '$lib/components/visualizer/TrailVisualizerComponent.svelte';
 	import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
 	import { ChevronLeftOutline, ChevronRightOutline } from 'flowbite-svelte-icons';
 	import { get, writable, type Writable } from 'svelte/store';
+	import TrailComponent from './TrailComponent.svelte';
 
 	interface Props {
 		previousTrails: TrailCollection;
@@ -18,19 +18,19 @@
 		(collapse ? [currentTrail] : [...previousTrails, currentTrail]).reverse()
 	);
 
-	let expanded: Writable<boolean[]> = writable([]);
+	let expandedWritable: Writable<boolean[]> = writable([]);
 
 	$effect(() => {
-		let or = get(expanded).reverse();
+		let or = get(expandedWritable).reverse();
 		let state = trails.map((_, idx) => or[idx] || false).reverse();
-		expanded.set(state);
+		expandedWritable.set(state);
 	});
 
 	function toggleExpand(index: number) {
-		const state = get(expanded);
+		const state = get(expandedWritable);
 		const updated = [...state];
 		updated[index] = !updated[index];
-		expanded.set(updated);
+		expandedWritable.set(updated);
 	}
 
 	function handleHoverLine(index: number) {
@@ -40,11 +40,15 @@
 	function handleLeaveLine() {
 		hoverIndex = -1;
 	}
+
+	function uuid(index: number): number {
+		return trails.length - index;
+	}
 </script>
 
 <div class="trail-visualizer flex flex-row">
 	<div class="trails flex flex-col">
-		{#each trails as trail, i (i)}
+		{#each trails as trail, i (uuid(i))}
 			<div class="line">
 				<button
 					class="enumerate transition"
@@ -55,14 +59,14 @@
 					<span class="line-item chakra-petch-medium">
 						{#if hoverIndex !== i}
 							<p>{i}</p>
-						{:else if $expanded[i]}
+						{:else if $expandedWritable[i]}
 							<ChevronLeftOutline slot="icon" class="h-8 w-8" />
 						{:else}
 							<ChevronRightOutline slot="icon" class="h-8 w-8" />
 						{/if}
 					</span>
 				</button>
-				<TrailVisualizerComponent {trail} />
+				<TrailComponent {trail} />
 			</div>
 		{/each}
 	</div>

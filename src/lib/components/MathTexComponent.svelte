@@ -16,7 +16,7 @@
 	span {
 		display: table;
 		margin: 0;
-		font-size: 16px;
+		font-size: var(--TeX-font-size);
 		text-align: center;
 		vertical-align: center;
 	}

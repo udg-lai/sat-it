@@ -5,17 +5,14 @@
 
 	interface Props {
 		decision: DecisionVariable;
+		onClick?: () => void;
 	}
-	let { decision }: Props = $props();
+	let { decision, onClick }: Props = $props();
 	let decisionColor: string = $state('teal');
 
 	$effect(() => {
 		decisionColor = decision.isD() ? 'teal' : 'red';
 	});
-
-	function onContextMenu(e: Event): void {
-		console.log(e);
-	}
 
 	// let previousIndex = $derived(currentWP < startingWP);
 </script>
@@ -25,8 +22,8 @@
 	class:decide={decision.isD()}
 	class:backtrack={decision.isK()}
 >
-	<button class="decision-literal-btn" oncontextmenu={onContextMenu}>
-		<Indicator placement="bottom-right" size="md" color={decisionColor} />
+	<button class="decision-literal-btn" onclick={onClick}>
+		<Indicator placement="top-left" size="md" color={decisionColor} />
 		<MathTexComponent equation={decision.toTeX()} />
 	</button>
 </div>

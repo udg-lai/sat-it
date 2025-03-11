@@ -7,8 +7,8 @@
 	import VariablePoolBuilder from '$lib/transversal/entities/VariablePoolBuilder.ts';
 	import { type IVariablePool } from '$lib/transversal/utils/interfaces/IVariablePool.ts';
 	import { isJust, fromJust } from '$lib/transversal/utils/types/maybe.ts';
-	import TrailCollectionVisualizerComponent from './visualizer/TrailCollectionVisualizerComponent.svelte';
 	import decide from '$lib/transversal/algorithms/decision.ts';
+	import TrailEditor from './visualizer/TrailEditor.svelte';
 
 	const trailCollection = new TrailCollection();
 	let collapse = $state(false);
@@ -62,11 +62,7 @@
 	{textCollapse}
 </button>
 
-<TrailCollectionVisualizerComponent
-	previousTrails={trailCollection}
-	currentTrail={trail}
-	{collapse}
-/>
+<TrailEditor previousTrails={trailCollection} currentTrail={trail} {collapse} />
 
 <!-- <InterpretationVisualizerComponent {variables} />
 <CnfVisualizerComponent {cnf} />
