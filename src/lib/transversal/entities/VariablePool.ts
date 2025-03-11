@@ -18,8 +18,8 @@ class VariablePool implements IVariablePool {
 	}
 
 	allAssigned(): boolean {
-		// pointer is in the last index position
-		return this.pointer === this.poolCapacity - 1;
+		// Edit: Now the pointer is allways looking at the variable that is going to be assigned
+		return this.pointer === this.poolCapacity;
 	}
 
 	dispose(variable: number): void {
@@ -29,8 +29,11 @@ class VariablePool implements IVariablePool {
 	}
 
 	persist(variable: number, assignment: boolean): void {
-		this.checkIndex(variable);
-		this.dispose(variable);
+		const variableIdx = this.checkIndex(variable);
+		this.checkAssignment(variableIdx);
+		// updates the pointer if the user just selected the
+		// next variable to assign
+		if (this.pointer === variableIdx) this.pointer++;
 		this.assignVariable(variable, assignment);
 	}
 
@@ -69,6 +72,12 @@ class VariablePool implements IVariablePool {
 	public unassignVariable(id: number) {
 		const idx = this.checkIndex(id);
 		this.collection[idx].unassign();
+	}
+
+	private checkAssignment(idx: number) {
+		if (this.collection[idx].isAssigned()) {
+			throw '[ERROR]: You can not reassign this variable in this trail';
+		}
 	}
 
 	private checkIndex(variableId: number): number {

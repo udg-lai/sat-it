@@ -1,0 +1,42 @@
+.toasts {
+	position: fixed;
+	top: 10px;
+	right: 10px;
+	display: flex;
+	flex-direction: column;
+	gap: 10px; /* Ensures spacing between notifications */
+	z-index: var(--notification-z-index);
+}
+
+play-area {
+	align-items: center;
+	justify-content: center;
+	padding: var(--windows-padding);
+	flex: 2;
+	position: relative;
+}
+
+workspace {
+	flex: auto;
+}
+
+main {
+	display: flex;
+	height: 100%;
+}
+
+app {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	width: 100%;
+}
+
+.tools-section {
+	position: relative;
+}
+
+footer {
+	border-width: 1px 0px 0px 0px;
+	border-color: var(--border-color);
+}
