@@ -44,6 +44,10 @@
 	function uuid(index: number): number {
 		return trails.length - index;
 	}
+
+	function isLastTrail(index: number): boolean {
+		return index === trails.length;
+	}
 </script>
 
 <div class="trail-visualizer flex flex-row">
@@ -56,9 +60,9 @@
 					onmouseleave={() => handleLeaveLine()}
 					onclick={() => toggleExpand(i)}
 				>
-					<span class="line-item chakra-petch-medium">
+					<span class="line-item chakra-petch-medium" class:line-item-active={isLastTrail(uuid(i))}>
 						{#if hoverIndex !== i}
-							<p>{i}</p>
+							<p>{uuid(i)}</p>
 						{:else if $expandedWritable[i]}
 							<ChevronLeftOutline slot="icon" class="h-8 w-8" />
 						{:else}
@@ -86,6 +90,10 @@
 	.line-item {
 		font-size: 1.5rem;
 		opacity: 0.5;
+	}
+
+	.line-item-active {
+		opacity: 1;
 	}
 
 	.enumerate {
