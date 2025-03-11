@@ -5,15 +5,16 @@
 	interface Props {
 		onClick?: () => void;
 		icon?: Component;
+		active?: boolean;
 	}
 
-	let { onClick, icon }: Props = $props();
+	let { onClick, icon, active }: Props = $props();
 	const iconProps = {
 		class: 'h-10 w-10 cursor-pointer'
 	};
 </script>
 
-<button onclick={onClick} type="button" class="button-high-contrast !p-2">
+<button onclick={onClick} type="button" class="button-high-contrast !p-2" class:active={active}>
 	{#if icon}
 		<DynamicRender component={icon} props={iconProps} />
 	{/if}
@@ -43,5 +44,9 @@
 
 	.button-high-contrast:active {
 		border-style: solid;
+	}
+
+	.button-high-contrast.active {
+		color: var(--main-font-color);
 	}
 </style>
