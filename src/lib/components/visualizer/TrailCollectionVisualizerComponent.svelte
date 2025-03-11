@@ -2,7 +2,8 @@
 	import { TrailCollection } from '$lib/transversal/entities/TrailCollection.svelte.ts';
 	import TrailVisualizerComponent from '$lib/components/visualizer/TrailVisualizerComponent.svelte';
 	import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
-	import { ChevronLeftOutline } from 'flowbite-svelte-icons';
+	import { ChevronLeftOutline, ChevronRightOutline } from 'flowbite-svelte-icons';
+	import { get, writable, type Writable } from 'svelte/store';
 
 	interface Props {
 		previousTrails: TrailCollection;
@@ -11,15 +12,33 @@
 	}
 	let { previousTrails, currentTrail, collapse }: Props = $props();
 
+	let hoverIndex: number = $state(-1);
+
 	let trails: Trail[] = $derived(
 		(collapse ? [currentTrail] : [...previousTrails, currentTrail]).reverse()
 	);
 
-	let expanded: boolean[] = $state([...previousTrails, currentTrail].map(() => false));
+	let expanded: Writable<boolean[]> = writable([]);
+
+	$effect(() => {
+		let or = get(expanded).reverse();
+		let state = trails.map((_, idx) => or[idx] || false).reverse();
+		expanded.set(state);
+	});
 
 	function toggleExpand(index: number) {
-		expanded[index] = !expanded[index];
-		console.log($state.snapshot(expanded));
+		const state = get(expanded);
+		const updated = [...state];
+		updated[index] = !updated[index];
+		expanded.set(updated);
+	}
+
+	function handleHoverLine(index: number) {
+		hoverIndex = index;
+	}
+
+	function handleLeaveLine() {
+		hoverIndex = -1;
 	}
 </script>
 
@@ -27,12 +46,19 @@
 	<div class="trails flex flex-col">
 		{#each trails as trail, i (i)}
 			<div class="line">
-				<button class="enumerate transition" onclick={() => toggleExpand(i)}>
-					<span class="line-item chakra-petch-medium" class:animate-to-close={expanded[i]}>
-						{#if expanded[i]}
+				<button
+					class="enumerate transition"
+					onmouseenter={() => handleHoverLine(i)}
+					onmouseleave={() => handleLeaveLine()}
+					onclick={() => toggleExpand(i)}
+				>
+					<span class="line-item chakra-petch-medium">
+						{#if hoverIndex !== i}
+							<p>{i}</p>
+						{:else if $expanded[i]}
 							<ChevronLeftOutline slot="icon" class="h-8 w-8" />
 						{:else}
-							<p>{i}</p>
+							<ChevronRightOutline slot="icon" class="h-8 w-8" />
 						{/if}
 					</span>
 				</button>
@@ -69,47 +95,13 @@
 	.trails {
 		height: 100%;
 		gap: 0.5rem;
-	}
-
-	/**
-
-	@keyframes animateToOpen {
-		0% {
-			transform: translateX(0px);
-		}
-		50% {
-			transform: translateX(3px);
-		}
-		100% {
-			transform: translateX(0px);
-		}
-	}
-
-	.transition:hover .animate-to-open {
-		animation: animateToOpen 1.5s infinite ease-in-out;
-	}
-	*/
-
-	@keyframes animateToClose {
-		0% {
-			transform: translateX(0px);
-		}
-		50% {
-			transform: translateX(-3px);
-		}
-		100% {
-			transform: translateX(0px);
-		}
-	}
-
-	.transition:hover .animate-to-close {
-		animation: animateToClose 1.5s infinite ease-in-out;
+		display: flex;
+		flex-direction: column;
 	}
 
 	.trail-visualizer {
 		padding: 1rem;
 		height: 50rem;
-		flex: 1;
 		overflow-y: scroll;
 	}
 </style>
