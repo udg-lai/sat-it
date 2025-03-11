@@ -3,7 +3,7 @@
 @import 'tailwindcss/utilities';
 
 :root {
-	--border-color: #c1c7cd;
+	--border-color: #cacaca;
 	--main-bg-color: #f2f4f8;
 	--main-font-color: #121212;
 	--secondary-font-color: #110b0ba8;

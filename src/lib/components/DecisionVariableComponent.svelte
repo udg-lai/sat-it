@@ -36,8 +36,8 @@
 		background-color: #d3d3d357;
 		width: 42px;
 		height: 42px;
-		border-radius: 45%;
-		border-color: #424242;
+		border-radius: 50%;
+		border-color: var(--border-color);
 		border-width: 1px;
 	}
 

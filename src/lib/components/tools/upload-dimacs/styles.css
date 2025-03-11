@@ -38,7 +38,7 @@ li button {
 		padding: 20px;
 		display: grid;
 		place-items: center;
-		border: 2px dashed #cacaca;
+		border: 2px dashed var(--border-color);
 		border-radius: 5px;
 		margin-bottom: 5px;
 		cursor: pointer;
