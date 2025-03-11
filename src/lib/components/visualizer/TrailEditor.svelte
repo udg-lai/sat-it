@@ -4,6 +4,7 @@
 	import { ChevronLeftOutline, ChevronRightOutline } from 'flowbite-svelte-icons';
 	import { get, writable, type Writable } from 'svelte/store';
 	import TrailComponent from './TrailComponent.svelte';
+	import { makeTuple, type Tuple } from '$lib/transversal/utils/types/tuple.ts';
 
 	interface Props {
 		previousTrails: TrailCollection;
@@ -14,8 +15,11 @@
 
 	let hoverIndex: number = $state(-1);
 
-	let trails: Trail[] = $derived(
-		(collapse ? [currentTrail] : [...previousTrails, currentTrail]).reverse()
+	let trails: Tuple<number, Trail>[] = $derived(
+		(() => {
+			const xs = [...previousTrails, currentTrail].map((t, idx) => makeTuple(idx + 1, t)).reverse();
+			return collapse ? xs.slice(0, 1) : xs;
+		})()
 	);
 
 	let expandedWritable: Writable<boolean[]> = writable([]);
@@ -41,18 +45,14 @@
 		hoverIndex = -1;
 	}
 
-	function uuid(index: number): number {
-		return trails.length - index;
-	}
-
-	function isLastTrail(index: number): boolean {
-		return index === trails.length;
+	function isActiveTrail(index: number): boolean {
+		return index === trails[0].fst;
 	}
 </script>
 
 <div class="trail-visualizer flex flex-row">
 	<div class="trails flex flex-col">
-		{#each trails as trail, i (uuid(i))}
+		{#each trails as trail, i (trail.fst)}
 			<div class="line">
 				<button
 					class="enumerate transition"
@@ -60,9 +60,12 @@
 					onmouseleave={() => handleLeaveLine()}
 					onclick={() => toggleExpand(i)}
 				>
-					<span class="line-item chakra-petch-medium" class:line-item-active={isLastTrail(uuid(i))}>
+					<span
+						class="line-item chakra-petch-medium"
+						class:line-item-active={isActiveTrail(trail.fst)}
+					>
 						{#if hoverIndex !== i}
-							<p>{uuid(i)}</p>
+							<p>{trail.fst}</p>
 						{:else if $expandedWritable[i]}
 							<ChevronLeftOutline slot="icon" class="h-8 w-8" />
 						{:else}
@@ -70,7 +73,7 @@
 						{/if}
 					</span>
 				</button>
-				<TrailComponent {trail} />
+				<TrailComponent trail={trail.snd} />
 			</div>
 		{/each}
 	</div>
