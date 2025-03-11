@@ -32,7 +32,6 @@ li button {
 	flex-direction: column;
 	border-radius: 10px;
 	height: auto;
-	background-color: #ffffff;
 	padding: 20px;
 
 	.input-box {
