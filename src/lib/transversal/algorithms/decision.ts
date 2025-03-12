@@ -1,20 +1,20 @@
 import DecisionVariable, { AssignmentReason } from '../entities/DecisionLiteral.svelte.ts';
 import type { Trail } from '../entities/Trail.svelte.ts';
 import type { TrailCollection } from '../entities/TrailCollection.svelte.ts';
-import type { IVariablePool } from '../utils/interfaces/IVariablePool.ts';
 import { fromJust, isJust } from '../utils/types/maybe.ts';
+import { pool, persistVariable, disposeVariable } from '$lib/store/variablePool.store.ts';
+import { get } from 'svelte/store';
+import type { IVariablePool } from '../utils/interfaces/IVariablePool.ts';
 
-export default function decide(
-	trailCollection: TrailCollection,
-	trail: Trail,
-	pool: IVariablePool
-): void {
-	if (!pool.allAssigned()) {
-		const nextVariable = pool.nextVariableToAssign();
+export default function decide(trailCollection: TrailCollection, trail: Trail): void {
+	const currentPool: IVariablePool = get(pool);
+
+	if (!currentPool.allAssigned()) {
+		const nextVariable = currentPool.nextVariableToAssign();
 		if (isJust(nextVariable)) {
 			const variableId = fromJust(nextVariable);
-			pool.persist(variableId, true);
-			const variable = pool.get(variableId);
+			persistVariable(variableId, true);
+			const variable = currentPool.get(variableId);
 			const dVariable = new DecisionVariable(variable, AssignmentReason.D);
 			trail.push(dVariable);
 		} else {
@@ -26,11 +26,11 @@ export default function decide(
 		let lastDecision = trail.pop();
 		while (!backtrack && lastDecision !== undefined) {
 			const lastVariable = lastDecision.getVariable();
-			pool.dispose(lastVariable.getInt());
+			disposeVariable(lastVariable.getInt());
 			if (lastDecision.isD()) {
 				backtrack = true;
-				pool.persist(lastVariable.getInt(), !fromJust(lastVariable.getAssignment()));
-				const variable = pool.get(lastVariable.getInt());
+				persistVariable(lastVariable.getInt(), !fromJust(lastVariable.getAssignment()));
+				const variable = currentPool.get(lastVariable.getInt());
 				const dVariable = new DecisionVariable(variable, AssignmentReason.K);
 				trail.push(dVariable);
 				trail.updateFollowUpIndex();
