@@ -1,15 +1,22 @@
 <script lang="ts">
-	import { display } from 'mathlifier';
+	import katex from 'katex';
 
 	interface Props {
 		equation: string;
 	}
 
 	let { equation }: Props = $props();
+
+	const equationHtml = $derived(
+		katex.renderToString(equation, {
+			displayMode: true,
+			output: 'html'
+		})
+	);
 </script>
 
 <span>
-	{@html display(equation)}
+	{@html equationHtml}
 </span>
 
 <style>
