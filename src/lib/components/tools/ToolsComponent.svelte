@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Button from './Button.svelte';
 	import UploadDimacsComponent from './upload-dimacs/UploadDimacsComponent.svelte';
-	import { AngleRightOutline, BugOutline, FileCirclePlusOutline } from 'flowbite-svelte-icons';
+	import { BugOutline, CommandOutline, FileCirclePlusOutline } from 'flowbite-svelte-icons';
 	import './styles.css';
 
 	interface Props {
@@ -129,7 +129,7 @@
 			<Button onClick={() => activateView('viewA')} icon={FileCirclePlusOutline} />
 		</div>
 		<div class="toggle-button">
-			<Button onClick={() => activateView('viewB')} icon={AngleRightOutline} />
+			<Button onClick={() => activateView('viewB')} icon={CommandOutline} />
 		</div>
 		<div class="toggle-button">
 			<Button onClick={() => activateView('viewC')} icon={BugOutline} />

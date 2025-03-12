@@ -22,6 +22,9 @@
 <style>
 	span {
 		display: table;
-		margin: 0 auto;
+		margin: 0;
+		font-size: var(--TeX-font-size);
+		text-align: center;
+		vertical-align: center;
 	}
 </style>

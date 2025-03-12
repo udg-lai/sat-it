@@ -62,9 +62,17 @@ export default class DecisionVariable {
 	}
 
 	public toTeX(): string {
-		return [
-			!fromJust(this.variable.getAssignment()) ? `\\neg` : '',
-			this.variable.getInt().toString()
-		].join('');
+		const assignment = this.variable.getAssignment();
+		if (isNothing(assignment)) {
+			throw Error('No TeX representation for un assigned decision variable');
+		} else {
+			const truthAssignment = fromJust(assignment);
+			const variable = this.variable.getInt();
+			if (truthAssignment) {
+				return `\\overline{${variable}}`;
+			} else {
+				return variable.toString();
+			}
+		}
 	}
 }
