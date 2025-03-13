@@ -9,37 +9,20 @@
 	} from 'flowbite-svelte-icons';
 	import { Toggle } from 'flowbite-svelte';
 	import './styles.css';
-	import { getContext, hasContext } from 'svelte';
 	import type { DimacsInstance } from '$lib/dimacs/dimacs-instance.interface.ts';
 	import dimacsParser from '$lib/transversal/utils/parsers/dimacs.ts';
 	import { logError, logInfo, logWarning } from '$lib/transversal/utils/logging.ts';
+	import { instances, type Instance } from '$lib/store/instances.store.ts';
+	import { get } from 'svelte/store';
 
 	interface InteractivelyInstance extends DimacsInstance {
 		removable: boolean;
 		active: boolean;
 	}
 
-	let instances: InteractivelyInstance[] = $state([]);
+	let localInstances: Instance[] = $state([...get(instances)])
+
 	let fileInputRef: HTMLInputElement;
-
-	fetchPreloadedInstances();
-
-	function fetchPreloadedInstances(): void {
-		const queryKey = 'preloadedInstances';
-		if (!hasContext(queryKey)) {
-			const title = 'Preloaded instances';
-			const description = 'None preloaded instance found';
-			logWarning(title, description);
-		} else {
-			const preloadInstances = getContext(queryKey) as DimacsInstance[];
-			const initInteractive = {
-				removable: false,
-				active: false
-			};
-			instances = preloadInstances.map((e) => ({ ...e, ...initInteractive }));
-			instances[0].active = true;
-		}
-	}
 
 	function uploadFiles() {
 		const files = fileInputRef.files || [];
@@ -58,7 +41,7 @@
 	}
 
 	function processFile(fileName: string, content: string): void {
-		const file = instances.find((p) => p.fileName === fileName);
+		const file = localInstances.find((p) => p.fileName === fileName);
 		if (file) {
 			const title = 'Duplicated instance';
 			const description = `File ${fileName} already uplaoded`;
@@ -66,8 +49,8 @@
 		} else {
 			try {
 				const summary = dimacsParser(content);
-				instances = [
-					...instances,
+				localInstances = [
+					...localInstances,
 					{
 						fileName,
 						content,
@@ -88,10 +71,9 @@
 	}
 
 	function onToggleChange(index: number): void {
-		const turnOn = false;
-		instances = instances.map((e) => ({ ...e, ...{ active: turnOn } }));
-		instances[index].active = true;
-		setInstanceToCtx(instances[index]);
+		localInstances = localInstances.map((e) => ({ ...e, ...{ active: false } }));
+		localInstances[index].active = true;
+		setInstanceToCtx(localInstances[index]);
 	}
 
 	function setInstanceToCtx(instance: InteractivelyInstance) {
@@ -124,7 +106,7 @@
 	<AccordionItem open={true}>
 		<span slot="header">List of problems</span>
 		<ul>
-			{#each instances as item, i}
+			{#each localInstances as item, i}
 				<li>
 					<div class="flex">
 						<button class="icon not-removable" disabled={!item.removable || item.active}>

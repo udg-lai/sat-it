@@ -137,8 +137,7 @@
 		<div class="toggle-button"></div>
 		<div class="toggle-button"></div>
 	</div>
-	<div bind:this={toolsViewRef} class="tools-view" class:hide-tools-view={hide}>
-		{#if !hide}
+	<div bind:this={toolsViewRef} class="default-tools-width" class:hide-tools-view={hide}>
 			<div class="tools-view-container">
 				{#each views as { name, open } (name)}
 					{#if open}
@@ -150,7 +149,6 @@
 					{/if}
 				{/each}
 			</div>
-		{/if}
 	</div>
 	<div
 		use:resizeHandle
