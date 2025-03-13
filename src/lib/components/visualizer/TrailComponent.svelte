@@ -1,15 +1,12 @@
 <script lang="ts">
 	import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
-	import DecisionVariableComponent from '$lib/components/DecisionVariableComponent.svelte';
+	import DecisionVariableComponent from '$lib/components/decision-variable/DecisionVariableComponent.svelte';
 	import { get, writable, type Writable } from 'svelte/store';
 
 	interface Props {
 		trail: Trail;
 	}
 	let { trail }: Props = $props();
-
-	let timeoutDecisionVariable = 1000;
-	let hoverTimeout: number;
 
 	let toggledWritable: Writable<boolean[]> = writable([]);
 
@@ -25,20 +22,6 @@
 			updated[index] = !updated[index];
 			return updated;
 		});
-	}
-
-	function mouseEnterDecisionVariable(index: number) {
-		hoverTimeout = setTimeout(() => {
-			toggledWritable.update((state: boolean[]) => {
-				const updated = [...state];
-				updated[index] = true;
-				return updated;
-			});
-		}, timeoutDecisionVariable);
-	}
-
-	function mouseLeaveDecisionVariable() {
-		clearTimeout(hoverTimeout);
 	}
 </script>
 
@@ -58,9 +41,7 @@
 			</div>
 		{/if}
 		<DecisionVariableComponent
-			{decision}
-			onEnter={() => mouseEnterDecisionVariable(index)}
-			onLeave={() => mouseLeaveDecisionVariable()}
+			decisionVariable={decision}
 			onClick={() => clickDecisionVariable(index)}
 		/>
 	{/each}
