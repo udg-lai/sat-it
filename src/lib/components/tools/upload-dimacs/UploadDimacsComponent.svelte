@@ -20,7 +20,7 @@
 		active: boolean;
 	}
 
-	let localInstances: Instance[] = $state([...get(instances)])
+	let localInstances: Instance[] = $state([...get(instances)]);
 
 	let fileInputRef: HTMLInputElement;
 

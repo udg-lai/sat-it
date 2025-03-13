@@ -5,7 +5,7 @@ import queens4 from '$lib/dimacs/queens/queens4.ts';
 import type { DimacsInstance } from '$lib/dimacs/dimacs-instance.interface.ts';
 import { logError } from './logging.ts';
 
-export const BOOSTRAP_INSTANCES_CTX_KEY = "boostrapInstances";
+export const BOOSTRAP_INSTANCES_CTX_KEY = 'boostrapInstances';
 
 export function bootstrapInstances(): void {
 	try {
