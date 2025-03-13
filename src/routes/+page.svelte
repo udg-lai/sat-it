@@ -6,10 +6,12 @@
 	import ScrollableComponent from '$lib/components/ScrollableComponent.svelte';
 	import ToastComponent from '$lib/components/ToastComponent.svelte';
 	import { disableContextMenu } from '$lib/transversal/utils/utils.ts';
-	import { bootstrapInstances } from '$lib/transversal/utils/bootstrap.ts';
 	import { toasts } from '$lib/store/toasts.store.ts';
+	import { loadInstances } from '$lib/store/instances.store.ts';
 
-	bootstrapInstances();
+	loadInstances()
+		.then(() => console.log('fetched pre-loaded instances'))
+		.catch(() => console.log('fking error'));
 </script>
 
 <svelte:body oncontextmenu={disableContextMenu} />

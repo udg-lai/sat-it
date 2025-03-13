@@ -11,16 +11,8 @@
 	import './styles.css';
 	import type { DimacsInstance } from '$lib/dimacs/dimacs-instance.interface.ts';
 	import dimacsParser from '$lib/transversal/utils/parsers/dimacs.ts';
-	import { logError, logInfo, logWarning } from '$lib/transversal/utils/logging.ts';
-	import { instances, type Instance } from '$lib/store/instances.store.ts';
-	import { get } from 'svelte/store';
-
-	interface InteractivelyInstance extends DimacsInstance {
-		removable: boolean;
-		active: boolean;
-	}
-
-	let localInstances: Instance[] = $state([...get(instances)]);
+	import { logError } from '$lib/transversal/utils/logging.ts';
+	import { activateInstance, addInstance, instances } from '$lib/store/instances.store.ts';
 
 	let fileInputRef: HTMLInputElement;
 
@@ -28,56 +20,32 @@
 		const files = fileInputRef.files || [];
 		for (const file of files) {
 			const reader = new FileReader();
-			const fileName = file.name;
+			const instanceName = file.name;
 			reader.onload = (e: ProgressEvent<FileReader>) => {
-				processFile(fileName, e.target?.result as string);
+				saveInstance(instanceName, e.target?.result as string);
 			};
 			reader.onerror = () => {
-				const title = `File ${fileName} could not be loaded`;
+				const title = `File ${instanceName} could not be loaded`;
 				logError(title, title);
 			};
 			reader.readAsText(file);
 		}
 	}
 
-	function processFile(fileName: string, content: string): void {
-		const file = localInstances.find((p) => p.fileName === fileName);
-		if (file) {
-			const title = 'Duplicated instance';
-			const description = `File ${fileName} already uplaoded`;
-			logWarning(title, description);
-		} else {
-			try {
-				const summary = dimacsParser(content);
-				localInstances = [
-					...localInstances,
-					{
-						fileName,
-						content,
-						summary,
-						active: false,
-						removable: true
-					}
-				];
-				const title = `File uploaded`;
-				const description = `File ${fileName} parsed and ready to use`;
-				logInfo(title, description);
-			} catch (error) {
-				const title = `Instance ${fileName} contains an error`;
-				const description = (error as Error).message;
-				logError(title, description);
-			}
+	function saveInstance(instanceName: string, content: string): void {
+		try {
+			const summary = dimacsParser(content);
+			const instance: DimacsInstance = {
+				instanceName,
+				content,
+				summary
+			};
+			addInstance(instance);
+		} catch (error) {
+			const title = `Instance ${instanceName} contains an error`;
+			const description = (error as Error).message;
+			logError(title, description);
 		}
-	}
-
-	function onToggleChange(index: number): void {
-		localInstances = localInstances.map((e) => ({ ...e, ...{ active: false } }));
-		localInstances[index].active = true;
-		setInstanceToCtx(localInstances[index]);
-	}
-
-	function setInstanceToCtx(instance: InteractivelyInstance) {
-		console.log('updating problem', instance);
 	}
 </script>
 
@@ -106,28 +74,28 @@
 	<AccordionItem open={true}>
 		<span slot="header">List of problems</span>
 		<ul>
-			{#each localInstances as item, i}
+			{#each $instances as instance}
 				<li>
 					<div class="flex">
-						<button class="icon not-removable" disabled={!item.removable || item.active}>
-							{#if item.removable && !item.active}
+						<button class="icon not-removable" disabled={!instance.removable || instance.active}>
+							{#if instance.removable && !instance.active}
 								<TrashBinOutline />
-							{:else if item.removable && item.active}
+							{:else if instance.removable && instance.active}
 								<LockOutline />
 							{:else}
 								<DatabaseOutline />
 							{/if}
 						</button>
-						<p class="mb-2 text-gray-500 dark:text-gray-400">{item.fileName}</p>
+						<p class="mb-2 text-gray-500 dark:text-gray-400">{instance.instanceName}</p>
 					</div>
 					<div class="flex">
 						<button class="icon">
 							<EyeOutline />
 						</button>
 						<Toggle
-							onchange={() => onToggleChange(i)}
-							checked={item.active}
-							disabled={item.active}
+							onchange={() => activateInstance(instance)}
+							checked={instance.active}
+							disabled={instance.active}
 							class="toggle"
 						/>
 					</div>
