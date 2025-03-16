@@ -13,12 +13,15 @@
 		class: 'h-10 w-10 cursor-pointer'
 	};
 </script>
+<div class="flex flex-row">
+	<div class="side-bar" class:active></div>
+	<button onclick={onClick} type="button" class="button-high-contrast !p-2" class:active>
+		{#if icon}
+			<DynamicRender component={icon} props={iconProps} />
+		{/if}
+	</button>	
+</div>
 
-<button onclick={onClick} type="button" class="button-high-contrast !p-2" class:active>
-	{#if icon}
-		<DynamicRender component={icon} props={iconProps} />
-	{/if}
-</button>
 
 <style>
 	.button-high-contrast {
@@ -48,6 +51,16 @@
 
 	.button-high-contrast.active {
 		color: var(--main-font-color);
-		border-left: 2px solid var(--focus-border-color);
 	}
+
+	.side-bar {
+		margin-right: -1px;
+		width: 1px;
+		background-color: var(--main-bg-color);
+	}
+
+	.side-bar.active {
+		background-color: var(--focus-border-color);
+	}
+
 </style>
