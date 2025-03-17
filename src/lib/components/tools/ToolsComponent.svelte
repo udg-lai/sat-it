@@ -137,20 +137,18 @@
 		<div class="toggle-button"></div>
 		<div class="toggle-button"></div>
 	</div>
-	<div bind:this={toolsViewRef} class="tools-view" class:hide-tools-view={hide}>
-		{#if !hide}
-			<div class="tools-view-container">
-				{#each views as { name, open } (name)}
-					{#if open}
-						{#if name === 'viewA'}
-							<UploadDimacsComponent />
-						{:else}
-							<h2>{name}</h2>
-						{/if}
+	<div bind:this={toolsViewRef} class="default-tools-width" class:hide-tools-view={hide}>
+		<div class="tools-view-container">
+			{#each views as { name, open } (name)}
+				{#if open}
+					{#if name === 'viewA'}
+						<UploadDimacsComponent />
+					{:else}
+						<h2>{name}</h2>
 					{/if}
-				{/each}
-			</div>
-		{/if}
+				{/if}
+			{/each}
+		</div>
 	</div>
 	<div
 		use:resizeHandle

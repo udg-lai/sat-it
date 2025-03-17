@@ -6,7 +6,7 @@ export function logWarning(title: string, description: string): void {
 		type: 'warn',
 		title: formatText(title),
 		description: formatText(description),
-		dismissible: true
+		dismissible: false
 	});
 }
 
@@ -16,7 +16,7 @@ export function logInfo(title: string, description: string): void {
 		type: 'info',
 		title: formatText(title),
 		description: formatText(description),
-		dismissible: true
+		dismissible: false
 	});
 }
 
@@ -25,7 +25,8 @@ export function logError(title: string, description: string): void {
 	addToast({
 		type: 'error',
 		title: formatText(title),
-		description: formatText(description)
+		description: formatText(description),
+		dismissible: false
 	});
 }
 

@@ -22,16 +22,16 @@
 	padding: 0rem 1rem;
 }
 
-.tools-view {
+.default-tools-width {
 	width: var(--tools-width);
 }
 
-.open-tools-view {
+.max-tools-width {
 	width: var(--max-width-tools);
 }
 
 .hide-tools-view {
-	width: 0px !important;
+	display: none;
 }
 
 .draggable-bar {
