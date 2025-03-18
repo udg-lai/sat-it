@@ -55,11 +55,11 @@
 
 	.side-bar {
 		margin-right: -1px;
-		width: 1px;
+		width: 2px;
 		background-color: var(--main-bg-color);
 	}
 
 	.side-bar.active {
-		background-color: var(--focus-border-color);
+		background-color: var(--main-font-color);
 	}
 </style>
