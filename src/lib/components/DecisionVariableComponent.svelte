@@ -1,62 +1,66 @@
 <script lang="ts">
 	import type DecisionVariable from '$lib/transversal/entities/DecisionLiteral.svelte.ts';
 	import MathTexComponent from '$lib/components/MathTexComponent.svelte';
+	import { Indicator } from 'flowbite-svelte';
 
 	interface Props {
 		decision: DecisionVariable;
-		startingWP: number;
-		currentWP: number;
+		onClick?: () => void;
+		onEnter?: () => void;
+		onLeave?: () => void;
 	}
-	let { decision, startingWP, currentWP }: Props = $props();
-	let previousIndex = $derived(currentWP < startingWP);
+	let { decision, onClick, onEnter, onLeave }: Props = $props();
+	let decisionColor: string = $state('teal');
+
+	$effect(() => {
+		decisionColor = decision.isD() ? 'teal' : 'red';
+	});
+
+	// let previousIndex = $derived(currentWP < startingWP);
 </script>
 
 <div
-	class="trail"
-	class:decide={decision.isD() && !previousIndex}
-	class:decidePrevious={decision.isD() && previousIndex}
-	class:unit-propagation={decision.isUP() && !previousIndex}
-	class:unit-propagationPrevious={decision.isUP() && previousIndex}
-	class:backtrack={decision.isK() && !previousIndex}
-	class:backtrackPrevious={decision.isK() && previousIndex}
+	class="decision-literal-wrapper"
+	class:decide={decision.isD()}
+	class:backtrack={decision.isK()}
 >
-	<MathTexComponent equation={decision.toTeX()} />
+	<button
+		class="decision-literal-btn"
+		onmouseleave={onLeave}
+		onmouseenter={onEnter}
+		onclick={onClick}
+	>
+		<Indicator placement="top-left" size="md" color={decisionColor} />
+		<MathTexComponent equation={decision.toTeX()} />
+	</button>
 </div>
 
 <style>
-	.trail {
+	.decision-literal-wrapper {
+		background-color: #d3d3d357;
+		width: 42px;
+		height: 42px;
+		border-radius: 50%;
+		border-color: var(--border-color);
+		border-width: 1px;
+	}
+
+	.decision-literal-btn {
+		width: 33px;
+		height: 33px;
+		position: relative;
+	}
+
+	.decision-literal-btn,
+	.decision-literal-wrapper {
 		display: flex;
 		align-items: center;
-		font-size: 25px;
-		padding-right: 5px;
-		padding-left: 5px;
+		justify-content: center;
 	}
+
 	.decide {
-		color: var(--decide-color);
-		--decide-color: #1434a4;
-	}
-
-	.decidePrevious {
-		color: var(--decide-previous);
-		--decide-previous: #1433a48e;
-	}
-
-	.unit-propagation {
-		color: var(--unit-propagation-color);
-		--unit-propagation-color: #36454f;
-	}
-
-	.unit-propagationPrevious {
-		color: var(--unit-propagationPrevious);
-		--unit-propagationPrevious: #36454f8e;
 	}
 
 	.backtrack {
-		color: var(--backtrack-color);
-		--backtrack-color: #e7aa00;
-	}
-	.backtrackPrevious {
-		color: var(--backtracking-previous);
-		--backtracking-previous: #e7a9007e;
 	}
 </style>

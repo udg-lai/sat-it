@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Button from './Button.svelte';
 	import UploadDimacsComponent from './upload-dimacs/UploadDimacsComponent.svelte';
-	import { AngleRightOutline, BugOutline, FileCirclePlusOutline } from 'flowbite-svelte-icons';
+	import { BugOutline, CommandOutline, FileCirclePlusOutline } from 'flowbite-svelte-icons';
 	import './styles.css';
 
 	interface Props {
@@ -135,7 +135,7 @@
 		<div class="toggle-button">
 			<Button
 				onClick={() => activateView('viewB')}
-				icon={AngleRightOutline}
+				icon={CommandOutline}
 				active={views.find((v) => v.name === 'viewB')?.open}
 			/>
 		</div>
@@ -149,20 +149,18 @@
 		<div class="toggle-button"></div>
 		<div class="toggle-button"></div>
 	</div>
-	<div bind:this={toolsViewRef} class="tools-view" class:hide-tools-view={hide}>
-		{#if !hide}
-			<div class="tools-view-container">
-				{#each views as { name, open } (name)}
-					{#if open}
-						{#if name === 'viewA'}
-							<UploadDimacsComponent />
-						{:else}
-							<h2>{name}</h2>
-						{/if}
+	<div bind:this={toolsViewRef} class="default-tools-width" class:hide-tools-view={hide}>
+		<div class="tools-view-container">
+			{#each views as { name, open } (name)}
+				{#if open}
+					{#if name === 'viewA'}
+						<UploadDimacsComponent />
+					{:else}
+						<h2>{name}</h2>
 					{/if}
-				{/each}
-			</div>
-		{/if}
+				{/if}
+			{/each}
+		</div>
 	</div>
 	<div
 		use:resizeHandle
