@@ -1,14 +1,14 @@
 <script lang="ts">
 	import Button from './Button.svelte';
 	import UploadDimacsComponent from './upload-dimacs/UploadDimacsComponent.svelte';
-	import { BugOutline, CommandOutline, FileCirclePlusOutline } from 'flowbite-svelte-icons';
+	import { BugOutline, FileCirclePlusOutline } from 'flowbite-svelte-icons';
 	import './styles.css';
 
 	interface Props {
-		hide: boolean;
+		closed: boolean;
 	}
 
-	let { hide }: Props = $props();
+	let { closed }: Props = $props();
 
 	let toolsViewRef: HTMLElement;
 	let isResizing = $state(false);
@@ -44,9 +44,9 @@
 				const minWidthTool = 240;
 				let newX = event.clientX;
 				if (newX < barWidth + minWidthTool / 2) {
-					hide = true;
+					closed = true;
 				} else {
-					hide = false;
+					closed = false;
 					if (newX < barWidth + minWidthTool) {
 						toolsViewRef.style.width = `${minWidthTool}px`;
 					} else {
@@ -79,84 +79,58 @@
 
 	interface View {
 		name: string;
-		open: boolean;
+		active: boolean;
 	}
+
 	let views: View[] = $state([
 		{
 			name: 'viewA',
-			open: true
+			active: true
 		},
 		{
 			name: 'viewB',
-			open: false
-		},
-		{
-			name: 'viewC',
-			open: false
-		},
-		{
-			name: 'viewD',
-			open: false
+			active: false
 		}
 	]);
 
-	function activateView(view: string): void {
-		const viewIndex = views.findIndex((v) => v.name === view);
-		const viewRef = viewIndex == -1 ? undefined : views[viewIndex];
-		if (viewIndex === undefined) {
-			console.warn(`Accessing to not defined view ${view}`);
+	function activateView(what: number): void {
+		const alreadyActive = views[what].active;
+		if (alreadyActive) {
+			views[what].active = false;
 		} else {
-			const viewIsOpen: boolean = viewRef?.open || false;
-			if (viewIsOpen) {
-				hide = !hide;
-			} else {
-				views = views.map((v) => ({ ...v, open: false }));
-				const newViewRef = views[viewIndex];
-				newViewRef.open = true;
-				if (hide) {
-					hide = false;
-					toolsViewRef.style.width = 'var(--max-width-tools)';
-				}
-			}
+			views = views.map((v) => ({ ...v, active: false }));
+			views[what].active = true;
+			toolsViewRef.style.width = 'var(--max-width-tools)';
 		}
+		views = [...views];
+		closed = views.every((v) => v.active === false);
 	}
 </script>
 
 <div class="tools-container">
 	<div class="options-tools">
+		{#each views as { name }, id}
+			<div class="toggle-button">
+				{#if name === 'viewA'}
+					{@render btnViewA(id)}
+				{:else if name === 'viewB'}
+					{@render btnViewB(id)}
+				{:else}
+					{@render notImplementedYet()}
+				{/if}
+			</div>
+		{/each}
 		<div class="vertical-separator"></div>
-		<div class="toggle-button">
-			<Button
-				onClick={() => activateView('viewA')}
-				icon={FileCirclePlusOutline}
-				active={views.find((v) => v.name === 'viewA')?.open}
-			/>
-		</div>
-		<div class="toggle-button">
-			<Button
-				onClick={() => activateView('viewB')}
-				icon={CommandOutline}
-				active={views.find((v) => v.name === 'viewB')?.open}
-			/>
-		</div>
-		<div class="toggle-button">
-			<Button
-				onClick={() => activateView('viewC')}
-				icon={BugOutline}
-				active={views.find((v) => v.name === 'viewC')?.open}
-			/>
-		</div>
-		<div class="toggle-button"></div>
-		<div class="toggle-button"></div>
 	</div>
-	<div bind:this={toolsViewRef} class="default-tools-width" class:hide-tools-view={hide}>
+
+	<div bind:this={toolsViewRef} class="default-tools-width" class:hide-tools-view={closed}>
 		<div class="tools-view-container">
-			{#each views as { name, open } (name)}
-				{#if open}
+			{#each views as { name, active } (name)}
+				{#if active}
 					{#if name === 'viewA'}
 						<UploadDimacsComponent />
 					{:else}
-						<h2>{name}</h2>
+						{@render notImplementedYet(name)}
 					{/if}
 				{/if}
 			{/each}
@@ -168,3 +142,15 @@
 		class:resizing={isResizing}
 	></div>
 </div>
+
+{#snippet btnViewA(id: number)}
+	<Button onClick={() => activateView(id)} icon={FileCirclePlusOutline} active={views[id].active} />
+{/snippet}
+
+{#snippet btnViewB(id: number)}
+	<Button onClick={() => activateView(id)} icon={BugOutline} active={views[id].active} />
+{/snippet}
+
+{#snippet notImplementedYet(what?: string)}
+	<p>Missing {what}</p>
+{/snippet}

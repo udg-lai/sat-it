@@ -67,14 +67,3 @@
 </button>
 
 <TrailEditor previousTrails={trailCollection} currentTrail={trail} {collapse} />
-
-<!-- <InterpretationVisualizerComponent {variables} />
-<CnfVisualizerComponent {cnf} />
-
-<p>
-	Let's visualize the new clause created by applying logic resolution to the first and second clause
-	of the cnf
-</p>
-<ClauseVisualizerComponent clause={resolutionClause} />
-
-<p>The cnf is <strong>{getCNFeval()}</strong></p> -->
