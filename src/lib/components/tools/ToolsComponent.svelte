@@ -3,6 +3,7 @@
 	import UploadDimacsComponent from './upload-dimacs/UploadDimacsComponent.svelte';
 	import { BugOutline, FileCirclePlusOutline } from 'flowbite-svelte-icons';
 	import './styles.css';
+	import DebuggerComponent from './debugger/DebuggerComponent.svelte';
 
 	interface Props {
 		closed: boolean;
@@ -124,17 +125,17 @@
 	</div>
 
 	<div bind:this={toolsViewRef} class="default-tools-width" class:hide-tools-view={closed}>
-		<div class="tools-view-container">
-			{#each views as { name, active } (name)}
-				{#if active}
+		{#each views as { name, active } (name)}
+			{#if active}
+				<div class="view-container">
 					{#if name === 'viewA'}
 						<UploadDimacsComponent />
 					{:else}
-						{@render notImplementedYet(name)}
+						<DebuggerComponent />
 					{/if}
-				{/if}
-			{/each}
-		</div>
+				</div>
+			{/if}
+		{/each}
 	</div>
 	<div
 		use:resizeHandle

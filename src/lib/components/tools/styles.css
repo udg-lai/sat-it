@@ -18,12 +18,14 @@
 	margin-bottom: 1rem;
 }
 
-.tools-view-container {
-	padding: 0rem 1rem;
+.view-container {
+	padding: 1rem 1rem;
+	flex: 1;
 }
 
 .default-tools-width {
 	width: var(--tools-width);
+	display: flex;
 }
 
 .max-tools-width {

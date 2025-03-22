@@ -8,10 +8,11 @@
 	import { disableContextMenu } from '$lib/transversal/utils/utils.ts';
 	import { toasts } from '$lib/store/toasts.store.ts';
 	import { loadInstances } from '$lib/store/instances.store.ts';
+	import { logError } from '$lib/transversal/utils/logging.ts';
 
-	loadInstances()
-		.then(() => console.log('fetched pre-loaded instances'))
-		.catch(() => console.log('fking error'));
+	loadInstances().catch(() =>
+		logError(`Preloaded instances`, `Could not fetch preloaded instances correctly`)
+	);
 </script>
 
 <svelte:body oncontextmenu={disableContextMenu} />

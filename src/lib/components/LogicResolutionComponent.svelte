@@ -53,17 +53,4 @@
 	}
 </script>
 
-<button
-	onclick={() => decide(trailCollection, trail)}
-	class="rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white shadow-md transition duration-300 ease-in-out hover:bg-blue-700"
->
-	Decide
-</button>
-<button
-	onclick={flipVisualize}
-	class="rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white shadow-md transition duration-300 ease-in-out hover:bg-blue-700"
->
-	{textCollapse}
-</button>
-
 <TrailEditor previousTrails={trailCollection} currentTrail={trail} {collapse} />
