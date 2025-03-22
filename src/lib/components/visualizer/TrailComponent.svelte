@@ -8,9 +8,6 @@
 	}
 	let { trail }: Props = $props();
 
-	let timeoutDecisionVariable = 1000;
-	let hoverTimeout: number;
-
 	let toggledWritable: Writable<boolean[]> = writable([]);
 
 	$effect(() => {
@@ -25,20 +22,6 @@
 			updated[index] = !updated[index];
 			return updated;
 		});
-	}
-
-	function mouseEnterDecisionVariable(index: number) {
-		hoverTimeout = setTimeout(() => {
-			toggledWritable.update((state: boolean[]) => {
-				const updated = [...state];
-				updated[index] = true;
-				return updated;
-			});
-		}, timeoutDecisionVariable);
-	}
-
-	function mouseLeaveDecisionVariable() {
-		clearTimeout(hoverTimeout);
 	}
 </script>
 
@@ -57,12 +40,7 @@
 				<button class="option">C</button>
 			</div>
 		{/if}
-		<DecisionVariableComponent
-			{decision}
-			onEnter={() => mouseEnterDecisionVariable(index)}
-			onLeave={() => mouseLeaveDecisionVariable()}
-			onClick={() => clickDecisionVariable(index)}
-		/>
+		<DecisionVariableComponent {decision} onClick={() => clickDecisionVariable(index)} />
 	{/each}
 </div>
 

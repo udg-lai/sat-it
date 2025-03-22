@@ -6,10 +6,8 @@
 	interface Props {
 		decision: DecisionVariable;
 		onClick?: () => void;
-		onEnter?: () => void;
-		onLeave?: () => void;
 	}
-	let { decision, onClick, onEnter, onLeave }: Props = $props();
+	let { decision, onClick }: Props = $props();
 	let decisionColor: string = $state('teal');
 
 	$effect(() => {
@@ -24,12 +22,7 @@
 	class:decide={decision.isD()}
 	class:backtrack={decision.isK()}
 >
-	<button
-		class="decision-literal-btn"
-		onmouseleave={onLeave}
-		onmouseenter={onEnter}
-		onclick={onClick}
-	>
+	<button class="decision-literal-btn" onclick={onClick}>
 		<Indicator placement="top-left" size="md" color={decisionColor} />
 		<MathTexComponent equation={decision.toTeX()} />
 	</button>
