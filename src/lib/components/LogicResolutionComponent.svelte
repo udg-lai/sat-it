@@ -6,11 +6,21 @@
 	import { TrailCollection } from '$lib/transversal/entities/TrailCollection.svelte.ts';
 	import VariablePoolBuilder from '$lib/transversal/entities/VariablePoolBuilder.ts';
 	import { isJust, fromJust } from '$lib/transversal/utils/types/maybe.ts';
-	import decide from '$lib/transversal/algorithms/decision.ts';
 	import TrailEditor from './visualizer/TrailEditor.svelte';
 	import { pool, persistVariable } from '$lib/store/variablePool.store.ts';
 	import { get } from 'svelte/store';
 	import type { IVariablePool } from '$lib/transversal/utils/interfaces/IVariablePool.ts';
+	import { onMount } from 'svelte';
+	import { decideEvent, expandedEvent } from './tools/debugger/events.svelte.ts';
+
+	onMount(() => {
+		const unsubscribeDecision = decideEvent.subscribe(console.log);
+		const unsubscribeExpanded = expandedEvent.subscribe(console.log);
+		return () => {
+			unsubscribeDecision();
+			unsubscribeExpanded();
+		};
+	});
 
 	const trailCollection = new TrailCollection();
 	let collapse = $state(false);

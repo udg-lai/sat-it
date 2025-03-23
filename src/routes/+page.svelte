@@ -7,12 +7,42 @@
 	import ToastComponent from '$lib/components/ToastComponent.svelte';
 	import { disableContextMenu } from '$lib/transversal/utils/utils.ts';
 	import { toasts } from '$lib/store/toasts.store.ts';
-	import { loadInstances } from '$lib/store/instances.store.ts';
+	import {
+		instanceStore,
+		initializeInstancesStore,
+		type InteractiveInstance
+	} from '$lib/store/instances.store.ts';
 	import { logError } from '$lib/transversal/utils/logging.ts';
+	import VariablePool from '$lib/transversal/entities/VariablePool.ts';
+	import { updateProblem } from '$lib/problem.svelte.ts';
+	import { onMount } from 'svelte';
 
-	loadInstances().catch(() =>
-		logError(`Preloaded instances`, `Could not fetch preloaded instances correctly`)
-	);
+	onMount(() => {
+		initializeInstancesStore()
+			.then(setDefaultInstanceToSolve)
+			.catch(() =>
+				logError(`Preloaded instances`, `Could not fetch preloaded instances correctly`)
+			);
+	});
+
+	function setDefaultInstanceToSolve() {
+		// pre: only executed if there are problems to set as default
+		const instances: InteractiveInstance[] = $instanceStore;
+		if (instances.length > 0) {
+			const { summary } = instances[0];
+
+			const pools = {
+				variables: new VariablePool(summary.varCount),
+				clauses: new VariablePool(summary.varCount)
+			};
+
+			const algorithm = () => console.log('new algorithm');
+
+			const problem = { pools, algorithm };
+
+			updateProblem(problem);
+		}
+	}
 </script>
 
 <svelte:body oncontextmenu={disableContextMenu} />
@@ -28,7 +58,7 @@
 
 	<main>
 		<div class="tools-section z-10">
-			<ToolsComponent hide={true} />
+			<ToolsComponent closed={true} />
 		</div>
 		<workspace class="flex flex-col md:flex-row">
 			<play-area>

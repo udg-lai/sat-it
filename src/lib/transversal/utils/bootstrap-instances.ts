@@ -12,9 +12,7 @@ async function fakeRequest(): Promise<DimacsInstance[]> {
 	return [dummy, queens4, queens8];
 }
 
-async function bootstrapRequest(): Promise<DimacsInstance[]> {
+export default async function fetchInstances(): Promise<DimacsInstance[]> {
 	const instances = await fakeRequest();
 	return instances;
 }
-
-export default bootstrapRequest;

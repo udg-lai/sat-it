@@ -1,12 +1,20 @@
 <script lang="ts">
+	import { emitDecision, emitExpand } from './events.svelte.ts';
+
+	let expanded = $state(true);
+
+	function toggleExpand() {
+		expanded = !expanded;
+		emitExpand(expanded);
+	}
 </script>
 
 <div class="flex-center debugger flex">
-	<button class="btn" onclick={() => console.log('decide')}>
+	<button class="btn" onclick={() => emitDecision('Automated')}>
 		<h1>Decide</h1>
 	</button>
 
-	<button class="btn" onclick={() => console.log('visualize')}>
+	<button class="btn" onclick={toggleExpand}>
 		<h1>Toggle</h1>
 	</button>
 </div>
