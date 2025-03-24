@@ -9,16 +9,17 @@
 	interface Props {
 		previousTrails: TrailCollection;
 		currentTrail: Trail;
-		collapse: boolean;
+		expanded: boolean;
 	}
-	let { previousTrails, currentTrail, collapse }: Props = $props();
+	let { previousTrails, currentTrail, expanded }: Props = $props();
 
+	// denotes over which trail user is hover
 	let hoverIndex: number = $state(-1);
 
 	let trails: Tuple<number, Trail>[] = $derived(
 		(() => {
 			const xs = [...previousTrails, currentTrail].map((t, idx) => makeTuple(idx + 1, t)).reverse();
-			return collapse ? xs.slice(0, 1) : xs;
+			return expanded ? xs : xs.slice(0, 1);
 		})()
 	);
 

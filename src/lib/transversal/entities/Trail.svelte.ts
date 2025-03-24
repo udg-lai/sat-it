@@ -14,6 +14,7 @@ export class Trail {
 		const newTrail = new Trail(this.trailCapacity);
 		newTrail.trail = this.trail.map((decision) => decision.copy());
 		newTrail.followUPIndex = this.followUPIndex;
+		newTrail.updateFollowUpIndex();
 		return newTrail;
 	}
 
@@ -21,21 +22,12 @@ export class Trail {
 		return this.trail;
 	}
 
-	public getFollowUpIndex(): number {
-		return this.followUPIndex;
-	}
-
-	public updateFollowUpIndex(): void {
-		this.followUPIndex = this.trail.length - 1;
-	}
-
-	public push(decision: DecisionVariable, updateFollowUpIndex: boolean = false) {
+	public push(decision: DecisionVariable) {
 		if (this.trail.length == this.trailCapacity)
 			console.warn('[WARN]: skipped allocating decision as trail capacity is fulfilled');
 		else {
 			this.trail.push(decision);
 			if (decision.isD()) this.decisionLevel++;
-			if (updateFollowUpIndex) this.updateFollowUpIndex();
 		}
 	}
 
@@ -58,5 +50,9 @@ export class Trail {
 		thisArg?: unknown
 	): void {
 		this.trail.forEach(callback, thisArg);
+	}
+
+	private updateFollowUpIndex(): void {
+		this.followUPIndex = this.trail.length;
 	}
 }

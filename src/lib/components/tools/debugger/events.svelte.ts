@@ -6,18 +6,18 @@ export interface DecisionEvent<T> {
 	decision: Decide<T>;
 }
 
-export const decideEvent: Writable<DecisionEvent<number>> = writable();
+export const decisionEventStore: Writable<DecisionEvent<number>> = writable();
 
-export const emitDecision = (decision: Decide<number>) => {
-	decideEvent.update(() => ({ decision }));
+export const emitDecisionEvent = (decision: Decide<number>) => {
+	decisionEventStore.update(() => ({ decision }));
 };
 
-export interface ExpandEvent {
+export interface EditorViewEvent {
 	expand: boolean;
 }
 
-export const expandedEvent: Writable<ExpandEvent> = writable();
+export const editorViewEventStore: Writable<EditorViewEvent> = writable();
 
-export const emitExpand = (state: boolean) => {
-	expandedEvent.update(() => ({ expand: state }));
+export const emitEditorViewEvent = (state: boolean) => {
+	editorViewEventStore.update(() => ({ expand: state }));
 };
