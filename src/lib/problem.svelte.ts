@@ -1,4 +1,4 @@
-import { derived, get, readable, writable, type Readable, type Writable } from 'svelte/store';
+import { get, writable, type Writable } from 'svelte/store';
 import VariablePool from './transversal/entities/VariablePool.ts';
 
 interface Problem {

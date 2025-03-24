@@ -4,9 +4,9 @@ import type { TrailCollection } from '../entities/TrailCollection.svelte.ts';
 import { fromJust, isJust } from '../utils/types/maybe.ts';
 import { pool, persistVariable, disposeVariable } from '$lib/store/variablePool.store.ts';
 import { get } from 'svelte/store';
-import type { IVariablePool } from '../utils/interfaces/IVariablePool.ts';
+import type { IVariablePool } from '$lib/transversal/utils/interfaces/IVariablePool.ts';
 
-export default function decide(trailCollection: TrailCollection, trail: Trail): void {
+export function dummySearch(trailCollection: TrailCollection, trail: Trail): void {
 	const currentPool: IVariablePool = get(pool);
 
 	if (!currentPool.allAssigned()) {

@@ -11,20 +11,16 @@
 	import { get } from 'svelte/store';
 	import type { IVariablePool } from '$lib/transversal/utils/interfaces/IVariablePool.ts';
 	import { onMount } from 'svelte';
-	import { decideEvent, expandedEvent } from './tools/debugger/events.svelte.ts';
-
-	onMount(() => {
-		const unsubscribeDecision = decideEvent.subscribe(console.log);
-		const unsubscribeExpanded = expandedEvent.subscribe(console.log);
-		return () => {
-			unsubscribeDecision();
-			unsubscribeExpanded();
-		};
-	});
+	import {
+		decideEvent,
+		expandedEvent,
+		type DecisionEvent,
+		type ExpandEvent
+	} from './tools/debugger/events.svelte.ts';
+	import { dummySearch } from '$lib/transversal/algorithms/decision.ts';
 
 	const trailCollection = new TrailCollection();
-	let collapse = $state(false);
-	let textCollapse = $derived(collapse ? 'Expand' : 'Collapse');
+	let expanded = $state(false);
 
 	const nVariables = 4;
 	pool.set(VariablePoolBuilder.build('VariablePool', nVariables));
@@ -58,9 +54,30 @@
 		}
 	}
 
-	function flipVisualize() {
-		collapse = !collapse;
+	function flipVisualize(e: ExpandEvent) {
+		if (e === undefined) return;
+
+		expanded = !expanded;
 	}
+
+	function algorithm(e: DecisionEvent<number>): void {
+		if (e === undefined) return;
+
+		if (e.decision === 'Automated') {
+			dummySearch(trailCollection, trail);
+		} else {
+			console.log(`User decision not implemented yet`);
+		}
+	}
+
+	onMount(() => {
+		const unsubscribeDecision = decideEvent.subscribe(algorithm);
+		const unsubscribeExpanded = expandedEvent.subscribe(flipVisualize);
+		return () => {
+			unsubscribeDecision();
+			unsubscribeExpanded();
+		};
+	});
 </script>
 
-<TrailEditor previousTrails={trailCollection} currentTrail={trail} {collapse} />
+<TrailEditor previousTrails={trailCollection} currentTrail={trail} collapse={!expanded} />

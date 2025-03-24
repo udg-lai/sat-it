@@ -1,7 +1,13 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { emitDecision, emitExpand } from './events.svelte.ts';
 
 	let expanded = $state(true);
+	let textCollapse = $derived(expanded ? 'Expanded' : 'Collapsed');
+
+	onMount(() => {
+		emitExpand(expanded);
+	});
 
 	function toggleExpand() {
 		expanded = !expanded;
@@ -15,7 +21,7 @@
 	</button>
 
 	<button class="btn" onclick={toggleExpand}>
-		<h1>Toggle</h1>
+		<h1>Toggle - {textCollapse}</h1>
 	</button>
 </div>
 
