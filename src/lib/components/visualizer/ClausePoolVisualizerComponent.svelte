@@ -1,12 +1,12 @@
 <script lang="ts">
-	import CNF from '$lib/transversal/entities/CNF.svelte.ts';
+	import ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';
 	import ClauseVisualizerComponent from '$lib/components/visualizer/ClauseVisualizerComponent.svelte';
 	interface Props {
-		cnf: CNF;
+		clausePool: ClausePool;
 	}
-	let { cnf }: Props = $props();
+	let { clausePool }: Props = $props();
 
-	let clauses = $state(cnf.getClauses());
+	let clauses = $state(clausePool.getClauses());
 </script>
 
 <div>

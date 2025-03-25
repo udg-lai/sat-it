@@ -15,7 +15,7 @@ import {
 	type Maybe
 } from '$lib/transversal/utils/types/maybe.ts';
 
-type Claims = number[][];
+export type Claims = number[][];
 
 export interface Summary {
 	comment: string;

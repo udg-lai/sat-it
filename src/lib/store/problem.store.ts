@@ -1,5 +1,6 @@
 import { get, writable, type Writable } from 'svelte/store';
 import VariablePool from '../transversal/entities/VariablePool.ts';
+import type ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';
 
 export interface Problem {
 	pools: Pools;
@@ -8,7 +9,7 @@ export interface Problem {
 
 interface Pools {
 	variables: VariablePool;
-	clauses: VariablePool;
+	clauses: ClausePool;
 }
 
 export const problemStore: Writable<Problem> = writable();

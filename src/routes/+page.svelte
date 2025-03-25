@@ -4,7 +4,7 @@
 	import ToolsComponent from '$lib/components/tools/ToolsComponent.svelte';
 	import ScrollableComponent from '$lib/components/ScrollableComponent.svelte';
 	import ToastComponent from '$lib/components/ToastComponent.svelte';
-	import { disableContextMenu } from '$lib/transversal/utils/utils.ts';
+	import { disableContextMenu, fromClaimsToClause } from '$lib/transversal/utils/utils.ts';
 	import { toasts } from '$lib/store/toasts.store.ts';
 	import {
 		instanceStore,
@@ -16,6 +16,7 @@
 	import { updateProblem } from '$lib/store/problem.store.ts';
 	import { onMount } from 'svelte';
 	import AppComponent from '$lib/components/AppComponent.svelte';
+	import ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';
 
 	onMount(() => {
 		initializeInstancesStore()
@@ -31,10 +32,14 @@
 		if (instances.length > 0) {
 			const { summary } = instances[0];
 
+			const variables: VariablePool = new VariablePool(summary.varCount);
+
 			const pools = {
-				variables: new VariablePool(summary.varCount),
-				clauses: new VariablePool(summary.varCount)
+				variables,
+				clauses: new ClausePool(fromClaimsToClause(summary.claims.simplified, variables))
 			};
+
+			console.log(pools.clauses);
 
 			const algorithm = () => console.log('new algorithm');
 
