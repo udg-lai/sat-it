@@ -39,8 +39,6 @@
 				clauses: new ClausePool(fromClaimsToClause(summary.claims.simplified, variables))
 			};
 
-			console.log(pools.clauses);
-
 			const algorithm = () => console.log('new algorithm');
 
 			const problem = { pools, algorithm };
