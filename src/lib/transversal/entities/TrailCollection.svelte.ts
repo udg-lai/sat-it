@@ -25,7 +25,7 @@ export class TrailCollection {
 		}
 	}
 
-	// Functions to make this class iterbale
+	// Functions to make this class iterable
 	[Symbol.iterator]() {
 		return this.collection.values();
 	}

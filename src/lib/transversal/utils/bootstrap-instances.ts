@@ -9,7 +9,7 @@ function timeout(ms: number): Promise<void> {
 
 async function fakeRequest(): Promise<DimacsInstance[]> {
 	await timeout(300);
-	return [dummy, queens4, queens8];
+	return [queens4, queens8, dummy];
 }
 
 export default async function fetchInstances(): Promise<DimacsInstance[]> {

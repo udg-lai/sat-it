@@ -2,7 +2,7 @@ import type DecisionVariable from '$lib/transversal/entities/DecisionLiteral.sve
 
 export class Trail {
 	private trail: DecisionVariable[] = $state([]);
-	private followUPIndex: number = $state(0);
+	private followUPIndex: number = $state(-1);
 	private decisionLevel: number = 0;
 	private trailCapacity: number = 0;
 
@@ -21,21 +21,12 @@ export class Trail {
 		return this.trail;
 	}
 
-	public getFollowUpIndex(): number {
-		return this.followUPIndex;
-	}
-
-	public updateFollowUpIndex(): void {
-		this.followUPIndex = this.trail.length - 1;
-	}
-
-	public push(decision: DecisionVariable, updateFollowUpIndex: boolean = false) {
+	public push(decision: DecisionVariable) {
 		if (this.trail.length == this.trailCapacity)
 			console.warn('[WARN]: skipped allocating decision as trail capacity is fulfilled');
 		else {
 			this.trail.push(decision);
 			if (decision.isD()) this.decisionLevel++;
-			if (updateFollowUpIndex) this.updateFollowUpIndex();
 		}
 	}
 
@@ -58,5 +49,9 @@ export class Trail {
 		thisArg?: unknown
 	): void {
 		this.trail.forEach(callback, thisArg);
+	}
+
+	public updateFollowUpIndex(): void {
+		this.followUPIndex = this.trail.length - 1;
 	}
 }

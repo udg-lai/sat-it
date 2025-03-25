@@ -42,6 +42,10 @@ class VariablePool implements IVariablePool {
 		return this.collection[idx].copy();
 	}
 
+	nVariables(): number {
+		return this.poolCapacity;
+	}
+
 	private updatePointer(disposedPosition: number) {
 		this.pointer = Math.min(disposedPosition, this.pointer);
 	}

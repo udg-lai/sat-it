@@ -1,7 +1,6 @@
 <script lang="ts">
 	import './styles.css';
 	import FooterComponent from '$lib/components/FooterComponent.svelte';
-	import LogicResolutionComponent from '$lib/components/LogicResolutionComponent.svelte';
 	import ToolsComponent from '$lib/components/tools/ToolsComponent.svelte';
 	import ScrollableComponent from '$lib/components/ScrollableComponent.svelte';
 	import ToastComponent from '$lib/components/ToastComponent.svelte';
@@ -14,8 +13,9 @@
 	} from '$lib/store/instances.store.ts';
 	import { logError } from '$lib/transversal/utils/logging.ts';
 	import VariablePool from '$lib/transversal/entities/VariablePool.ts';
-	import { updateProblem } from '$lib/problem.svelte.ts';
+	import { updateProblem } from '$lib/store/problem.store.ts';
 	import { onMount } from 'svelte';
+	import AppComponent from '$lib/components/AppComponent.svelte';
 
 	onMount(() => {
 		initializeInstancesStore()
@@ -62,7 +62,7 @@
 		</div>
 		<workspace class="flex flex-col md:flex-row">
 			<play-area>
-				<ScrollableComponent component={logicResolution} />
+				<ScrollableComponent component={app} />
 			</play-area>
 		</workspace>
 	</main>
@@ -71,6 +71,6 @@
 	</footer>
 </app>
 
-{#snippet logicResolution()}
-	<LogicResolutionComponent />
+{#snippet app()}
+	<AppComponent />
 {/snippet}

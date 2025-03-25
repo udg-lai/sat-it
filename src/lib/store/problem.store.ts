@@ -1,7 +1,7 @@
 import { get, writable, type Writable } from 'svelte/store';
-import VariablePool from './transversal/entities/VariablePool.ts';
+import VariablePool from '../transversal/entities/VariablePool.ts';
 
-interface Problem {
+export interface Problem {
 	pools: Pools;
 	algorithm: () => void;
 }
