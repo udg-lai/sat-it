@@ -2,7 +2,7 @@ import type DecisionVariable from '$lib/transversal/entities/DecisionLiteral.sve
 
 export class Trail {
 	private trail: DecisionVariable[] = $state([]);
-	private followUPIndex: number = $state(0);
+	private followUPIndex: number = $state(-1);
 	private decisionLevel: number = 0;
 	private trailCapacity: number = 0;
 
@@ -14,7 +14,6 @@ export class Trail {
 		const newTrail = new Trail(this.trailCapacity);
 		newTrail.trail = this.trail.map((decision) => decision.copy());
 		newTrail.followUPIndex = this.followUPIndex;
-		newTrail.updateFollowUpIndex();
 		return newTrail;
 	}
 
@@ -52,7 +51,7 @@ export class Trail {
 		this.trail.forEach(callback, thisArg);
 	}
 
-	private updateFollowUpIndex(): void {
-		this.followUPIndex = this.trail.length;
+	public updateFollowUpIndex(): void {
+		this.followUPIndex = this.trail.length - 1;
 	}
 }

@@ -22,6 +22,7 @@ export function dummySearch(params: DummySearchParams): void {
 			const variable = variablePool.get(variableId);
 			const dVariable = new DecisionVariable(variable, AssignmentReason.D);
 			currentTrail.push(dVariable);
+			currentTrail.updateFollowUpIndex()
 		} else {
 			logError('Dummy Search Algorithm', 'No variable to decide');
 		}
@@ -41,6 +42,9 @@ export function dummySearch(params: DummySearchParams): void {
 			} else {
 				lastDecision = currentTrail.pop();
 			}
+		}
+		if (!backtrack) {
+			currentTrail.updateFollowUpIndex();
 		}
 	}
 }
