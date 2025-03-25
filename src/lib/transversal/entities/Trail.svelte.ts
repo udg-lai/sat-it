@@ -65,6 +65,60 @@ export class Trail {
 		return newTrail;
 	}
 
+	getTrail(): Decision[] {
+		return this.trail;
+	}
+
+	push(decision: Decision) {
+		let n = 1;
+		if (decision.type === 'Forward') {
+			n += decision.propagations.length;
+		}
+
+		if (n <= this.remainingSpace()) {
+			this.trail.push(decision);
+			this.nDecision += n;
+
+			if (decision.type === 'Forward') {
+				this.decisionLevel++;
+			}
+		} else {
+			console.warn('[WARN]: skipped allocating decision as trail capacity is fulfilled');
+		}
+	}
+
+	pop(): Decision | undefined {
+		const decision = this.trail.pop();
+		if (decision !== undefined) {
+			let n = 1;
+			if (decision.type === 'Forward') {
+				this.decisionLevel--;
+				n += decision.propagations.length;
+			}
+			this.nDecision -= n;
+		}
+		return decision;
+	}
+
+	[Symbol.iterator]() {
+		return this.trail.values();
+	}
+
+	forEach(
+		callback: (decision: Decision, index: number, array: Decision[]) => void,
+		thisArg?: unknown
+	): void {
+		this.trail.forEach(callback, thisArg);
+	}
+
+	updateFollowUpIndex(): void {
+		this.followUPIndex = this.trail.length - 1;
+	}
+
+	remainingSpace(): number {
+		return this.maximumDecisions - this.nDecision;
+	}
+
 	private copyTrail(trail: Decision[]): Decision[] {
 		const decisionCopier = (d: Decision) => {
 			let newDecision: Decision;
@@ -82,52 +136,5 @@ export class Trail {
 			return newDecision;
 		};
 		return trail.map(decisionCopier);
-	}
-
-	getTrail(): Decision[] {
-		return this.trail;
-	}
-
-	push(decision: Decision) {
-		let n = 1;
-		if (decision.type === 'Forward') {
-			n += decision.propagations.length;
-		}
-
-		if (n <= this.remainingSpace()) {
-			this.trail.push(decision);
-			this.decisionLevel += n;
-
-			if (decision.type === 'Forward') {
-				this.decisionLevel++;
-			}
-		} else {
-			console.warn('[WARN]: skipped allocating decision as trail capacity is fulfilled');
-		}
-	}
-
-	private remainingSpace(): number {
-		return this.maximumDecisions - this.nDecision;
-	}
-
-	public pop(): Decision | undefined {
-		const decision = this.trail.pop();
-		if (decision?.type === 'Forward') this.decisionLevel--;
-		return decision;
-	}
-
-	[Symbol.iterator]() {
-		return this.trail.values();
-	}
-
-	forEach(
-		callback: (decision: Decision, index: number, array: Decision[]) => void,
-		thisArg?: unknown
-	): void {
-		this.trail.forEach(callback, thisArg);
-	}
-
-	public updateFollowUpIndex(): void {
-		this.followUPIndex = this.trail.length - 1;
 	}
 }
