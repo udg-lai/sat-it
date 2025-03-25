@@ -1,30 +1,27 @@
 <script lang="ts">
-	import type DecisionVariable from '$lib/transversal/entities/DecisionLiteral.svelte.ts';
 	import MathTexComponent from '$lib/components/MathTexComponent.svelte';
 	import { Indicator } from 'flowbite-svelte';
+	import type { Decision } from '$lib/transversal/entities/Trail.svelte.ts';
 
 	interface Props {
-		decision: DecisionVariable;
+		decision: Decision;
 		onClick?: () => void;
 	}
 	let { decision, onClick }: Props = $props();
-	let decisionColor: string = $state('teal');
 
-	$effect(() => {
-		decisionColor = decision.isD() ? 'teal' : 'red';
-	});
+	let decisionColor: string = $derived(decision.type === 'Forward' ? 'teal' : 'red');
 
 	// let previousIndex = $derived(currentWP < startingWP);
 </script>
 
 <div
 	class="decision-literal-wrapper"
-	class:decide={decision.isD()}
-	class:backtrack={decision.isK()}
+	class:decide={decision.type === 'Forward'}
+	class:backtrack={decision.type === 'Rollback'}
 >
 	<button class="decision-literal-btn" onclick={onClick}>
 		<Indicator placement="top-left" size="md" color={decisionColor} />
-		<MathTexComponent equation={decision.toTeX()} />
+		<MathTexComponent equation={decision.decision.toTeX()} />
 	</button>
 </div>
 
@@ -49,11 +46,5 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-	}
-
-	.decide {
-	}
-
-	.backtrack {
 	}
 </style>

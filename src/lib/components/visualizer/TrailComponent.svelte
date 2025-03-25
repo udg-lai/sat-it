@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
-	import DecisionVariableComponent from '$lib/components/DecisionVariableComponent.svelte';
+	import DecisionComponent from '$lib/components/DecisionComponent.svelte';
 	import { get, writable, type Writable } from 'svelte/store';
 
 	interface Props {
@@ -40,7 +40,7 @@
 				<button class="option">C</button>
 			</div>
 		{/if}
-		<DecisionVariableComponent {decision} onClick={() => clickDecisionVariable(index)} />
+		<DecisionComponent {decision} onClick={() => clickDecisionVariable(index)} />
 	{/each}
 </div>
 
