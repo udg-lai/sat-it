@@ -12,7 +12,7 @@
 	import type { DimacsInstance } from '$lib/dimacs/dimacs-instance.interface.ts';
 	import dimacsParser from '$lib/transversal/utils/parsers/dimacs.ts';
 	import { logError } from '$lib/transversal/utils/logging.ts';
-	import { activateInstance, addInstance, instances } from '$lib/store/instances.store.ts';
+	import { activateInstance, addInstance, instanceStore } from '$lib/store/instances.store.ts';
 
 	let fileInputRef: HTMLInputElement;
 
@@ -74,7 +74,7 @@
 	<AccordionItem open={true}>
 		<span slot="header">List of problems</span>
 		<ul>
-			{#each $instances as instance}
+			{#each $instanceStore as instance}
 				<li>
 					<div class="flex">
 						<button class="icon not-removable" disabled={!instance.removable || instance.active}>
