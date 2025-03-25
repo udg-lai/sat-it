@@ -39,11 +39,13 @@ export function dummySearch(params: DummySearchParams): void {
 				const variable = variablePool.get(lastVariable.getInt());
 				const dVariable = new DecisionVariable(variable, AssignmentReason.K);
 				currentTrail.push(dVariable);
+				currentTrail.updateFollowUpIndex();
 			} else {
 				lastDecision = currentTrail.pop();
 			}
 		}
 		if (!backtrack) {
+			// this denotes that no backward decision was found in the trail
 			currentTrail.updateFollowUpIndex();
 		}
 	}
