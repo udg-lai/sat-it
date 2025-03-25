@@ -22,7 +22,7 @@ export function dummySearch(params: DummySearchParams): void {
 			const variable = variablePool.get(variableId);
 			const dVariable = new DecisionVariable(variable, AssignmentReason.D);
 			currentTrail.push(dVariable);
-			currentTrail.updateFollowUpIndex()
+			currentTrail.updateFollowUpIndex();
 		} else {
 			logError('Dummy Search Algorithm', 'No variable to decide');
 		}
