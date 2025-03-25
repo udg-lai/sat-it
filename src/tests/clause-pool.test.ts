@@ -14,15 +14,15 @@ const dummyExample: Claims = [
 
 const extraClause: number[] = [-1, -2, 0];
 
-const variablePool: VariablePool = new VariablePool(3);
-
 describe('clause pool', () => {
 	it('unresolved', () => {
+		const variablePool: VariablePool = new VariablePool(3);
 		const clausePool: ClausePool = new ClausePool(fromClaimsToClause(dummyExample, variablePool));
 		variablePool.persist(1, true);
 		expect(clausePool.eval()).toBe(Eval.UNRESOLVED);
 	});
 	it('unsat', () => {
+		const variablePool: VariablePool = new VariablePool(3);
 		const clausePool: ClausePool = new ClausePool(fromClaimsToClause(dummyExample, variablePool));
 		variablePool.persist(1, true);
 		variablePool.persist(2, true);
@@ -30,6 +30,7 @@ describe('clause pool', () => {
 		expect(clausePool.eval()).toBe(Eval.UNSAT);
 	});
 	it('sat', () => {
+		const variablePool: VariablePool = new VariablePool(3);
 		const clausePool: ClausePool = new ClausePool(fromClaimsToClause(dummyExample, variablePool));
 		variablePool.persist(1, true);
 		variablePool.persist(2, false);
@@ -37,6 +38,7 @@ describe('clause pool', () => {
 		expect(clausePool.eval()).toBe(Eval.SAT);
 	});
 	it('addition-sat', () => {
+		const variablePool: VariablePool = new VariablePool(3);
 		const clausePool: ClausePool = new ClausePool(fromClaimsToClause(dummyExample, variablePool));
 		const literalCollection: Literal[] = [];
 		extraClause.forEach((value) => {
