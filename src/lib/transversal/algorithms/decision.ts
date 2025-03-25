@@ -19,7 +19,7 @@ export function dummySearch(params: DummySearchParams): void {
 		if (isJust(nextVariable)) {
 			const variableId = fromJust(nextVariable);
 			variablePool.persist(variableId, true);
-			const variable = variablePool.get(variableId);
+			const variable = variablePool.getCopy(variableId);
 			const dVariable = new DecisionVariable(variable, AssignmentReason.D);
 			currentTrail.push(dVariable);
 			currentTrail.updateFollowUpIndex();
@@ -36,7 +36,7 @@ export function dummySearch(params: DummySearchParams): void {
 			if (lastDecision.isD()) {
 				backtrack = true;
 				variablePool.persist(lastVariable.getInt(), !fromJust(lastVariable.getAssignment()));
-				const variable = variablePool.get(lastVariable.getInt());
+				const variable = variablePool.getCopy(lastVariable.getInt());
 				const dVariable = new DecisionVariable(variable, AssignmentReason.K);
 				currentTrail.push(dVariable);
 				currentTrail.updateFollowUpIndex();

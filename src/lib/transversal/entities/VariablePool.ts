@@ -39,6 +39,11 @@ class VariablePool implements IVariablePool {
 
 	get(variable: number): Variable {
 		const idx = this.checkIndex(variable);
+		return this.collection[idx];
+	}
+
+	getCopy(variable: number): Variable {
+		const idx = this.checkIndex(variable);
 		return this.collection[idx].copy();
 	}
 

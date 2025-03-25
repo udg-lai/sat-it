@@ -47,10 +47,10 @@ describe('variable pool', () => {
 			}
 		}
 		for (let i = 0; i < capacity - 1; i++) {
-			const variable = pool.get(i + 1);
+			const variable = pool.getCopy(i + 1);
 			expect(variable.isAssigned()).toBe(true);
 		}
-		const variable = pool.get(4);
+		const variable = pool.getCopy(4);
 		expect(variable.isAssigned()).toBe(false);
 		let nextVariable = pool.nextVariableToAssign();
 		expect(isJust(nextVariable)).toBe(true);
