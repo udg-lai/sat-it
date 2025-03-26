@@ -47,7 +47,7 @@ describe('clause pool', () => {
 					new Literal(variablePool.get(Math.abs(value)), value < 0 ? 'Negative' : 'Positive')
 				);
 			}
-			clausePool.addClause(new Clause(literalCollection));
+			clausePool.addClause(new Clause(literalCollection, clausePool.getPoolCapacity()));
 		});
 		variablePool.persist(1, true);
 		variablePool.persist(2, false);

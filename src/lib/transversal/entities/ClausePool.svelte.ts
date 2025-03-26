@@ -58,6 +58,10 @@ class ClausePool implements IClausePool {
 	getClauses(): Clause[] {
 		return this.collection;
 	}
+
+	getPoolCapacity() {
+		return this.poolCapacity;
+	}
 }
 
 export default ClausePool;

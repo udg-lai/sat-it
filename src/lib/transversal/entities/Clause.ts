@@ -1,15 +1,14 @@
 import type Literal from './Literal.svelte.ts';
 import logicResolution from '../algorithms/resolution.ts';
-import { v4 as uuidv4 } from 'uuid';
 import { arraysEqual } from '../utils/types/array.ts';
 import type { Comparable } from '../utils/interfaces/Comparable.ts';
 
 class Clause implements Comparable<Clause> {
 	literals: Literal[] = [];
-	id: string;
+	id: number;
 
-	constructor(literals: Literal[]) {
-		this.id = uuidv4();
+	constructor(literals: Literal[], id: number) {
+		this.id = id;
 		this.literals = literals;
 	}
 
