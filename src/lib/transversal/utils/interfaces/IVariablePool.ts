@@ -8,5 +8,6 @@ export interface IVariablePool {
 	nextVariableToAssign(): Maybe<number>;
 	dispose(variable: number): void;
 	persist(variable: number, assignment: boolean): void;
-	get(variable: number): Variable;
+	get(variable: number): void;
+	getCopy(variable: number): Variable;
 }

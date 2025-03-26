@@ -18,7 +18,7 @@ class VariablePool implements IVariablePool {
 	}
 
 	allAssigned(): boolean {
-		// Edit: Now the pointer is allways looking at the variable that is going to be assigned
+		// Edit: Now the pointer is always looking at the variable that is going to be assigned
 		return this.pointer === this.poolCapacity;
 	}
 
@@ -39,7 +39,11 @@ class VariablePool implements IVariablePool {
 
 	get(variable: number): Variable {
 		const idx = this.checkIndex(variable);
-		return this.collection[idx].copy();
+		return this.collection[idx];
+	}
+
+	getCopy(variable: number): Variable {
+		return this.get(variable).copy();
 	}
 
 	nVariables(): number {
