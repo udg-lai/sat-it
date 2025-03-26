@@ -11,7 +11,7 @@
 
 <div
 	class="literal flex"
-	class:undefined={!literal.isDefined()}
+	class:undefined={!literal.isAssigned()}
 	class:true={literal.isTrue()}
 	class:false={literal.isFalse()}
 >
