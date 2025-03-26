@@ -1,7 +1,7 @@
 import Variable from '$lib/transversal/entities/Variable.svelte.ts';
 import { v4 as uuidv4 } from 'uuid';
 import type { Comparable } from '../utils/interfaces/Comparable.ts';
-import { fromJust, isJust, isNothing } from '../utils/types/maybe.ts';
+import { fromJust, isNothing } from '../utils/types/maybe.ts';
 
 export type Polarity = 'Positive' | 'Negative';
 
@@ -35,7 +35,7 @@ export default class Literal implements Comparable<Literal> {
 	public evaluate(): boolean {
 		const mb_evaluation = this.variable.getAssignment();
 		if (isNothing(mb_evaluation)) {
-			throw Error("The literal is not yet assigned")
+			throw Error('The literal is not yet assigned');
 		}
 		let evaluation = fromJust(mb_evaluation);
 		if (this.polarity === 'Negative') evaluation = !evaluation;
