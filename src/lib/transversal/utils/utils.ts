@@ -18,8 +18,7 @@ export function fromClaimsToClause(claims: Claims, variablePool: VariablePool): 
 		if (claim.length === 0) {
 			logError('Claim to clause', `Claim ${i} is empty. With no EOS`);
 		} else {
-			const [eos, ...rest] = claim.reverse();
-			console.log(claim);
+			const [eos, ...rest] = [...claim].reverse();
 			if (eos === 0) {
 				const literals: Literal[] = [];
 				rest.forEach((lit) => {
