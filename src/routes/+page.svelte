@@ -31,12 +31,14 @@
 		const instances: InteractiveInstance[] = $instanceStore;
 		if (instances.length > 0) {
 			const { summary } = instances[0];
+			const { claims } = summary;
 
 			const variables: VariablePool = new VariablePool(summary.varCount);
+			const clauses: ClausePool = new ClausePool(fromClaimsToClause(claims.simplified, variables));
 
 			const pools = {
 				variables,
-				clauses: new ClausePool(fromClaimsToClause(summary.claims.simplified, variables))
+				clauses
 			};
 
 			const algorithm = () => console.log('new algorithm');

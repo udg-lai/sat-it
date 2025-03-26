@@ -27,6 +27,7 @@ class ClausePool implements IClausePool {
 			}
 		}
 		const state: Eval = unsat ? Eval.UNSAT : nSatisfied == i ? Eval.SAT : Eval.UNRESOLVED;
+		console.log(state, 'stateeee');
 		return state;
 	}
 
