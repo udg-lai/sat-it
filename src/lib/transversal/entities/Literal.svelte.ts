@@ -32,7 +32,7 @@ export default class Literal implements Comparable<Literal> {
 		return this.variable.isAssigned();
 	}
 
-	public evaluate(): boolean {
+	private evaluate(): boolean {
 		const mb_evaluation = this.variable.getAssignment();
 		if (isNothing(mb_evaluation)) {
 			throw Error('The literal is not yet assigned');
