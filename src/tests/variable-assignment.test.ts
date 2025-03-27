@@ -39,14 +39,14 @@ describe('variable assignment', () => {
 			VariableAssignment.createWithBacktracking(params.variablePool.getCopy(4))
 		);
 	});
-	it('Unit Propagation baby',() => {
-        dummyAssignmentAlgorithm(params);
-        params.variablePool.dispose(4);
-        params.variablePool.persist(4, false);
-        //We do not have any clause but this should be okay for now
-        params.currentTrail.push(VariableAssignment.createWithUP(params.variablePool.getCopy(4), 3));
-        const lastDecision = params.currentTrail.pop();
-        expect(lastDecision?.isUP()).toBe(true);
-        expect(lastDecision?.getCause()).toBe(3);
-    });
+	it('Unit Propagation baby', () => {
+		dummyAssignmentAlgorithm(params);
+		params.variablePool.dispose(4);
+		params.variablePool.persist(4, false);
+		//We do not have any clause but this should be okay for now
+		params.currentTrail.push(VariableAssignment.createWithUP(params.variablePool.getCopy(4), 3));
+		const lastDecision = params.currentTrail.pop();
+		expect(lastDecision?.isUP()).toBe(true);
+		expect(lastDecision?.getCause()).toBe(3);
+	});
 });

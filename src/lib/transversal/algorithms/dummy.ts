@@ -1,4 +1,4 @@
-import VariableAssignment, { DecisionCause} from '../entities/VariableAssignment.ts';
+import VariableAssignment, { DecisionCause } from '../entities/VariableAssignment.ts';
 import type { Trail } from '../entities/Trail.svelte.ts';
 import type { TrailCollection } from '../entities/TrailCollection.svelte.ts';
 import type VariablePool from '../entities/VariablePool.ts';
