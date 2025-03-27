@@ -10,7 +10,7 @@ export function logWarning(title: string, description: string): void {
 	});
 }
 
-export function logInfo(title: string, description: string): void {
+export function logInfo(title: string, description?: string): void {
 	console.error('title:\n', title, '\ndescription:\n', description);
 	addToast({
 		type: 'info',
@@ -20,7 +20,7 @@ export function logInfo(title: string, description: string): void {
 	});
 }
 
-export function logError(title: string, description: string): void {
+export function logError(title: string, description?: string): void {
 	console.error('title:\n', title, '\ndescription:\n', description);
 	addToast({
 		type: 'error',
@@ -30,6 +30,11 @@ export function logError(title: string, description: string): void {
 	});
 }
 
-function formatText(text: string) {
-	return text.at(0)?.toUpperCase() + text.substring(1).toLowerCase();
+export function logFatal(title: string, description?: string): never {
+	logError(title, description);
+	throw title
+}
+
+function formatText(text?: string): string {
+	return text === undefined ? '' : text.at(0)?.toUpperCase() + text.substring(1).toLowerCase();
 }

@@ -1,46 +1,57 @@
 import type { Comparable } from '../utils/interfaces/Comparable.ts';
-import { isJust, makeJust, makeNothing, type Maybe } from '../utils/types/maybe.ts';
+import { logFatal } from '../utils/logging.ts';
 
 export default class Variable implements Comparable<Variable> {
-	id: number;
-	assignment: Maybe<boolean> = makeNothing();
+	private id: number;
+	private assignment: boolean | undefined;
 
-	constructor(id: number, assignment: Maybe<boolean> = makeNothing()) {
+	constructor(id: number, assignment: boolean | undefined = undefined) {
 		if (id < 0) throw 'ERROR: variable ID should be >= 0';
 		this.id = id;
 		this.assignment = assignment;
 	}
 
-	public getInt(): number {
+	getInt(): number {
 		return this.id;
 	}
 
-	public isAssigned(): boolean {
-		return isJust(this.assignment);
+	isAssigned(): boolean {
+		return this.assignment !== undefined;
 	}
 
-	public getAssignment(): Maybe<boolean> {
+	isNotAssigned(): boolean {
+		return !this.isAssigned();
+	}
+
+	getAssignment(): boolean {
+		if (this.assignment === undefined) {
+			logFatal("Evaluation of an undefined variable")
+		}
 		return this.assignment;
 	}
 
-	public assign(evaluation: boolean): void {
-		this.assignment = makeJust(evaluation);
+	assign(assignment: boolean): void {
+		this.assignment = assignment;
 	}
 
-	public unassign(): void {
-		this.assignment = makeNothing();
+	unassign(): void {
+		this.assignment = undefined;
 	}
 
-	public negate(): void {
-		this.assign(!this.assignment);
+	negate(): void {
+		if (this.isNotAssigned()) {
+			logFatal("You can not negate the assigment of a non assigned variable")
+		} else {
+			this.assign(!this.assignment);
+		}
 	}
 
-	public copy(): Variable {
+	copy(): Variable {
 		const newVariable = new Variable(this.id, this.assignment);
 		return newVariable;
 	}
 
-	public equals(other: Variable): boolean {
+	equals(other: Variable): boolean {
 		return this.id === other.id;
 	}
 }
