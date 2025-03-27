@@ -18,7 +18,7 @@ class Clause implements Comparable<Clause> {
 	}
 
 	public removeLiteral(lit: Literal) {
-		this.literals = this.literals.filter((l) => l.id != lit.id);
+		this.literals = this.literals.filter((l) => l.getId() != lit.getId());
 	}
 
 	public eval(): ClauseEval {
