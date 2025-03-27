@@ -2,14 +2,14 @@ import { writable, type Writable } from 'svelte/store';
 
 type Decide<T> = 'Automated' | T;
 
-export interface DecisionEvent<T> {
-	decision: Decide<T>;
+export interface AssignmentEvent<T> {
+	assignment: Decide<T>;
 }
 
-export const decisionEventStore: Writable<DecisionEvent<number>> = writable();
+export const assignmentEventStore: Writable<AssignmentEvent<number>> = writable();
 
-export const emitDecisionEvent = (decision: Decide<number>) => {
-	decisionEventStore.update(() => ({ decision }));
+export const emitAssignmentEvent = (assignment: Decide<number>) => {
+	assignmentEventStore.update(() => ({ assignment: assignment }));
 };
 
 export interface EditorViewEvent {
