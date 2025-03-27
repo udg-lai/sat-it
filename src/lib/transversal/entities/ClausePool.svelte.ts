@@ -1,15 +1,13 @@
 import type { IClausePool } from '../utils/interfaces/IClausePool.ts';
 import { Eval } from '../utils/interfaces/IClausePool.ts';
-import type Clause from './Clause.ts';
+import Clause from './Clause.ts';
 import { ClauseEval } from './Clause.ts';
 
 class ClausePool implements IClausePool {
 	private collection: Clause[];
-	poolCapacity: number = 0;
 
 	constructor(clauses: Clause[] = []) {
 		this.collection = clauses;
-		this.poolCapacity = clauses.length;
 	}
 
 	eval(): Eval {
@@ -32,11 +30,18 @@ class ClausePool implements IClausePool {
 
 	addClause(clause: Clause): void {
 		this.collection.push(clause);
-		this.poolCapacity++;
 	}
 
-	removeClause(clause: number): void {
-		this.collection = this.collection.filter((_, i) => i !== clause);
+	/*Eventually, this function will be only called when be go back in a trail and we want to forget a clause 
+	  so there is no need to update the remaining clauses ids, but maybe in a future the user will be able to
+	  delete some other clauses so I will leave the "reassignment" of the caluses ids */
+	
+	removeClause(clauseIndex: number): void {
+		this.collection = this.collection.filter((_,i) => i !== clauseIndex);
+		for (let i = clauseIndex; i < this.collection.length; i++) {
+			this.collection[i].setId(i);
+		}
+		Clause.setIdCounter(this.collection.length);
 	}
 
 	get(i: number): Clause {
@@ -59,8 +64,8 @@ class ClausePool implements IClausePool {
 		return this.collection;
 	}
 
-	getPoolCapacity() {
-		return this.poolCapacity;
+	poolCapacity() : number {
+		return this.collection.length;
 	}
 }
 

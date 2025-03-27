@@ -7,9 +7,19 @@ class Clause implements Comparable<Clause> {
 	literals: Literal[] = [];
 	id: number;
 
-	constructor(literals: Literal[], id: number) {
-		this.id = id;
+	static idCounter: number = 0;
+
+	constructor(literals: Literal[]) {
+		this.id = Clause.idCounter++;
 		this.literals = literals;
+	}
+
+	static setIdCounter(initialId: number) {
+		Clause.idCounter = initialId;
+	}
+
+	public setId(newId:number): void {
+		this.id = newId;
 	}
 
 	public addLiteral(lit: Literal) {

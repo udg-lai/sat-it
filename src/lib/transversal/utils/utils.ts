@@ -33,7 +33,7 @@ export function fromClaimsToClause(claims: Claims, variablePool: VariablePool): 
 						);
 					}
 				});
-				clauses.push(new Clause(literals, i));
+				clauses.push(new Clause(literals));
 			} else {
 				logError(`Claim's EOS not found`, `Claim ${i} has not EOS`);
 			}

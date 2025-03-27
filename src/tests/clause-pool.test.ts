@@ -22,6 +22,7 @@ describe('clause pool', () => {
 		expect(clausePool.eval()).toBe(Eval.UNRESOLVED);
 	});
 	it('unsat', () => {
+		Clause.setIdCounter(0);
 		const variablePool: VariablePool = new VariablePool(3);
 		const clausePool: ClausePool = new ClausePool(fromClaimsToClause(dummyExample, variablePool));
 		variablePool.persist(1, true);
@@ -30,6 +31,7 @@ describe('clause pool', () => {
 		expect(clausePool.eval()).toBe(Eval.UNSAT);
 	});
 	it('sat', () => {
+		Clause.setIdCounter(0);
 		const variablePool: VariablePool = new VariablePool(3);
 		const clausePool: ClausePool = new ClausePool(fromClaimsToClause(dummyExample, variablePool));
 		variablePool.persist(1, true);
@@ -38,6 +40,7 @@ describe('clause pool', () => {
 		expect(clausePool.eval()).toBe(Eval.SAT);
 	});
 	it('addition-sat', () => {
+		Clause.setIdCounter(0);
 		const variablePool: VariablePool = new VariablePool(3);
 		const clausePool: ClausePool = new ClausePool(fromClaimsToClause(dummyExample, variablePool));
 		const literalCollection: Literal[] = [];
@@ -47,11 +50,31 @@ describe('clause pool', () => {
 					new Literal(variablePool.get(Math.abs(value)), value < 0 ? 'Negative' : 'Positive')
 				);
 			}
-			clausePool.addClause(new Clause(literalCollection, clausePool.getPoolCapacity()));
+			clausePool.addClause(new Clause(literalCollection));
 		});
 		variablePool.persist(1, true);
 		variablePool.persist(2, false);
 		variablePool.persist(3, true);
 		expect(clausePool.eval()).toBe(Eval.SAT);
+	});
+	it('addition-sat', () => {
+		Clause.setIdCounter(0);
+		const variablePool: VariablePool = new VariablePool(3);
+		const clausePool: ClausePool = new ClausePool(fromClaimsToClause(dummyExample, variablePool));
+		expect(clausePool.poolCapacity()).toBe(2);
+		const literalCollection: Literal[] = [];
+		extraClause.forEach((value) => {
+			if (value !== 0) {
+				literalCollection.push(
+					new Literal(variablePool.get(Math.abs(value)), value < 0 ? 'Negative' : 'Positive')
+				);
+			}
+		});
+		clausePool.addClause(new Clause(literalCollection));
+		expect(clausePool.get(2).id).toBe(2);
+		clausePool.removeClause(1);
+		expect(clausePool.get(1).id).toBe(1);
+		expect(Clause.idCounter).toBe(2);
+		
 	});
 });
