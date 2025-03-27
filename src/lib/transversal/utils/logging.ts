@@ -32,7 +32,7 @@ export function logError(title: string, description?: string): void {
 
 export function logFatal(title: string, description?: string): never {
 	logError(title, description);
-	throw title
+	throw title;
 }
 
 function formatText(text?: string): string {

@@ -64,14 +64,16 @@ export default class DecisionVariable {
 
 	toTeX(): string {
 		if (this.variable.isNotAssigned()) {
-			logFatal("Evaluating a variable assigment with not assigned value", "The evaluation is given by its variable which is not yet assigned");
+			logFatal(
+				'Evaluating a variable assigment with not assigned value',
+				'The evaluation is given by its variable which is not yet assigned'
+			);
 		}
 		const assignment = this.variable.getAssignment();
 		const variable = this.variable.getInt();
 		if (assignment) {
 			return `\\overline{${variable}}`;
-		}
-		else {
+		} else {
 			return variable.toString();
 		}
 	}

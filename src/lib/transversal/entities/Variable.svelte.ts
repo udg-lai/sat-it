@@ -25,7 +25,7 @@ export default class Variable implements Comparable<Variable> {
 
 	getAssignment(): boolean {
 		if (this.assignment === undefined) {
-			logFatal("Evaluation of an undefined variable")
+			logFatal('Evaluation of an undefined variable');
 		}
 		return this.assignment;
 	}
@@ -40,7 +40,7 @@ export default class Variable implements Comparable<Variable> {
 
 	negate(): void {
 		if (this.isNotAssigned()) {
-			logFatal("You can not negate the assigment of a non assigned variable")
+			logFatal('You can not negate the assigment of a non assigned variable');
 		} else {
 			this.assign(!this.assignment);
 		}
