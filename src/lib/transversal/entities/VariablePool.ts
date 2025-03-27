@@ -67,11 +67,6 @@ class VariablePool implements IVariablePool {
 		return nextFound ? makeJust(this.collection[this.pointer].getInt()) : makeNothing();
 	}
 
-	public getVariableState(id: number): Maybe<boolean> {
-		const idx = this.checkIndex(id);
-		return this.collection[idx].getAssignment();
-	}
-
 	public assignVariable(id: number, evaluation: boolean): void {
 		const idx = this.checkIndex(id);
 		this.collection[idx].assign(evaluation);

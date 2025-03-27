@@ -71,10 +71,12 @@ export default class DecisionVariable {
 		}
 		const assignment = this.variable.getAssignment();
 		const variable = this.variable.getInt();
+		let text: string;
 		if (assignment) {
-			return `\\overline{${variable}}`;
+			text = variable.toString();
 		} else {
-			return variable.toString();
+			text = `\\overline{${variable}}`;
 		}
+		return text;
 	}
 }

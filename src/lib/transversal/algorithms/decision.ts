@@ -35,7 +35,7 @@ export function dummySearch(params: DummySearchParams): void {
 			variablePool.dispose(lastVariable.getInt());
 			if (lastDecision.isD()) {
 				backtrack = true;
-				variablePool.persist(lastVariable.getInt(), !fromJust(lastVariable.getAssignment()));
+				variablePool.persist(lastVariable.getInt(), !lastVariable.getAssignment());
 				const variable = variablePool.getCopy(lastVariable.getInt());
 				const dVariable = new DecisionVariable(variable, AssignmentReason.K);
 				currentTrail.push(dVariable);
