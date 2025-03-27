@@ -28,7 +28,6 @@ export default class VariableAssignment {
 		this.clauseUpId = clauseUpId;
 	}
 
-
 	public copy(): VariableAssignment {
 		return new VariableAssignment(this.variable, this.reason, this.clauseUpId);
 	}
