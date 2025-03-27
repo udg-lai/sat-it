@@ -2,6 +2,7 @@ import type VariableAssignment from '$lib/transversal/entities/VariableAssignmen
 
 export class Trail {
 	private assignments: VariableAssignment[] = $state([]);
+	private decisionBookMark: number[] = $state([]);
 	private followUPIndex: number = $state(-1);
 	private decisionLevel: number = 0;
 	private trailCapacity: number = 0;
@@ -13,6 +14,7 @@ export class Trail {
 	public copy(): Trail {
 		const newTrail = new Trail(this.trailCapacity);
 		newTrail.assignments = this.assignments.map((assignment) => assignment.copy());
+		newTrail.decisionBookMark = [...this.decisionBookMark];
 		newTrail.followUPIndex = this.followUPIndex;
 		return newTrail;
 	}
