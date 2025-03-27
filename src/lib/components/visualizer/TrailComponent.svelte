@@ -34,7 +34,7 @@
 				<button class="option">C</button>
 			</div>
 		{/if}
-		<VariableAssignmentComponent assignment={assignment} onClick={() => onVariableAssignmentClick(index)} />
+		<VariableAssignmentComponent {assignment} onClick={() => onVariableAssignmentClick(index)} />
 	{/each}
 </div>
 

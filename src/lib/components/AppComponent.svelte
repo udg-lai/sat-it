@@ -1,6 +1,9 @@
 <script lang="ts">
 	import { problemStore, type Problem } from '$lib/store/problem.store.ts';
-	import { dummyAssignmentAlgorithm, type DummySearchParams } from '$lib/transversal/algorithms/dummy.ts';
+	import {
+		dummyAssignmentAlgorithm,
+		type DummySearchParams
+	} from '$lib/transversal/algorithms/dummy.ts';
 	import { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
 	import { TrailCollection } from '$lib/transversal/entities/TrailCollection.svelte.ts';
 	import { onMount } from 'svelte';
