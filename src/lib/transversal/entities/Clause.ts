@@ -4,8 +4,8 @@ import { arraysEqual } from '../utils/types/array.ts';
 import type { Comparable } from '../utils/interfaces/Comparable.ts';
 
 class Clause implements Comparable<Clause> {
-	literals: Literal[] = [];
-	id: number;
+	private literals: Literal[] = [];
+	private id: number;
 
 	static idCounter: number = 0;
 
@@ -18,19 +18,19 @@ class Clause implements Comparable<Clause> {
 		Clause.idCounter = initialId;
 	}
 
-	public setId(newId: number): void {
+	setId(newId: number): void {
 		this.id = newId;
 	}
 
-	public addLiteral(lit: Literal) {
+	addLiteral(lit: Literal) {
 		this.literals.push(lit);
 	}
 
-	public removeLiteral(lit: Literal) {
+	removeLiteral(lit: Literal) {
 		this.literals = this.literals.filter((l) => l.id != lit.id);
 	}
 
-	public eval(): ClauseEval {
+	eval(): ClauseEval {
 		let state = ClauseEval.UNRESOLVED;
 		let i = 0;
 		let unsatCount = 0;
@@ -53,27 +53,27 @@ class Clause implements Comparable<Clause> {
 		return state;
 	}
 
-	public isUndetermined(): boolean {
+	isUndetermined(): boolean {
 		return this.eval() === ClauseEval.UNRESOLVED;
 	}
 
-	public isSAT(): boolean {
+	isSAT(): boolean {
 		return this.eval() === ClauseEval.SAT;
 	}
 
-	public isUnSAT(): boolean {
+	isUnSAT(): boolean {
 		return this.eval() === ClauseEval.UNSAT;
 	}
 
-	public isUnit(): boolean {
+	isUnit(): boolean {
 		return this.eval() === ClauseEval.UNIT;
 	}
 
-	public resolution(other: Clause): Clause {
+	resolution(other: Clause): Clause {
 		return logicResolution(this, other);
 	}
 
-	public equals(other: Clause): boolean {
+	equals(other: Clause): boolean {
 		const c1 = this.literals.map((l) => l.toInt());
 		const c2 = other.literals.map((l) => l.toInt());
 		return arraysEqual(c1.sort(), c2.sort());
