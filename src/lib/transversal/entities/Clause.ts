@@ -18,7 +18,7 @@ class Clause implements Comparable<Clause> {
 		Clause.idCounter = initialId;
 	}
 
-	public setId(newId:number): void {
+	public setId(newId: number): void {
 		this.id = newId;
 	}
 

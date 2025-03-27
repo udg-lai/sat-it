@@ -75,6 +75,5 @@ describe('clause pool', () => {
 		clausePool.removeClause(1);
 		expect(clausePool.get(1).id).toBe(1);
 		expect(Clause.idCounter).toBe(2);
-		
 	});
 });
