@@ -4,6 +4,7 @@ import {
 	fromJust,
 	type Maybe
 } from '$lib/transversal/utils/types/maybe.ts';
+import { logFatal } from '../utils/logging.ts';
 import type Variable from './Variable.svelte.ts';
 
 export enum AssignmentReason {
@@ -31,45 +32,48 @@ export default class VariableAssignment {
 		return new VariableAssignment(this.variable, this.reason, this.clauseUpId);
 	}
 
-	public getVariable(): Variable {
+	getVariable(): Variable {
 		return this.variable;
 	}
 
-	public getSource(): number {
+	getSource(): number {
 		if (isNothing(this.clauseUpId)) {
 			throw 'ERROR: There is no source for the decision';
 		}
 		return fromJust(this.clauseUpId);
 	}
 
-	public isD(): boolean {
+	isD(): boolean {
 		return this.reason === AssignmentReason.D;
 	}
 
-	public isUP(): boolean {
+	isUP(): boolean {
 		return this.reason === AssignmentReason.UP;
 	}
 
-	public isK(): boolean {
+	isK(): boolean {
 		return this.reason === AssignmentReason.K;
 	}
 
-	public unassign(): void {
+	unassign(): void {
 		this.variable.unassign();
 	}
 
-	public toTeX(): string {
-		const assignment = this.variable.getAssignment();
-		if (isNothing(assignment)) {
-			throw Error('No TeX representation for un assigned decision variable');
-		} else {
-			const truthAssignment = fromJust(assignment);
-			const variable = this.variable.getInt();
-			if (truthAssignment) {
-				return `\\overline{${variable}}`;
-			} else {
-				return variable.toString();
-			}
+	toTeX(): string {
+		if (this.variable.isNotAssigned()) {
+			logFatal(
+				'Evaluating a variable assigment with not assigned value',
+				'The evaluation is given by its variable which is not yet assigned'
+			);
 		}
+		const assignment = this.variable.getAssignment();
+		const variable = this.variable.getInt();
+		let text: string;
+		if (assignment) {
+			text = variable.toString();
+		} else {
+			text = `\\overline{${variable}}`;
+		}
+		return text;
 	}
 }
