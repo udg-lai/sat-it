@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { emitDecisionEvent, emitEditorViewEvent } from './events.svelte.ts';
+	import { emitAssignmentEvent, emitEditorViewEvent } from './events.svelte.ts';
 
 	let expanded = $state(true);
 	let textCollapse = $derived(expanded ? 'Expanded' : 'Collapsed');
@@ -16,7 +16,7 @@
 </script>
 
 <div class="flex-center debugger flex">
-	<button class="btn" onclick={() => emitDecisionEvent('Automated')}>
+	<button class="btn" onclick={() => emitAssignmentEvent('Automated')}>
 		<h1>Decide</h1>
 	</button>
 

@@ -13,10 +13,7 @@ export enum AssignmentReason {
 	K = 'backtracking'
 }
 
-export default class DecisionVariable {
-	/**
-	 * Any instance of the decision literal is evaluated to true
-	 */
+export default class VariableAssignment {
 	variable: Variable;
 	reason: AssignmentReason;
 	clauseUpId: Maybe<number>;
@@ -31,8 +28,9 @@ export default class DecisionVariable {
 		this.clauseUpId = clauseUpId;
 	}
 
-	copy(): DecisionVariable {
-		return new DecisionVariable(this.variable, this.reason, this.clauseUpId);
+
+	public copy(): VariableAssignment {
+		return new VariableAssignment(this.variable, this.reason, this.clauseUpId);
 	}
 
 	getVariable(): Variable {

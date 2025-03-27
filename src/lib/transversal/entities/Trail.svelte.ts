@@ -1,57 +1,57 @@
-import type DecisionVariable from '$lib/transversal/entities/DecisionLiteral.svelte.ts';
+import type VariableAssignment from '$lib/transversal/entities/VariableAssignment.ts';
 
 export class Trail {
-	private trail: DecisionVariable[] = $state([]);
+	private assignments: VariableAssignment[] = $state([]);
 	private followUPIndex: number = $state(-1);
 	private decisionLevel: number = 0;
 	private trailCapacity: number = 0;
 
-	constructor(trailCapacity: number) {
+	constructor(trailCapacity: number = 0) {
 		this.trailCapacity = trailCapacity;
 	}
 
 	public copy(): Trail {
 		const newTrail = new Trail(this.trailCapacity);
-		newTrail.trail = this.trail.map((decision) => decision.copy());
+		newTrail.assignments = this.assignments.map((assignment) => assignment.copy());
 		newTrail.followUPIndex = this.followUPIndex;
 		return newTrail;
 	}
 
-	public getTrail(): DecisionVariable[] {
-		return this.trail;
+	public getAssignments(): VariableAssignment[] {
+		return this.assignments;
 	}
 
-	public push(decision: DecisionVariable) {
-		if (this.trail.length == this.trailCapacity)
-			console.warn('[WARN]: skipped allocating decision as trail capacity is fulfilled');
+	public push(assignment: VariableAssignment) {
+		if (this.assignments.length == this.trailCapacity)
+			console.warn('[WARN]: skipped allocating assignment as trail capacity is fulfilled');
 		else {
-			this.trail.push(decision);
-			if (decision.isD()) this.decisionLevel++;
+			this.assignments.push(assignment);
+			if (assignment.isD()) this.decisionLevel++;
 		}
 	}
 
-	public pop(): DecisionVariable | undefined {
-		const returnValue = this.trail.pop();
+	public pop(): VariableAssignment | undefined {
+		const returnValue = this.assignments.pop();
 		if (returnValue?.isD()) this.decisionLevel--;
 		return returnValue;
 	}
 
-	public indexOf(decision: DecisionVariable): number {
-		return this.trail.indexOf(decision);
+	public indexOf(assignment: VariableAssignment): number {
+		return this.assignments.indexOf(assignment);
 	}
 
 	[Symbol.iterator]() {
-		return this.trail.values();
+		return this.assignments.values();
 	}
 
 	forEach(
-		callback: (decision: DecisionVariable, index: number, array: DecisionVariable[]) => void,
+		callback: (assignment: VariableAssignment, index: number, array: VariableAssignment[]) => void,
 		thisArg?: unknown
 	): void {
-		this.trail.forEach(callback, thisArg);
+		this.assignments.forEach(callback, thisArg);
 	}
 
 	public updateFollowUpIndex(): void {
-		this.followUPIndex = this.trail.length - 1;
+		this.followUPIndex = this.assignments.length - 1;
 	}
 }

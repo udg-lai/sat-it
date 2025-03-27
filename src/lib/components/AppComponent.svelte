@@ -1,13 +1,16 @@
 <script lang="ts">
 	import { problemStore, type Problem } from '$lib/store/problem.store.ts';
-	import { dummySearch, type DummySearchParams } from '$lib/transversal/algorithms/decision.ts';
+	import {
+		dummyAssignmentAlgorithm,
+		type DummySearchParams
+	} from '$lib/transversal/algorithms/dummy.ts';
 	import { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
 	import { TrailCollection } from '$lib/transversal/entities/TrailCollection.svelte.ts';
 	import { onMount } from 'svelte';
 	import {
-		decisionEventStore,
+		assignmentEventStore,
 		editorViewEventStore,
-		type DecisionEvent,
+		type AssignmentEvent,
 		type EditorViewEvent
 	} from './tools/debugger/events.svelte.ts';
 	import TrailEditor from './visualizer/TrailEditorComponent.svelte';
@@ -16,9 +19,9 @@
 	let editorExpanded: boolean = $state(true);
 
 	let trailCollection: TrailCollection = $state(new TrailCollection());
-	let currentTrail: Trail = $state(new Trail(0));
+	let currentTrail: Trail = $state(new Trail());
 
-	function algorithmStep(e: DecisionEvent<number>, trails: TrailCollection, trail: Trail): void {
+	function algorithmStep(e: AssignmentEvent<number>, trails: TrailCollection, trail: Trail): void {
 		if (e === undefined) return;
 
 		const { pools }: Problem = get(problemStore);
@@ -30,10 +33,10 @@
 			variablePool: variables
 		};
 
-		if (e.decision === 'Automated') {
-			dummySearch(params);
+		if (e.assignment === 'Automated') {
+			dummyAssignmentAlgorithm(params);
 		} else {
-			console.log(`User decision not implemented yet`);
+			console.log(`User assignment not implemented yet`);
 		}
 	}
 
@@ -56,13 +59,13 @@
 	onMount(() => {
 		const unsubscribeProblem = problemStore.subscribe(onProblemUpdated);
 		const unsubscribeToggleEditor = editorViewEventStore.subscribe(toggleEditorView);
-		const unsubscribeDecision = decisionEventStore.subscribe((e) =>
+		const unsubscribeAssignment = assignmentEventStore.subscribe((e) =>
 			algorithmStep(e, trailCollection, currentTrail)
 		);
 		return () => {
 			unsubscribeProblem();
 			unsubscribeToggleEditor();
-			unsubscribeDecision();
+			unsubscribeAssignment();
 		};
 	});
 </script>
