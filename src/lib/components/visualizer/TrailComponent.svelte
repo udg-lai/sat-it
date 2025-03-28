@@ -8,6 +8,8 @@
 	}
 	let { trail }: Props = $props();
 
+	let all: boolean = $state(false);
+
 	let toggledWritable: Writable<boolean[]> = writable([]);
 
 	$effect(() => {
@@ -26,16 +28,15 @@
 </script>
 
 <div class="trail flex flex-row">
-	{#each trail as assignment, index (index)}
-		{#if $toggledWritable[index]}
-			<div class="options flex flex-row">
-				<button class="option">A</button>
-				<button class="option">B</button>
-				<button class="option">C</button>
-			</div>
-		{/if}
-		<VariableAssignmentComponent {assignment} onClick={() => onVariableAssignmentClick(index)} />
-	{/each}
+	{#if all}
+		{#each trail as assignment, index (index)}
+			<VariableAssignmentComponent {assignment} onClick={() => onVariableAssignmentClick(index)} />
+		{/each}
+	{:else}
+		{#each trail.getDecisions() as assignment, index (index)}
+			<VariableAssignmentComponent {assignment} onClick={() => onVariableAssignmentClick(index)} />
+		{/each}
+	{/if}
 </div>
 
 <style>
@@ -43,15 +44,5 @@
 		display: flex;
 		gap: 0.5rem;
 		align-items: center;
-	}
-
-	.options {
-		gap: 10px;
-	}
-
-	.option {
-		height: 15px;
-		width: 15px;
-		background-color: green;
 	}
 </style>

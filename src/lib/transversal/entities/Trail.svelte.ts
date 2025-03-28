@@ -1,5 +1,10 @@
 import type VariableAssignment from '$lib/transversal/entities/VariableAssignment.ts';
 
+interface IndexedDecision {
+	bookMark: number,
+	decision: VariableAssignment
+}
+
 export class Trail {
 	private assignments: VariableAssignment[] = $state([]);
 	private decisionBookMark: number[] = $state([]);
@@ -11,7 +16,7 @@ export class Trail {
 		this.trailCapacity = trailCapacity;
 	}
 
-	public copy(): Trail {
+	copy(): Trail {
 		const newTrail = new Trail(this.trailCapacity);
 		newTrail.assignments = this.assignments.map((assignment) => assignment.copy());
 		newTrail.decisionBookMark = [...this.decisionBookMark];
@@ -19,28 +24,52 @@ export class Trail {
 		return newTrail;
 	}
 
-	public getAssignments(): VariableAssignment[] {
+	getAssignments(): VariableAssignment[] {
 		return this.assignments;
 	}
 
-	public push(assignment: VariableAssignment) {
+	getDecisionBookMark(): number[] {
+		return this.decisionBookMark;
+	}
+
+	getDecisions(): VariableAssignment[] {
+		return this.decisionBookMark.map(mark => this.assignments[mark])
+	}
+
+	getPropagations(mark: number): VariableAssignment[] {
+		const idx = this
+		if (!uniqueBookMark.has(mark)) {
+			throw Error("Can not have propagation of non decision assigment")
+		} else {
+
+		}
+	}
+
+	push(assignment: VariableAssignment) {
 		if (this.assignments.length == this.trailCapacity)
 			console.warn('[WARN]: skipped allocating assignment as trail capacity is fulfilled');
 		else {
 			this.assignments.push(assignment);
-			if (assignment.isD()) this.decisionLevel++;
+			if (assignment.isD()) {
+				this.decisionLevel++;
+				this.decisionBookMark.push(this.assignments.length - 1);
+			}
 		}
 	}
 
-	public pop(): VariableAssignment | undefined {
+	pop(): VariableAssignment | undefined {
 		const returnValue = this.assignments.pop();
-		if (returnValue?.isD()) this.decisionLevel--;
+		if (returnValue?.isD()) {
+			this.decisionLevel--;
+			this.decisionBookMark.pop();
+		}
 		return returnValue;
 	}
 
-	public indexOf(assignment: VariableAssignment): number {
+	indexOf(assignment: VariableAssignment): number {
 		return this.assignments.indexOf(assignment);
 	}
+
 
 	[Symbol.iterator]() {
 		return this.assignments.values();
@@ -53,7 +82,7 @@ export class Trail {
 		this.assignments.forEach(callback, thisArg);
 	}
 
-	public updateFollowUpIndex(): void {
+	updateFollowUpIndex(): void {
 		this.followUPIndex = this.assignments.length - 1;
 	}
 }

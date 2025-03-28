@@ -5,13 +5,14 @@
 
 	interface Props {
 		assignment: VariableAssignment;
+		propagated?: VariableAssignment[],
 		onClick?: () => void;
 	}
-	let { assignment: decision, onClick }: Props = $props();
+	let { assignment, onClick }: Props = $props();
 	let decisionColor: string = $state('teal');
 
 	$effect(() => {
-		decisionColor = decision.isD() ? 'teal' : 'red';
+		decisionColor = assignment.isD() ? 'teal' : 'red';
 	});
 
 	// let previousIndex = $derived(currentWP < startingWP);
@@ -19,12 +20,12 @@
 
 <div
 	class="decision-literal-wrapper"
-	class:decide={decision.isD()}
-	class:backtrack={decision.isK()}
+	class:decide={assignment.isD()}
+	class:backtrack={assignment.isK()}
 >
 	<button class="decision-literal-btn" onclick={onClick}>
 		<Indicator placement="top-left" size="md" color={decisionColor} />
-		<MathTexComponent equation={decision.toTeX()} />
+		<MathTexComponent equation={assignment.toTeX()} />
 	</button>
 </div>
 
