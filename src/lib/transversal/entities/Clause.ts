@@ -1,27 +1,50 @@
 import type Literal from './Literal.svelte.ts';
 import logicResolution from '../algorithms/resolution.ts';
-import { v4 as uuidv4 } from 'uuid';
 import { arraysEqual } from '../utils/types/array.ts';
 import type { Comparable } from '../utils/interfaces/Comparable.ts';
 
 class Clause implements Comparable<Clause> {
-	literals: Literal[] = [];
-	id: string;
+	private static idGenerator: number = 0;
+
+	private literals: Literal[] = [];
+	private id: number;
 
 	constructor(literals: Literal[]) {
-		this.id = uuidv4();
+		this.id = this.generateUniqueId();
 		this.literals = literals;
 	}
 
-	public addLiteral(lit: Literal) {
+	static resetUniqueIdGenerator() {
+		Clause.idGenerator = 0;
+	}
+
+	static nextUniqueId() {
+		return Clause.idGenerator;
+	}
+
+	generateUniqueId() {
+		const id = Clause.idGenerator;
+		Clause.idGenerator += 1;
+		return id;
+	}
+
+	getId(): number {
+		return this.id;
+	}
+
+	setId(newId: number): void {
+		this.id = newId;
+	}
+
+	addLiteral(lit: Literal) {
 		this.literals.push(lit);
 	}
 
-	public removeLiteral(lit: Literal) {
+	removeLiteral(lit: Literal) {
 		this.literals = this.literals.filter((l) => l.getId() != lit.getId());
 	}
 
-	public eval(): ClauseEval {
+	eval(): ClauseEval {
 		let state = ClauseEval.UNRESOLVED;
 		let i = 0;
 		let unsatCount = 0;
@@ -44,27 +67,27 @@ class Clause implements Comparable<Clause> {
 		return state;
 	}
 
-	public isUndetermined(): boolean {
+	isUndetermined(): boolean {
 		return this.eval() === ClauseEval.UNRESOLVED;
 	}
 
-	public isSAT(): boolean {
+	isSAT(): boolean {
 		return this.eval() === ClauseEval.SAT;
 	}
 
-	public isUnSAT(): boolean {
+	isUnSAT(): boolean {
 		return this.eval() === ClauseEval.UNSAT;
 	}
 
-	public isUnit(): boolean {
+	isUnit(): boolean {
 		return this.eval() === ClauseEval.UNIT;
 	}
 
-	public resolution(other: Clause): Clause {
+	resolution(other: Clause): Clause {
 		return logicResolution(this, other);
 	}
 
-	public equals(other: Clause): boolean {
+	equals(other: Clause): boolean {
 		const c1 = this.literals.map((l) => l.toInt());
 		const c2 = other.literals.map((l) => l.toInt());
 		return arraysEqual(c1.sort(), c2.sort());
