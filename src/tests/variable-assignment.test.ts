@@ -18,17 +18,17 @@ dummyAssignmentAlgorithm(params);
 
 describe('variable assignment', () => {
 	it('Automated Decision', () => {
-		expect(params.currentTrail.pop()?.getCause()).toBe(DecisionCause.AUTOMATED);
+		expect(params.currentTrail.pop()?.getReason()).toBe(DecisionCause.AUTOMATED);
 	});
 	it('Manual Decision', () => {
 		params.variablePool.dispose(3);
 		params.variablePool.persist(3, false);
 		params.currentTrail.push(
-			VariableAssignment.createWithDecision(params.variablePool.getCopy(3), DecisionCause.MANUAL)
+			VariableAssignment.newDecisionAssignment(params.variablePool.getCopy(3), DecisionCause.MANUAL)
 		);
-		expect(params.currentTrail.pop()?.getCause()).toBe(DecisionCause.MANUAL);
+		expect(params.currentTrail.pop()?.getReason()).toBe(DecisionCause.MANUAL);
 		params.currentTrail.push(
-			VariableAssignment.createWithDecision(params.variablePool.getCopy(3), DecisionCause.MANUAL)
+			VariableAssignment.newDecisionAssignment(params.variablePool.getCopy(3), DecisionCause.MANUAL)
 		);
 	});
 	it('Backtracking', () => {
@@ -36,7 +36,7 @@ describe('variable assignment', () => {
 		dummyAssignmentAlgorithm(params);
 		expect(params.currentTrail.pop()?.isK()).toBe(true);
 		params.currentTrail.push(
-			VariableAssignment.createWithBacktracking(params.variablePool.getCopy(4))
+			VariableAssignment.newAssignmentBacktracking(params.variablePool.getCopy(4))
 		);
 	});
 	it('Unit Propagation baby', () => {
@@ -44,9 +44,9 @@ describe('variable assignment', () => {
 		params.variablePool.dispose(4);
 		params.variablePool.persist(4, false);
 		//We do not have any clause but this should be okay for now
-		params.currentTrail.push(VariableAssignment.createWithUP(params.variablePool.getCopy(4), 3));
+		params.currentTrail.push(VariableAssignment.newUPAssignment(params.variablePool.getCopy(4), 3));
 		const lastDecision = params.currentTrail.pop();
 		expect(lastDecision?.isUP()).toBe(true);
-		expect(lastDecision?.getCause()).toBe(3);
+		expect(lastDecision?.getReason()).toBe(3);
 	});
 });

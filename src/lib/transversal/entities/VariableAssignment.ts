@@ -1,104 +1,67 @@
 import { logFatal } from '../utils/logging.ts';
 import type Variable from './Variable.svelte.ts';
 
-export enum DecisionCause {
-	AUTOMATED = 'Automated',
-	MANUAL = 'Manual'
+interface Automated {
+	algorithm: string
 }
 
-type Decision = {
-	type: 'Decision';
-	cause: DecisionCause;
-};
+type DecisionReason = Automated | 'Manual'
 
-type UP = {
-	type: 'UP';
-	cause: number;
-};
+type ClauseReason = number
 
-type Backtracking = {
-	type: 'Backtracking';
-};
+export type AssignmentReason = DecisionReason | ClauseReason;
 
-export type Reason = UP | Decision | Backtracking;
+type AssignmentKind = "Decision" | "UP" | "Backtracking"
 
 export default class VariableAssignment {
 	variable: Variable;
-	reason: Reason;
+	assignmentKind: AssignmentKind;
+	reason: AssignmentReason | undefined;
 
-	private constructor(variable: Variable, reason: Reason) {
+	private constructor(variable: Variable, kind: AssignmentKind, reason?: AssignmentReason) {
 		this.variable = variable;
+		this.assignmentKind = kind;
 		this.reason = reason;
 	}
 
-	//Factory patterns to return VariableAssignment instanses
-	static createWithDecision(variable: Variable, cause: DecisionCause) {
-		const reason: Reason = {
-			type: 'Decision',
-			cause
-		};
-		return new VariableAssignment(variable, reason);
+	static newAutomatedAssignment(variable: Variable, algorithm: string) {
+		return VariableAssignment.newDecisionAssignment(variable, { algorithm })
 	}
 
-	static createWithUP(variable: Variable, cause: number) {
-		const reason: Reason = {
-			type: 'UP',
-			cause
-		};
-		return new VariableAssignment(variable, reason);
+	static newDecisionAssignment(variable: Variable, reason: DecisionReason) {
+		return new VariableAssignment(variable, "Decision", reason);
 	}
 
-	static createWithBacktracking(variable: Variable) {
-		const reason: Reason = {
-			type: 'Backtracking'
-		};
-		return new VariableAssignment(variable, reason);
+	static newUPAssignment(variable: Variable, clauseId: ClauseReason) {
+		return new VariableAssignment(variable, "UP", clauseId);
+	}
+
+	static newAssignmentBacktracking(variable: Variable) {
+		return new VariableAssignment(variable, "Backtracking");
 	}
 
 	copy(): VariableAssignment {
-		return new VariableAssignment(this.variable, this.reason);
+		return new VariableAssignment(this.variable, this.assignmentKind, this.reason);
 	}
 
 	getVariable(): Variable {
 		return this.variable;
 	}
 
-	private getDecisionCause(): DecisionCause {
-		if (!this.isD()) {
-			logFatal(
-				`Impossible to retrieve cause`,
-				`It is not possible to get the decision cause as this variable assignment is a ${this.reason.type}`
-			);
-		}
-		return (this.reason as Decision).cause;
-	}
-
-	private getPropagationClause(): number {
-		if (!this.isUP) {
-			logFatal(
-				`Impossible to retrieve clause`,
-				`It is not possible to get the propagation clause as this variable assignment is a ${this.reason.type}`
-			);
-		}
-		return (this.reason as UP).cause;
-	}
-
-	getCause(): number | DecisionCause {
-		if (this.isD()) return this.getDecisionCause();
-		else if (this.isUP()) return this.getPropagationClause();
-		logFatal(`There is no cause for a Backtracking`);
+	getReason(): AssignmentReason | undefined {
+		return this.reason;
 	}
 
 	isD(): boolean {
-		return this.reason.type === 'Decision';
+		return this.assignmentKind === "Decision";
 	}
 
 	isUP(): boolean {
-		return this.reason.type === 'UP';
+		return this.assignmentKind === 'UP';
 	}
 
 	isK(): boolean {
-		return this.reason.type === 'Backtracking';
+		return this.assignmentKind === 'Backtracking';
 	}
 
 	unassign(): void {
