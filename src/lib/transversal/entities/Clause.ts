@@ -4,18 +4,32 @@ import { arraysEqual } from '../utils/types/array.ts';
 import type { Comparable } from '../utils/interfaces/Comparable.ts';
 
 class Clause implements Comparable<Clause> {
+	private static idGenerator: number = 0;
+
 	private literals: Literal[] = [];
 	private id: number;
 
-	static idCounter: number = 0;
-
 	constructor(literals: Literal[]) {
-		this.id = Clause.idCounter++;
+		this.id = this.generateUniqueId();
 		this.literals = literals;
 	}
 
-	static setIdCounter(initialId: number) {
-		Clause.idCounter = initialId;
+	static resetUniqueIdGenerator() {
+		Clause.idGenerator = 0;
+	}
+
+	static nextUniqueId() {
+		return Clause.idGenerator;
+	}
+
+	generateUniqueId() {
+		const id = Clause.idGenerator;
+		Clause.idGenerator += 1;
+		return id;
+	}
+
+	getId(): number {
+		return this.id;
 	}
 
 	setId(newId: number): void {
@@ -26,7 +40,7 @@ class Clause implements Comparable<Clause> {
 		this.literals.push(lit);
 	}
 
-	public removeLiteral(lit: Literal) {
+	removeLiteral(lit: Literal) {
 		this.literals = this.literals.filter((l) => l.getId() != lit.getId());
 	}
 

@@ -32,18 +32,6 @@ class ClausePool implements IClausePool {
 		this.collection.push(clause);
 	}
 
-	/*Eventually, this function will be only called when be go back in a trail and we want to forget a clause 
-	  so there is no need to update the remaining clauses ids, but maybe in a future the user will be able to
-	  delete some other clauses so I will leave the "reassignment" of the caluses ids */
-
-	removeClause(clauseIndex: number): void {
-		this.collection = this.collection.filter((_, i) => i !== clauseIndex);
-		for (let i = clauseIndex; i < this.collection.length; i++) {
-			this.collection[i].setId(i);
-		}
-		Clause.setIdCounter(this.collection.length);
-	}
-
 	get(i: number): Clause {
 		if (i < 0 || i >= this.collection.length) {
 			throw '[ERROR]: accessing out of range for consulting a clause in the CNF';
@@ -64,7 +52,7 @@ class ClausePool implements IClausePool {
 		return this.collection;
 	}
 
-	poolCapacity(): number {
+	size(): number {
 		return this.collection.length;
 	}
 }
