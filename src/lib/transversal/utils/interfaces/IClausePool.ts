@@ -6,7 +6,7 @@ export interface IClausePool {
 	get(clause: number): Clause;
 	getUnitClauses(): Set<Clause>;
 	getClauses(): Clause[];
-	size(): number
+	size(): number;
 }
 
 export enum Eval {

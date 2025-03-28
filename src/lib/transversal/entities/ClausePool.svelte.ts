@@ -4,7 +4,6 @@ import Clause from './Clause.ts';
 import { ClauseEval } from './Clause.ts';
 
 class ClausePool implements IClausePool {
-
 	private collection: Clause[];
 
 	constructor(clauses: Clause[] = []) {
