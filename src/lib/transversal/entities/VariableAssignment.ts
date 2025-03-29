@@ -2,42 +2,42 @@ import { logFatal } from '../utils/logging.ts';
 import type Variable from './Variable.svelte.ts';
 
 interface Automated {
-	algorithm: string
+	algorithm: string;
 }
 
-type DecisionReason = Automated | 'Manual'
+type DecisionReason = Automated | 'Manual';
 
-type ClauseReason = number
+type ClauseReason = number;
 
 export type AssignmentReason = DecisionReason | ClauseReason;
 
-type AssignmentKind = "Decision" | "UP" | "Backtracking"
+type AssignmentKind = 'Decision' | 'UP' | 'Backtracking';
 
 export default class VariableAssignment {
 	variable: Variable;
 	assignmentKind: AssignmentKind;
-	reason: AssignmentReason | undefined;
+	reason: AssignmentReason | never;
 
-	private constructor(variable: Variable, kind: AssignmentKind, reason?: AssignmentReason) {
+	private constructor(variable: Variable, kind: AssignmentKind, reason: AssignmentReason | never) {
 		this.variable = variable;
 		this.assignmentKind = kind;
 		this.reason = reason;
 	}
 
 	static newAutomatedAssignment(variable: Variable, algorithm: string) {
-		return VariableAssignment.newDecisionAssignment(variable, { algorithm })
+		return VariableAssignment.newDecisionAssignment(variable, { algorithm });
 	}
 
 	static newDecisionAssignment(variable: Variable, reason: DecisionReason) {
-		return new VariableAssignment(variable, "Decision", reason);
+		return new VariableAssignment(variable, 'Decision', reason);
 	}
 
 	static newUPAssignment(variable: Variable, clauseId: ClauseReason) {
-		return new VariableAssignment(variable, "UP", clauseId);
+		return new VariableAssignment(variable, 'UP', clauseId);
 	}
 
 	static newAssignmentBacktracking(variable: Variable) {
-		return new VariableAssignment(variable, "Backtracking");
+		return new VariableAssignment(variable, 'Backtracking', undefined as never);
 	}
 
 	copy(): VariableAssignment {
@@ -48,12 +48,12 @@ export default class VariableAssignment {
 		return this.variable;
 	}
 
-	getReason(): AssignmentReason | undefined {
+	getReason(): AssignmentReason | never {
 		return this.reason;
 	}
 
 	isD(): boolean {
-		return this.assignmentKind === "Decision";
+		return this.assignmentKind === 'Decision';
 	}
 
 	isUP(): boolean {

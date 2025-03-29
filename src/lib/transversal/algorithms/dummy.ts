@@ -1,4 +1,4 @@
-import VariableAssignment, { DecisionCause } from '../entities/VariableAssignment.ts';
+import VariableAssignment from '../entities/VariableAssignment.ts';
 import type { Trail } from '../entities/Trail.svelte.ts';
 import type { TrailCollection } from '../entities/TrailCollection.svelte.ts';
 import type VariablePool from '../entities/VariablePool.ts';
@@ -11,7 +11,7 @@ export interface DummySearchParams {
 	variablePool: VariablePool;
 }
 
-const algorithm = "dummyAssignment"
+const algorithm = 'dummyAssignment';
 
 export function dummyAssignmentAlgorithm(params: DummySearchParams): void {
 	const { otherTrails, currentTrail, variablePool } = params;

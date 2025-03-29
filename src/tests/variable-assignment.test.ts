@@ -4,7 +4,7 @@ import {
 } from '$lib/transversal/algorithms/dummy.ts';
 import { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
 import { TrailCollection } from '$lib/transversal/entities/TrailCollection.svelte.ts';
-import VariableAssignment, { DecisionCause } from '$lib/transversal/entities/VariableAssignment.ts';
+import VariableAssignment from '$lib/transversal/entities/VariableAssignment.ts';
 import VariablePool from '$lib/transversal/entities/VariablePool.ts';
 import { describe, expect, it } from 'vitest';
 const params: DummySearchParams = {
@@ -18,23 +18,31 @@ dummyAssignmentAlgorithm(params);
 
 describe('variable assignment', () => {
 	it('Automated Decision', () => {
-		expect(params.currentTrail.pop()?.getReason()).toBe(DecisionCause.AUTOMATED);
+		const lastReason = params.currentTrail.pop()?.getReason();
+		console.log(lastReason);
+		if (lastReason && typeof lastReason === 'object' && 'algorithm' in lastReason) {
+			expect(lastReason.algorithm).toBe('dummyAssignment');
+		} else {
+			expect(lastReason).toBe('dummyAssignment');
+		}
 	});
 	it('Manual Decision', () => {
 		params.variablePool.dispose(3);
 		params.variablePool.persist(3, false);
 		params.currentTrail.push(
-			VariableAssignment.newDecisionAssignment(params.variablePool.getCopy(3), DecisionCause.MANUAL)
+			VariableAssignment.newDecisionAssignment(params.variablePool.getCopy(3), 'Manual')
 		);
-		expect(params.currentTrail.pop()?.getReason()).toBe(DecisionCause.MANUAL);
+		expect(params.currentTrail.pop()?.getReason()).toBe('Manual');
 		params.currentTrail.push(
-			VariableAssignment.newDecisionAssignment(params.variablePool.getCopy(3), DecisionCause.MANUAL)
+			VariableAssignment.newDecisionAssignment(params.variablePool.getCopy(3), 'Manual')
 		);
 	});
 	it('Backtracking', () => {
 		dummyAssignmentAlgorithm(params);
 		dummyAssignmentAlgorithm(params);
-		expect(params.currentTrail.pop()?.isK()).toBe(true);
+		const lastDecision = params.currentTrail.pop();
+		expect(lastDecision?.isK()).toBe(true);
+		expect(typeof lastDecision?.getReason()).toBe('undefined');
 		params.currentTrail.push(
 			VariableAssignment.newAssignmentBacktracking(params.variablePool.getCopy(4))
 		);
