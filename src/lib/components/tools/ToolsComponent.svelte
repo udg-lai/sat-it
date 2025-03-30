@@ -1,18 +1,68 @@
 <script lang="ts">
 	import { BugOutline, FileCirclePlusOutline } from 'flowbite-svelte-icons';
+	import { onMount } from 'svelte';
 	import Button from './Button.svelte';
 	import DebuggerComponent from './debugger/DebuggerComponent.svelte';
 	import DimacsComponent from './dimacs/DimacsComponent.svelte';
 	import './styles.css';
 
-	interface Props {
-		closed: boolean;
+	let toolsViewRef: HTMLElement;
+
+	let isResizing = $state(false);
+
+	interface View {
+		name: string;
+		active: boolean;
 	}
 
-	let { closed }: Props = $props();
+	let views: View[] = $state([]);
+	let lastActiveViewIndex: number = $state(0);
+	let closed: boolean = $derived(views.every((v) => v.active === false));
 
-	let toolsViewRef: HTMLElement;
-	let isResizing = $state(false);
+	onMount(() => {
+		views = [
+			{
+				name: 'viewA',
+				active: true
+			},
+			{
+				name: 'viewB',
+				active: false
+			}
+		];
+	});
+
+	$effect(() => {
+		let activeViewIndex = views.findIndex((v) => v.active);
+		if (activeViewIndex !== -1) {
+			lastActiveViewIndex = activeViewIndex;
+		}
+	});
+
+	function activateView(what: number): void {
+		const alreadyActive = views[what].active;
+		if (alreadyActive) {
+			views[what].active = false;
+		} else {
+			views = views.map((v) => ({ ...v, active: false }));
+			views[what].active = true;
+			toolsViewRef.style.width = 'var(--max-width-tools)';
+		}
+		views = [...views];
+	}
+
+	function closeAllViews(): void {
+		views = views.map((v) => ({ ...v, active: false }));
+	}
+
+	function openLastView(): void {
+		views[lastActiveViewIndex].active = true;
+		views = [...views];
+	}
+
+	function lastViewClosed(): boolean {
+		return closed;
+	}
 
 	function enableResizeCursor(): void {
 		document.body.style.cursor = 'col-resize';
@@ -45,9 +95,11 @@
 				const minWidthTool = 240;
 				let newX = event.clientX;
 				if (newX < barWidth + minWidthTool / 2) {
-					closed = true;
+					closeAllViews();
 				} else {
-					closed = false;
+					if (lastViewClosed()) {
+						openLastView();
+					}
 					if (newX < barWidth + minWidthTool) {
 						toolsViewRef.style.width = `${minWidthTool}px`;
 					} else {
@@ -76,35 +128,6 @@
 				htmlElement.removeEventListener('mousemove', onMouseMove);
 			}
 		};
-	}
-
-	interface View {
-		name: string;
-		active: boolean;
-	}
-
-	let views: View[] = $state([
-		{
-			name: 'viewA',
-			active: true
-		},
-		{
-			name: 'viewB',
-			active: false
-		}
-	]);
-
-	function activateView(what: number): void {
-		const alreadyActive = views[what].active;
-		if (alreadyActive) {
-			views[what].active = false;
-		} else {
-			views = views.map((v) => ({ ...v, active: false }));
-			views[what].active = true;
-			toolsViewRef.style.width = 'var(--max-width-tools)';
-		}
-		views = [...views];
-		closed = views.every((v) => v.active === false);
 	}
 </script>
 
