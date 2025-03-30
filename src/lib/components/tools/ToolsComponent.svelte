@@ -57,7 +57,7 @@
 
 	function openLastView(): void {
 		views[lastActiveViewIndex].active = true;
-		views = [...views]
+		views = [...views];
 	}
 
 	function lastViewClosed(): boolean {
