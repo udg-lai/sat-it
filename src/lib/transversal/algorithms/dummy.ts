@@ -1,4 +1,4 @@
-import DecisionVariable, { AssignmentReason } from '../entities/DecisionLiteral.svelte.ts';
+import VariableAssignment, { AssignmentReason } from '../entities/VariableAssignment.ts';
 import type { Trail } from '../entities/Trail.svelte.ts';
 import type { TrailCollection } from '../entities/TrailCollection.svelte.ts';
 import type VariablePool from '../entities/VariablePool.ts';
@@ -11,7 +11,7 @@ export interface DummySearchParams {
 	variablePool: VariablePool;
 }
 
-export function dummySearch(params: DummySearchParams): void {
+export function dummyAssignmentAlgorithm(params: DummySearchParams): void {
 	const { otherTrails, currentTrail, variablePool } = params;
 
 	if (!variablePool.allAssigned()) {
@@ -19,8 +19,8 @@ export function dummySearch(params: DummySearchParams): void {
 		if (isJust(nextVariable)) {
 			const variableId = fromJust(nextVariable);
 			variablePool.persist(variableId, true);
-			const variable = variablePool.get(variableId);
-			const dVariable = new DecisionVariable(variable, AssignmentReason.D);
+			const variable = variablePool.getCopy(variableId);
+			const dVariable = new VariableAssignment(variable, AssignmentReason.D);
 			currentTrail.push(dVariable);
 			currentTrail.updateFollowUpIndex();
 		} else {
@@ -35,9 +35,9 @@ export function dummySearch(params: DummySearchParams): void {
 			variablePool.dispose(lastVariable.getInt());
 			if (lastDecision.isD()) {
 				backtrack = true;
-				variablePool.persist(lastVariable.getInt(), !fromJust(lastVariable.getAssignment()));
-				const variable = variablePool.get(lastVariable.getInt());
-				const dVariable = new DecisionVariable(variable, AssignmentReason.K);
+				variablePool.persist(lastVariable.getInt(), !lastVariable.getAssignment());
+				const variable = variablePool.getCopy(lastVariable.getInt());
+				const dVariable = new VariableAssignment(variable, AssignmentReason.K);
 				currentTrail.push(dVariable);
 				currentTrail.updateFollowUpIndex();
 			} else {

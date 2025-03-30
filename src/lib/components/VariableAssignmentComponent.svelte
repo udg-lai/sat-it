@@ -1,13 +1,13 @@
 <script lang="ts">
-	import type DecisionVariable from '$lib/transversal/entities/DecisionLiteral.svelte.ts';
+	import type VariableAssignment from '$lib/transversal/entities/VariableAssignment.ts';
 	import MathTexComponent from '$lib/components/MathTexComponent.svelte';
 	import { Indicator } from 'flowbite-svelte';
 
 	interface Props {
-		decision: DecisionVariable;
+		assignment: VariableAssignment;
 		onClick?: () => void;
 	}
-	let { decision, onClick }: Props = $props();
+	let { assignment: decision, onClick }: Props = $props();
 	let decisionColor: string = $state('teal');
 
 	$effect(() => {
@@ -49,11 +49,5 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-	}
-
-	.decide {
-	}
-
-	.backtrack {
 	}
 </style>
