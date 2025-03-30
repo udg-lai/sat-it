@@ -5,14 +5,14 @@
 
 	interface Props {
 		onActivateInstance?: (instance: InteractiveInstance) => void;
-		instancesLoaded: InteractiveInstance[];
+		instances: InteractiveInstance[];
 	}
 
-	let { onActivateInstance, instancesLoaded }: Props = $props();
+	let { onActivateInstance, instances }: Props = $props();
 </script>
 
 <ul>
-	{#each instancesLoaded as instance}
+	{#each instances as instance}
 		<li>
 			<div class="flex">
 				<button class="icon not-removable" disabled={!instance.removable || instance.active}>
