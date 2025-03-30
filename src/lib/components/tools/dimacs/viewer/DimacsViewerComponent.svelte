@@ -1,17 +1,44 @@
 <script lang="ts">
+	import type { DimacsInstance } from '$lib/dimacs/dimacs-instance.interface.ts';
+	import { logFatal } from '$lib/transversal/utils/logging.ts';
 	import type { Summary } from '$lib/transversal/utils/parsers/dimacs.ts';
 
 	interface Props {
-		summary: Summary;
+		dimacs: DimacsInstance;
 	}
 
-	let { summary }: Props = $props();
+	let { dimacs }: Props = $props();
 
-	const { varCount, clauseCount, claims }: Summary = summary;
-	const { original } = claims;
+	let headerHtml = $state('');
 
-	let dimacsHeader = `cnf ${varCount} ${clauseCount}`;
-	let dimacsBody = original.map((c) => c.map((l) => l.toString()).join(' '));
+	const { summary }: DimacsInstance = dimacs;
+	const { varCount, clauseCount }: Summary = summary;
 
-	console.log(dimacsHeader, dimacsBody);
+	headerHtml = `<p>cnf ${varCount} ${clauseCount}</p>`;
+
+	const claimToHtml = (claim: number[]): string => {
+		const [eos, ...clause] = [...claim].reverse();
+		if (eos !== 0) {
+			logFatal('Claim end of sequence not found');
+		}
+		clause.reverse();
+		console.log(clause);
+		let html;
+		if (clause.length === 0) {
+			html = `<p></p>`;
+		} else {
+			const [fst, ...rest] = clause;
+			html = `<p>${fst}`;
+			html += rest.map((lit) => ` ${lit}`).join(' ');
+			html += `</p>`;
+		}
+		return html;
+	};
 </script>
+
+<p>{dimacs.instanceName}</p>
+<p>{@html headerHtml}</p>
+
+{#each dimacs?.summary.claims.original as claim}
+	{@html claimToHtml(claim)}
+{/each}

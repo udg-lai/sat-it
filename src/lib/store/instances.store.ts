@@ -1,7 +1,7 @@
-import { get, writable, type Writable } from 'svelte/store';
 import type { DimacsInstance } from '$lib/dimacs/dimacs-instance.interface.ts';
-import { logInfo, logWarning } from '$lib/transversal/utils/logging.ts';
 import fetchInstances from '$lib/transversal/utils/bootstrap-instances.ts';
+import { logWarning } from '$lib/transversal/utils/logging.ts';
+import { get, writable, type Writable } from 'svelte/store';
 
 export interface InteractiveInstance extends DimacsInstance {
 	removable: boolean;
@@ -9,6 +9,8 @@ export interface InteractiveInstance extends DimacsInstance {
 }
 
 export const instanceStore: Writable<InteractiveInstance[]> = writable([]);
+
+export const activeInstanceStore: Writable<DimacsInstance> = writable();
 
 const defaultInstanceState = {
 	removable: false,
@@ -30,6 +32,8 @@ export async function initializeInstancesStore() {
 		// Activate the first instance if available
 		if (initializedInstances.length > 0) {
 			initializedInstances[0].active = true;
+			const dimacsInstance = fromInteractiveToDimacs(initializedInstances[0]);
+			setActiveInstance(dimacsInstance);
 		}
 
 		return initializedInstances;
@@ -57,7 +61,6 @@ export function addInstance(instance: DimacsInstance): void {
 		logWarning(title, description);
 	} else {
 		instanceStore.update((prev) => [...prev, { ...instance, ...newInstanceState }]);
-		logInfo(`File uploaded`, `File ${instance.instanceName} parsed and ready to use`);
 	}
 }
 
@@ -75,4 +78,13 @@ export function activateInstance(instance: InteractiveInstance): void {
 		const description = `Instance ${instance.instanceName} not found`;
 		logWarning(title, description);
 	}
+}
+
+function setActiveInstance(instance: DimacsInstance): void {
+	activeInstanceStore.set(instance);
+}
+
+function fromInteractiveToDimacs(instance: InteractiveInstance): DimacsInstance {
+	const { instanceName, content, summary } = instance;
+	return { instanceName, content, summary };
 }
