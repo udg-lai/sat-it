@@ -1,9 +1,9 @@
 <script lang="ts">
-	import Button from './Button.svelte';
-	import UploadDimacsComponent from './upload-dimacs/UploadDimacsComponent.svelte';
 	import { BugOutline, FileCirclePlusOutline } from 'flowbite-svelte-icons';
-	import './styles.css';
+	import Button from './Button.svelte';
 	import DebuggerComponent from './debugger/DebuggerComponent.svelte';
+	import DimacsComponent from './dimacs/DimacsComponent.svelte';
+	import './styles.css';
 
 	interface Props {
 		closed: boolean;
@@ -129,7 +129,7 @@
 			{#if active}
 				<div class="view-container">
 					{#if name === 'viewA'}
-						<UploadDimacsComponent />
+						<DimacsComponent />
 					{:else}
 						<DebuggerComponent />
 					{/if}
