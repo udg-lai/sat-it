@@ -1,4 +1,4 @@
-import VariableAssignment, { DecisionCause } from '../entities/VariableAssignment.ts';
+import VariableAssignment from '../entities/VariableAssignment.ts';
 import type { Trail } from '../entities/Trail.svelte.ts';
 import type { TrailCollection } from '../entities/TrailCollection.svelte.ts';
 import type VariablePool from '../entities/VariablePool.ts';
@@ -11,6 +11,8 @@ export interface DummySearchParams {
 	variablePool: VariablePool;
 }
 
+export const algorithmName = 'dummyAssignment';
+
 export function dummyAssignmentAlgorithm(params: DummySearchParams): void {
 	const { otherTrails, currentTrail, variablePool } = params;
 
@@ -20,7 +22,7 @@ export function dummyAssignmentAlgorithm(params: DummySearchParams): void {
 			const variableId = fromJust(nextVariable);
 			variablePool.persist(variableId, true);
 			const variable = variablePool.getCopy(variableId);
-			currentTrail.push(VariableAssignment.createWithDecision(variable, DecisionCause.AUTOMATED));
+			currentTrail.push(VariableAssignment.newAutomatedAssignment(variable, algorithmName));
 			currentTrail.updateFollowUpIndex();
 		} else {
 			logError('Dummy Search Algorithm', 'No variable to decide');
@@ -36,7 +38,7 @@ export function dummyAssignmentAlgorithm(params: DummySearchParams): void {
 				backtrack = true;
 				variablePool.persist(lastVariable.getInt(), !lastVariable.getAssignment());
 				const variable = variablePool.getCopy(lastVariable.getInt());
-				currentTrail.push(VariableAssignment.createWithBacktracking(variable));
+				currentTrail.push(VariableAssignment.newBacktrackingAssignment(variable));
 				currentTrail.updateFollowUpIndex();
 			} else {
 				lastDecision = currentTrail.pop();
