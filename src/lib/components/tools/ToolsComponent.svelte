@@ -4,7 +4,7 @@
 	import Button from './Button.svelte';
 	import DebuggerComponent from './debugger/DebuggerComponent.svelte';
 	import './styles.css';
-	import UploadDimacsComponent from './upload-dimacs/UploadDimacsComponent.svelte';
+	import DimacsComponent from './dimacs/DimacsComponent.svelte';
 
 	let toolsViewRef: HTMLElement;
 
@@ -152,7 +152,7 @@
 			{#if active}
 				<div class="view-container">
 					{#if name === 'viewA'}
-						<UploadDimacsComponent />
+						<DimacsComponent />
 					{:else}
 						<DebuggerComponent />
 					{/if}
