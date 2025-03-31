@@ -1,15 +1,13 @@
 import type { IClausePool } from '../utils/interfaces/IClausePool.ts';
 import { Eval } from '../utils/interfaces/IClausePool.ts';
-import type Clause from './Clause.ts';
+import Clause from './Clause.ts';
 import { ClauseEval } from './Clause.ts';
 
 class ClausePool implements IClausePool {
 	private collection: Clause[];
-	poolCapacity: number = 0;
 
 	constructor(clauses: Clause[] = []) {
 		this.collection = clauses;
-		this.poolCapacity = clauses.length;
 	}
 
 	eval(): Eval {
@@ -32,11 +30,6 @@ class ClausePool implements IClausePool {
 
 	addClause(clause: Clause): void {
 		this.collection.push(clause);
-		this.poolCapacity++;
-	}
-
-	removeClause(clause: number): void {
-		this.collection = this.collection.filter((_, i) => i !== clause);
 	}
 
 	get(i: number): Clause {
@@ -57,6 +50,10 @@ class ClausePool implements IClausePool {
 
 	getClauses(): Clause[] {
 		return this.collection;
+	}
+
+	size(): number {
+		return this.collection.length;
 	}
 }
 
