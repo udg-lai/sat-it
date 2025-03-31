@@ -1,67 +1,121 @@
 import { logFatal } from '../utils/logging.ts';
 import type Variable from './Variable.svelte.ts';
 
-interface Automated {
-	algorithm: string
-}
+type Automated = {
+	type: 'automated';
+	algorithm: string;
+};
 
-type DecisionReason = Automated | 'Manual'
+type Manual = {
+	type: 'manual';
+};
 
-type ClauseReason = number
+type Decision = Automated | Manual;
 
-export type AssignmentReason = DecisionReason | ClauseReason;
+type UnitPropagation = {
+	type: 'propagated';
+	clauseId: number;
+};
 
-type AssignmentKind = "Decision" | "UP" | "Backtracking"
+type Backtracking = {
+	type: 'backtracking';
+};
+
+export type AssignmentKind = Decision | UnitPropagation | Backtracking;
+
+export const isDecisionAssignment = (a: AssignmentKind): a is Decision => {
+	return a.type === 'manual' || a.type === 'automated';
+};
+
+export const isAutomatedAssignment = (a: AssignmentKind): a is Automated => {
+	return a.type === 'automated';
+};
+
+export const isManualAssignment = (a: AssignmentKind): a is Manual => {
+	return a.type === 'manual';
+};
+
+export const isUnitPropagationAssignment = (a: AssignmentKind): a is UnitPropagation => {
+	return a.type === 'propagated';
+};
+
+export const isBacktrackingAssignment = (a: AssignmentKind): a is Backtracking => {
+	return a.type === 'backtracking';
+};
+
+export const makeAutomatedAssignment = (algorithm: string): Automated => {
+	return {
+		type: 'automated',
+		algorithm
+	};
+};
+
+export const makeManualAssignment = (): Manual => {
+	return {
+		type: 'manual'
+	};
+};
+
+export const makeUnitPropagationAssignment = (clauseId: number): UnitPropagation => {
+	return {
+		type: 'propagated',
+		clauseId
+	};
+};
+
+export const makeBacktrackingAssignment = (): Backtracking => {
+	return {
+		type: 'backtracking'
+	};
+};
 
 export default class VariableAssignment {
 	variable: Variable;
 	assignmentKind: AssignmentKind;
-	reason: AssignmentReason | undefined;
 
-	private constructor(variable: Variable, kind: AssignmentKind, reason?: AssignmentReason) {
+	private constructor(variable: Variable, kind: AssignmentKind) {
 		this.variable = variable;
 		this.assignmentKind = kind;
-		this.reason = reason;
 	}
 
 	static newAutomatedAssignment(variable: Variable, algorithm: string) {
-		return VariableAssignment.newDecisionAssignment(variable, { algorithm })
+		return new VariableAssignment(variable, makeAutomatedAssignment(algorithm));
 	}
 
-	static newDecisionAssignment(variable: Variable, reason: DecisionReason) {
-		return new VariableAssignment(variable, "Decision", reason);
+	static newManualAssignment(variable: Variable) {
+		return new VariableAssignment(variable, makeManualAssignment());
 	}
 
-	static newUPAssignment(variable: Variable, clauseId: ClauseReason) {
-		return new VariableAssignment(variable, "UP", clauseId);
+	static newUnitPropagationAssignment(variable: Variable, clauseId: number) {
+		return new VariableAssignment(variable, makeUnitPropagationAssignment(clauseId));
 	}
 
-	static newAssignmentBacktracking(variable: Variable) {
-		return new VariableAssignment(variable, "Backtracking");
+	static newBacktrackingAssignment(variable: Variable) {
+		return new VariableAssignment(variable, makeBacktrackingAssignment());
 	}
 
 	copy(): VariableAssignment {
-		return new VariableAssignment(this.variable, this.assignmentKind, this.reason);
+		return new VariableAssignment(this.variable, this.assignmentKind);
 	}
 
 	getVariable(): Variable {
 		return this.variable;
 	}
 
-	getReason(): AssignmentReason | undefined {
-		return this.reason;
-	}
-
 	isD(): boolean {
-		return this.assignmentKind === "Decision";
+		return isDecisionAssignment(this.assignmentKind);
 	}
 
 	isUP(): boolean {
-		return this.assignmentKind === 'UP';
+		return isUnitPropagationAssignment(this.assignmentKind);
 	}
 
 	isK(): boolean {
-		return this.assignmentKind === 'Backtracking';
+		return isBacktrackingAssignment(this.assignmentKind);
+	}
+
+	getAssignmentKind(): AssignmentKind {
+		return this.assignmentKind;
 	}
 
 	unassign(): void {
@@ -71,7 +125,7 @@ export default class VariableAssignment {
 	toTeX(): string {
 		if (this.variable.isNotAssigned()) {
 			logFatal(
-				'Evaluating a variable assigment with not assigned value',
+				'Evaluating a variable assignment with not assigned value',
 				'The evaluation is given by its variable which is not yet assigned'
 			);
 		}
