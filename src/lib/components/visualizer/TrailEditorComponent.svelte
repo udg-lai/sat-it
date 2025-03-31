@@ -5,7 +5,7 @@
 	import TrailComponent from './TrailComponent.svelte';
 
 	interface Props {
-		trails: Trail[],
+		trails: Trail[];
 		expanded: boolean;
 	}
 	let { trails, expanded }: Props = $props();
@@ -14,32 +14,28 @@
 	let hoverIndex: number = $state(-1);
 
 	interface IndexedTrail {
-		index: number,
-		trail: Trail,
+		index: number;
+		trail: Trail;
 		expanded: boolean;
 	}
 
 	const makeIndexedTrail = (index: number, trail: Trail): IndexedTrail => {
-		return { index, trail, expanded: false }
-	}
+		return { index, trail, expanded: false };
+	};
 
 	const toIndexedTrails = (trails: Trail[]): IndexedTrail[] => {
 		return trails.map((trail, idx) => {
-			return makeIndexedTrail(idx, trail)
-		})
-	}
+			return makeIndexedTrail(idx, trail);
+		});
+	};
 
-	let indexedTrail = $state(toIndexedTrails(trails))
-
-	$effect(() => {
-		console.log($state.snapshot(indexedTrail))
-	})
+	let indexedTrail = $derived(toIndexedTrails(trails));
 
 	function toggleExpand(index: number) {
 		checkTrailIndex(index);
 		const expanded = indexedTrail[index].expanded;
-		indexedTrail[index].expanded = !expanded; 
-		indexedTrail = [...indexedTrail];
+		indexedTrail[index].expanded = !expanded;
+		//indexedTrail = [...indexedTrail];
 	}
 
 	function handleHoverLine(index: number) {
@@ -48,7 +44,7 @@
 
 	function checkTrailIndex(index: number): number {
 		if (index < 0 || index >= indexedTrail.length) {
-			logFatal("Trail index out of range", `Expected index range [0, ${indexedTrail.length - 1}]`)
+			logFatal('Trail index out of range', `Expected index range [0, ${indexedTrail.length - 1}]`);
 		}
 		return index;
 	}
@@ -64,7 +60,7 @@
 
 <div class="trail-visualizer flex flex-row">
 	<div class="trails flex flex-col">
-		{#each indexedTrail as { trail, index, expanded } }
+		{#each indexedTrail as { trail, index, expanded }}
 			<div class="line">
 				<button
 					class="enumerate transition"
@@ -72,10 +68,7 @@
 					onmouseleave={() => handleLeaveLine()}
 					onclick={() => toggleExpand(index)}
 				>
-					<span
-						class="line-item chakra-petch-medium"
-						class:line-item-active={isActiveTrail(index)}
-					>
+					<span class="line-item chakra-petch-medium" class:line-item-active={isActiveTrail(index)}>
 						{#if hoverIndex !== index}
 							<p>{index}</p>
 						{:else if expanded}
@@ -85,8 +78,7 @@
 						{/if}
 					</span>
 				</button>
-				{@html JSON.stringify(trail)}
-				<TrailComponent trail={trail} hidePropagations={!expanded}  />
+				<TrailComponent {trail} hidePropagations={false} />
 			</div>
 		{/each}
 	</div>

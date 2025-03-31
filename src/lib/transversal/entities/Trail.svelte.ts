@@ -2,7 +2,7 @@ import type VariableAssignment from '$lib/transversal/entities/VariableAssignmen
 import { logFatal } from '../utils/logging.ts';
 
 export class Trail {
-	private assignments: VariableAssignment[] = $state([]);
+	private assignments: VariableAssignment[] = [];
 	private decisionBookMark: number[] = [];
 	private followUPIndex: number = -1;
 	private decisionLevel: number = 0;

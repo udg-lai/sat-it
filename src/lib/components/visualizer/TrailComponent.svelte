@@ -15,12 +15,6 @@
 
 	let toggledWritable: Writable<boolean[]> = writable([]);
 
-	$effect(() => {
-		let or = get(toggledWritable);
-		let state = [...trail].map((_, idx) => or[idx] || false);
-		toggledWritable.set(state);
-	});
-
 	function onVariableAssignmentClick(index: number) {
 		toggledWritable.update((state: boolean[]) => {
 			const updated = [...state];
