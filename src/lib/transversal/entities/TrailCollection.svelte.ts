@@ -1,39 +1,43 @@
 import { Trail } from './Trail.svelte.ts';
 
 export class TrailCollection {
-	private collection: Trail[] = $state([]);
+	private trails: Trail[] = $state([]);
 
 	constructor() {}
 
-	public push(trail: Trail): void {
-		this.collection.push(trail);
+	push(trail: Trail): void {
+		this.trails.push(trail);
 	}
 
-	public isEmpty(): boolean {
-		return this.collection.length == 0;
+	isEmpty(): boolean {
+		return this.trails.length == 0;
 	}
 
-	public pop(): Trail {
+	pop(): Trail {
 		if (this.isEmpty()) throw '[ERROR]: pop and empty stack';
-		else return this.collection.pop() as Trail;
+		else return this.trails.pop() as Trail;
 	}
 
-	public last(): Trail {
+	last(): Trail {
 		if (this.isEmpty()) throw '[ERROR]: last to and empty stack';
 		else {
-			return this.collection[this.collection.length - 1];
+			return this.trails[this.trails.length - 1];
 		}
+	}
+
+	getTrails() {
+		return this.trails;
 	}
 
 	// Functions to make this class iterable
 	[Symbol.iterator]() {
-		return this.collection.values();
+		return this.trails.values();
 	}
 
 	forEach(
 		callback: (trail: Trail, index: number, array: Trail[]) => void,
 		thisArg?: unknown
 	): void {
-		this.collection.forEach(callback, thisArg);
+		this.trails.forEach(callback, thisArg);
 	}
 }

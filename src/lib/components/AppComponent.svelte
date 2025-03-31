@@ -21,6 +21,8 @@
 	let trailCollection: TrailCollection = $state(new TrailCollection());
 	let currentTrail: Trail = $state(new Trail());
 
+	let trails = $derived([...trailCollection.getTrails(), currentTrail])
+
 	function algorithmStep(e: AssignmentEvent<number>, trails: TrailCollection, trail: Trail): void {
 		if (e === undefined) return;
 
@@ -70,4 +72,4 @@
 	});
 </script>
 
-<TrailEditor previousTrails={trailCollection} {currentTrail} expanded={editorExpanded} />
+<TrailEditor trails={trails} expanded={editorExpanded} />

@@ -2,13 +2,16 @@
 	import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
 	import { get, writable, type Writable } from 'svelte/store';
 	import VariableAssignmentComponent from '../VariableAssignmentComponent.svelte';
+	import type VariableAssignment from '$lib/transversal/entities/VariableAssignment.ts';
 
 	interface Props {
 		trail: Trail;
+		hidePropagations: boolean
 	}
-	let { trail }: Props = $props();
 
-	let all: boolean = $state(false);
+	let { trail, hidePropagations }: Props = $props();
+
+	let assignments: VariableAssignment[] = $derived(hidePropagations ? trail.getDecisions() : trail.getAssignments())
 
 	let toggledWritable: Writable<boolean[]> = writable([]);
 
@@ -28,15 +31,9 @@
 </script>
 
 <div class="trail flex flex-row">
-	{#if all}
-		{#each trail as assignment, index (index)}
+		{#each assignments as assignment, index (index)}
 			<VariableAssignmentComponent {assignment} onClick={() => onVariableAssignmentClick(index)} />
 		{/each}
-	{:else}
-		{#each trail.getDecisions() as assignment, index (index)}
-			<VariableAssignmentComponent {assignment} onClick={() => onVariableAssignmentClick(index)} />
-		{/each}
-	{/if}
 </div>
 
 <style>

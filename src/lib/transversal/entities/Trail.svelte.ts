@@ -1,14 +1,10 @@
 import type VariableAssignment from '$lib/transversal/entities/VariableAssignment.ts';
-
-interface IndexedDecision {
-	bookMark: number,
-	decision: VariableAssignment
-}
+import { logFatal } from '../utils/logging.ts';
 
 export class Trail {
 	private assignments: VariableAssignment[] = $state([]);
-	private decisionBookMark: number[] = $state([]);
-	private followUPIndex: number = $state(-1);
+	private decisionBookMark: number[] = [];
+	private followUPIndex: number = -1;
 	private decisionLevel: number = 0;
 	private trailCapacity: number = 0;
 
@@ -25,7 +21,7 @@ export class Trail {
 	}
 
 	getAssignments(): VariableAssignment[] {
-		return this.assignments;
+		return [...this.assignments];
 	}
 
 	getDecisionBookMark(): number[] {
@@ -37,22 +33,28 @@ export class Trail {
 	}
 
 	getPropagations(mark: number): VariableAssignment[] {
-		const idx = this
-		if (!uniqueBookMark.has(mark)) {
-			throw Error("Can not have propagation of non decision assigment")
-		} else {
-
+		const idx = this.getMarkIndex(mark);
+		const isLastMark = (idx: number): boolean => {
+			return this.decisionBookMark.length - 1 === idx;
 		}
+		let propagations: VariableAssignment[] = [];
+		if (isLastMark(idx)) {
+			propagations = this.assignments.slice(idx)
+		} else {
+			const nextDecisionIdx = this.decisionBookMark[idx + 1];
+			propagations = this.assignments.slice(idx, nextDecisionIdx);
+		}
+		return propagations;
 	}
 
 	push(assignment: VariableAssignment) {
 		if (this.assignments.length == this.trailCapacity)
-			console.warn('[WARN]: skipped allocating assignment as trail capacity is fulfilled');
+			logFatal("skipped allocating assignment as trail capacity is fulfilled");
 		else {
 			this.assignments.push(assignment);
 			if (assignment.isD()) {
 				this.decisionLevel++;
-				this.decisionBookMark.push(this.assignments.length - 1);
+				this.registerDecisionMark();
 			}
 		}
 	}
@@ -84,5 +86,29 @@ export class Trail {
 
 	updateFollowUpIndex(): void {
 		this.followUPIndex = this.assignments.length - 1;
+	}
+
+	private registerDecisionMark(): void {
+		const mark = this.assignments.length - 1;
+		if (this.markAlreadyExists(mark)) {
+			logFatal("Adding an existing mark", `Can not register mark ${mark} because it already exists`)
+		} else {
+			this.decisionBookMark.push(mark);
+		}
+	}
+
+	private markAlreadyExists(mark: number): boolean {
+		return new Set(this.decisionBookMark).has(mark);
+	}
+
+	private getMarkIndex(mark: number): number {
+		if (mark < 0 || mark >= this.trailCapacity) {
+			logFatal("Mark out of range", `Mark ${mark} out of range`)
+		}
+		const idx = this.decisionBookMark.findIndex(m => m === mark)
+		if (idx === -1) {
+			logFatal("Mark does not exist", `Mark ${mark} not found in decision book mark`)
+		}
+		return idx;
 	}
 }
