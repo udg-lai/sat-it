@@ -51,9 +51,7 @@
 	onMount(() => {
 		const unsubscribeProblem = problemStore.subscribe(onProblemUpdated);
 		const unsubscribeToggleEditor = editorViewEventStore.subscribe(toggleEditorView);
-		const unsubscribeAssignment = assignmentEventStore.subscribe((e) =>
-			algorithmStep(e)
-		);
+		const unsubscribeAssignment = assignmentEventStore.subscribe((e) => algorithmStep(e));
 		return () => {
 			unsubscribeProblem();
 			unsubscribeToggleEditor();

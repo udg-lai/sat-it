@@ -5,7 +5,7 @@
 
 	interface Props {
 		assignment: VariableAssignment;
-		propagated?: VariableAssignment[],
+		propagated?: VariableAssignment[];
 		onClick?: () => void;
 	}
 	let { assignment, onClick }: Props = $props();

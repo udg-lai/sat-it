@@ -6,9 +6,9 @@
 
 	interface Props {
 		trails: Trail[];
-		expanded: boolean;
+		expanded?: boolean;
 	}
-	let { trails, expanded }: Props = $props();
+	let { trails }: Props = $props();
 
 	// denotes over which trail user is hover
 	let hoverIndex: number = $state(-1);

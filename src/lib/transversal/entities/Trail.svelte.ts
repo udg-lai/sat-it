@@ -29,17 +29,17 @@ export class Trail {
 	}
 
 	getDecisions(): VariableAssignment[] {
-		return this.decisionBookMark.map(mark => this.assignments[mark])
+		return this.decisionBookMark.map((mark) => this.assignments[mark]);
 	}
 
 	getPropagations(mark: number): VariableAssignment[] {
 		const idx = this.getMarkIndex(mark);
 		const isLastMark = (idx: number): boolean => {
 			return this.decisionBookMark.length - 1 === idx;
-		}
+		};
 		let propagations: VariableAssignment[] = [];
 		if (isLastMark(idx)) {
-			propagations = this.assignments.slice(idx)
+			propagations = this.assignments.slice(idx);
 		} else {
 			const nextDecisionIdx = this.decisionBookMark[idx + 1];
 			propagations = this.assignments.slice(idx, nextDecisionIdx);
@@ -49,7 +49,7 @@ export class Trail {
 
 	push(assignment: VariableAssignment) {
 		if (this.assignments.length == this.trailCapacity)
-			logFatal("skipped allocating assignment as trail capacity is fulfilled");
+			logFatal('skipped allocating assignment as trail capacity is fulfilled');
 		else {
 			this.assignments.push(assignment);
 			if (assignment.isD()) {
@@ -72,7 +72,6 @@ export class Trail {
 		return this.assignments.indexOf(assignment);
 	}
 
-
 	[Symbol.iterator]() {
 		return this.assignments.values();
 	}
@@ -91,7 +90,10 @@ export class Trail {
 	private registerDecisionMark(): void {
 		const mark = this.assignments.length - 1;
 		if (this.markAlreadyExists(mark)) {
-			logFatal("Adding an existing mark", `Can not register mark ${mark} because it already exists`)
+			logFatal(
+				'Adding an existing mark',
+				`Can not register mark ${mark} because it already exists`
+			);
 		} else {
 			this.decisionBookMark.push(mark);
 		}
@@ -103,11 +105,11 @@ export class Trail {
 
 	private getMarkIndex(mark: number): number {
 		if (mark < 0 || mark >= this.trailCapacity) {
-			logFatal("Mark out of range", `Mark ${mark} out of range`)
+			logFatal('Mark out of range', `Mark ${mark} out of range`);
 		}
-		const idx = this.decisionBookMark.findIndex(m => m === mark)
+		const idx = this.decisionBookMark.findIndex((m) => m === mark);
 		if (idx === -1) {
-			logFatal("Mark does not exist", `Mark ${mark} not found in decision book mark`)
+			logFatal('Mark does not exist', `Mark ${mark} not found in decision book mark`);
 		}
 		return idx;
 	}

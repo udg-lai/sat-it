@@ -1,18 +1,19 @@
+import VariableAssignment from '../entities/VariableAssignment.ts';
 import { Trail } from '../entities/Trail.svelte.ts';
-import VariableAssignment, { AssignmentReason } from '../entities/VariableAssignment.ts';
 import type VariablePool from '../entities/VariablePool.ts';
 import { logFatal } from '../utils/logging.ts';
 import { fromJust, isJust } from '../utils/types/maybe.ts';
 
 export interface DummySearchParams {
-	trails: Trail[],
+	trails: Trail[];
 	variables: VariablePool;
 }
 
-type StepAlgorithm = (params: DummySearchParams) => Trail[]
+export const algorithmName = 'dummyAssignment';
+
+type StepAlgorithm = (params: DummySearchParams) => Trail[];
 
 export const dummyAssignmentAlgorithm: StepAlgorithm = (params: DummySearchParams): Trail[] => {
-
 	const { trails, variables } = params;
 
 	let nextTrailsState: Trail[] = [];
@@ -23,7 +24,6 @@ export const dummyAssignmentAlgorithm: StepAlgorithm = (params: DummySearchParam
 		nextTrailsState = [...trails];
 	}
 
-
 	const workingTrail = nextTrailsState[nextTrailsState.length - 1];
 
 	if (!variables.allAssigned()) {
@@ -32,8 +32,7 @@ export const dummyAssignmentAlgorithm: StepAlgorithm = (params: DummySearchParam
 			const variableId = fromJust(nextVariable);
 			variables.persist(variableId, true);
 			const variable = variables.getCopy(variableId);
-			const dVariable = new VariableAssignment(variable, AssignmentReason.D);
-			workingTrail.push(dVariable);
+			workingTrail.push(VariableAssignment.newAutomatedAssignment(variable, algorithmName));
 		} else {
 			logFatal('Dummy Search Algorithm', 'No variable to decide');
 		}
@@ -48,8 +47,7 @@ export const dummyAssignmentAlgorithm: StepAlgorithm = (params: DummySearchParam
 				backtrack = true;
 				variables.persist(lastVariable.getInt(), !lastVariable.getAssignment());
 				const variable = variables.getCopy(lastVariable.getInt());
-				const dVariable = new VariableAssignment(variable, AssignmentReason.K);
-				copyWorkingTrail.push(dVariable);
+				copyWorkingTrail.push(VariableAssignment.newBacktrackingAssignment(variable));
 				copyWorkingTrail.updateFollowUpIndex();
 			} else {
 				lastDecision = copyWorkingTrail.pop();
@@ -61,6 +59,5 @@ export const dummyAssignmentAlgorithm: StepAlgorithm = (params: DummySearchParam
 		}
 		nextTrailsState.push(copyWorkingTrail);
 	}
-	console.log("state return", [...nextTrailsState])
 	return nextTrailsState;
-}
+};
