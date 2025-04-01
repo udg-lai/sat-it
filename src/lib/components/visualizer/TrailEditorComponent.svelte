@@ -68,7 +68,7 @@
 
 <div class="trail-visualizer flex flex-row">
 	<div class="trails flex flex-col">
-		{#each indexedTrail as { trail, index, expandPropagations }}
+		{#each indexedTrail as { trail, index, expandPropagations } (index)}
 			<div class="line">
 				<button
 					class="enumerate transition"
