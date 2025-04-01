@@ -21,16 +21,20 @@
 
 	let expandedPropagationsArray = $state(new Array(trails.length).fill(false));
 
-	const makeIndexedTrail = (index: number, trail: Trail, expandPropagations: boolean): IndexedTrail => {
-		return { index, trail, expandPropagations};
+	const makeIndexedTrail = (
+		index: number,
+		trail: Trail,
+		expandPropagations: boolean
+	): IndexedTrail => {
+		return { index, trail, expandPropagations };
 	};
-	
+
 	const toIndexedTrails = (trails: Trail[], ep: boolean[]): IndexedTrail[] => {
 		return trails.map((trail, idx) => {
 			return makeIndexedTrail(idx, trail, ep[idx]);
 		});
 	};
-	
+
 	let indexedTrail = $derived(toIndexedTrails(trails, expandedPropagationsArray));
 
 	function toggleExpand(index: number) {

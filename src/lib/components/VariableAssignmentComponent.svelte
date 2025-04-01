@@ -9,7 +9,19 @@
 		onClick?: () => void;
 	}
 
-	type IndicatorColor = "teal" | "red" | "none" | "gray" | "yellow" | "green" | "indigo" | "purple" | "blue" | "dark" | "orange" | undefined;
+	type IndicatorColor =
+		| 'teal'
+		| 'red'
+		| 'none'
+		| 'gray'
+		| 'yellow'
+		| 'green'
+		| 'indigo'
+		| 'purple'
+		| 'blue'
+		| 'dark'
+		| 'orange'
+		| undefined;
 
 	let { assignment, onClick }: Props = $props();
 	let decisionColor: IndicatorColor = $state('teal');
