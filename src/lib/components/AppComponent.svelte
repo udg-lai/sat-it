@@ -60,4 +60,4 @@
 	});
 </script>
 
-<TrailEditor {trails} expanded={editorExpanded} />
+<TrailEditor {trails} {editorExpanded} />

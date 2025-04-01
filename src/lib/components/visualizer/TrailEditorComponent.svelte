@@ -6,9 +6,9 @@
 
 	interface Props {
 		trails: Trail[];
-		expanded?: boolean;
+		editorExpanded?: boolean;
 	}
-	let { trails }: Props = $props();
+	let { trails , editorExpanded}: Props = $props();
 
 	// denotes over which trail user is hover
 	let hoverIndex: number = $state(-1);
@@ -30,9 +30,10 @@
 	};
 
 	const toIndexedTrails = (trails: Trail[], ep: boolean[]): IndexedTrail[] => {
-		return trails.map((trail, idx) => {
+		const indexTrails =  trails.map((trail, idx) => {
 			return makeIndexedTrail(idx, trail, ep[idx]);
-		});
+		}).reverse();
+		return editorExpanded ? indexTrails : indexTrails.slice(0,1);
 	};
 
 	let indexedTrail = $derived(toIndexedTrails(trails, expandedPropagationsArray));
