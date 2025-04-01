@@ -51,8 +51,8 @@
 	}
 
 	function checkTrailIndex(index: number): number {
-		if (index < 0 || index >= indexedTrail.length) {
-			logFatal('Trail index out of range', `Expected index range [0, ${indexedTrail.length - 1}]`);
+		if (index < 0 || index >= trails.length) {
+			logFatal('Trail index out of range', `Expected index range [0, ${trails.length - 1}]`);
 		}
 		return index;
 	}
