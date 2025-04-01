@@ -8,8 +8,23 @@
 		propagated?: VariableAssignment[];
 		onClick?: () => void;
 	}
+
+	type IndicatorColor =
+		| 'teal'
+		| 'red'
+		| 'none'
+		| 'gray'
+		| 'yellow'
+		| 'green'
+		| 'indigo'
+		| 'purple'
+		| 'blue'
+		| 'dark'
+		| 'orange'
+		| undefined;
+
 	let { assignment, onClick }: Props = $props();
-	let decisionColor: string = $state('teal');
+	let decisionColor: IndicatorColor = $state('teal');
 
 	$effect(() => {
 		decisionColor = assignment.isD() ? 'teal' : 'red';
