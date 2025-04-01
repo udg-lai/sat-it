@@ -6,13 +6,13 @@
 
 	interface Props {
 		trail: Trail;
-		hidePropagations: boolean;
+		expandPropagations: boolean;
 	}
 
-	let { trail, hidePropagations }: Props = $props();
+	let { trail, expandPropagations }: Props = $props();
 
 	let assignments: VariableAssignment[] = $derived(
-		hidePropagations ? trail.getDecisions() : trail.getAssignments()
+		expandPropagations ? trail.getDecisions() : trail.getAssignments()
 	);
 
 	let toggledWritable: Writable<boolean[]> = writable([]);

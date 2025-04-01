@@ -16,26 +16,27 @@
 	interface IndexedTrail {
 		index: number;
 		trail: Trail;
-		expanded: boolean;
+		expandPropagations: boolean;
 	}
 
-	const makeIndexedTrail = (index: number, trail: Trail): IndexedTrail => {
-		return { index, trail, expanded: false };
-	};
+	let expandedPropagationsArray = $state(new Array(trails.length).fill(false));
 
-	const toIndexedTrails = (trails: Trail[]): IndexedTrail[] => {
+	const makeIndexedTrail = (index: number, trail: Trail, expandPropagations: boolean): IndexedTrail => {
+		return { index, trail, expandPropagations};
+	};
+	
+	const toIndexedTrails = (trails: Trail[], ep: boolean[]): IndexedTrail[] => {
 		return trails.map((trail, idx) => {
-			return makeIndexedTrail(idx, trail);
+			return makeIndexedTrail(idx, trail, ep[idx]);
 		});
 	};
-
-	let indexedTrail = $derived(toIndexedTrails(trails));
+	
+	let indexedTrail = $derived(toIndexedTrails(trails, expandedPropagationsArray));
 
 	function toggleExpand(index: number) {
 		checkTrailIndex(index);
-		const expanded = indexedTrail[index].expanded;
-		indexedTrail[index].expanded = !expanded;
-		//indexedTrail = [...indexedTrail];
+		const expanded = expandedPropagationsArray[index];
+		expandedPropagationsArray[index] = !expanded;
 	}
 
 	function handleHoverLine(index: number) {
@@ -60,7 +61,7 @@
 
 <div class="trail-visualizer flex flex-row">
 	<div class="trails flex flex-col">
-		{#each indexedTrail as { trail, index, expanded }}
+		{#each indexedTrail as { trail, index, expandPropagations }}
 			<div class="line">
 				<button
 					class="enumerate transition"
@@ -71,14 +72,14 @@
 					<span class="line-item chakra-petch-medium" class:line-item-active={isActiveTrail(index)}>
 						{#if hoverIndex !== index}
 							<p>{index}</p>
-						{:else if expanded}
+						{:else if expandPropagations}
 							<ChevronLeftOutline slot="icon" class="h-8 w-8" />
 						{:else}
 							<ChevronRightOutline slot="icon" class="h-8 w-8" />
 						{/if}
 					</span>
 				</button>
-				<TrailComponent {trail} hidePropagations={false} />
+				<TrailComponent {trail} {expandPropagations} />
 			</div>
 		{/each}
 	</div>
