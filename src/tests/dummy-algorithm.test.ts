@@ -22,7 +22,7 @@ for (let i = 0; i < 3; i++) {
 describe('variable assignment', () => {
 	it('Automated Decision', () => {
 		const { trails } = params;
-		const lastAssignment = trails[trails.length-1].pop();
+		const lastAssignment = trails[trails.length - 1].pop();
 		expect(lastAssignment).not.toBe(undefined);
 		if (lastAssignment) {
 			const assignmentKind = lastAssignment.getAssignmentKind();
@@ -37,8 +37,10 @@ describe('variable assignment', () => {
 		variables.dispose(3);
 		variables.persist(3, false);
 
-		trails[trails.length-1].push(VariableAssignment.newManualAssignment(params.variables.getCopy(3)));
-		const lastAssignment = trails[trails.length-1].pop();
+		trails[trails.length - 1].push(
+			VariableAssignment.newManualAssignment(params.variables.getCopy(3))
+		);
+		const lastAssignment = trails[trails.length - 1].pop();
 		expect(lastAssignment).not.toBe(undefined);
 		if (lastAssignment) {
 			const assignmentKind = lastAssignment.getAssignmentKind();
@@ -52,7 +54,7 @@ describe('variable assignment', () => {
 		}
 
 		const { trails } = params;
-		const lastDecision = trails[trails.length-1].pop();
+		const lastDecision = trails[trails.length - 1].pop();
 
 		expect(lastDecision?.isK()).toBe(true);
 	});
