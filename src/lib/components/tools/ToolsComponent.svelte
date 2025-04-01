@@ -52,7 +52,7 @@
 	}
 
 	function openGutHubRepository() {
-		window.open("https://github.com/udg-lai/edu.satit", "_blank")
+		window.open('https://github.com/udg-lai/edu.satit', '_blank');
 	}
 
 	function closeAllViews(): void {

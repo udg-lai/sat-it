@@ -16,10 +16,12 @@
 
 .fixed_bottom {
 	width: var(--bar-width);
-	position: fixed;
-	bottom: 1rem;
-	padding: 1rem;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	margin-top: auto;
 }
+
 
 .options-tools > .toggle-button:not(:last-child) {
 	margin-bottom: 1rem;
