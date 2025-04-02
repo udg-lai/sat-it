@@ -26,9 +26,9 @@
 		<InstanceListComponent instances={$instanceStore} />
 	</AccordionItem>
 	<AccordionItem open={previewOpen}>
-		<span slot="header"
-			>Preview instance: {$activeInstanceStore ? $activeInstanceStore.instanceName : ''}</span
-		>
+		<span slot="header">
+			Preview current instance: {$activeInstanceStore ? $activeInstanceStore.instanceName : ''}
+		</span>
 		{#if $activeInstanceStore}
 			<DimacsViewerComponent dimacs={$activeInstanceStore} />
 		{/if}

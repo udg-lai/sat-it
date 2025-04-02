@@ -15,7 +15,7 @@
 	const header = `<div class="header">cnf ${varCount} ${clauseCount}</div>`;
 
 	const claimToHtml = (claim: number[]): string => {
-		const eos = claims[claims.length - 1];
+		const eos = claim[claim.length - 1];
 		if (eos !== 0) {
 			logFatal('Claim end of sequence not found');
 		}
