@@ -19,7 +19,13 @@
 		expandPropagations: boolean;
 	}
 
-	let expandedPropagationsArray = $state(new Array(trails.length).fill(false));
+	let expandedPropagationsArray: boolean[] = $state([]);
+
+	$effect(() => {
+		while($state.snapshot(expandedPropagationsArray).length !== trails.length) {
+			expandedPropagationsArray.push(true);
+		}
+	})
 
 	const makeIndexedTrail = (
 		index: number,
