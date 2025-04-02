@@ -9,36 +9,64 @@
 
 	let { dimacs }: Props = $props();
 
-	let headerHtml = $state('');
-
 	const { summary }: DimacsInstance = dimacs;
 	const { varCount, clauseCount }: Summary = summary;
 
-	headerHtml = `<p>cnf ${varCount} ${clauseCount}</p>`;
+	const header = `<div class="header">cnf ${varCount} ${clauseCount}</div>`;
 
 	const claimToHtml = (claim: number[]): string => {
-		const [eos, ...clause] = [...claim].reverse();
+		const eos = claims[claims.length - 1];
 		if (eos !== 0) {
 			logFatal('Claim end of sequence not found');
 		}
-		clause.reverse();
-		console.log(clause);
-		let html;
-		if (clause.length === 0) {
-			html = `<p></p>`;
-		} else {
-			const [fst, ...rest] = clause;
-			html = `<p>${fst}`;
-			html += rest.map((lit) => ` ${lit}`).join(' ');
-			html += `</p>`;
-		}
+		const html = claim
+			.map((lit) => {
+				return `<span class="${lit === 0 ? 'delimiter' : 'literal'}">${lit}</span>`;
+			})
+			.join(' ');
 		return html;
 	};
+
+	const claimsToHtml = (claims: number[][]): string => {
+		return claims
+			.map((claim) => {
+				return `<div class="clause">` + claimToHtml(claim) + `</div>`;
+			})
+			.join('');
+	};
+
+	const originalClaims = dimacs.summary.claims.original;
+	const claims = claimsToHtml(originalClaims);
 </script>
 
-<p>{dimacs.instanceName}</p>
-<p>{@html headerHtml}</p>
+{@html header}
+{@html claims}
 
-{#each dimacs?.summary.claims.original as claim}
-	{@html claimToHtml(claim)}
-{/each}
+<style>
+	:global(.literal) {
+		color: blue;
+		font-weight: bold;
+	}
+
+	:global(.delimiter) {
+		color: red;
+	}
+
+	:global(.literal, .delimiter) {
+		display: inline-block;
+		width: 20px;
+		text-align: right;
+	}
+
+	:global(.header) {
+		font-weight: bold;
+		font-size: 1.2em;
+		color: darkgreen;
+		margin-bottom: 8px;
+	}
+
+	:global(.clause) {
+		display: flex;
+		gap: 5px;
+	}
+</style>
