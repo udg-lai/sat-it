@@ -63,7 +63,7 @@
 
 	<main>
 		<div class="tools-section z-10">
-			<ToolsComponent closed={true} />
+			<ToolsComponent />
 		</div>
 		<workspace class="flex flex-col md:flex-row">
 			<play-area>

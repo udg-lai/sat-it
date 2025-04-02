@@ -8,13 +8,14 @@
 	import InstanceListComponent from './instance-list/InstanceListComponent.svelte';
 	import DimacsUploaderComponent from './uploader/DimacsUploaderComponent.svelte';
 	import { onMount } from 'svelte';
+	import type { DimacsInstance } from '$lib/dimacs/dimacs-instance.interface.ts';
 
 	let uploaderOpen = $state(false);
 	let listOpen = $derived(!uploaderOpen);
 
 	let instances: InteractiveInstance[] = $state([]);
 
-	function addAndCloseUploader(e: InteractiveInstance) {
+	function addAndCloseUploader(e: DimacsInstance) {
 		addInstance(e);
 		uploaderOpen = false;
 	}
