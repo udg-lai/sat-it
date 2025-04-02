@@ -22,10 +22,10 @@
 	let expandedPropagationsArray: boolean[] = $state([]);
 
 	$effect(() => {
-		while($state.snapshot(expandedPropagationsArray).length !== trails.length) {
+		while ($state.snapshot(expandedPropagationsArray).length !== trails.length) {
 			expandedPropagationsArray.push(true);
 		}
-	})
+	});
 
 	const makeIndexedTrail = (
 		index: number,
