@@ -1,14 +1,13 @@
 <script lang="ts">
-	import type { InteractiveInstance } from '$lib/store/instances.store.ts';
+	import { activateInstance, type InteractiveInstance } from '$lib/store/instances.store.ts';
 	import { Toggle } from 'flowbite-svelte';
 	import { DatabaseOutline, EyeOutline, LockOutline, TrashBinOutline } from 'flowbite-svelte-icons';
 
 	interface Props {
-		onActivateInstance?: (instance: InteractiveInstance) => void;
 		instances: InteractiveInstance[];
 	}
 
-	let { onActivateInstance, instances }: Props = $props();
+	let { instances }: Props = $props();
 </script>
 
 <ul>
@@ -31,7 +30,7 @@
 					<EyeOutline />
 				</button>
 				<Toggle
-					onchange={() => onActivateInstance?.(instance)}
+					onchange={() => activateInstance(instance)}
 					checked={instance.active}
 					disabled={instance.active}
 					class="toggle"

@@ -1,58 +1,121 @@
-import {
-	isNothing,
-	makeNothing,
-	fromJust,
-	type Maybe
-} from '$lib/transversal/utils/types/maybe.ts';
 import { logFatal } from '../utils/logging.ts';
 import type Variable from './Variable.svelte.ts';
 
-export enum AssignmentReason {
-	D = 'decision',
-	UP = 'unit_propagation',
-	K = 'backtracking'
-}
+type Automated = {
+	type: 'automated';
+	algorithm: string;
+};
+
+type Manual = {
+	type: 'manual';
+};
+
+type Decision = Automated | Manual;
+
+type UnitPropagation = {
+	type: 'propagated';
+	clauseId: number;
+};
+
+type Backtracking = {
+	type: 'backtracking';
+};
+
+export type AssignmentKind = Decision | UnitPropagation | Backtracking;
+
+export const isDecisionAssignment = (a: AssignmentKind): a is Decision => {
+	return a.type === 'manual' || a.type === 'automated';
+};
+
+export const isAutomatedAssignment = (a: AssignmentKind): a is Automated => {
+	return a.type === 'automated';
+};
+
+export const isManualAssignment = (a: AssignmentKind): a is Manual => {
+	return a.type === 'manual';
+};
+
+export const isUnitPropagationAssignment = (a: AssignmentKind): a is UnitPropagation => {
+	return a.type === 'propagated';
+};
+
+export const isBacktrackingAssignment = (a: AssignmentKind): a is Backtracking => {
+	return a.type === 'backtracking';
+};
+
+export const makeAutomatedAssignment = (algorithm: string): Automated => {
+	return {
+		type: 'automated',
+		algorithm
+	};
+};
+
+export const makeManualAssignment = (): Manual => {
+	return {
+		type: 'manual'
+	};
+};
+
+export const makeUnitPropagationAssignment = (clauseId: number): UnitPropagation => {
+	return {
+		type: 'propagated',
+		clauseId
+	};
+};
+
+export const makeBacktrackingAssignment = (): Backtracking => {
+	return {
+		type: 'backtracking'
+	};
+};
 
 export default class VariableAssignment {
 	variable: Variable;
-	reason: AssignmentReason;
-	clauseUpId: Maybe<number>;
+	assignmentKind: AssignmentKind;
 
-	constructor(
-		variable: Variable,
-		reason: AssignmentReason,
-		clauseUpId: Maybe<number> = makeNothing()
-	) {
+	private constructor(variable: Variable, kind: AssignmentKind) {
 		this.variable = variable;
-		this.reason = reason;
-		this.clauseUpId = clauseUpId;
+		this.assignmentKind = kind;
 	}
 
-	public copy(): VariableAssignment {
-		return new VariableAssignment(this.variable, this.reason, this.clauseUpId);
+	static newAutomatedAssignment(variable: Variable, algorithm: string) {
+		return new VariableAssignment(variable, makeAutomatedAssignment(algorithm));
+	}
+
+	static newManualAssignment(variable: Variable) {
+		return new VariableAssignment(variable, makeManualAssignment());
+	}
+
+	static newUnitPropagationAssignment(variable: Variable, clauseId: number) {
+		return new VariableAssignment(variable, makeUnitPropagationAssignment(clauseId));
+	}
+
+	static newBacktrackingAssignment(variable: Variable) {
+		return new VariableAssignment(variable, makeBacktrackingAssignment());
+	}
+
+	copy(): VariableAssignment {
+		return new VariableAssignment(this.variable, this.assignmentKind);
 	}
 
 	getVariable(): Variable {
 		return this.variable;
 	}
 
-	getSource(): number {
-		if (isNothing(this.clauseUpId)) {
-			throw 'ERROR: There is no source for the decision';
-		}
-		return fromJust(this.clauseUpId);
-	}
-
 	isD(): boolean {
-		return this.reason === AssignmentReason.D;
+		return isDecisionAssignment(this.assignmentKind);
 	}
 
 	isUP(): boolean {
-		return this.reason === AssignmentReason.UP;
+		return isUnitPropagationAssignment(this.assignmentKind);
 	}
 
 	isK(): boolean {
-		return this.reason === AssignmentReason.K;
+		return isBacktrackingAssignment(this.assignmentKind);
+	}
+
+	getAssignmentKind(): AssignmentKind {
+		return this.assignmentKind;
 	}
 
 	unassign(): void {
@@ -62,7 +125,7 @@ export default class VariableAssignment {
 	toTeX(): string {
 		if (this.variable.isNotAssigned()) {
 			logFatal(
-				'Evaluating a variable assigment with not assigned value',
+				'Evaluating a variable assignment with not assigned value',
 				'The evaluation is given by its variable which is not yet assigned'
 			);
 		}
