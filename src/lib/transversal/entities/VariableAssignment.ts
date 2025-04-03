@@ -21,25 +21,25 @@ type Backtracking = {
 	type: 'backtracking';
 };
 
-export type AssignmentKind = Decision | UnitPropagation | Backtracking;
+export type Reason = Decision | UnitPropagation | Backtracking;
 
-export const isDecisionAssignment = (a: AssignmentKind): a is Decision => {
+export const isDecisionAssignment = (a: Reason): a is Decision => {
 	return a.type === 'manual' || a.type === 'automated';
 };
 
-export const isAutomatedAssignment = (a: AssignmentKind): a is Automated => {
+export const isAutomatedAssignment = (a: Reason): a is Automated => {
 	return a.type === 'automated';
 };
 
-export const isManualAssignment = (a: AssignmentKind): a is Manual => {
+export const isManualAssignment = (a: Reason): a is Manual => {
 	return a.type === 'manual';
 };
 
-export const isUnitPropagationAssignment = (a: AssignmentKind): a is UnitPropagation => {
+export const isUnitPropagationAssignment = (a: Reason): a is UnitPropagation => {
 	return a.type === 'propagated';
 };
 
-export const isBacktrackingAssignment = (a: AssignmentKind): a is Backtracking => {
+export const isBacktrackingAssignment = (a: Reason): a is Backtracking => {
 	return a.type === 'backtracking';
 };
 
@@ -71,11 +71,11 @@ export const makeBacktrackingAssignment = (): Backtracking => {
 
 export default class VariableAssignment {
 	variable: Variable;
-	assignmentKind: AssignmentKind;
+	reason: Reason;
 
-	private constructor(variable: Variable, kind: AssignmentKind) {
+	private constructor(variable: Variable, kind: Reason) {
 		this.variable = variable;
-		this.assignmentKind = kind;
+		this.reason = kind;
 	}
 
 	static newAutomatedAssignment(variable: Variable, algorithm: string) {
@@ -95,7 +95,7 @@ export default class VariableAssignment {
 	}
 
 	copy(): VariableAssignment {
-		return new VariableAssignment(this.variable, this.assignmentKind);
+		return new VariableAssignment(this.variable, this.reason);
 	}
 
 	getVariable(): Variable {
@@ -103,19 +103,19 @@ export default class VariableAssignment {
 	}
 
 	isD(): boolean {
-		return isDecisionAssignment(this.assignmentKind);
+		return isDecisionAssignment(this.reason);
 	}
 
 	isUP(): boolean {
-		return isUnitPropagationAssignment(this.assignmentKind);
+		return isUnitPropagationAssignment(this.reason);
 	}
 
 	isK(): boolean {
-		return isBacktrackingAssignment(this.assignmentKind);
+		return isBacktrackingAssignment(this.reason);
 	}
 
-	getAssignmentKind(): AssignmentKind {
-		return this.assignmentKind;
+	getAssignmentKind(): Reason {
+		return this.reason;
 	}
 
 	unassign(): void {
