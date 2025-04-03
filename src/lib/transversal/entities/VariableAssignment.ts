@@ -23,24 +23,24 @@ type Backtracking = {
 
 export type Reason = Decision | UnitPropagation | Backtracking;
 
-export const isDecisionAssignment = (a: Reason): a is Decision => {
-	return a.type === 'manual' || a.type === 'automated';
+export const isDecisionAssignment = (r: Reason): r is Decision => {
+	return r.type === 'manual' || r.type === 'automated';
 };
 
-export const isAutomatedAssignment = (a: Reason): a is Automated => {
-	return a.type === 'automated';
+export const isAutomatedAssignment = (r: Reason): r is Automated => {
+	return r.type === 'automated';
 };
 
-export const isManualAssignment = (a: Reason): a is Manual => {
-	return a.type === 'manual';
+export const isManualAssignment = (r: Reason): r is Manual => {
+	return r.type === 'manual';
 };
 
-export const isUnitPropagationAssignment = (a: Reason): a is UnitPropagation => {
-	return a.type === 'propagated';
+export const isUnitPropagationAssignment = (r: Reason): r is UnitPropagation => {
+	return r.type === 'propagated';
 };
 
-export const isBacktrackingAssignment = (a: Reason): a is Backtracking => {
-	return a.type === 'backtracking';
+export const isBacktrackingAssignment = (r: Reason): r is Backtracking => {
+	return r.type === 'backtracking';
 };
 
 export const makeAutomatedAssignment = (algorithm: string): Automated => {
