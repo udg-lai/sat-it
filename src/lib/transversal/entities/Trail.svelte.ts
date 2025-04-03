@@ -86,7 +86,6 @@ export class Trail {
 
 	updateFollowUpIndex(): void {
 		this.followUPIndex = this.assignments.length - 1;
-		console.log(this.decisionLevel);
 	}
 
 	private registerDecisionMark(): void {
