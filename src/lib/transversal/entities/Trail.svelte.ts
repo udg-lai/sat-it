@@ -1,9 +1,11 @@
 import type VariableAssignment from '$lib/transversal/entities/VariableAssignment.ts';
 import { logFatal } from '../utils/logging.ts';
+import type Clause from './Clause.ts';
 
 export class Trail {
 	private assignments: VariableAssignment[] = [];
 	private decisionBookMark: number[] = [];
+	private learned: Clause[] = [];
 	private followUPIndex: number = -1;
 	private decisionLevel: number = 0;
 	private trailCapacity: number = 0;
@@ -16,7 +18,10 @@ export class Trail {
 		const newTrail = new Trail(this.trailCapacity);
 		newTrail.assignments = this.assignments.map((assignment) => assignment.copy());
 		newTrail.decisionBookMark = [...this.decisionBookMark];
+		newTrail.learned = this.learned.map((clause) => clause);
 		newTrail.followUPIndex = this.followUPIndex;
+		newTrail.decisionLevel = this.decisionLevel;
+		newTrail.trailCapacity = this.trailCapacity;
 		return newTrail;
 	}
 
@@ -108,5 +113,13 @@ export class Trail {
 			logFatal('Mark does not exist', `Mark ${mark} not found in decision book mark`);
 		}
 		return idx;
+	}
+
+	learnedClauses(): Clause[] {
+		return this.learned;
+	}
+
+	learn(clause: Clause): void {
+		this.learned.push(clause);
 	}
 }
