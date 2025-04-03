@@ -23,23 +23,23 @@ type Backtracking = {
 
 export type Reason = Decision | UnitPropagation | Backtracking;
 
-export const isDecisionAssignment = (r: Reason): r is Decision => {
+export const isDecisionReason = (r: Reason): r is Decision => {
 	return r.type === 'manual' || r.type === 'automated';
 };
 
-export const isAutomatedAssignment = (r: Reason): r is Automated => {
+export const isAutomatedReason = (r: Reason): r is Automated => {
 	return r.type === 'automated';
 };
 
-export const isManualAssignment = (r: Reason): r is Manual => {
+export const isManualReason = (r: Reason): r is Manual => {
 	return r.type === 'manual';
 };
 
-export const isUnitPropagationAssignment = (r: Reason): r is UnitPropagation => {
+export const isUnitPropagationReason = (r: Reason): r is UnitPropagation => {
 	return r.type === 'propagated';
 };
 
-export const isBacktrackingAssignment = (r: Reason): r is Backtracking => {
+export const isBacktrackingReason = (r: Reason): r is Backtracking => {
 	return r.type === 'backtracking';
 };
 
@@ -103,15 +103,15 @@ export default class VariableAssignment {
 	}
 
 	isD(): boolean {
-		return isDecisionAssignment(this.reason);
+		return isDecisionReason(this.reason);
 	}
 
 	isUP(): boolean {
-		return isUnitPropagationAssignment(this.reason);
+		return isUnitPropagationReason(this.reason);
 	}
 
 	isK(): boolean {
-		return isBacktrackingAssignment(this.reason);
+		return isBacktrackingReason(this.reason);
 	}
 
 	getReason(): Reason {

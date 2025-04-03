@@ -6,8 +6,8 @@ import {
 import { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
 import { TrailCollection } from '$lib/transversal/entities/TrailCollection.svelte.ts';
 import VariableAssignment, {
-	isAutomatedAssignment,
-	isManualAssignment
+	isAutomatedReason,
+	isManualReason
 } from '$lib/transversal/entities/VariableAssignment.ts';
 import VariablePool from '$lib/transversal/entities/VariablePool.ts';
 import { describe, expect, it } from 'vitest';
@@ -29,7 +29,7 @@ describe('variable assignment', () => {
 		expect(lastAssignment).not.toBe(undefined);
 		if (lastAssignment) {
 			const reason = lastAssignment.getReason();
-			if (isAutomatedAssignment(reason)) {
+			if (isAutomatedReason(reason)) {
 				const { algorithm } = reason;
 				expect(algorithm).toBe(dummyAlgorithmName);
 			}
@@ -46,7 +46,7 @@ describe('variable assignment', () => {
 		expect(lastAssignment).not.toBe(undefined);
 		if (lastAssignment) {
 			const reason = lastAssignment.getReason();
-			const manualAssignment = isManualAssignment(reason);
+			const manualAssignment = isManualReason(reason);
 			expect(manualAssignment).toBe(true);
 		}
 	});
