@@ -124,7 +124,7 @@ export class Trail {
 		return this.learned;
 	}
 
-	learn(learnedClause: Clause): void {
-		this.learned.push(learnedClause);
+	learn(clause: Clause): void {
+		this.learned.push(clause);
 	}
 }
