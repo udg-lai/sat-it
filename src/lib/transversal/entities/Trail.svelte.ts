@@ -5,7 +5,7 @@ import type Clause from './Clause.ts';
 export class Trail {
 	private assignments: VariableAssignment[] = [];
 	private decisionBookMark: number[] = [];
-	private learnedClauses: Clause[] = [];
+	private learned: Clause[] = [];
 	private followUPIndex: number = -1;
 	private decisionLevel: number = 0;
 	private trailCapacity: number = 0;
@@ -18,7 +18,7 @@ export class Trail {
 		const newTrail = new Trail(this.trailCapacity);
 		newTrail.assignments = this.assignments.map((assignment) => assignment.copy());
 		newTrail.decisionBookMark = [...this.decisionBookMark];
-		newTrail.learnedClauses = this.learnedClauses.map((clause) => clause);
+		newTrail.learned = this.learned.map((clause) => clause);
 		newTrail.followUPIndex = this.followUPIndex;
 		newTrail.decisionLevel = this.decisionLevel;
 		newTrail.trailCapacity = this.trailCapacity;
@@ -120,11 +120,11 @@ export class Trail {
 		return idx;
 	}
 
-	getLearnedClauses(): Clause[] {
-		return this.learnedClauses;
+	learnedClauses(): Clause[] {
+		return this.learned;
 	}
 
-	addLearnedClause(learnedClause: Clause): void {
-		this.learnedClauses.push(learnedClause);
+	learn(learnedClause: Clause): void {
+		this.learned.push(learnedClause);
 	}
 }
