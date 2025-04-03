@@ -1,20 +1,21 @@
 <script lang="ts">
 	import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
-	import { get, writable, type Writable } from 'svelte/store';
+	import type VariableAssignment from '$lib/transversal/entities/VariableAssignment.ts';
+	import { writable, type Writable } from 'svelte/store';
 	import VariableAssignmentComponent from '../VariableAssignmentComponent.svelte';
 
 	interface Props {
 		trail: Trail;
+		expandPropagations: boolean;
 	}
-	let { trail }: Props = $props();
+
+	let { trail, expandPropagations }: Props = $props();
+
+	let assignments: VariableAssignment[] = $derived(
+		expandPropagations ? trail.getAssignments() : trail.getDecisions()
+	);
 
 	let toggledWritable: Writable<boolean[]> = writable([]);
-
-	$effect(() => {
-		let or = get(toggledWritable);
-		let state = [...trail].map((_, idx) => or[idx] || false);
-		toggledWritable.set(state);
-	});
 
 	function onVariableAssignmentClick(index: number) {
 		toggledWritable.update((state: boolean[]) => {
@@ -26,14 +27,7 @@
 </script>
 
 <div class="trail flex flex-row">
-	{#each trail as assignment, index (index)}
-		{#if $toggledWritable[index]}
-			<div class="options flex flex-row">
-				<button class="option">A</button>
-				<button class="option">B</button>
-				<button class="option">C</button>
-			</div>
-		{/if}
+	{#each assignments as assignment, index (index)}
 		<VariableAssignmentComponent {assignment} onClick={() => onVariableAssignmentClick(index)} />
 	{/each}
 </div>
@@ -43,15 +37,5 @@
 		display: flex;
 		gap: 0.5rem;
 		align-items: center;
-	}
-
-	.options {
-		gap: 10px;
-	}
-
-	.option {
-		height: 15px;
-		width: 15px;
-		background-color: green;
 	}
 </style>

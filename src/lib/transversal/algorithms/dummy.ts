@@ -1,52 +1,63 @@
 import VariableAssignment from '../entities/VariableAssignment.ts';
-import type { Trail } from '../entities/Trail.svelte.ts';
-import type { TrailCollection } from '../entities/TrailCollection.svelte.ts';
+import { Trail } from '../entities/Trail.svelte.ts';
 import type VariablePool from '../entities/VariablePool.ts';
-import { logError } from '../utils/logging.ts';
+import { logFatal } from '../utils/logging.ts';
 import { fromJust, isJust } from '../utils/types/maybe.ts';
 
 export interface DummySearchParams {
-	otherTrails: TrailCollection;
-	currentTrail: Trail;
-	variablePool: VariablePool;
+	trails: Trail[];
+	variables: VariablePool;
 }
 
 export const algorithmName = 'dummyAssignment';
 
-export function dummyAssignmentAlgorithm(params: DummySearchParams): void {
-	const { otherTrails, currentTrail, variablePool } = params;
+type StepAlgorithm = (params: DummySearchParams) => Trail[];
 
-	if (!variablePool.allAssigned()) {
-		const nextVariable = variablePool.nextVariableToAssign();
+export const dummyAssignmentAlgorithm: StepAlgorithm = (params: DummySearchParams): Trail[] => {
+	const { trails, variables } = params;
+
+	let nextTrailsState: Trail[] = [];
+
+	if (trails.length === 0) {
+		nextTrailsState = [new Trail(variables.nVariables())];
+	} else {
+		nextTrailsState = [...trails];
+	}
+
+	const workingTrail = nextTrailsState[nextTrailsState.length - 1];
+
+	if (!variables.allAssigned()) {
+		const nextVariable = variables.nextVariableToAssign();
 		if (isJust(nextVariable)) {
 			const variableId = fromJust(nextVariable);
-			variablePool.persist(variableId, true);
-			const variable = variablePool.getCopy(variableId);
-			currentTrail.push(VariableAssignment.newAutomatedAssignment(variable, algorithmName));
-			currentTrail.updateFollowUpIndex();
+			variables.persist(variableId, true);
+			const variable = variables.getCopy(variableId);
+			workingTrail.push(VariableAssignment.newAutomatedAssignment(variable, algorithmName));
 		} else {
-			logError('Dummy Search Algorithm', 'No variable to decide');
+			logFatal('Dummy Search Algorithm', 'No variable to decide');
 		}
 	} else {
-		otherTrails.push(currentTrail.copy());
 		let backtrack = false;
-		let lastDecision = currentTrail.pop();
+		const copyWorkingTrail = workingTrail.copy();
+		let lastDecision: VariableAssignment | undefined = copyWorkingTrail.pop();
 		while (!backtrack && lastDecision !== undefined) {
 			const lastVariable = lastDecision.getVariable();
-			variablePool.dispose(lastVariable.getInt());
+			variables.dispose(lastVariable.getInt());
 			if (lastDecision.isD()) {
 				backtrack = true;
-				variablePool.persist(lastVariable.getInt(), !lastVariable.getAssignment());
-				const variable = variablePool.getCopy(lastVariable.getInt());
-				currentTrail.push(VariableAssignment.newBacktrackingAssignment(variable));
-				currentTrail.updateFollowUpIndex();
+				variables.persist(lastVariable.getInt(), !lastVariable.getAssignment());
+				const variable = variables.getCopy(lastVariable.getInt());
+				copyWorkingTrail.push(VariableAssignment.newBacktrackingAssignment(variable));
+				copyWorkingTrail.updateFollowUpIndex();
 			} else {
-				lastDecision = currentTrail.pop();
+				lastDecision = copyWorkingTrail.pop();
 			}
 		}
-		if (!backtrack) {
+		if (lastDecision === undefined) {
 			// this denotes that no backward decision was found in the trail
-			currentTrail.updateFollowUpIndex();
+			copyWorkingTrail.updateFollowUpIndex();
 		}
+		nextTrailsState.push(copyWorkingTrail);
 	}
-}
+	return nextTrailsState;
+};

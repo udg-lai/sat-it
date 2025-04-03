@@ -1,45 +1,65 @@
 <script lang="ts">
-	import { TrailCollection } from '$lib/transversal/entities/TrailCollection.svelte.ts';
 	import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
+	import { logFatal } from '$lib/transversal/utils/logging.ts';
 	import { ChevronLeftOutline, ChevronRightOutline } from 'flowbite-svelte-icons';
-	import { get, writable, type Writable } from 'svelte/store';
 	import TrailComponent from './TrailComponent.svelte';
-	import { makeTuple, type Tuple } from '$lib/transversal/utils/types/tuple.ts';
+	import { get, writable, type Writable } from 'svelte/store';
 
 	interface Props {
-		previousTrails: TrailCollection;
-		currentTrail: Trail;
-		expanded: boolean;
+		trails: Trail[];
+		editorExpanded?: boolean;
 	}
-	let { previousTrails, currentTrail, expanded }: Props = $props();
+	let { trails, editorExpanded }: Props = $props();
 
 	// denotes over which trail user is hover
 	let hoverIndex: number = $state(-1);
 
-	let trails: Tuple<number, Trail>[] = $derived(
-		(() => {
-			const xs = [...previousTrails, currentTrail].map((t, idx) => makeTuple(idx + 1, t)).reverse();
-			return expanded ? xs : xs.slice(0, 1);
-		})()
-	);
+	interface IndexedTrail {
+		index: number;
+		trail: Trail;
+	}
 
 	let expandedWritable: Writable<boolean[]> = writable([]);
 
 	$effect(() => {
-		let or = get(expandedWritable).reverse();
-		let state = trails.map((_, idx) => or[idx] || false).reverse();
+		let or = get(expandedWritable);
+		let state = trails.map((_, idx) => or[idx] ?? true);
 		expandedWritable.set(state);
 	});
 
+	const makeIndexedTrail = (index: number, trail: Trail): IndexedTrail => {
+		return { index, trail };
+	};
+
+	const toIndexedTrails = (trails: Trail[]): IndexedTrail[] => {
+		const indexTrails = trails
+			.map((trail, idx) => {
+				return makeIndexedTrail(idx, trail);
+			})
+			.reverse();
+		return editorExpanded ? indexTrails : indexTrails.slice(0, 1);
+	};
+
+	let indexedTrail = $derived(toIndexedTrails(trails));
+
 	function toggleExpand(index: number) {
-		const state = get(expandedWritable);
-		const updated = [...state];
-		updated[index] = !updated[index];
-		expandedWritable.set(updated);
+		checkTrailIndex(index);
+		expandedWritable.update((state) => {
+			const updated = [...state];
+			updated[index] = !updated[index];
+			return updated;
+		});
 	}
 
 	function handleHoverLine(index: number) {
 		hoverIndex = index;
+	}
+
+	function checkTrailIndex(index: number): number {
+		if (index < 0 || index >= trails.length) {
+			logFatal('Trail index out of range', `Expected index range [0, ${trails.length - 1}]`);
+		}
+		return index;
 	}
 
 	function handleLeaveLine() {
@@ -47,34 +67,31 @@
 	}
 
 	function isActiveTrail(index: number): boolean {
-		return index === trails[0].fst;
+		return index === indexedTrail[0].index;
 	}
 </script>
 
 <div class="trail-visualizer flex flex-row">
 	<div class="trails flex flex-col">
-		{#each trails as trail, i (trail.fst)}
+		{#each indexedTrail as { trail, index } (index)}
 			<div class="line">
 				<button
 					class="enumerate transition"
-					onmouseenter={() => handleHoverLine(i)}
+					onmouseenter={() => handleHoverLine(index)}
 					onmouseleave={() => handleLeaveLine()}
-					onclick={() => toggleExpand(i)}
+					onclick={() => toggleExpand(index)}
 				>
-					<span
-						class="line-item chakra-petch-medium"
-						class:line-item-active={isActiveTrail(trail.fst)}
-					>
-						{#if hoverIndex !== i}
-							<p>{trail.fst}</p>
-						{:else if $expandedWritable[i]}
+					<span class="line-item chakra-petch-medium" class:line-item-active={isActiveTrail(index)}>
+						{#if hoverIndex !== index}
+							<p>{index}</p>
+						{:else if $expandedWritable[index]}
 							<ChevronLeftOutline slot="icon" class="h-8 w-8" />
 						{:else}
 							<ChevronRightOutline slot="icon" class="h-8 w-8" />
 						{/if}
 					</span>
 				</button>
-				<TrailComponent trail={trail.snd} />
+				<TrailComponent {trail} expandPropagations={$expandedWritable[index]} />
 			</div>
 		{/each}
 	</div>
