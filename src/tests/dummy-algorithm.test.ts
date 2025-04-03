@@ -28,9 +28,9 @@ describe('variable assignment', () => {
 		const lastAssignment = currentTrail.pop();
 		expect(lastAssignment).not.toBe(undefined);
 		if (lastAssignment) {
-			const assignmentKind = lastAssignment.getAssignmentKind();
-			if (isAutomatedAssignment(assignmentKind)) {
-				const { algorithm } = assignmentKind;
+			const reason = lastAssignment.getReason();
+			if (isAutomatedAssignment(reason)) {
+				const { algorithm } = reason;
 				expect(algorithm).toBe(dummyAlgorithmName);
 			}
 		}
@@ -45,8 +45,8 @@ describe('variable assignment', () => {
 		const lastAssignment = currentTrail.pop();
 		expect(lastAssignment).not.toBe(undefined);
 		if (lastAssignment) {
-			const assignmentKind = lastAssignment.getAssignmentKind();
-			const manualAssignment = isManualAssignment(assignmentKind);
+			const reason = lastAssignment.getReason();
+			const manualAssignment = isManualAssignment(reason);
 			expect(manualAssignment).toBe(true);
 		}
 	});

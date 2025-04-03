@@ -43,27 +43,27 @@ export const isBacktrackingAssignment = (r: Reason): r is Backtracking => {
 	return r.type === 'backtracking';
 };
 
-export const makeAutomatedAssignment = (algorithm: string): Automated => {
+export const makeAutomatedReason = (algorithm: string): Automated => {
 	return {
 		type: 'automated',
 		algorithm
 	};
 };
 
-export const makeManualAssignment = (): Manual => {
+export const makeManualReason = (): Manual => {
 	return {
 		type: 'manual'
 	};
 };
 
-export const makeUnitPropagationAssignment = (clauseId: number): UnitPropagation => {
+export const makeUnitPropagationReason = (clauseId: number): UnitPropagation => {
 	return {
 		type: 'propagated',
 		clauseId
 	};
 };
 
-export const makeBacktrackingAssignment = (): Backtracking => {
+export const makeBacktrackingReason = (): Backtracking => {
 	return {
 		type: 'backtracking'
 	};
@@ -79,19 +79,19 @@ export default class VariableAssignment {
 	}
 
 	static newAutomatedAssignment(variable: Variable, algorithm: string) {
-		return new VariableAssignment(variable, makeAutomatedAssignment(algorithm));
+		return new VariableAssignment(variable, makeAutomatedReason(algorithm));
 	}
 
 	static newManualAssignment(variable: Variable) {
-		return new VariableAssignment(variable, makeManualAssignment());
+		return new VariableAssignment(variable, makeManualReason());
 	}
 
 	static newUnitPropagationAssignment(variable: Variable, clauseId: number) {
-		return new VariableAssignment(variable, makeUnitPropagationAssignment(clauseId));
+		return new VariableAssignment(variable, makeUnitPropagationReason(clauseId));
 	}
 
 	static newBacktrackingAssignment(variable: Variable) {
-		return new VariableAssignment(variable, makeBacktrackingAssignment());
+		return new VariableAssignment(variable, makeBacktrackingReason());
 	}
 
 	copy(): VariableAssignment {
@@ -114,7 +114,7 @@ export default class VariableAssignment {
 		return isBacktrackingAssignment(this.reason);
 	}
 
-	getAssignmentKind(): Reason {
+	getReason(): Reason {
 		return this.reason;
 	}
 
