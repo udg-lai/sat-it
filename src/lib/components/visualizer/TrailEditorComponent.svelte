@@ -3,6 +3,7 @@
 	import { logFatal } from '$lib/transversal/utils/logging.ts';
 	import { ChevronLeftOutline, ChevronRightOutline } from 'flowbite-svelte-icons';
 	import TrailComponent from './TrailComponent.svelte';
+	import { get, writable, type Writable } from 'svelte/store';
 
 	interface Props {
 		trails: Trail[];
@@ -16,40 +17,41 @@
 	interface IndexedTrail {
 		index: number;
 		trail: Trail;
-		expandPropagations: boolean;
 	}
 
-	let expandedPropagationsArray: boolean[] = $state([]);
+	let expandedWritable: Writable<boolean[]> = writable([]);
 
 	$effect(() => {
-		while ($state.snapshot(expandedPropagationsArray).length !== trails.length) {
-			expandedPropagationsArray.push(true);
-		}
+		let or = get(expandedWritable);
+		let state = trails.map((_,idx) => or[idx] ?? true);
+		expandedWritable.set(state);
 	});
 
 	const makeIndexedTrail = (
 		index: number,
-		trail: Trail,
-		expandPropagations: boolean
+		trail: Trail
 	): IndexedTrail => {
-		return { index, trail, expandPropagations };
+		return { index, trail};
 	};
 
-	const toIndexedTrails = (trails: Trail[], ep: boolean[]): IndexedTrail[] => {
+	const toIndexedTrails = (trails: Trail[]): IndexedTrail[] => {
 		const indexTrails = trails
 			.map((trail, idx) => {
-				return makeIndexedTrail(idx, trail, ep[idx]);
+				return makeIndexedTrail(idx, trail);
 			})
 			.reverse();
 		return editorExpanded ? indexTrails : indexTrails.slice(0, 1);
 	};
 
-	let indexedTrail = $derived(toIndexedTrails(trails, expandedPropagationsArray));
+	let indexedTrail = $derived(toIndexedTrails(trails));
 
 	function toggleExpand(index: number) {
 		checkTrailIndex(index);
-		const expanded = expandedPropagationsArray[index];
-		expandedPropagationsArray[index] = !expanded;
+		expandedWritable.update(state => {
+			const updated = [...state];
+			updated[index] = !updated[index]
+			return updated
+		})
 	}
 
 	function handleHoverLine(index: number) {
@@ -74,7 +76,7 @@
 
 <div class="trail-visualizer flex flex-row">
 	<div class="trails flex flex-col">
-		{#each indexedTrail as { trail, index, expandPropagations } (index)}
+		{#each indexedTrail as { trail, index} (index)}
 			<div class="line">
 				<button
 					class="enumerate transition"
@@ -85,14 +87,14 @@
 					<span class="line-item chakra-petch-medium" class:line-item-active={isActiveTrail(index)}>
 						{#if hoverIndex !== index}
 							<p>{index}</p>
-						{:else if expandPropagations}
+						{:else if $expandedWritable[index]}
 							<ChevronLeftOutline slot="icon" class="h-8 w-8" />
 						{:else}
 							<ChevronRightOutline slot="icon" class="h-8 w-8" />
 						{/if}
 					</span>
 				</button>
-				<TrailComponent {trail} {expandPropagations} />
+				<TrailComponent {trail} expandPropagations={$expandedWritable[index]} />
 			</div>
 		{/each}
 	</div>
