@@ -23,15 +23,12 @@
 
 	$effect(() => {
 		let or = get(expandedWritable);
-		let state = trails.map((_,idx) => or[idx] ?? true);
+		let state = trails.map((_, idx) => or[idx] ?? true);
 		expandedWritable.set(state);
 	});
 
-	const makeIndexedTrail = (
-		index: number,
-		trail: Trail
-	): IndexedTrail => {
-		return { index, trail};
+	const makeIndexedTrail = (index: number, trail: Trail): IndexedTrail => {
+		return { index, trail };
 	};
 
 	const toIndexedTrails = (trails: Trail[]): IndexedTrail[] => {
@@ -47,11 +44,11 @@
 
 	function toggleExpand(index: number) {
 		checkTrailIndex(index);
-		expandedWritable.update(state => {
+		expandedWritable.update((state) => {
 			const updated = [...state];
-			updated[index] = !updated[index]
-			return updated
-		})
+			updated[index] = !updated[index];
+			return updated;
+		});
 	}
 
 	function handleHoverLine(index: number) {
@@ -76,7 +73,7 @@
 
 <div class="trail-visualizer flex flex-row">
 	<div class="trails flex flex-col">
-		{#each indexedTrail as { trail, index} (index)}
+		{#each indexedTrail as { trail, index } (index)}
 			<div class="line">
 				<button
 					class="enumerate transition"
