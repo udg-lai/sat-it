@@ -12,7 +12,7 @@
 	let { trail, expandPropagations }: Props = $props();
 
 	let assignments: VariableAssignment[] = $derived(
-		expandPropagations ? trail.getDecisions() : trail.getAssignments()
+		expandPropagations ? trail.getAssignments() : trail.getDecisions()
 	);
 
 	let toggledWritable: Writable<boolean[]> = writable([]);

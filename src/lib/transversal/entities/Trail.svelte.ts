@@ -68,10 +68,6 @@ export class Trail {
 		return returnValue;
 	}
 
-	indexOf(assignment: VariableAssignment): number {
-		return this.assignments.indexOf(assignment);
-	}
-
 	[Symbol.iterator]() {
 		return this.assignments.values();
 	}
