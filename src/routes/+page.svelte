@@ -18,7 +18,6 @@
 				logError(`Preloaded instances`, `Could not fetch preloaded instances correctly`)
 			);
 	});
-
 </script>
 
 <svelte:body oncontextmenu={disableContextMenu} />

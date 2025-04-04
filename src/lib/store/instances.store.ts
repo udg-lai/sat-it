@@ -75,7 +75,7 @@ export function activateInstance(instance: InteractiveInstance): void {
 			return updated;
 		});
 		setInstanceToSolve(idx);
-		logInfo(`Instance Updated`, `Inatance ${instance.instanceName} is now active`)
+		logInfo(`Instance Updated`, `Inatance ${instance.instanceName} is now active`);
 	} else {
 		const title = 'Activating an unknown instance';
 		const description = `Instance ${instance.instanceName} not found`;
@@ -106,9 +106,9 @@ export function setInstanceToSolve(index: number): void {
 }
 
 function checkInstenceIndex(instances: InteractiveInstance[], index: number): boolean {
-	if(instances.length > 0) {
-		if(index < 0 || instances.length <= index) {
-			logFatal("The instance you are trying to use is not valid");
+	if (instances.length > 0) {
+		if (index < 0 || instances.length <= index) {
+			logFatal('The instance you are trying to use is not valid');
 		}
 		return true;
 	}
