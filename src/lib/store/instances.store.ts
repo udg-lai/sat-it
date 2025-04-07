@@ -1,11 +1,11 @@
-import { get, writable, type Writable } from 'svelte/store';
 import type { DimacsInstance } from '$lib/dimacs/dimacs-instance.interface.ts';
-import { logFatal, logInfo, logWarning } from '$lib/transversal/utils/logging.ts';
-import fetchInstances from '$lib/transversal/utils/bootstrap-instances.ts';
-import { fromClaimsToClause } from '$lib/transversal/utils/utils.ts';
-import VariablePool from '$lib/transversal/entities/VariablePool.ts';
 import ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';
-import { updateProblem } from './problem.store.ts';
+import VariablePool from '$lib/transversal/entities/VariablePool.ts';
+import fetchInstances from '$lib/transversal/utils/bootstrap-instances.ts';
+import { logFatal, logInfo, logWarning } from '$lib/transversal/utils/logging.ts';
+import { fromClaimsToClause } from '$lib/transversal/utils/utils.ts';
+import { get, writable, type Writable } from 'svelte/store';
+import { problemStore, updateProblem } from './problem.store.ts';
 
 export interface InteractiveInstance extends DimacsInstance {
 	removable: boolean;
@@ -75,7 +75,6 @@ export function activateInstance(instance: InteractiveInstance): void {
 			return updated;
 		});
 		setInstanceToSolve(idx);
-		logInfo(`Instance Updated`, `Inatance ${instance.instanceName} is now active`);
 	} else {
 		const title = 'Activating an unknown instance';
 		const description = `Instance ${instance.instanceName} not found`;
@@ -83,7 +82,11 @@ export function activateInstance(instance: InteractiveInstance): void {
 	}
 }
 
-export function setInstanceToSolve(index: number): void {
+export function setDefaultInstanceToSolve(): void {
+	setInstanceToSolve(0);
+}
+
+function setInstanceToSolve(index: number): void {
 	const instances: InteractiveInstance[] = get(instanceStore);
 	if (checkInstenceIndex(instances, index)) {
 		const { summary } = instances[index];
@@ -97,7 +100,11 @@ export function setInstanceToSolve(index: number): void {
 			clauses
 		};
 
-		const algorithm = () => console.log('new algorithm');
+		const previousProblem = get(problemStore);
+		let algorithm = () => console.log('dummy');
+		if (previousProblem !== undefined) {
+			algorithm = previousProblem.algorithm;
+		}
 
 		const problem = { pools, algorithm };
 

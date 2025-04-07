@@ -6,14 +6,17 @@
 	import ToastComponent from '$lib/components/ToastComponent.svelte';
 	import { disableContextMenu } from '$lib/transversal/utils/utils.ts';
 	import { toasts } from '$lib/store/toasts.store.ts';
-	import { initializeInstancesStore, setInstanceToSolve } from '$lib/store/instances.store.ts';
+	import {
+		initializeInstancesStore,
+		setDefaultInstanceToSolve
+	} from '$lib/store/instances.store.ts';
 	import { logError } from '$lib/transversal/utils/logging.ts';
 	import { onMount } from 'svelte';
 	import AppComponent from '$lib/components/AppComponent.svelte';
 
 	onMount(() => {
 		initializeInstancesStore()
-			.then(() => setInstanceToSolve(0))
+			.then(setDefaultInstanceToSolve)
 			.catch(() =>
 				logError(`Preloaded instances`, `Could not fetch preloaded instances correctly`)
 			);
