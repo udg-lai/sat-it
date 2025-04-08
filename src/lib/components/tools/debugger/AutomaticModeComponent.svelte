@@ -1,29 +1,17 @@
 <script lang="ts">
 	import { emitAssignmentEvent } from './events.svelte.ts';
-	import { problemStore, type Problem } from '$lib/store/problem.store.ts';
 	import './style.css';
-	import { get } from 'svelte/store';
-	import { fromJust, isJust, type Maybe } from '$lib/transversal/utils/types/maybe.ts';
+	import { fromJust, isJust } from '$lib/transversal/utils/types/maybe.ts';
+	import {
+		followingVariable,
+		updateFollowingVariable
+	} from '$lib/store/followingVariable.store.ts';
 	import { onMount } from 'svelte';
 
 	let algorithms = ['Dummy', 'Backtracking', 'DPLL', 'CDCL'];
 	let selectedAlgorithm = $state(algorithms[0]);
-
-	function getFollowingVariable(p: Problem): Maybe<number> {
-		const { pools }: Problem = p;
-		const { variables } = pools;
-
-		return variables.nextVariableToAssign();
-	}
-
-	let problem = $derived(get(problemStore));
-	let followingVariable: Maybe<number> = $derived(problem.pools.variables.nextVariableToAssign());
-
 	onMount(() => {
-		const unsubscribeFollowingVariable = problemStore.subscribe(getFollowingVariable);
-		return () => {
-			unsubscribeFollowingVariable();
-		};
+		updateFollowingVariable();
 	});
 </script>
 
@@ -35,16 +23,17 @@
 		{/each}
 	</select>
 </div>
-
-{#if isJust(followingVariable)}
-	<div class="flex-row">
+<div class="mb-1 flex-row" style="display: flex;">
+	{#if isJust($followingVariable)}
+		<span class="fixed-text">Following variable:</span>
+		<span class="var-text">{fromJust($followingVariable)}</span>
 		<button class="btn" onclick={() => emitAssignmentEvent('Automated')}>
 			<h1>Proceed</h1>
 		</button>
-		<span>{fromJust(followingVariable)}</span>
-	</div>
-{:else}
-	<button class="btn-fix" onclick={() => emitAssignmentEvent('Automated')}>
-		<h1>FIX</h1>
-	</button>
-{/if}
+	{:else}
+		<span class="var-text">No variables left to assign</span>
+		<button class="btn" onclick={() => emitAssignmentEvent('Automated')}>
+			<h1>Resolve</h1>
+		</button>
+	{/if}
+</div>

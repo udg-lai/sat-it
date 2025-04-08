@@ -23,6 +23,9 @@
 </script>
 
 <div class="flex-center debugger flex-col">
+	<button class="btn-expand" onclick={toggleExpand}>
+		<h1>Toggle - {textCollapse}</h1>
+	</button>
 	<div class="mode-section">
 		<span class="mode" class:automaticMode={!automaticMode}>Manual</span>
 		<Toggle
@@ -45,9 +48,6 @@
 	</button>
 
 	 -->
-	 <button class="btn" onclick={toggleExpand}>
-		<h1>Toggle - {textCollapse}</h1>
-	</button>
 </div>
 
 <style>

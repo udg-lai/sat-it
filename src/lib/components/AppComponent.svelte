@@ -14,6 +14,9 @@
 	} from './tools/debugger/events.svelte.ts';
 	import TrailEditor from './visualizer/TrailEditorComponent.svelte';
 	import { get } from 'svelte/store';
+	import {
+		updateFollowingVariable
+	} from '$lib/store/followingVariable.store.ts';
 
 	let editorExpanded: boolean = $state(true);
 
@@ -35,6 +38,7 @@
 		} else {
 			console.log(`User assignment not implemented yet`);
 		}
+		updateFollowingVariable();
 	}
 
 	function toggleEditorView(e: EditorViewEvent) {
