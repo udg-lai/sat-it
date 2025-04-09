@@ -14,9 +14,7 @@
 	} from './tools/debugger/events.svelte.ts';
 	import TrailEditor from './visualizer/TrailEditorComponent.svelte';
 	import { get } from 'svelte/store';
-	import {
-		updateFollowingVariable
-	} from '$lib/store/debugger.store.ts';
+	import { updateFollowingVariable } from '$lib/store/debugger.store.ts';
 
 	let editorExpanded: boolean = $state(true);
 

@@ -16,12 +16,12 @@ export function updateFollowingVariable(): void {
 
 export function updateNonAssignedVariables(): void {
 	nonAssignedVariables.update(() => {
-		return get(problemStore).pools.variables.getNonAssignedVariables()
+		return get(problemStore).pools.variables.getNonAssignedVariables();
 	});
 }
 
 export function updateAssignedVariables(): void {
 	assignedVariables.update(() => {
-		return get(problemStore).pools.variables.getAssignedVariables()
+		return get(problemStore).pools.variables.getAssignedVariables();
 	});
 }

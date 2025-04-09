@@ -28,12 +28,7 @@
 	</button>
 	<div class="mode-section">
 		<span class="mode" class:automaticMode={!automaticMode}>Manual</span>
-		<Toggle
-			bind:checked={isAutomatic}
-			size="custom"
-			{customSize}
-			color="grey"
-		/>
+		<Toggle bind:checked={isAutomatic} size="custom" {customSize} color="grey" />
 		<span class="mode" class:automaticMode>Automatic</span>
 	</div>
 	{#if automaticMode}

@@ -2,10 +2,7 @@
 	import { emitAssignmentEvent } from './events.svelte.ts';
 	import './style.css';
 	import { fromJust, isJust } from '$lib/transversal/utils/types/maybe.ts';
-	import {
-		followingVariable,
-		updateFollowingVariable
-	} from '$lib/store/debugger.store.ts';
+	import { followingVariable, updateFollowingVariable } from '$lib/store/debugger.store.ts';
 	import { onMount } from 'svelte';
 
 	let algorithms = ['Dummy', 'Backtracking', 'DPLL', 'CDCL'];
@@ -23,7 +20,7 @@
 		{/each}
 	</select>
 </div>
-<div class="mb-1 flex-row pack" style="display: flex;">
+<div class="pack mb-1 flex-row" style="display: flex;">
 	{#if isJust($followingVariable)}
 		<span class="fixed-text w-[9rem] grow-0">Following variable:</span>
 		<span class="var-text grow">{fromJust($followingVariable)}</span>
