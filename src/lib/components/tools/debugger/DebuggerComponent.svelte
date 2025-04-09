@@ -30,7 +30,6 @@
 		<span class="mode" class:automaticMode={!automaticMode}>Manual</span>
 		<Toggle
 			bind:checked={isAutomatic}
-			onchange={() => console.log(automaticMode)}
 			size="custom"
 			{customSize}
 			color="grey"

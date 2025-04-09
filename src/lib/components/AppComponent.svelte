@@ -16,7 +16,7 @@
 	import { get } from 'svelte/store';
 	import {
 		updateFollowingVariable
-	} from '$lib/store/followingVariable.store.ts';
+	} from '$lib/store/debugger.store.ts';
 
 	let editorExpanded: boolean = $state(true);
 

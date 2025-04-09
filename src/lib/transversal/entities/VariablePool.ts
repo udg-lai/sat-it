@@ -93,6 +93,18 @@ class VariablePool implements IVariablePool {
 	private variableToIndex(variableId: number): number {
 		return variableId - 1;
 	}
+
+	public getAssignedVariables(): number[] {
+		return this.collection
+			.filter(variable => variable.isAssigned())
+			.map(variable => variable.getInt());
+	}
+	
+	public getNonAssignedVariables(): number[] {
+		return this.collection
+		.filter(variable => variable.isNotAssigned())
+		.map(variable => variable.getInt());
+	}
 }
 
 export default VariablePool;

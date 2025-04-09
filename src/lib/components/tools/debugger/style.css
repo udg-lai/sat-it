@@ -1,7 +1,17 @@
 .btn {
 	background-color: var(--border-color);
-	width: 15rem;
-	height: 3rem;
+	width: 10rem;
+	height: 5rem;
+}
+
+.polarity {
+	background-color: #cacaca30;
+	width: 5rem;
+	height: 2rem;
+}
+
+.polarity.positive {
+	background-color: var(--border-color);
 }
 
 .btn-expand {
@@ -36,21 +46,18 @@
 }
 
 .fixed-text {
-	width: 9rem;
 	display: flex;
-	flex-grow: 0;
 	align-items: center;
 	text-align: center;
-	border-color: var(--border-color);
-	border-style: solid;
-	border-width: 0 0 1px 0;
 }
 
 .var-text {
-	flex-grow: 1;
 	display: flex;
 	align-items: center;
 	text-align: center;
+}
+
+.pack {
 	border-color: var(--border-color);
 	border-style: solid;
 	border-width: 0 0 1px 0;

@@ -5,7 +5,7 @@
 	import {
 		followingVariable,
 		updateFollowingVariable
-	} from '$lib/store/followingVariable.store.ts';
+	} from '$lib/store/debugger.store.ts';
 	import { onMount } from 'svelte';
 
 	let algorithms = ['Dummy', 'Backtracking', 'DPLL', 'CDCL'];
@@ -23,15 +23,15 @@
 		{/each}
 	</select>
 </div>
-<div class="mb-1 flex-row" style="display: flex;">
+<div class="mb-1 flex-row pack" style="display: flex;">
 	{#if isJust($followingVariable)}
-		<span class="fixed-text">Following variable:</span>
-		<span class="var-text">{fromJust($followingVariable)}</span>
+		<span class="fixed-text w-[9rem] grow-0">Following variable:</span>
+		<span class="var-text grow">{fromJust($followingVariable)}</span>
 		<button class="btn" onclick={() => emitAssignmentEvent('Automated')}>
 			<h1>Proceed</h1>
 		</button>
 	{:else}
-		<span class="var-text">No variables left to assign</span>
+		<span class="var-text grow">No variables left to assign</span>
 		<button class="btn" onclick={() => emitAssignmentEvent('Automated')}>
 			<h1>Resolve</h1>
 		</button>
