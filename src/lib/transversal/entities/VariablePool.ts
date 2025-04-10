@@ -95,7 +95,7 @@ class VariablePool implements IVariablePool {
 	}
 
 	public getVariablesIDs(): number[] {
-		return this.collection.map(variable => variable.getInt())
+		return this.collection.map((variable) => variable.getInt());
 	}
 }
 

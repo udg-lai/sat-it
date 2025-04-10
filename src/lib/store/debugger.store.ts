@@ -4,14 +4,8 @@ import { problemStore } from './problem.store.ts';
 
 export const followingVariable: Writable<Maybe<number>> = writable(makeNothing());
 
-export const nonAssignedVariables: Writable<number[]> = writable([]);
-
 export function updateFollowingVariable(): void {
 	followingVariable.update(() => {
 		return get(problemStore).pools.variables.nextVariableToAssign();
 	});
-}
-
-export function setNonAssignedVariables(): void {
-	nonAssignedVariables.set(get(problemStore).pools.variables.getVariablesIDs());
 }
