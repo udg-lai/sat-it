@@ -1,7 +1,7 @@
 import Clause from '../entities/Clause.ts';
 import Literal from '../entities/Literal.svelte.ts';
 import type VariablePool from '../entities/VariablePool.ts';
-import { logError } from './logging.ts';
+import { logError, logWarning } from './logging.ts';
 import type { Claims } from './parsers/dimacs.ts';
 
 export function disableContextMenu(event: Event): void {
@@ -16,7 +16,8 @@ export function fromClaimsToClause(claims: Claims, variablePool: VariablePool): 
 	const clauses: Clause[] = [];
 	claims.forEach((claim, i) => {
 		if (claim.length === 0) {
-			logError('Claim to clause', `Claim ${i} is empty. With no EOS`);
+			logWarning('Claim to clause', `Claim ${i} is empty. With no EOS`);
+			clauses.push(new Clause());
 		} else {
 			const [eos, ...rest] = [...claim].reverse();
 			if (eos === 0) {
