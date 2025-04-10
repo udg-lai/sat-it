@@ -19,10 +19,9 @@ export function setNonAssignedVariables(): void {
 export function updateNonAssignedVariables(remove: boolean, variable: number): void {
 	nonAssignedVariables.update((oldNAV) => {
 		let newNAV;
-		if(remove) {
-			newNAV = oldNAV.filter((v) => v !== variable)
-		}
-		else {
+		if (remove) {
+			newNAV = oldNAV.filter((v) => v !== variable);
+		} else {
 			newNAV = oldNAV;
 			newNAV.push(variable);
 		}

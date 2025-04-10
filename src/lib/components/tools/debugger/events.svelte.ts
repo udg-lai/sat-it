@@ -1,9 +1,9 @@
 import { writable, type Writable } from 'svelte/store';
 
 export type Manual = {
-	variable: number,
-	polarity: boolean
-}
+	variable: number;
+	polarity: boolean;
+};
 
 type Decide<Manual> = 'Automated' | Manual;
 

@@ -18,14 +18,13 @@
 		isJust($followingVariable) && $nonAssignedVariables.includes($followingVariable.value)
 	);
 
-	function emitAssignment(){
+	function emitAssignment() {
 		const userVariable = fromJust($followingVariable);
 		const nextVariable = fromJust($problemStore.pools.variables.nextVariableToAssign());
-		if( userVariable === nextVariable  && positive) {
-			emitAssignmentEvent('Automated')
-		}
-		else {
-			emitAssignmentEvent({variable: $followingVariable.value, polarity: positive} as Manual);
+		if (userVariable === nextVariable && positive) {
+			emitAssignmentEvent('Automated');
+		} else {
+			emitAssignmentEvent({ variable: $followingVariable.value, polarity: positive } as Manual);
 		}
 	}
 
@@ -68,10 +67,7 @@
 			<h1>Decide</h1>
 		</button>
 	{:else}
-		<button
-			class="btn w-[10rem] shrink-0"
-			onclick={() => emitAssignmentEvent('Automated')}
-		>
+		<button class="btn w-[10rem] shrink-0" onclick={() => emitAssignmentEvent('Automated')}>
 			<h1>FIX</h1>
 		</button>
 	{/if}

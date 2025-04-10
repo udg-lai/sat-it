@@ -11,9 +11,7 @@
 		editorViewEventStore,
 		type AssignmentEvent,
 		type EditorViewEvent,
-
 		type Manual
-
 	} from './tools/debugger/events.svelte.ts';
 	import TrailEditor from './visualizer/TrailEditorComponent.svelte';
 	import { get } from 'svelte/store';
