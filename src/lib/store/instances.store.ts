@@ -1,7 +1,11 @@
 import type { DimacsInstance } from '$lib/dimacs/dimacs-instance.interface.ts';
+import ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';
+import VariablePool from '$lib/transversal/entities/VariablePool.ts';
 import fetchInstances from '$lib/transversal/utils/bootstrap-instances.ts';
-import { logWarning } from '$lib/transversal/utils/logging.ts';
+import { logFatal, logWarning } from '$lib/transversal/utils/logging.ts';
+import { fromClaimsToClause } from '$lib/transversal/utils/utils.ts';
 import { get, writable, type Writable } from 'svelte/store';
+import { problemStore, updateProblem } from './problem.store.ts';
 
 export interface InteractiveInstance extends DimacsInstance {
 	removable: boolean;
@@ -73,6 +77,7 @@ export function activateInstance(instance: InteractiveInstance): void {
 			updated[idx].active = true;
 			return updated;
 		});
+		setInstanceToSolve(idx);
 	} else {
 		const title = 'Activating an unknown instance';
 		const description = `Instance ${instance.instanceName} not found`;
@@ -87,4 +92,44 @@ function setActiveInstance(instance: DimacsInstance): void {
 function fromInteractiveToDimacs(instance: InteractiveInstance): DimacsInstance {
 	const { instanceName, content, summary } = instance;
 	return { instanceName, content, summary };
+}
+
+export function setDefaultInstanceToSolve(): void {
+	setInstanceToSolve(0);
+}
+
+function setInstanceToSolve(index: number): void {
+	const instances: InteractiveInstance[] = get(instanceStore);
+	if (checkInstenceIndex(instances, index)) {
+		const { summary } = instances[index];
+		const { claims } = summary;
+
+		const variables: VariablePool = new VariablePool(summary.varCount);
+		const clauses: ClausePool = new ClausePool(fromClaimsToClause(claims.simplified, variables));
+
+		const pools = {
+			variables,
+			clauses
+		};
+
+		const previousProblem = get(problemStore);
+		let algorithm = () => console.log('dummy');
+		if (previousProblem !== undefined) {
+			algorithm = previousProblem.algorithm;
+		}
+
+		const problem = { pools, algorithm };
+
+		updateProblem(problem);
+	}
+}
+
+function checkInstenceIndex(instances: InteractiveInstance[], index: number): boolean {
+	if (instances.length > 0) {
+		if (index < 0 || instances.length <= index) {
+			logFatal('The instance you are trying to use is not valid');
+		}
+		return true;
+	}
+	return false;
 }

@@ -3,60 +3,58 @@ import {
 	dummyAssignmentAlgorithm,
 	type DummySearchParams
 } from '$lib/transversal/algorithms/dummy.ts';
-import { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
-import { TrailCollection } from '$lib/transversal/entities/TrailCollection.svelte.ts';
 import VariableAssignment, {
-	isAutomatedAssignment,
-	isManualAssignment
+	isAutomatedReason,
+	isManualReason
 } from '$lib/transversal/entities/VariableAssignment.ts';
 import VariablePool from '$lib/transversal/entities/VariablePool.ts';
 import { describe, expect, it } from 'vitest';
 
 const params: DummySearchParams = {
-	otherTrails: new TrailCollection(),
-	currentTrail: new Trail(4),
-	variablePool: new VariablePool(4)
+	trails: [],
+	variables: new VariablePool(4)
 };
 
 for (let i = 0; i < 3; i++) {
-	dummyAssignmentAlgorithm(params);
+	params.trails = dummyAssignmentAlgorithm(params);
 }
 
 describe('variable assignment', () => {
 	it('Automated Decision', () => {
-		const { currentTrail } = params;
-		const lastAssignment = currentTrail.pop();
+		const { trails } = params;
+		const lastAssignment = trails[trails.length - 1].pop();
 		expect(lastAssignment).not.toBe(undefined);
 		if (lastAssignment) {
-			const assignmentKind = lastAssignment.getAssignmentKind();
-			if (isAutomatedAssignment(assignmentKind)) {
-				const { algorithm } = assignmentKind;
+			const reason = lastAssignment.getReason();
+			if (isAutomatedReason(reason)) {
+				const { algorithm } = reason;
 				expect(algorithm).toBe(dummyAlgorithmName);
 			}
 		}
 	});
 	it('Manual Decision', () => {
-		const { currentTrail, variablePool } = params;
+		const { trails, variables } = params;
+		variables.dispose(3);
+		variables.persist(3, false);
 
-		variablePool.dispose(3);
-		variablePool.persist(3, false);
-
-		currentTrail.push(VariableAssignment.newManualAssignment(params.variablePool.getCopy(3)));
-		const lastAssignment = currentTrail.pop();
+		trails[trails.length - 1].push(
+			VariableAssignment.newManualAssignment(params.variables.getCopy(3))
+		);
+		const lastAssignment = trails[trails.length - 1].pop();
 		expect(lastAssignment).not.toBe(undefined);
 		if (lastAssignment) {
-			const assignmentKind = lastAssignment.getAssignmentKind();
-			const manualAssignment = isManualAssignment(assignmentKind);
+			const reason = lastAssignment.getReason();
+			const manualAssignment = isManualReason(reason);
 			expect(manualAssignment).toBe(true);
 		}
 	});
 	it('Backtracking', () => {
 		for (let i = 0; i < 2; i++) {
-			dummyAssignmentAlgorithm(params);
+			params.trails = dummyAssignmentAlgorithm(params);
 		}
 
-		const { currentTrail } = params;
-		const lastDecision = currentTrail.pop();
+		const { trails } = params;
+		const lastDecision = trails[trails.length - 1].pop();
 
 		expect(lastDecision?.isK()).toBe(true);
 	});
