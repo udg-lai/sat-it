@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { activateInstance, type InteractiveInstance } from '$lib/store/instances.store.ts';
+	import { updateActiveInstance, type InteractiveInstance } from '$lib/store/instances.store.ts';
 	import { Toggle } from 'flowbite-svelte';
 	import { DatabaseOutline, EyeOutline, LockOutline, TrashBinOutline } from 'flowbite-svelte-icons';
 
@@ -30,7 +30,7 @@
 					<EyeOutline />
 				</button>
 				<Toggle
-					onchange={() => activateInstance(instance)}
+					onchange={() => updateActiveInstance(instance)}
 					checked={instance.active}
 					disabled={instance.active}
 					class="toggle"
