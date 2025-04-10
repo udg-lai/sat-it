@@ -6,22 +6,12 @@ export const followingVariable: Writable<Maybe<number>> = writable(makeNothing()
 
 export const nonAssignedVariables: Writable<number[]> = writable([]);
 
-export const assignedVariables: Writable<number[]> = writable([]);
-
 export function updateFollowingVariable(): void {
 	followingVariable.update(() => {
 		return get(problemStore).pools.variables.nextVariableToAssign();
 	});
 }
 
-export function updateNonAssignedVariables(): void {
-	nonAssignedVariables.update(() => {
-		return get(problemStore).pools.variables.getNonAssignedVariables();
-	});
-}
-
-export function updateAssignedVariables(): void {
-	assignedVariables.update(() => {
-		return get(problemStore).pools.variables.getAssignedVariables();
-	});
+export function setNonAssignedVariables(): void {
+	nonAssignedVariables.set(get(problemStore).pools.variables.getVariablesIDs());
 }

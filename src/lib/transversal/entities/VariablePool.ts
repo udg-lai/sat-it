@@ -94,16 +94,8 @@ class VariablePool implements IVariablePool {
 		return variableId - 1;
 	}
 
-	public getAssignedVariables(): number[] {
-		return this.collection
-			.filter((variable) => variable.isAssigned())
-			.map((variable) => variable.getInt());
-	}
-
-	public getNonAssignedVariables(): number[] {
-		return this.collection
-			.filter((variable) => variable.isNotAssigned())
-			.map((variable) => variable.getInt());
+	public getVariablesIDs(): number[] {
+		return this.collection.map(variable => variable.getInt())
 	}
 }
 

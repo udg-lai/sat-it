@@ -1,64 +1,36 @@
-.btn {
-	background-color: var(--border-color);
-	width: 10rem;
-	height: 5rem;
-}
-
-.polarity {
-	background-color: #cacaca30;
-	width: 5rem;
-	height: 2rem;
-}
-
-.polarity.positive {
-	background-color: var(--border-color);
-}
-
 .btn-expand {
 	background-color: var(--border-color);
 	width: 100%;
 	height: 2rem;
 }
 
-.algorithm-section {
-	width: 100%;
-	height: 3rem;
-	display: flex;
-	align-items: center;
-	margin-bottom: 3px;
+.pack {
 	border-color: var(--border-color);
 	border-style: solid;
-	border-width: 0 0 2px 0;
+	border-width: 1px 0 1px 0;
 }
 
-.algo-txt {
-	display: flex;
-	flex-shrink: 0;
-	width: 10rem;
-	text-align: center;
-}
-
-.algorithm-selector {
-	flex-grow: 1;
+.variable-selector {
 	background-color: var(--main-bg-color);
 	border: none;
 	cursor: pointer;
 }
 
-.fixed-text {
-	display: flex;
-	align-items: center;
-	text-align: center;
+.polarity {
+	background-color: #cacaca30;
 }
 
-.var-text {
-	display: flex;
-	align-items: center;
-	text-align: center;
+.polarity.positive {
+	background-color: var(--border-color);
 }
 
-.pack {
-	border-color: var(--border-color);
-	border-style: solid;
-	border-width: 0 0 1px 0;
+.btn {
+	background-color: var(--border-color);
+	height: 4rem;
+}
+
+.general-btn {
+	background-color: var(--border-color);
+	width: 100%;
+	height: 5rem;
 }

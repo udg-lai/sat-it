@@ -6,7 +6,7 @@ import { logFatal, logInfo, logWarning } from '$lib/transversal/utils/logging.ts
 import { fromClaimsToClause } from '$lib/transversal/utils/utils.ts';
 import { get, writable, type Writable } from 'svelte/store';
 import { problemStore, updateProblem } from './problem.store.ts';
-import { updateAssignedVariables, updateNonAssignedVariables } from './debugger.store.ts';
+import { setNonAssignedVariables } from './debugger.store.ts';
 
 export interface InteractiveInstance extends DimacsInstance {
 	removable: boolean;
@@ -110,8 +110,7 @@ function setInstanceToSolve(index: number): void {
 		const problem = { pools, algorithm };
 
 		updateProblem(problem);
-		updateAssignedVariables();
-		updateNonAssignedVariables();
+		setNonAssignedVariables();
 	}
 }
 
