@@ -6,6 +6,7 @@
 	} from '$lib/transversal/algorithms/dummy.ts';
 	import { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
 	import { onMount } from 'svelte';
+	import { get } from 'svelte/store';
 	import {
 		assignmentEventStore,
 		editorViewEventStore,
@@ -13,7 +14,6 @@
 		type EditorViewEvent
 	} from './tools/debugger/events.svelte.ts';
 	import TrailEditor from './visualizer/TrailEditorComponent.svelte';
-	import { get } from 'svelte/store';
 
 	let editorExpanded: boolean = $state(true);
 

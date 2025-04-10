@@ -6,10 +6,10 @@
 	import './styles.css';
 
 	interface Props {
-		onInstanceLoaded?: (instance: DimacsInstance) => void;
+		onUpload?: (instance: DimacsInstance) => void;
 	}
 
-	let { onInstanceLoaded }: Props = $props();
+	let { onUpload }: Props = $props();
 
 	let fileInputRef: HTMLInputElement;
 
@@ -37,7 +37,7 @@
 				content,
 				summary
 			};
-			onInstanceLoaded?.(instance);
+			onUpload?.(instance);
 		} catch (error) {
 			const title = `Instance ${instanceName} contains an error`;
 			const description = (error as Error).message;

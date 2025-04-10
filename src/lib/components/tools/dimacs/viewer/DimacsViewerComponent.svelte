@@ -4,69 +4,50 @@
 	import type { Summary } from '$lib/transversal/utils/parsers/dimacs.ts';
 
 	interface Props {
-		dimacs: DimacsInstance;
+		dimacsInstance: DimacsInstance;
 	}
 
-	let { dimacs }: Props = $props();
+	let { dimacsInstance }: Props = $props();
 
-	const { summary }: DimacsInstance = dimacs;
-	const { varCount, clauseCount }: Summary = summary;
+	let header = $derived(makeHeader(dimacsInstance));
+	let claims = $derived(makeClaims(dimacsInstance));
 
-	const header = `<div class="header">cnf ${varCount} ${clauseCount}</div>`;
+	function makeHeader(instance: DimacsInstance): string {
+		const { summary }: DimacsInstance = instance;
+		const { varCount, clauseCount }: Summary = summary;
+		const header = `<div class="header">cnf ${varCount} ${clauseCount}</div>`;
+		return header;
+	}
 
-	const claimToHtml = (claim: number[]): string => {
-		const eos = claim[claim.length - 1];
-		if (eos !== 0) {
-			logFatal('Claim end of sequence not found');
-		}
-		const html = claim
-			.map((lit) => {
-				return `<span class="${lit === 0 ? 'delimiter' : 'literal'}">${lit}</span>`;
-			})
-			.join(' ');
-		return html;
-	};
+	function makeClaims(instance: DimacsInstance): string {
+		const { summary }: DimacsInstance = instance;
 
-	const claimsToHtml = (claims: number[][]): string => {
-		return claims
-			.map((claim) => {
-				return `<div class="clause">` + claimToHtml(claim) + `</div>`;
-			})
-			.join('');
-	};
+		const claimToHtml = (claim: number[]): string => {
+			const eos = claim[claim.length - 1];
+			if (eos !== 0) {
+				logFatal('Claim end of sequence not found');
+			}
+			const html = claim
+				.map((lit) => {
+					return `<span class="${lit === 0 ? 'delimiter' : 'literal'}">${lit}</span>`;
+				})
+				.join(' ');
+			return html;
+		};
 
-	const originalClaims = dimacs.summary.claims.original;
-	const claims = claimsToHtml(originalClaims);
+		const claimsToHtml = (claims: number[][]): string => {
+			return claims
+				.map((claim) => {
+					return `<div class="clause">` + claimToHtml(claim) + `</div>`;
+				})
+				.join('');
+		};
+
+		const originalClaims = summary.claims.original;
+		const claims = claimsToHtml(originalClaims);
+		return claims;
+	}
 </script>
 
 {@html header}
 {@html claims}
-
-<style>
-	:global(.literal) {
-		color: blue;
-		font-weight: bold;
-	}
-
-	:global(.delimiter) {
-		color: red;
-	}
-
-	:global(.literal, .delimiter) {
-		display: inline-block;
-		width: 20px;
-		text-align: right;
-	}
-
-	:global(.header) {
-		font-weight: bold;
-		font-size: 1.2em;
-		color: darkgreen;
-		margin-bottom: 8px;
-	}
-
-	:global(.clause) {
-		display: flex;
-		gap: 5px;
-	}
-</style>

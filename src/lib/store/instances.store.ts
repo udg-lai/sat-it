@@ -2,7 +2,7 @@ import type { DimacsInstance } from '$lib/dimacs/dimacs-instance.interface.ts';
 import fetchInstances from '$lib/transversal/utils/bootstrap-instances.ts';
 import { logError, logWarning } from '$lib/transversal/utils/logging.ts';
 import { get, writable, type Writable } from 'svelte/store';
-import { updateProblem } from './problem.store.ts';
+import { updateProblemDomain } from './problem.store.ts';
 
 export interface InteractiveInstance extends DimacsInstance {
 	removable: boolean;
@@ -43,47 +43,34 @@ export async function initializeInstancesStore() {
 }
 
 export function setDefaultInstanceToSolve(): void {
-	if (emptyIntanceSet()) {
-		logError("Can not set default instance from an empty set")
-	}
-	else {
-		deactiveAllInstances();
+	// pre: instances already exist
+	if (emptyInstanceSet()) {
+		logError('Can not set default instance from an empty set');
+	} else {
 		instanceStore.update((instances) => {
-			const [fst, ...others] = instances;
+			const newInstances = instances.map((e) => {
+				return {
+					...e,
+					active: false
+				};
+			});
+			const fst = newInstances[0];
 			fst.active = true;
-			updateActiveInstanceStore(fst);
-			return [fst, ...others];
-		})
+			activeInstanceStore.set(fst);
+			afterActivateInstance(fst);
+			return newInstances;
+		});
 	}
 }
 
-function emptyIntanceSet(): boolean {
-	let instances = get(instanceStore);
+function emptyInstanceSet(): boolean {
+	const instances = get(instanceStore);
 	return instances.length === 0;
-}
-
-function deactiveAllInstances(): void {
-	instanceStore.update((instances) => {
-		return instances.map((instance) => {
-			return { ...instance, active: false }
-		})
-	})
 }
 
 function updateInstanceStore(newInstances: InteractiveInstance[]): void {
 	instanceStore.set(newInstances);
 }
-
-function updateActiveInstanceStore(instance: InteractiveInstance): void {
-	activeInstanceStore.set(instance);
-	updateProblem()
-}
-
-export function activateInstance(instance: InteractiveInstance): void {
-	console.log(instance)
-	updateActiveInstanceStore(instance);
-}
-
 
 export function addInstance(instance: DimacsInstance): void {
 	const found = get(instanceStore).find((i) => i.instanceName === instance.instanceName);
@@ -94,4 +81,29 @@ export function addInstance(instance: DimacsInstance): void {
 	} else {
 		instanceStore.update((prev) => [...prev, { ...instance, ...newInstanceState }]);
 	}
+}
+
+export function activateInstanceByName(instanceName: string): void {
+	// pre: that instance should exist in the store
+	instanceStore.update((instances) => {
+		const newInstances = instances.map((e) => {
+			return {
+				...e,
+				active: false
+			};
+		});
+		const instance = newInstances.find((e) => e.instanceName === instanceName);
+		if (instance !== undefined) {
+			instance.active = true;
+			activeInstanceStore.set(instance);
+			afterActivateInstance(instance);
+		} else {
+			logError('Not instance found to activate');
+		}
+		return newInstances;
+	});
+}
+
+function afterActivateInstance(instance: DimacsInstance): void {
+	updateProblemDomain(instance);
 }
