@@ -4,8 +4,28 @@ import { problemStore } from './problem.store.ts';
 
 export const followingVariable: Writable<Maybe<number>> = writable(makeNothing());
 
+export const nonAssignedVariables: Writable<number[]> = writable([]);
+
 export function updateFollowingVariable(): void {
 	followingVariable.update(() => {
 		return get(problemStore).pools.variables.nextVariableToAssign();
+	});
+}
+
+export function setNonAssignedVariables(): void {
+	nonAssignedVariables.set(get(problemStore).pools.variables.getVariablesIDs());
+}
+
+export function updateNonAssignedVariables(remove: boolean, variable: number): void {
+	nonAssignedVariables.update((oldNAV) => {
+		let newNAV;
+		if(remove) {
+			newNAV = oldNAV.filter((v) => v !== variable)
+		}
+		else {
+			newNAV = oldNAV;
+			newNAV.push(variable);
+		}
+		return newNAV;
 	});
 }

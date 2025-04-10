@@ -1,14 +1,33 @@
 <script lang="ts">
-	import { followingVariable, updateFollowingVariable } from '$lib/store/debugger.store.ts';
-	import { isJust } from '$lib/transversal/utils/types/maybe.ts';
+	import {
+		followingVariable,
+		nonAssignedVariables,
+		updateFollowingVariable
+	} from '$lib/store/debugger.store.ts';
+	import { fromJust, isJust } from '$lib/transversal/utils/types/maybe.ts';
 	import { onMount } from 'svelte';
-	import { emitAssignmentEvent } from './events.svelte.ts';
+	import { emitAssignmentEvent, type Manual } from './events.svelte.ts';
 	import './style.css';
 	import { problemStore } from '$lib/store/problem.store.ts';
 
 	let polarity: boolean = $state(true);
 	let positive: boolean = $derived(polarity);
 	const maxValue: number = $derived($problemStore.pools.variables.nVariables());
+
+	let isVariableValid: boolean = $derived(
+		isJust($followingVariable) && $nonAssignedVariables.includes($followingVariable.value)
+	);
+
+	function emitAssignment(){
+		const userVariable = fromJust($followingVariable);
+		const nextVariable = fromJust($problemStore.pools.variables.nextVariableToAssign());
+		if( userVariable === nextVariable  && positive) {
+			emitAssignmentEvent('Automated')
+		}
+		else {
+			emitAssignmentEvent({variable: $followingVariable.value, polarity: positive} as Manual);
+		}
+	}
 
 	onMount(() => {
 		updateFollowingVariable();
@@ -21,6 +40,7 @@
 		<input
 			type="number"
 			class="variable-selector min-w-0 flex-grow"
+			class:invalidOption={!isVariableValid}
 			bind:value={$followingVariable.value}
 			placeholder="Enter variable"
 			min="1"
@@ -38,8 +58,21 @@
 			<h1>False</h1>
 		</button>
 	</div>
-
-	<button class="btn w-[10rem] shrink-0" onclick={() => emitAssignmentEvent('Automated')}>
-		<h1>Decide</h1>
-	</button>
+	{#if isJust($followingVariable)}
+		<button
+			class="btn w-[10rem] shrink-0"
+			class:invalidOption={!isVariableValid}
+			onclick={() => emitAssignment()}
+			disabled={!isVariableValid}
+		>
+			<h1>Decide</h1>
+		</button>
+	{:else}
+		<button
+			class="btn w-[10rem] shrink-0"
+			onclick={() => emitAssignmentEvent('Automated')}
+		>
+			<h1>FIX</h1>
+		</button>
+	{/if}
 </div>

@@ -15,6 +15,9 @@
 	border: none;
 	cursor: pointer;
 }
+.variable-selector.invalidOption {
+	color: red;
+}
 
 .polarity {
 	background-color: #cacaca30;
@@ -26,6 +29,12 @@
 
 .btn {
 	background-color: var(--border-color);
+	height: 4rem;
+	transition: background-color 0.3s ease;
+}
+
+.btn.invalidOption {
+	background-color: #cacaca30;
 	height: 4rem;
 }
 

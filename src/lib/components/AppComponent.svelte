@@ -10,31 +10,39 @@
 		assignmentEventStore,
 		editorViewEventStore,
 		type AssignmentEvent,
-		type EditorViewEvent
+		type EditorViewEvent,
+
+		type Manual
+
 	} from './tools/debugger/events.svelte.ts';
 	import TrailEditor from './visualizer/TrailEditorComponent.svelte';
 	import { get } from 'svelte/store';
 	import { updateFollowingVariable } from '$lib/store/debugger.store.ts';
+	import { manualDecision, type ManualParams } from '$lib/transversal/algorithms/manual.ts';
 
 	let editorExpanded: boolean = $state(true);
 
 	let trails: Trail[] = $state([]);
 
-	function algorithmStep(e: AssignmentEvent<number>): void {
+	function algorithmStep(e: AssignmentEvent<Manual>): void {
 		if (e === undefined) return;
 
 		const { pools }: Problem = get(problemStore);
 		const { variables } = pools;
 
-		const params: DummySearchParams = {
-			variables,
-			trails
-		};
-
 		if (e.assignment === 'Automated') {
+			const params: DummySearchParams = {
+				variables,
+				trails
+			};
 			trails = dummyAssignmentAlgorithm(params);
 		} else {
-			console.log(`User assignment not implemented yet`);
+			const params: ManualParams = {
+				assignemnt: e.assignment,
+				variables,
+				trails
+			};
+			trails = manualDecision(params);
 		}
 		updateFollowingVariable();
 	}
