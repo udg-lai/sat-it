@@ -25,6 +25,7 @@
 			emitAssignmentEvent('Automated');
 		} else {
 			emitAssignmentEvent({ variable: $followingVariable.value, polarity: positive } as Manual);
+			polarity = true;
 		}
 	}
 
