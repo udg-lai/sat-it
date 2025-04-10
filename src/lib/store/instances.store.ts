@@ -1,11 +1,8 @@
 import type { DimacsInstance } from '$lib/dimacs/dimacs-instance.interface.ts';
-import ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';
-import VariablePool from '$lib/transversal/entities/VariablePool.ts';
 import fetchInstances from '$lib/transversal/utils/bootstrap-instances.ts';
-import { logError, logFatal, logWarning } from '$lib/transversal/utils/logging.ts';
-import { fromClaimsToClause } from '$lib/transversal/utils/utils.ts';
+import { logError, logWarning } from '$lib/transversal/utils/logging.ts';
 import { get, writable, type Writable } from 'svelte/store';
-import { problemStore, updateProblem } from './problem.store.ts';
+import { updateProblem } from './problem.store.ts';
 
 export interface InteractiveInstance extends DimacsInstance {
 	removable: boolean;
@@ -46,30 +43,45 @@ export async function initializeInstancesStore() {
 }
 
 export function setDefaultInstanceToSolve(): void {
-	let instances = get(instanceStore);
-
-	if (instances.length === 0) {
+	if (emptyIntanceSet()) {
 		logError("Can not set default instance from an empty set")
-	} 
+	}
 	else {
-		instances = instances.map((i) => {
-			return { ...i, active: false }
+		deactiveAllInstances();
+		instanceStore.update((instances) => {
+			const [fst, ...others] = instances;
+			fst.active = true;
+			updateActiveInstanceStore(fst);
+			return [fst, ...others];
 		})
-		const instance: InteractiveInstance = instances[0];
-		instance.active = true;
-		updateInstanceStore(instances);
-		updateActiveInstanceStore(instance)
-		updateProblem()
 	}
 }
 
+function emptyIntanceSet(): boolean {
+	let instances = get(instanceStore);
+	return instances.length === 0;
+}
+
+function deactiveAllInstances(): void {
+	instanceStore.update((instances) => {
+		return instances.map((instance) => {
+			return { ...instance, active: false }
+		})
+	})
+}
 
 function updateInstanceStore(newInstances: InteractiveInstance[]): void {
 	instanceStore.set(newInstances);
 }
 
-export function updateActiveInstanceStore(instance: InteractiveInstance): void {
+function updateActiveInstanceStore(instance: InteractiveInstance): void {
 	activeInstanceStore.set(instance);
+	updateProblem()
+}
+
+export function activateInstance(instance: InteractiveInstance): void {
+	console.log(instance)
+	updateActiveInstanceStore(instance);
 }
 
 
@@ -82,27 +94,4 @@ export function addInstance(instance: DimacsInstance): void {
 	} else {
 		instanceStore.update((prev) => [...prev, { ...instance, ...newInstanceState }]);
 	}
-}
-
-
-function updateProblem(dimacsInstance: InteractiveInstance): void {
-	const { summary } = dimacsInstance;
-	const { claims } = summary;
-	const variables: VariablePool = new VariablePool(summary.varCount);
-	const clauses: ClausePool = new ClausePool(fromClaimsToClause(claims.simplified, variables));
-
-	const pools = {
-		variables,
-		clauses
-	};
-
-	const previousProblem = get(problemStore);
-	let algorithm = () => console.log('dummy');
-	if (previousProblem !== undefined) {
-		algorithm = previousProblem.algorithm;
-	}
-
-	const problem = { pools, algorithm };
-
-	updateProblem(problem);
 }

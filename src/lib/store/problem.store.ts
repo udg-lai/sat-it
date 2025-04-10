@@ -1,7 +1,7 @@
+import ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';
 import { get, writable, type Writable } from 'svelte/store';
 import VariablePool from '../transversal/entities/VariablePool.ts';
-import ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';
-import { activeInstanceStore, instanceStore, type InteractiveInstance } from './instances.store.ts';
+import { activeInstanceStore } from './instances.store.ts';
 
 export interface Problem {
 	pools: Pools;
@@ -15,16 +15,17 @@ interface Pools {
 
 export const problemStore: Writable<Problem> = writable();
 
-export function updateProblem(p: Problem) {
+export function updateProblem() {
+	const p: Problem = fromActiveInstanceToProblem();
 	problemStore.set(p);
 }
 
-function getActiveProblem(): Problem {
+function fromActiveInstanceToProblem(): Problem {
 	const activeInstance = get(activeInstanceStore)
 	const { summary } = activeInstance;
 	const { claims } = summary;
 	const variables: VariablePool = new VariablePool(summary.varCount);
-	const clauses: ClausePool = new ClausePool(fromClaimsToClause(claims.simplified, variables));
+	const clauses: ClausePool = ClausePool.buildFrom(claims.simplified, variables);
 
 	const pools = {
 		variables,
@@ -37,9 +38,11 @@ function getActiveProblem(): Problem {
 		algorithm = previousProblem.algorithm;
 	}
 
-	const problem = { pools, algorithm };
-
-} 
+	return {
+		pools,
+		algorithm
+	}
+}
 
 export function updatePools(pools: Pools) {
 	const currentProblem = get(problemStore);
