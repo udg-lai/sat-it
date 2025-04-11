@@ -5,6 +5,7 @@
 		activeInstanceStore,
 		addInstance,
 		instanceStore,
+		previewInstanceByName,
 		type InteractiveInstance
 	} from '$lib/store/instances.store.ts';
 	import { Accordion, AccordionItem } from 'flowbite-svelte';
@@ -17,14 +18,15 @@
 	let uploadOpen = $state(true);
 
 	let instances: InteractiveInstance[] = $state([]);
-	let currentActiveInstance: DimacsInstance | undefined = $state(undefined);
+	let viewingInstance: DimacsInstance | undefined = $state(undefined);
 
 	let preview = $derived(
 		instances.map((e) => {
 			return {
 				removable: e.removable,
 				active: e.active,
-				instanceName: e.instanceName
+				instanceName: e.instanceName,
+				previewing: e.previewing
 			};
 		})
 	);
@@ -32,7 +34,7 @@
 	onMount(() => {
 		const unsubscribeListOfInstances = instanceStore.subscribe((xs) => (instances = [...xs]));
 		const unsubscribeActiveInstance = activeInstanceStore.subscribe(
-			(instance) => (currentActiveInstance = instance)
+			(instance) => (viewingInstance = instance)
 		);
 		return () => {
 			unsubscribeListOfInstances();
@@ -44,16 +46,20 @@
 		activateInstanceByName(instanceName);
 	}
 
-	function setPreviewInstance(instanceName: string): void {
-		currentActiveInstance = instances.find((e) => e.instanceName === instanceName);
+	function onPreviewInstance(instanceName: string): void {
+		previewInstanceByName(instanceName);
+		setPreviewInstance(instanceName);
 	}
 
+	function setPreviewInstance(instanceName: string): void {
+		viewingInstance = instances.find((e) => e.instanceName === instanceName);
+	}
 </script>
 
 <div class="dimacs-viewer">
-	{#if currentActiveInstance}
+	{#if viewingInstance}
 		<div class="dimacs-preview">
-			<DimacsViewerComponent dimacsInstance={currentActiveInstance} />
+			<DimacsViewerComponent dimacsInstance={viewingInstance} />
 		</div>
 	{/if}
 
@@ -63,13 +69,12 @@
 			<InstanceListComponent
 				{preview}
 				onActivate={onActivateInstance}
-				onPreview={setPreviewInstance}
+				onPreview={onPreviewInstance}
 			/>
 		</AccordionItem>
 
 		<AccordionItem bind:open={uploadOpen}>
 			<span slot="header">Upload dimacs instance</span>
-
 			<DimacsUploaderComponent onUpload={addInstance} />
 		</AccordionItem>
 	</Accordion>

@@ -7,6 +7,7 @@ import { updateProblemDomain } from './problem.store.ts';
 export interface InteractiveInstance extends DimacsInstance {
 	removable: boolean;
 	active: boolean;
+	previewing: boolean;
 }
 
 export const instanceStore: Writable<InteractiveInstance[]> = writable([]);
@@ -15,12 +16,14 @@ export const activeInstanceStore: Writable<DimacsInstance> = writable();
 
 const defaultInstanceState = {
 	removable: false,
-	active: false
+	active: false,
+	previewing: false
 };
 
 const newInstanceState = {
 	removable: true,
-	active: false
+	active: false,
+	previewing: false
 };
 
 export async function initializeInstancesStore() {
@@ -56,6 +59,7 @@ export function setDefaultInstanceToSolve(): void {
 			});
 			const fst = newInstances[0];
 			fst.active = true;
+			fst.previewing = true;
 			activeInstanceStore.set(fst);
 			afterActivateInstance(fst);
 			return newInstances;
@@ -89,14 +93,35 @@ export function activateInstanceByName(instanceName: string): void {
 		const newInstances = instances.map((e) => {
 			return {
 				...e,
+				previewing: false,
 				active: false
 			};
 		});
 		const instance = newInstances.find((e) => e.instanceName === instanceName);
 		if (instance !== undefined) {
 			instance.active = true;
+			instance.previewing = true;
 			activeInstanceStore.set(instance);
 			afterActivateInstance(instance);
+		} else {
+			logError('Not instance found to activate');
+		}
+		return newInstances;
+	});
+}
+
+export function previewInstanceByName(instanceName: string): void {
+	instanceStore.update((instances) => {
+		const newInstances = instances.map((e) => {
+			return {
+				...e,
+				previewing: false
+			};
+		});
+		const instance = newInstances.find((e) => e.instanceName === instanceName);
+		if (instance !== undefined) {
+			instance.previewing = true;
+			activeInstanceStore.set(instance);
 		} else {
 			logError('Not instance found to activate');
 		}

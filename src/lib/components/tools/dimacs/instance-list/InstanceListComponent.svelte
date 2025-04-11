@@ -5,6 +5,7 @@
 	interface Preview {
 		removable: boolean;
 		active: boolean;
+		previewing: boolean;
 		instanceName: string;
 	}
 
@@ -38,7 +39,10 @@
 			</div>
 			<div class="flex">
 				<button class="icon">
-					<EyeOutline onclick={() => onPreview(instance.instanceName)} />
+					<EyeOutline
+						class={instance.previewing ? '' : 'not-previewing'}
+						onclick={() => onPreview(instance.instanceName)}
+					/>
 				</button>
 				<Toggle
 					onchange={() => emitOnActive(instance)}
@@ -50,3 +54,9 @@
 		</li>
 	{/each}
 </ul>
+
+<style>
+	:global(.not-previewing) {
+		opacity: 0.5;
+	}
+</style>
