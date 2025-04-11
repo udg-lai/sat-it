@@ -6,13 +6,15 @@
 
 	interface Props {
 		dimacsInstance: DimacsInstance;
-		height: number
 	}
 
-	let { dimacsInstance, height }: Props = $props();
+	let { dimacsInstance }: Props = $props();
 
 	let header = $derived(makeHeader(dimacsInstance));
 	let claims: string[] = $derived(makeClaims(dimacsInstance));
+
+	let previewObserver: ResizeObserver;
+	let virtualHeight: number = $state(0);
 
 	function makeHeader(instance: DimacsInstance): string {
 		const { summary }: DimacsInstance = instance;
@@ -38,42 +40,71 @@
 		};
 
 		const claimsToHtml = (claims: number[][]): string[] => {
-			return claims
-				.map((claim) => {
-					return `<div class="clause">` + claimToHtml(claim) + `</div>`;
-				})
+			return claims.map((claim) => {
+				return `<div class="clause">` + claimToHtml(claim) + `</div>`;
+			});
 		};
 
 		const originalClaims = summary.claims.original;
 		const claims = claimsToHtml(originalClaims);
 		return claims;
 	}
+
+	function updateHeight(htmlElement: HTMLElement) {
+		if (previewObserver) previewObserver.disconnect();
+
+		previewObserver = new ResizeObserver((entries) => {
+			for (const entry of entries) {
+				virtualHeight = entry.contentRect.height - 25;
+			}
+			console.log(virtualHeight);
+		});
+		previewObserver.observe(htmlElement);
+		return {
+			destroy() {
+				previewObserver.disconnect();
+			}
+		};
+	}
 </script>
 
-
-
 <div class="dimacs-viewer-component">
-<VirtualList
-    width="100%"
-    height={height}
-		scrollDirection="vertical"
-    itemCount={claims.length}
-    itemSize={50}>
-  <div slot="item" let:index let:style {style}>
-    {@html claims[index]}
-  </div>
-</VirtualList>
+	<p>Instance: {dimacsInstance.instanceName}</p>
+	<p>Variables: {dimacsInstance.summary.varCount}</p>
+	<p>Clauses: {dimacsInstance.summary.clauseCount}</p>
 
+	<div class="dimacs-list" use:updateHeight>
+		<VirtualList
+			width="100%"
+			height={virtualHeight}
+			scrollDirection="vertical"
+			itemCount={claims.length}
+			itemSize={50}
+		>
+			<div slot="item" let:index let:style {style}>
+				{@html claims[index]}
+			</div>
+		</VirtualList>
+	</div>
 </div>
- <!--
+
+<!--
 
 
  -->
 
 <style>
-	.virtual-scroll-container {
-		height: 100%;
+	.dimacs-viewer-component {
+		flex: 1;
 		width: 100%;
 		position: relative;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.dimacs-list {
+		position: relative;
+		display: flex;
+		flex:1;
 	}
 </style>

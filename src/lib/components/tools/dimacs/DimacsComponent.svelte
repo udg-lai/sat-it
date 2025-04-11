@@ -13,7 +13,7 @@
 	import type { DimacsInstance } from '$lib/dimacs/dimacs-instance.interface.ts';
 	import { onMount } from 'svelte';
 
-	let listOpen = $state(true);
+	let listOpen = $state(false);
 	let instancePreviewOpen = $state(true);
 	let uploadOpen = $state(false);
 
@@ -21,8 +21,6 @@
 	let currentActiveInstance: DimacsInstance | undefined = $state(undefined);
 
 	let previewerRef: HTMLElement | undefined = $state(undefined);
-	let previewObserver: ResizeObserver;
-	let dimacsViewerHeight: number = $state(0);
 
 	let preview = $derived(
 		instances.map((e) => {
@@ -54,22 +52,6 @@
 		instancePreviewOpen = true;
 	}
 
-	function updateHeight(htmlElement: HTMLElement) {
-		if (previewObserver) previewObserver.disconnect();
-
-		previewObserver = new ResizeObserver((entries) => {
-			for (const entry of entries) {
-				dimacsViewerHeight = entry.contentRect.height - 25;
-			}
-			console.log(dimacsViewerHeight);
-		});
-		previewObserver.observe(htmlElement);
-		return {
-			destroy() {
-				previewObserver.disconnect();
-			}
-		};
-	}
 </script>
 
 <div class="dimacs-viewer">
@@ -91,8 +73,8 @@
 	</Accordion>
 
 	{#if currentActiveInstance}
-		<div class="dimacs-preview" bind:this={previewerRef} use:updateHeight>
-			<DimacsViewerComponent dimacsInstance={currentActiveInstance} height={dimacsViewerHeight} />
+		<div class="dimacs-preview">
+			<DimacsViewerComponent dimacsInstance={currentActiveInstance}  />
 		</div>
 	{/if}
 </div>
