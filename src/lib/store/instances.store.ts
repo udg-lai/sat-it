@@ -129,6 +129,18 @@ export function previewInstanceByName(instanceName: string): void {
 	});
 }
 
+export function removeInstanceByName(instanceName: string): void {
+	const filterFun = (e: InteractiveInstance, instanceName: string) => {
+		return (
+			e.instanceName !== instanceName || (e.instanceName === instanceName && e.removable === false)
+		);
+	};
+
+	instanceStore.update((instances) => {
+		return instances.filter((e) => filterFun(e, instanceName));
+	});
+}
+
 function afterActivateInstance(instance: DimacsInstance): void {
 	updateProblemDomain(instance);
 }

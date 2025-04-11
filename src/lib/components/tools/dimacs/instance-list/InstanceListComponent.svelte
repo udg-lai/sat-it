@@ -13,9 +13,10 @@
 		preview: Preview[];
 		onActivate: (instanceName: string) => void;
 		onPreview: (instanceName: string) => void;
+		onRemove: (instanceName: string) => void;
 	}
 
-	let { preview, onActivate, onPreview }: Props = $props();
+	let { preview, onActivate, onPreview, onRemove }: Props = $props();
 
 	function emitOnActive({ instanceName }: Preview) {
 		onActivate(instanceName);
@@ -28,7 +29,7 @@
 			<div class="flex">
 				<button class="icon not-removable" disabled={!instance.removable || instance.active}>
 					{#if instance.removable && !instance.active}
-						<TrashBinOutline />
+						<TrashBinOutline onclick={() => onRemove(instance.instanceName)} />
 					{:else if instance.removable && instance.active}
 						<LockOutline />
 					{:else}

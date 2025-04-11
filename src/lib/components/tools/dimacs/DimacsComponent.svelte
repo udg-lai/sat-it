@@ -6,6 +6,7 @@
 		addInstance,
 		instanceStore,
 		previewInstanceByName,
+		removeInstanceByName,
 		type InteractiveInstance
 	} from '$lib/store/instances.store.ts';
 	import { Accordion, AccordionItem } from 'flowbite-svelte';
@@ -70,6 +71,7 @@
 				{preview}
 				onActivate={onActivateInstance}
 				onPreview={onPreviewInstance}
+				onRemove={removeInstanceByName}
 			/>
 		</AccordionItem>
 
