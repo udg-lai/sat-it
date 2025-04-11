@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { DimacsInstance } from '$lib/dimacs/dimacs-instance.interface.ts';
 	import {
 		activateInstanceByName,
 		activeInstanceStore,
@@ -7,20 +8,16 @@
 		type InteractiveInstance
 	} from '$lib/store/instances.store.ts';
 	import { Accordion, AccordionItem } from 'flowbite-svelte';
+	import { onMount } from 'svelte';
 	import InstanceListComponent from './instance-list/InstanceListComponent.svelte';
 	import DimacsUploaderComponent from './uploader/DimacsUploaderComponent.svelte';
 	import DimacsViewerComponent from './viewer/DimacsViewerComponent.svelte';
-	import type { DimacsInstance } from '$lib/dimacs/dimacs-instance.interface.ts';
-	import { onMount } from 'svelte';
 
-	let listOpen = $state(false);
-	let instancePreviewOpen = $state(true);
-	let uploadOpen = $state(false);
+	let listOpen = $state(true);
+	let uploadOpen = $state(true);
 
 	let instances: InteractiveInstance[] = $state([]);
 	let currentActiveInstance: DimacsInstance | undefined = $state(undefined);
-
-	let previewerRef: HTMLElement | undefined = $state(undefined);
 
 	let preview = $derived(
 		instances.map((e) => {
@@ -49,19 +46,18 @@
 
 	function setPreviewInstance(instanceName: string): void {
 		currentActiveInstance = instances.find((e) => e.instanceName === instanceName);
-		instancePreviewOpen = true;
 	}
 
 </script>
 
 <div class="dimacs-viewer">
+	{#if currentActiveInstance}
+		<div class="dimacs-preview">
+			<DimacsViewerComponent dimacsInstance={currentActiveInstance} />
+		</div>
+	{/if}
+
 	<Accordion flush multiple={true} defaultClass="accordion">
-		<AccordionItem bind:open={uploadOpen}>
-			<span slot="header">Upload dimacs instance</span>
-
-			<DimacsUploaderComponent onUpload={addInstance} />
-		</AccordionItem>
-
 		<AccordionItem bind:open={listOpen}>
 			<span slot="header">List of instances</span>
 			<InstanceListComponent
@@ -70,13 +66,13 @@
 				onPreview={setPreviewInstance}
 			/>
 		</AccordionItem>
-	</Accordion>
 
-	{#if currentActiveInstance}
-		<div class="dimacs-preview">
-			<DimacsViewerComponent dimacsInstance={currentActiveInstance}  />
-		</div>
-	{/if}
+		<AccordionItem bind:open={uploadOpen}>
+			<span slot="header">Upload dimacs instance</span>
+
+			<DimacsUploaderComponent onUpload={addInstance} />
+		</AccordionItem>
+	</Accordion>
 </div>
 
 <style>
@@ -92,7 +88,7 @@
 	}
 
 	.dimacs-preview {
-		padding: 1.25rem 0rem;
+		padding: 0;
 		display: flex;
 		flex: 1;
 	}

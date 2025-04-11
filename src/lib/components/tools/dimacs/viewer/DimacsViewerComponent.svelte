@@ -1,7 +1,6 @@
 <script lang="ts">
 	import type { DimacsInstance } from '$lib/dimacs/dimacs-instance.interface.ts';
 	import { logFatal } from '$lib/transversal/utils/logging.ts';
-	import type { Summary } from '$lib/transversal/utils/parsers/dimacs.ts';
 	import VirtualList from 'svelte-tiny-virtual-list';
 
 	interface Props {
@@ -10,18 +9,11 @@
 
 	let { dimacsInstance }: Props = $props();
 
-	let header = $derived(makeHeader(dimacsInstance));
 	let claims: string[] = $derived(makeClaims(dimacsInstance));
 
 	let previewObserver: ResizeObserver;
 	let virtualHeight: number = $state(0);
-
-	function makeHeader(instance: DimacsInstance): string {
-		const { summary }: DimacsInstance = instance;
-		const { varCount, clauseCount }: Summary = summary;
-		const header = `<div class="header">cnf ${varCount} ${clauseCount}</div>`;
-		return header;
-	}
+	let itemSize: number = $state(40);
 
 	function makeClaims(instance: DimacsInstance): string[] {
 		const { summary }: DimacsInstance = instance;
@@ -55,9 +47,8 @@
 
 		previewObserver = new ResizeObserver((entries) => {
 			for (const entry of entries) {
-				virtualHeight = entry.contentRect.height - 25;
+				virtualHeight = entry.contentRect.height - 20;
 			}
-			console.log(virtualHeight);
 		});
 		previewObserver.observe(htmlElement);
 		return {
@@ -69,29 +60,29 @@
 </script>
 
 <div class="dimacs-viewer-component">
-	<p>Instance: {dimacsInstance.instanceName}</p>
-	<p>Variables: {dimacsInstance.summary.varCount}</p>
-	<p>Clauses: {dimacsInstance.summary.clauseCount}</p>
+	<div class="dimacs-header">
+		<h3>{dimacsInstance.instanceName}</h3>
+	</div>
 
-	<div class="dimacs-list" use:updateHeight>
+	<div class="dimacs-header" style="padding-top: 0rem;">
+		<p>Variables: {dimacsInstance.summary.varCount}</p>
+		<p>Clauses: {dimacsInstance.summary.clauseCount}</p>
+	</div>
+
+	<div class="dimacs-list border-b" use:updateHeight>
 		<VirtualList
 			width="100%"
 			height={virtualHeight}
 			scrollDirection="vertical"
 			itemCount={claims.length}
-			itemSize={50}
+			{itemSize}
 		>
-			<div slot="item" let:index let:style {style}>
+			<div slot="item" class="item-list" let:index let:style {style}>
 				{@html claims[index]}
 			</div>
 		</VirtualList>
 	</div>
 </div>
-
-<!--
-
-
- -->
 
 <style>
 	.dimacs-viewer-component {
@@ -105,6 +96,26 @@
 	.dimacs-list {
 		position: relative;
 		display: flex;
-		flex:1;
+		flex: 1;
+	}
+
+	.item-list {
+		display: flex;
+		align-items: center;
+	}
+
+	.dimacs-header {
+		display: flex;
+		justify-content: center;
+		padding: 0.75rem 0rem;
+		gap: 1rem;
+	}
+
+	.border-b {
+		border-bottom-width: 1px;
+	}
+
+	h3 {
+		font-size: 1.5rem;
 	}
 </style>
