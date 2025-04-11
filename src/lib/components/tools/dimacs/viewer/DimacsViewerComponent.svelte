@@ -2,15 +2,17 @@
 	import type { DimacsInstance } from '$lib/dimacs/dimacs-instance.interface.ts';
 	import { logFatal } from '$lib/transversal/utils/logging.ts';
 	import type { Summary } from '$lib/transversal/utils/parsers/dimacs.ts';
+	import VirtualList from 'svelte-tiny-virtual-list';
 
 	interface Props {
 		dimacsInstance: DimacsInstance;
+		height: number
 	}
 
-	let { dimacsInstance }: Props = $props();
+	let { dimacsInstance, height }: Props = $props();
 
 	let header = $derived(makeHeader(dimacsInstance));
-	let claims = $derived(makeClaims(dimacsInstance));
+	let claims: string[] = $derived(makeClaims(dimacsInstance));
 
 	function makeHeader(instance: DimacsInstance): string {
 		const { summary }: DimacsInstance = instance;
@@ -19,7 +21,7 @@
 		return header;
 	}
 
-	function makeClaims(instance: DimacsInstance): string {
+	function makeClaims(instance: DimacsInstance): string[] {
 		const { summary }: DimacsInstance = instance;
 
 		const claimToHtml = (claim: number[]): string => {
@@ -35,12 +37,11 @@
 			return html;
 		};
 
-		const claimsToHtml = (claims: number[][]): string => {
+		const claimsToHtml = (claims: number[][]): string[] => {
 			return claims
 				.map((claim) => {
 					return `<div class="clause">` + claimToHtml(claim) + `</div>`;
 				})
-				.join('');
 		};
 
 		const originalClaims = summary.claims.original;
@@ -49,5 +50,30 @@
 	}
 </script>
 
-{@html header}
-{@html claims}
+
+
+<div class="dimacs-viewer-component">
+<VirtualList
+    width="100%"
+    height={height}
+		scrollDirection="vertical"
+    itemCount={claims.length}
+    itemSize={50}>
+  <div slot="item" let:index let:style {style}>
+    {@html claims[index]}
+  </div>
+</VirtualList>
+
+</div>
+ <!--
+
+
+ -->
+
+<style>
+	.virtual-scroll-container {
+		height: 100%;
+		width: 100%;
+		position: relative;
+	}
+</style>

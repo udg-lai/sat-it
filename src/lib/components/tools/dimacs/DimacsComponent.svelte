@@ -20,6 +20,10 @@
 	let instances: InteractiveInstance[] = $state([]);
 	let currentActiveInstance: DimacsInstance | undefined = $state(undefined);
 
+	let previewerRef: HTMLElement | undefined = $state(undefined);
+	let previewObserver: ResizeObserver;
+	let dimacsViewerHeight: number = $state(0);
+
 	let preview = $derived(
 		instances.map((e) => {
 			return {
@@ -49,51 +53,65 @@
 		currentActiveInstance = instances.find((e) => e.instanceName === instanceName);
 		instancePreviewOpen = true;
 	}
+
+	function updateHeight(htmlElement: HTMLElement) {
+		if (previewObserver) previewObserver.disconnect();
+
+		previewObserver = new ResizeObserver((entries) => {
+			for (const entry of entries) {
+				dimacsViewerHeight = entry.contentRect.height - 25;
+			}
+			console.log(dimacsViewerHeight);
+		});
+		previewObserver.observe(htmlElement);
+		return {
+			destroy() {
+				previewObserver.disconnect();
+			}
+		};
+	}
 </script>
 
-<Accordion flush multiple={true} defaultClass="accordion">
-	<AccordionItem bind:open={uploadOpen}>
-		<span slot="header">Upload dimacs instance</span>
+<div class="dimacs-viewer">
+	<Accordion flush multiple={true} defaultClass="accordion">
+		<AccordionItem bind:open={uploadOpen}>
+			<span slot="header">Upload dimacs instance</span>
 
-		<DimacsUploaderComponent onUpload={addInstance} />
-	</AccordionItem>
+			<DimacsUploaderComponent onUpload={addInstance} />
+		</AccordionItem>
 
-	<AccordionItem bind:open={listOpen}>
-		<span slot="header">List of instances</span>
-		<InstanceListComponent
-			{preview}
-			onActivate={onActivateInstance}
-			onPreview={setPreviewInstance}
-		/>
-	</AccordionItem>
+		<AccordionItem bind:open={listOpen}>
+			<span slot="header">List of instances</span>
+			<InstanceListComponent
+				{preview}
+				onActivate={onActivateInstance}
+				onPreview={setPreviewInstance}
+			/>
+		</AccordionItem>
+	</Accordion>
 
-	<AccordionItem bind:open={instancePreviewOpen}>
-		<span slot="header">
-			Instance previewer - {currentActiveInstance ? currentActiveInstance.instanceName : ''}
-		</span>
-		{#if currentActiveInstance}
-			<DimacsViewerComponent dimacsInstance={currentActiveInstance} />
-		{/if}
-	</AccordionItem>
-</Accordion>
+	{#if currentActiveInstance}
+		<div class="dimacs-preview" bind:this={previewerRef} use:updateHeight>
+			<DimacsViewerComponent dimacsInstance={currentActiveInstance} height={dimacsViewerHeight} />
+		</div>
+	{/if}
+</div>
 
 <style>
+	.dimacs-viewer {
+		display: flex;
+		flex-direction: column;
+		flex: 1;
+	}
+
 	:global(.accordion) {
-		height: 100%;
 		display: flex;
 		flex-direction: column;
 	}
 
-	:global(.accordion > div:last-child) {
+	.dimacs-preview {
+		padding: 1.25rem 0rem;
 		display: flex;
 		flex: 1;
-		overflow-y: auto;
-		position: relative;
-	}
-
-	:global(.accordion > div:last-child > div) {
-		position: absolute;
-		width: 100%;
-		height: 100%;
 	}
 </style>
