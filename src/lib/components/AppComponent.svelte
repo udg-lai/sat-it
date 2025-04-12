@@ -16,7 +16,7 @@
 	import TrailEditor from './visualizer/TrailEditorComponent.svelte';
 	import { get } from 'svelte/store';
 	import { updateFollowingVariable } from '$lib/store/debugger.store.ts';
-	import { manualDecision, type ManualParams } from '$lib/transversal/algorithms/manual.ts';
+	import { manualAssignment, type ManualParams } from '$lib/transversal/algorithms/manual.ts';
 
 	let editorExpanded: boolean = $state(true);
 
@@ -40,7 +40,7 @@
 				variables,
 				trails
 			};
-			trails = manualDecision(params);
+			trails = manualAssignment(params);
 		}
 		updateFollowingVariable();
 	}

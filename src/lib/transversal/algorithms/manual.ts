@@ -10,7 +10,7 @@ export interface ManualParams {
 	variables: VariablePool;
 }
 
-export function manualDecision(params: ManualParams): Trail[] {
+export function manualAssignment(params: ManualParams): Trail[] {
 	const { assignemnt, trails, variables } = params;
 
 	let nextTrailsState: Trail[] = [];

@@ -20,11 +20,11 @@
 
 	function emitAssignment() {
 		const userVariable = fromJust($followingVariable);
-		const nextVariable = fromJust($problemStore.pools.variables.nextVariableToAssign());
-		if (userVariable === nextVariable && positive) {
+		const algorithmVariable = fromJust($problemStore.pools.variables.nextVariableToAssign());
+		if (userVariable === algorithmVariable && positive) {
 			emitAssignmentEvent('Automated');
 		} else {
-			emitAssignmentEvent({ variable: $followingVariable.value, polarity: positive } as Manual);
+			emitAssignmentEvent({ variable: userVariable, polarity: positive } as Manual);
 			polarity = true;
 		}
 	}
