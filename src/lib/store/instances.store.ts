@@ -108,7 +108,7 @@ export function activateInstanceByName(instanceName: string): void {
 		}
 		return newInstances;
 	});
-	setNonAssignedVariables()
+	setNonAssignedVariables();
 }
 
 export function previewInstanceByName(instanceName: string): void {

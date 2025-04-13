@@ -27,7 +27,7 @@ class VariablePool implements IVariablePool {
 		const variableIdx = this.checkIndex(variable);
 		this.unassignVariable(variable);
 		this.updatePointer(variableIdx);
-		updateAssignedVariables(true,variable);
+		updateAssignedVariables(true, variable);
 	}
 
 	persist(variable: number, assignment: boolean): void {
@@ -37,7 +37,7 @@ class VariablePool implements IVariablePool {
 		// next variable to assign
 		if (this.pointer === variableIdx) this.pointer++;
 		this.assignVariable(variable, assignment);
-		updateAssignedVariables(false,variable);
+		updateAssignedVariables(false, variable);
 	}
 
 	get(variable: number): Variable {

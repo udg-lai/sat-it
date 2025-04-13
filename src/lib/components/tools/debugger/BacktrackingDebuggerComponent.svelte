@@ -20,7 +20,7 @@
 	);
 
 	function emitAssignment() {
-		if(isVariableValid) {
+		if (isVariableValid) {
 			const userVariable = fromJust($followingVariable);
 			const algorithmVariable = fromJust($problemStore.pools.variables.nextVariableToAssign());
 			if (userVariable === algorithmVariable && positive) {
@@ -29,11 +29,9 @@
 				emitAssignmentEvent({ variable: userVariable, polarity: positive } as Manual);
 				polarity = true;
 			}
+		} else {
+			logInfo('Invalid Variable', 'The variable you are trying to assign is already assigned');
 		}
-		else {
-			logInfo("Invalid Variable", "The variable you are trying to assign is already assigned");
-		}
-		
 	}
 
 	onMount(() => {
