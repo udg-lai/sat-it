@@ -1,0 +1,28 @@
+.literal {
+	color: blue;
+	font-weight: bold;
+}
+
+.delimiter {
+	color: red;
+}
+
+.literal,
+.delimiter {
+	display: inline-block;
+	width: 20px;
+	text-align: right;
+}
+
+.header {
+	font-weight: bold;
+	font-size: 1.2em;
+	color: darkgreen;
+	padding: 0rem;
+	padding-bottom: 1rem;
+}
+
+.clause {
+	display: flex;
+	gap: 5px;
+}
