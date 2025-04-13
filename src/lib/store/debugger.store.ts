@@ -4,7 +4,7 @@ import { problemStore } from './problem.store.ts';
 
 export const followingVariable: Writable<Maybe<number>> = writable(makeNothing());
 
-export const nonAssignedVariables: Writable<number[]> = writable([]);
+export const assignedVariables: Writable<number[]> = writable([]);
 
 export function updateFollowingVariable(): void {
 	followingVariable.update(() => {
@@ -13,11 +13,11 @@ export function updateFollowingVariable(): void {
 }
 
 export function setNonAssignedVariables(): void {
-	nonAssignedVariables.set(get(problemStore).pools.variables.getVariablesIDs());
+	assignedVariables.set([]);
 }
 
-export function updateNonAssignedVariables(remove: boolean, variable: number): void {
-	nonAssignedVariables.update((oldNAV) => {
+export function updateAssignedVariables(remove: boolean, variable: number): void {
+	assignedVariables.update((oldNAV) => {
 		let newNAV;
 		if (remove) {
 			newNAV = oldNAV.filter((v) => v !== variable);

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import {
 		followingVariable,
-		nonAssignedVariables,
+		assignedVariables,
 		updateFollowingVariable
 	} from '$lib/store/debugger.store.ts';
 	import { fromJust, isJust } from '$lib/transversal/utils/types/maybe.ts';
@@ -9,24 +9,31 @@
 	import { emitAssignmentEvent, type Manual } from './events.svelte.ts';
 	import './style.css';
 	import { problemStore } from '$lib/store/problem.store.ts';
+	import { logInfo } from '$lib/transversal/utils/logging.ts';
 
 	let polarity: boolean = $state(true);
 	let positive: boolean = $derived(polarity);
 	const maxValue: number = $derived($problemStore.pools.variables.nVariables());
 
 	let isVariableValid: boolean = $derived(
-		isJust($followingVariable) && $nonAssignedVariables.includes($followingVariable.value)
+		isJust($followingVariable) && !$assignedVariables.includes($followingVariable.value)
 	);
 
 	function emitAssignment() {
-		const userVariable = fromJust($followingVariable);
-		const algorithmVariable = fromJust($problemStore.pools.variables.nextVariableToAssign());
-		if (userVariable === algorithmVariable && positive) {
-			emitAssignmentEvent('Automated');
-		} else {
-			emitAssignmentEvent({ variable: userVariable, polarity: positive } as Manual);
-			polarity = true;
+		if(isVariableValid) {
+			const userVariable = fromJust($followingVariable);
+			const algorithmVariable = fromJust($problemStore.pools.variables.nextVariableToAssign());
+			if (userVariable === algorithmVariable && positive) {
+				emitAssignmentEvent('Automated');
+			} else {
+				emitAssignmentEvent({ variable: userVariable, polarity: positive } as Manual);
+				polarity = true;
+			}
 		}
+		else {
+			logInfo("Invalid Variable", "The variable you are trying to assign is already assigned");
+		}
+		
 	}
 
 	onMount(() => {
@@ -63,7 +70,6 @@
 			class="btn w-[10rem] shrink-0"
 			class:invalidOption={!isVariableValid}
 			onclick={() => emitAssignment()}
-			disabled={!isVariableValid}
 		>
 			<h1>Decide</h1>
 		</button>

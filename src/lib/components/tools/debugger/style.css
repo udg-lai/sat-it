@@ -43,3 +43,15 @@
 	width: 100%;
 	height: 5rem;
 }
+
+/*This lines is to delete the arrows to increase and decrease the variable from the inputs*/
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button {
+	-webkit-appearance: none;
+	margin: 0;
+}
+
+input[type=number] {
+	-moz-appearance: textfield;
+	appearance: textfield;
+}

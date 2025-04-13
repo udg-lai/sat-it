@@ -1,3 +1,4 @@
+import { updateAssignedVariables } from '$lib/store/debugger.store.ts';
 import type { IVariablePool } from '../utils/interfaces/IVariablePool.ts';
 import { makeJust, makeNothing, type Maybe } from '../utils/types/maybe.ts';
 import Variable from './Variable.svelte.ts';
@@ -26,6 +27,7 @@ class VariablePool implements IVariablePool {
 		const variableIdx = this.checkIndex(variable);
 		this.unassignVariable(variable);
 		this.updatePointer(variableIdx);
+		updateAssignedVariables(true,variable);
 	}
 
 	persist(variable: number, assignment: boolean): void {
@@ -35,6 +37,7 @@ class VariablePool implements IVariablePool {
 		// next variable to assign
 		if (this.pointer === variableIdx) this.pointer++;
 		this.assignVariable(variable, assignment);
+		updateAssignedVariables(false,variable);
 	}
 
 	get(variable: number): Variable {

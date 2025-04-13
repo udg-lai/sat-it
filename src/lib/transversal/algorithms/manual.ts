@@ -1,5 +1,4 @@
 import type { Manual } from '$lib/components/tools/debugger/events.svelte.ts';
-import { updateNonAssignedVariables } from '$lib/store/debugger.store.ts';
 import { Trail } from '../entities/Trail.svelte.ts';
 import VariableAssignment from '../entities/VariableAssignment.ts';
 import type VariablePool from '../entities/VariablePool.ts';
@@ -27,6 +26,5 @@ export function manualAssignment(params: ManualParams): Trail[] {
 	const variable = variables.getCopy(assignemnt.variable);
 	workingTrail.push(VariableAssignment.newAutomatedAssignment(variable, 'Manual'));
 
-	updateNonAssignedVariables(true, assignemnt.variable);
 	return nextTrailsState;
 }
