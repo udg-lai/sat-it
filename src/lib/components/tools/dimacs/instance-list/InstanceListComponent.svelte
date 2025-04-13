@@ -1,22 +1,35 @@
 <script lang="ts">
-	import { activateInstance, type InteractiveInstance } from '$lib/store/instances.store.ts';
 	import { Toggle } from 'flowbite-svelte';
 	import { DatabaseOutline, EyeOutline, LockOutline, TrashBinOutline } from 'flowbite-svelte-icons';
 
-	interface Props {
-		instances: InteractiveInstance[];
+	interface Preview {
+		removable: boolean;
+		active: boolean;
+		previewing: boolean;
+		instanceName: string;
 	}
 
-	let { instances }: Props = $props();
+	interface Props {
+		preview: Preview[];
+		onActivate: (instanceName: string) => void;
+		onPreview: (instanceName: string) => void;
+		onRemove: (instanceName: string) => void;
+	}
+
+	let { preview, onActivate, onPreview, onRemove }: Props = $props();
+
+	function emitOnActive({ instanceName }: Preview) {
+		onActivate(instanceName);
+	}
 </script>
 
 <ul>
-	{#each instances as instance}
+	{#each preview as instance (instance.instanceName)}
 		<li>
 			<div class="flex">
 				<button class="icon not-removable" disabled={!instance.removable || instance.active}>
 					{#if instance.removable && !instance.active}
-						<TrashBinOutline />
+						<TrashBinOutline onclick={() => onRemove(instance.instanceName)} />
 					{:else if instance.removable && instance.active}
 						<LockOutline />
 					{:else}
@@ -27,10 +40,13 @@
 			</div>
 			<div class="flex">
 				<button class="icon">
-					<EyeOutline />
+					<EyeOutline
+						class={instance.previewing ? '' : 'not-previewing'}
+						onclick={() => onPreview(instance.instanceName)}
+					/>
 				</button>
 				<Toggle
-					onchange={() => activateInstance(instance)}
+					onchange={() => emitOnActive(instance)}
 					checked={instance.active}
 					disabled={instance.active}
 					class="toggle"
@@ -39,3 +55,9 @@
 		</li>
 	{/each}
 </ul>
+
+<style>
+	:global(.not-previewing) {
+		opacity: 0.5;
+	}
+</style>

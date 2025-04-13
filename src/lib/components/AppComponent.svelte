@@ -6,6 +6,7 @@
 	} from '$lib/transversal/algorithms/dummy.ts';
 	import { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
 	import { onMount } from 'svelte';
+	import { get } from 'svelte/store';
 	import {
 		assignmentEventStore,
 		editorViewEventStore,
@@ -14,7 +15,6 @@
 		type Manual
 	} from './tools/debugger/events.svelte.ts';
 	import TrailEditor from './visualizer/TrailEditorComponent.svelte';
-	import { get } from 'svelte/store';
 	import { updateFollowingVariable } from '$lib/store/debugger.store.ts';
 	import { manualAssignment, type ManualParams } from '$lib/transversal/algorithms/manual.ts';
 

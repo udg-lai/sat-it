@@ -1,28 +1,29 @@
 import type { DimacsInstance } from '$lib/dimacs/dimacs-instance.interface.ts';
-import ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';
-import VariablePool from '$lib/transversal/entities/VariablePool.ts';
 import fetchInstances from '$lib/transversal/utils/bootstrap-instances.ts';
-import { logFatal, logInfo, logWarning } from '$lib/transversal/utils/logging.ts';
-import { fromClaimsToClause } from '$lib/transversal/utils/utils.ts';
+import { logError, logWarning } from '$lib/transversal/utils/logging.ts';
 import { get, writable, type Writable } from 'svelte/store';
-import { problemStore, updateProblem } from './problem.store.ts';
+import { updateProblemDomain } from './problem.store.ts';
 import { setNonAssignedVariables } from './debugger.store.ts';
-
 export interface InteractiveInstance extends DimacsInstance {
 	removable: boolean;
 	active: boolean;
+	previewing: boolean;
 }
 
 export const instanceStore: Writable<InteractiveInstance[]> = writable([]);
 
+export const activeInstanceStore: Writable<DimacsInstance> = writable();
+
 const defaultInstanceState = {
 	removable: false,
-	active: false
+	active: false,
+	previewing: false
 };
 
 const newInstanceState = {
 	removable: true,
-	active: false
+	active: false,
+	previewing: false
 };
 
 export async function initializeInstancesStore() {
@@ -31,26 +32,48 @@ export async function initializeInstancesStore() {
 			...di,
 			...defaultInstanceState
 		}));
-
-		// Activate the first instance if available
-		if (initializedInstances.length > 0) {
-			initializedInstances[0].active = true;
-		}
-
 		return initializedInstances;
 	};
 
 	try {
 		const fetchedInstances: DimacsInstance[] = await fetchInstances();
 		const transformedInstances = transform(fetchedInstances);
-		setInstances(transformedInstances);
+		updateInstanceStore(transformedInstances);
 	} catch (error) {
 		const description = (error as Error)?.message;
 		logWarning('Could not load instances', `Error: ${description ?? error}`);
 	}
 }
 
-function setInstances(newInstances: InteractiveInstance[]): void {
+export function setDefaultInstanceToSolve(): void {
+	// pre: instances already exist
+	if (emptyInstanceSet()) {
+		logError('Can not set default instance from an empty set');
+	} else {
+		instanceStore.update((instances) => {
+			const newInstances = instances.map((e) => {
+				return {
+					...e,
+					active: false
+				};
+			});
+			const fst = newInstances[0];
+			fst.active = true;
+			fst.previewing = true;
+			activeInstanceStore.set(fst);
+			afterActivateInstance(fst);
+			return newInstances;
+		});
+		setNonAssignedVariables();
+	}
+}
+
+function emptyInstanceSet(): boolean {
+	const instances = get(instanceStore);
+	return instances.length === 0;
+}
+
+function updateInstanceStore(newInstances: InteractiveInstance[]): void {
 	instanceStore.set(newInstances);
 }
 
@@ -62,64 +85,64 @@ export function addInstance(instance: DimacsInstance): void {
 		logWarning(title, description);
 	} else {
 		instanceStore.update((prev) => [...prev, { ...instance, ...newInstanceState }]);
-		logInfo(`File uploaded`, `File ${instance.instanceName} parsed and ready to use`);
 	}
 }
 
-export function activateInstance(instance: InteractiveInstance): void {
-	const idx = get(instanceStore).findIndex((i) => i.instanceName === instance.instanceName);
-	const found = idx >= 0;
-	if (found) {
-		instanceStore.update((prev) => {
-			const updated = prev.map((i) => ({ ...i, active: false }));
-			updated[idx].active = true;
-			return updated;
+export function activateInstanceByName(instanceName: string): void {
+	// pre: that instance should exist in the store
+	instanceStore.update((instances) => {
+		const newInstances = instances.map((e) => {
+			return {
+				...e,
+				previewing: false,
+				active: false
+			};
 		});
-		setInstanceToSolve(idx);
-	} else {
-		const title = 'Activating an unknown instance';
-		const description = `Instance ${instance.instanceName} not found`;
-		logWarning(title, description);
-	}
-}
-
-export function setDefaultInstanceToSolve(): void {
-	setInstanceToSolve(0);
-}
-
-function setInstanceToSolve(index: number): void {
-	const instances: InteractiveInstance[] = get(instanceStore);
-	if (checkInstenceIndex(instances, index)) {
-		const { summary } = instances[index];
-		const { claims } = summary;
-
-		const variables: VariablePool = new VariablePool(summary.varCount);
-		const clauses: ClausePool = new ClausePool(fromClaimsToClause(claims.simplified, variables));
-
-		const pools = {
-			variables,
-			clauses
-		};
-
-		const previousProblem = get(problemStore);
-		let algorithm = () => console.log('dummy');
-		if (previousProblem !== undefined) {
-			algorithm = previousProblem.algorithm;
+		const instance = newInstances.find((e) => e.instanceName === instanceName);
+		if (instance !== undefined) {
+			instance.active = true;
+			instance.previewing = true;
+			activeInstanceStore.set(instance);
+			afterActivateInstance(instance);
+		} else {
+			logError('Not instance found to activate');
 		}
-
-		const problem = { pools, algorithm };
-
-		updateProblem(problem);
-		setNonAssignedVariables();
-	}
+		return newInstances;
+	});
+	setNonAssignedVariables();
 }
 
-function checkInstenceIndex(instances: InteractiveInstance[], index: number): boolean {
-	if (instances.length > 0) {
-		if (index < 0 || instances.length <= index) {
-			logFatal('The instance you are trying to use is not valid');
+export function previewInstanceByName(instanceName: string): void {
+	instanceStore.update((instances) => {
+		const newInstances = instances.map((e) => {
+			return {
+				...e,
+				previewing: false
+			};
+		});
+		const instance = newInstances.find((e) => e.instanceName === instanceName);
+		if (instance !== undefined) {
+			instance.previewing = true;
+			activeInstanceStore.set(instance);
+		} else {
+			logError('Not instance found to activate');
 		}
-		return true;
-	}
-	return false;
+		return newInstances;
+	});
+}
+
+export function removeInstanceByName(instanceName: string): void {
+	const filterFun = (e: InteractiveInstance, instanceName: string) => {
+		return (
+			e.instanceName !== instanceName || (e.instanceName === instanceName && e.removable === false)
+		);
+	};
+
+	instanceStore.update((instances) => {
+		return instances.filter((e) => filterFun(e, instanceName));
+	});
+}
+
+function afterActivateInstance(instance: DimacsInstance): void {
+	updateProblemDomain(instance);
 }

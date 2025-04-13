@@ -9,7 +9,7 @@ class Clause implements Comparable<Clause> {
 	private literals: Literal[] = [];
 	private id: number;
 
-	constructor(literals: Literal[]) {
+	constructor(literals: Literal[] = []) {
 		this.id = this.generateUniqueId();
 		this.literals = literals;
 	}
@@ -80,7 +80,25 @@ class Clause implements Comparable<Clause> {
 	}
 
 	isUnit(): boolean {
-		return this.eval() === ClauseEval.UNIT;
+		return this.optimCheckIsUnit();
+	}
+
+	private optimCheckIsUnit(): boolean {
+		let nNotAssigned = 0;
+		let i = 0;
+		const len = this.literals.length;
+		let satisfied = false;
+		while (i < len && nNotAssigned < 2 && !satisfied) {
+			const lit: Literal = this.literals[i];
+			if (!lit.isAssigned()) {
+				nNotAssigned += 1;
+			} else {
+				satisfied = lit.isTrue();
+			}
+			i++;
+		}
+		const unit = !satisfied && nNotAssigned == 1;
+		return unit;
 	}
 
 	resolution(other: Clause): Clause {

@@ -3,8 +3,8 @@
 	import { onMount } from 'svelte';
 	import Button from './Button.svelte';
 	import DebuggerComponent from './debugger/DebuggerComponent.svelte';
-	import './styles.css';
 	import DimacsComponent from './dimacs/DimacsComponent.svelte';
+	import './styles.css';
 
 	let toolsViewRef: HTMLElement;
 

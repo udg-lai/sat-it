@@ -1,13 +1,22 @@
 import type { IClausePool } from '../utils/interfaces/IClausePool.ts';
 import { Eval } from '../utils/interfaces/IClausePool.ts';
+import type { Claims } from '../utils/parsers/dimacs.ts';
+import { fromClaimsToClause } from '../utils/utils.ts';
 import Clause from './Clause.ts';
 import { ClauseEval } from './Clause.ts';
+import type VariablePool from './VariablePool.ts';
 
 class ClausePool implements IClausePool {
 	private collection: Clause[];
 
 	constructor(clauses: Clause[] = []) {
 		this.collection = clauses;
+	}
+
+	static buildFrom(claims: Claims, variables: VariablePool): ClausePool {
+		Clause.resetUniqueIdGenerator();
+		const clauses = fromClaimsToClause(claims, variables);
+		return new ClausePool(clauses);
 	}
 
 	eval(): Eval {
