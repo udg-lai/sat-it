@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { updateFollowingVariable } from '$lib/store/debugger.store.ts';
 	import { problemStore, type Problem } from '$lib/store/problem.store.ts';
 	import {
 		dummyAssignmentAlgorithm,
@@ -40,7 +39,6 @@
 			};
 			trails = manualAssignment(params);
 		}
-		updateFollowingVariable();
 	}
 
 	function toggleEditorView(e: EditorViewEvent) {
