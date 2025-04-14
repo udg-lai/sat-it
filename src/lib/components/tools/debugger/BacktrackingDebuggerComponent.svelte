@@ -25,7 +25,7 @@
 			logInfo('Invalid Variable', 'The variable you are trying to assign is already assigned');
 		} else {
 			if (
-				userNextVariable === undefined && polarity||
+				(userNextVariable === undefined && polarity) ||
 				(userNextVariable !== undefined && userNextVariable === defaultNextVariable && polarity)
 			) {
 				emitAssignmentEvent({ type: 'automated' });
