@@ -1,10 +1,9 @@
 <script lang="ts">
 	import { problemStore } from '$lib/store/problem.store.ts';
-	import { logInfo } from '$lib/transversal/utils/logging.ts';
+	import { logError, logInfo } from '$lib/transversal/utils/logging.ts';
 	import { emitAssignmentEvent } from './events.svelte.ts';
 
 	let polarity: boolean = $state(true);
-	let positive: boolean = $derived(polarity);
 	let maxValue: number = $derived($problemStore.variables.nVariables());
 
 	let defaultNextVariable = $derived($problemStore.variables.nextVariable);
@@ -25,18 +24,25 @@
 		if (!isVariableValid) {
 			logInfo('Invalid Variable', 'The variable you are trying to assign is already assigned');
 		} else {
-			if (userNextVariable === undefined) {
+			if (
+				userNextVariable === undefined && polarity||
+				(userNextVariable !== undefined && userNextVariable === defaultNextVariable && polarity)
+			) {
 				emitAssignmentEvent({ type: 'automated' });
+			} else if (defaultNextVariable !== undefined && userNextVariable === undefined && !polarity) {
+				emitAssignmentEvent({ type: 'manual', variable: defaultNextVariable, polarity: polarity });
+			} else if (userNextVariable !== undefined) {
+				emitAssignmentEvent({ type: 'manual', variable: userNextVariable, polarity: polarity });
 			} else {
-				if (userNextVariable === defaultNextVariable && positive) {
-					emitAssignmentEvent({ type: 'automated' });
-				} else {
-					emitAssignmentEvent({ type: 'manual', variable: userNextVariable, polarity: positive });
-					userNextVariable = undefined;
-				}
+				logError('Could not control case of assignment');
 			}
 		}
+		resetState();
+	}
+
+	function resetState(): void {
 		userNextVariable = undefined;
+		polarity = true;
 	}
 </script>
 
@@ -58,7 +64,7 @@
 	<div class="flex w-[4.5rem] shrink-0 flex-col justify-between gap-1">
 		<button
 			class="polarity"
-			class:positive
+			class:polarity
 			onclick={() => (polarity = true)}
 			disabled={defaultNextVariable === undefined}
 		>
@@ -66,7 +72,7 @@
 		</button>
 		<button
 			class="polarity"
-			class:positive={!positive}
+			class:polarity={!polarity}
 			onclick={() => (polarity = false)}
 			disabled={defaultNextVariable === undefined}
 		>

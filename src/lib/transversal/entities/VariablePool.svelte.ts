@@ -5,13 +5,13 @@ import Variable from './Variable.svelte.ts';
 
 class VariablePool implements IVariablePool {
 	variables: Variable[] = $state([]);
-	poolCapacity: number = 0;
+	capacity: number = 0;
 	pointer: number = $state(0);
 	nextVariable: number | undefined = $derived(this.variables.at(this.pointer)?.getInt());
 
 	constructor(nVariables: number) {
 		this.variables = new Array(nVariables).fill(null).map((_, index) => new Variable(index + 1));
-		this.poolCapacity = nVariables;
+		this.capacity = nVariables;
 		this.pointer = 0;
 	}
 
@@ -21,22 +21,20 @@ class VariablePool implements IVariablePool {
 
 	allAssigned(): boolean {
 		// Edit: Now the pointer is always looking at the variable that is going to be assigned
-		return this.pointer === this.poolCapacity;
+		return this.pointer === this.capacity;
 	}
 
 	dispose(variable: number): void {
-		const variableIdx = this.checkIndex(variable);
+		const varIndex = this.checkIndex(variable);
 		this.unassignVariable(variable);
-		this.updatePointer(variableIdx);
+		this.updatePointer(varIndex, 'dispose');
 	}
 
 	persist(variable: number, assignment: boolean): void {
-		const variableIdx = this.checkIndex(variable);
-		this.checkAssignment(variableIdx);
-		// updates the pointer if the user just selected the
-		// next variable to assign
-		if (this.pointer === variableIdx) this.pointer++;
+		const varIndex = this.checkIndex(variable);
+		this.checkAssignment(varIndex);
 		this.assignVariable(variable, assignment);
+		this.updatePointer(varIndex, 'persist');
 	}
 
 	get(variable: number): Variable {
@@ -49,20 +47,28 @@ class VariablePool implements IVariablePool {
 	}
 
 	nVariables(): number {
-		return this.poolCapacity;
+		return this.capacity;
 	}
 
 	assignedVariables(): number[] {
 		return this.variables.filter((v) => v.isAssigned()).map((v) => v.getInt());
 	}
 
-	private updatePointer(disposedPosition: number) {
-		this.pointer = Math.min(disposedPosition, this.pointer);
+	private updatePointer(varIndex: number, kind: 'dispose' | 'persist') {
+		if (kind === 'dispose') {
+			this.pointer = Math.min(varIndex, this.pointer);
+		} else {
+			if (this.pointer === varIndex) {
+				while (this.pointer < this.capacity && this.variables[this.pointer].isAssigned()) {
+					this.pointer++;
+				}
+			}
+		}
 	}
 
 	private getNextId(): Maybe<number> {
 		let nextFound = false;
-		while (this.pointer < this.poolCapacity && !nextFound) {
+		while (this.pointer < this.capacity && !nextFound) {
 			const assigned = this.variables[this.pointer].isAssigned();
 			if (!assigned) {
 				nextFound = true;
