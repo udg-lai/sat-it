@@ -1,7 +1,7 @@
 import Clause from '$lib/transversal/entities/Clause.ts';
 import ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';
 import Literal from '$lib/transversal/entities/Literal.svelte.ts';
-import VariablePool from '$lib/transversal/entities/VariablePool.ts';
+import VariablePool from '$lib/transversal/entities/VariablePool.svelte.ts';
 import { Eval } from '$lib/transversal/utils/interfaces/IClausePool.ts';
 import type { Claims } from '$lib/transversal/utils/parsers/dimacs.ts';
 import { fromClaimsToClause } from '$lib/transversal/utils/utils.ts';

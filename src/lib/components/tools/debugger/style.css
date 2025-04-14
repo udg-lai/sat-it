@@ -1,0 +1,53 @@
+.btn-expand {
+	background-color: var(--border-color);
+	width: 100%;
+	height: 2rem;
+}
+
+.pack {
+	border-color: var(--border-color);
+	border-style: solid;
+	border-width: 1px 0 1px 0;
+}
+
+.variable-selector {
+	background-color: var(--main-bg-color);
+	border: none;
+	cursor: pointer;
+}
+.variable-selector.invalidOption {
+	color: red;
+}
+
+.polarity {
+	background-color: var(--border-color);
+}
+
+.btn {
+	background-color: var(--border-color);
+	height: 4rem;
+	transition: background-color 0.3s ease;
+}
+
+.btn.invalidOption {
+	background-color: #cacaca30;
+	height: 4rem;
+}
+
+.general-btn {
+	background-color: var(--border-color);
+	width: 100%;
+	height: 5rem;
+}
+
+/*These lines are to delete the arrows to increase and decrease the variable from the inputs*/
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+	-webkit-appearance: none;
+	margin: 0;
+}
+
+input[type='number'] {
+	-moz-appearance: textfield;
+	appearance: textfield;
+}

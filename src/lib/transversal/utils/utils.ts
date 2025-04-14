@@ -1,6 +1,6 @@
 import Clause from '../entities/Clause.ts';
 import Literal from '../entities/Literal.svelte.ts';
-import type VariablePool from '../entities/VariablePool.ts';
+import type VariablePool from '../entities/VariablePool.svelte.ts';
 import { logError, logWarning } from './logging.ts';
 import type { Claims } from './parsers/dimacs.ts';
 

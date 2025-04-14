@@ -96,7 +96,7 @@
 		function onMouseMove(event: MouseEvent) {
 			if (isResizing) {
 				const barWidth = 66;
-				const minWidthTool = 240;
+				const minWidthTool = 295;
 				let newX = event.clientX;
 				if (newX < barWidth + minWidthTool / 2) {
 					closeAllViews();

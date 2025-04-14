@@ -4,6 +4,7 @@
 		dummyAssignmentAlgorithm,
 		type DummySearchParams
 	} from '$lib/transversal/algorithms/dummy.ts';
+	import { manualAssignment, type ManualParams } from '$lib/transversal/algorithms/manual.ts';
 	import { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
 	import { onMount } from 'svelte';
 	import { get } from 'svelte/store';
@@ -19,21 +20,24 @@
 
 	let trails: Trail[] = $state([]);
 
-	function algorithmStep(e: AssignmentEvent<number>): void {
+	function algorithmStep(e: AssignmentEvent): void {
 		if (e === undefined) return;
 
-		const { pools }: Problem = get(problemStore);
-		const { variables } = pools;
+		const { variables }: Problem = get(problemStore);
 
-		const params: DummySearchParams = {
-			variables,
-			trails
-		};
-
-		if (e.assignment === 'Automated') {
+		if (e.type === 'automated') {
+			const params: DummySearchParams = {
+				variables,
+				trails
+			};
 			trails = dummyAssignmentAlgorithm(params);
 		} else {
-			console.log(`User assignment not implemented yet`);
+			const params: ManualParams = {
+				assignment: e,
+				variables,
+				trails
+			};
+			trails = manualAssignment(params);
 		}
 	}
 
