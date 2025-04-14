@@ -1,5 +1,5 @@
 import ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';
-import VariablePool from '$lib/transversal/entities/VariablePool.ts';
+import VariablePool from '$lib/transversal/entities/VariablePool.svelte.ts';
 import type { Claims } from '$lib/transversal/utils/parsers/dimacs.ts';
 import { describe, expect, it } from 'vitest';
 

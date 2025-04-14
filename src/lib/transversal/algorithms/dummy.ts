@@ -1,6 +1,6 @@
 import VariableAssignment from '../entities/VariableAssignment.ts';
 import { Trail } from '../entities/Trail.svelte.ts';
-import type VariablePool from '../entities/VariablePool.ts';
+import type VariablePool from '../entities/VariablePool.svelte.ts';
 import { logFatal } from '../utils/logging.ts';
 import { fromJust, isJust } from '../utils/types/maybe.ts';
 
