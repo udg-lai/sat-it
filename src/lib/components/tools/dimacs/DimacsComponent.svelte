@@ -16,7 +16,7 @@
 	import DimacsViewerComponent from './viewer/DimacsViewerComponent.svelte';
 
 	let listOpen = $state(true);
-	let uploadOpen = $state(true);
+	let uploadOpen = $state(false);
 
 	let instances: InteractiveInstance[] = $state([]);
 	let viewingInstance: DimacsInstance | undefined = $state(undefined);

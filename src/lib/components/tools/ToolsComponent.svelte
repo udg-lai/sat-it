@@ -154,10 +154,14 @@
 		<div class="vertical-separator"></div>
 	</div>
 
-	<div bind:this={toolsViewRef} class="default-tools-width" class:hide-tools-view={closed}>
+	<div
+		bind:this={toolsViewRef}
+		class="tool-content scrollable-content"
+		class:hide-tools-view={closed}
+	>
 		{#each views as { name, active } (name)}
 			{#if active}
-				<div class="view-container">
+				<div class="view">
 					{#if name === 'viewA'}
 						<DimacsComponent />
 					{:else}

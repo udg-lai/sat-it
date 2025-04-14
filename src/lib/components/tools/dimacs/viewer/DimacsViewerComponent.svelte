@@ -47,7 +47,8 @@
 
 		previewObserver = new ResizeObserver((entries) => {
 			for (const entry of entries) {
-				virtualHeight = entry.contentRect.height - 20;
+				const h = entry.contentRect.height - itemSize / 2;
+				virtualHeight = Math.max(h, 0);
 			}
 		});
 		previewObserver.observe(htmlElement);
@@ -107,7 +108,7 @@
 	.dimacs-header {
 		display: flex;
 		justify-content: center;
-		padding: 0.75rem 0rem;
+		padding: 0.5rem 0rem;
 		gap: 1rem;
 	}
 
