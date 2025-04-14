@@ -80,10 +80,22 @@ class Clause implements Comparable<Clause> {
 	}
 
 	isUnit(): boolean {
-		return this.optimCheckIsUnit();
+		return this.optimalCheckUnit();
 	}
 
-	private optimCheckIsUnit(): boolean {
+	containsVariable(variableId: number): boolean {
+		const found = this.literals.find((lit) => {
+			const id = lit.toInt();
+			return Math.abs(id) === variableId;
+		});
+		return found !== undefined;
+	}
+
+	getLiterals(): Literal[] {
+		return [...this.literals];
+	}
+
+	private optimalCheckUnit(): boolean {
 		let nNotAssigned = 0;
 		let i = 0;
 		const len = this.literals.length;

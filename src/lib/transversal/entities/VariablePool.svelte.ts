@@ -54,6 +54,20 @@ class VariablePool implements IVariablePool {
 		return this.variables.filter((v) => v.isAssigned()).map((v) => v.getInt());
 	}
 
+	assignVariable(id: number, evaluation: boolean): void {
+		const idx = this.checkIndex(id);
+		this.variables[idx].assign(evaluation);
+	}
+
+	unassignVariable(id: number) {
+		const idx = this.checkIndex(id);
+		this.variables[idx].unassign();
+	}
+
+	getVariablesIDs(): number[] {
+		return this.variables.map((variable) => variable.getInt());
+	}
+
 	private updatePointer(varIndex: number, kind: 'dispose' | 'persist') {
 		if (kind === 'dispose') {
 			this.pointer = Math.min(varIndex, this.pointer);
@@ -79,16 +93,6 @@ class VariablePool implements IVariablePool {
 		return nextFound ? makeJust(this.variables[this.pointer].getInt()) : makeNothing();
 	}
 
-	public assignVariable(id: number, evaluation: boolean): void {
-		const idx = this.checkIndex(id);
-		this.variables[idx].assign(evaluation);
-	}
-
-	public unassignVariable(id: number) {
-		const idx = this.checkIndex(id);
-		this.variables[idx].unassign();
-	}
-
 	private checkAssignment(idx: number) {
 		if (this.variables[idx].isAssigned()) {
 			logError(`Variable ${idx} is already assigned`);
@@ -104,10 +108,6 @@ class VariablePool implements IVariablePool {
 
 	private variableToIndex(variableId: number): number {
 		return variableId - 1;
-	}
-
-	public getVariablesIDs(): number[] {
-		return this.variables.map((variable) => variable.getInt());
 	}
 }
 
