@@ -1,16 +1,16 @@
-import type { Manual } from '$lib/components/tools/debugger/events.svelte.ts';
+import type { ManualAssignment } from '$lib/components/tools/debugger/events.svelte.ts';
 import { Trail } from '../entities/Trail.svelte.ts';
 import VariableAssignment from '../entities/VariableAssignment.ts';
-import type VariablePool from '../entities/VariablePool.ts';
+import type VariablePool from '../entities/VariablePool.svelte.ts';
 
 export interface ManualParams {
-	assignemnt: Manual;
+	assignment: ManualAssignment;
 	trails: Trail[];
 	variables: VariablePool;
 }
 
 export function manualAssignment(params: ManualParams): Trail[] {
-	const { assignemnt, trails, variables } = params;
+	const { assignment, trails, variables } = params;
 
 	let nextTrailsState: Trail[] = [];
 
@@ -22,8 +22,8 @@ export function manualAssignment(params: ManualParams): Trail[] {
 
 	const workingTrail = nextTrailsState[nextTrailsState.length - 1];
 
-	variables.persist(assignemnt.variable, assignemnt.polarity);
-	const variable = variables.getCopy(assignemnt.variable);
+	variables.persist(assignment.variable, assignment.polarity);
+	const variable = variables.getCopy(assignment.variable);
 	workingTrail.push(VariableAssignment.newAutomatedAssignment(variable, 'Manual'));
 
 	return nextTrailsState;

@@ -2,7 +2,7 @@ import type Variable from '$lib/transversal/entities/Variable.svelte.ts';
 import type { Maybe } from '../types/maybe.ts';
 
 export interface IVariablePool {
-	poolCapacity: number;
+	capacity: number;
 
 	allAssigned(): boolean;
 	nextVariableToAssign(): Maybe<number>;

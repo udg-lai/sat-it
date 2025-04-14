@@ -4,7 +4,7 @@ import type { Claims } from '../utils/parsers/dimacs.ts';
 import { fromClaimsToClause } from '../utils/utils.ts';
 import Clause from './Clause.ts';
 import { ClauseEval } from './Clause.ts';
-import type VariablePool from './VariablePool.ts';
+import type VariablePool from './VariablePool.svelte.ts';
 
 class ClausePool implements IClausePool {
 	private collection: Clause[];

@@ -1,69 +1,85 @@
 <script lang="ts">
-	import {
-		followingVariable,
-		assignedVariables,
-		updateFollowingVariable
-	} from '$lib/store/debugger.store.ts';
-	import { fromJust, isJust } from '$lib/transversal/utils/types/maybe.ts';
-	import { onMount } from 'svelte';
-	import { emitAssignmentEvent, type Manual } from './events.svelte.ts';
-	import './style.css';
 	import { problemStore } from '$lib/store/problem.store.ts';
-	import { logInfo } from '$lib/transversal/utils/logging.ts';
+	import { logError, logInfo } from '$lib/transversal/utils/logging.ts';
+	import { emitAssignmentEvent } from './events.svelte.ts';
 
 	let polarity: boolean = $state(true);
-	let positive: boolean = $derived(polarity);
-	const maxValue: number = $derived($problemStore.pools.variables.nVariables());
+	let maxValue: number = $derived($problemStore.variables.nVariables());
 
-	let isVariableValid: boolean = $derived(
-		isJust($followingVariable) && !$assignedVariables.includes($followingVariable.value)
-	);
+	let defaultNextVariable = $derived($problemStore.variables.nextVariable);
+	let userNextVariable: number | undefined = $state(undefined);
+
+	let isVariableValid: boolean = $derived.by(() => {
+		if (userNextVariable === undefined) return true;
+		else {
+			if (userNextVariable < 1 || userNextVariable > maxValue) return false;
+			else {
+				const assignedVariables = $problemStore.variables.assignedVariables();
+				return !assignedVariables.includes(userNextVariable);
+			}
+		}
+	});
 
 	function emitAssignment() {
-		if (isVariableValid) {
-			const userVariable = fromJust($followingVariable);
-			const algorithmVariable = fromJust($problemStore.pools.variables.nextVariableToAssign());
-			if (userVariable === algorithmVariable && positive) {
-				emitAssignmentEvent('Automated');
-			} else {
-				emitAssignmentEvent({ variable: userVariable, polarity: positive } as Manual);
-				polarity = true;
-			}
-		} else {
+		if (!isVariableValid) {
 			logInfo('Invalid Variable', 'The variable you are trying to assign is already assigned');
+		} else {
+			if (
+				(userNextVariable === undefined && polarity) ||
+				(userNextVariable !== undefined && userNextVariable === defaultNextVariable && polarity)
+			) {
+				emitAssignmentEvent({ type: 'automated' });
+			} else if (defaultNextVariable !== undefined && userNextVariable === undefined && !polarity) {
+				emitAssignmentEvent({ type: 'manual', variable: defaultNextVariable, polarity: polarity });
+			} else if (userNextVariable !== undefined) {
+				emitAssignmentEvent({ type: 'manual', variable: userNextVariable, polarity: polarity });
+			} else {
+				logError('Could not control case of assignment');
+			}
 		}
+		resetState();
 	}
 
-	onMount(() => {
-		updateFollowingVariable();
-	});
+	function resetState(): void {
+		userNextVariable = undefined;
+		polarity = true;
+	}
 </script>
 
 <div class="pack mb-1 flex flex-row items-center gap-2">
-	{#if isJust($followingVariable)}
-		<span>Variable:</span>
-		<input
-			type="number"
-			class="variable-selector min-w-0 flex-grow"
-			class:invalidOption={!isVariableValid}
-			bind:value={$followingVariable.value}
-			placeholder="Enter variable"
-			min="1"
-			max={maxValue}
-		/>
-	{:else}
-		<span class="min-w-0 flex-grow">No more variables to assign</span>
-	{/if}
+	<span>Variable:</span>
+	<input
+		bind:value={userNextVariable}
+		type="number"
+		class="variable-selector min-w-0 flex-grow"
+		class:invalidOption={!isVariableValid}
+		placeholder={defaultNextVariable
+			? defaultNextVariable.toString()
+			: 'No more variables to assign'}
+		disabled={defaultNextVariable === undefined}
+		min="1"
+		max={maxValue}
+	/>
 
 	<div class="flex w-[4.5rem] shrink-0 flex-col justify-between gap-1">
-		<button class="polarity" class:positive onclick={() => (polarity = true)}>
+		<button
+			class="polarity"
+			class:polarity
+			onclick={() => (polarity = true)}
+			disabled={defaultNextVariable === undefined}
+		>
 			<h1>True</h1>
 		</button>
-		<button class="polarity" class:positive={!positive} onclick={() => (polarity = false)}>
+		<button
+			class="polarity"
+			class:polarity={!polarity}
+			onclick={() => (polarity = false)}
+			disabled={defaultNextVariable === undefined}
+		>
 			<h1>False</h1>
 		</button>
 	</div>
-	{#if isJust($followingVariable)}
+	{#if defaultNextVariable}
 		<button
 			class="btn w-[10rem] shrink-0"
 			class:invalidOption={!isVariableValid}
@@ -72,7 +88,10 @@
 			<h1>Decide</h1>
 		</button>
 	{:else}
-		<button class="btn w-[10rem] shrink-0" onclick={() => emitAssignmentEvent('Automated')}>
+		<button
+			class="btn w-[10rem] shrink-0"
+			onclick={() => emitAssignmentEvent({ type: 'automated' })}
+		>
 			<h1>FIX</h1>
 		</button>
 	{/if}
