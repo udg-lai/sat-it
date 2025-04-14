@@ -20,10 +20,6 @@
 }
 
 .polarity {
-	background-color: #cacaca30;
-}
-
-.polarity.positive {
 	background-color: var(--border-color);
 }
 
