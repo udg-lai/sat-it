@@ -7,7 +7,7 @@ import VariableAssignment, {
 	isAutomatedReason,
 	isManualReason
 } from '$lib/transversal/entities/VariableAssignment.ts';
-import VariablePool from '$lib/transversal/entities/VariablePool.ts';
+import VariablePool from '$lib/transversal/entities/VariablePool.svelte.ts';
 import { describe, expect, it } from 'vitest';
 
 const params: DummySearchParams = {

@@ -1,9 +1,11 @@
 <script lang="ts">
+	import { updateFollowingVariable } from '$lib/store/debugger.store.ts';
 	import { problemStore, type Problem } from '$lib/store/problem.store.ts';
 	import {
 		dummyAssignmentAlgorithm,
 		type DummySearchParams
 	} from '$lib/transversal/algorithms/dummy.ts';
+	import { manualAssignment, type ManualParams } from '$lib/transversal/algorithms/manual.ts';
 	import { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
 	import { onMount } from 'svelte';
 	import { get } from 'svelte/store';
@@ -11,24 +13,20 @@
 		assignmentEventStore,
 		editorViewEventStore,
 		type AssignmentEvent,
-		type EditorViewEvent,
-		type Manual
+		type EditorViewEvent
 	} from './tools/debugger/events.svelte.ts';
 	import TrailEditor from './visualizer/TrailEditorComponent.svelte';
-	import { updateFollowingVariable } from '$lib/store/debugger.store.ts';
-	import { manualAssignment, type ManualParams } from '$lib/transversal/algorithms/manual.ts';
 
 	let editorExpanded: boolean = $state(true);
 
 	let trails: Trail[] = $state([]);
 
-	function algorithmStep(e: AssignmentEvent<Manual>): void {
+	function algorithmStep(e: AssignmentEvent): void {
 		if (e === undefined) return;
 
-		const { pools }: Problem = get(problemStore);
-		const { variables } = pools;
+		const { variables }: Problem = get(problemStore);
 
-		if (e.assignment === 'Automated') {
+		if (e.type === 'automated') {
 			const params: DummySearchParams = {
 				variables,
 				trails
@@ -36,7 +34,7 @@
 			trails = dummyAssignmentAlgorithm(params);
 		} else {
 			const params: ManualParams = {
-				assignemnt: e.assignment,
+				assignment: e,
 				variables,
 				trails
 			};

@@ -3,7 +3,6 @@ import fetchInstances from '$lib/transversal/utils/bootstrap-instances.ts';
 import { logError, logWarning } from '$lib/transversal/utils/logging.ts';
 import { get, writable, type Writable } from 'svelte/store';
 import { updateProblemDomain } from './problem.store.ts';
-import { setNonAssignedVariables } from './debugger.store.ts';
 export interface InteractiveInstance extends DimacsInstance {
 	removable: boolean;
 	active: boolean;
@@ -108,7 +107,6 @@ export function activateInstanceByName(instanceName: string): void {
 		}
 		return newInstances;
 	});
-	setNonAssignedVariables();
 }
 
 export function previewInstanceByName(instanceName: string): void {

@@ -1,20 +1,21 @@
 import { writable, type Writable } from 'svelte/store';
 
-export type Manual = {
+export type ManualAssignment = {
+	type: 'manual';
 	variable: number;
 	polarity: boolean;
 };
 
-type Decide<Manual> = 'Automated' | Manual;
+type AutomatedAssignment = {
+	type: 'automated';
+};
 
-export interface AssignmentEvent<Manual> {
-	assignment: Decide<Manual>;
-}
+export type AssignmentEvent = AutomatedAssignment | ManualAssignment;
 
-export const assignmentEventStore: Writable<AssignmentEvent<Manual>> = writable();
+export const assignmentEventStore: Writable<AssignmentEvent> = writable();
 
-export const emitAssignmentEvent = (assignment: Decide<Manual>) => {
-	assignmentEventStore.update(() => ({ assignment: assignment }));
+export const emitAssignmentEvent = (assignment: AssignmentEvent) => {
+	assignmentEventStore.set({ ...assignment });
 };
 
 export interface EditorViewEvent {
