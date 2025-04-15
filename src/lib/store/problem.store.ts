@@ -45,8 +45,6 @@ export function updateProblemDomain(instance: DimacsInstance) {
 		};
 	}
 
-	console.log(newProblem)
-
 	problemStore.set(newProblem);
 }
 
