@@ -3,12 +3,12 @@ import { get, writable, type Writable } from 'svelte/store';
 import VariablePool from '../transversal/entities/VariablePool.svelte.ts';
 import type { DimacsInstance } from '$lib/dimacs/dimacs-instance.interface.ts';
 
-type Variable2Clauses = Map<number, Set<number>>;
+type Literal2Clauses = Map<number, Set<number>>;
 
 export interface Problem {
 	variables: VariablePool;
 	clauses: ClausePool;
-	mapping: Variable2Clauses;
+	mapping: Literal2Clauses;
 	algorithm: () => void;
 }
 
@@ -19,7 +19,7 @@ export function updateProblemDomain(instance: DimacsInstance) {
 	const { claims } = summary;
 	const variables: VariablePool = new VariablePool(summary.varCount);
 	const clauses: ClausePool = ClausePool.buildFrom(claims.simplified, variables);
-	const mapping: Variable2Clauses = variablesToClauses(variables, clauses);
+	const mapping: Literal2Clauses = literalToClauses(clauses);
 
 	const previousProblem = get(problemStore);
 
@@ -45,6 +45,8 @@ export function updateProblemDomain(instance: DimacsInstance) {
 		};
 	}
 
+	console.log(newProblem)
+
 	problemStore.set(newProblem);
 }
 
@@ -53,29 +55,21 @@ export function updateAlgorithm(algorithm: () => void) {
 	problemStore.set({ ...currentProblem, ...algorithm });
 }
 
-function variablesToClauses(variables: VariablePool, clauses: ClausePool): Variable2Clauses {
+function literalToClauses(clauses: ClausePool): Literal2Clauses {
 	const mapping: Map<number, Set<number>> = new Map();
 
 	clauses.getClauses().forEach((clause, clauseId) => {
 		clause.getLiterals().forEach((literal) => {
-			const variableId = Math.abs(literal.toInt());
-			if (mapping.has(variableId)) {
-				const s = mapping.get(variableId);
+			const literalId = literal.toInt();
+			if (mapping.has(literalId)) {
+				const s = mapping.get(literalId);
 				s?.add(clauseId);
 			} else {
 				const s = new Set([clauseId]);
-				mapping.set(variableId, s);
+				mapping.set(literalId, s);
 			}
 		});
 	});
-
-	const addedVariables = new Set(mapping.keys());
-	const allVariables = new Set(variables.getVariablesIDs());
-	const diff = allVariables.difference(addedVariables);
-
-	for (const variableId of diff) {
-		mapping.set(variableId, new Set());
-	}
 
 	return mapping;
 }
