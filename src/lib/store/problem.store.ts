@@ -3,9 +3,12 @@ import { get, writable, type Writable } from 'svelte/store';
 import VariablePool from '../transversal/entities/VariablePool.svelte.ts';
 import type { DimacsInstance } from '$lib/dimacs/dimacs-instance.interface.ts';
 
+type Literal2Clauses = Map<number, Set<number>>;
+
 export interface Problem {
 	variables: VariablePool;
 	clauses: ClausePool;
+	mapping: Literal2Clauses;
 	algorithm: () => void;
 }
 
@@ -16,23 +19,55 @@ export function updateProblemDomain(instance: DimacsInstance) {
 	const { claims } = summary;
 	const variables: VariablePool = new VariablePool(summary.varCount);
 	const clauses: ClausePool = ClausePool.buildFrom(claims.simplified, variables);
+	const mapping: Literal2Clauses = literalToClauses(clauses);
 
 	const previousProblem = get(problemStore);
-	let algorithm = () => console.log('dummy');
-	if (previousProblem !== undefined) {
-		algorithm = previousProblem.algorithm;
-	}
 
-	const problem = {
+	const params = {
 		variables,
 		clauses,
-		algorithm
+		mapping
 	};
 
-	problemStore.set(problem);
+	let newProblem: Problem;
+
+	if (previousProblem === undefined) {
+		const algorithm = () => console.log('I am dummy ;)');
+		newProblem = {
+			...params,
+			algorithm
+		};
+	} else {
+		const { algorithm } = previousProblem;
+		newProblem = {
+			...params,
+			algorithm
+		};
+	}
+
+	problemStore.set(newProblem);
 }
 
 export function updateAlgorithm(algorithm: () => void) {
 	const currentProblem = get(problemStore);
 	problemStore.set({ ...currentProblem, ...algorithm });
+}
+
+function literalToClauses(clauses: ClausePool): Literal2Clauses {
+	const mapping: Map<number, Set<number>> = new Map();
+
+	clauses.getClauses().forEach((clause, clauseId) => {
+		clause.getLiterals().forEach((literal) => {
+			const literalId = literal.toInt();
+			if (mapping.has(literalId)) {
+				const s = mapping.get(literalId);
+				s?.add(clauseId);
+			} else {
+				const s = new Set([clauseId]);
+				mapping.set(literalId, s);
+			}
+		});
+	});
+
+	return mapping;
 }
