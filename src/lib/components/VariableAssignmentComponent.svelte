@@ -1,69 +1,71 @@
 <script lang="ts">
 	import type VariableAssignment from '$lib/transversal/entities/VariableAssignment.ts';
 	import MathTexComponent from '$lib/components/MathTexComponent.svelte';
-	import { Indicator } from 'flowbite-svelte';
 
 	interface Props {
-		assignment: VariableAssignment;
+		assignment?: VariableAssignment;
 		propagated?: VariableAssignment[];
 		onClick?: () => void;
 	}
 
-	type IndicatorColor =
-		| 'teal'
-		| 'red'
-		| 'none'
-		| 'gray'
-		| 'yellow'
-		| 'green'
-		| 'indigo'
-		| 'purple'
-		| 'blue'
-		| 'dark'
-		| 'orange'
-		| undefined;
+	let { assignment, propagated, onClick }: Props = $props();
 
-	let { assignment, onClick }: Props = $props();
-	let decisionColor: IndicatorColor = $state('teal');
-
-	$effect(() => {
-		decisionColor = assignment.isD() ? 'teal' : 'red';
-	});
-
-	// let previousIndex = $derived(currentWP < startingWP);
+	let levelExpanded = $state(false);
 </script>
 
-<div
-	class="decision-literal-wrapper"
-	class:decide={assignment.isD()}
-	class:backtrack={assignment.isK()}
->
-	<button class="decision-literal-btn" onclick={onClick}>
-		<Indicator placement="top-left" size="md" color={decisionColor} />
+{#if assignment}
+	<button
+		class="literal-style decision"
+		class:level-expanded={levelExpanded}
+		onclick={() => (levelExpanded = !levelExpanded)}
+	>
 		<MathTexComponent equation={assignment.toTeX()} />
 	</button>
-</div>
+{/if}
+
+{#if propagated}
+	{#each propagated as assignment}
+		<button
+			class="literal-style decision"
+			class:backtracking={assignment.isK()}
+			class:unit-propagation={assignment.isUP()}
+			onclick={onClick}
+		>
+			<MathTexComponent equation={assignment.toTeX()} />
+		</button>
+	{/each}
+{/if}
 
 <style>
-	.decision-literal-wrapper {
-		background-color: #d3d3d357;
-		width: 42px;
-		height: 42px;
-		border-radius: 50%;
-		border-color: var(--border-color);
-		border-width: 1px;
-	}
-
-	.decision-literal-btn {
+	.literal-style {
 		width: 33px;
 		height: 33px;
 		position: relative;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		border: none;
+		border-bottom: 1px solid;
 	}
 
-	.decision-literal-btn,
-	.decision-literal-wrapper {
-		display: flex;
-		align-items: center;
-		justify-content: center;
+	.decision {
+		border-color: black;
+		color: black;
+		border-left: 1px solid;
+		border-right: 1px solid;
+	}
+
+	.level-expanded {
+		border-right: 1px solid transparent;
+	}
+
+	.backtracking {
+		border-color: #f77777;
+		color: #f77777;
+	}
+
+	.unit-propagation {
+		border-color: #6b788a;
+		color: #6b788a;
 	}
 </style>
