@@ -43,12 +43,17 @@ export class Trail {
 			logFatal(`There is no such decision level: ${level}`);
 		}
 		const indexStart = this.decisionLevelBookmark.get(level) as number;
-		let indexEnd = this.assignments.length - 1;
+		let indexEnd;
 		const nextLevel = level + 1;
 		if (this.decisionLevelExists(nextLevel)) {
 			indexEnd = this.decisionLevelBookmark.get(nextLevel) as number;
+		} else {
+			indexEnd = this.assignments.length;
 		}
-		return this.assignments.slice(indexStart, indexEnd);
+		console.log(this.assignments);
+		console.log(this.decisionLevelBookmark);
+		console.log('level', level, 'start', indexStart + 1, 'end', indexEnd);
+		return this.assignments.slice(indexStart + 1, indexEnd);
 	}
 
 	push(assignment: VariableAssignment) {
@@ -107,8 +112,8 @@ export class Trail {
 		if (!this.decisionLevelExists(this.decisionLevel)) {
 			logFatal(`Trying to delete current decision level but was not saved`);
 		}
-		this.decisionLevel = this.decisionLevel - 1;
 		this.decisionLevelBookmark.delete(this.decisionLevel);
+		this.decisionLevel = this.decisionLevel - 1;
 	}
 
 	private decisionLevelExists(level: number): boolean {
