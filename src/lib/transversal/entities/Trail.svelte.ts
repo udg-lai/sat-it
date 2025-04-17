@@ -38,22 +38,16 @@ export class Trail {
 		return decisions;
 	}
 
+	getInitialPropagations(): VariableAssignment[] {
+		return this.getPropagations(0);
+	}
+
 	getPropagations(level: number): VariableAssignment[] {
-		if (!this.decisionLevelExists(level)) {
-			logFatal(`There is no such decision level: ${level}`);
-		}
-		const indexStart = this.decisionLevelBookmark.get(level) as number;
-		let indexEnd;
-		const nextLevel = level + 1;
-		if (this.decisionLevelExists(nextLevel)) {
-			indexEnd = this.decisionLevelBookmark.get(nextLevel) as number;
+		if (level === 0) {
+			return this.getLevelZeroPropagations();
 		} else {
-			indexEnd = this.assignments.length;
+			return this.getLevelPropagations(level);
 		}
-		console.log(this.assignments);
-		console.log(this.decisionLevelBookmark);
-		console.log('level', level, 'start', indexStart + 1, 'end', indexEnd);
-		return this.assignments.slice(indexStart + 1, indexEnd);
 	}
 
 	push(assignment: VariableAssignment) {
@@ -96,6 +90,33 @@ export class Trail {
 		thisArg?: unknown
 	): void {
 		this.assignments.forEach(callback, thisArg);
+	}
+
+	private getLevelZeroPropagations(): VariableAssignment[] {
+		const indexStart = 0;
+		let indexEnd;
+		const level1 = 1;
+		if (this.decisionLevelExists(level1)) {
+			indexEnd = this.decisionLevelBookmark.get(level1) as number;
+		} else {
+			indexEnd = this.assignments.length;
+		}
+		return this.assignments.slice(indexStart, indexEnd);
+	}
+
+	private getLevelPropagations(level: number): VariableAssignment[] {
+		if (!this.decisionLevelExists(level)) {
+			logFatal(`There is no such decision level: ${level}`);
+		}
+		const indexStart = this.decisionLevelBookmark.get(level) as number;
+		let indexEnd;
+		const nextLevel = level + 1;
+		if (this.decisionLevelExists(nextLevel)) {
+			indexEnd = this.decisionLevelBookmark.get(nextLevel) as number;
+		} else {
+			indexEnd = this.assignments.length;
+		}
+		return this.assignments.slice(indexStart + 1, indexEnd);
 	}
 
 	private registerNewDecisionLevel(): void {
