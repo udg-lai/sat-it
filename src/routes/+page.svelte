@@ -34,7 +34,7 @@
 			{/each}
 		</div>
 	{/if}
-	
+
 	<div class="decision-zone">
 		<DebuggerComponent />
 	</div>
@@ -52,7 +52,6 @@
 	<footer>
 		<FooterComponent />
 	</footer>
-
 </app>
 
 {#snippet app()}

@@ -1,10 +1,15 @@
 <script lang="ts">
 	import './style.css';
 
-	import { onMount } from "svelte";
-	import { emitEditorViewEvent } from "./events.svelte.ts";
+	import { onMount } from 'svelte';
+	import { emitEditorViewEvent } from './events.svelte.ts';
 	import DynamicRender from '$lib/components/DynamicRender.svelte';
-	import { ArrowRightAltSolid, RectangleListSolid, ReplySolid, StackoverflowSolid } from 'flowbite-svelte-icons';
+	import {
+		ArrowRightAltSolid,
+		RectangleListSolid,
+		ReplySolid,
+		StackoverflowSolid
+	} from 'flowbite-svelte-icons';
 
 	let expanded = $state(true);
 	//let textCollapse = $derived(expanded ? 'Expanded' : 'Collapsed');
@@ -25,23 +30,21 @@
 		expanded = !expanded;
 		emitEditorViewEvent(expanded);
 	}
-
 </script>
 
-<div class="flex flex-col h-full gap-1">
-	<div class="flex flex-row place-content-around flex-[2] w-full">
-		<button class="general-btn"> 
-			<DynamicRender component={StackoverflowSolid} props={generalProps} />	
+<div class="flex h-full flex-col gap-1">
+	<div class="flex w-full flex-[2] flex-row place-content-around">
+		<button class="general-btn">
+			<DynamicRender component={StackoverflowSolid} props={generalProps} />
 		</button>
-		<button class="general-btn mx-1"> 
-			<DynamicRender component={ArrowRightAltSolid} props={generalProps} />		
+		<button class="general-btn mx-1">
+			<DynamicRender component={ArrowRightAltSolid} props={generalProps} />
 		</button>
-		<button class="general-btn"> 
-			<DynamicRender component={ReplySolid} props={generalProps} />	
+		<button class="general-btn">
+			<DynamicRender component={ReplySolid} props={generalProps} />
 		</button>
 	</div>
-	<button class="btn-expand flex-[1] w-full" onclick={toggleExpand}>
-    <DynamicRender component={RectangleListSolid} props={toggleExpandProps} />	
-  </button>
+	<button class="btn-expand w-full flex-[1]" onclick={toggleExpand}>
+		<DynamicRender component={RectangleListSolid} props={toggleExpandProps} />
+	</button>
 </div>
-

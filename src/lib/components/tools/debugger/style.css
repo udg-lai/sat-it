@@ -3,7 +3,6 @@
 	align-items: center;
 	justify-content: center;
 	background-color: var(--border-color);
-
 }
 
 .pack {
@@ -23,9 +22,9 @@
 
 .polarity {
 	background-color: #cacaca30;
-	transition: 
+	transition:
 		background-color 0.3s ease,
-		color 0.3s ease,
+		color 0.3s ease;
 }
 
 .polarity:hover {
@@ -38,9 +37,9 @@
 
 .btn {
 	background-color: var(--border-color);
-	transition: 
+	transition:
 		background-color 0.3s ease,
-		color 0.3s ease
+		color 0.3s ease;
 }
 
 .btn:active {

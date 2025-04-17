@@ -1,19 +1,24 @@
 <script lang="ts">
 	import { problemStore } from '$lib/store/problem.store.ts';
 	import { logError, logInfo } from '$lib/transversal/utils/logging.ts';
-	import { CheckCircleSolid, CircleMinusSolid, HammerSolid, PlaySolid } from 'flowbite-svelte-icons';
+	import {
+		CheckCircleSolid,
+		CircleMinusSolid,
+		HammerSolid,
+		PlaySolid
+	} from 'flowbite-svelte-icons';
 	import { emitAssignmentEvent } from './events.svelte.ts';
 	import DynamicRender from '$lib/components/DynamicRender.svelte';
 
 	let polarity: boolean = $state(true);
 	let maxValue: number = $derived.by(() => {
-		if($problemStore !== undefined) return $problemStore.variables.nVariables()
+		if ($problemStore !== undefined) return $problemStore.variables.nVariables();
 		else return 0;
 	});
 
 	let defaultNextVariable = $derived.by(() => {
-		if($problemStore !== undefined) return $problemStore.variables.nextVariable
-		else return 0
+		if ($problemStore !== undefined) return $problemStore.variables.nextVariable;
+		else return 0;
 	});
 	let userNextVariable: number | undefined = $state(undefined);
 
@@ -62,9 +67,8 @@
 	}
 </script>
 
-<div class="flex flex-row h-full gap-2">
-	<div class="mb-2 mt-2 flex flex-row flex-[3] items-center justify-center">
-
+<div class="flex h-full flex-row gap-2">
+	<div class="mb-2 mt-2 flex flex-[3] flex-row items-center justify-center">
 		<span>Variable:</span>
 		<input
 			bind:value={userNextVariable}
@@ -79,21 +83,21 @@
 			max={maxValue}
 		/>
 
-		<div class="m-2 flex flex-col flex-1 h-full items-center justify-center gap-2">
+		<div class="m-2 flex h-full flex-1 flex-col items-center justify-center gap-2">
 			<button
-			class="polarity w-full flex-1 flex items-center justify-center"
-			class:active={polarity}
-			onclick={() => (polarity = true)}
-			disabled={defaultNextVariable === undefined}
+				class="polarity flex w-full flex-1 items-center justify-center"
+				class:active={polarity}
+				onclick={() => (polarity = true)}
+				disabled={defaultNextVariable === undefined}
 			>
 				<DynamicRender component={CheckCircleSolid} props={polarityProps} />
 			</button>
-		
+
 			<button
-			class="polarity w-full flex-1 flex items-center justify-center"
-			class:active={!polarity}
-			onclick={() => (polarity = false)}
-			disabled={defaultNextVariable === undefined}
+				class="polarity flex w-full flex-1 items-center justify-center"
+				class:active={!polarity}
+				onclick={() => (polarity = false)}
+				disabled={defaultNextVariable === undefined}
 			>
 				<DynamicRender component={CircleMinusSolid} props={polarityProps} />
 			</button>
@@ -101,21 +105,20 @@
 	</div>
 	<div class="mb-2 mt-2 flex flex-[1] items-center justify-center">
 		{#if defaultNextVariable}
-		<button
-			class="btn flex w-full h-full items-center justify-center"
-			class:invalidOption={!isVariableValid}
-			onclick={() => emitAssignment()}
-		>
-			<DynamicRender component={PlaySolid} props={assignmentProps} />
-		</button>
-	{:else}
-		<button
-			class="btn flex w-full h-full  items-center justify-center"
-			onclick={() => emitAssignmentEvent({ type: 'automated' })}
-		>
-			<DynamicRender component={HammerSolid} props={assignmentProps} />
-		</button>
-	{/if}
+			<button
+				class="btn flex h-full w-full items-center justify-center"
+				class:invalidOption={!isVariableValid}
+				onclick={() => emitAssignment()}
+			>
+				<DynamicRender component={PlaySolid} props={assignmentProps} />
+			</button>
+		{:else}
+			<button
+				class="btn flex h-full w-full items-center justify-center"
+				onclick={() => emitAssignmentEvent({ type: 'automated' })}
+			>
+				<DynamicRender component={HammerSolid} props={assignmentProps} />
+			</button>
+		{/if}
 	</div>
-	
 </div>
