@@ -50,6 +50,10 @@ export class Trail {
 		}
 	}
 
+	hasPropagations(level: number): boolean {
+		return this.getPropagations(level).length > 0;
+	}
+
 	push(assignment: VariableAssignment) {
 		if (this.assignments.length == this.trailCapacity)
 			logFatal('skipped allocating assignment as trail capacity is fulfilled');

@@ -1,30 +1,32 @@
 <script lang="ts">
 	import type VariableAssignment from '$lib/transversal/entities/VariableAssignment.ts';
-	import VariableAssignmentComponent from './VariableAssignmentComponent.svelte';
+	import BacktrackingComponent from '../assignment/BacktrackingComponent.svelte';
+	import ChildlessDecisionComponent from '../assignment/ChildlessDecisionComponent.svelte';
+	import DecisionComponent from '../assignment/DecisionComponent.svelte';
+	import UnitPropagationComponent from '../assignment/UnitPropagationComponent.svelte';
 
 	interface Props {
 		decision: VariableAssignment;
 		propagations?: VariableAssignment[];
 		expanded: boolean;
+		emitExpand?: () => void;
+		emitClose?: () => void;
 	}
 
-	let { decision, propagations = [], expanded }: Props = $props();
+	let { decision, propagations = [], expanded, emitClose, emitExpand }: Props = $props();
 </script>
 
-<VariableAssignmentComponent
-	assignment={decision}
-	open={propagations.length === 0 || expanded}
-	eventClick={() => (expanded = !expanded)}
-/>
-
-{#if propagations && expanded}
-	{#each propagations as assignment}
-		<VariableAssignmentComponent {assignment} />
-	{/each}
+{#if propagations?.length === 0}
+	<ChildlessDecisionComponent assignment={decision} />
+{:else}
+	<DecisionComponent assignment={decision} bind:expanded {emitClose} {emitExpand} />
+	{#if expanded}
+		{#each propagations as assignment}
+			{#if assignment.isK()}
+				<BacktrackingComponent {assignment} />
+			{:else}
+				<UnitPropagationComponent {assignment} />
+			{/if}
+		{/each}
+	{/if}
 {/if}
-
-<style>
-	:global(.no-propagations) {
-		border-right: 1px solid transparent;
-	}
-</style>

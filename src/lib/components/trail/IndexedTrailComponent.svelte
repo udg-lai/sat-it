@@ -10,9 +10,14 @@
 
 	let { trail, index }: Props = $props();
 
-  let noDecisions = $derived(trail.getDecisions().length === 0);
-  let allDecisions = $derived(trail.getDecisions().length === trail.getAssignments().length)
-  let noPropagations = $derived(trail.getDecisions().map((_, index) => trail.getPropagations(index + 1)).flat().length === 0)
+	let noDecisions = $derived(trail.getDecisions().length === 0);
+	let allDecisions = $derived(trail.getDecisions().length === trail.getAssignments().length);
+	let noPropagations = $derived(
+		trail
+			.getDecisions()
+			.map((_, index) => trail.getPropagations(index + 1))
+			.flat().length === 0
+	);
 
 	let hoverIndex = $state(false);
 	let expanded = $state(false);
@@ -35,7 +40,12 @@
 			{/if}
 		</span>
 	</button>
-	<TrailComponent {trail} expandLevels={expanded} />
+	<TrailComponent
+		{trail}
+		{expanded}
+		emitAllOpen={() => (expanded = true)}
+		emitNotAllOpen={() => (expanded = false)}
+	/>
 </div>
 
 <style>
