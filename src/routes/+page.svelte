@@ -13,6 +13,7 @@
 	import { logError } from '$lib/transversal/utils/logging.ts';
 	import { onMount } from 'svelte';
 	import AppComponent from '$lib/components/AppComponent.svelte';
+	import DebuggerComponent from '$lib/components/tools/debugger/DebuggerComponent.svelte';
 
 	onMount(() => {
 		initializeInstancesStore()
@@ -33,6 +34,10 @@
 			{/each}
 		</div>
 	{/if}
+	
+	<div class="decision-zone">
+		<DebuggerComponent />
+	</div>
 
 	<main>
 		<div class="tools-section z-10">
@@ -47,6 +52,7 @@
 	<footer>
 		<FooterComponent />
 	</footer>
+
 </app>
 
 {#snippet app()}

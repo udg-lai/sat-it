@@ -1,7 +1,9 @@
 .btn-expand {
+	display: flex;
+	align-items: center;
+	justify-content: center;
 	background-color: var(--border-color);
-	width: 100%;
-	height: 2rem;
+
 }
 
 .pack {
@@ -20,13 +22,29 @@
 }
 
 .polarity {
-	background-color: var(--border-color);
+	background-color: #cacaca30;
+	transition: 
+		background-color 0.3s ease,
+		color 0.3s ease,
+}
+
+.polarity:hover {
+	background-color: #cacaca70;
+}
+
+.polarity.active {
+	background-color: #cacaca;
 }
 
 .btn {
 	background-color: var(--border-color);
-	height: 4rem;
-	transition: background-color 0.3s ease;
+	transition: 
+		background-color 0.3s ease,
+		color 0.3s ease
+}
+
+.btn:active {
+	background-color: #cacaca50;
 }
 
 .btn.invalidOption {
@@ -35,9 +53,11 @@
 }
 
 .general-btn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
 	background-color: var(--border-color);
 	width: 100%;
-	height: 5rem;
 }
 
 /*These lines are to delete the arrows to increase and decrease the variable from the inputs*/

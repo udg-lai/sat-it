@@ -24,10 +24,6 @@
 			{
 				name: 'viewA',
 				active: true
-			},
-			{
-				name: 'viewB',
-				active: false
 			}
 		];
 	});
