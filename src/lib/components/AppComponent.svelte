@@ -14,7 +14,7 @@
 		type AssignmentEvent,
 		type EditorViewEvent
 	} from './tools/debugger/events.svelte.ts';
-	import TrailEditor from './visualizer/TrailEditorComponent.svelte';
+	import TrailEditor from './TrailEditorComponent.svelte';
 
 	let editorExpanded: boolean = $state(true);
 
