@@ -11,7 +11,9 @@
 
 	let { trail, expandPropagations }: Props = $props();
 
-	let assignments: VariableAssignment[] = $derived(trail.getDecisions());
+	let assignments: VariableAssignment[] = $derived(
+		trail.getDecisions()
+	);
 
 	let toggledWritable: Writable<boolean[]> = writable([]);
 
@@ -26,10 +28,7 @@
 
 <div class="trail flex flex-row">
 	{#each assignments as assignment, index (index)}
-		<VariableAssignmentComponent
-			{assignment}
-			propagated={trail.getPropagations(index + 1)}
-			onClick={() => onVariableAssignmentClick(index)}
+		<VariableAssignmentComponent {assignment} propagated={trail.getPropagations(index + 1)} onClick={() => onVariableAssignmentClick(index)}
 		/>
 	{/each}
 </div>
@@ -40,4 +39,4 @@
 		gap: 0.5rem;
 		align-items: center;
 	}
-</style>
+</style> 
