@@ -20,8 +20,8 @@
 				index: idx,
 				trail: t
 			};
-		})
-		return showOnlyLast ? indexed.slice(-1) : indexed
+		});
+		return showOnlyLast ? indexed.slice(-1) : indexed;
 	});
 </script>
 
