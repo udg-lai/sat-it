@@ -69,11 +69,11 @@
 
 <div class="flex h-full flex-row gap-2">
 	<div class="mb-2 mt-2 flex flex-[3] flex-row items-center justify-center">
-		<span>Variable:</span>
+		<span class="text-[16px]">Variable:</span>
 		<input
 			bind:value={userNextVariable}
 			type="number"
-			class="variable-selector min-w-0 flex-grow"
+			class="variable-selector min-w-0 flex-grow text-[16px]"
 			class:invalidOption={!isVariableValid}
 			placeholder={defaultNextVariable
 				? defaultNextVariable.toString()
@@ -89,6 +89,7 @@
 				class:active={polarity}
 				onclick={() => (polarity = true)}
 				disabled={defaultNextVariable === undefined}
+				title="Set true"
 			>
 				<DynamicRender component={CheckCircleSolid} props={polarityProps} />
 			</button>
@@ -98,6 +99,7 @@
 				class:active={!polarity}
 				onclick={() => (polarity = false)}
 				disabled={defaultNextVariable === undefined}
+				title="Set false"
 			>
 				<DynamicRender component={CircleMinusSolid} props={polarityProps} />
 			</button>
@@ -109,6 +111,7 @@
 				class="btn flex h-full w-full items-center justify-center"
 				class:invalidOption={!isVariableValid}
 				onclick={() => emitAssignment()}
+				title="Decide"
 			>
 				<DynamicRender component={PlaySolid} props={assignmentProps} />
 			</button>
@@ -116,6 +119,7 @@
 			<button
 				class="btn flex h-full w-full items-center justify-center"
 				onclick={() => emitAssignmentEvent({ type: 'automated' })}
+				title="Fix"
 			>
 				<DynamicRender component={HammerSolid} props={assignmentProps} />
 			</button>

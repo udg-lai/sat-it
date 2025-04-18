@@ -1,10 +1,3 @@
-.btn-expand {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	background-color: var(--border-color);
-}
-
 .pack {
 	border-color: var(--border-color);
 	border-style: solid;
@@ -22,6 +15,7 @@
 
 .polarity {
 	background-color: #cacaca30;
+	cursor: pointer;
 	transition:
 		background-color 0.3s ease,
 		color 0.3s ease;
@@ -37,25 +31,28 @@
 
 .btn {
 	background-color: var(--border-color);
+	cursor: pointer;
 	transition:
 		background-color 0.3s ease,
 		color 0.3s ease;
 }
 
+.btn:hover {
+	background-color: #cacaca90;
+}
+
 .btn:active {
-	background-color: #cacaca50;
+	background-color: #cacaca70;
 }
 
 .btn.invalidOption {
 	background-color: #cacaca30;
-	height: 4rem;
 }
 
 .general-btn {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	background-color: var(--border-color);
 	width: 100%;
 }
 
