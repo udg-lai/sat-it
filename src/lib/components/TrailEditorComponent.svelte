@@ -9,19 +9,20 @@
 
 	interface Props {
 		trails: Trail[];
-		editorExpanded?: boolean;
+		showOnlyLast?: boolean;
 	}
 
-	let { trails, editorExpanded }: Props = $props();
+	let { trails, showOnlyLast = false }: Props = $props();
 
-	let indexedTrails: IndexedTrail[] = $derived(
-		trails.map((t, idx) => {
+	let indexedTrails: IndexedTrail[] = $derived.by(() => {
+		const indexed = trails.map((t, idx) => {
 			return {
 				index: idx,
 				trail: t
 			};
 		})
-	);
+		return showOnlyLast ? indexed.slice(-1) : indexed
+	});
 </script>
 
 <div class="trail-visualizer flex flex-row">
