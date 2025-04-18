@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { DimacsInstance } from '$lib/dimacs/dimacs-instance.interface.ts';
 	import { logError } from '$lib/transversal/utils/logging.ts';
-	import dimacsParser from '$lib/transversal/utils/parsers/dimacs.ts';
+	import parser from '$lib/transversal/utils/parsers/dimacs.ts';
 	import { UploadOutline } from 'flowbite-svelte-icons';
 	import './styles.css';
 
@@ -31,7 +31,7 @@
 
 	function saveInstance(instanceName: string, content: string): void {
 		try {
-			const summary = dimacsParser(content);
+			const summary = parser(content);
 			const instance: DimacsInstance = {
 				instanceName,
 				content,

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import dimacsParser, { type Summary } from '$lib/transversal/utils/parsers/dimacs.ts';
+import parser, { type Summary } from '$lib/transversal/utils/parsers/dimacs.ts';
 
 const example01 = `
 c
@@ -72,8 +72,8 @@ c bu
 
 describe('dimacs parser', () => {
 	it('example01', () => {
-		const summary: Summary = dimacsParser(example01);
-		expect(summary.comment).toBe(`\n\nstart with comments\n\nadios\n`);
+		const summary: Summary = parser(example01);
+		expect(summary.description).toBe(`\n\nstart with comments\n\nadios\n`);
 		expect(summary.varCount).toBe(5);
 		expect(summary.clauseCount).toBe(3);
 		expect(summary.claims.original).toStrictEqual([
@@ -83,8 +83,8 @@ describe('dimacs parser', () => {
 		]);
 	});
 	it('example02', () => {
-		const summary: Summary = dimacsParser(example02);
-		expect(summary.comment).toBe('');
+		const summary: Summary = parser(example02);
+		expect(summary.description).toBe('');
 		expect(summary.varCount).toBe(4);
 		expect(summary.clauseCount).toBe(5);
 		expect(summary.claims.original).toStrictEqual([
@@ -96,8 +96,8 @@ describe('dimacs parser', () => {
 		]);
 	});
 	it('example03', () => {
-		const summary: Summary = dimacsParser(example03);
-		expect(summary.comment).toBe(`hola\n\n\nstart with comments\nbu\n`);
+		const summary: Summary = parser(example03);
+		expect(summary.description).toBe(`hola\n\n\nstart with comments\nbu\n`);
 		expect(summary.varCount).toBe(4);
 		expect(summary.clauseCount).toBe(6);
 		expect(summary.claims.original).toStrictEqual([
@@ -117,8 +117,8 @@ describe('dimacs parser', () => {
 		]);
 	});
 	it('example04', () => {
-		const summary: Summary = dimacsParser(example04);
-		expect(summary.comment).toBe(`hola\n\n\nstart with comments\nbu\n`);
+		const summary: Summary = parser(example04);
+		expect(summary.description).toBe(`hola\n\n\nstart with comments\nbu\n`);
 		expect(summary.varCount).toBe(4);
 		expect(summary.clauseCount).toBe(6);
 		expect(summary.claims.original).toStrictEqual([
@@ -138,6 +138,6 @@ describe('dimacs parser', () => {
 		]);
 	});
 	it('example05', () => {
-		expect(() => dimacsParser(example05)).toThrowError();
+		expect(() => parser(example05)).toThrowError();
 	});
 });
