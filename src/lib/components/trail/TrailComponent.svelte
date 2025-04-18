@@ -13,11 +13,11 @@
 	interface Props {
 		trail: Trail;
 		expanded: boolean;
-		emitAllOpen?: () => void;
-		emitNotAllOpen?: () => void;
 	}
 
-	let { trail, expanded, emitAllOpen, emitNotAllOpen }: Props = $props();
+	let { trail, expanded = $bindable(false) }: Props = $props();
+
+	let decisionLevelExpanded = $derived(expanded);
 
 	let initialPropagations = $derived(trail.getInitialPropagations());
 
@@ -37,15 +37,25 @@
 		return levels.reduce((a, b) => a + b, 0);
 	});
 
-	let nExpanded = $state(0);
+	let nExpanded = $state(expanded ? countLevelsWithPropagations() : 0);
 
-	$effect(() => {
-		if (nExpanded == nExpandable) {
-			emitAllOpen?.();
-		} else {
-			emitNotAllOpen?.();
-		}
-	});
+	function countLevelsWithPropagations(): number {
+		const propagations: number[] = trail.getDecisions().map((_, idx) => {
+			const level = idx + 1;
+			return trail.hasPropagations(level) ? 1 : 0;
+		});
+		return propagations.reduce((a, b) => a + b, 0);
+	}
+
+	function onEmitClose(): void {
+		nExpanded = Math.max(nExpanded - 1, 0);
+		expanded = nExpanded === nExpandable;
+	}
+
+	function onEmitExpand(): void {
+		nExpanded = Math.min(nExpanded + 1, nExpandable);
+		expanded = nExpanded === nExpandable;
+	}
 </script>
 
 <div class="trail flex flex-row">
@@ -61,9 +71,9 @@
 		<DecisionLevelComponent
 			decision={assignment.assignment}
 			propagations={trail.getPropagations(assignment.level)}
-			{expanded}
-			emitClose={() => (nExpanded = Math.max(nExpanded - 1, 0))}
-			emitExpand={() => (nExpanded = Math.min(nExpanded + 1, nExpandable))}
+			expanded={decisionLevelExpanded}
+			emitClose={onEmitClose}
+			emitExpand={onEmitExpand}
 		/>
 	{/each}
 </div>

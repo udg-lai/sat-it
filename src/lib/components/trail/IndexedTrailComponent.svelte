@@ -10,6 +10,9 @@
 
 	let { trail, index }: Props = $props();
 
+	let hoverIndex = $state(false);
+	let expanded = $state(false);
+
 	let noDecisions = $derived(trail.getDecisions().length === 0);
 	let allDecisions = $derived(trail.getDecisions().length === trail.getAssignments().length);
 	let noPropagations = $derived(
@@ -19,8 +22,7 @@
 			.flat().length === 0
 	);
 
-	let hoverIndex = $state(false);
-	let expanded = $state(false);
+	let disabled = $derived(noDecisions || allDecisions || noPropagations);
 </script>
 
 <div class="line">
@@ -29,9 +31,12 @@
 		onmouseenter={() => (hoverIndex = true)}
 		onmouseleave={() => (hoverIndex = false)}
 		onclick={() => (expanded = !expanded)}
+		{disabled}
 	>
 		<span class="line-item chakra-petch-medium" class:line-item-active={hoverIndex}>
-			{#if !hoverIndex || noDecisions || allDecisions || noPropagations}
+			{#if disabled}
+				<p>{index}</p>
+			{:else if !hoverIndex}
 				<p>{index}</p>
 			{:else if expanded}
 				<ChevronLeftOutline slot="icon" class="h-8 w-8" />
@@ -40,12 +45,7 @@
 			{/if}
 		</span>
 	</button>
-	<TrailComponent
-		{trail}
-		{expanded}
-		emitAllOpen={() => (expanded = true)}
-		emitNotAllOpen={() => (expanded = false)}
-	/>
+	<TrailComponent {trail} bind:expanded />
 </div>
 
 <style>
