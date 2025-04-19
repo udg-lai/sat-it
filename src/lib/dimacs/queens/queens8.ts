@@ -747,7 +747,7 @@ p cnf 194 740
 -2 0
 `;
 
-const summary = parser( {content, name: fileName });
+const summary = parser({ content, name: fileName });
 
 const instance: DimacsInstance = { instanceName: fileName, content, summary };
 

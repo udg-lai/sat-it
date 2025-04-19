@@ -76,7 +76,7 @@ describe('dimacs parser', () => {
 		expect(summary.description).toBe(`c\nc\nc start with comments\nc\nc adios`);
 		expect(summary.varCount).toBe(5);
 		expect(summary.clauseCount).toBe(3);
-		expect(summary.claims.map(claim => claim.clause)).toStrictEqual([
+		expect(summary.claims.map((claim) => claim.clause)).toStrictEqual([
 			[1, -5, 4, 0],
 			[-1, 5, 3, 4, 0],
 			[-3, -4, 0]
@@ -87,7 +87,7 @@ describe('dimacs parser', () => {
 		expect(summary.description).toBe('');
 		expect(summary.varCount).toBe(4);
 		expect(summary.clauseCount).toBe(5);
-		expect(summary.claims.map(claim => claim.clause)).toStrictEqual([
+		expect(summary.claims.map((claim) => claim.clause)).toStrictEqual([
 			[1, -2, 4, 0],
 			[-1, 2, 3, 4, 0],
 			[-3, -4, 0],
@@ -100,7 +100,7 @@ describe('dimacs parser', () => {
 		expect(summary.description).toBe('c hola\nc');
 		expect(summary.varCount).toBe(4);
 		expect(summary.clauseCount).toBe(6);
-		expect(summary.claims.map(claim => claim.clause)).toStrictEqual([
+		expect(summary.claims.map((claim) => claim.clause)).toStrictEqual([
 			[1, -2, 4, 0],
 			[-1, 2, 3, 4, 0],
 			[-1, -2, 2, 4, 0],
@@ -121,7 +121,7 @@ describe('dimacs parser', () => {
 		expect(summary.description).toBe(`c hola\nc`);
 		expect(summary.varCount).toBe(4);
 		expect(summary.clauseCount).toBe(6);
-		expect(summary.claims.map(claim => claim.clause)).toStrictEqual([
+		expect(summary.claims.map((claim) => claim.clause)).toStrictEqual([
 			[1, -2, -2, 4, 0],
 			[-1, 2, 3, 4, 0],
 			[-1, -2, 2, 4, 0],

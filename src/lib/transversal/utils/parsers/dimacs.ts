@@ -46,8 +46,8 @@ const emptySummary = (): Summary => {
 };
 
 export interface Input {
-	content: string,
-	name: string
+	content: string;
+	name: string;
 }
 
 export default function parser(input: Input): Summary {
@@ -69,7 +69,7 @@ export default function parser(input: Input): Summary {
 		summary.clauseCount = clauseCount;
 		lines = lines.slice(endLine);
 	} else {
-		logFatal("Problem parsing summary", unwrapEither(eitherSummary));
+		logFatal('Problem parsing summary', unwrapEither(eitherSummary));
 	}
 
 	const eitherClaims = parseClaims(lines, summary.clauseCount);
@@ -78,7 +78,7 @@ export default function parser(input: Input): Summary {
 		summary.claims = claims;
 		lines = lines.slice(endLine + 1);
 	} else {
-		logFatal("Problem parsing claims", unwrapEither(eitherClaims));
+		logFatal('Problem parsing claims', unwrapEither(eitherClaims));
 	}
 
 	const eitherClauses = makeClauses(summary.claims, summary.varCount);
@@ -86,7 +86,7 @@ export default function parser(input: Input): Summary {
 		const { clauses } = unwrapEither(eitherClauses);
 		summary.clauses = clauses;
 	} else {
-		logFatal("Problem simplifying claims to clauses", unwrapEither(eitherClauses))
+		logFatal('Problem simplifying claims to clauses', unwrapEither(eitherClauses));
 	}
 
 	return summary;
@@ -196,8 +196,7 @@ interface MakeClausesResult {
 }
 
 function makeClauses(claims: Claim[], varCount: number): Either<ErrorMessage, MakeClausesResult> {
-
-	const rawClauses = claims.map(claim => claim.clause);
+	const rawClauses = claims.map((claim) => claim.clause);
 
 	const asserts: Maybe<ErrorMessage>[] = rawClauses.map((rawClause, idx) => {
 		const [eos, ...literals] = [...rawClause].reverse();
@@ -220,7 +219,7 @@ function makeClauses(claims: Claim[], varCount: number): Either<ErrorMessage, Ma
 		// 2) remove trivial true clauses
 		// 3) builds the clause (adds the eos)
 		const clauses = rawClauses
-			.map(rawClause => {
+			.map((rawClause) => {
 				const literals = rawClause.slice(0, -1);
 				return new Set(literals);
 			})
