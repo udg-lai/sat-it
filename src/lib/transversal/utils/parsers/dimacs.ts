@@ -16,14 +16,16 @@ import {
 import { type ErrorMessage } from '$lib/transversal/utils/types/types.ts';
 import { logFatal } from '../logging.ts';
 
+export type RawClause = number[];
 type Clause = number[];
 
 export interface Claim {
 	comments: string[];
-	clause: Clause;
+	clause: RawClause;
 }
 
 export interface Summary {
+	name: string;
 	description: string;
 	varCount: number;
 	clauseCount: number;
@@ -33,6 +35,7 @@ export interface Summary {
 
 const emptySummary = (): Summary => {
 	const summary: Summary = {
+		name: '',
 		description: '',
 		varCount: -1,
 		clauseCount: -1,
@@ -42,23 +45,31 @@ const emptySummary = (): Summary => {
 	return summary;
 };
 
-export default function parser(dimacsInput: string): Summary {
-	let lines: string[] = dimacsInput.trim().split('\n');
+export interface Input {
+	content: string,
+	name: string
+}
+
+export default function parser(input: Input): Summary {
+	const { content, name } = input;
+
+	let lines: string[] = content.trim().split('\n');
 
 	const summary = emptySummary();
+	summary.name = name;
 
 	const { description, endLine } = parseDescription(lines);
 	summary.description = description;
-	lines = lines.slice(endLine + 1);
+	lines = lines.slice(endLine);
 
 	const eitherSummary = parseSummary(lines);
 	if (isRight(eitherSummary)) {
 		const { varCount, clauseCount, endLine } = unwrapEither(eitherSummary);
 		summary.varCount = varCount;
 		summary.clauseCount = clauseCount;
-		lines = lines.slice(endLine + 1);
+		lines = lines.slice(endLine);
 	} else {
-		logFatal(unwrapEither(eitherSummary));
+		logFatal("Problem parsing summary", unwrapEither(eitherSummary));
 	}
 
 	const eitherClaims = parseClaims(lines, summary.clauseCount);
@@ -67,10 +78,16 @@ export default function parser(dimacsInput: string): Summary {
 		summary.claims = claims;
 		lines = lines.slice(endLine + 1);
 	} else {
-		logFatal(unwrapEither(eitherClaims));
+		logFatal("Problem parsing claims", unwrapEither(eitherClaims));
 	}
 
-	const clauses = makeClauses(summary.claims, summary.varCount);
+	const eitherClauses = makeClauses(summary.claims, summary.varCount);
+	if (isRight(eitherClauses)) {
+		const { clauses } = unwrapEither(eitherClauses);
+		summary.clauses = clauses;
+	} else {
+		logFatal("Problem simplifying claims to clauses", unwrapEither(eitherClauses))
+	}
 
 	return summary;
 }
@@ -82,20 +99,20 @@ interface DescriptionResult {
 
 function parseDescription(lines: string[]): DescriptionResult {
 	const description: string[] = [];
-	let i = 0;
+	let endLine = 0;
 	let scape = false;
-	while (!scape && i < lines.length) {
-		const line = lines[i];
+	while (!scape && endLine < lines.length) {
+		const line = lines[endLine];
 		if (line.at(0) === 'p') {
 			scape = true;
 		} else {
 			description.push(line);
-			i += 1;
+			endLine += 1;
 		}
 	}
 	return {
-		description: description.join(' '),
-		endLine: i
+		description: description.join('\n'),
+		endLine: endLine
 	};
 }
 
@@ -134,7 +151,7 @@ function parseSummary(lines: string[]): Either<ErrorMessage, SummaryResult> {
 	return makeRight({
 		varCount,
 		clauseCount,
-		endLine: 0
+		endLine: 1
 	});
 }
 
@@ -175,13 +192,15 @@ function parseClaims(lines: string[], clauseCount: number): Either<ErrorMessage,
 }
 
 interface MakeClausesResult {
-	clauses: Clause[];
+	clauses: RawClause[];
 }
 
 function makeClauses(claims: Claim[], varCount: number): Either<ErrorMessage, MakeClausesResult> {
-	const asserts: Maybe<ErrorMessage>[] = claims.map(({ clause }, idx: number) => {
-		const eos = clause.at(-1);
-		const literals = clause.slice(0, -1);
+
+	const rawClauses = claims.map(claim => claim.clause);
+
+	const asserts: Maybe<ErrorMessage>[] = rawClauses.map((rawClause, idx) => {
+		const [eos, ...literals] = [...rawClause].reverse();
 
 		if (eos !== 0) {
 			return makeJust(`Clause with no EOS '0' at ${idx}`);
@@ -200,10 +219,13 @@ function makeClauses(claims: Claim[], varCount: number): Either<ErrorMessage, Ma
 		// 1) drops repeated literals (removing the eos)
 		// 2) remove trivial true clauses
 		// 3) builds the clause (adds the eos)
-		const clauses = claims
-			.map(({ clause }) => new Set(clause.slice(-1)))
+		const clauses = rawClauses
+			.map(rawClause => {
+				const literals = rawClause.slice(0, -1);
+				return new Set(literals);
+			})
 			.filter((clause) => !isTautology(clause))
-			.map((clause) => [...Array.from(clause), 0]);
+			.map((clause) => [...Array.from(clause)]);
 		return makeRight({ clauses });
 	}
 }

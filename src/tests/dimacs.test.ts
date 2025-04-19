@@ -72,22 +72,22 @@ c bu
 
 describe('dimacs parser', () => {
 	it('example01', () => {
-		const summary: Summary = parser(example01);
-		expect(summary.description).toBe(`\n\nstart with comments\n\nadios\n`);
+		const summary: Summary = parser({ name: 'example01', content: example01 });
+		expect(summary.description).toBe(`c\nc\nc start with comments\nc\nc adios`);
 		expect(summary.varCount).toBe(5);
 		expect(summary.clauseCount).toBe(3);
-		expect(summary.claims.original).toStrictEqual([
+		expect(summary.claims.map(claim => claim.clause)).toStrictEqual([
 			[1, -5, 4, 0],
 			[-1, 5, 3, 4, 0],
 			[-3, -4, 0]
 		]);
 	});
 	it('example02', () => {
-		const summary: Summary = parser(example02);
+		const summary: Summary = parser({ name: 'example02', content: example02 });
 		expect(summary.description).toBe('');
 		expect(summary.varCount).toBe(4);
 		expect(summary.clauseCount).toBe(5);
-		expect(summary.claims.original).toStrictEqual([
+		expect(summary.claims.map(claim => claim.clause)).toStrictEqual([
 			[1, -2, 4, 0],
 			[-1, 2, 3, 4, 0],
 			[-3, -4, 0],
@@ -96,11 +96,11 @@ describe('dimacs parser', () => {
 		]);
 	});
 	it('example03', () => {
-		const summary: Summary = parser(example03);
-		expect(summary.description).toBe(`hola\n\n\nstart with comments\nbu\n`);
+		const summary: Summary = parser({ name: 'example03', content: example03 });
+		expect(summary.description).toBe('c hola\nc');
 		expect(summary.varCount).toBe(4);
 		expect(summary.clauseCount).toBe(6);
-		expect(summary.claims.original).toStrictEqual([
+		expect(summary.claims.map(claim => claim.clause)).toStrictEqual([
 			[1, -2, 4, 0],
 			[-1, 2, 3, 4, 0],
 			[-1, -2, 2, 4, 0],
@@ -108,20 +108,20 @@ describe('dimacs parser', () => {
 			[-1, -2, 0],
 			[-1, -2, 3, 0]
 		]);
-		expect(summary.claims.simplified).toStrictEqual([
-			[1, -2, 4, 0],
-			[-1, 2, 3, 4, 0],
-			[-3, -4, 0],
-			[-1, -2, 0],
-			[-1, -2, 3, 0]
+		expect(summary.clauses).toStrictEqual([
+			[1, -2, 4],
+			[-1, 2, 3, 4],
+			[-3, -4],
+			[-1, -2],
+			[-1, -2, 3]
 		]);
 	});
 	it('example04', () => {
-		const summary: Summary = parser(example04);
-		expect(summary.description).toBe(`hola\n\n\nstart with comments\nbu\n`);
+		const summary: Summary = parser({ name: 'example04', content: example04 });
+		expect(summary.description).toBe(`c hola\nc`);
 		expect(summary.varCount).toBe(4);
 		expect(summary.clauseCount).toBe(6);
-		expect(summary.claims.original).toStrictEqual([
+		expect(summary.claims.map(claim => claim.clause)).toStrictEqual([
 			[1, -2, -2, 4, 0],
 			[-1, 2, 3, 4, 0],
 			[-1, -2, 2, 4, 0],
@@ -129,15 +129,15 @@ describe('dimacs parser', () => {
 			[-1, -2, 0],
 			[-1, -2, 3, 3, 0]
 		]);
-		expect(summary.claims.simplified).toStrictEqual([
-			[1, -2, 4, 0],
-			[-1, 2, 3, 4, 0],
-			[-3, -4, 0],
-			[-1, -2, 0],
-			[-1, -2, 3, 0]
+		expect(summary.clauses).toStrictEqual([
+			[1, -2, 4],
+			[-1, 2, 3, 4],
+			[-3, -4],
+			[-1, -2],
+			[-1, -2, 3]
 		]);
 	});
 	it('example05', () => {
-		expect(() => parser(example05)).toThrowError();
+		expect(() => parser({ name: 'example05', content: example05 })).toThrowError();
 	});
 });

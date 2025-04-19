@@ -9,7 +9,7 @@ p cnf 3 2
 -2 3 0
 `;
 
-const summary = parser(content);
+const summary = parser( {content, name: fileName });
 
 const instance: DimacsInstance = { instanceName: fileName, content, summary };
 

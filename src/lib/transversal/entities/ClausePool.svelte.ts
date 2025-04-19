@@ -1,7 +1,7 @@
 import type { IClausePool } from '../utils/interfaces/IClausePool.ts';
 import { Eval } from '../utils/interfaces/IClausePool.ts';
-import type { Claims } from '../utils/parsers/dimacs.ts';
-import { fromClaimsToClause } from '../utils/utils.ts';
+import type { RawClause } from '../utils/parsers/dimacs.ts';
+import { rawClausesToClauses } from '../utils/utils.ts';
 import Clause from './Clause.ts';
 import { ClauseEval } from './Clause.ts';
 import type VariablePool from './VariablePool.svelte.ts';
@@ -13,9 +13,9 @@ class ClausePool implements IClausePool {
 		this.collection = clauses;
 	}
 
-	static buildFrom(claims: Claims, variables: VariablePool): ClausePool {
+	static buildFrom(rawClauses: RawClause[], variables: VariablePool): ClausePool {
 		Clause.resetUniqueIdGenerator();
-		const clauses = fromClaimsToClause(claims, variables);
+		const clauses = rawClausesToClauses(rawClauses, variables);
 		return new ClausePool(clauses);
 	}
 

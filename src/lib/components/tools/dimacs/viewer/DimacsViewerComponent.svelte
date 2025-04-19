@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { DimacsInstance } from '$lib/dimacs/dimacs-instance.interface.ts';
 	import { logFatal } from '$lib/transversal/utils/logging.ts';
+	import type { Claim } from '$lib/transversal/utils/parsers/dimacs.ts';
 	import VirtualList from 'svelte-tiny-virtual-list';
 
 	interface Props {
@@ -18,12 +19,14 @@
 	function makeClaims(instance: DimacsInstance): string[] {
 		const { summary }: DimacsInstance = instance;
 
-		const claimToHtml = (claim: number[]): string => {
-			const eos = claim[claim.length - 1];
+		const claimToHtml = (claim: Claim): string => {
+			const { clause } = claim;
+
+			const eos = clause[clause.length - 1];
 			if (eos !== 0) {
 				logFatal('Claim end of sequence not found');
 			}
-			const html = claim
+			const html = clause
 				.map((lit) => {
 					return `<span class="${lit === 0 ? 'delimiter' : 'literal'}">${lit}</span>`;
 				})
@@ -31,15 +34,16 @@
 			return html;
 		};
 
-		const claimsToHtml = (claims: number[][]): string[] => {
+		const claimsToHtml = (claims: Claim[]): string[] => {
 			return claims.map((claim) => {
 				return `<div class="clause">` + claimToHtml(claim) + `</div>`;
 			});
 		};
 
-		const originalClaims = summary.claims.original;
-		const claims = claimsToHtml(originalClaims);
-		return claims;
+		const { claims } = summary;
+		const html = claimsToHtml(claims);
+
+		return html;
 	}
 
 	function updateHeight(htmlElement: HTMLElement) {

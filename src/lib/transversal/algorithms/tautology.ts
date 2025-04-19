@@ -6,5 +6,5 @@ export const isTautology = (clause: Set<number>): boolean => {
 			break;
 		}
 	}
-	return !tautology;
+	return tautology;
 };

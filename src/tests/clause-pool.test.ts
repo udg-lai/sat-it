@@ -3,11 +3,11 @@ import ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';
 import Literal from '$lib/transversal/entities/Literal.svelte.ts';
 import VariablePool from '$lib/transversal/entities/VariablePool.svelte.ts';
 import { Eval } from '$lib/transversal/utils/interfaces/IClausePool.ts';
-import type { Claims } from '$lib/transversal/utils/parsers/dimacs.ts';
-import { fromClaimsToClause } from '$lib/transversal/utils/utils.ts';
+import type { RawClause } from '$lib/transversal/utils/parsers/dimacs.ts';
+import { rawClausesToClauses } from '$lib/transversal/utils/utils.ts';
 import { describe, expect, it } from 'vitest';
 
-const claims: Claims = [
+const rawClauses: RawClause[] = [
 	[1, 2, -3, 0],
 	[-2, 3, 0]
 ];
@@ -18,14 +18,14 @@ describe('clause pool', () => {
 	it('unresolved', () => {
 		Clause.resetUniqueIdGenerator();
 		const variablePool: VariablePool = new VariablePool(3);
-		const clausePool: ClausePool = new ClausePool(fromClaimsToClause(claims, variablePool));
+		const clausePool: ClausePool = new ClausePool(rawClausesToClauses(rawClauses, variablePool));
 		variablePool.persist(1, true);
 		expect(clausePool.eval()).toBe(Eval.UNRESOLVED);
 	});
 	it('unsat', () => {
 		Clause.resetUniqueIdGenerator();
 		const variablePool: VariablePool = new VariablePool(3);
-		const clausePool: ClausePool = new ClausePool(fromClaimsToClause(claims, variablePool));
+		const clausePool: ClausePool = new ClausePool(rawClausesToClauses(rawClauses, variablePool));
 		variablePool.persist(1, true);
 		variablePool.persist(2, true);
 		variablePool.persist(3, false);
@@ -34,7 +34,7 @@ describe('clause pool', () => {
 	it('sat', () => {
 		Clause.resetUniqueIdGenerator();
 		const variablePool: VariablePool = new VariablePool(3);
-		const clausePool: ClausePool = new ClausePool(fromClaimsToClause(claims, variablePool));
+		const clausePool: ClausePool = new ClausePool(rawClausesToClauses(rawClauses, variablePool));
 		variablePool.persist(1, true);
 		variablePool.persist(2, false);
 		variablePool.persist(3, true);
@@ -43,7 +43,7 @@ describe('clause pool', () => {
 	it('addition-sat', () => {
 		Clause.resetUniqueIdGenerator();
 		const variablePool: VariablePool = new VariablePool(3);
-		const clausePool: ClausePool = new ClausePool(fromClaimsToClause(claims, variablePool));
+		const clausePool: ClausePool = new ClausePool(rawClausesToClauses(rawClauses, variablePool));
 		const literalCollection: Literal[] = [];
 		anotherClaim.forEach((value) => {
 			if (value !== 0) {
@@ -61,7 +61,7 @@ describe('clause pool', () => {
 	it('addition-sat', () => {
 		Clause.resetUniqueIdGenerator();
 		const variablePool: VariablePool = new VariablePool(3);
-		const clausePool: ClausePool = new ClausePool(fromClaimsToClause(claims, variablePool));
+		const clausePool: ClausePool = new ClausePool(rawClausesToClauses(rawClauses, variablePool));
 		expect(clausePool.size()).toBe(2);
 		const literals: Literal[] = [];
 		anotherClaim.forEach((value) => {
