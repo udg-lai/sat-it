@@ -87,6 +87,5 @@
 			font-size: 12px;
 			color: #a3a3a3;
 		}
-
 	}
 </style>
