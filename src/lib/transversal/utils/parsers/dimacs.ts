@@ -16,8 +16,9 @@ import {
 import { type ErrorMessage } from '$lib/transversal/utils/types/types.ts';
 import { logFatal } from '../logging.ts';
 
-export type RawClause = number[];
-type Clause = number[];
+export type RawClause = number[]; // this contains the eos '0'
+export type LiteralSet = number[]; // this contains just the literals
+export type CNF = LiteralSet[];
 
 export interface Claim {
 	comments: string[];
@@ -30,7 +31,7 @@ export interface Summary {
 	varCount: number;
 	clauseCount: number;
 	claims: Claim[];
-	clauses: Clause[];
+	cnf: CNF;
 }
 
 const emptySummary = (): Summary => {
@@ -40,7 +41,7 @@ const emptySummary = (): Summary => {
 		varCount: -1,
 		clauseCount: -1,
 		claims: [],
-		clauses: []
+		cnf: []
 	};
 	return summary;
 };
@@ -84,7 +85,7 @@ export default function parser(input: Input): Summary {
 	const eitherClauses = makeClauses(summary.claims, summary.varCount);
 	if (isRight(eitherClauses)) {
 		const { clauses } = unwrapEither(eitherClauses);
-		summary.clauses = clauses;
+		summary.cnf = clauses;
 	} else {
 		logFatal('Problem simplifying claims to clauses', unwrapEither(eitherClauses));
 	}

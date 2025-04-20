@@ -1,9 +1,8 @@
 import type { IClausePool } from '../utils/interfaces/IClausePool.ts';
 import { Eval } from '../utils/interfaces/IClausePool.ts';
-import type { RawClause } from '../utils/parsers/dimacs.ts';
-import { rawClausesToClauses } from '../utils/utils.ts';
-import Clause from './Clause.ts';
-import { ClauseEval } from './Clause.ts';
+import type { CNF } from '../utils/parsers/dimacs.ts';
+import { cnfToClauseSet } from '../utils/utils.ts';
+import Clause, { ClauseEval } from './Clause.ts';
 import type VariablePool from './VariablePool.svelte.ts';
 
 class ClausePool implements IClausePool {
@@ -13,9 +12,9 @@ class ClausePool implements IClausePool {
 		this.collection = clauses;
 	}
 
-	static buildFrom(rawClauses: RawClause[], variables: VariablePool): ClausePool {
+	static buildFrom(cnf: CNF, variables: VariablePool): ClausePool {
 		Clause.resetUniqueIdGenerator();
-		const clauses = rawClausesToClauses(rawClauses, variables);
+		const clauses: Clause[] = cnfToClauseSet(cnf, variables);
 		return new ClausePool(clauses);
 	}
 

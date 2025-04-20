@@ -15,7 +15,7 @@ export interface Problem {
 export const problemStore: Writable<Problem> = writable();
 
 export function updateProblemDomain(instance: DimacsInstance) {
-	const { varCount, clauses } = instance.summary;
+	const { varCount, cnf: clauses } = instance.summary;
 
 	const variablePool: VariablePool = new VariablePool(varCount);
 	const clausePool: ClausePool = ClausePool.buildFrom(clauses, variablePool);

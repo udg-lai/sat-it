@@ -31,7 +31,7 @@
 
 	function saveInstance(instanceName: string, content: string): void {
 		try {
-			const summary = parser(instanceName, content);
+			const summary = parser({ name: instanceName, content });
 			const instance: DimacsInstance = {
 				instanceName,
 				content,
