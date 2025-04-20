@@ -15,15 +15,15 @@
 		dimacsInstance: DimacsInstance;
 	}
 
+	type Html = string;
+
 	let { dimacsInstance }: Props = $props();
 
-	let items: string[] = $derived(makeHtmlItems(dimacsInstance));
+	let items: Html[] = $derived(makeHtmlItems(dimacsInstance));
 
 	let previewObserver: ResizeObserver;
 	let virtualHeight: number = $state(0);
 	let itemSize: number = $state(40);
-
-	type Html = string;
 
 	function makeHtmlItems(instance: DimacsInstance): Html[] {
 		const clauseToHtml = (clause: RawClause): Html => {
@@ -173,4 +173,5 @@
 		display: flex;
 		gap: 1rem;
 	}
+
 </style>
