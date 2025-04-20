@@ -130,9 +130,7 @@ export function previewInstanceByName(name: string): void {
 
 export function removeInstanceByName(name: string): void {
 	const filterFun = (e: InteractiveInstance, name: string) => {
-		return (
-			e.name !== name || (e.name === name && e.removable === false)
-		);
+		return e.name !== name || (e.name === name && e.removable === false);
 	};
 
 	instanceStore.update((instances) => {
