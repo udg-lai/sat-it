@@ -16,29 +16,29 @@
 		const files = fileInputRef.files || [];
 		for (const file of files) {
 			const reader = new FileReader();
-			const instanceName = file.name;
+			const name = file.name;
 			reader.onload = (e: ProgressEvent<FileReader>) => {
-				saveInstance(instanceName, e.target?.result as string);
+				saveInstance(name, e.target?.result as string);
 			};
 			reader.onerror = () => {
-				const title = `File ${instanceName} could not be loaded`;
+				const title = `File ${name} could not be loaded`;
 				logError(title, title);
 			};
 			reader.readAsText(file);
 		}
 	}
 
-	function saveInstance(instanceName: string, content: string): void {
+	function saveInstance(name: string, content: string): void {
 		try {
-			const summary = parser({ name: instanceName, content });
+			const summary = parser({ name: name, content });
 			const instance: DimacsInstance = {
-				instanceName,
+				name: name,
 				content,
 				summary
 			};
 			onUpload?.(instance);
 		} catch (error) {
-			const title = `Instance ${instanceName} contains an error`;
+			const title = `Instance ${name} contains an error`;
 			const description = (error as Error).message;
 			logError(title, description);
 		}

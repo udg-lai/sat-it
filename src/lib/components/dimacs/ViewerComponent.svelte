@@ -66,7 +66,7 @@
 
 <div class="dimacs-viewer-component">
 	<div class="dimacs-header">
-		<h3>{dimacsInstance.instanceName}</h3>
+		<h3>{dimacsInstance.name}</h3>
 	</div>
 
 	<div class="dimacs-header" style="padding-top: 0rem;">

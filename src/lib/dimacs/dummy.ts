@@ -11,6 +11,6 @@ p cnf 3 2
 
 const summary = parser({ content, name: fileName });
 
-const instance: DimacsInstance = { instanceName: fileName, content, summary };
+const instance: DimacsInstance = { name: fileName, content, summary };
 
 export default instance;

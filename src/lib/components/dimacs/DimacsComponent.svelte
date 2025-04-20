@@ -26,7 +26,7 @@
 			return {
 				removable: e.removable,
 				active: e.active,
-				instanceName: e.instanceName,
+				name: e.name,
 				previewing: e.previewing
 			};
 		})
@@ -43,17 +43,17 @@
 		};
 	});
 
-	function onActivateInstance(instanceName: string): void {
-		activateInstanceByName(instanceName);
+	function onActivateInstance(name: string): void {
+		activateInstanceByName(name);
 	}
 
-	function onPreviewInstance(instanceName: string): void {
-		previewInstanceByName(instanceName);
-		setPreviewInstance(instanceName);
+	function onPreviewInstance(name: string): void {
+		previewInstanceByName(name);
+		setPreviewInstance(name);
 	}
 
-	function setPreviewInstance(instanceName: string): void {
-		viewingInstance = instances.find((e) => e.instanceName === instanceName);
+	function setPreviewInstance(name: string): void {
+		viewingInstance = instances.find((e) => e.name === name);
 	}
 </script>
 

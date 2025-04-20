@@ -749,6 +749,6 @@ p cnf 194 740
 
 const summary = parser({ content, name: fileName });
 
-const instance: DimacsInstance = { instanceName: fileName, content, summary };
+const instance: DimacsInstance = { name: fileName, content, summary };
 
 export default instance;
