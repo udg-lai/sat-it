@@ -11,9 +11,9 @@
 	} from '$lib/store/instances.store.ts';
 	import { Accordion, AccordionItem } from 'flowbite-svelte';
 	import { onMount } from 'svelte';
-	import InstanceListComponent from './instance-list/InstanceListComponent.svelte';
-	import DimacsUploaderComponent from './uploader/DimacsUploaderComponent.svelte';
-	import DimacsViewerComponent from './viewer/DimacsViewerComponent.svelte';
+	import InstanceListComponent from './ListComponent.svelte';
+	import DimacsUploaderComponent from './UploaderComponent.svelte';
+	import DimacsViewerComponent from './ViewerComponent.svelte';
 
 	let listOpen = $state(true);
 	let uploadOpen = $state(false);

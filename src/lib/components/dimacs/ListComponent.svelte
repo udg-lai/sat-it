@@ -60,4 +60,28 @@
 	:global(.not-previewing) {
 		opacity: 0.5;
 	}
+
+	ul li {
+		display: flex;
+		align-items: center;
+		display: flex;
+		position: relative;
+		justify-content: space-between;
+		padding: 10px;
+	}
+
+	ul li p {
+		margin: 0px !important;
+		padding: 5px;
+	}
+
+	li button {
+		padding: 5px;
+	}
+
+	:global(.toggle) {
+		padding-left: 5px;
+		--tw-grayscale: 0%;
+		--tw-contrast: 1;
+	}
 </style>

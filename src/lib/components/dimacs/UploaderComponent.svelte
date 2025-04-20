@@ -3,7 +3,6 @@
 	import { logError } from '$lib/transversal/utils/logging.ts';
 	import parser from '$lib/transversal/utils/parsers/dimacs.ts';
 	import { UploadOutline } from 'flowbite-svelte-icons';
-	import './styles.css';
 
 	interface Props {
 		onUpload?: (instance: DimacsInstance) => void;
@@ -64,3 +63,30 @@
 		</div>
 	</div>
 </div>
+
+<style>
+	.file-input-box {
+		display: flex;
+		justify-content: center;
+		flex-direction: column;
+		border-radius: 10px;
+		height: auto;
+		padding: 20px;
+
+		.input-box {
+			padding: 20px;
+			display: grid;
+			place-items: center;
+			border: 2px dashed var(--border-color);
+			border-radius: 5px;
+			margin-bottom: 5px;
+			cursor: pointer;
+		}
+
+		small {
+			font-size: 12px;
+			color: #a3a3a3;
+		}
+
+	}
+</style>
