@@ -5,6 +5,7 @@ const fileName = 'NQueens4.dimacs';
 
 const content = `
 p cnf 60 128
+c this encode something in queens 4
 -18 -60 0
 -18 -59 0
 -15 -58 0
@@ -18,6 +19,7 @@ p cnf 60 128
 -10 -52 0
 -10 51 0
 -13 52 0
+c this encode something
 -13 -51 0
 -16 -52 0
 -16 -51 0
@@ -131,6 +133,8 @@ p cnf 60 128
 -4 -19 0
 -3 -20 0
 -3 -19 0
+c second last constraint
+c i guess it works
 1 0
 -2 0`;
 

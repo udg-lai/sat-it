@@ -1,7 +1,14 @@
 <script lang="ts">
 	import type { DimacsInstance } from '$lib/dimacs/dimacs-instance.interface.ts';
 	import { logFatal } from '$lib/transversal/utils/logging.ts';
-	import type { Claim } from '$lib/transversal/utils/parsers/dimacs.ts';
+	import type { Claim, RawClause } from '$lib/transversal/utils/parsers/dimacs.ts';
+	import {
+		fromJust,
+		isJust,
+		makeJust,
+		makeNothing,
+		type Maybe
+	} from '$lib/transversal/utils/types/maybe.ts';
 	import VirtualList from 'svelte-tiny-virtual-list';
 
 	interface Props {
@@ -10,40 +17,55 @@
 
 	let { dimacsInstance }: Props = $props();
 
-	let claims: string[] = $derived(makeClaims(dimacsInstance));
+	let items: string[] = $derived(makeHtmlItems(dimacsInstance));
 
 	let previewObserver: ResizeObserver;
 	let virtualHeight: number = $state(0);
 	let itemSize: number = $state(40);
 
-	function makeClaims(instance: DimacsInstance): string[] {
-		const { summary }: DimacsInstance = instance;
+	type Html = string;
 
-		const claimToHtml = (claim: Claim): string => {
-			const { clause } = claim;
+	function makeHtmlItems(instance: DimacsInstance): Html[] {
+		const clauseToHtml = (clause: RawClause): Html => {
+			return (
+				`<p class="clause">` +
+				clause
+					.map((lit) => {
+						return `<span class="${lit === 0 ? 'delimiter' : 'literal'}">${lit}</span>`;
+					})
+					.join('') +
+				`</p>`
+			);
+		};
+
+		const commentToHtml = (comment: string): Maybe<Html> => {
+			const trimmed = comment.trim();
+			if (trimmed.length === 0 || trimmed === '%c') {
+				return makeNothing();
+			} else {
+				return makeJust(`<p class="comment">` + trimmed.slice(2) + `</p>`);
+			}
+		};
+
+		const claimToHtml = (claim: Claim): Html[] => {
+			const { comments, clause } = claim;
+
+			const htmlComments: Html[] = comments.map(commentToHtml).filter(isJust).map(fromJust);
 
 			const eos = clause[clause.length - 1];
 			if (eos !== 0) {
 				logFatal('Claim end of sequence not found');
 			}
-			const html = clause
-				.map((lit) => {
-					return `<span class="${lit === 0 ? 'delimiter' : 'literal'}">${lit}</span>`;
-				})
-				.join(' ');
-			return html;
+			const htmlClause = clauseToHtml(clause);
+
+			return [...htmlComments, htmlClause];
 		};
 
-		const claimsToHtml = (claims: Claim[]): string[] => {
-			return claims.map((claim) => {
-				return `<div class="clause">` + claimToHtml(claim) + `</div>`;
-			});
-		};
+		const { claims } = instance.summary;
 
-		const { claims } = summary;
-		const html = claimsToHtml(claims);
+		const items: Html[] = claims.flatMap(claimToHtml);
 
-		return html;
+		return items;
 	}
 
 	function updateHeight(htmlElement: HTMLElement) {
@@ -79,11 +101,11 @@
 			width="100%"
 			height={virtualHeight}
 			scrollDirection="vertical"
-			itemCount={claims.length}
+			itemCount={items.length}
 			{itemSize}
 		>
 			<div slot="item" class="item-list" let:index let:style {style}>
-				{@html claims[index]}
+				{@html items[index]}
 			</div>
 		</VirtualList>
 	</div>
@@ -123,4 +145,33 @@
 	h3 {
 		font-size: 1.5rem;
 	}
+
+	:global(.literal) {
+		color: blue;
+		font-weight: bold;
+	}
+
+	:global(.delimiter) {
+		color: red;
+	}
+
+	:global(.literal, .delimiter) {
+		display: inline-block;
+		width: 20px;
+		text-align: right;
+	}
+
+	:global(.comment) {
+		color: rgb(107 114 128 / var(--tw-text-opacity, 1));
+		background-color: #f6f8fa;
+		font-family: monospace;
+		font-style: italic;
+		display: block;
+	}
+
+	:global(.clause) {
+		display: flex;
+		gap: 1rem;
+	}
+
 </style>
