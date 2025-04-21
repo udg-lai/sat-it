@@ -26,13 +26,12 @@
 
 	let lastTrail: HTMLDivElement;
 	$effect(() => {
-		console.log("After update");
-		if(trails) scrollToBottom(lastTrail);
-	})
+		if (trails) scrollToBottom(lastTrail);
+	});
 
 	const scrollToBottom = async (node: HTMLDivElement) => {
 		node.scroll({ top: node.scrollHeight, behavior: 'smooth' });
-	}
+	};
 </script>
 
 <div bind:this={lastTrail} class="trail-visualizer flex flex-row">
