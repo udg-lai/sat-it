@@ -4,7 +4,7 @@ import type Clause from './Clause.ts';
 
 export class Trail {
 	private assignments: VariableAssignment[] = [];
-	private decisionLevelBookmark: Map<number, number> = new Map();
+	private decisionLevelBookmark: number[] = [-1];
 	private learned: Clause[] = [];
 	private followUPIndex: number = -1;
 	private decisionLevel: number = 0;
@@ -17,7 +17,7 @@ export class Trail {
 	copy(): Trail {
 		const newTrail = new Trail(this.trailCapacity);
 		newTrail.assignments = this.assignments.map((assignment) => assignment.copy());
-		newTrail.decisionLevelBookmark = new Map(this.decisionLevelBookmark);
+		newTrail.decisionLevelBookmark = [...this.decisionLevelBookmark];
 		newTrail.learned = this.learned.map((clause) => clause);
 		newTrail.followUPIndex = this.followUPIndex;
 		newTrail.decisionLevel = this.decisionLevel;
@@ -30,12 +30,7 @@ export class Trail {
 	}
 
 	getDecisions(): VariableAssignment[] {
-		const levels = [...this.decisionLevelBookmark.keys()].sort();
-		const decisions: VariableAssignment[] = levels.map((level) => {
-			const decisionIndex = this.decisionLevelBookmark.get(level) as number;
-			return this.assignments[decisionIndex];
-		});
-		return decisions;
+		return this.getDecisionLevelMarks().map((mark) => this.assignments[mark]);
 	}
 
 	getInitialPropagations(): VariableAssignment[] {
@@ -98,29 +93,22 @@ export class Trail {
 
 	private getLevelZeroPropagations(): VariableAssignment[] {
 		const indexStart = 0;
-		let indexEnd;
-		const level1 = 1;
-		if (this.decisionLevelExists(level1)) {
-			indexEnd = this.decisionLevelBookmark.get(level1) as number;
-		} else {
-			indexEnd = this.assignments.length;
+		let indexEnd = this.assignments.length - 1;
+		if (this.hasDecisions()) {
+			indexEnd = this.getMarkOfDecisionLevel(1);
 		}
 		return this.assignments.slice(indexStart, indexEnd);
 	}
 
 	private getLevelPropagations(level: number): VariableAssignment[] {
-		if (!this.decisionLevelExists(level)) {
-			logFatal(`There is no such decision level: ${level}`);
-		}
-		const indexStart = this.decisionLevelBookmark.get(level) as number;
-		let indexEnd;
-		const nextLevel = level + 1;
-		if (this.decisionLevelExists(nextLevel)) {
-			indexEnd = this.decisionLevelBookmark.get(nextLevel) as number;
+		const startMark = this.getMarkOfDecisionLevel(level);
+		let endMark;
+		if (this.decisionLevelExists(level + 1)) {
+			endMark = this.getMarkOfDecisionLevel(level + 1);
 		} else {
-			indexEnd = this.assignments.length;
+			endMark = this.assignments.length;
 		}
-		return this.assignments.slice(indexStart + 1, indexEnd);
+		return this.assignments.slice(startMark + 1, endMark);
 	}
 
 	private registerNewDecisionLevel(): void {
@@ -129,19 +117,37 @@ export class Trail {
 			logFatal(`Trying to save an existing decision level ${nextDecisionLevel}`);
 		}
 		this.decisionLevel = nextDecisionLevel;
-		const startIndex = this.assignments.length - 1;
-		this.decisionLevelBookmark.set(this.decisionLevel, startIndex);
+		const decisionMark = this.assignments.length - 1;
+		this.decisionLevelBookmark.push(decisionMark);
 	}
 
 	private deleteCurrentDecisionLevel(): void {
 		if (!this.decisionLevelExists(this.decisionLevel)) {
 			logFatal(`Trying to delete current decision level but was not saved`);
 		}
-		this.decisionLevelBookmark.delete(this.decisionLevel);
+		this.decisionLevelBookmark = this.decisionLevelBookmark.slice(0, -1);
 		this.decisionLevel = this.decisionLevel - 1;
 	}
 
 	private decisionLevelExists(level: number): boolean {
-		return this.decisionLevelBookmark.has(level);
+		const levels = this.getDecisionLevelMarks();
+		return level > 0 && level <= levels.length;
+	}
+
+	private getMarkOfDecisionLevel(level: number): number {
+		if (!this.decisionLevelExists(level)) {
+			logFatal(`Level ${level} does not exist`);
+		}
+		const levels = this.getDecisionLevelMarks();
+		return levels[level - 1];
+	}
+
+	private getDecisionLevelMarks(): number[] {
+		return this.decisionLevelBookmark.slice(1);
+	}
+
+	private hasDecisions(): boolean {
+		const levels = this.getDecisionLevelMarks();
+		return levels.length > 0;
 	}
 }
