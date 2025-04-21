@@ -13,7 +13,7 @@
 		editorViewEventStore,
 		type AssignmentEvent,
 		type EditorViewEvent
-	} from './tools/debugger/events.svelte.ts';
+	} from './debugger/events.svelte.ts';
 	import TrailEditor from './TrailEditorComponent.svelte';
 
 	let showOnlyLastTrail: boolean = $state(false);

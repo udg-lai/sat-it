@@ -1,4 +1,4 @@
-import type { ManualAssignment } from '$lib/components/tools/debugger/events.svelte.ts';
+import type { ManualAssignment } from '$lib/components/debugger/events.svelte.ts';
 import { Trail } from '../entities/Trail.svelte.ts';
 import VariableAssignment from '../entities/VariableAssignment.ts';
 import type VariablePool from '../entities/VariablePool.svelte.ts';
