@@ -10,7 +10,7 @@
 	const equationHtml = $derived(
 		katex.renderToString(equation, {
 			displayMode: true,
-			output: 'html'
+			output: 'mathml'
 		})
 	);
 </script>
