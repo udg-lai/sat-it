@@ -2,9 +2,9 @@
 	import { BugOutline, FileCirclePlusOutline, GithubSolid } from 'flowbite-svelte-icons';
 	import { onMount } from 'svelte';
 	import Button from './Button.svelte';
-	import DebuggerComponent from './debugger/DebuggerComponent.svelte';
-	import DimacsComponent from './dimacs/DimacsComponent.svelte';
-	import './styles.css';
+	import DebuggerComponent from '../debugger/DebuggerComponent.svelte';
+	import DimacsComponent from '../dimacs/DimacsComponent.svelte';
+	import './_styles.css';
 
 	let toolsViewRef: HTMLElement;
 

@@ -1,9 +1,8 @@
 <script lang="ts">
 	import type { DimacsInstance } from '$lib/dimacs/dimacs-instance.interface.ts';
 	import { logError } from '$lib/transversal/utils/logging.ts';
-	import dimacsParser from '$lib/transversal/utils/parsers/dimacs.ts';
+	import parser from '$lib/transversal/utils/parsers/dimacs.ts';
 	import { UploadOutline } from 'flowbite-svelte-icons';
-	import './styles.css';
 
 	interface Props {
 		onUpload?: (instance: DimacsInstance) => void;
@@ -17,29 +16,29 @@
 		const files = fileInputRef.files || [];
 		for (const file of files) {
 			const reader = new FileReader();
-			const instanceName = file.name;
+			const name = file.name;
 			reader.onload = (e: ProgressEvent<FileReader>) => {
-				saveInstance(instanceName, e.target?.result as string);
+				saveInstance(name, e.target?.result as string);
 			};
 			reader.onerror = () => {
-				const title = `File ${instanceName} could not be loaded`;
+				const title = `File ${name} could not be loaded`;
 				logError(title, title);
 			};
 			reader.readAsText(file);
 		}
 	}
 
-	function saveInstance(instanceName: string, content: string): void {
+	function saveInstance(name: string, content: string): void {
 		try {
-			const summary = dimacsParser(content);
+			const summary = parser({ name: name, content });
 			const instance: DimacsInstance = {
-				instanceName,
+				name: name,
 				content,
 				summary
 			};
 			onUpload?.(instance);
 		} catch (error) {
-			const title = `Instance ${instanceName} contains an error`;
+			const title = `Instance ${name} contains an error`;
 			const description = (error as Error).message;
 			logError(title, description);
 		}
@@ -64,3 +63,29 @@
 		</div>
 	</div>
 </div>
+
+<style>
+	.file-input-box {
+		display: flex;
+		justify-content: center;
+		flex-direction: column;
+		border-radius: 10px;
+		height: auto;
+		padding: 20px;
+
+		.input-box {
+			padding: 20px;
+			display: grid;
+			place-items: center;
+			border: 2px dashed var(--border-color);
+			border-radius: 5px;
+			margin-bottom: 5px;
+			cursor: pointer;
+		}
+
+		small {
+			font-size: 12px;
+			color: #a3a3a3;
+		}
+	}
+</style>

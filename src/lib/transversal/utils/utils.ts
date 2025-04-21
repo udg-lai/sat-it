@@ -1,8 +1,8 @@
 import Clause from '../entities/Clause.ts';
 import Literal from '../entities/Literal.svelte.ts';
-import type VariablePool from '../entities/VariablePool.svelte.ts';
-import { logError, logWarning } from './logging.ts';
-import type { Claims } from './parsers/dimacs.ts';
+import VariablePool from '../entities/VariablePool.svelte.ts';
+import { logWarning } from './logging.ts';
+import type { CNF } from './parsers/dimacs.ts';
 
 export function disableContextMenu(event: Event): void {
 	event.preventDefault();
@@ -12,33 +12,24 @@ export function enableContextMenu(event: Event) {
 	event.stopPropagation(); // Prevent global listener from triggering
 }
 
-export function fromClaimsToClause(claims: Claims, variablePool: VariablePool): Clause[] {
-	const clauses: Clause[] = [];
-	claims.forEach((claim, i) => {
-		if (claim.length === 0) {
-			logWarning('Claim to clause', `Claim ${i} is empty. With no EOS`);
-			clauses.push(new Clause());
-		} else {
-			const [eos, ...rest] = [...claim].reverse();
-			if (eos === 0) {
-				const literals: Literal[] = [];
-				rest.forEach((lit) => {
-					if (lit === 0) {
-						logError(
-							'Unexpected literal representation',
-							`Found literal '0' which is not a valid representation`
-						);
-					} else {
-						literals.push(
-							new Literal(variablePool.get(Math.abs(lit)), lit < 0 ? 'Negative' : 'Positive')
-						);
-					}
-				});
-				clauses.push(new Clause(literals));
-			} else {
-				logError(`Claim's EOS not found`, `Claim ${i} has not EOS`);
-			}
-		}
-	});
-	return clauses;
+function literalSetToClause(literals: number[], variables: VariablePool): Clause {
+	let clause;
+	literals = literals.filter((lit) => lit !== 0);
+	if (literals.length === 0) {
+		logWarning('Literals to clause', 'An empty clause has been created');
+		clause = new Clause();
+	} else {
+		const literalInstances = literals.map((lit) => {
+			const variable = Math.abs(lit);
+			const polarity = lit < 0 ? 'Negative' : 'Positive';
+			const literal = new Literal(variables.get(variable), polarity);
+			return literal;
+		});
+		clause = new Clause(literalInstances);
+	}
+	return clause;
+}
+
+export function cnfToClauseSet(cnf: CNF, variables: VariablePool): Clause[] {
+	return cnf.map((literals) => literalSetToClause(literals, variables));
 }

@@ -1,4 +1,4 @@
-import { type ErrorMessage } from '$lib/transversal/utils/types/types.ts';
+import { isTautology } from '$lib/transversal/algorithms/tautology.ts';
 import {
 	isRight,
 	makeLeft,
@@ -6,7 +6,6 @@ import {
 	unwrapEither,
 	type Either
 } from '$lib/transversal/utils/types/either.ts';
-import { type Tuple, makeTuple } from '$lib/transversal/utils/types/tuple.ts';
 import {
 	fromJust,
 	isJust,
@@ -14,81 +13,119 @@ import {
 	makeNothing,
 	type Maybe
 } from '$lib/transversal/utils/types/maybe.ts';
+import { type ErrorMessage } from '$lib/transversal/utils/types/types.ts';
+import { logFatal } from '../logging.ts';
 
-export type Claims = number[][];
+export type RawClause = number[]; // this contains the eos '0'
+export type LiteralSet = number[]; // this contains just the literals
+export type CNF = LiteralSet[];
 
-export interface Summary {
-	comment: string;
-	varCount: number;
-	clauseCount: number;
-	claims: {
-		original: Claims;
-		simplified: Claims;
-	};
+export interface Claim {
+	comments: string[];
+	clause: RawClause;
 }
 
-export default function dimacsParser(input: string): Summary {
-	let lines: string[] = input.trim().split('\n');
+export interface Summary {
+	name: string;
+	description: string;
+	varCount: number;
+	clauseCount: number;
+	claims: Claim[];
+	cnf: CNF;
+}
+
+const emptySummary = (): Summary => {
 	const summary: Summary = {
-		comment: '',
+		name: '',
+		description: '',
 		varCount: -1,
 		clauseCount: -1,
-		claims: {
-			original: [],
-			simplified: []
-		}
+		claims: [],
+		cnf: []
 	};
-	// comments
-	const comments = parseComment(lines);
-	summary.comment = comments.fst;
-	lines = comments.snd;
-	// summary
+	return summary;
+};
+
+export interface Input {
+	content: string;
+	name: string;
+}
+
+export default function parser(input: Input): Summary {
+	const { content, name } = input;
+
+	let lines: string[] = content.trim().split('\n');
+
+	const summary = emptySummary();
+	summary.name = name;
+
+	const { description, endLine } = parseDescription(lines);
+	summary.description = description;
+	lines = lines.slice(endLine);
+
 	const eitherSummary = parseSummary(lines);
 	if (isRight(eitherSummary)) {
-		const right = unwrapEither(eitherSummary);
-		summary.varCount = right.fst;
-		summary.clauseCount = right.snd;
-		lines = lines.slice(1);
+		const { varCount, clauseCount, endLine } = unwrapEither(eitherSummary);
+		summary.varCount = varCount;
+		summary.clauseCount = clauseCount;
+		lines = lines.slice(endLine);
 	} else {
-		const msg = unwrapEither(eitherSummary);
-		throw new Error(msg);
+		logFatal('Problem parsing summary', unwrapEither(eitherSummary));
 	}
-	const eitherCNF = parseCNF(lines, summary.varCount, summary.clauseCount);
-	if (isRight(eitherCNF)) {
-		const right = unwrapEither(eitherCNF);
-		summary.claims.original = right.fst;
-		summary.claims.simplified = right.snd;
+
+	const eitherClaims = parseClaims(lines, summary.clauseCount);
+	if (isRight(eitherClaims)) {
+		const { claims, endLine } = unwrapEither(eitherClaims);
+		summary.claims = claims;
+		lines = lines.slice(endLine + 1);
 	} else {
-		const msg = unwrapEither(eitherCNF);
-		throw new Error(msg);
+		logFatal('Problem parsing claims', unwrapEither(eitherClaims));
 	}
+
+	const eitherClauses = makeClauses(summary.claims, summary.varCount);
+	if (isRight(eitherClauses)) {
+		const { clauses } = unwrapEither(eitherClauses);
+		summary.cnf = clauses;
+	} else {
+		logFatal('Problem simplifying claims to clauses', unwrapEither(eitherClauses));
+	}
+
 	return summary;
 }
 
-function parseComment(oLines: string[]): Tuple<string, string[]> {
-	const lines: string[] = [];
-	let comments = '';
-	let i = 0;
-	while (i < oLines.length) {
-		const line = oLines[i];
-		const commentLine = line.at(0) == 'c';
-		if (commentLine) {
-			const content = line.split(' ').slice(1).join(' ');
-			comments = comments.concat(content, '\n');
-		} else {
-			lines.push(oLines[i]);
-		}
-		i += 1;
-	}
-	return makeTuple(comments, lines);
+interface DescriptionResult {
+	description: string;
+	endLine: number;
 }
 
-function parseSummary(lines: string[]): Either<ErrorMessage, Tuple<number, number>> {
+function parseDescription(lines: string[]): DescriptionResult {
+	const description: string[] = [];
+	let endLine = 0;
+	let scape = false;
+	while (!scape && endLine < lines.length) {
+		const line = lines[endLine];
+		if (line.at(0) === 'p') {
+			scape = true;
+		} else {
+			description.push(line);
+			endLine += 1;
+		}
+	}
+	return {
+		description: description.join('\n'),
+		endLine: endLine
+	};
+}
+
+interface SummaryResult {
+	varCount: number;
+	clauseCount: number;
+	endLine: number;
+}
+
+function parseSummary(lines: string[]): Either<ErrorMessage, SummaryResult> {
 	if (lines.length == 0) {
 		return makeLeft('could not parser summary because lines are empty');
-	}
-	if (lines.length === 0) {
-		return makeLeft('summary header not found');
 	}
 	const summary = lines[0];
 	const chunkSummary = summary.split(' ');
@@ -102,64 +139,93 @@ function parseSummary(lines: string[]): Either<ErrorMessage, Tuple<number, numbe
 	if (cnf !== 'cnf') {
 		return makeLeft(`boolean formula expected to be represented in Conjunctive Normal From (CNF)`);
 	}
-	const varsCount = parseInt(vars);
-	if (Number.isNaN(varsCount)) {
+	const varCount = parseInt(vars);
+	if (Number.isNaN(varCount)) {
 		return makeLeft(`could not parse expected variable count to number representation of ${vars}`);
 	}
-	const clausesCount = parseInt(clauses);
-	if (Number.isNaN(clausesCount)) {
+	const clauseCount = parseInt(clauses);
+	if (Number.isNaN(clauseCount)) {
 		return makeLeft(
 			`could not parse expected clauses count to number representation of ${clauses}`
 		);
 	}
-	return makeRight(makeTuple(varsCount, clausesCount));
+	return makeRight({
+		varCount,
+		clauseCount,
+		endLine: 1
+	});
 }
 
-function parseCNF(
-	lines: string[],
-	varCount: number,
-	clauseCount: number
-): Either<ErrorMessage, Tuple<Claims, Claims>> {
-	if (lines.length > clauseCount) {
-		return makeLeft(`number of CNF greater than the number of expected clauses ${clauseCount}`);
+interface ClaimsResult {
+	claims: Claim[];
+	endLine: number;
+}
+
+function isLineComment(line: string): boolean {
+	return line.at(0) === 'c';
+}
+
+function parseClaims(lines: string[], clauseCount: number): Either<ErrorMessage, ClaimsResult> {
+	const nClauses = lines.filter((line) => !isLineComment(line)).length;
+	if (nClauses !== clauseCount) {
+		return makeLeft(`Number of clauses found ${nClauses} and it was expected to be ${clauseCount}`);
 	}
-	const originalClaim: Claims = lines.map((line) =>
-		line
+
+	const claims: Claim[] = [];
+	let c = 0;
+	let i = 0;
+	while (c < clauseCount) {
+		const comments = [];
+		while (isLineComment(lines[i])) {
+			comments.push(lines[i]);
+			i += 1;
+		}
+		const clause = lines[i]
 			.trim()
 			.split(' ')
-			.map((n) => parseInt(n))
-	);
-	const assertClaim: Maybe<ErrorMessage>[] = originalClaim.map((line: number[], idx: number) => {
-		const literals = line.slice(0, -1);
-		const eos = line.at(-1);
-		if (literals.length === 0) {
-			return makeJust(`empty clause in list of clause at index: ${idx}`);
-		} else if (!literals.every((l) => Math.abs(l) <= varCount)) {
-			return makeJust(`literal out of bounds in list of clause at index: ${idx}`);
-		} else if (eos !== 0) {
-			return makeJust(`clause does not finish with the expected '0' at index ${idx}`);
+			.map((lit) => parseInt(lit));
+		claims.push({ comments, clause });
+		c += 1;
+		i += 1;
+	}
+
+	return makeRight({ claims, endLine: i });
+}
+
+interface MakeClausesResult {
+	clauses: RawClause[];
+}
+
+function makeClauses(claims: Claim[], varCount: number): Either<ErrorMessage, MakeClausesResult> {
+	const rawClauses = claims.map((claim) => claim.clause);
+
+	const asserts: Maybe<ErrorMessage>[] = rawClauses.map((rawClause, idx) => {
+		const [eos, ...literals] = [...rawClause].reverse();
+
+		if (eos !== 0) {
+			return makeJust(`Clause with no EOS '0' at ${idx}`);
+		} else if (literals.some((l) => Math.abs(l) > varCount)) {
+			return makeJust(`Literal at claim ${idx} out of range`);
 		} else {
 			return makeNothing();
 		}
 	});
-	const clauseError = assertClaim.find((c) => isJust(c));
-	if (clauseError) {
-		return makeLeft(fromJust(clauseError));
+
+	const firstError = asserts.find((c) => isJust(c));
+
+	if (firstError) {
+		return makeLeft(fromJust(firstError));
 	} else {
-		const simplifiedClaim = originalClaim
-			.map((c) => c.slice(0, -1))
-			.map((c) => new Set(c))
-			.filter((c: Set<number>) => {
-				let trivialTrue = false;
-				for (const lit of c) {
-					if (c.has(lit * -1)) {
-						trivialTrue = true;
-						break;
-					}
-				}
-				return !trivialTrue;
+		// 1) drops repeated literals (removing the eos)
+		// 2) remove trivial true clauses
+		// 3) builds the clause (adds the eos)
+		const clauses = rawClauses
+			.map((rawClause) => {
+				const literals = rawClause.slice(0, -1);
+				return new Set(literals);
 			})
-			.map((s) => [...Array.from(s), 0]);
-		return makeRight(makeTuple(originalClaim, simplifiedClaim));
+			.filter((clause) => !isTautology(clause))
+			.map((clause) => [...Array.from(clause)]);
+		return makeRight({ clauses });
 	}
 }

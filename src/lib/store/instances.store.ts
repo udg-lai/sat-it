@@ -76,7 +76,7 @@ function updateInstanceStore(newInstances: InteractiveInstance[]): void {
 }
 
 export function addInstance(instance: DimacsInstance): void {
-	const found = get(instanceStore).find((i) => i.instanceName === instance.instanceName);
+	const found = get(instanceStore).find((i) => i.name === instance.name);
 	if (found) {
 		const title = 'Duplicated instance';
 		const description = `Instance already loaded in the collection of instances`;
@@ -86,7 +86,7 @@ export function addInstance(instance: DimacsInstance): void {
 	}
 }
 
-export function activateInstanceByName(instanceName: string): void {
+export function activateInstanceByName(name: string): void {
 	// pre: that instance should exist in the store
 	instanceStore.update((instances) => {
 		const newInstances = instances.map((e) => {
@@ -96,7 +96,7 @@ export function activateInstanceByName(instanceName: string): void {
 				active: false
 			};
 		});
-		const instance = newInstances.find((e) => e.instanceName === instanceName);
+		const instance = newInstances.find((e) => e.name === name);
 		if (instance !== undefined) {
 			instance.active = true;
 			instance.previewing = true;
@@ -109,7 +109,7 @@ export function activateInstanceByName(instanceName: string): void {
 	});
 }
 
-export function previewInstanceByName(instanceName: string): void {
+export function previewInstanceByName(name: string): void {
 	instanceStore.update((instances) => {
 		const newInstances = instances.map((e) => {
 			return {
@@ -117,7 +117,7 @@ export function previewInstanceByName(instanceName: string): void {
 				previewing: false
 			};
 		});
-		const instance = newInstances.find((e) => e.instanceName === instanceName);
+		const instance = newInstances.find((e) => e.name === name);
 		if (instance !== undefined) {
 			instance.previewing = true;
 			activeInstanceStore.set(instance);
@@ -128,15 +128,13 @@ export function previewInstanceByName(instanceName: string): void {
 	});
 }
 
-export function removeInstanceByName(instanceName: string): void {
-	const filterFun = (e: InteractiveInstance, instanceName: string) => {
-		return (
-			e.instanceName !== instanceName || (e.instanceName === instanceName && e.removable === false)
-		);
+export function removeInstanceByName(name: string): void {
+	const filterFun = (e: InteractiveInstance, name: string) => {
+		return e.name !== name || (e.name === name && e.removable === false);
 	};
 
 	instanceStore.update((instances) => {
-		return instances.filter((e) => filterFun(e, instanceName));
+		return instances.filter((e) => filterFun(e, name));
 	});
 }
 

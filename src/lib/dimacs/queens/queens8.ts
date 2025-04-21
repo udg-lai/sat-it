@@ -1,4 +1,4 @@
-import dimacsParser from '$lib/transversal/utils/parsers/dimacs.ts';
+import parser from '$lib/transversal/utils/parsers/dimacs.ts';
 import type { DimacsInstance } from '../dimacs-instance.interface.ts';
 
 const fileName = `NQueens8.dimacs`;
@@ -747,8 +747,8 @@ p cnf 194 740
 -2 0
 `;
 
-const summary = dimacsParser(content);
+const summary = parser({ content, name: fileName });
 
-const instance: DimacsInstance = { instanceName: fileName, content, summary };
+const instance: DimacsInstance = { name: fileName, content, summary };
 
 export default instance;

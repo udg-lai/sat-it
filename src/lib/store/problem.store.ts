@@ -3,29 +3,29 @@ import { get, writable, type Writable } from 'svelte/store';
 import VariablePool from '../transversal/entities/VariablePool.svelte.ts';
 import type { DimacsInstance } from '$lib/dimacs/dimacs-instance.interface.ts';
 
-type Literal2Clauses = Map<number, Set<number>>;
+type MappingLiteral2Clauses = Map<number, Set<number>>;
 
 export interface Problem {
 	variables: VariablePool;
 	clauses: ClausePool;
-	mapping: Literal2Clauses;
+	mapping: MappingLiteral2Clauses;
 	algorithm: () => void;
 }
 
 export const problemStore: Writable<Problem> = writable();
 
 export function updateProblemDomain(instance: DimacsInstance) {
-	const { summary } = instance;
-	const { claims } = summary;
-	const variables: VariablePool = new VariablePool(summary.varCount);
-	const clauses: ClausePool = ClausePool.buildFrom(claims.simplified, variables);
-	const mapping: Literal2Clauses = literalToClauses(clauses);
+	const { varCount, cnf: clauses } = instance.summary;
+
+	const variablePool: VariablePool = new VariablePool(varCount);
+	const clausePool: ClausePool = ClausePool.buildFrom(clauses, variablePool);
+	const mapping: MappingLiteral2Clauses = literalToClauses(clausePool);
 
 	const previousProblem = get(problemStore);
 
 	const params = {
-		variables,
-		clauses,
+		variables: variablePool,
+		clauses: clausePool,
 		mapping
 	};
 
@@ -53,7 +53,7 @@ export function updateAlgorithm(algorithm: () => void) {
 	problemStore.set({ ...currentProblem, ...algorithm });
 }
 
-function literalToClauses(clauses: ClausePool): Literal2Clauses {
+function literalToClauses(clauses: ClausePool): MappingLiteral2Clauses {
 	const mapping: Map<number, Set<number>> = new Map();
 
 	clauses.getClauses().forEach((clause, clauseId) => {

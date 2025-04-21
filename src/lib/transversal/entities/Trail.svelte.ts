@@ -4,7 +4,7 @@ import type Clause from './Clause.ts';
 
 export class Trail {
 	private assignments: VariableAssignment[] = [];
-	private decisionBookMark: number[] = [];
+	private decisionLevelBookmark: Map<number, number> = new Map();
 	private learned: Clause[] = [];
 	private followUPIndex: number = -1;
 	private decisionLevel: number = 0;
@@ -17,7 +17,7 @@ export class Trail {
 	copy(): Trail {
 		const newTrail = new Trail(this.trailCapacity);
 		newTrail.assignments = this.assignments.map((assignment) => assignment.copy());
-		newTrail.decisionBookMark = [...this.decisionBookMark];
+		newTrail.decisionLevelBookmark = new Map(this.decisionLevelBookmark);
 		newTrail.learned = this.learned.map((clause) => clause);
 		newTrail.followUPIndex = this.followUPIndex;
 		newTrail.decisionLevel = this.decisionLevel;
@@ -29,27 +29,29 @@ export class Trail {
 		return [...this.assignments];
 	}
 
-	getDecisionBookMark(): number[] {
-		return this.decisionBookMark;
-	}
-
 	getDecisions(): VariableAssignment[] {
-		return this.decisionBookMark.map((mark) => this.assignments[mark]);
+		const levels = [...this.decisionLevelBookmark.keys()].sort();
+		const decisions: VariableAssignment[] = levels.map((level) => {
+			const decisionIndex = this.decisionLevelBookmark.get(level) as number;
+			return this.assignments[decisionIndex];
+		});
+		return decisions;
 	}
 
-	getPropagations(mark: number): VariableAssignment[] {
-		const idx = this.getMarkIndex(mark);
-		const isLastMark = (idx: number): boolean => {
-			return this.decisionBookMark.length - 1 === idx;
-		};
-		let propagations: VariableAssignment[] = [];
-		if (isLastMark(idx)) {
-			propagations = this.assignments.slice(idx);
+	getInitialPropagations(): VariableAssignment[] {
+		return this.getPropagations(0);
+	}
+
+	getPropagations(level: number): VariableAssignment[] {
+		if (level === 0) {
+			return this.getLevelZeroPropagations();
 		} else {
-			const nextDecisionIdx = this.decisionBookMark[idx + 1];
-			propagations = this.assignments.slice(idx, nextDecisionIdx);
+			return this.getLevelPropagations(level);
 		}
-		return propagations;
+	}
+
+	hasPropagations(level: number): boolean {
+		return this.getPropagations(level).length > 0;
 	}
 
 	push(assignment: VariableAssignment) {
@@ -58,8 +60,7 @@ export class Trail {
 		else {
 			this.assignments.push(assignment);
 			if (assignment.isD()) {
-				this.decisionLevel++;
-				this.registerDecisionMark();
+				this.registerNewDecisionLevel();
 			}
 		}
 	}
@@ -67,10 +68,21 @@ export class Trail {
 	pop(): VariableAssignment | undefined {
 		const returnValue = this.assignments.pop();
 		if (returnValue?.isD()) {
-			this.decisionLevel--;
-			this.decisionBookMark.pop();
+			this.deleteCurrentDecisionLevel();
 		}
 		return returnValue;
+	}
+
+	learnedClauses(): Clause[] {
+		return this.learned;
+	}
+
+	learn(clause: Clause): void {
+		this.learned.push(clause);
+	}
+
+	updateFollowUpIndex(): void {
+		this.followUPIndex = this.assignments.length - 1;
 	}
 
 	[Symbol.iterator]() {
@@ -84,42 +96,52 @@ export class Trail {
 		this.assignments.forEach(callback, thisArg);
 	}
 
-	updateFollowUpIndex(): void {
-		this.followUPIndex = this.assignments.length - 1;
-	}
-
-	private registerDecisionMark(): void {
-		const mark = this.assignments.length - 1;
-		if (this.markAlreadyExists(mark)) {
-			logFatal(
-				'Adding an existing mark',
-				`Can not register mark ${mark} because it already exists`
-			);
+	private getLevelZeroPropagations(): VariableAssignment[] {
+		const indexStart = 0;
+		let indexEnd;
+		const level1 = 1;
+		if (this.decisionLevelExists(level1)) {
+			indexEnd = this.decisionLevelBookmark.get(level1) as number;
 		} else {
-			this.decisionBookMark.push(mark);
+			indexEnd = this.assignments.length;
 		}
+		return this.assignments.slice(indexStart, indexEnd);
 	}
 
-	private markAlreadyExists(mark: number): boolean {
-		return new Set(this.decisionBookMark).has(mark);
-	}
-
-	private getMarkIndex(mark: number): number {
-		if (mark < 0 || mark >= this.trailCapacity) {
-			logFatal('Mark out of range', `Mark ${mark} out of range`);
+	private getLevelPropagations(level: number): VariableAssignment[] {
+		if (!this.decisionLevelExists(level)) {
+			logFatal(`There is no such decision level: ${level}`);
 		}
-		const idx = this.decisionBookMark.findIndex((m) => m === mark);
-		if (idx === -1) {
-			logFatal('Mark does not exist', `Mark ${mark} not found in decision book mark`);
+		const indexStart = this.decisionLevelBookmark.get(level) as number;
+		let indexEnd;
+		const nextLevel = level + 1;
+		if (this.decisionLevelExists(nextLevel)) {
+			indexEnd = this.decisionLevelBookmark.get(nextLevel) as number;
+		} else {
+			indexEnd = this.assignments.length;
 		}
-		return idx;
+		return this.assignments.slice(indexStart + 1, indexEnd);
 	}
 
-	learnedClauses(): Clause[] {
-		return this.learned;
+	private registerNewDecisionLevel(): void {
+		const nextDecisionLevel = this.decisionLevel + 1;
+		if (this.decisionLevelExists(nextDecisionLevel)) {
+			logFatal(`Trying to save an existing decision level ${nextDecisionLevel}`);
+		}
+		this.decisionLevel = nextDecisionLevel;
+		const startIndex = this.assignments.length - 1;
+		this.decisionLevelBookmark.set(this.decisionLevel, startIndex);
 	}
 
-	learn(clause: Clause): void {
-		this.learned.push(clause);
+	private deleteCurrentDecisionLevel(): void {
+		if (!this.decisionLevelExists(this.decisionLevel)) {
+			logFatal(`Trying to delete current decision level but was not saved`);
+		}
+		this.decisionLevelBookmark.delete(this.decisionLevel);
+		this.decisionLevel = this.decisionLevel - 1;
+	}
+
+	private decisionLevelExists(level: number): boolean {
+		return this.decisionLevelBookmark.has(level);
 	}
 }

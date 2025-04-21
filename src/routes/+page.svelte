@@ -13,7 +13,7 @@
 	import { logError } from '$lib/transversal/utils/logging.ts';
 	import { onMount } from 'svelte';
 	import AppComponent from '$lib/components/AppComponent.svelte';
-	import DebuggerComponent from '$lib/components/tools/debugger/DebuggerComponent.svelte';
+	import DebuggerComponent from '$lib/components/debugger/DebuggerComponent.svelte';
 
 	onMount(() => {
 		initializeInstancesStore()
