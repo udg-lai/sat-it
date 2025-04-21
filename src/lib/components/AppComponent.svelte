@@ -14,9 +14,9 @@
 		type AssignmentEvent,
 		type EditorViewEvent
 	} from './debugger/events.svelte.ts';
-	import TrailEditor from './visualizer/TrailEditorComponent.svelte';
+	import TrailEditor from './TrailEditorComponent.svelte';
 
-	let editorExpanded: boolean = $state(true);
+	let showOnlyLastTrail: boolean = $state(false);
 
 	let trails: Trail[] = $state([]);
 
@@ -44,7 +44,7 @@
 	function toggleEditorView(e: EditorViewEvent) {
 		if (e === undefined) return;
 
-		editorExpanded = e.expand;
+		showOnlyLastTrail = !e.expand;
 	}
 
 	function onProblemUpdated(p: Problem): void {
@@ -64,4 +64,4 @@
 	});
 </script>
 
-<TrailEditor {trails} {editorExpanded} />
+<TrailEditor {trails} showOnlyLast={showOnlyLastTrail} />

@@ -1,0 +1,10 @@
+.literal-style {
+	width: 33px;
+	height: 33px;
+	position: relative;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	border: none;
+	border-bottom: 1px solid;
+}
