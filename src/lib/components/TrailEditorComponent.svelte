@@ -23,9 +23,18 @@
 		});
 		return showOnlyLast ? indexed.slice(-1) : indexed;
 	});
+
+	let lastTrail: HTMLDivElement;
+	$effect(() => {
+		if (trails) scrollToBottom(lastTrail);
+	});
+
+	const scrollToBottom = async (node: HTMLDivElement) => {
+		node.scroll({ top: node.scrollHeight, behavior: 'smooth' });
+	};
 </script>
 
-<div class="trail-visualizer flex flex-row">
+<div bind:this={lastTrail} class="trail-visualizer flex flex-row">
 	<div class="trails flex flex-col">
 		{#each indexedTrails as indexedTrail (indexedTrail.index)}
 			<IndexedTrailComponent trail={indexedTrail.trail} index={indexedTrail.index} />
