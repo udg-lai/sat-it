@@ -92,12 +92,12 @@ export class Trail {
 	}
 
 	private getLevelZeroPropagations(): VariableAssignment[] {
-		const indexStart = 0;
-		let indexEnd = this.assignments.length - 1;
+		const startMark = 0;
+		let endMark = this.assignments.length;
 		if (this.hasDecisions()) {
-			indexEnd = this.getMarkOfDecisionLevel(1);
+			endMark = this.getMarkOfDecisionLevel(1);
 		}
-		return this.assignments.slice(indexStart, indexEnd);
+		return this.assignments.slice(startMark, endMark);
 	}
 
 	private getLevelPropagations(level: number): VariableAssignment[] {
