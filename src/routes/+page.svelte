@@ -1,6 +1,5 @@
 <script lang="ts">
 	import './_styles.css';
-	import FooterComponent from '$lib/components/FooterComponent.svelte';
 	import ToolsComponent from '$lib/components/tools/ToolsComponent.svelte';
 	import ScrollableComponent from '$lib/components/ScrollableComponent.svelte';
 	import ToastComponent from '$lib/components/ToastComponent.svelte';

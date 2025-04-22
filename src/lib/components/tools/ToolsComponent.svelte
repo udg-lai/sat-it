@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { BugOutline, FileCirclePlusOutline, GithubSolid } from 'flowbite-svelte-icons';
+	import { BugOutline, FileCirclePlusOutline } from 'flowbite-svelte-icons';
 	import { onMount } from 'svelte';
 	import Button from './Button.svelte';
 	import DebuggerComponent from '../debugger/DebuggerComponent.svelte';
@@ -46,10 +46,12 @@
 		}
 		views = [...views];
 	}
-
+	
+	/*
 	function openGutHubRepository() {
 		window.open('https://github.com/udg-lai/edu.satit', '_blank');
 	}
+	*/
 
 	function closeAllViews(): void {
 		views = views.map((v) => ({ ...v, active: false }));
@@ -179,9 +181,11 @@
 	<Button onClick={() => activateView(id)} icon={BugOutline} active={views[id].active} />
 {/snippet}
 
+<!--
 {#snippet btnGitHub()}
 	<Button onClick={() => openGutHubRepository()} icon={GithubSolid} />
 {/snippet}
+-->
 
 {#snippet notImplementedYet(what?: string)}
 	<p>Missing {what}</p>
