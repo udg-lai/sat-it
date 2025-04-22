@@ -13,6 +13,7 @@
 	function onClick() {
 		eventClick?.();
 	}
+
 </script>
 
 <button class="literal-style backtracking" onclick={onClick}>
@@ -26,5 +27,9 @@
 		border-left: 1px transparent;
 		border-right: 1px transparent;
 		cursor: help;
+	}
+
+	:global(mo) {
+		margin-bottom: 2px;
 	}
 </style>

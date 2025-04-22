@@ -26,6 +26,7 @@
 		overflow: auto;
 		-ms-overflow-style: none; /* Internet Explorer 10+ */
 		scrollbar-width: none; /* Firefox */
+		display: flex;
 	}
 
 	scrollable-area::-webkit-scrollbar {

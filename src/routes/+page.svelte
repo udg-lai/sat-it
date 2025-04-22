@@ -46,9 +46,6 @@
 			</play-area>
 		</workspace>
 	</main>
-	<footer>
-		<FooterComponent />
-	</footer>
 </app>
 
 {#snippet app()}
