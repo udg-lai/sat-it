@@ -23,7 +23,7 @@
 <style>
 	.debugger {
 		width: 100%;
-		height: 100%;
+		height: var(--debugger-height);
 		display: flex;
 		border-bottom: 1px;
 		border-color: var(--border-color);
@@ -36,5 +36,9 @@
 		border-right: 1px;
 		border-color: var(--border-color);
 		border-style: solid;
+	}
+
+	:root {
+		--debugger-height: 66px;
 	}
 </style>

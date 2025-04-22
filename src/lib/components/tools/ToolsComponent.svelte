@@ -144,9 +144,6 @@
 				{/if}
 			</div>
 		{/each}
-		<div class="fixed_bottom">
-			{@render btnGitHub()}
-		</div>
 		<div class="vertical-separator"></div>
 	</div>
 

@@ -18,6 +18,7 @@ play-area {
 
 workspace {
 	flex: auto;
+	flex-direction: column;
 }
 
 main {
