@@ -84,7 +84,7 @@
 		<input
 			bind:value={userNextVariable}
 			type="number"
-			class="variable-selector min-w-0 flex-grow"
+			class="variable-selector w-[128px]"
 			class:invalidOption={!isVariableValid}
 			placeholder={defaultNextVariable
 				? defaultNextVariable.toString()

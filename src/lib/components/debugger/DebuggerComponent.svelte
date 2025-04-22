@@ -11,6 +11,15 @@
 </script>
 
 <div class="flex-center debugger align-center flex-row gap-2">
+	
+	<div class="variable-display">
+		{#if defaultNextVariable}
+			{defaultNextVariable}
+		{:else}
+			{"X"}
+		{/if}
+	</div>
+
 	<BacktrackingDebugger {defaultNextVariable} />
 
 	<ManualDebuggerComponent {defaultNextVariable} />
@@ -29,6 +38,12 @@
 		border-color: var(--border-color);
 		border-style: solid;
 	}
+
+	.variable-display {
+	width: 50px; 
+	text-align: center;
+	color: grey;
+	}	
 
 	:root {
 		--debugger-height: 90px;

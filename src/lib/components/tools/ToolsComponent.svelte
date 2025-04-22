@@ -46,7 +46,7 @@
 		}
 		views = [...views];
 	}
-	
+
 	/*
 	function openGutHubRepository() {
 		window.open('https://github.com/udg-lai/edu.satit', '_blank');

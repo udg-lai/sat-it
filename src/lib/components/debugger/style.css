@@ -15,7 +15,7 @@
 }
 
 .btn:active {
-	background-color: #cacaca70;
+	background-color: #cacaca60;
 }
 
 .btn.invalidOption {
@@ -71,6 +71,10 @@
 .manual-decision {
 	background-color: var(--main-bg-color);
 	color: black;
+
+	button:hover {
+		background-color: #cacaca70;
+	}
 }
 
 .variable-selector {
