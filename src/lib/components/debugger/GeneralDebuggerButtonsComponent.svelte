@@ -11,6 +11,7 @@
 		CaretUpOutline,
 		ReplyOutline
 	} from 'flowbite-svelte-icons';
+	import InformationComponent from './InformationComponent.svelte';
 
 	let expanded = $state(true);
 	let textCollapse = $derived(expanded ? 'Collaps trails' : 'Expand Trails');
@@ -27,6 +28,7 @@
 		expanded = !expanded;
 		emitEditorViewEvent(expanded);
 	}
+
 </script>
 
 <button class="btn general-btn" title="Solve trail">
@@ -44,3 +46,6 @@
 <button class="btn general-btn" title={textCollapse} onclick={toggleExpand}>
 	<DynamicRender component={expanded ? CaretUpOutline : CaretDownOutline} props={generalProps} />
 </button>
+
+<InformationComponent {generalProps} />
+
