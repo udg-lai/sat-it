@@ -28,7 +28,6 @@
 		expanded = !expanded;
 		emitEditorViewEvent(expanded);
 	}
-
 </script>
 
 <button class="btn general-btn" title="Solve trail">
@@ -48,4 +47,3 @@
 </button>
 
 <InformationComponent {generalProps} />
-
