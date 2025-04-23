@@ -51,10 +51,9 @@
 	justify-content: center;
 	border: none;
 	background-color: transparent;
-	color:#7d7d7d;
+	color: #7d7d7d;
 
-	transition:
-		color 0.3s ease;
+	transition: color 0.3s ease;
 }
 
 .information-btn:hover {
@@ -62,7 +61,7 @@
 }
 
 .information-btn:active {
-	color:#4b4b4b;
+	color: #4b4b4b;
 }
 
 /*Polarity buttons*/

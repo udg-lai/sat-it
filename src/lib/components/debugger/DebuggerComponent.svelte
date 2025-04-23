@@ -11,7 +11,7 @@
 	});
 </script>
 
-<div class="relative flex-center debugger align-center flex-row gap-2">
+<div class="flex-center debugger align-center relative flex-row gap-2">
 	<div class="variable-display">
 		{#if defaultNextVariable}
 			{defaultNextVariable}
