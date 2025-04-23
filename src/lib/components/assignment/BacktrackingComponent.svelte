@@ -27,4 +27,8 @@
 		border-right: 1px transparent;
 		cursor: help;
 	}
+
+	:global(mo) {
+		margin-bottom: 2px;
+	}
 </style>

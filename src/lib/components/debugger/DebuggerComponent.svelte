@@ -1,36 +1,55 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { emitEditorViewEvent } from './events.svelte.ts';
+	import { problemStore } from '$lib/store/problem.store.ts';
 	import BacktrackingDebugger from './BacktrackingDebuggerComponent.svelte';
 	import GeneralDebuggerButtons from './GeneralDebuggerButtonsComponent.svelte';
+	import InformationComponent from './InformationComponent.svelte';
+	import ManualDebuggerComponent from './ManualDebuggerComponent.svelte';
 
-	let expanded = $state(true);
-	let textCollapse = $derived(expanded ? 'Expanded' : 'Collapsed');
-
-	onMount(() => {
-		emitEditorViewEvent(expanded);
+	let defaultNextVariable: number | undefined = $derived.by(() => {
+		if ($problemStore !== undefined) return $problemStore.variables.nextVariable;
+		else return 0;
 	});
-
-	function toggleExpand() {
-		expanded = !expanded;
-		emitEditorViewEvent(expanded);
-	}
 </script>
 
-<div class="flex-center debugger flex-col">
-	<button class="btn-expand mb-[1rem]" onclick={toggleExpand}>
-		<h1>Toggle - {textCollapse}</h1>
-	</button>
-	<!-- Here we should have an if deppending on the algorithm view -->
-	<BacktrackingDebugger />
-	<!-- End Of If -->
+<div class="flex-center debugger align-center relative flex-row gap-2">
+	<div class="variable-display">
+		{#if defaultNextVariable}
+			{defaultNextVariable}
+		{:else}
+			{'X'}
+		{/if}
+	</div>
+
+	<BacktrackingDebugger {defaultNextVariable} />
+
+	<ManualDebuggerComponent {defaultNextVariable} />
+
 	<GeneralDebuggerButtons />
+
+	<div class="absolute right-2">
+		<InformationComponent />
+	</div>
 </div>
 
 <style>
 	.debugger {
 		width: 100%;
-		height: 100%;
+		height: var(--debugger-height);
 		display: flex;
+		align-items: center;
+		justify-content: center;
+		border-bottom: 1px;
+		border-color: var(--border-color);
+		border-style: solid;
+	}
+
+	.variable-display {
+		width: 50px;
+		text-align: center;
+		color: grey;
+	}
+
+	:root {
+		--debugger-height: 90px;
 	}
 </style>

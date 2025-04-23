@@ -1,13 +1,102 @@
-.btn-expand {
+/*Buttons style*/
+.btn {
+	border-style: solid;
+	border-color: #afafaf;
+	border-width: 1px;
 	background-color: var(--border-color);
-	width: 100%;
-	height: 2rem;
+	cursor: pointer;
+	transition:
+		background-color 0.3s ease,
+		color 0.3s ease;
 }
 
-.pack {
-	border-color: var(--border-color);
+.btn:hover {
+	background-color: #cacaca90;
+}
+
+.btn:active {
+	background-color: #cacaca60;
+}
+
+.btn.invalidOption {
+	background-color: #cacaca30;
+	pointer-events: none;
+}
+
+/*Specific buttons*/
+.general-btn {
+	display: flex;
+	height: 50px;
+	width: 50px;
+	border-radius: 6px;
+	align-items: center;
+	justify-content: center;
+}
+
+.manual-button {
+	height: 50px;
+	width: 100%;
+	display: flex;
+	flex: 1;
+	align-items: center;
+	justify-content: center;
+}
+
+.information-btn {
+	display: flex;
+	height: 45px;
+	width: 45px;
+	border-radius: 6px;
+	align-items: center;
+	justify-content: center;
+	border: none;
+	background-color: transparent;
+	color: #7d7d7d;
+
+	transition: color 0.3s ease;
+}
+
+.information-btn:hover {
+	color: black;
+}
+
+.information-btn:active {
+	color: #4b4b4b;
+}
+
+/*Polarity buttons*/
+.polarity {
+	display: flex;
+	flex: 1;
+	width: 100%;
+	justify-content: center;
+	align-items: center;
 	border-style: solid;
-	border-width: 1px 0 1px 0;
+	border-color: #afafaf;
+	border-width: 1px;
+	background-color: #cacaca30;
+	cursor: pointer;
+	transition:
+		background-color 0.3s ease,
+		color 0.3s ease;
+}
+
+.polarity:hover {
+	background-color: #cacaca70;
+}
+
+.polarity.active {
+	background-color: #cacaca;
+}
+
+/*Others*/
+.manual-decision {
+	background-color: var(--main-bg-color);
+	color: black;
+
+	button:hover {
+		background-color: #cacaca70;
+	}
 }
 
 .variable-selector {
@@ -15,29 +104,9 @@
 	border: none;
 	cursor: pointer;
 }
+
 .variable-selector.invalidOption {
 	color: red;
-}
-
-.polarity {
-	background-color: var(--border-color);
-}
-
-.btn {
-	background-color: var(--border-color);
-	height: 4rem;
-	transition: background-color 0.3s ease;
-}
-
-.btn.invalidOption {
-	background-color: #cacaca30;
-	height: 4rem;
-}
-
-.general-btn {
-	background-color: var(--border-color);
-	width: 100%;
-	height: 5rem;
 }
 
 /*These lines are to delete the arrows to increase and decrease the variable from the inputs*/

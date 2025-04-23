@@ -51,8 +51,8 @@
 	}
 
 	.trail-visualizer {
-		padding: 1rem;
-		height: 50rem;
+		padding: 0.5rem;
+		flex: 1;
 		overflow-y: scroll;
 	}
 </style>

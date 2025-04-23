@@ -1,6 +1,5 @@
 <script lang="ts">
-	import './styles.css';
-	import FooterComponent from '$lib/components/FooterComponent.svelte';
+	import './_styles.css';
 	import ToolsComponent from '$lib/components/tools/ToolsComponent.svelte';
 	import ScrollableComponent from '$lib/components/ScrollableComponent.svelte';
 	import ToastComponent from '$lib/components/ToastComponent.svelte';
@@ -13,6 +12,7 @@
 	import { logError } from '$lib/transversal/utils/logging.ts';
 	import { onMount } from 'svelte';
 	import AppComponent from '$lib/components/AppComponent.svelte';
+	import DebuggerComponent from '$lib/components/debugger/DebuggerComponent.svelte';
 
 	onMount(() => {
 		initializeInstancesStore()
@@ -38,15 +38,13 @@
 		<div class="tools-section z-10">
 			<ToolsComponent />
 		</div>
-		<workspace class="flex flex-col md:flex-row">
+		<workspace class="flex flex-col">
+			<DebuggerComponent />
 			<play-area>
 				<ScrollableComponent component={app} />
 			</play-area>
 		</workspace>
 	</main>
-	<footer>
-		<FooterComponent />
-	</footer>
 </app>
 
 {#snippet app()}
