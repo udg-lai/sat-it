@@ -2,6 +2,7 @@
 	import { problemStore } from '$lib/store/problem.store.ts';
 	import BacktrackingDebugger from './BacktrackingDebuggerComponent.svelte';
 	import GeneralDebuggerButtons from './GeneralDebuggerButtonsComponent.svelte';
+	import InformationComponent from './InformationComponent.svelte';
 	import ManualDebuggerComponent from './ManualDebuggerComponent.svelte';
 
 	let defaultNextVariable: number | undefined = $derived.by(() => {
@@ -24,6 +25,8 @@
 	<ManualDebuggerComponent {defaultNextVariable} />
 
 	<GeneralDebuggerButtons />
+
+	<InformationComponent />
 </div>
 
 <style>

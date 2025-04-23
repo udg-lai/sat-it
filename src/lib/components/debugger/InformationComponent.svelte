@@ -9,10 +9,9 @@
 	import DecisionComponent from '../assignment/DecisionComponent.svelte';
 	import ChildlessDecisionComponent from '../assignment/ChildlessDecisionComponent.svelte';
 
-	interface Props {
-		generalProps: { class: string };
-	}
-	let { generalProps }: Props = $props();
+	const informationProps = {
+		class: 'h-8 w-8 cursor-pointer'
+	};
 
 	let informationModal: boolean = $state(false);
 
@@ -26,18 +25,18 @@
 </script>
 
 <button class="btn general-btn" title={'Trail Legend'} onclick={() => (informationModal = true)}>
-	<DynamicRender component={InfoCircleOutline} props={generalProps} />
+	<DynamicRender component={InfoCircleOutline} props={informationProps} />
 </button>
 
 <Modal bind:open={informationModal} size="xs" outsideclose class="manual-decision">
 	<div class="pointer-events-none flex flex-col items-center text-center">
 		<div class="mb-4 flex w-full max-w-4xl flex-row items-start justify-center">
 			<div class="flex flex-1 flex-col items-center">
-				<p class="mb-2">Propagations Expanded:</p>
+				<p class="mb-2"><strong>Decision expanded</strong></p>
 				<ChildlessDecisionComponent assignment={decisionExample} />
 			</div>
 			<div class="flex flex-1 flex-col items-center">
-				<p class="mb-2">Propagations Closed:</p>
+				<p class="mb-2"><strong>Decision colapsed</strong></p>
 				<DecisionComponent assignment={decisionExample} expanded={false} />
 			</div>
 		</div>
