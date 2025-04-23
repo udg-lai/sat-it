@@ -13,7 +13,6 @@
 	function onClick() {
 		eventClick?.();
 	}
-
 </script>
 
 <button class="literal-style backtracking" onclick={onClick}>
