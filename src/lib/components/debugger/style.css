@@ -42,6 +42,29 @@
 	justify-content: center;
 }
 
+.information-btn {
+	display: flex;
+	height: 45px;
+	width: 45px;
+	border-radius: 6px;
+	align-items: center;
+	justify-content: center;
+	border: none;
+	background-color: transparent;
+	color:#7d7d7d;
+
+	transition:
+		color 0.3s ease;
+}
+
+.information-btn:hover {
+	color: black;
+}
+
+.information-btn:active {
+	color:#4b4b4b;
+}
+
 /*Polarity buttons*/
 .polarity {
 	display: flex;

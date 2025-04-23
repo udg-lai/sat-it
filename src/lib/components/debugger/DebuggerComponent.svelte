@@ -11,7 +11,7 @@
 	});
 </script>
 
-<div class="flex-center debugger align-center flex-row gap-2">
+<div class="relative flex-center debugger align-center flex-row gap-2">
 	<div class="variable-display">
 		{#if defaultNextVariable}
 			{defaultNextVariable}
@@ -26,7 +26,9 @@
 
 	<GeneralDebuggerButtons />
 
-	<InformationComponent />
+	<div class="absolute right-2">
+		<InformationComponent />
+	</div>
 </div>
 
 <style>

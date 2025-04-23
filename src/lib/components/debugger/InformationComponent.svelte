@@ -10,7 +10,7 @@
 	import ChildlessDecisionComponent from '../assignment/ChildlessDecisionComponent.svelte';
 
 	const informationProps = {
-		class: 'h-8 w-8 cursor-pointer'
+		class: 'h-7 w-7 cursor-pointer'
 	};
 
 	let informationModal: boolean = $state(false);
@@ -24,7 +24,7 @@
 	);
 </script>
 
-<button class="btn general-btn" title={'Trail Legend'} onclick={() => (informationModal = true)}>
+<button class="information-btn" title={'Trail Legend'} onclick={() => (informationModal = true)}>
 	<DynamicRender component={InfoCircleOutline} props={informationProps} />
 </button>
 
@@ -43,11 +43,11 @@
 
 		<div class="flex w-full max-w-4xl flex-row items-start justify-center">
 			<div class="flex flex-1 flex-col items-center">
-				<p class="mb-2">Backtracking</p>
+				<p class="mb-2"><strong>Backtracking</strong></p>
 				<BacktrackingComponent assignment={backtrackingExample} />
 			</div>
 			<div class="flex flex-1 flex-col items-center">
-				<p class="mb-2">Unit Propagations</p>
+				<p class="mb-2"><strong>Unit Propagations</strong></p>
 				<UnitPropagationComponent assignment={unitPropagationExample} />
 			</div>
 		</div>
