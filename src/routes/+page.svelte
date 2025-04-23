@@ -1,6 +1,5 @@
 <script lang="ts">
-	import './styles.css';
-	import FooterComponent from '$lib/components/FooterComponent.svelte';
+	import './_styles.css';
 	import ToolsComponent from '$lib/components/tools/ToolsComponent.svelte';
 	import ScrollableComponent from '$lib/components/ScrollableComponent.svelte';
 	import ToastComponent from '$lib/components/ToastComponent.svelte';
@@ -35,23 +34,17 @@
 		</div>
 	{/if}
 
-	<div class="decision-zone">
-		<DebuggerComponent />
-	</div>
-
 	<main>
 		<div class="tools-section z-10">
 			<ToolsComponent />
 		</div>
-		<workspace class="flex flex-col md:flex-row">
+		<workspace class="flex flex-col">
+			<DebuggerComponent />
 			<play-area>
 				<ScrollableComponent component={app} />
 			</play-area>
 		</workspace>
 	</main>
-	<footer>
-		<FooterComponent />
-	</footer>
 </app>
 
 {#snippet app()}

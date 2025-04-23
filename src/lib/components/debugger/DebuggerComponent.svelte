@@ -1,40 +1,55 @@
 <script lang="ts">
-	import ConfigurationDebugger from './ConfigurationDebuggerComponent.svelte';
+	import { problemStore } from '$lib/store/problem.store.ts';
 	import BacktrackingDebugger from './BacktrackingDebuggerComponent.svelte';
 	import GeneralDebuggerButtons from './GeneralDebuggerButtonsComponent.svelte';
+	import InformationComponent from './InformationComponent.svelte';
+	import ManualDebuggerComponent from './ManualDebuggerComponent.svelte';
+
+	let defaultNextVariable: number | undefined = $derived.by(() => {
+		if ($problemStore !== undefined) return $problemStore.variables.nextVariable;
+		else return 0;
+	});
 </script>
 
-<div class="flex-center debugger flex-row">
-	<div class="my-2 mr-2 w-1/5">
-		<ConfigurationDebugger />
-	</div>
-	<!-- Here we should have an if deppending on the algorithm view -->
-
-	<div class="division w-3/5">
-		<BacktrackingDebugger />
-		<!-- End Of If  -->
+<div class="flex-center debugger align-center relative flex-row gap-2">
+	<div class="variable-display">
+		{#if defaultNextVariable}
+			{defaultNextVariable}
+		{:else}
+			{'X'}
+		{/if}
 	</div>
 
-	<div class="my-2 ml-2 mr-2 w-2/5">
-		<GeneralDebuggerButtons />
+	<BacktrackingDebugger {defaultNextVariable} />
+
+	<ManualDebuggerComponent {defaultNextVariable} />
+
+	<GeneralDebuggerButtons />
+
+	<div class="absolute right-2">
+		<InformationComponent />
 	</div>
 </div>
 
 <style>
 	.debugger {
 		width: 100%;
-		height: 100%;
+		height: var(--debugger-height);
 		display: flex;
+		align-items: center;
+		justify-content: center;
 		border-bottom: 1px;
 		border-color: var(--border-color);
 		border-style: solid;
 	}
-	.division {
-		padding-left: 1rem;
-		padding-right: 1rem;
-		border-left: 1px;
-		border-right: 1px;
-		border-color: var(--border-color);
-		border-style: solid;
+
+	.variable-display {
+		width: 50px;
+		text-align: center;
+		color: grey;
+	}
+
+	:root {
+		--debugger-height: 90px;
 	}
 </style>

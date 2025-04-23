@@ -21,7 +21,7 @@ body {
 	background-color: var(--main-bg-color);
 	color: var(--main-font-color);
 	font-size: var(--font-size);
-	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+	font-family: 'Biryani', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 body > div {

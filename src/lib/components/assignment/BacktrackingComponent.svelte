@@ -15,7 +15,7 @@
 	}
 </script>
 
-<button class="literal-style decision backtracking" onclick={onClick}>
+<button class="literal-style backtracking" onclick={onClick}>
 	<MathTexComponent equation={assignment.toTeX()} />
 </button>
 
@@ -25,5 +25,10 @@
 		color: #f77777;
 		border-left: 1px transparent;
 		border-right: 1px transparent;
+		cursor: help;
+	}
+
+	:global(mo) {
+		margin-bottom: 2px;
 	}
 </style>
