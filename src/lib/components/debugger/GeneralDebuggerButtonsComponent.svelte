@@ -11,18 +11,24 @@
 		CaretUpOutline,
 		ReplyOutline
 	} from 'flowbite-svelte-icons';
-	import { redo, undo } from '$lib/store/action.store.ts';
+	import { redo, undo, userActions, userActionsPointer } from '$lib/store/action.store.ts';
 	import { browser } from '$app/environment';
 
 	let expanded = $state(true);
 	let textCollapse = $derived(expanded ? 'Collaps trails' : 'Expand Trails');
 
+	let activateRedo = $derived.by(()=> {
+		const pointerValue = $userActionsPointer+1;
+		const stackSize = $userActions.length;
+		return pointerValue < stackSize;
+	})
+
 	const generalProps = {
-		class: 'h-8 w-8 cursor-pointer'
+		class: 'h-8 w-8'
 	};
 	const reverseProps = {
-	class: 'h-8 w-8 cursor-pointer transform -scale-x-100'
-};
+		class: 'h-8 w-8 transform -scale-x-100'
+	};
 
 	onMount(() => {
 		emitEditorViewEvent(expanded);
@@ -52,7 +58,7 @@
 		const isRedo =
 			(isMac && event.metaKey && event.shiftKey && event.key.toLowerCase() === 'z') ||
 			(!isMac && event.ctrlKey && event.shiftKey && event.key.toLowerCase() === 'z');
-			
+
 		if (isUndo) {
 			event.preventDefault();
 			undo();
@@ -76,7 +82,7 @@
 	<DynamicRender component={ReplyOutline} props={generalProps} />
 </button>
 
-<button class="btn general-btn" title="Undo" onclick={redo}>
+<button class="btn general-btn" class:invalidOption={!activateRedo} title="Redo" onclick={redo} disabled={!activateRedo}>
 	<DynamicRender component={ReplyOutline} props={reverseProps} />
 </button>
 

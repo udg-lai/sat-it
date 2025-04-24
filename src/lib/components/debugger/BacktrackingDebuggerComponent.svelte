@@ -11,7 +11,7 @@
 	let { defaultNextVariable }: Props = $props();
 
 	const assignmentProps = {
-		class: 'h-8 w-8 cursor-pointer'
+		class: 'h-8 w-8'
 	};
 </script>
 
@@ -28,7 +28,7 @@
 	</button>
 {:else}
 	<button
-		class="btn general-btn"
+		class="btn general-btn bkt-btn"
 		onclick={() => {
 			emitAssignmentEvent({ type: 'automated' });
 			recordAction('decision');

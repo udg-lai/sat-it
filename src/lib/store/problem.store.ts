@@ -53,7 +53,7 @@ export function updateProblemDomain(instance: DimacsInstance) {
 }
 
 export function updateAlgorithm(algorithm: () => void) {
-	const currentProblem = get(problemStore); 
+	const currentProblem = get(problemStore);
 	problemStore.set({ ...currentProblem, ...algorithm });
 	updateVariablePool(new VariablePool(currentProblem.variables.capacity));
 	resetTrails();

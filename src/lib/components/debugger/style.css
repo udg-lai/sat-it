@@ -3,7 +3,7 @@
 	border-style: solid;
 	border-color: #afafaf;
 	border-width: 1px;
-	background-color: var(--border-color);
+	background-color: #cacaca30;
 	cursor: pointer;
 	transition:
 		background-color 0.3s ease,
@@ -11,16 +11,16 @@
 }
 
 .btn:hover {
-	background-color: #cacaca90;
-}
-
-.btn:active {
 	background-color: #cacaca60;
 }
 
+.btn:active {
+	background-color: #cacaca90;
+}
+
 .btn.invalidOption {
-	background-color: #cacaca30;
-	pointer-events: none;
+	background-color: var(--border-color);
+	cursor: not-allowed;
 }
 
 /*Specific buttons*/
@@ -31,6 +31,13 @@
 	border-radius: 6px;
 	align-items: center;
 	justify-content: center;
+}
+
+.bkt-btn {
+	color: #f77777;
+	border-color: #f77777;
+	transition: 
+		border-color 0.3s ease;
 }
 
 .manual-button {

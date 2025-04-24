@@ -20,7 +20,7 @@
 	let { defaultNextVariable }: Props = $props();
 
 	const generalProps = {
-		class: 'h-8 w-8 cursor-pointer'
+		class: 'h-8 w-8'
 	};
 
 	let manualDecisionModal = $state(false);
