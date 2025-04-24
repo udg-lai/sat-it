@@ -7,8 +7,8 @@
 	import {
 		ArrowRightOutline,
 		BarsOutline,
-		CaretDownOutline,
-		CaretUpOutline,
+		ChevronLeftOutline,
+		ChevronRightOutline,
 		ReplyOutline
 	} from 'flowbite-svelte-icons';
 
@@ -42,5 +42,5 @@
 </button>
 
 <button class="btn general-btn" title={textCollapse} onclick={toggleExpand}>
-	<DynamicRender component={expanded ? CaretUpOutline : CaretDownOutline} props={generalProps} />
+	<DynamicRender component={expanded ? ChevronLeftOutline : ChevronRightOutline} props={generalProps} />
 </button>

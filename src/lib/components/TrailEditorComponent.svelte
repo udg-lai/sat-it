@@ -13,7 +13,7 @@
 		expandPropagations: boolean;
 	}
 
-	let {trails, expandPropagations}: Props = $props();
+	let { trails, expandPropagations }: Props = $props();
 
 	let indexedTrails: IndexedTrail[] = $derived.by(() => {
 		return trails.map((t, idx) => {
@@ -38,7 +38,11 @@
 <div bind:this={lastTrail} class="trail-visualizer flex flex-row">
 	<div class="trails flex flex-col">
 		{#each indexedTrails as indexedTrail (indexedTrail.index)}
-			<IndexedTrailComponent trail={indexedTrail.trail} index={indexedTrail.index} expandPropagations={indexedTrail.expandPropagations}  />
+			<IndexedTrailComponent
+				trail={indexedTrail.trail}
+				index={indexedTrail.index}
+				expanded={indexedTrail.expandPropagations}
+			/>
 		{/each}
 	</div>
 </div>
