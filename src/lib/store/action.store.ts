@@ -12,13 +12,13 @@ interface UserAction {
 	variablePoolSnapshot: VariablePool;
 }
 
-export const actionStack: Writable<UserAction[]> = writable([]);
+export const userActions: Writable<UserAction[]> = writable([]);
 
-export const actionPointer: Writable<number> = writable(-1);
+export const userActionsPointer: Writable<number> = writable(-1);
 
-export function resetStack() {
-	actionStack.set([]);
-	actionPointer.set(-1);
+export function resetUserActions() {
+	userActions.set([]);
+	userActionsPointer.set(-1);
 }
 
 export function recordAction(type: UserActionType) {
@@ -27,37 +27,36 @@ export function recordAction(type: UserActionType) {
 		trailSnapshot: get(trails).map((trail) => trail.copy()),
 		variablePoolSnapshot: get(problemStore).variables.copy()
 	};
-	actionStack.update((stack) => {
-		const pointerValue: number = get(actionPointer);
-		const newStack = [...stack.slice(0, pointerValue + 1), action];
-		actionPointer.set(newStack.length - 1);
-		return newStack;
+	userActions.update((previousActions) => {
+		const pointerValue: number = get(userActionsPointer);
+		const updatedActions = [...previousActions.slice(0, pointerValue + 1), action];
+		userActionsPointer.set(updatedActions.length - 1);
+		return updatedActions;
 	});
 }
 
 export function undo() {
-	const pointerValue: number = get(actionPointer);
+	const pointerValue: number = get(userActionsPointer);
 	if (pointerValue >= 0) {
-		actionPointer.set(pointerValue - 1);
-		const stack = get(actionStack);
-    if(pointerValue - 1 != -1) {
-      const lastState = stack[pointerValue - 1];
-      udpateTrails(lastState.trailSnapshot);
-      updateVariablePool(lastState.variablePoolSnapshot);
-    }
-    else {
-      resetTrails();
-      updateVariablePool(new VariablePool(get(problemStore).variables.capacity))
-    }
+		userActionsPointer.set(pointerValue - 1);
+		const previousActions = get(userActions);
+		if (pointerValue - 1 != -1) {
+			const lastState = previousActions[pointerValue - 1];
+			udpateTrails(lastState.trailSnapshot);
+			updateVariablePool(lastState.variablePoolSnapshot);
+		} else {
+			resetTrails();
+			updateVariablePool(new VariablePool(get(problemStore).variables.capacity));
+		}
 	}
 }
 
 export function redo() {
-  const pointerValue: number = get(actionPointer);
-  const stack: UserAction[] = get(actionStack);
-  if(pointerValue + 1 < stack.length) {
-    actionPointer.set(pointerValue+1);
-    console.log(stack[pointerValue+1]);
-    udpateTrails(stack[pointerValue+1].trailSnapshot);
-  }
+	const pointerValue: number = get(userActionsPointer);
+	const previousActions: UserAction[] = get(userActions);
+	if (pointerValue + 1 < previousActions.length) {
+		userActionsPointer.set(pointerValue + 1);
+		udpateTrails(previousActions[pointerValue + 1].trailSnapshot);
+		updateVariablePool(previousActions[pointerValue + 1].variablePoolSnapshot);
+	}
 }

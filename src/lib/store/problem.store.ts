@@ -3,7 +3,7 @@ import { get, writable, type Writable } from 'svelte/store';
 import VariablePool from '../transversal/entities/VariablePool.svelte.ts';
 import type { DimacsInstance } from '$lib/dimacs/dimacs-instance.interface.ts';
 import { resetTrails } from './trails.store.ts';
-import { resetStack } from './action.store.ts';
+import { resetUserActions } from './action.store.ts';
 
 type MappingLiteral2Clauses = Map<number, Set<number>>;
 
@@ -49,14 +49,15 @@ export function updateProblemDomain(instance: DimacsInstance) {
 
 	problemStore.set(newProblem);
 	resetTrails();
-	resetStack();
+	resetUserActions();
 }
 
 export function updateAlgorithm(algorithm: () => void) {
-	const currentProblem = get(problemStore);
+	const currentProblem = get(problemStore); 
 	problemStore.set({ ...currentProblem, ...algorithm });
+	updateVariablePool(new VariablePool(currentProblem.variables.capacity));
 	resetTrails();
-	resetStack();
+	resetUserActions();
 }
 
 export function updateVariablePool(variables: VariablePool) {

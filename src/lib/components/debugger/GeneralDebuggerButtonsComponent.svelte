@@ -20,20 +20,22 @@
 	const generalProps = {
 		class: 'h-8 w-8 cursor-pointer'
 	};
+	const reverseProps = {
+	class: 'h-8 w-8 cursor-pointer transform -scale-x-100'
+};
 
 	onMount(() => {
 		emitEditorViewEvent(expanded);
-		if(browser) {
+		if (browser) {
 			window.addEventListener('keydown', handleKeyDown);
 		}
-		
 	});
 
 	onDestroy(() => {
-		if(browser) {
+		if (browser) {
 			window.removeEventListener('keydown', handleKeyDown);
 		}
-	})
+	});
 
 	function toggleExpand() {
 		expanded = !expanded;
@@ -43,20 +45,22 @@
 	function handleKeyDown(event: KeyboardEvent) {
 		const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
 
-		const isUndo = (isMac && event.metaKey && event.key === 'z') ||
-									 (!isMac && event.ctrlKey && event.key === 'z');
+		const isUndo =
+			(isMac && event.metaKey && event.key === 'z') ||
+			(!isMac && event.ctrlKey && event.key === 'z');
 
-		const isRedo = (isMac && event.metaKey && event.shiftKey && event.key.toLowerCase() === 'z') ||
-                   (!isMac && event.ctrlKey && event.shiftKey && event.key.toLowerCase() === 'z');
-		if(isUndo) {
+		const isRedo =
+			(isMac && event.metaKey && event.shiftKey && event.key.toLowerCase() === 'z') ||
+			(!isMac && event.ctrlKey && event.shiftKey && event.key.toLowerCase() === 'z');
+			
+		if (isUndo) {
 			event.preventDefault();
 			undo();
-		} 
-		else if(isRedo) {
+		} else if (isRedo) {
 			event.preventDefault();
-			console.log("Hola");
+			console.log('Hola');
 			redo();
-		} 
+		}
 	}
 </script>
 
@@ -70,6 +74,10 @@
 
 <button class="btn general-btn" title="Undo" onclick={undo}>
 	<DynamicRender component={ReplyOutline} props={generalProps} />
+</button>
+
+<button class="btn general-btn" title="Undo" onclick={redo}>
+	<DynamicRender component={ReplyOutline} props={reverseProps} />
 </button>
 
 <button class="btn general-btn" title={textCollapse} onclick={toggleExpand}>
