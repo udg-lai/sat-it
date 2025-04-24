@@ -13,7 +13,7 @@
 	} from 'flowbite-svelte-icons';
 
 	let expanded = $state(true);
-	let textCollapse = $derived(expanded ? 'Collaps trails' : 'Expand Trails');
+	let textCollapse = $derived(expanded ? 'Collaps Propagations' : 'Expand Propagations');
 
 	const generalProps = {
 		class: 'h-8 w-8 cursor-pointer'
@@ -42,5 +42,8 @@
 </button>
 
 <button class="btn general-btn" title={textCollapse} onclick={toggleExpand}>
-	<DynamicRender component={expanded ? ChevronLeftOutline : ChevronRightOutline} props={generalProps} />
+	<DynamicRender
+		component={expanded ? ChevronLeftOutline : ChevronRightOutline}
+		props={generalProps}
+	/>
 </button>

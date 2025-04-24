@@ -10,7 +10,7 @@
 	}
 	let { trail, index, expanded = $bindable() }: Props = $props();
 
-	let hoverIndex = $state(false);	
+	let hoverIndex = $state(false);
 	let noDecisions = $derived(trail.getDecisions().length === 0);
 	let allDecisions = $derived(trail.getDecisions().length === trail.getAssignments().length);
 	let noPropagations = $derived(
