@@ -33,6 +33,10 @@ export class Trail {
 		return this.getDecisionLevelMarks().map((mark) => this.assignments[mark]);
 	}
 
+	getDecisionLevel(): number {
+		return this.decisionLevel;
+	}
+
 	getInitialPropagations(): VariableAssignment[] {
 		return this.getPropagations(0);
 	}
