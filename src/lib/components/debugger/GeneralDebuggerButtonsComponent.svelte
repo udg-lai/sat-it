@@ -17,11 +17,11 @@
 	let expanded = $state(true);
 	let textCollapse = $derived(expanded ? 'Collaps trails' : 'Expand Trails');
 
-	let activateRedo = $derived.by(()=> {
-		const pointerValue = $userActionsPointer+1;
+	let activateRedo = $derived.by(() => {
+		const pointerValue = $userActionsPointer + 1;
 		const stackSize = $userActions.length;
 		return pointerValue < stackSize;
-	})
+	});
 
 	const generalProps = {
 		class: 'h-8 w-8'
@@ -82,7 +82,13 @@
 	<DynamicRender component={ReplyOutline} props={generalProps} />
 </button>
 
-<button class="btn general-btn" class:invalidOption={!activateRedo} title="Redo" onclick={redo} disabled={!activateRedo}>
+<button
+	class="btn general-btn"
+	class:invalidOption={!activateRedo}
+	title="Redo"
+	onclick={redo}
+	disabled={!activateRedo}
+>
 	<DynamicRender component={ReplyOutline} props={reverseProps} />
 </button>
 
