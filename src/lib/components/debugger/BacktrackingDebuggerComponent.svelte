@@ -2,6 +2,7 @@
 	import { CaretRightOutline, CodeMergeOutline } from 'flowbite-svelte-icons';
 	import { emitAssignmentEvent } from './events.svelte.ts';
 	import DynamicRender from '$lib/components/DynamicRender.svelte';
+	import { recordAction } from '$lib/store/action.store.ts';
 
 	interface Props {
 		defaultNextVariable: number | undefined;
@@ -17,7 +18,10 @@
 {#if defaultNextVariable}
 	<button
 		class="btn general-btn"
-		onclick={() => emitAssignmentEvent({ type: 'automated' })}
+		onclick={() => {
+			recordAction('decision');
+			emitAssignmentEvent({ type: 'automated' });
+		}}
 		title="Decide"
 	>
 		<DynamicRender component={CaretRightOutline} props={assignmentProps} />
@@ -25,7 +29,10 @@
 {:else}
 	<button
 		class="btn general-btn"
-		onclick={() => emitAssignmentEvent({ type: 'automated' })}
+		onclick={() => {
+			recordAction('decision');
+			emitAssignmentEvent({ type: 'automated' });
+		}}
 		title="Backtrack"
 	>
 		<DynamicRender component={CodeMergeOutline} props={assignmentProps} />

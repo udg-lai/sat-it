@@ -11,6 +11,7 @@
 		PenOutline
 	} from 'flowbite-svelte-icons';
 	import DynamicRender from '../DynamicRender.svelte';
+	import { recordAction } from '$lib/store/action.store.ts';
 
 	interface Props {
 		defaultNextVariable: number | undefined;
@@ -46,6 +47,7 @@
 		if (!isVariableValid) {
 			logInfo('Invalid Variable', 'The variable you are trying to assign is already assigned');
 		} else {
+			recordAction('decision');
 			if (
 				(userNextVariable === undefined && polarity) ||
 				(userNextVariable !== undefined && userNextVariable === defaultNextVariable && polarity)

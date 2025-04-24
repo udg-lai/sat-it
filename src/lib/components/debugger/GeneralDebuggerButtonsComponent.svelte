@@ -11,6 +11,7 @@
 		CaretUpOutline,
 		ReplyOutline
 	} from 'flowbite-svelte-icons';
+	import { undo } from '$lib/store/action.store.ts';
 
 	let expanded = $state(true);
 	let textCollapse = $derived(expanded ? 'Collaps trails' : 'Expand Trails');
@@ -37,7 +38,7 @@
 	<DynamicRender component={BarsOutline} props={generalProps} />
 </button>
 
-<button class="btn general-btn" title="Undo">
+<button class="btn general-btn" title="Undo" onclick={undo}>
 	<DynamicRender component={ReplyOutline} props={generalProps} />
 </button>
 

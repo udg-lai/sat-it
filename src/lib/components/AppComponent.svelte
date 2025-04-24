@@ -5,7 +5,6 @@
 		type DummySearchParams
 	} from '$lib/transversal/algorithms/dummy.ts';
 	import { manualAssignment, type ManualParams } from '$lib/transversal/algorithms/manual.ts';
-	import { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
 	import { onMount } from 'svelte';
 	import { get } from 'svelte/store';
 	import {
@@ -15,10 +14,9 @@
 		type EditorViewEvent
 	} from './debugger/events.svelte.ts';
 	import TrailEditor from './TrailEditorComponent.svelte';
+	import { trails } from '$lib/store/trails.store.ts';
 
 	let showOnlyLastTrail: boolean = $state(false);
-
-	let trails: Trail[] = $state([]);
 
 	function algorithmStep(e: AssignmentEvent): void {
 		if (e === undefined) return;
@@ -28,16 +26,16 @@
 		if (e.type === 'automated') {
 			const params: DummySearchParams = {
 				variables,
-				trails
+				trails: $trails
 			};
-			trails = dummyAssignmentAlgorithm(params);
+			trails.update(() => dummyAssignmentAlgorithm(params));
 		} else {
 			const params: ManualParams = {
 				assignment: e,
 				variables,
-				trails
+				trails: $trails
 			};
-			trails = manualAssignment(params);
+			trails.update(() => manualAssignment(params));
 		}
 	}
 
@@ -47,21 +45,14 @@
 		showOnlyLastTrail = !e.expand;
 	}
 
-	function onProblemUpdated(p: Problem): void {
-		if (p === undefined) return;
-		trails = [];
-	}
-
 	onMount(() => {
-		const unsubscribeProblem = problemStore.subscribe(onProblemUpdated);
 		const unsubscribeToggleEditor = editorViewEventStore.subscribe(toggleEditorView);
 		const unsubscribeAssignment = assignmentEventStore.subscribe((e) => algorithmStep(e));
 		return () => {
-			unsubscribeProblem();
 			unsubscribeToggleEditor();
 			unsubscribeAssignment();
 		};
 	});
 </script>
 
-<TrailEditor {trails} showOnlyLast={showOnlyLastTrail} />
+<TrailEditor trails={$trails} showOnlyLast={showOnlyLastTrail} />
