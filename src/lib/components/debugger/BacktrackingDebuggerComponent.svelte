@@ -19,8 +19,8 @@
 	<button
 		class="btn general-btn"
 		onclick={() => {
-			recordAction('decision');
 			emitAssignmentEvent({ type: 'automated' });
+			recordAction('decision');
 		}}
 		title="Decide"
 	>
@@ -30,8 +30,8 @@
 	<button
 		class="btn general-btn"
 		onclick={() => {
-			recordAction('decision');
 			emitAssignmentEvent({ type: 'automated' });
+			recordAction('decision');
 		}}
 		title="Backtrack"
 	>

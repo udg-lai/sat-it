@@ -1,7 +1,7 @@
 import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
 import { get, writable, type Writable } from 'svelte/store';
-import { trails, udpateTrails } from './trails.store.ts';
-import type VariablePool from '$lib/transversal/entities/VariablePool.svelte.ts';
+import { resetTrails, trails, udpateTrails } from './trails.store.ts';
+import VariablePool from '$lib/transversal/entities/VariablePool.svelte.ts';
 import { problemStore, updateVariablePool } from './problem.store.ts';
 
 type UserActionType = 'decision' | 'solveTrail' | 'solveFull';
@@ -40,9 +40,24 @@ export function undo() {
 	if (pointerValue >= 0) {
 		actionPointer.set(pointerValue - 1);
 		const stack = get(actionStack);
-		const lastState = stack.pop() as UserAction;
-		udpateTrails(lastState.trailSnapshot);
-		updateVariablePool(lastState.variablePoolSnapshot);
-		actionStack.update(() => stack);
+    if(pointerValue - 1 != -1) {
+      const lastState = stack[pointerValue - 1];
+      udpateTrails(lastState.trailSnapshot);
+      updateVariablePool(lastState.variablePoolSnapshot);
+    }
+    else {
+      resetTrails();
+      updateVariablePool(new VariablePool(get(problemStore).variables.capacity))
+    }
 	}
+}
+
+export function redo() {
+  const pointerValue: number = get(actionPointer);
+  const stack: UserAction[] = get(actionStack);
+  if(pointerValue + 1 < stack.length) {
+    actionPointer.set(pointerValue+1);
+    console.log(stack[pointerValue+1]);
+    udpateTrails(stack[pointerValue+1].trailSnapshot);
+  }
 }

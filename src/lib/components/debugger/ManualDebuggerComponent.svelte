@@ -47,7 +47,6 @@
 		if (!isVariableValid) {
 			logInfo('Invalid Variable', 'The variable you are trying to assign is already assigned');
 		} else {
-			recordAction('decision');
 			if (
 				(userNextVariable === undefined && polarity) ||
 				(userNextVariable !== undefined && userNextVariable === defaultNextVariable && polarity)
@@ -60,6 +59,7 @@
 			} else {
 				logError('Could not control case of assignment');
 			}
+			recordAction('decision');
 		}
 		resetState();
 	}

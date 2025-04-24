@@ -1,7 +1,7 @@
 <script lang="ts">
 	import './style.css';
 
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import { emitEditorViewEvent } from './events.svelte.ts';
 	import DynamicRender from '$lib/components/DynamicRender.svelte';
 	import {
@@ -11,7 +11,8 @@
 		CaretUpOutline,
 		ReplyOutline
 	} from 'flowbite-svelte-icons';
-	import { undo } from '$lib/store/action.store.ts';
+	import { redo, undo } from '$lib/store/action.store.ts';
+	import { browser } from '$app/environment';
 
 	let expanded = $state(true);
 	let textCollapse = $derived(expanded ? 'Collaps trails' : 'Expand Trails');
@@ -22,11 +23,40 @@
 
 	onMount(() => {
 		emitEditorViewEvent(expanded);
+		if(browser) {
+			window.addEventListener('keydown', handleKeyDown);
+		}
+		
 	});
+
+	onDestroy(() => {
+		if(browser) {
+			window.removeEventListener('keydown', handleKeyDown);
+		}
+	})
 
 	function toggleExpand() {
 		expanded = !expanded;
 		emitEditorViewEvent(expanded);
+	}
+
+	function handleKeyDown(event: KeyboardEvent) {
+		const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+
+		const isUndo = (isMac && event.metaKey && event.key === 'z') ||
+									 (!isMac && event.ctrlKey && event.key === 'z');
+
+		const isRedo = (isMac && event.metaKey && event.shiftKey && event.key.toLowerCase() === 'z') ||
+                   (!isMac && event.ctrlKey && event.shiftKey && event.key.toLowerCase() === 'z');
+		if(isUndo) {
+			event.preventDefault();
+			undo();
+		} 
+		else if(isRedo) {
+			event.preventDefault();
+			console.log("Hola");
+			redo();
+		} 
 	}
 </script>
 
