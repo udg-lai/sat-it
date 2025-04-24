@@ -12,7 +12,7 @@
 		ReplyOutline
 	} from 'flowbite-svelte-icons';
 
-	let expanded = $state(true);
+	let expanded = $state(false);
 	let textCollapse = $derived(expanded ? 'Collaps Propagations' : 'Expand Propagations');
 
 	const generalProps = {

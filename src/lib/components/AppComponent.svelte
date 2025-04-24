@@ -43,7 +43,7 @@
 
 	function togglePropagations(e: EditorViewEvent) {
 		if (e === undefined) return;
-		expandPropagations = !e.expand;
+		expandPropagations = e.expand;
 	}
 
 	function onProblemUpdated(p: Problem): void {
