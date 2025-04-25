@@ -1,30 +1,15 @@
-import type ClausePool from '../entities/ClausePool.svelte.ts';
+import type { AlgorithmParams, AlgorithmReturn, AlgorithmStep } from '$lib/store/problem.store.ts';
 import { Trail } from '../entities/Trail.svelte.ts';
 import VariableAssignment from '../entities/VariableAssignment.ts';
 import type VariablePool from '../entities/VariablePool.svelte.ts';
-import type { Eval } from '../utils/interfaces/IClausePool.ts';
 import { logFatal } from '../utils/logging.ts';
 import { fromJust, isJust } from '../utils/types/maybe.ts';
 
-export interface BacktrackingParams {
-	trails: Trail[];
-	variables: VariablePool;
-	clauses: ClausePool;
-}
-
-export type BacktrackingReturn = {
-	type: Eval;
-	end: boolean;
-	trails: Trail[];
-};
-
-type StepAlgorithm = (params: BacktrackingParams) => BacktrackingReturn;
-
 export const algorithmName = 'backtracking';
 
-export const backtrackingAlgorithm: StepAlgorithm = (
-	params: BacktrackingParams
-): BacktrackingReturn => {
+export const backtrackingAlgorithm: AlgorithmStep = (
+	params: AlgorithmParams
+): AlgorithmReturn => {
 	const { trails, variables, clauses } = params;
 
 	let nextTrailsState: Trail[] = [];

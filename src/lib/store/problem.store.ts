@@ -2,14 +2,31 @@ import ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';
 import { get, writable, type Writable } from 'svelte/store';
 import VariablePool from '../transversal/entities/VariablePool.svelte.ts';
 import type { DimacsInstance } from '$lib/dimacs/dimacs-instance.interface.ts';
+import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
+import type { Eval } from '$lib/transversal/utils/interfaces/IClausePool.ts';
+import { backtrackingAlgorithm } from '$lib/transversal/algorithms/backtracking.ts';
 
-type MappingLiteral2Clauses = Map<number, Set<number>>;
+export type MappingLiteral2Clauses = Map<number, Set<number>>;
+
+export interface AlgorithmParams {
+	trails: Trail[];
+	variables: VariablePool;
+	clauses: ClausePool;
+};
+
+export type AlgorithmReturn = {
+	type: Eval;
+	end: boolean;
+	trails: Trail[];
+};
+
+export type AlgorithmStep = (params: AlgorithmParams) => AlgorithmReturn;
 
 export interface Problem {
 	variables: VariablePool;
 	clauses: ClausePool;
 	mapping: MappingLiteral2Clauses;
-	algorithm: () => void;
+	algorithm: AlgorithmStep;
 }
 
 export const problemStore: Writable<Problem> = writable();
@@ -32,7 +49,7 @@ export function updateProblemDomain(instance: DimacsInstance) {
 	let newProblem: Problem;
 
 	if (previousProblem === undefined) {
-		const algorithm = () => console.log('I am dummy ;)');
+		const algorithm = backtrackingAlgorithm;
 		newProblem = {
 			...params,
 			algorithm
@@ -53,7 +70,7 @@ export function updateAlgorithm(algorithm: () => void) {
 	problemStore.set({ ...currentProblem, ...algorithm });
 }
 
-function literalToClauses(clauses: ClausePool): MappingLiteral2Clauses {
+export function literalToClauses(clauses: ClausePool): MappingLiteral2Clauses {
 	const mapping: Map<number, Set<number>> = new Map();
 
 	clauses.getClauses().forEach((clause, clauseId) => {
