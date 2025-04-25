@@ -9,8 +9,17 @@ export interface IClausePool {
 	size(): number;
 }
 
-export enum Eval {
-	UNSAT,
-	SAT,
-	UNRESOLVED
+type Unsat = {
+	type: 'UNSAT',
+	conflicClause: number
+};
+
+type Sat = {
+	type: 'SAT'
+};
+
+type Unresolved = {
+	type: 'UNRESOLVED'
 }
+
+export type Eval = Unsat | Sat | Unresolved;
