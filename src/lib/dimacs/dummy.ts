@@ -6,7 +6,7 @@ const fileName = 'dummy.dimacs';
 const content = `
 p cnf 3 2
 c this is just a dummy example
-1 2 -3 0
+-1 -2 -3 0
 c this is added here
 -2 3 0
 `;

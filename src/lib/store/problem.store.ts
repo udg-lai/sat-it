@@ -12,7 +12,7 @@ export interface AlgorithmParams {
 	trails: Trail[];
 	variables: VariablePool;
 	clauses: ClausePool;
-};
+}
 
 export type AlgorithmReturn = {
 	type: Eval;
@@ -30,6 +30,7 @@ export interface Problem {
 }
 
 export const problemStore: Writable<Problem> = writable();
+export const finsihed: Writable<boolean> = writable(false);
 
 export function updateProblemDomain(instance: DimacsInstance) {
 	const { varCount, cnf: clauses } = instance.summary;
@@ -63,6 +64,17 @@ export function updateProblemDomain(instance: DimacsInstance) {
 	}
 
 	problemStore.set(newProblem);
+}
+
+export function resetProblem() {
+	const previousProblem = get(problemStore);
+	const { variables, ...parms } = previousProblem;
+	const newProblem: Problem = {
+		variables: new VariablePool(variables.capacity),
+		...parms
+	};
+	problemStore.set(newProblem);
+	finsihed.set(false);
 }
 
 export function updateAlgorithm(algorithm: () => void) {

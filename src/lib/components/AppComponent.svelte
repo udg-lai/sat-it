@@ -1,9 +1,11 @@
 <script lang="ts">
-	import { problemStore, type Problem } from '$lib/store/problem.store.ts';
 	import {
-		dummyAssignmentAlgorithm,
-		type DummySearchParams
-	} from '$lib/transversal/algorithms/dummy.ts';
+		finsihed,
+		problemStore,
+		type AlgorithmParams,
+		type AlgorithmReturn,
+		type Problem
+	} from '$lib/store/problem.store.ts';
 	import { manualAssignment, type ManualParams } from '$lib/transversal/algorithms/manual.ts';
 	import { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
 	import { onMount } from 'svelte';
@@ -23,14 +25,20 @@
 	function algorithmStep(e: AssignmentEvent): void {
 		if (e === undefined) return;
 
-		const { variables }: Problem = get(problemStore);
+		const { variables, clauses, algorithm }: Problem = get(problemStore);
 
 		if (e.type === 'automated') {
-			const params: DummySearchParams = {
+			const params: AlgorithmParams = {
 				variables,
+				clauses,
 				trails
 			};
-			trails = dummyAssignmentAlgorithm(params);
+
+			const algorithmResult: AlgorithmReturn = algorithm(params);
+			trails = algorithmResult.trails;
+			finsihed.update(() => {
+				return algorithmResult.end;
+			});
 		} else {
 			const params: ManualParams = {
 				assignment: e,

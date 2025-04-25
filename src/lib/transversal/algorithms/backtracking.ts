@@ -7,9 +7,7 @@ import { fromJust, isJust } from '../utils/types/maybe.ts';
 
 export const algorithmName = 'backtracking';
 
-export const backtrackingAlgorithm: AlgorithmStep = (
-	params: AlgorithmParams
-): AlgorithmReturn => {
+export const backtrackingAlgorithm: AlgorithmStep = (params: AlgorithmParams): AlgorithmReturn => {
 	const { trails, variables, clauses } = params;
 
 	let nextTrailsState: Trail[] = [];
