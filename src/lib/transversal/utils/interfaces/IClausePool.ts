@@ -9,17 +9,17 @@ export interface IClausePool {
 	size(): number;
 }
 
-type Unsat = {
-	type: 'UNSAT',
-	conflicClause: number
+export type Unsat = {
+	type: 'UNSAT';
+	conflicClause: number;
 };
 
-type Sat = {
-	type: 'SAT'
+export type Sat = {
+	type: 'SAT';
 };
 
-type Unresolved = {
-	type: 'UNRESOLVED'
-}
+export type Unresolved = {
+	type: 'UNRESOLVED';
+};
 
 export type Eval = Unsat | Sat | Unresolved;

@@ -31,22 +31,21 @@ class ClausePool implements IClausePool {
 				const sat = clauseEval === ClauseEval.SAT;
 				if (sat) nSatisfied++;
 				i++;
-			}
-			else {
+			} else {
 				conflicClause = clause;
 			}
 		}
 
 		let state: Eval;
-		if(unsat) {
+		if (unsat) {
 			state = {
 				type: 'UNSAT',
 				conflicClause: conflicClause?.getId() as number
-			}
-		} else if(nSatisfied === i) {
-			state = { type:'SAT' };
+			};
+		} else if (nSatisfied === i) {
+			state = { type: 'SAT' };
 		} else {
-			state = { type:'UNRESOLVED' };
+			state = { type: 'UNRESOLVED' };
 		}
 		return state;
 	}

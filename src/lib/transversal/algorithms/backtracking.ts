@@ -52,7 +52,7 @@ export const backtrackingAlgorithm: StepAlgorithm = (
 				type: clauseEval,
 				end: false,
 				trails: nextTrailsState
-			}
+			};
 		}
 	} else {
 		if (variables.allAssigned()) {
