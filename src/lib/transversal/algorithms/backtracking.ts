@@ -10,18 +10,18 @@ import { Trail } from '../entities/Trail.svelte.ts';
 import type Variable from '../entities/Variable.svelte.ts';
 import VariableAssignment from '../entities/VariableAssignment.ts';
 import type VariablePool from '../entities/VariablePool.svelte.ts';
-import type { Eval } from '../utils/interfaces/IClausePool.ts';
+import { isSat, isUnresolved, isUnsat, makeUnresolved, type Eval } from '../utils/interfaces/IClausePool.ts';
 import { logFatal } from '../utils/logging.ts';
 import { fromJust, isJust } from '../utils/types/maybe.ts';
 
-export const algorithmName = 'backtracking';
+export const backtrackingName = 'backtracking';
 
 export const backtrackingPreprocessing: Preprocessing = (
 	clauses: ClausePool
 ): PreprocessingReturn => {
 	const evaluation = clauses.eval();
 	let end = false;
-	if (evaluation.type !== 'UNRESOLVED') end = true;
+	if (!isUnresolved(evaluation)) end = true;
 	return {
 		eval: evaluation,
 		end
@@ -38,7 +38,7 @@ export const backtrackingAlgorithm: AlgorithmStep = (params: AlgorithmParams): A
 
 	//Assignació
 	let literalToCheck: number;
-	if (previousEval.type === 'UNSAT') {
+	if (isUnsat(previousEval)) {
 		const newTrail: Trail = workingTrail.copy();
 		const lastDecision = disposeUntilDecision(newTrail, variables);
 		literalToCheck = backtracking(newTrail, variables, lastDecision.getVariable());
@@ -57,17 +57,16 @@ export const backtrackingAlgorithm: AlgorithmStep = (params: AlgorithmParams): A
 	} else if (variables.allAssigned()) {
 		newEval = clauses.eval();
 	} else {
-		newEval = { type: 'UNRESOLVED' };
+		newEval = makeUnresolved();
 	}
-	if (newEval.type === 'SAT' && !variables.allAssigned()) {
-		newEval = { type: 'UNRESOLVED' };
+	if (isSat(newEval) && !variables.allAssigned()) {
+		newEval = makeUnresolved();
 	}
 
 	const end: boolean =
-		(newEval.type === 'UNSAT' && workingTrail.getDecisionLevel() === 0) ||
-		(newEval.type === 'SAT' && variables.allAssigned());
+		(isUnsat(newEval) && workingTrail.getDecisionLevel() === 0) ||
+		(isSat(newEval) && variables.allAssigned());
 
-	console.log(newEval.type);
 	return {
 		type: newEval,
 		end,
@@ -93,7 +92,7 @@ const backtracking = (
 	lastVariable: Variable
 ): number => {
 	const polarity: boolean = !lastVariable.getAssignment();
-
+	variables.dispose(lastVariable.getInt());
 	variables.persist(lastVariable.getInt(), polarity);
 	const variable = variables.getCopy(lastVariable.getInt());
 	workingTail.push(VariableAssignment.newBacktrackingAssignment(variable));
@@ -111,6 +110,6 @@ function followingAssignment(workingTrail: Trail, variables: VariablePool): numb
 	const variableId = fromJust(nextVariable);
 	variables.persist(variableId, true);
 	const variable = variables.getCopy(variableId);
-	workingTrail.push(VariableAssignment.newAutomatedAssignment(variable, algorithmName));
+	workingTrail.push(VariableAssignment.newAutomatedAssignment(variable, backtrackingName));
 	return -variableId;
 }

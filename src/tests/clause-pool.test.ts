@@ -31,7 +31,7 @@ describe('clause pool', () => {
 		variables.persist(3, false);
 		const evaluation = clausePool.eval() as Unsat;
 		expect(evaluation.type).toBe('UNSAT');
-		expect(evaluation.conflicClause).toBe(1);
+		expect(evaluation.conflictClause).toBe(1);
 	});
 	it('sat', () => {
 		Clause.resetUniqueIdGenerator();

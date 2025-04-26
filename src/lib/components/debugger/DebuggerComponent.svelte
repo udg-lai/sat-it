@@ -1,5 +1,7 @@
 <script lang="ts">
+	import { previousEval } from '$lib/store/previousEval.store.ts';
 	import { problemStore } from '$lib/store/problem.store.ts';
+	import { isUnresolved, type Eval } from '$lib/transversal/utils/interfaces/IClausePool.ts';
 	import BacktrackingDebugger from './BacktrackingDebuggerComponent.svelte';
 	import GeneralDebuggerButtons from './GeneralDebuggerButtonsComponent.svelte';
 	import InformationComponent from './InformationComponent.svelte';
@@ -9,18 +11,20 @@
 		if ($problemStore !== undefined) return $problemStore.variables.nextVariable;
 		else return 0;
 	});
+
+	const problemEval:Eval = $derived($previousEval);
 </script>
 
 <div class="flex-center debugger align-center relative flex-row gap-2">
 	<div class="variable-display">
-		{#if defaultNextVariable}
+		{#if isUnresolved(problemEval) && defaultNextVariable}
 			{defaultNextVariable}
 		{:else}
-			{'X'}
+			{problemEval.type}
 		{/if}
 	</div>
 
-	<BacktrackingDebugger {defaultNextVariable} />
+	<BacktrackingDebugger previousEval={$previousEval} />
 
 	<ManualDebuggerComponent {defaultNextVariable} />
 

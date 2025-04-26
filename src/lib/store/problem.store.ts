@@ -6,6 +6,7 @@ import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
 import type { Eval } from '$lib/transversal/utils/interfaces/IClausePool.ts';
 import {
 	backtrackingAlgorithm,
+	backtrackingName,
 	backtrackingPreprocessing
 } from '$lib/transversal/algorithms/backtracking.ts';
 
@@ -66,7 +67,7 @@ export function updateProblemDomain(instance: DimacsInstance) {
 
 	if (previousProblem === undefined) {
 		const algorithm = {
-			name: 'backtracking',
+			name: backtrackingName,
 			preprocessing: backtrackingPreprocessing,
 			step: backtrackingAlgorithm
 		};
@@ -83,17 +84,6 @@ export function updateProblemDomain(instance: DimacsInstance) {
 	}
 
 	problemStore.set(newProblem);
-}
-
-export function resetProblem() {
-	const previousProblem = get(problemStore);
-	const { variables, ...parms } = previousProblem;
-	const newProblem: Problem = {
-		variables: new VariablePool(variables.capacity),
-		...parms
-	};
-	problemStore.set(newProblem);
-	finsihed.set(false);
 }
 
 export function updateAlgorithm(algorithm: () => void) {

@@ -9,17 +9,41 @@ export interface IClausePool {
 	size(): number;
 }
 
-export type Unsat = {
+type Unsat = {
 	type: 'UNSAT';
-	conflicClause: number;
+	conflictClause: number;
 };
 
-export type Sat = {
+type Sat = {
 	type: 'SAT';
 };
 
-export type Unresolved = {
+type Unresolved = {
 	type: 'UNRESOLVED';
 };
 
 export type Eval = Unsat | Sat | Unresolved;
+
+export const isUnsat = (e: Eval): e is Unsat => {
+	return e.type === 'UNSAT';
+};
+
+export const isSat = (e: Eval): e is Sat => {
+	return e.type === 'SAT';
+};
+
+export const isUnresolved = (e: Eval): e is Unsat => {
+	return e.type === 'UNRESOLVED';
+};
+
+export const makeUnsat = (conflictClause: number): Unsat => {
+	return {type: 'UNSAT', conflictClause}
+}
+
+export const makeSat = (): Sat => {
+	return {type: 'SAT'}
+}
+
+export const makeUnresolved = (): Unresolved => {
+	return {type: 'UNRESOLVED'}
+}

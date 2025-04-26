@@ -72,7 +72,7 @@ describe('backtracking algorithm', () => {
 		const resultType = result.type as Unsat;
 		expect(result.end).toBe(false);
 		expect(resultType.type).toBe('UNSAT');
-		expect(resultType.conflicClause).toBe(0);
+		expect(resultType.conflictClause).toBe(0);
 	});
 	it('Fifth Assignemnt', () => {
 		const result: AlgorithmReturn = problem.algorithm({

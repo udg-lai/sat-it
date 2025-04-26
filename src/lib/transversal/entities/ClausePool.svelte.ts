@@ -40,7 +40,7 @@ class ClausePool implements IClausePool {
 		if (unsat) {
 			state = {
 				type: 'UNSAT',
-				conflicClause: conflicClause?.getId() as number
+				conflictClause: conflicClause?.getId() as number
 			};
 		} else if (nSatisfied === i) {
 			state = { type: 'SAT' };
@@ -79,7 +79,7 @@ class ClausePool implements IClausePool {
 		if (unsat) {
 			state = {
 				type: 'UNSAT',
-				conflicClause: conflicClause?.getId() as number
+				conflictClause: conflicClause?.getId() as number
 			};
 		} else if (nSatisfied === i) {
 			state = { type: 'SAT' };
