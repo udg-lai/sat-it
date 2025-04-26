@@ -68,7 +68,7 @@ export const backtrackingAlgorithm: AlgorithmStep = (params: AlgorithmParams): A
 	if (clausesToCheck !== undefined) {
 		newEval = clauses.partialEval(clausesToCheck);
 	} else {
-		newEval = variables.allAssigned() ?  { type: 'SAT' } : { type: 'UNRESOLVED' };
+		newEval = variables.allAssigned() ? { type: 'SAT' } : { type: 'UNRESOLVED' };
 	}
 	console.log(newEval.type);
 	if (

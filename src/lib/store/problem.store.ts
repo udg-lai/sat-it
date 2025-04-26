@@ -33,7 +33,7 @@ export type AlgorithmStep = (params: AlgorithmParams) => AlgorithmReturn;
 export type Preprocessing = (clauses: ClausePool) => PreprocessingReturn;
 
 export type Algorithm = {
-	name: 'backtracking' | 'dpll' | 'cdcl';
+	name: string;
 	preprocessing: Preprocessing;
 	step: AlgorithmStep;
 };
