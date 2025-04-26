@@ -1,17 +1,23 @@
+import type ClausePool from '../entities/ClausePool.svelte.ts';
+import { Trail } from '../entities/Trail.svelte.ts';
+import type Variable from '../entities/Variable.svelte.ts';
+import VariableAssignment from '../entities/VariableAssignment.ts';
+import type VariablePool from '../entities/VariablePool.svelte.ts';
+import {
+	isSat,
+	isUnresolved,
+	isUnsat,
+	makeUnresolved,
+	type Eval
+} from '../utils/interfaces/IClausePool.ts';
+import { logFatal } from '../utils/logging.ts';
 import type {
 	AlgorithmParams,
 	AlgorithmReturn,
 	AlgorithmStep,
 	Preprocessing,
 	PreprocessingReturn
-} from '$lib/store/problem.store.ts';
-import type ClausePool from '../entities/ClausePool.svelte.ts';
-import { Trail } from '../entities/Trail.svelte.ts';
-import type Variable from '../entities/Variable.svelte.ts';
-import VariableAssignment from '../entities/VariableAssignment.ts';
-import type VariablePool from '../entities/VariablePool.svelte.ts';
-import { isSat, isUnresolved, isUnsat, makeUnresolved, type Eval } from '../utils/interfaces/IClausePool.ts';
-import { logFatal } from '../utils/logging.ts';
+} from '../utils/types/algorithm.ts';
 import { fromJust, isJust } from '../utils/types/maybe.ts';
 
 export const backtrackingName = 'backtracking';
@@ -68,7 +74,7 @@ export const backtrackingAlgorithm: AlgorithmStep = (params: AlgorithmParams): A
 		(isSat(newEval) && variables.allAssigned());
 
 	return {
-		type: newEval,
+		eval: newEval,
 		end,
 		trails: nextTrailsState
 	};

@@ -4,7 +4,11 @@
 	import DynamicRender from '$lib/components/DynamicRender.svelte';
 	import { finsihed } from '$lib/store/problem.store.ts';
 	import { get } from 'svelte/store';
-	import { isUnresolved, isUnsat, type Eval } from '$lib/transversal/utils/interfaces/IClausePool.ts';
+	import {
+		isUnresolved,
+		isUnsat,
+		type Eval
+	} from '$lib/transversal/utils/interfaces/IClausePool.ts';
 
 	interface Props {
 		previousEval: Eval;
@@ -37,10 +41,7 @@
 		<DynamicRender component={CodeMergeOutline} props={assignmentProps} />
 	</button>
 {:else}
-	<button
-		class="btn general-btn"
-		title="Reset"
-	>
+	<button class="btn general-btn" title="Reset">
 		<DynamicRender component={RefreshOutline} props={assignmentProps} />
 	</button>
 {/if}

@@ -37,13 +37,13 @@ export const isUnresolved = (e: Eval): e is Unsat => {
 };
 
 export const makeUnsat = (conflictClause: number): Unsat => {
-	return {type: 'UNSAT', conflictClause}
-}
+	return { type: 'UNSAT', conflictClause };
+};
 
 export const makeSat = (): Sat => {
-	return {type: 'SAT'}
-}
+	return { type: 'SAT' };
+};
 
 export const makeUnresolved = (): Unresolved => {
-	return {type: 'UNRESOLVED'}
-}
+	return { type: 'UNRESOLVED' };
+};

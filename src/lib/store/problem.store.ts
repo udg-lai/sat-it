@@ -2,42 +2,11 @@ import ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';
 import { get, writable, type Writable } from 'svelte/store';
 import VariablePool from '../transversal/entities/VariablePool.svelte.ts';
 import type { DimacsInstance } from '$lib/dimacs/dimacs-instance.interface.ts';
-import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
-import type { Eval } from '$lib/transversal/utils/interfaces/IClausePool.ts';
-import {
-	backtrackingAlgorithm,
-	backtrackingName,
-	backtrackingPreprocessing
-} from '$lib/transversal/algorithms/backtracking.ts';
+import { backtracking } from '$lib/transversal/utils/types/algorithm.ts';
+import { type Algorithm } from '$lib/transversal/utils/types/algorithm.ts';
 
 export type MappingLiteral2Clauses = Map<number, Set<number>>;
 
-export interface AlgorithmParams {
-	variables: VariablePool;
-	clauses: ClausePool;
-	mapping: MappingLiteral2Clauses;
-	trails: Trail[];
-	previousEval: Eval;
-}
-
-export type AlgorithmReturn = {
-	type: Eval;
-	end: boolean;
-	trails: Trail[];
-};
-export type PreprocessingReturn = {
-	eval: Eval;
-	end: boolean;
-};
-
-export type AlgorithmStep = (params: AlgorithmParams) => AlgorithmReturn;
-export type Preprocessing = (clauses: ClausePool) => PreprocessingReturn;
-
-export type Algorithm = {
-	name: string;
-	preprocessing: Preprocessing;
-	step: AlgorithmStep;
-};
 export interface Problem {
 	variables: VariablePool;
 	clauses: ClausePool;
@@ -66,14 +35,9 @@ export function updateProblemDomain(instance: DimacsInstance) {
 	let newProblem: Problem;
 
 	if (previousProblem === undefined) {
-		const algorithm = {
-			name: backtrackingName,
-			preprocessing: backtrackingPreprocessing,
-			step: backtrackingAlgorithm
-		};
 		newProblem = {
 			...params,
-			algorithm
+			algorithm: backtracking
 		};
 	} else {
 		const { algorithm } = previousProblem;

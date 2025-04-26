@@ -12,7 +12,7 @@
 		else return 0;
 	});
 
-	const problemEval:Eval = $derived($previousEval);
+	const problemEval: Eval = $derived($previousEval);
 </script>
 
 <div class="flex-center debugger align-center relative flex-row gap-2">

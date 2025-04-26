@@ -1,11 +1,5 @@
 <script lang="ts">
-	import {
-		finsihed,
-		problemStore,
-		type AlgorithmParams,
-		type AlgorithmReturn,
-		type Problem
-	} from '$lib/store/problem.store.ts';
+	import { finsihed, problemStore, type Problem } from '$lib/store/problem.store.ts';
 	import { manualAssignment, type ManualParams } from '$lib/transversal/algorithms/manual.ts';
 	import { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
 	import { onMount } from 'svelte';
@@ -18,11 +12,11 @@
 	} from './debugger/events.svelte.ts';
 	import TrailEditor from './TrailEditorComponent.svelte';
 	import { previousEval, updateEval } from '$lib/store/previousEval.store.ts';
+	import type { AlgorithmParams, AlgorithmReturn } from '$lib/transversal/utils/types/algorithm.ts';
 
 	let showOnlyLastTrail: boolean = $state(false);
 
 	let trails: Trail[] = $state([]);
-	
 
 	function algorithmStep(e: AssignmentEvent): void {
 		if (e === undefined) return;
@@ -35,11 +29,11 @@
 				clauses,
 				mapping,
 				trails,
-				previousEval:$previousEval
+				previousEval: $previousEval
 			};
 
 			const algorithmResult: AlgorithmReturn = algorithm.step(params);
-			updateEval(algorithmResult.type);
+			updateEval(algorithmResult.eval);
 			trails = algorithmResult.trails;
 			finsihed.update(() => {
 				return algorithmResult.end;

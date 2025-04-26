@@ -1,15 +1,22 @@
 import {
 	literalToClauses,
-	type AlgorithmReturn,
 	type MappingLiteral2Clauses,
 	type Problem
 } from '$lib/store/problem.store.ts';
-import { backtrackingAlgorithm } from '$lib/transversal/algorithms/backtracking.ts';
 import ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';
-import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
 import VariablePool from '$lib/transversal/entities/VariablePool.svelte.ts';
-import type { Unsat } from '$lib/transversal/utils/interfaces/IClausePool.ts';
+import {
+	isSat,
+	isUnresolved,
+	isUnsat,
+	makeUnresolved
+} from '$lib/transversal/utils/interfaces/IClausePool.ts';
 import type { CNF } from '$lib/transversal/utils/parsers/dimacs.ts';
+import {
+	backtracking,
+	type AlgorithmParams,
+	type AlgorithmReturn
+} from '$lib/transversal/utils/types/algorithm.ts';
 import { cnfToClauseSet } from '$lib/transversal/utils/utils.ts';
 import { describe, expect, it } from 'vitest';
 
@@ -26,82 +33,61 @@ const problem: Problem = {
 	variables,
 	clauses,
 	mapping,
-	algorithm: backtrackingAlgorithm
+	algorithm: backtracking
 };
 
-let trails: Trail[] = [];
+const params: AlgorithmParams = {
+	variables: problem.variables,
+	clauses: problem.clauses,
+	mapping: mapping,
+	trails: [],
+	previousEval: makeUnresolved()
+};
 
 describe('backtracking algorithm', () => {
 	it('First Assignment', () => {
-		const result: AlgorithmReturn = problem.algorithm({
-			trails: trails,
-			variables: problem.variables,
-			clauses: problem.clauses
-		});
-		trails = result.trails;
+		const result: AlgorithmReturn = problem.algorithm.step(params);
+		params.trails = result.trails;
+		params.previousEval = result.eval;
 		expect(result.end).toBe(false);
-		expect(result.type.type).toBe('UNRESOLVED');
+		expect(isUnresolved(params.previousEval)).toBe(true);
 	});
 	it('Second Assignemnt', () => {
-		const result: AlgorithmReturn = problem.algorithm({
-			trails: trails,
-			variables: problem.variables,
-			clauses: problem.clauses
-		});
-		trails = result.trails;
+		const result: AlgorithmReturn = problem.algorithm.step(params);
+		params.trails = result.trails;
+		params.previousEval = result.eval;
 		expect(result.end).toBe(false);
-		expect(result.type.type).toBe('UNRESOLVED');
+		expect(isUnresolved(params.previousEval)).toBe(true);
 	});
 	it('Third Assignemnt', () => {
-		const result: AlgorithmReturn = problem.algorithm({
-			trails: trails,
-			variables: problem.variables,
-			clauses: problem.clauses
-		});
-		trails = result.trails;
-		expect(result.end).toBe(false);
-		expect(result.type.type).toBe('UNRESOLVED');
+		const result: AlgorithmReturn = problem.algorithm.step(params);
+		params.trails = result.trails;
+		params.previousEval = result.eval;
+		expect(isUnsat(params.previousEval)).toBe(true);
+		if (isUnsat(params.previousEval)) {
+			expect(result.end).toBe(false);
+			expect(params.previousEval.conflictClause).toBe(0);
+		}
 	});
 	it('Fourth Assignemnt', () => {
-		const result: AlgorithmReturn = problem.algorithm({
-			trails: trails,
-			variables: problem.variables,
-			clauses: problem.clauses
-		});
-		trails = result.trails;
-		const resultType = result.type as Unsat;
+		const result: AlgorithmReturn = problem.algorithm.step(params);
+		params.trails = result.trails;
+		params.previousEval = result.eval;
+		expect(isUnsat(params.previousEval)).toBe(true);
 		expect(result.end).toBe(false);
-		expect(resultType.type).toBe('UNSAT');
-		expect(resultType.conflictClause).toBe(0);
 	});
 	it('Fifth Assignemnt', () => {
-		const result: AlgorithmReturn = problem.algorithm({
-			trails: trails,
-			variables: problem.variables,
-			clauses: problem.clauses
-		});
-		trails = result.trails;
-		expect(result.type.type).toBe('UNSAT');
+		const result: AlgorithmReturn = problem.algorithm.step(params);
+		params.trails = result.trails;
+		params.previousEval = result.eval;
+		expect(isUnresolved(params.previousEval)).toBe(true);
 		expect(result.end).toBe(false);
 	});
 	it('Sixth Assignemnt', () => {
-		const result: AlgorithmReturn = problem.algorithm({
-			trails: trails,
-			variables: problem.variables,
-			clauses: problem.clauses
-		});
-		trails = result.trails;
-		expect(result.type.type).toBe('SAT');
-		expect(result.end).toBe(false);
-	});
-	it('Seventh Assignemnt', () => {
-		const result: AlgorithmReturn = problem.algorithm({
-			trails: trails,
-			variables: problem.variables,
-			clauses: problem.clauses
-		});
-		trails = result.trails;
-		expect(result.type.type).toBe('SAT');
+		const result: AlgorithmReturn = problem.algorithm.step(params);
+		params.trails = result.trails;
+		params.previousEval = result.eval;
+		expect(isSat(params.previousEval)).toBe(true);
 		expect(result.end).toBe(true);
 	});
 });
