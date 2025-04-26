@@ -7,6 +7,7 @@ import type {
 } from '$lib/store/problem.store.ts';
 import type ClausePool from '../entities/ClausePool.svelte.ts';
 import { Trail } from '../entities/Trail.svelte.ts';
+import type Variable from '../entities/Variable.svelte.ts';
 import VariableAssignment from '../entities/VariableAssignment.ts';
 import type VariablePool from '../entities/VariablePool.svelte.ts';
 import type { Eval } from '../utils/interfaces/IClausePool.ts';
@@ -30,52 +31,43 @@ export const backtrackingPreprocessing: Preprocessing = (
 export const backtrackingAlgorithm: AlgorithmStep = (params: AlgorithmParams): AlgorithmReturn => {
 	const { trails, variables, clauses, mapping, previousEval } = params;
 
-	let nextTrailsState: Trail[] = [];
-	let end: boolean = false;
-	let literalToCheck = 0;
-
-	if (trails.length === 0) {
-		nextTrailsState = [new Trail(variables.nVariables())];
-	} else {
-		nextTrailsState = [...trails];
-	}
+	const nextTrailsState: Trail[] =
+		trails.length === 0 ? [new Trail(variables.nVariables())] : [...trails];
 
 	let workingTrail = nextTrailsState[nextTrailsState.length - 1];
 
 	//Assignació
+	let literalToCheck: number;
 	if (previousEval.type === 'UNSAT') {
-		if (workingTrail.getDecisionLevel() === 0) {
-			logFatal('Backtracking Error', 'You are not suposed to get here');
-		} else {
-			const newTrail: Trail = workingTrail.copy();
-			literalToCheck = backtracking(newTrail, variables);
-			nextTrailsState.push(newTrail);
-			workingTrail = nextTrailsState[nextTrailsState.length - 1];
-		}
+		const newTrail: Trail = workingTrail.copy();
+		const lastDecision = disposeUntilDecision(newTrail, variables);
+		literalToCheck = backtracking(newTrail, variables, lastDecision.getVariable());
+		nextTrailsState.push(newTrail);
+		workingTrail = nextTrailsState[nextTrailsState.length - 1];
 	} else {
-		if (variables.allAssigned()) {
-			logFatal('Backtracking Error', 'You are not suposed to get here');
-		} else {
-			literalToCheck = followingAssignment(workingTrail, variables);
-		}
+		literalToCheck = followingAssignment(workingTrail, variables);
 	}
+
 	//Control d'errors
-	if (literalToCheck === 0) {
-		logFatal('Backtracking Error', 'No variable was assigned');
-	}
-	let newEval: Eval = previousEval;
+	let newEval: Eval;
+
 	const clausesToCheck: Set<number> | undefined = mapping.get(literalToCheck);
-	if (clausesToCheck !== undefined) {
+	if (clausesToCheck) {
 		newEval = clauses.partialEval(clausesToCheck);
+	} else if (variables.allAssigned()) {
+		newEval = clauses.eval();
 	} else {
-		newEval = variables.allAssigned() ? { type: 'SAT' } : { type: 'UNRESOLVED' };
+		newEval = { type: 'UNRESOLVED' };
 	}
-	console.log(newEval.type);
-	if (
+	if (newEval.type === 'SAT' && !variables.allAssigned()) {
+		newEval = { type: 'UNRESOLVED' };
+	}
+
+	const end: boolean =
 		(newEval.type === 'UNSAT' && workingTrail.getDecisionLevel() === 0) ||
-		(newEval.type === 'SAT' && variables.allAssigned())
-	)
-		end = true;
+		(newEval.type === 'SAT' && variables.allAssigned());
+
+	console.log(newEval.type);
 	return {
 		type: newEval,
 		end,
@@ -83,33 +75,32 @@ export const backtrackingAlgorithm: AlgorithmStep = (params: AlgorithmParams): A
 	};
 };
 
-const backtracking = (workingTail: Trail, variables: VariablePool): number => {
-	let backtrack = false;
-	let lastDecision: VariableAssignment | undefined = workingTail.pop();
-	let polarity: boolean | undefined = undefined;
+const disposeUntilDecision = (trail: Trail, variables: VariablePool): VariableAssignment => {
+	let last = trail.pop();
+	while (last && !last.isD()) {
+		variables.dispose(last.getVariable().getInt());
+		last = trail.pop();
+	}
+	if (!last) {
+		throw logFatal('No backtracking was made', 'There was no decision left to backtrack');
+	}
+	return last;
+};
 
-	while (!backtrack && lastDecision !== undefined) {
-		const lastVariable = lastDecision.getVariable();
-		variables.dispose(lastVariable.getInt());
-		if (lastDecision.isD()) {
-			backtrack = true;
-			polarity = !lastVariable.getAssignment();
-			variables.persist(lastVariable.getInt(), polarity);
-			const variable = variables.getCopy(lastVariable.getInt());
-			workingTail.push(VariableAssignment.newBacktrackingAssignment(variable));
-			workingTail.updateFollowUpIndex();
-		} else {
-			lastDecision = workingTail.pop();
-		}
-	}
-	if (lastDecision === undefined || polarity === undefined) {
-		throw logFatal(
-			'No backtracking was made',
-			'A backtraaking action should have been made, but nothing happened'
-		);
-	} else {
-		return polarity ? -lastDecision.getVariable().getInt() : lastDecision.getVariable().getInt();
-	}
+const backtracking = (
+	workingTail: Trail,
+	variables: VariablePool,
+	lastVariable: Variable
+): number => {
+	const polarity: boolean = !lastVariable.getAssignment();
+
+	variables.persist(lastVariable.getInt(), polarity);
+	const variable = variables.getCopy(lastVariable.getInt());
+	workingTail.push(VariableAssignment.newBacktrackingAssignment(variable));
+	workingTail.updateFollowUpIndex();
+
+	const litValue = polarity ? -lastVariable.getInt() : lastVariable.getInt();
+	return litValue;
 };
 
 function followingAssignment(workingTrail: Trail, variables: VariablePool): number {
