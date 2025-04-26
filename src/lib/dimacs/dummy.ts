@@ -4,11 +4,13 @@ import type { DimacsInstance } from './dimacs-instance.interface.ts';
 const fileName = 'dummy.dimacs';
 
 const content = `
-p cnf 3 2
+p cnf 4 3
 c this is just a dummy example
 -1 -2 -3 0
 c this is added here
 -2 3 0
+c this is another clause
+1 4 0
 `;
 
 const summary = parser({ content, name: fileName });

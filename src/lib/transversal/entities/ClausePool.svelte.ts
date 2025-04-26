@@ -50,6 +50,46 @@ class ClausePool implements IClausePool {
 		return state;
 	}
 
+	partialEval(clausesToCheck: Set<number>): Eval {
+		let unsat = false;
+		let nSatisfied = 0;
+		let i = 0;
+		let conflicClause: Clause | undefined = undefined;
+		const clauseIds = Array.from(clausesToCheck);
+		const totalToCheck = clauseIds.length;
+
+		while (i < totalToCheck && !unsat) {
+			const clauseId = clauseIds[i];
+			const clause = this.collection[clauseId];
+			const clauseEval = clause.eval();
+
+			unsat = clauseEval === ClauseEval.UNSAT;
+
+			if (!unsat) {
+				if (clauseEval === ClauseEval.SAT) {
+					nSatisfied++;
+				}
+				i++;
+			} else {
+				conflicClause = clause;
+			}
+		}
+
+		let state: Eval;
+		if (unsat) {
+			state = {
+				type: 'UNSAT',
+				conflicClause: conflicClause?.getId() as number
+			};
+		} else if (nSatisfied === i) {
+			state = { type: 'SAT' };
+		} else {
+			state = { type: 'UNRESOLVED' };
+		}
+
+		return state;
+	}
+
 	addClause(clause: Clause): void {
 		this.collection.push(clause);
 	}

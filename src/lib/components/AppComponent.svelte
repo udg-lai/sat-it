@@ -17,24 +17,29 @@
 		type EditorViewEvent
 	} from './debugger/events.svelte.ts';
 	import TrailEditor from './TrailEditorComponent.svelte';
+	import type { Eval } from '$lib/transversal/utils/interfaces/IClausePool.ts';
 
 	let showOnlyLastTrail: boolean = $state(false);
 
 	let trails: Trail[] = $state([]);
+	let previousEval: Eval = $state({ type: 'UNRESOLVED' });
 
 	function algorithmStep(e: AssignmentEvent): void {
 		if (e === undefined) return;
 
-		const { variables, clauses, algorithm }: Problem = get(problemStore);
+		const { variables, clauses, mapping, algorithm }: Problem = get(problemStore);
 
 		if (e.type === 'automated') {
 			const params: AlgorithmParams = {
 				variables,
 				clauses,
-				trails
+				mapping,
+				trails,
+				previousEval
 			};
 
-			const algorithmResult: AlgorithmReturn = algorithm(params);
+			const algorithmResult: AlgorithmReturn = algorithm.step(params);
+			previousEval = algorithmResult.type;
 			trails = algorithmResult.trails;
 			finsihed.update(() => {
 				return algorithmResult.end;
@@ -58,6 +63,7 @@
 	function onProblemUpdated(p: Problem): void {
 		if (p === undefined) return;
 		trails = [];
+		previousEval = p.clauses.eval();
 	}
 
 	onMount(() => {
