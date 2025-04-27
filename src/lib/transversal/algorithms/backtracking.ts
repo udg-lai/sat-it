@@ -15,6 +15,9 @@ import type {
 	AlgorithmParams,
 	AlgorithmReturn,
 	AlgorithmStep,
+	ConflictDetecion,
+	ConflictDetecionParams,
+	ConflictDetecionReturn,
 	Preprocessing,
 	PreprocessingReturn
 } from '../utils/types/algorithm.ts';
@@ -55,9 +58,26 @@ export const backtrackingAlgorithm: AlgorithmStep = (params: AlgorithmParams): A
 	}
 
 	//Control d'errors
-	let newEval: Eval;
-
 	const clausesToCheck: Set<number> | undefined = mapping.get(literalToCheck);
+	const { eval: newEval, end } = backtrackingConflictDetection({
+		workingTrail,
+		variables,
+		clauses,
+		clausesToCheck
+	});
+
+	return {
+		eval: newEval,
+		end,
+		trails: nextTrailsState
+	};
+};
+
+export const backtrackingConflictDetection: ConflictDetecion = (
+	params: ConflictDetecionParams
+): ConflictDetecionReturn => {
+	const { workingTrail, variables, clauses, clausesToCheck } = params;
+	let newEval: Eval;
 	if (clausesToCheck) {
 		newEval = clauses.partialEval(clausesToCheck);
 	} else if (variables.allAssigned()) {
@@ -72,11 +92,9 @@ export const backtrackingAlgorithm: AlgorithmStep = (params: AlgorithmParams): A
 	const end: boolean =
 		(isUnsat(newEval) && workingTrail.getDecisionLevel() === 0) ||
 		(isSat(newEval) && variables.allAssigned());
-
 	return {
 		eval: newEval,
-		end,
-		trails: nextTrailsState
+		end
 	};
 };
 
