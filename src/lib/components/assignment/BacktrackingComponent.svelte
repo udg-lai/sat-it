@@ -14,7 +14,7 @@
 	}
 
 	let { assignment, eventClick }: Props = $props();
-	let buttonId:string = nanoid();
+	let buttonId: string = nanoid();
 
 	let conflictClause: Clause = $derived.by(() => {
 		if (assignment.isK()) {
@@ -40,14 +40,13 @@
 	function onClick() {
 		eventClick?.();
 	}
-
 </script>
 
 <button id={buttonId} class="literal-style backtracking" onclick={onClick}>
 	<MathTexComponent equation={assignment.toTeX()} />
 </button>
 
-<Popover triggeredBy={"#" + buttonId} class="si-venga" placement="top">
+<Popover triggeredBy={'#' + buttonId} class="si-venga" trigger="click" placement="top">
 	<MathTexComponent equation={conflictClauseString} />
 </Popover>
 
