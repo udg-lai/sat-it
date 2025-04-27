@@ -13,8 +13,8 @@ import {
 import { logFatal } from '../utils/logging.ts';
 import type {
 	AlgorithmParams,
-	AlgorithmReturn,
 	AlgorithmStep,
+	AssignmentResult,
 	ConflictDetecion,
 	ConflictDetecionParams,
 	ConflictDetecionReturn,
@@ -37,7 +37,7 @@ export const backtrackingPreprocessing: Preprocessing = (
 	};
 };
 
-export const backtrackingAlgorithm: AlgorithmStep = (params: AlgorithmParams): AlgorithmReturn => {
+export const backtrackingAlgorithm: AlgorithmStep = (params: AlgorithmParams): AssignmentResult => {
 	const { trails, variables, clauses, mapping, previousEval } = params;
 
 	const nextTrailsState: Trail[] =

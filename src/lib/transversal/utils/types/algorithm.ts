@@ -18,7 +18,7 @@ export interface AlgorithmParams {
 	previousEval: Eval;
 }
 
-export type AlgorithmReturn = {
+export type AssignmentResult = {
 	eval: Eval;
 	end: boolean;
 	trails: Trail[];
@@ -41,7 +41,7 @@ export type ConflictDetecionReturn = {
 	end: boolean;
 };
 
-export type AlgorithmStep = (params: AlgorithmParams) => AlgorithmReturn;
+export type AlgorithmStep = (params: AlgorithmParams) => AssignmentResult;
 export type Preprocessing = (clauses: ClausePool) => PreprocessingReturn;
 export type ConflictDetecion = (params: ConflictDetecionParams) => ConflictDetecionReturn;
 
