@@ -11,10 +11,7 @@
 		PenOutline
 	} from 'flowbite-svelte-icons';
 	import DynamicRender from '../DynamicRender.svelte';
-	import {
-		isUnresolved,
-		type Eval
-	} from '$lib/transversal/utils/interfaces/IClausePool.ts';
+	import { isUnresolved, type Eval } from '$lib/transversal/utils/interfaces/IClausePool.ts';
 
 	interface Props {
 		previousEval: Eval;
