@@ -15,7 +15,7 @@ import type { CNF } from '$lib/transversal/utils/parsers/dimacs.ts';
 import {
 	backtracking,
 	type AlgorithmParams,
-	type AlgorithmReturn
+	type AssignmentResult
 } from '$lib/transversal/utils/types/algorithm.ts';
 import { cnfToClauseSet } from '$lib/transversal/utils/utils.ts';
 import { describe, expect, it } from 'vitest';
@@ -46,21 +46,21 @@ const params: AlgorithmParams = {
 
 describe('backtracking algorithm', () => {
 	it('First Assignment', () => {
-		const result: AlgorithmReturn = problem.algorithm.step(params);
+		const result: AssignmentResult = problem.algorithm.step(params);
 		params.trails = result.trails;
 		params.previousEval = result.eval;
 		expect(result.end).toBe(false);
 		expect(isUnresolved(params.previousEval)).toBe(true);
 	});
 	it('Second Assignemnt', () => {
-		const result: AlgorithmReturn = problem.algorithm.step(params);
+		const result: AssignmentResult = problem.algorithm.step(params);
 		params.trails = result.trails;
 		params.previousEval = result.eval;
 		expect(result.end).toBe(false);
 		expect(isUnresolved(params.previousEval)).toBe(true);
 	});
 	it('Third Assignemnt', () => {
-		const result: AlgorithmReturn = problem.algorithm.step(params);
+		const result: AssignmentResult = problem.algorithm.step(params);
 		params.trails = result.trails;
 		params.previousEval = result.eval;
 		expect(isUnsat(params.previousEval)).toBe(true);
@@ -70,21 +70,21 @@ describe('backtracking algorithm', () => {
 		}
 	});
 	it('Fourth Assignemnt', () => {
-		const result: AlgorithmReturn = problem.algorithm.step(params);
+		const result: AssignmentResult = problem.algorithm.step(params);
 		params.trails = result.trails;
 		params.previousEval = result.eval;
 		expect(isUnsat(params.previousEval)).toBe(true);
 		expect(result.end).toBe(false);
 	});
 	it('Fifth Assignemnt', () => {
-		const result: AlgorithmReturn = problem.algorithm.step(params);
+		const result: AssignmentResult = problem.algorithm.step(params);
 		params.trails = result.trails;
 		params.previousEval = result.eval;
 		expect(isUnresolved(params.previousEval)).toBe(true);
 		expect(result.end).toBe(false);
 	});
 	it('Sixth Assignemnt', () => {
-		const result: AlgorithmReturn = problem.algorithm.step(params);
+		const result: AssignmentResult = problem.algorithm.step(params);
 		params.trails = result.trails;
 		params.previousEval = result.eval;
 		expect(isSat(params.previousEval)).toBe(true);

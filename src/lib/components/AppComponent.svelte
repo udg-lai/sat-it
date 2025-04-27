@@ -12,7 +12,10 @@
 	} from './debugger/events.svelte.ts';
 	import TrailEditor from './TrailEditorComponent.svelte';
 	import { previousEval, updateEval } from '$lib/store/previousEval.store.ts';
-	import type { AlgorithmParams, AlgorithmReturn } from '$lib/transversal/utils/types/algorithm.ts';
+	import type {
+		AlgorithmParams,
+		AssignmentResult
+	} from '$lib/transversal/utils/types/algorithm.ts';
 
 	let showOnlyLastTrail: boolean = $state(false);
 
@@ -23,6 +26,7 @@
 
 		const { variables, clauses, mapping, algorithm }: Problem = get(problemStore);
 
+		let results: AssignmentResult;
 		if (e.type === 'automated') {
 			const params: AlgorithmParams = {
 				variables,
@@ -32,20 +36,23 @@
 				previousEval: $previousEval
 			};
 
-			const algorithmResult: AlgorithmReturn = algorithm.step(params);
-			updateEval(algorithmResult.eval);
-			trails = algorithmResult.trails;
-			finsihed.update(() => {
-				return algorithmResult.end;
-			});
+			results = algorithm.step(params);
 		} else {
 			const params: ManualParams = {
 				assignment: e,
 				variables,
-				trails
+				trails,
+				clauses,
+				mapping,
+				conflictDetectionAlgorithm: algorithm.conflictDetection
 			};
-			trails = manualAssignment(params);
+			results = manualAssignment(params);
 		}
+		updateEval(results.eval);
+		trails = results.trails;
+		finsihed.update(() => {
+			return results.end;
+		});
 	}
 
 	function toggleEditorView(e: EditorViewEvent) {

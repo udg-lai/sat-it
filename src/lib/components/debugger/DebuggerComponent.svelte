@@ -26,7 +26,7 @@
 
 	<BacktrackingDebugger previousEval={$previousEval} />
 
-	<ManualDebuggerComponent {defaultNextVariable} />
+	<ManualDebuggerComponent previousEval={$previousEval} />
 
 	<GeneralDebuggerButtons />
 

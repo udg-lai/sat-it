@@ -6,7 +6,8 @@ import type { Eval } from '../interfaces/IClausePool.ts';
 import {
 	backtrackingName,
 	backtrackingAlgorithm,
-	backtrackingPreprocessing
+	backtrackingPreprocessing,
+	backtrackingConflictDetection
 } from '$lib/transversal/algorithms/backtracking.ts';
 
 export interface AlgorithmParams {
@@ -17,27 +18,43 @@ export interface AlgorithmParams {
 	previousEval: Eval;
 }
 
-export type AlgorithmReturn = {
+export type AssignmentResult = {
 	eval: Eval;
 	end: boolean;
 	trails: Trail[];
 };
+
 export type PreprocessingReturn = {
 	eval: Eval;
 	end: boolean;
 };
 
-export type AlgorithmStep = (params: AlgorithmParams) => AlgorithmReturn;
+export type ConflictDetecionParams = {
+	workingTrail: Trail;
+	variables: VariablePool;
+	clauses: ClausePool;
+	clausesToCheck?: Set<number> | undefined;
+};
+
+export type ConflictDetecionReturn = {
+	eval: Eval;
+	end: boolean;
+};
+
+export type AlgorithmStep = (params: AlgorithmParams) => AssignmentResult;
 export type Preprocessing = (clauses: ClausePool) => PreprocessingReturn;
+export type ConflictDetecion = (params: ConflictDetecionParams) => ConflictDetecionReturn;
 
 export type Algorithm = {
 	name: string;
 	preprocessing: Preprocessing;
 	step: AlgorithmStep;
+	conflictDetection: ConflictDetecion;
 };
 
 export const backtracking: Algorithm = {
 	name: backtrackingName,
 	preprocessing: backtrackingPreprocessing,
-	step: backtrackingAlgorithm
+	step: backtrackingAlgorithm,
+	conflictDetection: backtrackingConflictDetection
 };
