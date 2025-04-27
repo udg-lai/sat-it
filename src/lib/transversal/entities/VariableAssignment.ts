@@ -19,6 +19,7 @@ type UnitPropagation = {
 
 type Backtracking = {
 	type: 'backtracking';
+	clauseId: number;
 };
 
 export type Reason = Decision | UnitPropagation | Backtracking;
@@ -63,9 +64,10 @@ export const makeUnitPropagationReason = (clauseId: number): UnitPropagation => 
 	};
 };
 
-export const makeBacktrackingReason = (): Backtracking => {
+export const makeBacktrackingReason = (clauseId: number): Backtracking => {
 	return {
-		type: 'backtracking'
+		type: 'backtracking',
+		clauseId
 	};
 };
 
@@ -90,8 +92,8 @@ export default class VariableAssignment {
 		return new VariableAssignment(variable, makeUnitPropagationReason(clauseId));
 	}
 
-	static newBacktrackingAssignment(variable: Variable) {
-		return new VariableAssignment(variable, makeBacktrackingReason());
+	static newBacktrackingAssignment(variable: Variable, clauseId: number) {
+		return new VariableAssignment(variable, makeBacktrackingReason(clauseId));
 	}
 
 	copy(): VariableAssignment {

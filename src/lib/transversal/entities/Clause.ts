@@ -133,6 +133,13 @@ class Clause implements Comparable<Clause> {
 	): void {
 		this.literals.forEach(callback, thisArg);
 	}
+	map<T>(
+		callback: (literal: Literal, index: number, array: Literal[]) => T,
+		thisArg?: unknown
+	): T[] {
+		return this.literals.map(callback, thisArg);
+	}
+	
 }
 
 export enum ClauseEval {

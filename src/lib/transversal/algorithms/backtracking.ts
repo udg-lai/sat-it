@@ -47,7 +47,7 @@ export const backtrackingAlgorithm: AlgorithmStep = (params: AlgorithmParams): A
 	if (isUnsat(previousEval)) {
 		const newTrail: Trail = workingTrail.copy();
 		const lastDecision = disposeUntilDecision(newTrail, variables);
-		literalToCheck = backtracking(newTrail, variables, lastDecision.getVariable());
+		literalToCheck = backtracking(newTrail, variables, lastDecision.getVariable(), previousEval.conflictClause);
 		nextTrailsState.push(newTrail);
 		workingTrail = nextTrailsState[nextTrailsState.length - 1];
 	} else {
@@ -95,13 +95,14 @@ const disposeUntilDecision = (trail: Trail, variables: VariablePool): VariableAs
 const backtracking = (
 	workingTail: Trail,
 	variables: VariablePool,
-	lastVariable: Variable
+	lastVariable: Variable,
+	conflictClause: number
 ): number => {
 	const polarity: boolean = !lastVariable.getAssignment();
 	variables.dispose(lastVariable.getInt());
 	variables.persist(lastVariable.getInt(), polarity);
 	const variable = variables.getCopy(lastVariable.getInt());
-	workingTail.push(VariableAssignment.newBacktrackingAssignment(variable));
+	workingTail.push(VariableAssignment.newBacktrackingAssignment(variable, conflictClause));
 	workingTail.updateFollowUpIndex();
 
 	const litValue = polarity ? -lastVariable.getInt() : lastVariable.getInt();
