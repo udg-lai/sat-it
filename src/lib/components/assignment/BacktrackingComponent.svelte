@@ -2,6 +2,7 @@
 	import type VariableAssignment from '$lib/transversal/entities/VariableAssignment.ts';
 	import MathTexComponent from '$lib/components/MathTexComponent.svelte';
 	import './_style.css';
+	import { nanoid } from 'nanoid';
 	import { Popover } from 'flowbite-svelte';
 	import { problemStore } from '$lib/store/problem.store.ts';
 	import { isBacktrackingReason } from '$lib/transversal/entities/VariableAssignment.ts';
@@ -13,6 +14,7 @@
 	}
 
 	let { assignment, eventClick }: Props = $props();
+	let buttonId:string = nanoid();
 
 	let conflictClause: Clause = $derived.by(() => {
 		if (assignment.isK()) {
@@ -38,17 +40,14 @@
 	function onClick() {
 		eventClick?.();
 	}
+
 </script>
 
-<button id="backtrack" class="literal-style backtracking" onclick={onClick}>
+<button id={buttonId} class="literal-style backtracking" onclick={onClick}>
 	<MathTexComponent equation={assignment.toTeX()} />
 </button>
 
-<Popover
-	triggeredBy="#backtrack"
-	class="w-72 bg-white text-sm font-light text-gray-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400"
-	placement="bottom-start"
->
+<Popover triggeredBy={"#" + buttonId} class="si-venga" placement="top">
 	<MathTexComponent equation={conflictClauseString} />
 </Popover>
 
@@ -59,6 +58,12 @@
 		border-left: 1px transparent;
 		border-right: 1px transparent;
 		cursor: help;
+	}
+
+	:global(.si-venga) {
+		background-color: var(--main-bg-color);
+		border-color: var(--border-color);
+		color: black;
 	}
 
 	:global(mo) {
