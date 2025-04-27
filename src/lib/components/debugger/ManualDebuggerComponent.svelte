@@ -11,12 +11,16 @@
 		PenOutline
 	} from 'flowbite-svelte-icons';
 	import DynamicRender from '../DynamicRender.svelte';
+	import {
+		isUnresolved,
+		type Eval
+	} from '$lib/transversal/utils/interfaces/IClausePool.ts';
 
 	interface Props {
-		defaultNextVariable: number | undefined;
+		previousEval: Eval;
 	}
 
-	let { defaultNextVariable }: Props = $props();
+	let { previousEval }: Props = $props();
 
 	const generalProps = {
 		class: 'h-8 w-8 cursor-pointer'
@@ -42,21 +46,14 @@
 		}
 	});
 
-	export function emitAssignment() {
+	function emitAssignment() {
 		if (!isVariableValid) {
 			logInfo('Invalid Variable', 'The variable you are trying to assign is already assigned');
 		} else {
-			if (
-				(userNextVariable === undefined && polarity) ||
-				(userNextVariable !== undefined && userNextVariable === defaultNextVariable && polarity)
-			) {
-				emitAssignmentEvent({ type: 'automated' });
-			} else if (defaultNextVariable !== undefined && userNextVariable === undefined && !polarity) {
-				emitAssignmentEvent({ type: 'manual', variable: defaultNextVariable, polarity: polarity });
-			} else if (userNextVariable !== undefined) {
-				emitAssignmentEvent({ type: 'manual', variable: userNextVariable, polarity: polarity });
+			if (userNextVariable === undefined) {
+				logError('Ther is no user variable to decide');
 			} else {
-				logError('Could not control case of assignment');
+				emitAssignmentEvent({ type: 'manual', variable: userNextVariable, polarity: polarity });
 			}
 		}
 		resetState();
@@ -70,10 +67,10 @@
 
 <button
 	class="btn general-btn"
-	class:invalidOption={defaultNextVariable === undefined}
+	class:invalidOption={!isUnresolved(previousEval)}
 	title="Manual Decision"
 	onclick={() => (manualDecisionModal = true)}
-	disabled={defaultNextVariable === undefined}
+	disabled={!isUnresolved(previousEval)}
 >
 	<DynamicRender component={PenOutline} props={generalProps} />
 </button>
@@ -86,10 +83,7 @@
 			type="number"
 			class="variable-selector w-[128px]"
 			class:invalidOption={!isVariableValid}
-			placeholder={defaultNextVariable
-				? defaultNextVariable.toString()
-				: 'No more variables to assign'}
-			disabled={defaultNextVariable === undefined}
+			placeholder={'Var?'}
 			min="1"
 			max={maxValue}
 		/>
@@ -100,7 +94,6 @@
 			class="polarity"
 			class:active={polarity}
 			onclick={() => (polarity = true)}
-			disabled={defaultNextVariable === undefined}
 			title="Set true"
 		>
 			<DynamicRender component={CheckCircleOutline} props={generalProps} />
@@ -110,7 +103,6 @@
 			class="polarity"
 			class:active={!polarity}
 			onclick={() => (polarity = false)}
-			disabled={defaultNextVariable === undefined}
 			title="Set false"
 		>
 			<DynamicRender component={CircleMinusOutline} props={generalProps} />
@@ -125,6 +117,7 @@
 				emitAssignment();
 				manualDecisionModal = false;
 			}}
+			disabled={!userNextVariable}
 			title="Decide"
 		>
 			<DynamicRender component={CaretRightOutline} props={generalProps} />
