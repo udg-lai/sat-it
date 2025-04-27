@@ -14,34 +14,41 @@
 
 	let { assignment, eventClick }: Props = $props();
 
-	let conflictClause: Clause = $derived.by(()=>{
-		if(assignment.isK()) {
+	let conflictClause: Clause = $derived.by(() => {
+		if (assignment.isK()) {
 			const reason = assignment.getReason();
-			if(isBacktrackingReason(reason)) {
-				return $problemStore.clauses.get(reason.clauseId)
+			if (isBacktrackingReason(reason)) {
+				return $problemStore.clauses.get(reason.clauseId);
+			} else {
+				logFatal('Reason error', 'The reason is not a backtracking');
 			}
-			else {
-				logFatal("Reason error", "The reason is not a backtracking");
-			}
-		}
-		else {
-			logFatal("Reason error", "The variable assignment is not a backtracking");
+		} else {
+			logFatal('Reason error', 'The variable assignment is not a backtracking');
 		}
 	});
 
-	let conflictClauseString:string =  $derived(conflictClause.map((literal) => {return literal.toTeX()}).join("\\: \\:"))
+	let conflictClauseString: string = $derived(
+		conflictClause
+			.map((literal) => {
+				return literal.toTeX();
+			})
+			.join('\\: \\:')
+	);
 
 	function onClick() {
 		eventClick?.();
 	}
-
 </script>
 
 <button id="backtrack" class="literal-style backtracking" onclick={onClick}>
 	<MathTexComponent equation={assignment.toTeX()} />
 </button>
 
-<Popover triggeredBy="#backtrack" class="w-72 text-sm font-light text-gray-500 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400" placement="bottom-start">
+<Popover
+	triggeredBy="#backtrack"
+	class="w-72 bg-white text-sm font-light text-gray-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400"
+	placement="bottom-start"
+>
 	<MathTexComponent equation={conflictClauseString} />
 </Popover>
 

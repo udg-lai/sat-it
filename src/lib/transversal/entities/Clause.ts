@@ -139,7 +139,6 @@ class Clause implements Comparable<Clause> {
 	): T[] {
 		return this.literals.map(callback, thisArg);
 	}
-	
 }
 
 export enum ClauseEval {

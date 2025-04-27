@@ -47,7 +47,12 @@ export const backtrackingAlgorithm: AlgorithmStep = (params: AlgorithmParams): A
 	if (isUnsat(previousEval)) {
 		const newTrail: Trail = workingTrail.copy();
 		const lastDecision = disposeUntilDecision(newTrail, variables);
-		literalToCheck = backtracking(newTrail, variables, lastDecision.getVariable(), previousEval.conflictClause);
+		literalToCheck = backtracking(
+			newTrail,
+			variables,
+			lastDecision.getVariable(),
+			previousEval.conflictClause
+		);
 		nextTrailsState.push(newTrail);
 		workingTrail = nextTrailsState[nextTrailsState.length - 1];
 	} else {
