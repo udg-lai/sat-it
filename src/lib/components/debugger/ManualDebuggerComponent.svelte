@@ -2,7 +2,7 @@
 	import { logError, logInfo } from '$lib/transversal/utils/logging.ts';
 
 	import { Modal } from 'flowbite-svelte';
-	import { emitAssignmentEvent } from './events.svelte.ts';
+	import { emitActionEvent, emitAssignmentEvent } from './events.svelte.ts';
 	import { problemStore } from '$lib/store/problem.store.ts';
 	import {
 		CaretRightOutline,
@@ -11,7 +11,6 @@
 		PenOutline
 	} from 'flowbite-svelte-icons';
 	import DynamicRender from '../DynamicRender.svelte';
-	import { recordAction } from '$lib/store/action.store.ts';
 
 	interface Props {
 		defaultNextVariable: number | undefined;
@@ -59,8 +58,8 @@
 			} else {
 				logError('Could not control case of assignment');
 			}
-			recordAction('decision');
 		}
+		emitActionEvent({ type: 'record' });
 		resetState();
 	}
 

@@ -2,7 +2,7 @@
 	import './style.css';
 
 	import { onDestroy, onMount } from 'svelte';
-	import { emitEditorViewEvent } from './events.svelte.ts';
+	import { emitActionEvent, emitEditorViewEvent } from './events.svelte.ts';
 	import DynamicRender from '$lib/components/DynamicRender.svelte';
 	import {
 		ArrowRightOutline,
@@ -11,15 +11,15 @@
 		ChevronRightOutline,
 		ReplyOutline
 	} from 'flowbite-svelte-icons';
-	import { redo, undo, userActions, userActionsPointer } from '$lib/store/action.store.ts';
+	import { stackPointer, trailStack } from '$lib/store/stack.store.ts';
 	import { browser } from '$app/environment';
 
 	let expanded = $state(false);
 	let textCollapse = $derived(expanded ? 'Collapse Propagations' : 'Expand Propagations');
 
 	let activateRedo = $derived.by(() => {
-		const pointerValue = $userActionsPointer + 1;
-		const stackSize = $userActions.length;
+		const pointerValue = $stackPointer + 1;
+		const stackSize = $trailStack.length;
 		return pointerValue < stackSize;
 	});
 
@@ -61,11 +61,10 @@
 
 		if (isUndo) {
 			event.preventDefault();
-			undo();
+			emitActionEvent({ type: 'undo' });
 		} else if (isRedo) {
 			event.preventDefault();
-			console.log('Hola');
-			redo();
+			emitActionEvent({ type: 'redo' });
 		}
 	}
 </script>
@@ -78,7 +77,7 @@
 	<DynamicRender component={BarsOutline} props={generalProps} />
 </button>
 
-<button class="btn general-btn" title="Undo" onclick={undo}>
+<button class="btn general-btn" title="Undo" onclick={() => emitActionEvent({ type: 'undo' })}>
 	<DynamicRender component={ReplyOutline} props={generalProps} />
 </button>
 
@@ -86,7 +85,7 @@
 	class="btn general-btn"
 	class:invalidOption={!activateRedo}
 	title="Redo"
-	onclick={redo}
+	onclick={() => emitActionEvent({ type: 'redo' })}
 	disabled={!activateRedo}
 >
 	<DynamicRender component={ReplyOutline} props={reverseProps} />

@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { CaretRightOutline, CodeMergeOutline } from 'flowbite-svelte-icons';
-	import { emitAssignmentEvent } from './events.svelte.ts';
+	import { emitActionEvent, emitAssignmentEvent } from './events.svelte.ts';
 	import DynamicRender from '$lib/components/DynamicRender.svelte';
-	import { recordAction } from '$lib/store/action.store.ts';
 
 	interface Props {
 		defaultNextVariable: number | undefined;
@@ -20,7 +19,7 @@
 		class="btn general-btn"
 		onclick={() => {
 			emitAssignmentEvent({ type: 'automated' });
-			recordAction('decision');
+			emitActionEvent({ type: 'record' });
 		}}
 		title="Decide"
 	>
@@ -31,7 +30,7 @@
 		class="btn general-btn bkt-btn"
 		onclick={() => {
 			emitAssignmentEvent({ type: 'automated' });
-			recordAction('decision');
+			emitActionEvent({ type: 'record' });
 		}}
 		title="Backtrack"
 	>
