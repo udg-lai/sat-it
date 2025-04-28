@@ -18,9 +18,9 @@
 	let textCollapse = $derived(expanded ? 'Collapse Propagations' : 'Expand Propagations');
 
 	let activateRedo = $derived.by(() => {
-		const pointerValue = $stackPointer + 1;
-		const stackSize = $trailStack.length;
-		return pointerValue < stackSize;
+		const pointerValue = $stackPointer;
+		const lastStackPosition = $trailStack.length - 1;
+		return pointerValue != lastStackPosition;
 	});
 
 	const generalProps = {
