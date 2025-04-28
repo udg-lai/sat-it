@@ -13,7 +13,7 @@
 	} from 'flowbite-svelte-icons';
 
 	let expanded = $state(false);
-	let textCollapse = $derived(expanded ? 'Collaps Propagations' : 'Expand Propagations');
+	let textCollapse = $derived(expanded ? 'Collapse Propagations' : 'Expand Propagations');
 
 	const generalProps = {
 		class: 'h-8 w-8 cursor-pointer'

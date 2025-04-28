@@ -8,7 +8,7 @@
 		index: number;
 		expanded: boolean;
 	}
-	let { trail, index, expanded = $bindable() }: Props = $props();
+	let { trail, index, expanded }: Props = $props();
 
 	let hoverIndex = $state(false);
 	let noDecisions = $derived(trail.getDecisions().length === 0);
