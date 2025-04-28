@@ -7,15 +7,15 @@
 	import {
 		ArrowRightOutline,
 		BarsOutline,
-		CaretDownOutline,
-		CaretUpOutline,
+		ChevronLeftOutline,
+		ChevronRightOutline,
 		ReplyOutline
 	} from 'flowbite-svelte-icons';
 	import { redo, undo, userActions, userActionsPointer } from '$lib/store/action.store.ts';
 	import { browser } from '$app/environment';
 
-	let expanded = $state(true);
-	let textCollapse = $derived(expanded ? 'Collaps trails' : 'Expand Trails');
+	let expanded = $state(false);
+	let textCollapse = $derived(expanded ? 'Collapse Propagations' : 'Expand Propagations');
 
 	let activateRedo = $derived.by(() => {
 		const pointerValue = $userActionsPointer + 1;
@@ -93,5 +93,8 @@
 </button>
 
 <button class="btn general-btn" title={textCollapse} onclick={toggleExpand}>
-	<DynamicRender component={expanded ? CaretUpOutline : CaretDownOutline} props={generalProps} />
+	<DynamicRender
+		component={expanded ? ChevronLeftOutline : ChevronRightOutline}
+		props={generalProps}
+	/>
 </button>

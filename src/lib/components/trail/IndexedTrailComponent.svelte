@@ -6,13 +6,11 @@
 	interface Props {
 		trail: Trail;
 		index: number;
+		expanded: boolean;
 	}
-
-	let { trail, index }: Props = $props();
+	let { trail, index, expanded }: Props = $props();
 
 	let hoverIndex = $state(false);
-	let expanded = $state(false);
-
 	let noDecisions = $derived(trail.getDecisions().length === 0);
 	let allDecisions = $derived(trail.getDecisions().length === trail.getAssignments().length);
 	let noPropagations = $derived(

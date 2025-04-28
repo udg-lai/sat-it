@@ -16,7 +16,7 @@
 	import TrailEditor from './TrailEditorComponent.svelte';
 	import { trails } from '$lib/store/trails.store.ts';
 
-	let showOnlyLastTrail: boolean = $state(false);
+	let expandPropagations: boolean = $state(false);
 
 	function algorithmStep(e: AssignmentEvent): void {
 		if (e === undefined) return;
@@ -39,14 +39,13 @@
 		}
 	}
 
-	function toggleEditorView(e: EditorViewEvent) {
+	function togglePropagations(e: EditorViewEvent) {
 		if (e === undefined) return;
-
-		showOnlyLastTrail = !e.expand;
+		expandPropagations = e.expand;
 	}
 
 	onMount(() => {
-		const unsubscribeToggleEditor = editorViewEventStore.subscribe(toggleEditorView);
+		const unsubscribeToggleEditor = editorViewEventStore.subscribe(togglePropagations);
 		const unsubscribeAssignment = assignmentEventStore.subscribe((e) => algorithmStep(e));
 		return () => {
 			unsubscribeToggleEditor();
@@ -55,4 +54,4 @@
 	});
 </script>
 
-<TrailEditor trails={$trails} showOnlyLast={showOnlyLastTrail} />
+<TrailEditor trails={$trails} {expandPropagations} />

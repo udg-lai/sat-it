@@ -5,23 +5,24 @@
 	interface IndexedTrail {
 		index: number;
 		trail: Trail;
+		expandPropagations: boolean;
 	}
 
 	interface Props {
 		trails: Trail[];
-		showOnlyLast?: boolean;
+		expandPropagations: boolean;
 	}
 
-	let { trails, showOnlyLast = false }: Props = $props();
+	let { trails, expandPropagations }: Props = $props();
 
 	let indexedTrails: IndexedTrail[] = $derived.by(() => {
-		const indexed = trails.map((t, idx) => {
+		return trails.map((t, idx) => {
 			return {
 				index: idx,
-				trail: t
+				trail: t,
+				expandPropagations
 			};
 		});
-		return showOnlyLast ? indexed.slice(-1) : indexed;
 	});
 
 	let lastTrail: HTMLDivElement;
@@ -37,7 +38,11 @@
 <div bind:this={lastTrail} class="trail-visualizer flex flex-row">
 	<div class="trails flex flex-col">
 		{#each indexedTrails as indexedTrail (indexedTrail.index)}
-			<IndexedTrailComponent trail={indexedTrail.trail} index={indexedTrail.index} />
+			<IndexedTrailComponent
+				trail={indexedTrail.trail}
+				index={indexedTrail.index}
+				expanded={indexedTrail.expandPropagations}
+			/>
 		{/each}
 	</div>
 </div>
