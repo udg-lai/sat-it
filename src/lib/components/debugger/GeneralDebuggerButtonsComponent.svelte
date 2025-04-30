@@ -1,8 +1,8 @@
 <script lang="ts">
-	import './style.css';
+	import './_style.css';
 
-	import { onMount } from 'svelte';
-	import { emitEditorViewEvent } from './events.svelte.ts';
+	import { onDestroy, onMount } from 'svelte';
+	import { emitActionEvent, emitEditorViewEvent } from './events.svelte.ts';
 	import DynamicRender from '$lib/components/DynamicRender.svelte';
 	import {
 		ArrowRightOutline,
@@ -11,21 +11,58 @@
 		ChevronRightOutline,
 		ReplyOutline
 	} from 'flowbite-svelte-icons';
+	import { getStackLength, getStackPointer } from '$lib/store/stack.svelte.ts';
+	import { browser } from '$app/environment';
 
 	let expanded = $state(false);
 	let textCollapse = $derived(expanded ? 'Collapse Propagations' : 'Expand Propagations');
 
+	let btnRedoActive = $derived(getStackPointer() < getStackLength() - 1);
+	let btnUndoActive = $derived(getStackPointer() > 0);
+
 	const generalProps = {
-		class: 'h-8 w-8 cursor-pointer'
+		class: 'h-8 w-8'
+	};
+
+	const reverseProps = {
+		class: 'h-8 w-8 transform -scale-x-100'
 	};
 
 	onMount(() => {
-		emitEditorViewEvent(expanded);
+		if (browser) {
+			window.addEventListener('keydown', handleKeyDown);
+		}
+	});
+
+	onDestroy(() => {
+		if (browser) {
+			window.removeEventListener('keydown', handleKeyDown);
+		}
 	});
 
 	function toggleExpand() {
 		expanded = !expanded;
-		emitEditorViewEvent(expanded);
+		emitEditorViewEvent();
+	}
+
+	function handleKeyDown(event: KeyboardEvent) {
+		const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+
+		const isUndo =
+			(isMac && event.metaKey && event.key === 'z') ||
+			(!isMac && event.ctrlKey && event.key === 'z');
+
+		const isRedo =
+			(isMac && event.metaKey && event.shiftKey && event.key.toLowerCase() === 'z') ||
+			(!isMac && event.ctrlKey && event.shiftKey && event.key.toLowerCase() === 'z');
+
+		if (isUndo) {
+			event.preventDefault();
+			emitActionEvent({ type: 'undo' });
+		} else if (isRedo) {
+			event.preventDefault();
+			emitActionEvent({ type: 'redo' });
+		}
 	}
 </script>
 
@@ -37,13 +74,29 @@
 	<DynamicRender component={BarsOutline} props={generalProps} />
 </button>
 
-<button class="btn general-btn" title="Undo">
+<button
+	class="btn general-btn"
+	class:invalidOption={!btnUndoActive}
+	title="Undo"
+	disabled={!btnUndoActive}
+	onclick={() => emitActionEvent({ type: 'undo' })}
+>
 	<DynamicRender component={ReplyOutline} props={generalProps} />
+</button>
+
+<button
+	class="btn general-btn"
+	class:invalidOption={!btnRedoActive}
+	title="Redo"
+	onclick={() => emitActionEvent({ type: 'redo' })}
+	disabled={!btnRedoActive}
+>
+	<DynamicRender component={ReplyOutline} props={reverseProps} />
 </button>
 
 <button class="btn general-btn" title={textCollapse} onclick={toggleExpand}>
 	<DynamicRender
-		component={expanded ? ChevronLeftOutline : ChevronRightOutline}
+		component={expanded ? ChevronRightOutline : ChevronLeftOutline}
 		props={generalProps}
 	/>
 </button>

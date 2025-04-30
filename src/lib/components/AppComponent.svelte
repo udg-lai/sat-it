@@ -1,24 +1,32 @@
 <script lang="ts">
-	import { problemStore, type Problem } from '$lib/store/problem.store.ts';
+	import {
+		problemStore,
+		resetProblem,
+		updateProblemFromTrail,
+		type Problem
+	} from '$lib/store/problem.store.ts';
 	import {
 		dummyAssignmentAlgorithm,
 		type DummySearchParams
 	} from '$lib/transversal/algorithms/dummy.ts';
 	import { manualAssignment, type ManualParams } from '$lib/transversal/algorithms/manual.ts';
-	import { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
 	import { onMount } from 'svelte';
 	import { get } from 'svelte/store';
 	import {
+		actionEvent,
 		assignmentEventStore,
 		editorViewEventStore,
+		type ActionEvent,
 		type AssignmentEvent,
 		type EditorViewEvent
 	} from './debugger/events.svelte.ts';
 	import TrailEditor from './TrailEditorComponent.svelte';
+	import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
+	import { getSnapshot, record, redo, undo, type Snapshot } from '$lib/store/stack.svelte.ts';
 
-	let expandPropagations: boolean = $state(false);
+	let expandPropagations: boolean = $state(true);
 
-	let trails: Trail[] = $state([]);
+	let trails: Trail[] = $state(getSnapshot().snapshot);
 
 	function algorithmStep(e: AssignmentEvent): void {
 		if (e === undefined) return;
@@ -41,24 +49,43 @@
 		}
 	}
 
-	function togglePropagations(e: EditorViewEvent) {
-		if (e === undefined) return;
-		expandPropagations = e.expand;
+	function actionReaction(a: ActionEvent) {
+		if (a === undefined) return;
+		if (a.type === 'record') {
+			record(trails);
+		} else if (a.type === 'undo') {
+			const snapshot = undo();
+			reloadFromSnapshot(snapshot);
+		} else if (a.type === 'redo') {
+			const snapshot = redo();
+			reloadFromSnapshot(snapshot);
+		}
 	}
 
-	function onProblemUpdated(p: Problem): void {
-		if (p === undefined) return;
-		trails = [];
+	function reloadFromSnapshot({ snapshot }: Snapshot): void {
+		const len = snapshot.length;
+		if (len > 0) {
+			const latest = snapshot[len - 1];
+			updateProblemFromTrail(latest);
+		} else {
+			resetProblem();
+		}
+		trails = [...snapshot];
+	}
+
+	function togglePropagations(e: EditorViewEvent) {
+		if (e === undefined) return;
+		expandPropagations = !expandPropagations;
 	}
 
 	onMount(() => {
-		const unsubscribeProblem = problemStore.subscribe(onProblemUpdated);
 		const unsubscribeToggleEditor = editorViewEventStore.subscribe(togglePropagations);
 		const unsubscribeAssignment = assignmentEventStore.subscribe((e) => algorithmStep(e));
+		const unsubscribeActionEvent = actionEvent.subscribe(actionReaction);
 		return () => {
-			unsubscribeProblem();
 			unsubscribeToggleEditor();
 			unsubscribeAssignment();
+			unsubscribeActionEvent();
 		};
 	});
 </script>

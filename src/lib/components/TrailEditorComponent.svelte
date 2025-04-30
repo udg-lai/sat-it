@@ -26,6 +26,7 @@
 	});
 
 	let lastTrail: HTMLDivElement;
+
 	$effect(() => {
 		if (trails) scrollToBottom(lastTrail);
 	});

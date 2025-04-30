@@ -2,7 +2,7 @@
 	import { logError, logInfo } from '$lib/transversal/utils/logging.ts';
 
 	import { Modal } from 'flowbite-svelte';
-	import { emitAssignmentEvent } from './events.svelte.ts';
+	import { emitActionEvent, emitAssignmentEvent } from './events.svelte.ts';
 	import { problemStore } from '$lib/store/problem.store.ts';
 	import {
 		CaretRightOutline,
@@ -19,7 +19,7 @@
 	let { defaultNextVariable }: Props = $props();
 
 	const generalProps = {
-		class: 'h-8 w-8 cursor-pointer'
+		class: 'h-8 w-8'
 	};
 
 	let manualDecisionModal = $state(false);
@@ -59,6 +59,7 @@
 				logError('Could not control case of assignment');
 			}
 		}
+		emitActionEvent({ type: 'record' });
 		resetState();
 	}
 
