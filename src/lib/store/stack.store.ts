@@ -23,11 +23,12 @@ export function record(trails: Trail[]) {
 	};
 	stack = [...stack, snapshot]
 	stackPointer = stack.length - 1;
-	console.dir('record', stack)
+	console.log('undo', stackPointer)
 }
 
 export function undo(): Snapshot {
 	stackPointer = Math.max(0, stackPointer - 1);
+	console.log('undo', stackPointer)
 	const snapshot = getSnapshot();
 	return snapshot;
 }
