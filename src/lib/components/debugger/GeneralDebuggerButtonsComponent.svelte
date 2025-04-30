@@ -1,5 +1,5 @@
 <script lang="ts">
-	import './style.css';
+	import './_style.css';
 
 	import { onDestroy, onMount } from 'svelte';
 	import { emitActionEvent, emitEditorViewEvent } from './events.svelte.ts';
@@ -11,13 +11,14 @@
 		ChevronRightOutline,
 		ReplyOutline
 	} from 'flowbite-svelte-icons';
-	import { stack, stackPointer } from '$lib/store/stack.store.ts';
+	import { getStackLength, getStackPointer } from '$lib/store/stack.svelte.ts';
 	import { browser } from '$app/environment';
 
 	let expanded = $state(false);
 	let textCollapse = $derived(expanded ? 'Collapse Propagations' : 'Expand Propagations');
 
-	let btnRedoActive = $derived(stackPointer < stack.length);
+	let btnRedoActive = $derived(getStackPointer() < getStackLength() - 1);
+	let btnUndoActive = $derived(getStackPointer() > 0);
 
 	const generalProps = {
 		class: 'h-8 w-8'
@@ -28,7 +29,6 @@
 	};
 
 	onMount(() => {
-		emitEditorViewEvent(expanded);
 		if (browser) {
 			window.addEventListener('keydown', handleKeyDown);
 		}
@@ -42,7 +42,7 @@
 
 	function toggleExpand() {
 		expanded = !expanded;
-		emitEditorViewEvent(expanded);
+		emitEditorViewEvent();
 	}
 
 	function handleKeyDown(event: KeyboardEvent) {
@@ -74,7 +74,13 @@
 	<DynamicRender component={BarsOutline} props={generalProps} />
 </button>
 
-<button class="btn general-btn" title="Undo" onclick={() => emitActionEvent({ type: 'undo' })}>
+<button
+	class="btn general-btn"
+	class:invalidOption={!btnUndoActive}
+	title="Undo"
+	disabled={!btnUndoActive}
+	onclick={() => emitActionEvent({ type: 'undo' })}
+>
 	<DynamicRender component={ReplyOutline} props={generalProps} />
 </button>
 
@@ -90,7 +96,7 @@
 
 <button class="btn general-btn" title={textCollapse} onclick={toggleExpand}>
 	<DynamicRender
-		component={expanded ? ChevronLeftOutline : ChevronRightOutline}
+		component={expanded ? ChevronRightOutline : ChevronLeftOutline}
 		props={generalProps}
 	/>
 </button>

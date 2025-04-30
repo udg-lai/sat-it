@@ -1,5 +1,10 @@
 <script lang="ts">
-	import { problemStore, resetProblem, updateProblemFromTrail, type Problem } from '$lib/store/problem.store.ts';
+	import {
+		problemStore,
+		resetProblem,
+		updateProblemFromTrail,
+		type Problem
+	} from '$lib/store/problem.store.ts';
 	import {
 		dummyAssignmentAlgorithm,
 		type DummySearchParams
@@ -17,9 +22,9 @@
 	} from './debugger/events.svelte.ts';
 	import TrailEditor from './TrailEditorComponent.svelte';
 	import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
-	import { getSnapshot, record, redo, undo, type Snapshot } from '$lib/store/stack.store.ts';
+	import { getSnapshot, record, redo, undo, type Snapshot } from '$lib/store/stack.svelte.ts';
 
-	let expandPropagations: boolean = $state(false);
+	let expandPropagations: boolean = $state(true);
 
 	let trails: Trail[] = $state(getSnapshot().snapshot);
 
@@ -50,17 +55,17 @@
 			record(trails);
 		} else if (a.type === 'undo') {
 			const snapshot = undo();
-			reloadFromSnapshot(snapshot)
+			reloadFromSnapshot(snapshot);
 		} else if (a.type === 'redo') {
 			const snapshot = redo();
-			reloadFromSnapshot(snapshot)
+			reloadFromSnapshot(snapshot);
 		}
 	}
 
 	function reloadFromSnapshot({ snapshot }: Snapshot): void {
-		const len = snapshot.length
+		const len = snapshot.length;
 		if (len > 0) {
-			const latest = snapshot[len - 1]
+			const latest = snapshot[len - 1];
 			updateProblemFromTrail(latest);
 		} else {
 			resetProblem();
@@ -70,7 +75,7 @@
 
 	function togglePropagations(e: EditorViewEvent) {
 		if (e === undefined) return;
-		expandPropagations = e.expand;
+		expandPropagations = !expandPropagations;
 	}
 
 	onMount(() => {

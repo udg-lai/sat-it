@@ -4,9 +4,9 @@ export interface Snapshot {
 	snapshot: Trail[];
 }
 
-export let stack: Snapshot[] = [{ snapshot: [] }];
+let stack: Snapshot[] = $state([{ snapshot: [] }]);
 
-export let stackPointer: number = 0;
+let stackPointer: number = $state(0);
 
 export function getSnapshot(): Snapshot {
 	return stack[stackPointer];
@@ -22,7 +22,7 @@ export function record(trails: Trail[]) {
 		snapshot: trails.map((trail) => trail.copy())
 	};
 	stack = stack.slice(0, stackPointer + 1);
-	stack = [...stack, snapshot]
+	stack = [...stack, snapshot];
 	stackPointer = stack.length - 1;
 }
 
@@ -37,3 +37,7 @@ export function redo(): Snapshot {
 	const snapshot = getSnapshot();
 	return snapshot;
 }
+
+export const getStackPointer = () => stackPointer;
+
+export const getStackLength = () => stack.length;

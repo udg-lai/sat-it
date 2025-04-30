@@ -19,16 +19,16 @@ export const emitAssignmentEvent = (assignment: AssignmentEvent) => {
 };
 
 export interface EditorViewEvent {
-	expand: boolean;
+	expand: undefined;
 }
 
 export const editorViewEventStore: Writable<EditorViewEvent> = writable();
 
-export const emitEditorViewEvent = (state: boolean) => {
-	editorViewEventStore.update(() => ({ expand: state }));
+export const emitEditorViewEvent = () => {
+	editorViewEventStore.update(() => ({ expand: undefined }));
 };
 
-type RecordAciton = {
+type RecordAction = {
 	type: 'record';
 };
 
@@ -40,7 +40,7 @@ type RedoAction = {
 	type: 'redo';
 };
 
-export type ActionEvent = RecordAciton | UndoAction | RedoAction;
+export type ActionEvent = RecordAction | UndoAction | RedoAction;
 
 export const actionEvent: Writable<ActionEvent> = writable();
 
