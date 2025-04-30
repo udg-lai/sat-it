@@ -21,14 +21,13 @@ export function record(trails: Trail[]) {
 	const snapshot: Snapshot = {
 		snapshot: trails.map((trail) => trail.copy())
 	};
+	stack = stack.slice(0, stackPointer + 1);
 	stack = [...stack, snapshot]
 	stackPointer = stack.length - 1;
-	console.log('undo', stackPointer)
 }
 
 export function undo(): Snapshot {
 	stackPointer = Math.max(0, stackPointer - 1);
-	console.log('undo', stackPointer)
 	const snapshot = getSnapshot();
 	return snapshot;
 }
