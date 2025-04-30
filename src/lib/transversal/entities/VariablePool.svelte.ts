@@ -15,15 +15,6 @@ class VariablePool implements IVariablePool {
 		this.pointer = 0;
 	}
 
-	copy(): VariablePool {
-		const newVariablePool = new VariablePool(this.capacity);
-		const assignedVar = this.assignedVariables();
-		assignedVar.forEach((value) => {
-			newVariablePool.persist(value, true);
-		});
-		return newVariablePool;
-	}
-
 	nextVariableToAssign(): Maybe<number> {
 		return this.getNextId();
 	}

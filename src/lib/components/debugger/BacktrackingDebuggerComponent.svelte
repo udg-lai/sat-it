@@ -1,4 +1,5 @@
 <script lang="ts">
+	import './_style.css';
 	import { CaretRightOutline, CodeMergeOutline } from 'flowbite-svelte-icons';
 	import { emitActionEvent, emitAssignmentEvent } from './events.svelte.ts';
 	import DynamicRender from '$lib/components/DynamicRender.svelte';

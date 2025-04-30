@@ -37,6 +37,7 @@
 	color: #f77777;
 	border-color: #f77777;
 	transition: border-color 0.3s ease;
+	border-style: dashed;
 }
 
 .manual-button {
