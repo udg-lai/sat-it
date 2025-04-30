@@ -1,63 +1,40 @@
 import { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
-import { get, writable, type Writable } from 'svelte/store';
-import { problemStore } from './problem.store.ts';
 
-interface TrailStack {
-	stack: Trail[];
+export interface Snapshot {
+	snapshot: Trail[];
 }
 
-//Writable that will contain the Different states of trails
-export const trailStack: Writable<TrailStack[]> = writable([]);
+export let stack: Snapshot[] = [{ snapshot: [] }];
 
-//Writable that will know which is the current activeTrail
-export const stackPointer: Writable<number> = writable(0);
+export let stackPointer: number = 0;
 
-//Writable that will contain the current active trail
-export const activeTrail: Writable<Trail[]> = writable([]);
+export function getSnapshot(): Snapshot {
+	return stack[stackPointer];
+}
 
 export function resetStack() {
-	trailStack.set([
-		{
-			stack: [new Trail(get(problemStore).variables.nVariables())]
-		}
-	]);
-	stackPointer.set(0);
-	updateActiveTrail(get(trailStack)[0].stack);
+	stack = stack.slice(0, 1);
+	stackPointer = 0;
 }
 
-export function recordStack(trailsSnapshot: Trail[]) {
-	const action: TrailStack = {
-		stack: trailsSnapshot.map((trail) => trail.copy())
+export function record(trails: Trail[]) {
+	const snapshot: Snapshot = {
+		snapshot: trails.map((trail) => trail.copy())
 	};
-	trailStack.update((previousStack) => {
-		const pointerValue: number = get(stackPointer);
-		const updatedStack = [...previousStack.slice(0, pointerValue + 1), action];
-		stackPointer.set(updatedStack.length - 1);
-		updateActiveTrail(updatedStack[updatedStack.length - 1].stack);
-		return updatedStack;
-	});
+	stack = [...stack, snapshot]
+	stackPointer += 1;
+	console.dir('record', stack)
 }
 
-function updateActiveTrail(currentTrailCollection: Trail[]) {
-	activeTrail.update(() => {
-		return currentTrailCollection.map((trail) => trail.copy());
-	});
+export function undo(): Snapshot {
+	stackPointer = Math.max(0, stackPointer - 1);
+	const snapshot = getSnapshot();
+	console.dir('undo', stack)
+	return snapshot;
 }
 
-export function undo() {
-	const pointerValue: number = get(stackPointer);
-	if (pointerValue > 0) {
-		stackPointer.set(pointerValue - 1);
-		const previousStack = get(trailStack);
-		updateActiveTrail(previousStack[pointerValue - 1].stack);
-	}
-}
-
-export function redo() {
-	const pointerValue: number = get(stackPointer);
-	const previousStack: TrailStack[] = get(trailStack);
-	if (pointerValue + 1 < previousStack.length) {
-		stackPointer.set(pointerValue + 1);
-		updateActiveTrail(previousStack[pointerValue + 1].stack);
-	}
+export function redo(): Snapshot {
+	stackPointer = Math.min(stack.length - 1, stackPointer + 1);
+	const snapshot = getSnapshot();
+	return snapshot;
 }

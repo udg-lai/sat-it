@@ -11,21 +11,18 @@
 		ChevronRightOutline,
 		ReplyOutline
 	} from 'flowbite-svelte-icons';
-	import { stackPointer, trailStack } from '$lib/store/stack.store.ts';
+	import { stack, stackPointer } from '$lib/store/stack.store.ts';
 	import { browser } from '$app/environment';
 
 	let expanded = $state(false);
 	let textCollapse = $derived(expanded ? 'Collapse Propagations' : 'Expand Propagations');
 
-	let activateRedo = $derived.by(() => {
-		const pointerValue = $stackPointer;
-		const lastStackPosition = $trailStack.length - 1;
-		return pointerValue != lastStackPosition;
-	});
+	let btnRedoActive = $derived(stackPointer < stack.length);
 
 	const generalProps = {
 		class: 'h-8 w-8'
 	};
+
 	const reverseProps = {
 		class: 'h-8 w-8 transform -scale-x-100'
 	};
@@ -83,10 +80,10 @@
 
 <button
 	class="btn general-btn"
-	class:invalidOption={!activateRedo}
+	class:invalidOption={!btnRedoActive}
 	title="Redo"
 	onclick={() => emitActionEvent({ type: 'redo' })}
-	disabled={!activateRedo}
+	disabled={!btnRedoActive}
 >
 	<DynamicRender component={ReplyOutline} props={reverseProps} />
 </button>

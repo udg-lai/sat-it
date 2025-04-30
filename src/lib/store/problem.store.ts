@@ -58,15 +58,20 @@ export function updateAlgorithm(algorithm: () => void) {
 	resetStack();
 }
 
-export function updateVariablePool(trail: Trail) {
+export function updateProblemFromTrail(trail: Trail) {
 	const { variables, ...currentProblem } = get(problemStore);
 	const newVariablePool: VariablePool = new VariablePool(variables.capacity);
 	trail.forEach((value) => {
 		const variable = value.getVariable();
 		newVariablePool.persist(variable.getInt(), variable.getAssignment());
 	});
-
 	problemStore.set({ ...currentProblem, variables: newVariablePool });
+}
+
+export function resetProblem() {
+	const problem: Problem = get(problemStore);
+	const variablePool = new VariablePool(problem.variables.capacity);
+	problemStore.set({ ...problem, variables: variablePool })
 }
 
 function literalToClauses(clauses: ClausePool): MappingLiteral2Clauses {
