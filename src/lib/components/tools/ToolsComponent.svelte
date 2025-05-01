@@ -1,50 +1,53 @@
 <script lang="ts">
-	import { BugOutline, FileCirclePlusOutline } from 'flowbite-svelte-icons';
+	import { BugOutline, FileCirclePlusOutline, CogOutline } from 'flowbite-svelte-icons';
 	import { onMount } from 'svelte';
-	import Button from './Button.svelte';
-	import DebuggerComponent from '../debugger/DebuggerComponent.svelte';
 	import DimacsComponent from '../dimacs/DimacsComponent.svelte';
 	import './_styles.css';
+	import Button from './Button.svelte';
 
 	let toolsViewRef: HTMLElement;
 
 	let isResizing = $state(false);
 
-	interface View {
+	interface Tool {
 		name: string;
 		active: boolean;
 	}
 
-	let views: View[] = $state([]);
+	let tools: Tool[] = $state([]);
 	let lastActiveViewIndex: number = $state(0);
-	let closed: boolean = $derived(views.every((v) => v.active === false));
+	let closed: boolean = $derived(tools.every((v) => v.active === false));
 
 	onMount(() => {
-		views = [
+		tools = [
 			{
 				name: 'viewA',
 				active: true
+			},
+			{
+				name: 'viewB',
+				active: false
 			}
 		];
 	});
 
 	$effect(() => {
-		let activeViewIndex = views.findIndex((v) => v.active);
+		let activeViewIndex = tools.findIndex((v) => v.active);
 		if (activeViewIndex !== -1) {
 			lastActiveViewIndex = activeViewIndex;
 		}
 	});
 
-	function activateView(what: number): void {
-		const alreadyActive = views[what].active;
+	function activateTool(what: number): void {
+		const alreadyActive = tools[what].active;
 		if (alreadyActive) {
-			views[what].active = false;
+			tools[what].active = false;
 		} else {
-			views = views.map((v) => ({ ...v, active: false }));
-			views[what].active = true;
+			tools = tools.map((v) => ({ ...v, active: false }));
+			tools[what].active = true;
 			toolsViewRef.style.width = 'var(--max-width-tools)';
 		}
-		views = [...views];
+		tools = [...tools];
 	}
 
 	/*
@@ -54,35 +57,35 @@
 	*/
 
 	function closeAllViews(): void {
-		views = views.map((v) => ({ ...v, active: false }));
+		tools = tools.map((v) => ({ ...v, active: false }));
 	}
 
 	function openLastView(): void {
-		views[lastActiveViewIndex].active = true;
-		views = [...views];
-	}
-
-	function lastViewClosed(): boolean {
-		return closed;
-	}
-
-	function enableResizeCursor(): void {
-		document.body.style.cursor = 'col-resize';
-	}
-
-	function disableResizeCursor(): void {
-		document.body.style.cursor = '';
-	}
-
-	function disableSelection() {
-		document.body.style.userSelect = 'none';
-	}
-
-	function enableSelection() {
-		document.body.style.userSelect = '';
+		tools[lastActiveViewIndex].active = true;
+		tools = [...tools];
 	}
 
 	function resizeHandle(htmlElement: HTMLElement) {
+		function lastViewClosed(): boolean {
+			return closed;
+		}
+
+		function enableResizeCursor(): void {
+			document.body.style.cursor = 'col-resize';
+		}
+
+		function disableResizeCursor(): void {
+			document.body.style.cursor = '';
+		}
+
+		function disableSelection() {
+			document.body.style.userSelect = 'none';
+		}
+
+		function enableSelection() {
+			document.body.style.userSelect = '';
+		}
+
 		function onMouseDown() {
 			isResizing = true;
 			document.addEventListener('mousemove', onMouseMove);
@@ -131,21 +134,28 @@
 			}
 		};
 	}
+
+	function openSettings(): void {
+		console.log('settings');
+	}
 </script>
 
 <div class="tools-container">
 	<div class="options-tools">
-		{#each views as { name }, id}
+		{#each tools as { name }, id}
 			<div class="toggle-button">
 				{#if name === 'viewA'}
-					{@render btnViewA(id)}
+					{@render toolA(id)}
 				{:else if name === 'viewB'}
-					{@render btnViewB(id)}
+					{@render toolB(id)}
 				{:else}
 					{@render notImplementedYet()}
 				{/if}
 			</div>
 		{/each}
+		<div class="toggle-button settings-btn">
+			{@render settings()}
+		</div>
 		<div class="vertical-separator"></div>
 	</div>
 
@@ -154,13 +164,13 @@
 		class="tool-content scrollable-content"
 		class:hide-tools-view={closed}
 	>
-		{#each views as { name, active } (name)}
+		{#each tools as { name, active } (name)}
 			{#if active}
 				<div class="view">
 					{#if name === 'viewA'}
 						<DimacsComponent />
 					{:else}
-						<DebuggerComponent />
+						{@render notImplementedYet()}
 					{/if}
 				</div>
 			{/if}
@@ -173,12 +183,16 @@
 	></div>
 </div>
 
-{#snippet btnViewA(id: number)}
-	<Button onClick={() => activateView(id)} icon={FileCirclePlusOutline} active={views[id].active} />
+{#snippet toolA(id: number)}
+	<Button onClick={() => activateTool(id)} icon={FileCirclePlusOutline} active={tools[id].active} />
 {/snippet}
 
-{#snippet btnViewB(id: number)}
-	<Button onClick={() => activateView(id)} icon={BugOutline} active={views[id].active} />
+{#snippet toolB(id: number)}
+	<Button onClick={() => activateTool(id)} icon={BugOutline} active={tools[id].active} />
+{/snippet}
+
+{#snippet settings()}
+	<Button onClick={openSettings} icon={CogOutline} />
 {/snippet}
 
 <!--
