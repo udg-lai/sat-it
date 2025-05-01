@@ -96,7 +96,7 @@
 		const unsubscribeToggleEditor = editorViewEventStore.subscribe(togglePropagations);
 		const unsubscribeAssignment = assignmentEventStore.subscribe((e) => algorithmStep(e));
 		const unsubscribeActionEvent = actionEvent.subscribe(actionReaction);
-		const unsubscribeChangeInstanceEvent = changeInstanceEventBus.subscribe(() => reset());
+		const unsubscribeChangeInstanceEvent = changeInstanceEventBus.subscribe(reset);
 		return () => {
 			unsubscribeToggleEditor();
 			unsubscribeAssignment();
