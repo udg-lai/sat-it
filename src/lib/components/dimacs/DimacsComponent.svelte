@@ -2,7 +2,7 @@
 	import type { DimacsInstance } from '$lib/dimacs/dimacs-instance.interface.ts';
 	import {
 		activateInstanceByName,
-		activeInstanceStore,
+		previewingInstanceStore,
 		addInstance,
 		instanceStore,
 		previewInstanceByName,
@@ -34,7 +34,7 @@
 
 	onMount(() => {
 		const unsubscribeListOfInstances = instanceStore.subscribe((xs) => (instances = [...xs]));
-		const unsubscribeActiveInstance = activeInstanceStore.subscribe(
+		const unsubscribeActiveInstance = previewingInstanceStore.subscribe(
 			(instance) => (viewingInstance = instance)
 		);
 		return () => {
