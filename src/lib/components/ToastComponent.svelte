@@ -17,17 +17,17 @@
 
 <div class="toast active">
 	{#if toast.type === 'error'}
-		<ExclamationCircleOutline color="red" slot="icon" class="h-8 w-8" />
+		<ExclamationCircleOutline color="red" slot="icon" class="h-5 w-5" />
 	{:else if toast.type === 'warn'}
-		<ExclamationCircleOutline color="orange" slot="icon" class="h-8 w-8" />
+		<ExclamationCircleOutline color="orange" slot="icon" class="h-5 w-5" />
 	{:else}
-		<ExclamationCircleOutline color="blue" slot="icon" class="h-8 w-8" />
+		<ExclamationCircleOutline color="blue" slot="icon" class="h-5 w-5" />
 	{/if}
 
 	<div class="flex items-center">
 		<div class="ms-3">
 			<h4 class="font-semibold text-gray-900">{toast.title}</h4>
-			<div class="font-normal">{toast.description}</div>
+			<div class="description font-normal">{toast.description}</div>
 		</div>
 	</div>
 	<button class="close" onclick={selfClose}>
@@ -38,7 +38,7 @@
 <style>
 	.toast {
 		position: relative;
-		width: 320px;
+		width: 20rem;
 		border-radius: 12px;
 		background: #fff;
 		box-shadow: 0 6px 20px -5px rgba(0, 0, 0, 0.1);
@@ -50,9 +50,14 @@
 		padding: 1rem;
 	}
 
+	.description {
+		font-size: 12px;
+	}
+
 	.toast.active {
 		transform: translateX(0%);
 	}
+
 	.toast .close {
 		position: absolute;
 		top: 10px;

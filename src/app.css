@@ -11,6 +11,7 @@
 	--windows-padding: 0.5rem;
 	--font-size: 1rem;
 	--notification-z-index: 1000;
+	--more-options-z-index: 100;
 	--TeX-font-size: 20px;
 }
 
@@ -22,6 +23,7 @@ body {
 	color: var(--main-font-color);
 	font-size: var(--font-size);
 	font-family: 'Biryani', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+	overflow: hidden;
 }
 
 body > div {

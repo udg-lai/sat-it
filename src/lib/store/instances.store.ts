@@ -1,9 +1,9 @@
 import type { DimacsInstance } from '$lib/dimacs/dimacs-instance.interface.ts';
 import fetchInstances from '$lib/transversal/utils/bootstrap-instances.ts';
-import { logError, logWarning } from '$lib/transversal/utils/logging.ts';
+import { logError, logInfo, logWarning } from '$lib/transversal/utils/logging.ts';
 import { get, writable, type Writable } from 'svelte/store';
 import { updateProblemDomain } from './problem.store.ts';
-import { createEventBus } from '$lib/transversal/createEventBus.ts';
+import { changeInstanceEventBus } from '$lib/transversal/events.ts';
 
 export interface InteractiveInstance extends DimacsInstance {
 	removable: boolean;
@@ -14,8 +14,6 @@ export interface InteractiveInstance extends DimacsInstance {
 export const instanceStore: Writable<InteractiveInstance[]> = writable([]);
 
 export const previewingInstanceStore: Writable<DimacsInstance> = writable();
-
-export const changeInstanceEventBus = createEventBus<void>();
 
 const defaultInstanceState = {
 	removable: false,
@@ -87,6 +85,7 @@ export function addInstance(instance: DimacsInstance): void {
 		logWarning(title, description);
 	} else {
 		instanceStore.update((prev) => [...prev, { ...instance, ...newInstanceState }]);
+		logInfo('Instance added', `Instance ${instance.name}`);
 	}
 }
 

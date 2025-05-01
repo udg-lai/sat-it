@@ -12,7 +12,7 @@
 	import { Accordion, AccordionItem } from 'flowbite-svelte';
 	import { onMount } from 'svelte';
 	import InstanceListComponent from './ListComponent.svelte';
-	import DimacsUploaderComponent from './UploaderComponent.svelte';
+	import DimacsUploaderComponent from '../tools/UploaderComponent.svelte';
 	import DimacsViewerComponent from './ViewerComponent.svelte';
 
 	let listOpen = $state(true);

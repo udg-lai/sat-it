@@ -10,7 +10,7 @@
 
 	let { onClick, icon, active }: Props = $props();
 	const iconProps = {
-		class: 'h-10 w-10 cursor-pointer'
+		class: 'h-8 w-8 cursor-pointer'
 	};
 </script>
 

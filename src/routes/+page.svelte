@@ -13,6 +13,10 @@
 	import { onMount } from 'svelte';
 	import AppComponent from '$lib/components/AppComponent.svelte';
 	import DebuggerComponent from '$lib/components/debugger/DebuggerComponent.svelte';
+	import { openViewMoreOptionEventBus } from '$lib/transversal/events.ts';
+	import SettingsComponent from '$lib/components/settings/SettingsComponent.svelte';
+
+	let settingsVisible = $state(true);
 
 	onMount(() => {
 		initializeInstancesStore()
@@ -20,6 +24,14 @@
 			.catch(() =>
 				logError(`Preloaded instances`, `Could not fetch preloaded instances correctly`)
 			);
+
+		const unsubscribeOpenSettings = openViewMoreOptionEventBus.subscribe(
+			() => (settingsVisible = true)
+		);
+
+		return () => {
+			unsubscribeOpenSettings();
+		};
 	});
 </script>
 
@@ -46,6 +58,8 @@
 		</workspace>
 	</main>
 </app>
+
+<SettingsComponent bind:visible={settingsVisible} />
 
 {#snippet app()}
 	<AppComponent />

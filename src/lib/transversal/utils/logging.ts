@@ -11,12 +11,12 @@ export function logWarning(title: string, description: string): void {
 }
 
 export function logInfo(title: string, description?: string): void {
-	console.error('title:\n', title, '\ndescription:\n', description);
+	console.info('title:\n', title, '\ndescription:\n', description);
 	addToast({
 		type: 'info',
 		title: formatText(title),
 		description: formatText(description),
-		dismissible: false
+		dismissible: true
 	});
 }
 

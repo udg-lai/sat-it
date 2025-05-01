@@ -1,5 +1,10 @@
 <script lang="ts">
-	import { BugOutline, FileCirclePlusOutline, CogOutline } from 'flowbite-svelte-icons';
+	import { openViewMoreOptionEventBus } from '$lib/transversal/events.ts';
+	import {
+		ArrowUpFromBracketOutline,
+		BugOutline,
+		FileCirclePlusOutline
+	} from 'flowbite-svelte-icons';
 	import { onMount } from 'svelte';
 	import DimacsComponent from '../dimacs/DimacsComponent.svelte';
 	import './_styles.css';
@@ -135,8 +140,8 @@
 		};
 	}
 
-	function openSettings(): void {
-		console.log('settings');
+	function onOpenViewMoreEvent(): void {
+		openViewMoreOptionEventBus.emit();
 	}
 </script>
 
@@ -192,7 +197,7 @@
 {/snippet}
 
 {#snippet settings()}
-	<Button onClick={openSettings} icon={CogOutline} />
+	<Button onClick={onOpenViewMoreEvent} icon={ArrowUpFromBracketOutline} />
 {/snippet}
 
 <!--

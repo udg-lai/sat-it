@@ -1,0 +1,80 @@
+<script lang="ts">
+	import OptionsComponent, { type OptionEmit } from './OptionsComponent.svelte';
+
+	type ActiveView = 'list' | 'engine' | 'legend' | 'info';
+
+	interface Props {
+		visible: boolean;
+	}
+
+	let { visible = $bindable() }: Props = $props();
+
+	let hide = $derived(!visible);
+
+	let view: ActiveView = $state('list');
+
+	function handleOptionEvent(event: OptionEmit): void {
+		if (event === 'list') {
+			console.log('show list');
+		} else if (event === 'engine') {
+			console.log('show engine');
+		} else {
+			console.log('show legend');
+		}
+		view = event;
+	}
+</script>
+
+<div class="settings" class:hide-settings={hide}>
+	<div class="setting-view">
+		<class class="setting-content">
+			{#if view}
+				{#if view === 'list'}
+					<p>list</p>
+				{:else if view === 'engine'}
+					<p>engine</p>
+				{:else}
+					<p>legend</p>
+				{/if}
+			{/if}
+		</class>
+	</div>
+
+	<OptionsComponent event={handleOptionEvent} bind:visible />
+</div>
+
+<style>
+	.setting-view {
+		padding: 1rem max(1rem, 10vw);
+		padding-bottom: 0rem;
+		max-height: calc(100% - 6rem);
+		flex: 1;
+		width: 100%;
+		display: flex;
+	}
+
+	.setting-content {
+		height: 100%;
+		width: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.settings {
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		right: 0;
+		left: 0;
+		background-color: blanchedalmond;
+		z-index: var(--more-options-z-index);
+		transform: translateY(0%);
+		transition: transform 0.2s ease-out;
+		display: flex;
+	}
+
+	.hide-settings {
+		transform: translateY(100%);
+	}
+</style>

@@ -1,14 +1,9 @@
 <script lang="ts">
 	import type { DimacsInstance } from '$lib/dimacs/dimacs-instance.interface.ts';
+	import { addInstance } from '$lib/store/instances.store.ts';
 	import { logError } from '$lib/transversal/utils/logging.ts';
 	import parser from '$lib/transversal/utils/parsers/dimacs.ts';
 	import { UploadOutline } from 'flowbite-svelte-icons';
-
-	interface Props {
-		onUpload?: (instance: DimacsInstance) => void;
-	}
-
-	let { onUpload }: Props = $props();
 
 	let fileInputRef: HTMLInputElement;
 
@@ -36,7 +31,7 @@
 				content,
 				summary
 			};
-			onUpload?.(instance);
+			addInstance(instance);
 		} catch (error) {
 			const title = `Instance ${name} contains an error`;
 			const description = (error as Error).message;
@@ -66,6 +61,8 @@
 
 <style>
 	.file-input-box {
+		color: #6b7280;
+
 		display: flex;
 		justify-content: center;
 		flex-direction: column;
@@ -77,7 +74,7 @@
 			padding: 20px;
 			display: grid;
 			place-items: center;
-			border: 2px dashed var(--border-color);
+			border: 2px dashed #6b7280;
 			border-radius: 5px;
 			margin-bottom: 5px;
 			cursor: pointer;
@@ -85,7 +82,7 @@
 
 		small {
 			font-size: 12px;
-			color: #a3a3a3;
+			color: #6b7280;
 		}
 	}
 </style>
