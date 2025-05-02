@@ -118,8 +118,7 @@ export function deleteInstanceByName(name: string): void {
 		return instances.filter((e) => filterFun(e, name));
 	});
 
-	logInfo("Instance deleted", `Instance ${name} has been deleted`)
-
+	logInfo('Instance deleted', `Instance ${name} has been deleted`);
 }
 
 function afterActivateInstance(instance: DimacsInstance): void {

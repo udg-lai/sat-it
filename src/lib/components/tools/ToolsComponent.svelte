@@ -171,8 +171,7 @@
 		{#each tools as { name, active } (name)}
 			{#if active}
 				<div class="view">
-					{#if name === 'viewA'}
-					{:else}
+					{#if name === 'viewA'}{:else}
 						{@render notImplementedYet()}
 					{/if}
 				</div>

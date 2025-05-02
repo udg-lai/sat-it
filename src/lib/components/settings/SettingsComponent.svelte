@@ -1,5 +1,6 @@
 <script lang="ts">
 	import BookmarkInstances from './BookmarkInstances.svelte';
+	import LegendComponent from './LegendComponent.svelte';
 	import OptionsComponent, { type OptionEmit } from './OptionsComponent.svelte';
 
 	type ActiveView = 'bookmark' | 'engine' | 'legend' | 'info';
@@ -35,7 +36,7 @@
 				{:else if view === 'engine'}
 					<p>engine</p>
 				{:else}
-					<p>legend</p>
+					<LegendComponent />
 				{/if}
 			{/if}
 		</class>
