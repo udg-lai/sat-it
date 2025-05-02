@@ -14,7 +14,8 @@ import type {
 	PreprocesUnitClauseReturn,
 	StepParams,
 	StepResult,
-	UnitPropagationParams
+	UnitPropagationParams,
+	UnitPropagationReturn
 } from '../utils/types/algorithms.ts';
 import { fromJust, isJust } from '../utils/types/maybe.ts';
 
@@ -58,10 +59,10 @@ export const dpllAlgorithmStep = (params: StepParams): StepResult => {
 	if (!clausesToCheck) {
 		clausesToCheck = new Set<number>();
 	}
-	return { clausesToCheck };
+	return { clausesToCheck, trails: nextTrailsState };
 };
 
-export const dpllUnitPropagation = (params: UnitPropagationParams): void => {
+export const dpllUnitPropagation = (params: UnitPropagationParams): UnitPropagationReturn => {
 	const { variables, trails, literalToPropagate } = params;
 	const nextTrailsState: Trail[] =
 		trails.length === 0 ? [new Trail(variables.nVariables())] : [...trails];
@@ -74,6 +75,7 @@ export const dpllUnitPropagation = (params: UnitPropagationParams): void => {
 	variables.persist(variableId, polarity);
 	const variable = variables.getCopy(variableId);
 	workingTrail.push(VariableAssignment.newAutomatedAssignment(variable, dpllname));
+	return { trails: nextTrailsState };
 };
 
 export const dpllConflictDetection = (params: ConflictDetectionParams): ConflictDetectionReturn => {
@@ -113,7 +115,7 @@ const backtracking = (
 function followingAssignment(workingTrail: Trail, variables: VariablePool): number {
 	const nextVariable = variables.nextVariableToAssign();
 	if (!isJust(nextVariable)) {
-		logFatal('Backtracking Algorithm', 'No variable to decide');
+		logFatal('DPLL Algorithm', 'No variable to decide');
 	}
 	const variableId = fromJust(nextVariable);
 	variables.persist(variableId, true);

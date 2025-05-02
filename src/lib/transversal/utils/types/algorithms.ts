@@ -39,12 +39,17 @@ export interface StepParams {
 
 export type StepResult = {
 	clausesToCheck: Set<number>;
+	trails: Trail[];
 };
 
 export type UnitPropagationParams = {
 	variables: VariablePool;
 	trails: Trail[];
 	literalToPropagate: number;
+};
+
+export type UnitPropagationReturn = {
+	trails: Trail[];
 };
 
 export type ConflictDetectionParams = {

@@ -4,6 +4,7 @@ import VariablePool from '../transversal/entities/VariablePool.svelte.ts';
 import type { DimacsInstance } from '$lib/dimacs/dimacs-instance.interface.ts';
 import { resetStack } from './stack.svelte.ts';
 import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
+import { dpll, type Algorithm } from '$lib/transversal/utils/types/algorithms.ts';
 
 export type MappingLiteral2Clauses = Map<number, Set<number>>;
 
@@ -11,7 +12,7 @@ export interface Problem {
 	variables: VariablePool;
 	clauses: ClausePool;
 	mapping: MappingLiteral2Clauses;
-	algorithm: () => void;
+	algorithm: Algorithm;
 }
 
 export const problemStore: Writable<Problem> = writable();
@@ -34,7 +35,7 @@ export function updateProblemDomain(instance: DimacsInstance) {
 	let newProblem: Problem;
 
 	if (previousProblem === undefined) {
-		const algorithm = () => console.log('I am dummy ;)');
+		const algorithm: Algorithm = dpll;
 		newProblem = {
 			...params,
 			algorithm
@@ -51,7 +52,7 @@ export function updateProblemDomain(instance: DimacsInstance) {
 	resetStack();
 }
 
-export function updateAlgorithm(algorithm: () => void) {
+export function updateAlgorithm(algorithm: Algorithm) {
 	const currentProblem = get(problemStore);
 	const variables = new VariablePool(currentProblem.variables.capacity);
 	problemStore.set({ ...currentProblem, variables, ...algorithm });

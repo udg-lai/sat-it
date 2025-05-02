@@ -14,10 +14,6 @@
 		undo,
 		type Snapshot
 	} from '$lib/store/stack.svelte.ts';
-	import {
-		dummyAssignmentAlgorithm,
-		type DummySearchParams
-	} from '$lib/transversal/algorithms/dummy.ts';
 	import { manualAssignment, type ManualParams } from '$lib/transversal/algorithms/manual.ts';
 	import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
 	import { onMount } from 'svelte';
@@ -31,30 +27,43 @@
 		type EditorViewEvent
 	} from './debugger/events.svelte.ts';
 	import TrailEditor from './TrailEditorComponent.svelte';
+	import { makeUnresolved, type Eval } from '$lib/transversal/utils/interfaces/IClausePool.ts';
+	import type { StepParams, StepResult } from '$lib/transversal/utils/types/algorithms.ts';
 
 	let expandPropagations: boolean = $state(true);
 
 	let trails: Trail[] = $state(getSnapshot().snapshot);
 
+	let previousEval: Eval = $state(makeUnresolved());
+
+	let clausesToCheck: Set<number> = $state(new Set<number>());
+
 	function algorithmStep(e: AssignmentEvent): void {
 		if (e === undefined) return;
 
-		const { variables }: Problem = get(problemStore);
+		const { variables, mapping, algorithm }: Problem = get(problemStore);
+
+		let returnValues: StepResult;
 
 		if (e.type === 'automated') {
-			const params: DummySearchParams = {
+			const params: StepParams = {
 				variables,
-				trails
+				mapping,
+				trails,
+				previousEval
 			};
-			trails = dummyAssignmentAlgorithm(params);
+			returnValues = algorithm.step(params);
 		} else {
 			const params: ManualParams = {
 				assignment: e,
 				variables,
-				trails
+				trails,
+				mapping
 			};
-			trails = manualAssignment(params);
+			returnValues = manualAssignment(params);
 		}
+		trails = returnValues.trails;
+		clausesToCheck = returnValues.clausesToCheck;
 	}
 
 	function actionReaction(a: ActionEvent) {
