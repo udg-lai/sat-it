@@ -23,7 +23,7 @@
 		}, 100);
 		return () => {
 			clearTimeout(timeout);
-		}
+		};
 	});
 </script>
 

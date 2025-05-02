@@ -9,15 +9,31 @@
 	import { DatabaseOutline, LockOutline, TrashBinOutline } from 'flowbite-svelte-icons';
 	import { onMount } from 'svelte';
 	import ViewerComponent from './ViewerComponent.svelte';
+	import { logInfo } from '$lib/transversal/logging.ts';
 
 	let previewingInstance: InteractiveInstance | undefined = $state(undefined);
 
 	onMount(() => {
-		const unsub = instanceStore.subscribe(() => (previewingInstance = getActiveInstance()));
+		const unsubscribe = instanceStore.subscribe(() => (previewingInstance = getActiveInstance()));
 		return () => {
-			unsub();
+			unsubscribe();
 		};
 	});
+
+	function onActivateInstance(instanceName: string): void {
+		const currentInstance = getActiveInstance();
+		let change = false;
+		if (currentInstance === undefined) {
+			change = true;
+		} else {
+			const { name } = currentInstance;
+			change = name !== instanceName;
+		}
+		if (change) {
+			activateInstanceByName(instanceName);
+			logInfo('New active instance', `Instance ${instanceName} has been activated`);
+		}
+	}
 </script>
 
 <div class="bookmark">
@@ -36,7 +52,7 @@
 							class:selected={instance.active}
 							onmouseenter={() => (previewingInstance = instance)}
 							onmouseleave={() => (previewingInstance = getActiveInstance())}
-							onclick={() => activateInstanceByName(instance.name)}
+							onclick={() => onActivateInstance(instance.name)}
 						>
 							<p>{instance.name}</p>
 						</button>

@@ -1,4 +1,5 @@
-import parser from '$lib/transversal/utils/parsers/dimacs.ts';
+import claims2html from '$lib/transversal/mapping/claimsToHtml.ts';
+import content2summary from '$lib/transversal/mapping/contentToSummary.ts';
 import type { DimacsInstance } from './dimacs-instance.interface.ts';
 
 const fileName = 'dummy.dimacs';
@@ -11,8 +12,13 @@ c this is added here
 -2 3 0
 `;
 
-const summary = parser({ content, name: fileName.toLowerCase() });
+const summary = content2summary({ content, name: fileName.toLowerCase() });
 
-const instance: DimacsInstance = { name: fileName.toLowerCase(), content, summary };
+const instance: DimacsInstance = {
+	name: fileName.toLowerCase(),
+	content,
+	summary,
+	html: claims2html(summary.claims)
+};
 
 export default instance;

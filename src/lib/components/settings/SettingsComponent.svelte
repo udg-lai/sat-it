@@ -65,6 +65,7 @@
 		border-style: solid;
 		border-color: var(--border-color);
 		border-width: 1px;
+		background-color: #ffff;
 	}
 
 	.settings {
@@ -73,7 +74,7 @@
 		bottom: 0;
 		right: 0;
 		left: 0;
-		background-color: blanchedalmond;
+		background-color: var(--main-bg-color);
 		z-index: var(--more-options-z-index);
 		transform: translateY(0%);
 		transition: transform 0.2s ease-out;

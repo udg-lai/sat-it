@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import parser, { type Summary } from '$lib/transversal/utils/parsers/dimacs.ts';
+import content2summary, { type Summary } from '$lib/transversal/mapping/contentToSummary.ts';
 
 const example01 = `
 c
@@ -72,7 +72,7 @@ c bu
 
 describe('dimacs parser', () => {
 	it('example01', () => {
-		const summary: Summary = parser({ name: 'example01', content: example01 });
+		const summary: Summary = content2summary({ name: 'example01', content: example01 });
 		expect(summary.description).toBe(`c\nc\nc start with comments\nc\nc adios`);
 		expect(summary.varCount).toBe(5);
 		expect(summary.clauseCount).toBe(3);
@@ -83,7 +83,7 @@ describe('dimacs parser', () => {
 		]);
 	});
 	it('example02', () => {
-		const summary: Summary = parser({ name: 'example02', content: example02 });
+		const summary: Summary = content2summary({ name: 'example02', content: example02 });
 		expect(summary.description).toBe('');
 		expect(summary.varCount).toBe(4);
 		expect(summary.clauseCount).toBe(5);
@@ -96,7 +96,7 @@ describe('dimacs parser', () => {
 		]);
 	});
 	it('example03', () => {
-		const summary: Summary = parser({ name: 'example03', content: example03 });
+		const summary: Summary = content2summary({ name: 'example03', content: example03 });
 		expect(summary.description).toBe('c hola\nc');
 		expect(summary.varCount).toBe(4);
 		expect(summary.clauseCount).toBe(6);
@@ -117,7 +117,7 @@ describe('dimacs parser', () => {
 		]);
 	});
 	it('example04', () => {
-		const summary: Summary = parser({ name: 'example04', content: example04 });
+		const summary: Summary = content2summary({ name: 'example04', content: example04 });
 		expect(summary.description).toBe(`c hola\nc`);
 		expect(summary.varCount).toBe(4);
 		expect(summary.clauseCount).toBe(6);
@@ -138,6 +138,6 @@ describe('dimacs parser', () => {
 		]);
 	});
 	it('example05', () => {
-		expect(() => parser({ name: 'example05', content: example05 })).toThrowError();
+		expect(() => content2summary({ name: 'example05', content: example05 })).toThrowError();
 	});
 });

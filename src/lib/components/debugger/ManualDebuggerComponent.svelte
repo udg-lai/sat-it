@@ -1,9 +1,7 @@
 <script lang="ts">
-	import { logError, logInfo } from '$lib/transversal/utils/logging.ts';
-
-	import { Modal } from 'flowbite-svelte';
-	import { emitActionEvent, emitAssignmentEvent } from './events.svelte.ts';
 	import { problemStore } from '$lib/store/problem.store.ts';
+	import { logError, logInfo } from '$lib/transversal/logging.ts';
+	import { Modal } from 'flowbite-svelte';
 	import {
 		CaretRightOutline,
 		CheckCircleOutline,
@@ -11,6 +9,7 @@
 		PenOutline
 	} from 'flowbite-svelte-icons';
 	import DynamicRender from '../DynamicRender.svelte';
+	import { emitActionEvent, emitAssignmentEvent } from './events.svelte.ts';
 
 	interface Props {
 		defaultNextVariable: number | undefined;

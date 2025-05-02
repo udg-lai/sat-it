@@ -1,7 +1,7 @@
 import type { DimacsInstance } from '$lib/dimacs/dimacs-instance.interface.ts';
 import { changeInstanceEventBus } from '$lib/transversal/events.ts';
-import fetchInstances from '$lib/transversal/utils/bootstrap-instances.ts';
-import { logError, logInfo, logWarning } from '$lib/transversal/utils/logging.ts';
+import fetchInstances from '$lib/transversal/bootstrap-instances.ts';
+import { logError, logInfo, logWarning } from '$lib/transversal/logging.ts';
 import { get, writable, type Writable } from 'svelte/store';
 import { updateProblemDomain } from './problem.store.ts';
 
@@ -95,7 +95,6 @@ export function activateInstanceByName(name: string): void {
 		if (instance !== undefined) {
 			instance.active = true;
 			afterActivateInstance(instance);
-			logInfo('New active instance', `Instance ${instance.name} has been activated`);
 		} else {
 			logError('Not instance found to activate');
 		}

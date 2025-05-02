@@ -1,7 +1,6 @@
-import type { IClausePool } from '../utils/interfaces/IClausePool.ts';
-import { Eval } from '../utils/interfaces/IClausePool.ts';
-import type { CNF } from '../utils/parsers/dimacs.ts';
-import { cnfToClauseSet } from '../utils/utils.ts';
+import { Eval, type IClausePool } from '../interfaces/IClausePool.ts';
+import type { CNF } from '../mapping/contentToSummary.ts';
+import { cnfToClauseSet } from '../utils.ts';
 import Clause, { ClauseEval } from './Clause.ts';
 import type VariablePool from './VariablePool.svelte.ts';
 

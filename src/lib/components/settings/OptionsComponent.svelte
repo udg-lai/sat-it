@@ -1,8 +1,9 @@
 <script lang="ts">
 	import type { DimacsInstance } from '$lib/dimacs/dimacs-instance.interface.ts';
 	import { addInstance } from '$lib/store/instances.store.ts';
-	import { logError } from '$lib/transversal/utils/logging.ts';
-	import parser from '$lib/transversal/utils/parsers/dimacs.ts';
+	import { logError } from '$lib/transversal/logging.ts';
+	import claims2html from '$lib/transversal/mapping/claimsToHtml.ts';
+	import parser from '$lib/transversal/mapping/contentToSummary.ts';
 	import { BottomNav, BottomNavItem, Tooltip } from 'flowbite-svelte';
 	import {
 		AdjustmentsVerticalOutline,
@@ -45,7 +46,8 @@
 			const instance: DimacsInstance = {
 				name: name.toLowerCase(),
 				content,
-				summary
+				summary,
+				html: claims2html(summary.claims)
 			};
 			addInstance(instance);
 		} catch (error) {

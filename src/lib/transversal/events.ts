@@ -1,4 +1,4 @@
-import { createEventBus } from './utils/createEventBus.ts';
+import { createEventBus } from './createEventBus.ts';
 
 // observable of instance changes
 export const changeInstanceEventBus = createEventBus<void>();
