@@ -95,6 +95,7 @@ export function activateInstanceByName(name: string): void {
 		if (instance !== undefined) {
 			instance.active = true;
 			afterActivateInstance(instance);
+			logInfo("New active instance", `Instance ${instance.name} has been activated`)
 		} else {
 			logError('Not instance found to activate');
 		}
