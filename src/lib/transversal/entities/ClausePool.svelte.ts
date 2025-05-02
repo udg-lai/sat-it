@@ -1,5 +1,5 @@
 import type { IClausePool } from '../utils/interfaces/IClausePool.ts';
-import { Eval } from '../utils/interfaces/IClausePool.ts';
+import type { Eval } from '../utils/interfaces/IClausePool.ts';
 import type { CNF } from '../utils/parsers/dimacs.ts';
 import { cnfToClauseSet } from '../utils/utils.ts';
 import Clause, { ClauseEval } from './Clause.ts';
@@ -22,6 +22,7 @@ class ClausePool implements IClausePool {
 		let unsat = false;
 		let nSatisfied = 0;
 		let i = 0;
+		let conflicClause: Clause | undefined = undefined;
 		while (i < this.collection.length && !unsat) {
 			const clause: Clause = this.collection[i];
 			const clauseEval: ClauseEval = clause.eval();
@@ -30,9 +31,21 @@ class ClausePool implements IClausePool {
 				const sat = clauseEval === ClauseEval.SAT;
 				if (sat) nSatisfied++;
 				i++;
+			} else {
+				conflicClause = clause;
 			}
 		}
-		const state: Eval = unsat ? Eval.UNSAT : nSatisfied == i ? Eval.SAT : Eval.UNRESOLVED;
+		let state: Eval;
+		if (unsat) {
+			state = {
+				type: 'UNSAT',
+				conflictClause: conflicClause?.getId() as number
+			};
+		} else if (nSatisfied === i) {
+			state = { type: 'SAT' };
+		} else {
+			state = { type: 'UNRESOLVED' };
+		}
 		return state;
 	}
 
@@ -48,10 +61,10 @@ class ClausePool implements IClausePool {
 		}
 	}
 
-	getUnitClauses(): Set<Clause> {
-		const S = new Set<Clause>();
+	getUnitClauses(): Set<number> {
+		const S = new Set<number>();
 		for (const c of this.getClauses()) {
-			if (c.isUnit()) S.add(c);
+			if (c.isUnit()) S.add(c.getId());
 		}
 		return S;
 	}
