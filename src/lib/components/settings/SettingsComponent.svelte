@@ -2,7 +2,7 @@
 	import BookmarkInstances from './BookmarkInstances.svelte';
 	import OptionsComponent, { type OptionEmit } from './OptionsComponent.svelte';
 
-	type ActiveView = 'list' | 'engine' | 'legend' | 'info';
+	type ActiveView = 'bookmark' | 'engine' | 'legend' | 'info';
 
 	interface Props {
 		visible: boolean;
@@ -12,10 +12,10 @@
 
 	let hide = $derived(!visible);
 
-	let view: ActiveView = $state('list');
+	let view: ActiveView = $state('bookmark');
 
 	function handleOptionEvent(event: OptionEmit): void {
-		if (event === 'list') {
+		if (event === 'bookmark') {
 			console.log('show list');
 		} else if (event === 'engine') {
 			console.log('show engine');
@@ -30,7 +30,7 @@
 	<div class="setting-view">
 		<class class="setting-content">
 			{#if view}
-				{#if view === 'list'}
+				{#if view === 'bookmark'}
 					<BookmarkInstances />
 				{:else if view === 'engine'}
 					<p>engine</p>

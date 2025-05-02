@@ -7,14 +7,12 @@
 	import {
 		AdjustmentsVerticalOutline,
 		ArrowDownToBracketOutline,
-		BookmarkOutline,
 		BookOpenOutline,
 		ExclamationCircleOutline,
-		PlusOutline,
-		WalletSolid
+		PlusOutline
 	} from 'flowbite-svelte-icons';
 
-	export type OptionEmit = 'list' | 'engine' | 'info';
+	export type OptionEmit = 'bookmark' | 'engine' | 'info';
 
 	interface Props {
 		event?: (emit: OptionEmit) => void;
@@ -80,7 +78,7 @@
 		<Tooltip arrow={false}>Engine</Tooltip>
 	</BottomNavItem>
 
-	<BottomNavItem btnName="Instances" appBtnPosition="middle" onclick={() => event?.('list')}>
+	<BottomNavItem btnName="Instances" appBtnPosition="middle" onclick={() => event?.('bookmark')}>
 		<BookOpenOutline
 			class="mb-1 h-6 w-6 text-gray-500 group-hover:text-primary-600 dark:text-gray-400 dark:group-hover:text-primary-500"
 		/>

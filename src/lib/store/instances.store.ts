@@ -1,30 +1,25 @@
 import type { DimacsInstance } from '$lib/dimacs/dimacs-instance.interface.ts';
+import { changeInstanceEventBus } from '$lib/transversal/events.ts';
 import fetchInstances from '$lib/transversal/utils/bootstrap-instances.ts';
 import { logError, logInfo, logWarning } from '$lib/transversal/utils/logging.ts';
 import { get, writable, type Writable } from 'svelte/store';
 import { updateProblemDomain } from './problem.store.ts';
-import { changeInstanceEventBus } from '$lib/transversal/events.ts';
 
 export interface InteractiveInstance extends DimacsInstance {
 	removable: boolean;
 	active: boolean;
-	previewing: boolean;
 }
 
 export const instanceStore: Writable<InteractiveInstance[]> = writable([]);
 
-export const previewingInstanceStore: Writable<DimacsInstance> = writable();
-
 const defaultInstanceState = {
 	removable: false,
-	active: false,
-	previewing: false
+	active: false
 };
 
 const newInstanceState = {
 	removable: true,
-	active: false,
-	previewing: false
+	active: false
 };
 
 export async function initializeInstancesStore() {
@@ -60,8 +55,6 @@ export function setDefaultInstanceToSolve(): void {
 			});
 			const fst = newInstances[0];
 			fst.active = true;
-			fst.previewing = true;
-			previewingInstanceStore.set(fst);
 			afterActivateInstance(fst);
 			return newInstances;
 		});
@@ -81,7 +74,7 @@ export function addInstance(instance: DimacsInstance): void {
 	const found = get(instanceStore).find((i) => i.name === instance.name);
 	if (found) {
 		const title = 'Duplicated instance';
-		const description = `Instance already loaded in the collection of instances`;
+		const description = `Instance ${instance.name} already loaded`;
 		logWarning(title, description);
 	} else {
 		instanceStore.update((prev) => [...prev, { ...instance, ...newInstanceState }]);
@@ -95,15 +88,12 @@ export function activateInstanceByName(name: string): void {
 		const newInstances = instances.map((e) => {
 			return {
 				...e,
-				previewing: false,
 				active: false
 			};
 		});
 		const instance = newInstances.find((e) => e.name === name);
 		if (instance !== undefined) {
 			instance.active = true;
-			instance.previewing = true;
-			previewingInstanceStore.set(instance);
 			afterActivateInstance(instance);
 		} else {
 			logError('Not instance found to activate');
@@ -112,23 +102,9 @@ export function activateInstanceByName(name: string): void {
 	});
 }
 
-export function previewInstanceByName(name: string): void {
-	instanceStore.update((instances) => {
-		const newInstances = instances.map((e) => {
-			return {
-				...e,
-				previewing: false
-			};
-		});
-		const instance = newInstances.find((e) => e.name === name);
-		if (instance !== undefined) {
-			instance.previewing = true;
-			previewingInstanceStore.set(instance);
-		} else {
-			logError('Not instance found to activate');
-		}
-		return newInstances;
-	});
+export function getActiveInstance(): InteractiveInstance | undefined {
+	const active = get(instanceStore).find((i) => i.active);
+	return active;
 }
 
 export function removeInstanceByName(name: string): void {

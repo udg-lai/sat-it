@@ -1,15 +1,51 @@
 <script lang="ts">
-	import { instanceStore } from '$lib/store/instances.store.ts';
+	import {
+		activateInstanceByName,
+		getActiveInstance,
+		instanceStore,
+		type InteractiveInstance
+	} from '$lib/store/instances.store.ts';
 	import { DatabaseOutline, LockOutline, TrashBinOutline } from 'flowbite-svelte-icons';
+	import { onMount } from 'svelte';
+	import ViewerComponent from './ViewerComponent.svelte';
+
+	let previewingInstance: InteractiveInstance | undefined = $state(undefined);
+
+	onMount(() => {
+		const unsub = instanceStore.subscribe(() => (previewingInstance = getActiveInstance()));
+		return () => {
+			unsub();
+		};
+	});
 </script>
 
 <div class="bookmark">
+	<div class="bookmark-preview">
+		{#if previewingInstance}
+			<ViewerComponent dimacsInstance={previewingInstance} />
+		{/if}
+	</div>
 	<div class="bookmark-list">
 		{#if $instanceStore}
 			<ul class="items scrollable">
 				{#each $instanceStore as instance}
-					<li class="item">
-						<button class="icon not-removable" disabled={!instance.removable || instance.active}>
+					<li>
+						<button
+							class="item"
+							class:selected={instance.active}
+							onmouseenter={() => (previewingInstance = instance)}
+							onmouseleave={() => (previewingInstance = getActiveInstance())}
+							onclick={() => activateInstanceByName(instance.name)}
+						>
+							<p>{instance.name}</p>
+						</button>
+
+						<button
+							class="icon"
+							class:removable={instance.removable && !instance.active}
+							class:invalid={!instance.removable || instance.active}
+							disabled={!instance.removable || instance.active}
+						>
 							{#if instance.removable && !instance.active}
 								<TrashBinOutline />
 							{:else if instance.removable && instance.active}
@@ -18,68 +54,30 @@
 								<DatabaseOutline />
 							{/if}
 						</button>
-						<p>{instance.name}</p>
 					</li>
 				{/each}
 			</ul>
 		{/if}
 	</div>
-	<div class="bookmark-preview"></div>
 </div>
 
-<!--
-{#if instanceStore}
-	<ul>
-		{#each $instanceStore as instance (instance.name)}
-			<li>
-				<div class="flex">
-					<button class="icon not-removable" disabled={!instance.removable || instance.active}>
-						{#if instance.removable && !instance.active}
-							<TrashBinOutline />
-						{:else if instance.removable && instance.active}
-							<LockOutline />
-						{:else}
-							<DatabaseOutline />
-						{/if}
-					</button>
-					<p class="mb-2 text-gray-500 dark:text-gray-400">{instance.name}</p>
-				</div>
-				<div class="flex">
-					<button class="icon">
-						<EyeOutline class={instance.previewing ? '' : 'not-previewing'} } />
-					</button>
-					<Toggle checked={instance.active} disabled={instance.active} class="toggle" />
-				</div>
-			</li>
-		{/each}
-	</ul>
-{/if}
--->
-
 <style>
-	:global(.not-previewing) {
-		opacity: 0.5;
-	}
-
 	.bookmark {
 		height: 100%;
 		width: 100%;
 		display: flex;
 	}
 
-	.padding {
-		padding: 1rem;
-	}
-
 	.bookmark-list {
 		width: 60%;
-		border-right: solid 1px;
 		display: flex;
 		align-items: center;
 	}
 
 	.bookmark-preview {
+		padding: 2rem 2rem;
 		flex: 1;
+		display: flex;
 	}
 
 	.items {
@@ -105,18 +103,38 @@
 		align-items: center;
 		display: flex;
 		position: relative;
-		padding: 1rem;
-		gap: 0.5rem;
+		padding: 2rem;
+		flex: 1;
+	}
+
+	li {
+		display: flex;
 		width: 100%;
+	}
+
+	.icon {
+		padding: 2rem;
+	}
+
+	.removable:hover {
+		color: rgb(239 86 47 / var(--tw-text-opacity, 1));
+	}
+
+	.icon.invalid {
+		cursor: not-allowed;
+	}
+
+	.item:hover {
+		background-color: rgba(239, 85, 47, 0.4);
+	}
+
+	.item.selected {
+		color: rgba(239, 85, 47);
 	}
 
 	.item p {
 		margin: 0;
-		margin-top: 0.5rem;
-	}
-
-	.item-btn {
-		padding: 5px;
+		margin-top: 0.4rem;
 	}
 
 	:global(.toggle) {
