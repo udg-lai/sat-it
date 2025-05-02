@@ -7,6 +7,8 @@
 	import {
 		AdjustmentsVerticalOutline,
 		ArrowDownToBracketOutline,
+		BookmarkOutline,
+		BookOpenOutline,
 		ExclamationCircleOutline,
 		PlusOutline,
 		WalletSolid
@@ -43,7 +45,7 @@
 		try {
 			const summary = parser({ name: name, content });
 			const instance: DimacsInstance = {
-				name: name,
+				name: name.toLowerCase(),
 				content,
 				summary
 			};
@@ -57,32 +59,32 @@
 </script>
 
 <BottomNav position="absolute" navType="application" classInner="grid-cols-5">
-	<BottomNavItem btnName="Home" appBtnPosition="left" onclick={() => (visible = false)}>
+	<BottomNavItem btnName="Hide" appBtnPosition="left" onclick={() => (visible = false)}>
 		<ArrowDownToBracketOutline
 			class="mb-1 h-6 w-6 text-gray-500 group-hover:text-primary-600 dark:text-gray-400 dark:group-hover:text-primary-500"
 		/>
-		<Tooltip arrow={false}>Home</Tooltip>
+		<Tooltip arrow={false}>Hide</Tooltip>
 	</BottomNavItem>
 
-	<BottomNavItem btnName="Wallet" appBtnPosition="middle" onclick={() => event?.('list')}>
-		<WalletSolid
-			class="mb-1 h-6 w-6 text-gray-500 group-hover:text-primary-600 dark:text-gray-400 dark:group-hover:text-primary-500"
-		/>
-		<Tooltip arrow={false}>Wallet</Tooltip>
-	</BottomNavItem>
-
-	<BottomNavItem btnName="Settings" appBtnPosition="middle" onclick={() => event?.('engine')}>
-		<AdjustmentsVerticalOutline
-			class="mb-1 h-6 w-6 text-gray-500 group-hover:text-primary-600 dark:text-gray-400 dark:group-hover:text-primary-500"
-		/>
-		<Tooltip arrow={false}>Settings</Tooltip>
-	</BottomNavItem>
-
-	<BottomNavItem btnName="Info" appBtnPosition="middle" onclick={() => event?.('info')}>
+	<BottomNavItem btnName="Legend" appBtnPosition="middle" onclick={() => event?.('info')}>
 		<ExclamationCircleOutline
 			class="mb-1 h-6 w-6 text-gray-500 group-hover:text-primary-600 dark:text-gray-400 dark:group-hover:text-primary-500"
 		/>
-		<Tooltip arrow={false}>Profile</Tooltip>
+		<Tooltip arrow={false}>Legend</Tooltip>
+	</BottomNavItem>
+
+	<BottomNavItem btnName="Engine" appBtnPosition="middle" onclick={() => event?.('engine')}>
+		<AdjustmentsVerticalOutline
+			class="mb-1 h-6 w-6 text-gray-500 group-hover:text-primary-600 dark:text-gray-400 dark:group-hover:text-primary-500"
+		/>
+		<Tooltip arrow={false}>Engine</Tooltip>
+	</BottomNavItem>
+
+	<BottomNavItem btnName="Instances" appBtnPosition="middle" onclick={() => event?.('list')}>
+		<BookOpenOutline
+			class="mb-1 h-6 w-6 text-gray-500 group-hover:text-primary-600 dark:text-gray-400 dark:group-hover:text-primary-500"
+		/>
+		<Tooltip arrow={false}>Instances</Tooltip>
 	</BottomNavItem>
 
 	<div class="flex items-center justify-center">

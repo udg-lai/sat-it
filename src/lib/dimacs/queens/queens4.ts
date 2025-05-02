@@ -138,8 +138,8 @@ c i guess it works
 1 0
 -2 0`;
 
-const summary = parser({ content, name: fileName });
+const summary = parser({ content, name: fileName.toLowerCase() });
 
-const instance: DimacsInstance = { name: fileName, content, summary };
+const instance: DimacsInstance = { name: fileName.toLowerCase(), content, summary };
 
 export default instance;

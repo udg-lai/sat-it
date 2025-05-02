@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { DimacsInstance } from '$lib/dimacs/dimacs-instance.interface.ts';
+	import instance from '$lib/dimacs/dummy.ts';
 	import { addInstance } from '$lib/store/instances.store.ts';
 	import { logError } from '$lib/transversal/utils/logging.ts';
 	import parser from '$lib/transversal/utils/parsers/dimacs.ts';
@@ -27,13 +28,13 @@
 		try {
 			const summary = parser({ name: name, content });
 			const instance: DimacsInstance = {
-				name: name,
+				name: name.toLowerCase(),
 				content,
 				summary
 			};
 			addInstance(instance);
 		} catch (error) {
-			const title = `Instance ${name} contains an error`;
+			const title = `Instance ${instance.name} contains an error`;
 			const description = (error as Error).message;
 			logError(title, description);
 		}

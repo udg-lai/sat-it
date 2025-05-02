@@ -1,4 +1,5 @@
 <script lang="ts">
+	import BookmarkInstances from './BookmarkInstances.svelte';
 	import OptionsComponent, { type OptionEmit } from './OptionsComponent.svelte';
 
 	type ActiveView = 'list' | 'engine' | 'legend' | 'info';
@@ -30,7 +31,7 @@
 		<class class="setting-content">
 			{#if view}
 				{#if view === 'list'}
-					<p>list</p>
+					<BookmarkInstances />
 				{:else if view === 'engine'}
 					<p>engine</p>
 				{:else}
@@ -59,6 +60,10 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		box-sizing: border-box;
+		border-style: solid;
+		border-color: var(--border-color);
+		border-width: 1px;
 	}
 
 	.settings {
