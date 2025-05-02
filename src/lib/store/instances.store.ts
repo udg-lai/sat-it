@@ -3,6 +3,8 @@ import fetchInstances from '$lib/transversal/utils/bootstrap-instances.ts';
 import { logError, logWarning } from '$lib/transversal/utils/logging.ts';
 import { get, writable, type Writable } from 'svelte/store';
 import { updateProblemDomain } from './problem.store.ts';
+import { createEventBus } from '$lib/transversal/createEventBus.ts';
+
 export interface InteractiveInstance extends DimacsInstance {
 	removable: boolean;
 	active: boolean;
@@ -11,7 +13,9 @@ export interface InteractiveInstance extends DimacsInstance {
 
 export const instanceStore: Writable<InteractiveInstance[]> = writable([]);
 
-export const activeInstanceStore: Writable<DimacsInstance> = writable();
+export const previewingInstanceStore: Writable<DimacsInstance> = writable();
+
+export const changeInstanceEventBus = createEventBus<void>();
 
 const defaultInstanceState = {
 	removable: false,
@@ -59,7 +63,7 @@ export function setDefaultInstanceToSolve(): void {
 			const fst = newInstances[0];
 			fst.active = true;
 			fst.previewing = true;
-			activeInstanceStore.set(fst);
+			previewingInstanceStore.set(fst);
 			afterActivateInstance(fst);
 			return newInstances;
 		});
@@ -100,7 +104,7 @@ export function activateInstanceByName(name: string): void {
 		if (instance !== undefined) {
 			instance.active = true;
 			instance.previewing = true;
-			activeInstanceStore.set(instance);
+			previewingInstanceStore.set(instance);
 			afterActivateInstance(instance);
 		} else {
 			logError('Not instance found to activate');
@@ -120,7 +124,7 @@ export function previewInstanceByName(name: string): void {
 		const instance = newInstances.find((e) => e.name === name);
 		if (instance !== undefined) {
 			instance.previewing = true;
-			activeInstanceStore.set(instance);
+			previewingInstanceStore.set(instance);
 		} else {
 			logError('Not instance found to activate');
 		}
@@ -140,4 +144,5 @@ export function removeInstanceByName(name: string): void {
 
 function afterActivateInstance(instance: DimacsInstance): void {
 	updateProblemDomain(instance);
+	changeInstanceEventBus.emit();
 }

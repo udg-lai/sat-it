@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { changeInstanceEventBus } from '$lib/store/instances.store.ts';
 	import {
 		problemStore,
 		resetProblem,
@@ -6,10 +7,19 @@
 		type Problem
 	} from '$lib/store/problem.store.ts';
 	import {
+		getSnapshot,
+		record,
+		redo,
+		resetStack,
+		undo,
+		type Snapshot
+	} from '$lib/store/stack.svelte.ts';
+	import {
 		dummyAssignmentAlgorithm,
 		type DummySearchParams
 	} from '$lib/transversal/algorithms/dummy.ts';
 	import { manualAssignment, type ManualParams } from '$lib/transversal/algorithms/manual.ts';
+	import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
 	import { onMount } from 'svelte';
 	import { get } from 'svelte/store';
 	import {
@@ -21,8 +31,6 @@
 		type EditorViewEvent
 	} from './debugger/events.svelte.ts';
 	import TrailEditor from './TrailEditorComponent.svelte';
-	import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
-	import { getSnapshot, record, redo, undo, type Snapshot } from '$lib/store/stack.svelte.ts';
 
 	let expandPropagations: boolean = $state(true);
 
@@ -78,14 +86,22 @@
 		expandPropagations = !expandPropagations;
 	}
 
+	function reset(): void {
+		resetStack();
+		const first = undo();
+		reloadFromSnapshot(first);
+	}
+
 	onMount(() => {
 		const unsubscribeToggleEditor = editorViewEventStore.subscribe(togglePropagations);
 		const unsubscribeAssignment = assignmentEventStore.subscribe((e) => algorithmStep(e));
 		const unsubscribeActionEvent = actionEvent.subscribe(actionReaction);
+		const unsubscribeChangeInstanceEvent = changeInstanceEventBus.subscribe(reset);
 		return () => {
 			unsubscribeToggleEditor();
 			unsubscribeAssignment();
 			unsubscribeActionEvent();
+			unsubscribeChangeInstanceEvent();
 		};
 	});
 </script>
