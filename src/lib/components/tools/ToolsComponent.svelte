@@ -6,7 +6,6 @@
 		FileCirclePlusOutline
 	} from 'flowbite-svelte-icons';
 	import { onMount } from 'svelte';
-	import DimacsComponent from '../dimacs/DimacsComponent.svelte';
 	import './_styles.css';
 	import Button from './Button.svelte';
 
@@ -173,7 +172,6 @@
 			{#if active}
 				<div class="view">
 					{#if name === 'viewA'}
-						<DimacsComponent />
 					{:else}
 						{@render notImplementedYet()}
 					{/if}
