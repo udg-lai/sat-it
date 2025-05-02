@@ -5,7 +5,7 @@ import type { DimacsInstance } from '$lib/dimacs/dimacs-instance.interface.ts';
 import { resetStack } from './stack.svelte.ts';
 import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
 
-type MappingLiteral2Clauses = Map<number, Set<number>>;
+export type MappingLiteral2Clauses = Map<number, Set<number>>;
 
 export interface Problem {
 	variables: VariablePool;
