@@ -107,14 +107,19 @@ export function getActiveInstance(): InteractiveInstance | undefined {
 	return active;
 }
 
-export function removeInstanceByName(name: string): void {
+export function deleteInstanceByName(name: string): void {
+	// pre: no active or not removable instance can be deleted
+
 	const filterFun = (e: InteractiveInstance, name: string) => {
-		return e.name !== name || (e.name === name && e.removable === false);
+		return e.name !== name || (e.name === name && (e.removable === false || e.active === true));
 	};
 
 	instanceStore.update((instances) => {
 		return instances.filter((e) => filterFun(e, name));
 	});
+
+	logInfo("Instance deleted", `Instance ${name} has been deleted`)
+
 }
 
 function afterActivateInstance(instance: DimacsInstance): void {

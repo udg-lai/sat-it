@@ -1,6 +1,7 @@
 <script lang="ts">
 	import {
 		activateInstanceByName,
+		deleteInstanceByName,
 		getActiveInstance,
 		instanceStore,
 		type InteractiveInstance
@@ -45,6 +46,7 @@
 							class:removable={instance.removable && !instance.active}
 							class:invalid={!instance.removable || instance.active}
 							disabled={!instance.removable || instance.active}
+							onclick={() => deleteInstanceByName(instance.name)}
 						>
 							{#if instance.removable && !instance.active}
 								<TrashBinOutline />
