@@ -6,7 +6,8 @@ export function logWarning(title: string, description: string): void {
 		type: 'warn',
 		title: formatText(title),
 		description: formatText(description),
-		dismissible: false
+		dismissible: true,
+		timeout: 10000
 	});
 }
 
