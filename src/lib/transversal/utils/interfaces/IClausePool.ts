@@ -32,7 +32,7 @@ export const isSat = (e: Eval): e is Sat => {
 	return e.type === 'SAT';
 };
 
-export const isUnresolved = (e: Eval): e is Unsat => {
+export const isUnresolved = (e: Eval): e is Unresolved => {
 	return e.type === 'UNRESOLVED';
 };
 

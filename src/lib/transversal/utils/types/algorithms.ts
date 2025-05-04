@@ -68,7 +68,7 @@ export type Preprocessing = {
 };
 export type ConflictDetecion = (params: ConflictDetectionParams) => ConflictDetectionReturn;
 
-export type UnitPropagationStep = (params: UnitPropagationParams) => void;
+export type UnitPropagationStep = (params: UnitPropagationParams) => UnitPropagationReturn;
 
 export type Algorithm = {
 	name: string;

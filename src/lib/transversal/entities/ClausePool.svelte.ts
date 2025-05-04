@@ -2,7 +2,7 @@ import type { IClausePool } from '../utils/interfaces/IClausePool.ts';
 import type { Eval } from '../utils/interfaces/IClausePool.ts';
 import type { CNF } from '../utils/parsers/dimacs.ts';
 import { cnfToClauseSet } from '../utils/utils.ts';
-import Clause, { ClauseEval } from './Clause.ts';
+import Clause, { type ClauseEval, isSatClause, isUnsatClause } from './Clause.ts';
 import type VariablePool from './VariablePool.svelte.ts';
 
 class ClausePool implements IClausePool {
@@ -26,9 +26,9 @@ class ClausePool implements IClausePool {
 		while (i < this.collection.length && !unsat) {
 			const clause: Clause = this.collection[i];
 			const clauseEval: ClauseEval = clause.eval();
-			unsat = clauseEval === ClauseEval.UNSAT;
+			unsat = isUnsatClause(clauseEval);
 			if (!unsat) {
-				const sat = clauseEval === ClauseEval.SAT;
+				const sat = isSatClause(clauseEval);
 				if (sat) nSatisfied++;
 				i++;
 			} else {
@@ -64,7 +64,7 @@ class ClausePool implements IClausePool {
 	getUnitClauses(): Set<number> {
 		const S = new Set<number>();
 		for (const c of this.getClauses()) {
-			if (c.isUnit()) S.add(c.getId());
+			if (c.optimalCheckUnit()) S.add(c.getId());
 		}
 		return S;
 	}

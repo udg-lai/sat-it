@@ -68,15 +68,11 @@ export const emitUPEvent = (event: UPEvent) => {
 	upEvent.set({ ...event });
 };
 
-type PreprocesCD = {
-	type: 'conflict-detection';
+type PreprocesBegin = {
+	type: 'start';
 };
 
-type PreprocesUC = {
-	type: 'unit-clauses';
-};
-
-export type PreprocesEvent = PreprocesCD | PreprocesUC;
+export type PreprocesEvent = PreprocesBegin;
 
 export const preprocesEvent: Writable<PreprocesEvent> = writable();
 
