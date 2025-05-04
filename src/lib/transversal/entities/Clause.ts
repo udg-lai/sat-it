@@ -46,21 +46,21 @@ class Clause implements Comparable<Clause> {
 
 	eval(): ClauseEval {
 		let satisfied = false;
-		let unassignedLiterals: number[] = [];
+		const unassignedLiterals: number[] = [];
 
 		let i = 0;
 		while (i < this.literals.length && !satisfied) {
 			const lit: Literal = this.literals[i];
 			if (lit.isTrue()) satisfied = true;
 			else {
-				if (!lit.isAssigned()) unassignedLiterals.push(lit.toInt())
+				if (!lit.isAssigned()) unassignedLiterals.push(lit.toInt());
 				i++;
 			}
 		}
 		let state: ClauseEval;
-		if(satisfied) state = makeSatClause();
-		else if(unassignedLiterals.length === 1) state = makeUnitClause(unassignedLiterals[0]);
-		else if(unassignedLiterals.length === 0) state = makeUnsatClause();
+		if (satisfied) state = makeSatClause();
+		else if (unassignedLiterals.length === 1) state = makeUnitClause(unassignedLiterals[0]);
+		else if (unassignedLiterals.length === 0) state = makeUnsatClause();
 		else state = makeUnresolvedClause();
 
 		return state;
