@@ -3,8 +3,8 @@ import { Trail } from '../entities/Trail.svelte.ts';
 import type Variable from '../entities/Variable.svelte.ts';
 import VariableAssignment from '../entities/VariableAssignment.ts';
 import type VariablePool from '../entities/VariablePool.svelte.ts';
-import { isUnsat } from '../utils/interfaces/IClausePool.ts';
-import { logFatal } from '../utils/logging.ts';
+import { isUnsat } from '$lib/transversal/interfaces/IClausePool.ts';
+import { logFatal } from '$lib/transversal/logging.ts';
 import type {
 	ConflictDetectionParams,
 	ConflictDetectionReturn,
@@ -17,7 +17,7 @@ import type {
 	UnitPropagationParams,
 	UnitPropagationReturn
 } from '../utils/types/algorithms.ts';
-import { fromJust, isJust } from '../utils/types/maybe.ts';
+import { fromJust, isJust } from '../types/maybe.ts';
 
 export const dpllname: string = 'dpll';
 

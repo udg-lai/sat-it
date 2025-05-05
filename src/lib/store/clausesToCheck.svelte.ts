@@ -4,7 +4,7 @@ import {
 	makeSat,
 	makeUnresolved,
 	type Eval
-} from '$lib/transversal/utils/interfaces/IClausePool.ts';
+} from '$lib/transversal/interfaces/IClausePool.ts';
 
 let clausesToCheck: Set<number> = $state(new Set<number>());
 

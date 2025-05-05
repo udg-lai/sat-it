@@ -1,5 +1,5 @@
 import type VariableAssignment from '$lib/transversal/entities/VariableAssignment.ts';
-import { logFatal } from '../utils/logging.ts';
+import { logFatal } from '../logging.ts';
 import type Clause from './Clause.ts';
 
 export class Trail {

@@ -3,7 +3,6 @@
 	import { problemStore } from '$lib/store/problem.store.ts';
 	import BacktrackingDebugger from './BacktrackingDebuggerComponent.svelte';
 	import GeneralDebuggerButtons from './GeneralDebuggerButtonsComponent.svelte';
-	import InformationComponent from './InformationComponent.svelte';
 	import ManualDebugger from './ManualDebuggerComponent.svelte';
 	import PreprocesDebugger from './PreprocesDebuggerComponent.svelte';
 	import UnitPropagationDebugger from './UnitPropagationDebuggerComponent.svelte';
@@ -34,10 +33,6 @@
 
 		<GeneralDebuggerButtons />
 	{/if}
-
-	<div class="absolute right-2">
-		<InformationComponent />
-	</div>
 </div>
 
 <style>

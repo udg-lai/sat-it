@@ -12,7 +12,7 @@ import type Clause from '$lib/transversal/entities/Clause.ts';
 import type ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';
 import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
 import type VariablePool from '$lib/transversal/entities/VariablePool.svelte.ts';
-import type { Eval } from '../interfaces/IClausePool.ts';
+import type { Eval } from '$lib/transversal/interfaces/IClausePool.ts';
 
 export type PreprocesCDParams = {
 	clauses: ClausePool;

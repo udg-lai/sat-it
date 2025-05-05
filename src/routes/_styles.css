@@ -9,16 +9,15 @@
 }
 
 play-area {
-	align-items: center;
-	justify-content: center;
-	padding: var(--windows-padding);
-	flex: 2;
+	display: flex;
+	flex: 1;
 	position: relative;
 }
 
 workspace {
 	flex: auto;
 	flex-direction: column;
+	max-height: 100%;
 }
 
 main {

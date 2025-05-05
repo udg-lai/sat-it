@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { changeInstanceEventBus } from '$lib/store/instances.store.ts';
 	import {
 		problemStore,
 		resetProblem,
@@ -31,7 +30,7 @@
 		type UPEvent
 	} from './debugger/events.svelte.ts';
 	import TrailEditor from './TrailEditorComponent.svelte';
-	import { isUnsat, makeUnsat, type Eval } from '$lib/transversal/utils/interfaces/IClausePool.ts';
+	import { isUnsat, makeUnsat, type Eval } from '$lib/transversal/interfaces/IClausePool.ts'
 	import type {
 		Algorithm,
 		StepParams,
@@ -50,6 +49,7 @@
 		updateStarted,
 		updateWorkingTrailPointer
 	} from '$lib/store/clausesToCheck.svelte.ts';
+	import { changeInstanceEventBus } from '$lib/transversal/events.ts';
 
 	let expandPropagations: boolean = $state(true);
 

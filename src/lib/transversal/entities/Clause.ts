@@ -1,7 +1,7 @@
 import type Literal from './Literal.svelte.ts';
 import logicResolution from '../algorithms/resolution.ts';
-import { arraysEqual } from '../utils/types/array.ts';
-import type { Comparable } from '../utils/interfaces/Comparable.ts';
+import { arraysEqual } from '../types/array.ts';
+import type { Comparable } from '$lib/transversal/interfaces/Comparable.ts';
 
 class Clause implements Comparable<Clause> {
 	private static idGenerator: number = 0;

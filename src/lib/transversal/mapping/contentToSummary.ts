@@ -5,15 +5,15 @@ import {
 	makeRight,
 	unwrapEither,
 	type Either
-} from '$lib/transversal/utils/types/either.ts';
+} from '$lib/transversal/types/either.ts';
 import {
 	fromJust,
 	isJust,
 	makeJust,
 	makeNothing,
 	type Maybe
-} from '$lib/transversal/utils/types/maybe.ts';
-import { type ErrorMessage } from '$lib/transversal/utils/types/types.ts';
+} from '$lib/transversal/types/maybe.ts';
+import { type ErrorMessage } from '$lib/transversal/types/types.ts';
 import { logFatal } from '../logging.ts';
 
 export type RawClause = number[]; // this contains the eos '0'
@@ -51,7 +51,7 @@ export interface Input {
 	name: string;
 }
 
-export default function parser(input: Input): Summary {
+export default function content2summary(input: Input): Summary {
 	const { content, name } = input;
 
 	let lines: string[] = content.trim().split('\n');
