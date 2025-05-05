@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { changeInstanceEventBus } from '$lib/store/instances.store.ts';
 	import {
 		problemStore,
 		resetProblem,
@@ -31,6 +30,7 @@
 		type EditorViewEvent
 	} from './debugger/events.svelte.ts';
 	import TrailEditor from './TrailEditorComponent.svelte';
+	import { changeInstanceEventBus } from '$lib/transversal/events.ts';
 
 	let expandPropagations: boolean = $state(true);
 

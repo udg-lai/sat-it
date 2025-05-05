@@ -1,5 +1,5 @@
 import WipVariablePool from '$lib/transversal/entities/VariablePool.svelte.ts';
-import { fromJust, isJust } from '$lib/transversal/utils/types/maybe.ts';
+import { fromJust, isJust } from '$lib/transversal/types/maybe.ts';
 import { describe, it, expect } from 'vitest';
 
 describe('variable pool', () => {

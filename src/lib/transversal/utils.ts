@@ -1,8 +1,8 @@
-import Clause from '../entities/Clause.ts';
-import Literal from '../entities/Literal.svelte.ts';
-import VariablePool from '../entities/VariablePool.svelte.ts';
+import Clause from './entities/Clause.ts';
+import Literal from './entities/Literal.svelte.ts';
+import VariablePool from './entities/VariablePool.svelte.ts';
 import { logWarning } from './logging.ts';
-import type { CNF } from './parsers/dimacs.ts';
+import type { CNF } from './mapping/contentToSummary.ts';
 
 export function disableContextMenu(event: Event): void {
 	event.preventDefault();

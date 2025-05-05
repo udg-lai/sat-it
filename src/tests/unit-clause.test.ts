@@ -1,6 +1,6 @@
 import ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';
 import VariablePool from '$lib/transversal/entities/VariablePool.svelte.ts';
-import type { RawClause } from '$lib/transversal/utils/parsers/dimacs.ts';
+import type { RawClause } from '$lib/transversal/mapping/contentToSummary.ts';
 import { describe, expect, it } from 'vitest';
 
 const rawClauses: RawClause[] = [[1, 2, -3, 0], [-2, 3, 0], []];

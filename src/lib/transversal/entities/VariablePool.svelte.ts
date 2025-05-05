@@ -1,6 +1,6 @@
 import type { IVariablePool } from '../utils/interfaces/IVariablePool.ts';
-import { logError } from '../utils/logging.ts';
-import { makeJust, makeNothing, type Maybe } from '../utils/types/maybe.ts';
+import { logError } from '../logging.ts';
+import { makeJust, makeNothing, type Maybe } from '../types/maybe.ts';
 import Variable from './Variable.svelte.ts';
 
 class VariablePool implements IVariablePool {

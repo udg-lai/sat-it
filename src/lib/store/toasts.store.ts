@@ -29,7 +29,7 @@ export const addToast = (toast: Toast) => {
 		title: '<empty>',
 		description: '<empty>',
 		dismissible: false,
-		timeout: 6000
+		timeout: 3000
 	};
 
 	// Push the toast to the top of the list of toasts

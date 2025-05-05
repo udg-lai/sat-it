@@ -1,7 +1,7 @@
 import Variable from '$lib/transversal/entities/Variable.svelte.ts';
 import { v4 as uuidv4 } from 'uuid';
 import type { Comparable } from '../utils/interfaces/Comparable.ts';
-import { logFatal } from '../utils/logging.ts';
+import { logFatal } from '../logging.ts';
 
 export type Polarity = 'Positive' | 'Negative';
 
