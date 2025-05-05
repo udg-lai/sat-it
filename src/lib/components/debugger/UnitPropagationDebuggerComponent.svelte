@@ -17,7 +17,7 @@
 	class="btn general-btn"
 	title="Step"
 	onclick={() => {
-		emitUPEvent({ type: 'step' });
+		emitUPEvent('step');
 	}}
 >
 	<DynamicRender component={CaretRightOutline} props={assignmentProps} />
@@ -26,7 +26,7 @@
 <button
 	class="btn general-btn"
 	title="Following Variable"
-	onclick={() => emitUPEvent({ type: 'following' })}
+	onclick={() => emitUPEvent('following')}
 >
 	<DynamicRender component={ReplyOutline} props={reverseProps} />
 </button>
@@ -34,7 +34,7 @@
 <button
 	class="btn general-btn"
 	title="Finish unit propagations"
-	onclick={() => emitUPEvent({ type: 'finish' })}
+	onclick={() => emitUPEvent('finish')}
 >
 	<DynamicRender component={ArrowRightOutline} props={assignmentProps} />
 </button>

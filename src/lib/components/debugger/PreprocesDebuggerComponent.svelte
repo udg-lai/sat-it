@@ -12,7 +12,7 @@
 <button
 	class="btn general-btn"
 	onclick={() => {
-		emitPreprocesEvent({ type: 'start' });
+		emitPreprocesEvent('start');
 	}}
 	title="Begin"
 >

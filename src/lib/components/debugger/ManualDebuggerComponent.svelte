@@ -58,7 +58,7 @@
 				logError('Could not control case of assignment');
 			}
 		}
-		emitActionEvent({ type: 'record' });
+		emitActionEvent('record' );
 		resetState();
 	}
 

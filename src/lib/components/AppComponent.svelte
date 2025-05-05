@@ -63,7 +63,7 @@
 	function preprocesStep(p: PreprocesEvent) {
 		if (p === undefined) return;
 		const { clauses, algorithm }: Problem = get(problemStore);
-		if (p.type === 'start') {
+		if (p === 'start') {
 			updateStarted(true);
 			const preprocesReturn = algorithm.preprocessing.conflictDetection({ clauses });
 			updatePreviousEval(preprocesReturn.evaluation);
@@ -107,15 +107,15 @@
 	function unitPropagationStep(e: UPEvent) {
 		if (e === undefined) return;
 		const { variables, clauses, algorithm }: Problem = get(problemStore);
-		if (e.type === 'step') {
+		if (e === 'step') {
 			up(variables, clauses, algorithm);
 			if (clausesToCheck.size === 0) checkAndUpdatePointer(variables, trails);
-		} else if (e.type === 'following') {
+		} else if (e === 'following') {
 			while (clausesToCheck.size > 0) {
 				up(variables, clauses, algorithm);
 			}
 			if (clausesToCheck.size === 0) checkAndUpdatePointer(variables, trails);
-		} else if (e.type === 'finish') {
+		} else if (e === 'finish') {
 			while (!checkAndUpdatePointer(variables, trails)) {
 				while (clausesToCheck.size > 0) {
 					up(variables, clauses, algorithm);
@@ -154,12 +154,12 @@
 
 	function actionReaction(a: ActionEvent) {
 		if (a === undefined) return;
-		if (a.type === 'record') {
+		if (a === 'record') {
 			record(trails);
-		} else if (a.type === 'undo') {
+		} else if (a === 'undo') {
 			const snapshot = undo();
 			reloadFromSnapshot(snapshot);
-		} else if (a.type === 'redo') {
+		} else if (a === 'redo') {
 			const snapshot = redo();
 			reloadFromSnapshot(snapshot);
 		}
@@ -190,11 +190,11 @@
 
 	onMount(() => {
 		const unsubscribeToggleEditor = editorViewEventStore.subscribe(togglePropagations);
-		const unsubscribeAssignment = assignmentEventStore.subscribe((e) => algorithmStep(e));
+		const unsubscribeAssignment = assignmentEventStore.subscribe(algorithmStep);
 		const unsubscribeActionEvent = actionEvent.subscribe(actionReaction);
 		const unsubscribeChangeInstanceEvent = changeInstanceEventBus.subscribe(reset);
-		const unsusbscribeUPEvent = upEvent.subscribe((e) => unitPropagationStep(e));
-		const unsusbscribePreprocesEvent = preprocesEvent.subscribe((p) => preprocesStep(p));
+		const unsusbscribeUPEvent = upEvent.subscribe(unitPropagationStep);
+		const unsusbscribePreprocesEvent = preprocesEvent.subscribe(preprocesStep);
 		return () => {
 			unsubscribeToggleEditor();
 			unsubscribeAssignment();

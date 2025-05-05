@@ -20,7 +20,7 @@
 		class="btn general-btn"
 		onclick={() => {
 			emitAssignmentEvent({ type: 'automated' });
-			emitActionEvent({ type: 'record' });
+			emitActionEvent('record');
 		}}
 		title="Decide"
 	>
@@ -31,7 +31,7 @@
 		class="btn general-btn bkt-btn"
 		onclick={() => {
 			emitAssignmentEvent({ type: 'automated' });
-			emitActionEvent({ type: 'record' });
+			emitActionEvent('record');
 		}}
 		title="Backtrack"
 	>

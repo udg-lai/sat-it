@@ -28,54 +28,26 @@ export const emitEditorViewEvent = () => {
 	editorViewEventStore.update(() => ({ expand: undefined }));
 };
 
-type RecordAction = {
-	type: 'record';
-};
-
-type UndoAction = {
-	type: 'undo';
-};
-
-type RedoAction = {
-	type: 'redo';
-};
-
-export type ActionEvent = RecordAction | UndoAction | RedoAction;
+export type ActionEvent = 'record' | 'undo' | 'redo';
 
 export const actionEvent: Writable<ActionEvent> = writable();
 
 export const emitActionEvent = (action: ActionEvent) => {
-	actionEvent.set({ ...action });
+	actionEvent.set(action);
 };
 
-type UPStep = {
-	type: 'step';
-};
-
-type UPFollowing = {
-	type: 'following';
-};
-
-type UPFinish = {
-	type: 'finish';
-};
-
-export type UPEvent = UPStep | UPFollowing | UPFinish;
+export type UPEvent = 'step' | 'following' | 'finish';
 
 export const upEvent: Writable<UPEvent> = writable();
 
 export const emitUPEvent = (event: UPEvent) => {
-	upEvent.set({ ...event });
+	upEvent.set(event);
 };
 
-type PreprocesBegin = {
-	type: 'start';
-};
-
-export type PreprocesEvent = PreprocesBegin;
+export type PreprocesEvent = 'start';
 
 export const preprocesEvent: Writable<PreprocesEvent> = writable();
 
 export const emitPreprocesEvent = (event: PreprocesEvent) => {
-	preprocesEvent.set({ ...event });
+	preprocesEvent.set(event);
 };

@@ -58,10 +58,10 @@
 
 		if (isUndo) {
 			event.preventDefault();
-			emitActionEvent({ type: 'undo' });
+			emitActionEvent('undo' );
 		} else if (isRedo) {
 			event.preventDefault();
-			emitActionEvent({ type: 'redo' });
+			emitActionEvent('redo');
 		}
 	}
 </script>
@@ -79,7 +79,7 @@
 	class:invalidOption={!btnUndoActive}
 	title="Undo"
 	disabled={!btnUndoActive}
-	onclick={() => emitActionEvent({ type: 'undo' })}
+	onclick={() => emitActionEvent('undo')}
 >
 	<DynamicRender component={ReplyOutline} props={generalProps} />
 </button>
@@ -88,7 +88,7 @@
 	class="btn general-btn"
 	class:invalidOption={!btnRedoActive}
 	title="Redo"
-	onclick={() => emitActionEvent({ type: 'redo' })}
+	onclick={() => emitActionEvent('redo')}
 	disabled={!btnRedoActive}
 >
 	<DynamicRender component={ReplyOutline} props={reverseProps} />

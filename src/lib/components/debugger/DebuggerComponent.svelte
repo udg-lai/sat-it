@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { getClausesToCheck, getStarted } from '$lib/store/clausesToCheck.svelte.ts';
 	import { problemStore } from '$lib/store/problem.store.ts';
+	import { slide } from 'svelte/transition';
 	import BacktrackingDebugger from './BacktrackingDebuggerComponent.svelte';
 	import GeneralDebuggerButtons from './GeneralDebuggerButtonsComponent.svelte';
 	import ManualDebugger from './ManualDebuggerComponent.svelte';
@@ -15,7 +16,7 @@
 	const enableUnitPropagtion = $derived(getClausesToCheck().size !== 0);
 </script>
 
-<div class="flex-center debugger align-center relative flex-row gap-2">
+<div transition:slide|global class="flex-center debugger align-center relative flex-row gap-2">
 	<div class="variable-display"></div>
 	{#if enablePreproces}
 		<PreprocesDebugger />
