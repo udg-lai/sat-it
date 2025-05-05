@@ -132,17 +132,17 @@
 			const clause = clauses.get(clauseId);
 			const evaluation = algorithm.conflictDetection({ clause });
 			clausesToCheck.delete(clauseId);
-			console.log("Variable pool state",variables.assignedVariables());
-			console.log("Clause ID that has been checked", clauseId);
-			console.log("Clause that has been checked", clause);
-			console.log("Current state of clauses to check", clausesToCheck);
-			console.log("Evaluation:",evaluation.evaluation);
+			console.log('Variable pool state', variables.assignedVariables());
+			console.log('Clause ID that has been checked', clauseId);
+			console.log('Clause that has been checked', clause);
+			console.log('Current state of clauses to check', clausesToCheck);
+			console.log('Evaluation:', evaluation.evaluation);
 			if (isUnitClause(evaluation.evaluation) && algorithm.UPstep !== undefined) {
 				const literalToPropagate = evaluation.evaluation.literal;
 				const upResult = algorithm.UPstep({ variables, trails, literalToPropagate });
 				trails = upResult.trails;
-				console.log("Propagated literal",literalToPropagate);
-				console.log("Current trail state", trails[trails.length-1])
+				console.log('Propagated literal', literalToPropagate);
+				console.log('Current trail state', trails[trails.length - 1]);
 			} else if (isUnsatClause(evaluation.evaluation)) {
 				updatePreviousEval(makeUnsat(clauseId));
 				if (trails[trails.length - 1].getDecisionLevel() === 0) {

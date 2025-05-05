@@ -41,7 +41,7 @@ describe('clause pool', () => {
 		variables.persist(1, true);
 		variables.persist(2, false);
 		variables.persist(3, true);
-		const evaluation = clausePool.eval()
+		const evaluation = clausePool.eval();
 		expect(isSat(evaluation)).toBe(true);
 	});
 	it('addition-sat', () => {
@@ -60,7 +60,7 @@ describe('clause pool', () => {
 		variables.persist(1, true);
 		variables.persist(2, false);
 		variables.persist(3, true);
-		const evaluation = clausePool.eval()
+		const evaluation = clausePool.eval();
 		expect(isSat(evaluation)).toBe(true);
 	});
 	it('addition-sat', () => {
