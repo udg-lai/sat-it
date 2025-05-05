@@ -18,16 +18,10 @@
 	import { onMount } from 'svelte';
 	import { get } from 'svelte/store';
 	import {
-		actionEvent,
 		assignmentEventStore,
 		editorViewEventStore,
-		preprocesEvent,
-		upEvent,
-		type ActionEvent,
 		type AssignmentEvent,
 		type EditorViewEvent,
-		type PreprocesEvent,
-		type UPEvent
 	} from './debugger/events.svelte.ts';
 	import TrailEditor from './TrailEditorComponent.svelte';
 	import { isUnsat, makeUnsat, type Eval } from '$lib/transversal/interfaces/IClausePool.ts'
@@ -49,7 +43,7 @@
 		updateStarted,
 		updateWorkingTrailPointer
 	} from '$lib/store/clausesToCheck.svelte.ts';
-	import { changeInstanceEventBus } from '$lib/transversal/events.ts';
+	import { changeInstanceEventBus, preprocesSignalEventBus, unitPropagationEventBus, userActionEventBus, type ActionEvent, type UPEvent } from '$lib/transversal/events.ts';
 
 	let expandPropagations: boolean = $state(true);
 
@@ -60,25 +54,22 @@
 	// Variables to take care of unit propagition
 	let clausesToCheck: Set<number> = $derived(getClausesToCheck());
 
-	function preprocesStep(p: PreprocesEvent) {
-		if (p === undefined) return;
+	function preprocesStep() {
 		const { clauses, algorithm }: Problem = get(problemStore);
-		if (p === 'start') {
-			updateStarted(true);
-			const preprocesReturn = algorithm.preprocessing.conflictDetection({ clauses });
-			updatePreviousEval(preprocesReturn.evaluation);
-			if (!isUnsat(previousEval) && algorithm.preprocessing.unitClauses) {
-				const preprocesReturn = algorithm.preprocessing.unitClauses({ clauses });
-				updateWorkingTrailPointer(trails, preprocesReturn.clausesToCheck);
-			} else if (isUnsat(previousEval)) {
-				updateFinished(true);
-			}
+		
+		updateStarted(true);
+		const preprocesReturn = algorithm.preprocessing.conflictDetection({ clauses });
+		updatePreviousEval(preprocesReturn.evaluation);
+		if (!isUnsat(previousEval) && algorithm.preprocessing.unitClauses) {
+			const preprocesReturn = algorithm.preprocessing.unitClauses({ clauses });
+			updateWorkingTrailPointer(trails, preprocesReturn.clausesToCheck);
+		} else if (isUnsat(previousEval)) {
+			updateFinished(true);
 		}
 	}
 
 	function algorithmStep(e: AssignmentEvent): void {
 		if (e === undefined) return;
-
 		const { variables, mapping, algorithm }: Problem = get(problemStore);
 
 		let returnValues: StepResult;
@@ -105,7 +96,6 @@
 	}
 
 	function unitPropagationStep(e: UPEvent) {
-		if (e === undefined) return;
 		const { variables, clauses, algorithm }: Problem = get(problemStore);
 		if (e === 'step') {
 			up(variables, clauses, algorithm);
@@ -153,7 +143,6 @@
 	}
 
 	function actionReaction(a: ActionEvent) {
-		if (a === undefined) return;
 		if (a === 'record') {
 			record(trails);
 		} else if (a === 'undo') {
@@ -191,10 +180,10 @@
 	onMount(() => {
 		const unsubscribeToggleEditor = editorViewEventStore.subscribe(togglePropagations);
 		const unsubscribeAssignment = assignmentEventStore.subscribe(algorithmStep);
-		const unsubscribeActionEvent = actionEvent.subscribe(actionReaction);
+		const unsubscribeActionEvent = userActionEventBus.subscribe(actionReaction);
 		const unsubscribeChangeInstanceEvent = changeInstanceEventBus.subscribe(reset);
-		const unsusbscribeUPEvent = upEvent.subscribe(unitPropagationStep);
-		const unsusbscribePreprocesEvent = preprocesEvent.subscribe(preprocesStep);
+		const unsusbscribeUPEvent = unitPropagationEventBus.subscribe(unitPropagationStep);
+		const unsusbscribePreprocesEvent = preprocesSignalEventBus.subscribe(preprocesStep)
 		return () => {
 			unsubscribeToggleEditor();
 			unsubscribeAssignment();

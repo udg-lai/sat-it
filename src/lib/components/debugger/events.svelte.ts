@@ -27,27 +27,3 @@ export const editorViewEventStore: Writable<EditorViewEvent> = writable();
 export const emitEditorViewEvent = () => {
 	editorViewEventStore.update(() => ({ expand: undefined }));
 };
-
-export type ActionEvent = 'record' | 'undo' | 'redo';
-
-export const actionEvent: Writable<ActionEvent> = writable();
-
-export const emitActionEvent = (action: ActionEvent) => {
-	actionEvent.set(action);
-};
-
-export type UPEvent = 'step' | 'following' | 'finish';
-
-export const upEvent: Writable<UPEvent> = writable();
-
-export const emitUPEvent = (event: UPEvent) => {
-	upEvent.set(event);
-};
-
-export type PreprocesEvent = 'start';
-
-export const preprocesEvent: Writable<PreprocesEvent> = writable();
-
-export const emitPreprocesEvent = (event: PreprocesEvent) => {
-	preprocesEvent.set(event);
-};

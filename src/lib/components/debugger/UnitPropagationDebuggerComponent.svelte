@@ -3,7 +3,7 @@
 
 	import { ArrowRightOutline, CaretRightOutline, ReplyOutline } from 'flowbite-svelte-icons';
 	import DynamicRender from '../DynamicRender.svelte';
-	import { emitUPEvent } from './events.svelte.ts';
+	import { unitPropagationEventBus } from '$lib/transversal/events.ts';
 
 	const assignmentProps = {
 		class: 'h-8 w-8'
@@ -17,7 +17,7 @@
 	class="btn general-btn"
 	title="Step"
 	onclick={() => {
-		emitUPEvent('step');
+		unitPropagationEventBus.emit('step');
 	}}
 >
 	<DynamicRender component={CaretRightOutline} props={assignmentProps} />
@@ -26,7 +26,7 @@
 <button
 	class="btn general-btn"
 	title="Following Variable"
-	onclick={() => emitUPEvent('following')}
+	onclick={() => unitPropagationEventBus.emit('following')}
 >
 	<DynamicRender component={ReplyOutline} props={reverseProps} />
 </button>
@@ -34,7 +34,7 @@
 <button
 	class="btn general-btn"
 	title="Finish unit propagations"
-	onclick={() => emitUPEvent('finish')}
+	onclick={() => unitPropagationEventBus.emit('finish')}
 >
 	<DynamicRender component={ArrowRightOutline} props={assignmentProps} />
 </button>

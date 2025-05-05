@@ -9,7 +9,8 @@
 		PenOutline
 	} from 'flowbite-svelte-icons';
 	import DynamicRender from '../DynamicRender.svelte';
-	import { emitActionEvent, emitAssignmentEvent } from './events.svelte.ts';
+	import { emitAssignmentEvent } from './events.svelte.ts';
+	import { userActionEventBus } from '$lib/transversal/events.ts';
 
 	interface Props {
 		defaultNextVariable: number | undefined;
@@ -58,7 +59,7 @@
 				logError('Could not control case of assignment');
 			}
 		}
-		emitActionEvent('record' );
+		userActionEventBus.emit('record');
 		resetState();
 	}
 
