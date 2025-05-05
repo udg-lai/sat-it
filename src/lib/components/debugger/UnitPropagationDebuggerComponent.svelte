@@ -8,6 +8,9 @@
 	const assignmentProps = {
 		class: 'h-8 w-8'
 	};
+	const reverseProps = {
+		class: 'h-8 w-8 transform -scale-x-100'
+	};
 </script>
 
 <button
@@ -25,7 +28,7 @@
 	title="Following Variable"
 	onclick={() => emitUPEvent({ type: 'following' })}
 >
-	<DynamicRender component={ReplyOutline} props={assignmentProps} />
+	<DynamicRender component={ReplyOutline} props={reverseProps} />
 </button>
 
 <button

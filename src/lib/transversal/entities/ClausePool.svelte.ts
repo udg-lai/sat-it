@@ -26,6 +26,8 @@ class ClausePool implements IClausePool {
 		while (i < this.collection.length && !unsat) {
 			const clause: Clause = this.collection[i];
 			const clauseEval: ClauseEval = clause.eval();
+			console.log("This is the eval of the clause", clause);
+			console.log(clauseEval);
 			unsat = isUnsatClause(clauseEval);
 			if (!unsat) {
 				const sat = isSatClause(clauseEval);

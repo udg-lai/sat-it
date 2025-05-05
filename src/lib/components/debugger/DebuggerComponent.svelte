@@ -1,8 +1,5 @@
 <script lang="ts">
-	import {
-		getClausesToCheck,
-		getStarted
-	} from '$lib/store/clausesToCheck.svelte.ts';
+	import { getClausesToCheck, getStarted } from '$lib/store/clausesToCheck.svelte.ts';
 	import { problemStore } from '$lib/store/problem.store.ts';
 	import BacktrackingDebugger from './BacktrackingDebuggerComponent.svelte';
 	import GeneralDebuggerButtons from './GeneralDebuggerButtonsComponent.svelte';

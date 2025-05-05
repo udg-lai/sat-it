@@ -2,7 +2,7 @@ import Clause from '$lib/transversal/entities/Clause.ts';
 import ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';
 import Literal from '$lib/transversal/entities/Literal.svelte.ts';
 import VariablePool from '$lib/transversal/entities/VariablePool.svelte.ts';
-import { Eval } from '$lib/transversal/utils/interfaces/IClausePool.ts';
+import { isSat, isUnresolved, isUnsat } from '$lib/transversal/utils/interfaces/IClausePool.ts';
 import type { CNF } from '$lib/transversal/utils/parsers/dimacs.ts';
 import { cnfToClauseSet } from '$lib/transversal/utils/utils.ts';
 import { describe, expect, it } from 'vitest';
@@ -20,7 +20,8 @@ describe('clause pool', () => {
 		const variables: VariablePool = new VariablePool(3);
 		const clausePool: ClausePool = new ClausePool(cnfToClauseSet(cnf, variables));
 		variables.persist(1, true);
-		expect(clausePool.eval()).toBe(Eval.UNRESOLVED);
+		const evaluation = clausePool.eval();
+		expect(isUnresolved(evaluation)).toBe(true);
 	});
 	it('unsat', () => {
 		Clause.resetUniqueIdGenerator();
@@ -29,7 +30,9 @@ describe('clause pool', () => {
 		variables.persist(1, true);
 		variables.persist(2, true);
 		variables.persist(3, false);
-		expect(clausePool.eval()).toBe(Eval.UNSAT);
+		const evaluation = clausePool.eval();
+
+		expect(isUnsat(evaluation)).toBe(true);
 	});
 	it('sat', () => {
 		Clause.resetUniqueIdGenerator();
@@ -38,7 +41,8 @@ describe('clause pool', () => {
 		variables.persist(1, true);
 		variables.persist(2, false);
 		variables.persist(3, true);
-		expect(clausePool.eval()).toBe(Eval.SAT);
+		const evaluation = clausePool.eval()
+		expect(isSat(evaluation)).toBe(true);
 	});
 	it('addition-sat', () => {
 		Clause.resetUniqueIdGenerator();
@@ -56,7 +60,8 @@ describe('clause pool', () => {
 		variables.persist(1, true);
 		variables.persist(2, false);
 		variables.persist(3, true);
-		expect(clausePool.eval()).toBe(Eval.SAT);
+		const evaluation = clausePool.eval()
+		expect(isSat(evaluation)).toBe(true);
 	});
 	it('addition-sat', () => {
 		Clause.resetUniqueIdGenerator();
