@@ -10,6 +10,8 @@ let clausesToCheck: SvelteSet<number> = $state(new SvelteSet<number>());
 
 let workingTrailPointer: number = $state(-1);
 
+let started: boolean = $state(false);
+
 let finished: boolean = $state(false);
 
 let previousEval: Eval = $state(makeUnresolved());
@@ -58,11 +60,16 @@ export function resetWorkingTrailPointer() {
 	workingTrailPointer = -1;
 	clausesToCheck = new SvelteSet<number>();
 	previousEval = makeUnresolved();
+	started = false;
 	finished = false;
 }
 
 export function updatePreviousEval(evaluation: Eval) {
 	previousEval = evaluation;
+}
+
+export function updateStarted(state: boolean) {
+	started = state;
 }
 
 export function updateFinished(state: boolean) {
@@ -74,5 +81,7 @@ export const getClausesToCheck = () => clausesToCheck;
 export const getWorkingTrailPointer = () => workingTrailPointer;
 
 export const getPreviousEval = () => previousEval;
+
+export const getStarted = () => started;
 
 export const getFinished = () => finished;
