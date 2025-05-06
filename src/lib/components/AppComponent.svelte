@@ -24,7 +24,7 @@
 		type EditorViewEvent
 	} from './debugger/events.svelte.ts';
 	import TrailEditor from './TrailEditorComponent.svelte';
-	import { isUnsat, makeUnsat, type Eval } from '$lib/transversal/interfaces/IClausePool.ts';
+	import { isSat, isUnsat, makeUnsat, type Eval } from '$lib/transversal/interfaces/IClausePool.ts';
 	import type {
 		Algorithm,
 		StepParams,
@@ -40,7 +40,6 @@
 		resetWorkingTrailPointer,
 		updateFinished,
 		updatePreviousEval,
-		updateStarted,
 		updateWorkingTrailPointer
 	} from '$lib/store/clausesToCheck.svelte.ts';
 	import {
@@ -57,22 +56,34 @@
 
 	let trails: Trail[] = $state(getSnapshot().snapshot);
 
+	let workingTrail: Trail | undefined = $derived(trails[trails.length - 1]);
+
 	let previousEval: Eval = $derived(getPreviousEval());
 
+	let finished: boolean = $derived.by(() => {
+		if (!workingTrail) return false;
+		const { variables, clauses } = get(problemStore);
+		const evaluation = clauses.eval();
+		return (
+			(isSat(evaluation) && variables.allAssigned()) ||
+			(isUnsat(evaluation) && workingTrail.getDecisionLevel() === 0)
+		);
+	});
+	$effect(() => {
+		updateFinished(finished);
+	});
+
 	// Variables to take care of unit propagition
-	let clausesToCheck: SvelteSet<number> = getClausesToCheck();
+	let clausesToCheck: SvelteSet<number> = $derived(getClausesToCheck());
 
 	function preprocesStep() {
 		const { clauses, algorithm }: Problem = get(problemStore);
 
-		updateStarted(true);
 		const preprocesReturn = algorithm.preprocessing.conflictDetection({ clauses });
 		updatePreviousEval(preprocesReturn.evaluation);
 		if (!isUnsat(previousEval) && algorithm.preprocessing.unitClauses) {
 			const preprocesReturn = algorithm.preprocessing.unitClauses({ clauses });
-			updateWorkingTrailPointer(trails, preprocesReturn.clausesToCheck);
-		} else if (isUnsat(previousEval)) {
-			updateFinished(true);
+			updateWorkingTrailPointer(workingTrail, preprocesReturn.clausesToCheck);
 		}
 	}
 
@@ -100,25 +111,26 @@
 			returnValues = manualAssignment(params);
 		}
 		trails = returnValues.trails;
-		updateWorkingTrailPointer(trails, returnValues.clausesToCheck);
+		updateWorkingTrailPointer(workingTrail, returnValues.clausesToCheck);
 	}
 
 	function unitPropagationStep(e: UPEvent) {
 		const { variables, clauses, algorithm }: Problem = get(problemStore);
 		if (e === 'step') {
 			up(variables, clauses, algorithm);
-			if (clausesToCheck.size === 0) checkAndUpdatePointer(variables, trails);
+			if (clausesToCheck.size === 0) checkAndUpdatePointer(variables, workingTrail as Trail);
 		} else if (e === 'following') {
 			while (clausesToCheck.size > 0) {
 				up(variables, clauses, algorithm);
 			}
-			if (clausesToCheck.size === 0) checkAndUpdatePointer(variables, trails);
+			if (clausesToCheck.size === 0) checkAndUpdatePointer(variables, workingTrail as Trail);
 		} else if (e === 'finish') {
-			while (!checkAndUpdatePointer(variables, trails)) {
+			while (!checkAndUpdatePointer(variables, workingTrail as Trail)) {
+				console.log('Hola');
 				while (clausesToCheck.size > 0) {
 					up(variables, clauses, algorithm);
 				}
-				if (clausesToCheck.size === 0) checkAndUpdatePointer(variables, trails);
+				if (clausesToCheck.size === 0) checkAndUpdatePointer(variables, workingTrail as Trail);
 			}
 		}
 	}
@@ -127,19 +139,15 @@
 		const clausesIterator = clausesToCheck.values().next();
 		const clauseId = clausesIterator.value;
 		if (clauseId) {
-			console.log('He entrat');
 			const clause = clauses.get(clauseId);
 			const evaluation = algorithm.conflictDetection({ clause });
 			clausesToCheck.delete(clauseId);
 			if (isUnitClause(evaluation.evaluation) && algorithm.UPstep !== undefined) {
 				const literalToPropagate = evaluation.evaluation.literal;
-				const upResult = algorithm.UPstep({ variables, trails, literalToPropagate });
+				const upResult = algorithm.UPstep({ variables, trails, literalToPropagate, clauseId });
 				trails = upResult.trails;
 			} else if (isUnsatClause(evaluation.evaluation)) {
 				updatePreviousEval(makeUnsat(clauseId));
-				if (trails[trails.length - 1].getDecisionLevel() === 0) {
-					updateFinished(true);
-				}
 			}
 		}
 	}

@@ -3,7 +3,7 @@ import type VariablePool from '$lib/transversal/entities/VariablePool.svelte.ts'
 import { makeSat, makeUnresolved, type Eval } from '$lib/transversal/interfaces/IClausePool.ts';
 import { SvelteSet } from 'svelte/reactivity';
 
-let clausesToCheck: SvelteSet<number> = new SvelteSet<number>();
+let clausesToCheck: SvelteSet<number> = $state(new SvelteSet<number>());
 
 let workingTrailPointer: number = $state(-1);
 
@@ -13,10 +13,9 @@ let finished: boolean = $state(false);
 
 let previousEval: Eval = $state(makeUnresolved());
 
-export function updateWorkingTrailPointer(trails: Trail[], ctc: Set<number>) {
-	const workingTrail = trails[trails.length - 1];
-	if (workingTrail) {
-		workingTrailPointer = workingTrail.getAssignments().length - 1;
+export function updateWorkingTrailPointer(wt: Trail | undefined, ctc: Set<number>) {
+	if (wt) {
+		workingTrailPointer = wt.getAssignments().length - 1;
 	}
 	clausesToCheck.clear();
 	for (const clause of ctc) {
@@ -24,16 +23,15 @@ export function updateWorkingTrailPointer(trails: Trail[], ctc: Set<number>) {
 	}
 }
 
-export function checkAndUpdatePointer(variables: VariablePool, trails: Trail[]): boolean {
-	if (workingTrailPointer !== trails[trails.length - 1].getAssignments().length - 1) {
+export function checkAndUpdatePointer(variables: VariablePool, workingTail: Trail): boolean {
+	if (workingTrailPointer !== workingTail.getAssignments().length - 1) {
 		workingTrailPointer += 1;
-		return false;
+		return true;
 	} else {
 		if (variables.allAssigned()) {
 			previousEval = makeSat();
-			finished = true;
 		}
-		return true;
+		return false;
 	}
 }
 

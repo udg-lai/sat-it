@@ -46,6 +46,7 @@ export type UnitPropagationParams = {
 	variables: VariablePool;
 	trails: Trail[];
 	literalToPropagate: number;
+	clauseId: number;
 };
 
 export type UnitPropagationReturn = {

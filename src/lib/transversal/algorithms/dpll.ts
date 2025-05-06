@@ -63,7 +63,7 @@ export const dpllAlgorithmStep = (params: StepParams): StepResult => {
 };
 
 export const dpllUnitPropagation = (params: UnitPropagationParams): UnitPropagationReturn => {
-	const { variables, trails, literalToPropagate } = params;
+	const { variables, trails, literalToPropagate, clauseId } = params;
 	const nextTrailsState: Trail[] =
 		trails.length === 0 ? [new Trail(variables.nVariables())] : [...trails];
 
@@ -74,7 +74,7 @@ export const dpllUnitPropagation = (params: UnitPropagationParams): UnitPropagat
 
 	variables.persist(variableId, polarity);
 	const variable = variables.getCopy(variableId);
-	workingTrail.push(VariableAssignment.newAutomatedAssignment(variable, dpllname));
+	workingTrail.push(VariableAssignment.newUnitPropagationAssignment(variable, clauseId));
 	return { trails: nextTrailsState };
 };
 

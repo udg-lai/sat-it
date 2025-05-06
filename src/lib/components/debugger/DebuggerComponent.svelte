@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getClausesToCheck, getStarted } from '$lib/store/clausesToCheck.svelte.ts';
+	import { getClausesToCheck, getFinished } from '$lib/store/clausesToCheck.svelte.ts';
 	import { problemStore } from '$lib/store/problem.store.ts';
 	import { slide } from 'svelte/transition';
 	import BacktrackingDebugger from './BacktrackingDebuggerComponent.svelte';
@@ -7,13 +7,29 @@
 	import ManualDebugger from './ManualDebuggerComponent.svelte';
 	import PreprocesDebugger from './PreprocesDebuggerComponent.svelte';
 	import UnitPropagationDebugger from './UnitPropagationDebuggerComponent.svelte';
+	import { onMount } from 'svelte';
+	import { changeInstanceEventBus, preprocesSignalEventBus } from '$lib/transversal/events.ts';
 
 	let defaultNextVariable: number | undefined = $derived.by(() => {
 		if ($problemStore !== undefined) return $problemStore.variables.nextVariable;
 		else return 0;
 	});
-	const enablePreproces = $derived(!getStarted());
+	let enablePreproces = $state(true);
 	const enableUnitPropagtion = $derived(getClausesToCheck().size !== 0);
+	const disableButton = $derived(getFinished());
+
+	onMount(() => {
+		const unsubscribeChangeInstanceEvent = changeInstanceEventBus.subscribe(
+			() => (enablePreproces = true)
+		);
+		const unsusbscribePreprocesEvent = preprocesSignalEventBus.subscribe(
+			() => (enablePreproces = false)
+		);
+		return () => {
+			unsubscribeChangeInstanceEvent();
+			unsusbscribePreprocesEvent();
+		};
+	});
 </script>
 
 <div transition:slide|global class="flex-center debugger align-center relative flex-row gap-2">
@@ -28,9 +44,9 @@
 		{:else}
 			{'X'}
 		{/if}
-		<BacktrackingDebugger {defaultNextVariable} />
+		<BacktrackingDebugger {defaultNextVariable} {disableButton} />
 
-		<ManualDebugger {defaultNextVariable} />
+		<ManualDebugger {defaultNextVariable} {disableButton} />
 
 		<GeneralDebuggerButtons />
 	{/if}
