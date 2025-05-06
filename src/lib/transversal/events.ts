@@ -4,4 +4,8 @@ import { createEventBus } from './createEventBus.ts';
 export const changeInstanceEventBus = createEventBus<void>();
 
 // open settings and more event
-export const openViewMoreOptionEventBus = createEventBus<void>();
+export const openSettingsViewEventBus = createEventBus<void>();
+
+
+// open settings and more event
+export const closeSettingsViewEventBus = createEventBus<void>();

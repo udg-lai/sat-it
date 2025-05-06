@@ -11,12 +11,12 @@
 	import { onMount } from 'svelte';
 	import AppComponent from '$lib/components/AppComponent.svelte';
 	import DebuggerComponent from '$lib/components/debugger/DebuggerComponent.svelte';
-	import { openViewMoreOptionEventBus } from '$lib/transversal/events.ts';
+	import { closeSettingsViewEventBus, openSettingsViewEventBus } from '$lib/transversal/events.ts';
 	import SettingsComponent from '$lib/components/settings/SettingsComponent.svelte';
 	import { disableContextMenu } from '$lib/transversal/utils.ts';
 	import { logError } from '$lib/transversal/logging.ts';
 
-	let settingsVisible = $state(true);
+	let renderSettings = $state(true);
 
 	onMount(() => {
 		initializeInstancesStore()
@@ -25,12 +25,16 @@
 				logError(`Preloaded instances`, `Could not fetch preloaded instances correctly`)
 			);
 
-		const unsubscribeOpenSettings = openViewMoreOptionEventBus.subscribe(
-			() => (settingsVisible = true)
+		const unsubscribeOpenSettings = openSettingsViewEventBus.subscribe(
+			() => (renderSettings = true)
+		);
+		const unsubscribeCloseSettings = closeSettingsViewEventBus.subscribe(
+			() => (renderSettings = false)
 		);
 
 		return () => {
 			unsubscribeOpenSettings();
+			unsubscribeCloseSettings();
 		};
 	});
 </script>
@@ -59,7 +63,11 @@
 	</main>
 </app>
 
-<SettingsComponent bind:visible={settingsVisible} />
+{#if renderSettings}
+<settings>
+	<SettingsComponent />
+</settings>
+{/if}
 
 {#snippet app()}
 	<AppComponent />

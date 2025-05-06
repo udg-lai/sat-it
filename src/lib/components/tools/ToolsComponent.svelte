@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { openViewMoreOptionEventBus } from '$lib/transversal/events.ts';
+	import { openSettingsViewEventBus } from '$lib/transversal/events.ts';
 	import {
 		ArrowUpFromBracketOutline,
 		BugOutline,
@@ -140,7 +140,7 @@
 	}
 
 	function onOpenViewMoreEvent(): void {
-		openViewMoreOptionEventBus.emit();
+		openSettingsViewEventBus.emit();
 	}
 </script>
 
