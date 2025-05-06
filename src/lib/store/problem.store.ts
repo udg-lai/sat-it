@@ -54,25 +54,25 @@ export function updateProblemDomain(instance: DimacsInstance) {
 
 export function updateAlgorithm(algorithm: Algorithm) {
 	const currentProblem = get(problemStore);
-	const variables = new VariablePool(currentProblem.variables.capacity);
-	problemStore.set({ ...currentProblem, variables, ...algorithm });
+	currentProblem.variables.reset();
+	problemStore.set({ ...currentProblem, ...algorithm });
 	resetStack();
 }
 
 export function updateProblemFromTrail(trail: Trail) {
 	const { variables, ...currentProblem } = get(problemStore);
-	const newVariablePool: VariablePool = new VariablePool(variables.capacity);
+	variables.reset();
 	trail.forEach((value) => {
 		const variable = value.getVariable();
-		newVariablePool.persist(variable.getInt(), variable.getAssignment());
+		variables.persist(variable.getInt(), variable.getAssignment());
 	});
-	problemStore.set({ ...currentProblem, variables: newVariablePool });
+	problemStore.set({ ...currentProblem, variables });
 }
 
 export function resetProblem() {
 	const problem: Problem = get(problemStore);
-	const variablePool = new VariablePool(problem.variables.capacity);
-	problemStore.set({ ...problem, variables: variablePool });
+	problem.variables.reset();
+	problemStore.set({ ...problem });
 }
 
 function literalToClauses(clauses: ClausePool): MappingLiteral2Clauses {

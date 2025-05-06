@@ -59,7 +59,7 @@
 
 		if (isUndo) {
 			event.preventDefault();
-			userActionEventBus.emit('undo' );
+			userActionEventBus.emit('undo');
 		} else if (isRedo) {
 			event.preventDefault();
 			userActionEventBus.emit('redo');

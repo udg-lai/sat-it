@@ -80,7 +80,6 @@ export const dpllUnitPropagation = (params: UnitPropagationParams): UnitPropagat
 
 export const dpllConflictDetection = (params: ConflictDetectionParams): ConflictDetectionReturn => {
 	const { clause } = params;
-	console.log('Evaluation Clause', clause);
 	const evaluation: ClauseEval = clause.eval();
 	return { evaluation };
 };

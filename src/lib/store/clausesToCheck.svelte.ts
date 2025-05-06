@@ -1,12 +1,9 @@
 import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
 import type VariablePool from '$lib/transversal/entities/VariablePool.svelte.ts';
-import {
-	makeSat,
-	makeUnresolved,
-	type Eval
-} from '$lib/transversal/interfaces/IClausePool.ts';
+import { makeSat, makeUnresolved, type Eval } from '$lib/transversal/interfaces/IClausePool.ts';
+import { SvelteSet } from 'svelte/reactivity';
 
-let clausesToCheck: Set<number> = $state(new Set<number>());
+let clausesToCheck: SvelteSet<number> = new SvelteSet<number>();
 
 let workingTrailPointer: number = $state(-1);
 
@@ -21,7 +18,10 @@ export function updateWorkingTrailPointer(trails: Trail[], ctc: Set<number>) {
 	if (workingTrail) {
 		workingTrailPointer = workingTrail.getAssignments().length - 1;
 	}
-	clausesToCheck = ctc;
+	clausesToCheck.clear();
+	for (const clause of ctc) {
+		clausesToCheck.add(clause);
+	}
 }
 
 export function checkAndUpdatePointer(variables: VariablePool, trails: Trail[]): boolean {
@@ -43,7 +43,7 @@ export function checkedClause(clause: number) {
 
 export function resetWorkingTrailPointer() {
 	workingTrailPointer = -1;
-	clausesToCheck = new Set<number>();
+	clausesToCheck = new SvelteSet<number>();
 	previousEval = makeUnresolved();
 	finished = false;
 	started = false;

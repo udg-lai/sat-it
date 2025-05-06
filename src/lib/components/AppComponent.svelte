@@ -21,10 +21,10 @@
 		assignmentEventStore,
 		editorViewEventStore,
 		type AssignmentEvent,
-		type EditorViewEvent,
+		type EditorViewEvent
 	} from './debugger/events.svelte.ts';
 	import TrailEditor from './TrailEditorComponent.svelte';
-	import { isUnsat, makeUnsat, type Eval } from '$lib/transversal/interfaces/IClausePool.ts'
+	import { isUnsat, makeUnsat, type Eval } from '$lib/transversal/interfaces/IClausePool.ts';
 	import type {
 		Algorithm,
 		StepParams,
@@ -32,7 +32,7 @@
 	} from '$lib/transversal/utils/types/algorithms.ts';
 	import { isUnitClause, isUnsatClause } from '$lib/transversal/entities/Clause.ts';
 	import type ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';
-	import type VariablePool from '$lib/transversal/entities/VariablePool.svelte.ts';
+	import VariablePool from '$lib/transversal/entities/VariablePool.svelte.ts';
 	import {
 		checkAndUpdatePointer,
 		getClausesToCheck,
@@ -43,7 +43,15 @@
 		updateStarted,
 		updateWorkingTrailPointer
 	} from '$lib/store/clausesToCheck.svelte.ts';
-	import { changeInstanceEventBus, preprocesSignalEventBus, unitPropagationEventBus, userActionEventBus, type ActionEvent, type UPEvent } from '$lib/transversal/events.ts';
+	import {
+		changeInstanceEventBus,
+		preprocesSignalEventBus,
+		unitPropagationEventBus,
+		userActionEventBus,
+		type ActionEvent,
+		type UPEvent
+	} from '$lib/transversal/events.ts';
+	import type { SvelteSet } from 'svelte/reactivity';
 
 	let expandPropagations: boolean = $state(true);
 
@@ -52,11 +60,11 @@
 	let previousEval: Eval = $derived(getPreviousEval());
 
 	// Variables to take care of unit propagition
-	let clausesToCheck: Set<number> = $derived(getClausesToCheck());
+	let clausesToCheck: SvelteSet<number> = getClausesToCheck();
 
 	function preprocesStep() {
 		const { clauses, algorithm }: Problem = get(problemStore);
-		
+
 		updateStarted(true);
 		const preprocesReturn = algorithm.preprocessing.conflictDetection({ clauses });
 		updatePreviousEval(preprocesReturn.evaluation);
@@ -70,8 +78,8 @@
 
 	function algorithmStep(e: AssignmentEvent): void {
 		if (e === undefined) return;
-		const { variables, mapping, algorithm }: Problem = get(problemStore);
 
+		const { variables, mapping, algorithm }: Problem = get(problemStore);
 		let returnValues: StepResult;
 
 		if (e.type === 'automated') {
@@ -119,20 +127,14 @@
 		const clausesIterator = clausesToCheck.values().next();
 		const clauseId = clausesIterator.value;
 		if (clauseId) {
+			console.log('He entrat');
 			const clause = clauses.get(clauseId);
 			const evaluation = algorithm.conflictDetection({ clause });
 			clausesToCheck.delete(clauseId);
-			console.log('Variable pool state', variables.assignedVariables());
-			console.log('Clause ID that has been checked', clauseId);
-			console.log('Clause that has been checked', clause);
-			console.log('Current state of clauses to check', clausesToCheck);
-			console.log('Evaluation:', evaluation.evaluation);
 			if (isUnitClause(evaluation.evaluation) && algorithm.UPstep !== undefined) {
 				const literalToPropagate = evaluation.evaluation.literal;
 				const upResult = algorithm.UPstep({ variables, trails, literalToPropagate });
 				trails = upResult.trails;
-				console.log('Propagated literal', literalToPropagate);
-				console.log('Current trail state', trails[trails.length - 1]);
 			} else if (isUnsatClause(evaluation.evaluation)) {
 				updatePreviousEval(makeUnsat(clauseId));
 				if (trails[trails.length - 1].getDecisionLevel() === 0) {
@@ -183,7 +185,7 @@
 		const unsubscribeActionEvent = userActionEventBus.subscribe(actionReaction);
 		const unsubscribeChangeInstanceEvent = changeInstanceEventBus.subscribe(reset);
 		const unsusbscribeUPEvent = unitPropagationEventBus.subscribe(unitPropagationStep);
-		const unsusbscribePreprocesEvent = preprocesSignalEventBus.subscribe(preprocesStep)
+		const unsusbscribePreprocesEvent = preprocesSignalEventBus.subscribe(preprocesStep);
 		return () => {
 			unsubscribeToggleEditor();
 			unsubscribeAssignment();
