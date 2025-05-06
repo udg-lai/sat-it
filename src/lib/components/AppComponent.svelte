@@ -24,7 +24,14 @@
 		type EditorViewEvent
 	} from './debugger/events.svelte.ts';
 	import TrailEditor from './TrailEditorComponent.svelte';
-	import { isSAT, isUnSAT, makeSat, makeUnresolved, makeUnSAT, type Eval } from '$lib/transversal/interfaces/IClausePool.ts';
+	import {
+		isSAT,
+		isUnSAT,
+		makeSat,
+		makeUnresolved,
+		makeUnSAT,
+		type Eval
+	} from '$lib/transversal/interfaces/IClausePool.ts';
 	import type {
 		Algorithm,
 		StepParams,
@@ -71,7 +78,7 @@
 	});
 	$effect(() => {
 		updateFinished(finished);
-		if(finished && get(problemStore).variables.allAssigned()) updatePreviousEval(makeSat());
+		if (finished && get(problemStore).variables.allAssigned()) updatePreviousEval(makeSat());
 	});
 
 	// Variables to take care of unit propagations
@@ -133,7 +140,10 @@
 				while (clausesToCheck.size > 0 && !isUnSAT(previousEval)) {
 					up(variables, clauses, algorithm);
 				}
-			} while (updateWorkingTrailPointer(variables, workingTrail as Trail) && !isUnSAT(previousEval));
+			} while (
+				updateWorkingTrailPointer(variables, workingTrail as Trail) &&
+				!isUnSAT(previousEval)
+			);
 		}
 	}
 
@@ -150,7 +160,7 @@
 				trails = upResult.trails;
 			} else if (isUnSATClause(evaluation.evaluation)) {
 				updatePreviousEval(makeUnSAT(clauseId));
-			} 
+			}
 		}
 	}
 
@@ -173,6 +183,7 @@
 			updateProblemFromTrail(latest);
 		} else {
 			resetProblem();
+			resetWorkingTrailPointer();
 		}
 		trails = [...snapshot];
 	}
