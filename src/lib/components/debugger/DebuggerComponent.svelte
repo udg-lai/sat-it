@@ -50,9 +50,9 @@
 			<BacktrackingDebugger {defaultNextVariable} {disableButton} />
 
 			<ManualDebugger {defaultNextVariable} {disableButton} />
-			{:else}
+		{:else}
 			<ResetProblemDebugger />
-			{/if}
+		{/if}
 		<GeneralDebuggerButtons />
 	{/if}
 </div>
