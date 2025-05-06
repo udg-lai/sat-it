@@ -4,4 +4,4 @@ let activeView: ActiveView = $state('bookmark');
 
 export const getActiveView = () => activeView;
 
-export const setActiveView = (view: ActiveView) => (activeView = view)
+export const setActiveView = (view: ActiveView) => (activeView = view);

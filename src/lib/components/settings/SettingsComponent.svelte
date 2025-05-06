@@ -24,10 +24,9 @@
 			setActiveView(event);
 		}
 	}
-
 </script>
 
-<div class="settings" transition:fly={{y: "100%", duration: 500}}>
+<div class="settings" transition:fly={{ y: '100%', duration: 500 }}>
 	<div class="setting-view">
 		<class class="setting-content">
 			{#if view}

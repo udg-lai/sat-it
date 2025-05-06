@@ -64,9 +64,9 @@
 </app>
 
 {#if renderSettings}
-<settings>
-	<SettingsComponent />
-</settings>
+	<settings>
+		<SettingsComponent />
+	</settings>
 {/if}
 
 {#snippet app()}
