@@ -2,7 +2,7 @@ import Clause from '$lib/transversal/entities/Clause.ts';
 import ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';
 import Literal from '$lib/transversal/entities/Literal.svelte.ts';
 import VariablePool from '$lib/transversal/entities/VariablePool.svelte.ts';
-import { isSat, isUnresolved, isUnsat } from '$lib/transversal/interfaces/IClausePool.ts';
+import { isSAT, isUnresolved, isUnSAT } from '$lib/transversal/interfaces/IClausePool.ts';
 import type { CNF } from '$lib/transversal/mapping/contentToSummary.ts';
 import { cnfToClauseSet } from '$lib/transversal/utils.ts';
 import { describe, expect, it } from 'vitest';
@@ -32,7 +32,7 @@ describe('clause pool', () => {
 		variables.persist(3, false);
 		const evaluation = clausePool.eval();
 
-		expect(isUnsat(evaluation)).toBe(true);
+		expect(isUnSAT(evaluation)).toBe(true);
 	});
 	it('sat', () => {
 		Clause.resetUniqueIdGenerator();
@@ -42,7 +42,7 @@ describe('clause pool', () => {
 		variables.persist(2, false);
 		variables.persist(3, true);
 		const evaluation = clausePool.eval();
-		expect(isSat(evaluation)).toBe(true);
+		expect(isSAT(evaluation)).toBe(true);
 	});
 	it('addition-sat', () => {
 		Clause.resetUniqueIdGenerator();
@@ -61,7 +61,7 @@ describe('clause pool', () => {
 		variables.persist(2, false);
 		variables.persist(3, true);
 		const evaluation = clausePool.eval();
-		expect(isSat(evaluation)).toBe(true);
+		expect(isSAT(evaluation)).toBe(true);
 	});
 	it('addition-sat', () => {
 		Clause.resetUniqueIdGenerator();

@@ -2,7 +2,7 @@
 	import './_style.css';
 	import { CaretRightOutline } from 'flowbite-svelte-icons';
 	import DynamicRender from '../DynamicRender.svelte';
-	import { preprocesSignalEventBus } from '$lib/transversal/events.ts';
+	import { preprocessSignalEventBus } from '$lib/transversal/events.ts';
 
 	const assignmentProps = {
 		class: 'h-8 w-8'
@@ -12,7 +12,7 @@
 <button
 	class="btn general-btn"
 	onclick={() => {
-		preprocesSignalEventBus.emit();
+		preprocessSignalEventBus.emit();
 	}}
 	title="Start Preproces"
 >

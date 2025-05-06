@@ -60,7 +60,7 @@ class Clause implements Comparable<Clause> {
 		let state: ClauseEval;
 		if (satisfied) state = makeSatClause();
 		else if (unassignedLiterals.length === 1) state = makeUnitClause(unassignedLiterals[0]);
-		else if (unassignedLiterals.length === 0) state = makeUnsatClause();
+		else if (unassignedLiterals.length === 0) state = makeUnSATClause();
 		else state = makeUnresolvedClause();
 
 		return state;
@@ -133,8 +133,8 @@ export interface SATClause {
 	type: 'SAT';
 }
 
-export interface UNSATClause {
-	type: 'UNSAT';
+export interface UnSATClause {
+	type: 'UnSAT';
 }
 
 export interface UNITClause {
@@ -146,14 +146,14 @@ export interface UNRESOLVEDClause {
 	type: 'UNRESOLVED';
 }
 
-export type ClauseEval = SATClause | UNSATClause | UNITClause | UNRESOLVEDClause;
+export type ClauseEval = SATClause | UnSATClause | UNITClause | UNRESOLVEDClause;
 
 export const makeSatClause = (): SATClause => {
 	return { type: 'SAT' };
 };
 
-export const makeUnsatClause = (): UNSATClause => {
-	return { type: 'UNSAT' };
+export const makeUnSATClause = (): UnSATClause => {
+	return { type: 'UnSAT' };
 };
 
 export const makeUnitClause = (literal: number): UNITClause => {
@@ -164,8 +164,8 @@ export const makeUnresolvedClause = (): UNRESOLVEDClause => {
 	return { type: 'UNRESOLVED' };
 };
 
-export const isUnsatClause = (e: ClauseEval): e is UNSATClause => {
-	return e.type === 'UNSAT';
+export const isUnSATClause = (e: ClauseEval): e is UnSATClause => {
+	return e.type === 'UnSAT';
 };
 
 export const isSatClause = (e: ClauseEval): e is SATClause => {

@@ -3,7 +3,7 @@ import { Trail } from '../entities/Trail.svelte.ts';
 import type Variable from '../entities/Variable.svelte.ts';
 import VariableAssignment from '../entities/VariableAssignment.ts';
 import type VariablePool from '../entities/VariablePool.svelte.ts';
-import { isUnsat } from '$lib/transversal/interfaces/IClausePool.ts';
+import { isUnSAT } from '$lib/transversal/interfaces/IClausePool.ts';
 import { logFatal } from '$lib/transversal/logging.ts';
 import type {
 	ConflictDetectionParams,
@@ -45,7 +45,7 @@ export const dpllAlgorithmStep = (params: StepParams): StepResult => {
 
 	let literalToCheck: number;
 
-	if (isUnsat(previousEval)) {
+	if (isUnSAT(previousEval)) {
 		const newTrail: Trail = workingTrail.copy();
 		const lastVariable: VariableAssignment = disposeUntilDecision(newTrail, variables);
 		literalToCheck = backtracking(newTrail, variables, lastVariable.getVariable());

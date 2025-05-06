@@ -11,12 +11,12 @@ let finished: boolean = $state(false);
 
 let previousEval: Eval = $state(makeUnresolved());
 
-export function updateWorkingTrailPointer(wt: Trail | undefined, ctc: Set<number>) {
+export function updateWorkingTrailPointer(wt: Trail | undefined, toCheck: Set<number>) {
 	if (wt) {
 		workingTrailPointer = wt.getAssignments().length - 1;
 	}
 	clausesToCheck.clear();
-	for (const clause of ctc) {
+	for (const clause of toCheck) {
 		clausesToCheck.add(clause);
 	}
 }
