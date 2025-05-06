@@ -34,13 +34,13 @@
 	import type ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';
 	import VariablePool from '$lib/transversal/entities/VariablePool.svelte.ts';
 	import {
-		checkAndUpdatePointer,
+		updateWorkingTrailPointer,
 		getClausesToCheck,
 		getPreviousEval,
 		resetWorkingTrailPointer,
 		updateFinished,
 		updatePreviousEval,
-		updateWorkingTrailPointer
+		setWorkingTrailPointer
 	} from '$lib/store/clausesToCheck.svelte.ts';
 	import {
 		changeInstanceEventBus,
@@ -83,7 +83,7 @@
 		updatePreviousEval(preprocessReturn.evaluation);
 		if (!isUnSAT(previousEval) && algorithm.preprocessing.unitClauses) {
 			const preprocessReturn = algorithm.preprocessing.unitClauses({ clauses });
-			updateWorkingTrailPointer(workingTrail, preprocessReturn.clausesToCheck);
+			setWorkingTrailPointer(workingTrail, preprocessReturn.clausesToCheck);
 		}
 	}
 
@@ -111,26 +111,27 @@
 			stepResult = manualAssignment(params);
 		}
 		trails = stepResult.trails;
-		updateWorkingTrailPointer(workingTrail, stepResult.clausesToCheck);
+		setWorkingTrailPointer(workingTrail, stepResult.clausesToCheck);
 	}
 
 	function unitPropagationStep(e: UPEvent) {
 		const { variables, clauses, algorithm }: Problem = get(problemStore);
 		if (e === 'step') {
 			up(variables, clauses, algorithm);
-			if (clausesToCheck.size === 0) checkAndUpdatePointer(variables, workingTrail as Trail);
+			if (clausesToCheck.size === 0) {
+				updateWorkingTrailPointer(variables, workingTrail as Trail);
+			}
 		} else if (e === 'following') {
 			while (clausesToCheck.size > 0) {
 				up(variables, clauses, algorithm);
 			}
-			if (clausesToCheck.size === 0) checkAndUpdatePointer(variables, workingTrail as Trail);
+			if (clausesToCheck.size === 0) updateWorkingTrailPointer(variables, workingTrail as Trail);
 		} else if (e === 'finish') {
-			while (!checkAndUpdatePointer(variables, workingTrail as Trail)) {
-				console.log('Hola');
+			while (!updateWorkingTrailPointer(variables, workingTrail as Trail)) {
 				while (clausesToCheck.size > 0) {
 					up(variables, clauses, algorithm);
 				}
-				if (clausesToCheck.size === 0) checkAndUpdatePointer(variables, workingTrail as Trail);
+				if (clausesToCheck.size === 0) updateWorkingTrailPointer(variables, workingTrail as Trail);
 			}
 		}
 	}
@@ -138,7 +139,7 @@
 	function up(variables: VariablePool, clauses: ClausePool, algorithm: Algorithm) {
 		const clausesIterator = clausesToCheck.values().next();
 		const clauseId = clausesIterator.value;
-		if (clauseId) {
+		if (clauseId !== undefined) {
 			const clause = clauses.get(clauseId);
 			const evaluation = algorithm.conflictDetection({ clause });
 			clausesToCheck.delete(clauseId);

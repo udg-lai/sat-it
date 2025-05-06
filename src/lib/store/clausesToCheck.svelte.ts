@@ -1,7 +1,10 @@
 import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
+import type Variable from '$lib/transversal/entities/Variable.svelte.ts';
 import type VariablePool from '$lib/transversal/entities/VariablePool.svelte.ts';
 import { makeSat, makeUnresolved, type Eval } from '$lib/transversal/interfaces/IClausePool.ts';
 import { SvelteSet } from 'svelte/reactivity';
+import { problemStore } from './problem.store.ts';
+import { get } from 'svelte/store';
 
 let clausesToCheck: SvelteSet<number> = $state(new SvelteSet<number>());
 
@@ -11,25 +14,39 @@ let finished: boolean = $state(false);
 
 let previousEval: Eval = $state(makeUnresolved());
 
-export function updateWorkingTrailPointer(wt: Trail | undefined, toCheck: Set<number>) {
-	if (wt) {
-		workingTrailPointer = wt.getAssignments().length - 1;
+export function setWorkingTrailPointer(wt: Trail | undefined, toCheck: Set<number>) {
+	workingTrailPointer = wt !== undefined ? wt.getAssignments().length - 1 : -1;
+	updateClausesToCheck(toCheck);
+}
+
+export function updateWorkingTrailPointer(variables: VariablePool, workingTail: Trail): boolean {
+	let refilledToCheck = false;
+	workingTrailPointer += 1;
+	while (workingTrailPointer < workingTail.getAssignments().length && !refilledToCheck) {
+		const variableAtPointer: Variable = workingTail
+			.getAssignments()
+			[workingTrailPointer].getVariable();
+		const literalToCheck: number = variableAtPointer.getAssignment()
+			? -variableAtPointer.getInt()
+			: variableAtPointer.getInt();
+		const toCheck = get(problemStore).mapping.get(literalToCheck);
+		if (toCheck) {
+			updateClausesToCheck(toCheck);
+			refilledToCheck = true;
+		} else {
+			workingTrailPointer += 1;
+		}
 	}
+	if (!refilledToCheck && variables.allAssigned()) {
+		previousEval = makeSat();
+	}
+	return refilledToCheck;
+}
+
+function updateClausesToCheck(toCheck: Set<number>) {
 	clausesToCheck.clear();
 	for (const clause of toCheck) {
 		clausesToCheck.add(clause);
-	}
-}
-
-export function checkAndUpdatePointer(variables: VariablePool, workingTail: Trail): boolean {
-	if (workingTrailPointer !== workingTail.getAssignments().length - 1) {
-		workingTrailPointer += 1;
-		return true;
-	} else {
-		if (variables.allAssigned()) {
-			previousEval = makeSat();
-		}
-		return false;
 	}
 }
 
