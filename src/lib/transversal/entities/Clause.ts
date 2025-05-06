@@ -114,6 +114,13 @@ class Clause implements Comparable<Clause> {
 		return this.literals.values();
 	}
 
+	map<T>(
+		callback: (literal: Literal, index: number, array: Literal[]) => T,
+		thisArg?: unknown
+	): T[] {
+		return this.literals.map(callback, thisArg);
+	}
+
 	forEach(
 		callback: (literal: Literal, index: number, array: Literal[]) => void,
 		thisArg?: unknown
