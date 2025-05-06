@@ -48,7 +48,8 @@ export function updateWorkingTrailPointer(variables: VariablePool, workingTail: 
 function updateClausesToCheck(toCheck: Set<number>) {
 	clausesToCheck.clear();
 	for (const clause of toCheck) {
-		clausesToCheck.add(clause);
+		console.dir('clause', clause);
+		clausesToCheck = clausesToCheck.add(clause);
 	}
 }
 

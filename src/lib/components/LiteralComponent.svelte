@@ -4,13 +4,15 @@
 
 	interface Props {
 		literal: Literal;
+		height?: string;
 	}
 
-	let { literal }: Props = $props();
+	let { literal, height }: Props = $props();
 </script>
 
 <div
-	class="literal flex"
+	class="literal-component"
+	style="--literal-height:{height ?? '25px'}"
 	class:undefined={!literal.isAssigned()}
 	class:true={literal.isTrue()}
 	class:false={literal.isFalse()}
@@ -19,22 +21,22 @@
 </div>
 
 <style>
-	.literal {
-		height: 150px;
-		width: 100%;
-		border: solid 1px;
-		align-items: center;
-	}
-
 	.undefined {
-		background-color: #e8daff;
+		color: #c7c7c7;
 	}
 
 	.false {
-		background-color: #ffd7d9;
+		color: #d62728;
 	}
 
 	.true {
-		background-color: #bae6ff;
+		color: #1f77b4;
+	}
+
+	.literal-component {
+		height: var(--literal-height);
+		display: flex;
+		flex-direction: column;
+		justify-content: end;
 	}
 </style>
