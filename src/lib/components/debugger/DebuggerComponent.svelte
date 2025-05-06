@@ -8,7 +8,7 @@
 	import PreprocesDebugger from './PreprocesDebuggerComponent.svelte';
 	import UnitPropagationDebugger from './UnitPropagationDebuggerComponent.svelte';
 	import { onMount } from 'svelte';
-	import { changeInstanceEventBus, preprocesSignalEventBus } from '$lib/transversal/events.ts';
+	import { changeInstanceEventBus, preprocessSignalEventBus } from '$lib/transversal/events.ts';
 	import ResetProblemDebugger from './ResetProblemDebuggerComponent.svelte';
 
 	let defaultNextVariable: number | undefined = $derived.by(() => {
@@ -24,7 +24,7 @@
 		const unsubscribeChangeInstanceEvent = changeInstanceEventBus.subscribe(
 			() => (enablePreproces = true)
 		);
-		const unsusbscribePreprocesEvent = preprocesSignalEventBus.subscribe(
+		const unsusbscribePreprocesEvent = preprocessSignalEventBus.subscribe(
 			() => (enablePreproces = false)
 		);
 		return () => {
@@ -50,9 +50,9 @@
 			<BacktrackingDebugger {defaultNextVariable} {disableButton} />
 
 			<ManualDebugger {defaultNextVariable} {disableButton} />
-			{:else} 
+		{:else}
 			<ResetProblemDebugger />
-			{/if}
+		{/if}
 		<GeneralDebuggerButtons />
 	{/if}
 </div>

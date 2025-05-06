@@ -2,15 +2,15 @@ import type Clause from '$lib/transversal/entities/Clause.ts';
 
 export interface IClausePool {
 	eval(): Eval;
-	addClause(caluse: Clause): void;
+	addClause(clause: Clause): void;
 	get(clause: number): Clause;
 	getUnitClauses(): Set<number>;
 	getClauses(): Clause[];
 	size(): number;
 }
 
-type Unsat = {
-	type: 'UNSAT';
+type UnSAT = {
+	type: 'UnSAT';
 	conflictClause: number;
 };
 
@@ -22,13 +22,13 @@ type Unresolved = {
 	type: 'UNRESOLVED';
 };
 
-export type Eval = Unsat | Sat | Unresolved;
+export type Eval = UnSAT | Sat | Unresolved;
 
-export const isUnsat = (e: Eval): e is Unsat => {
-	return e.type === 'UNSAT';
+export const isUnSAT = (e: Eval): e is UnSAT => {
+	return e.type === 'UnSAT';
 };
 
-export const isSat = (e: Eval): e is Sat => {
+export const isSAT = (e: Eval): e is Sat => {
 	return e.type === 'SAT';
 };
 
@@ -36,8 +36,8 @@ export const isUnresolved = (e: Eval): e is Unresolved => {
 	return e.type === 'UNRESOLVED';
 };
 
-export const makeUnsat = (conflictClause: number): Unsat => {
-	return { type: 'UNSAT', conflictClause };
+export const makeUnSAT = (conflictClause: number): UnSAT => {
+	return { type: 'UnSAT', conflictClause };
 };
 
 export const makeSat = (): Sat => {

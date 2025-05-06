@@ -1,7 +1,7 @@
 import type { Eval, IClausePool } from '../interfaces/IClausePool.ts';
 import type { CNF } from '../mapping/contentToSummary.ts';
 import { cnfToClauseSet } from '../utils.ts';
-import Clause, { type ClauseEval, isSatClause, isUnsatClause } from './Clause.ts';
+import Clause, { type ClauseEval, isSatClause, isUnSATClause } from './Clause.ts';
 import type VariablePool from './VariablePool.svelte.ts';
 
 class ClausePool implements IClausePool {
@@ -25,7 +25,7 @@ class ClausePool implements IClausePool {
 		while (i < this.collection.length && !unsat) {
 			const clause: Clause = this.collection[i];
 			const clauseEval: ClauseEval = clause.eval();
-			unsat = isUnsatClause(clauseEval);
+			unsat = isUnSATClause(clauseEval);
 			if (!unsat) {
 				const sat = isSatClause(clauseEval);
 				if (sat) nSatisfied++;
@@ -37,7 +37,7 @@ class ClausePool implements IClausePool {
 		let state: Eval;
 		if (unsat) {
 			state = {
-				type: 'UNSAT',
+				type: 'UnSAT',
 				conflictClause: conflicClause?.getId() as number
 			};
 		} else if (nSatisfied === i) {
