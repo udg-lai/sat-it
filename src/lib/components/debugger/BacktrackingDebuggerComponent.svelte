@@ -4,20 +4,21 @@
 	import { emitAssignmentEvent } from './events.svelte.ts';
 	import DynamicRender from '$lib/components/DynamicRender.svelte';
 	import { userActionEventBus } from '$lib/transversal/events.ts';
+	import { isUnSAT, type Eval } from '$lib/transversal/interfaces/IClausePool.ts';
 
 	interface Props {
-		defaultNextVariable: number | undefined;
+		previousEval: Eval;
 		disableButton: boolean;
 	}
 
-	let { defaultNextVariable, disableButton }: Props = $props();
+	let { previousEval, disableButton }: Props = $props();
 
 	const assignmentProps = {
 		class: 'h-8 w-8'
 	};
 </script>
 
-{#if defaultNextVariable}
+{#if !isUnSAT(previousEval)}
 	<button
 		class="btn general-btn"
 		class:invalidOption={disableButton}

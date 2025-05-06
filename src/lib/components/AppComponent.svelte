@@ -24,7 +24,7 @@
 		type EditorViewEvent
 	} from './debugger/events.svelte.ts';
 	import TrailEditor from './TrailEditorComponent.svelte';
-	import { isSAT, isUnSAT, makeUnSAT, type Eval } from '$lib/transversal/interfaces/IClausePool.ts';
+	import { isSAT, isUnSAT, makeSat, makeUnresolved, makeUnSAT, type Eval } from '$lib/transversal/interfaces/IClausePool.ts';
 	import type {
 		Algorithm,
 		StepParams,
@@ -71,6 +71,7 @@
 	});
 	$effect(() => {
 		updateFinished(finished);
+		if(finished && get(problemStore).variables.allAssigned()) updatePreviousEval(makeSat());
 	});
 
 	// Variables to take care of unit propagations
@@ -110,6 +111,7 @@
 			};
 			stepResult = manualAssignment(params);
 		}
+		updatePreviousEval(makeUnresolved());
 		trails = stepResult.trails;
 		setWorkingTrailPointer(workingTrail, stepResult.clausesToCheck);
 	}
@@ -122,16 +124,16 @@
 				updateWorkingTrailPointer(variables, workingTrail as Trail);
 			}
 		} else if (e === 'following') {
-			while (clausesToCheck.size > 0) {
+			while (clausesToCheck.size > 0 && !isUnSAT(previousEval)) {
 				up(variables, clauses, algorithm);
 			}
 			updateWorkingTrailPointer(variables, workingTrail as Trail);
 		} else if (e === 'finish') {
 			do {
-				while (clausesToCheck.size > 0) {
+				while (clausesToCheck.size > 0 && !isUnSAT(previousEval)) {
 					up(variables, clauses, algorithm);
 				}
-			} while(updateWorkingTrailPointer(variables, workingTrail as Trail))
+			} while (updateWorkingTrailPointer(variables, workingTrail as Trail) && !isUnSAT(previousEval));
 		}
 	}
 
@@ -148,7 +150,7 @@
 				trails = upResult.trails;
 			} else if (isUnSATClause(evaluation.evaluation)) {
 				updatePreviousEval(makeUnSAT(clauseId));
-			}
+			} 
 		}
 	}
 
