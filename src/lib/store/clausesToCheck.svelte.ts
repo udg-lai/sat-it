@@ -17,7 +17,8 @@ export function updateWorkingTrailPointer(wt: Trail | undefined, toCheck: Set<nu
 	}
 	clausesToCheck.clear();
 	for (const clause of toCheck) {
-		clausesToCheck.add(clause);
+		console.dir('clause', clause);
+		clausesToCheck = clausesToCheck.add(clause);
 	}
 }
 
