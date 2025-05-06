@@ -3,7 +3,7 @@
 		getClausesToCheck,
 		getFinished,
 		getPreviousEval,
-		getStarted,
+		getStarted
 	} from '$lib/store/clausesToCheck.svelte.ts';
 	import { problemStore } from '$lib/store/problem.store.ts';
 	import { slide } from 'svelte/transition';
