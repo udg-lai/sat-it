@@ -24,7 +24,14 @@
 		type EditorViewEvent
 	} from './debugger/events.svelte.ts';
 	import TrailEditor from './TrailEditorComponent.svelte';
-	import { isSAT, isUnSAT, makeUnSAT, type Eval } from '$lib/transversal/interfaces/IClausePool.ts';
+	import {
+		isSAT,
+		isUnSAT,
+		makeSat,
+		makeUnresolved,
+		makeUnSAT,
+		type Eval
+	} from '$lib/transversal/interfaces/IClausePool.ts';
 	import type {
 		Algorithm,
 		StepParams,
@@ -34,13 +41,13 @@
 	import type ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';
 	import VariablePool from '$lib/transversal/entities/VariablePool.svelte.ts';
 	import {
-		checkAndUpdatePointer,
+		updateWorkingTrailPointer,
 		getClausesToCheck,
 		getPreviousEval,
 		resetWorkingTrailPointer,
 		updateFinished,
 		updatePreviousEval,
-		updateWorkingTrailPointer
+		setWorkingTrailPointer
 	} from '$lib/store/clausesToCheck.svelte.ts';
 	import {
 		changeInstanceEventBus,
@@ -71,6 +78,7 @@
 	});
 	$effect(() => {
 		updateFinished(finished);
+		if (finished && get(problemStore).variables.allAssigned()) updatePreviousEval(makeSat());
 	});
 
 	// Variables to take care of unit propagations
@@ -83,7 +91,7 @@
 		updatePreviousEval(preprocessReturn.evaluation);
 		if (!isUnSAT(previousEval) && algorithm.preprocessing.unitClauses) {
 			const preprocessReturn = algorithm.preprocessing.unitClauses({ clauses });
-			updateWorkingTrailPointer(workingTrail, preprocessReturn.clausesToCheck);
+			setWorkingTrailPointer(workingTrail, preprocessReturn.clausesToCheck);
 		}
 	}
 
@@ -110,34 +118,39 @@
 			};
 			stepResult = manualAssignment(params);
 		}
+		updatePreviousEval(makeUnresolved());
 		trails = stepResult.trails;
-		updateWorkingTrailPointer(workingTrail, stepResult.clausesToCheck);
+		setWorkingTrailPointer(workingTrail, stepResult.clausesToCheck);
 	}
 
 	function unitPropagationStep(e: UPEvent) {
 		const { variables, clauses, algorithm }: Problem = get(problemStore);
 		if (e === 'step') {
 			up(variables, clauses, algorithm);
-			if (clausesToCheck.size === 0) checkAndUpdatePointer(variables, workingTrail as Trail);
+			if (clausesToCheck.size === 0) {
+				updateWorkingTrailPointer(variables, workingTrail as Trail);
+			}
 		} else if (e === 'following') {
-			while (clausesToCheck.size > 0) {
+			while (clausesToCheck.size > 0 && !isUnSAT(previousEval)) {
 				up(variables, clauses, algorithm);
 			}
-			if (clausesToCheck.size === 0) checkAndUpdatePointer(variables, workingTrail as Trail);
+			updateWorkingTrailPointer(variables, workingTrail as Trail);
 		} else if (e === 'finish') {
-			while (!checkAndUpdatePointer(variables, workingTrail as Trail)) {
-				while (clausesToCheck.size > 0) {
+			do {
+				while (clausesToCheck.size > 0 && !isUnSAT(previousEval)) {
 					up(variables, clauses, algorithm);
 				}
-				if (clausesToCheck.size === 0) checkAndUpdatePointer(variables, workingTrail as Trail);
-			}
+			} while (
+				updateWorkingTrailPointer(variables, workingTrail as Trail) &&
+				!isUnSAT(previousEval)
+			);
 		}
 	}
 
 	function up(variables: VariablePool, clauses: ClausePool, algorithm: Algorithm) {
 		const clausesIterator = clausesToCheck.values().next();
 		const clauseId = clausesIterator.value;
-		if (clauseId) {
+		if (clauseId !== undefined) {
 			const clause = clauses.get(clauseId);
 			const evaluation = algorithm.conflictDetection({ clause });
 			clausesToCheck.delete(clauseId);
@@ -170,6 +183,7 @@
 			updateProblemFromTrail(latest);
 		} else {
 			resetProblem();
+			resetWorkingTrailPointer();
 		}
 		trails = [...snapshot];
 	}
