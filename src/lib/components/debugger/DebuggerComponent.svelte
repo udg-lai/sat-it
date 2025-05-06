@@ -35,7 +35,7 @@
 		<UnitPropagationDebugger />
 	{:else}
 		{#if !finished}
-			{#if defaultNextVariable}
+			{#if !isUnSAT(previousEval) && defaultNextVariable}
 				{defaultNextVariable}
 			{:else}
 				{'X'}
