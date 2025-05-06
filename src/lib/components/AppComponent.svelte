@@ -125,14 +125,13 @@
 			while (clausesToCheck.size > 0) {
 				up(variables, clauses, algorithm);
 			}
-			if (clausesToCheck.size === 0) updateWorkingTrailPointer(variables, workingTrail as Trail);
+			updateWorkingTrailPointer(variables, workingTrail as Trail);
 		} else if (e === 'finish') {
-			while (!updateWorkingTrailPointer(variables, workingTrail as Trail)) {
+			do {
 				while (clausesToCheck.size > 0) {
 					up(variables, clauses, algorithm);
 				}
-				if (clausesToCheck.size === 0) updateWorkingTrailPointer(variables, workingTrail as Trail);
-			}
+			} while(updateWorkingTrailPointer(variables, workingTrail as Trail))
 		}
 	}
 
