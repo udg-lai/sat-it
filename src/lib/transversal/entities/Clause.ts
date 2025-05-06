@@ -40,10 +40,6 @@ class Clause implements Comparable<Clause> {
 		this.literals.push(lit);
 	}
 
-	removeLiteral(lit: Literal) {
-		this.literals = this.literals.filter((l) => l.getId() != lit.getId());
-	}
-
 	eval(): ClauseEval {
 		let satisfied = false;
 		const unassignedLiterals: number[] = [];
