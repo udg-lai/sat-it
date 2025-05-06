@@ -3,9 +3,7 @@
 		getClausesToCheck,
 		getFinished,
 		getPreviousEval,
-
 		getWorkingTrailPointer
-
 	} from '$lib/store/clausesToCheck.svelte.ts';
 	import { problemStore } from '$lib/store/problem.store.ts';
 	import { slide } from 'svelte/transition';
@@ -22,12 +20,13 @@
 		else return 0;
 	});
 
-	const  enablePreproces = $derived(getWorkingTrailPointer() === -1 && getClausesToCheck().size === 0);
+	const enablePreproces = $derived(
+		getWorkingTrailPointer() === -1 && getClausesToCheck().size === 0
+	);
 	const previousEval = $derived(getPreviousEval());
 	const enableUnitPropagtion = $derived(getClausesToCheck().size !== 0 && !isUnSAT(previousEval));
 	const disableButton = $derived(getFinished());
 	const finished = $derived(getFinished());
-
 </script>
 
 <div transition:slide|global class="flex-center debugger align-center relative flex-row gap-2">

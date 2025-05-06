@@ -70,7 +70,7 @@ export function updateProblemFromTrail(trail: Trail) {
 }
 
 export function resetProblem() {
-	console.log("Hola bona tarda")
+	console.log('Hola bona tarda');
 	const problem: Problem = get(problemStore);
 	problem.variables.reset();
 	problemStore.set({ ...problem });
