@@ -37,7 +37,7 @@ class ClausePool implements IClausePool {
 		let state: Eval;
 		if (unsat) {
 			state = {
-				type: 'UNSAT',
+				type: 'UnSAT',
 				conflictClause: conflicClause?.getId() as number
 			};
 		} else if (nSatisfied === i) {
