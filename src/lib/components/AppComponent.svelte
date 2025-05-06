@@ -126,7 +126,6 @@
 			if (clausesToCheck.size === 0) checkAndUpdatePointer(variables, workingTrail as Trail);
 		} else if (e === 'finish') {
 			while (!checkAndUpdatePointer(variables, workingTrail as Trail)) {
-				console.log('Hola');
 				while (clausesToCheck.size > 0) {
 					up(variables, clauses, algorithm);
 				}

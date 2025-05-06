@@ -8,6 +8,7 @@
 	import { onMount } from 'svelte';
 	import './_styles.css';
 	import Button from './Button.svelte';
+	import ClausesToCheckComponent from './ClausesToCheckComponent.svelte';
 
 	let toolsViewRef: HTMLElement;
 
@@ -171,7 +172,9 @@
 		{#each tools as { name, active } (name)}
 			{#if active}
 				<div class="view">
-					{#if name === 'viewA'}{:else}
+					{#if name === 'viewA'}
+						{@render snippetClausesToCheck()}
+					{:else}
 						{@render notImplementedYet()}
 					{/if}
 				</div>
@@ -195,6 +198,10 @@
 
 {#snippet settings()}
 	<Button onClick={onOpenViewMoreEvent} icon={ArrowUpFromBracketOutline} />
+{/snippet}
+
+{#snippet snippetClausesToCheck()}
+	<ClausesToCheckComponent />
 {/snippet}
 
 <!--
