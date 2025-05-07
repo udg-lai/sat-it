@@ -4,7 +4,10 @@ import { createEventBus } from './createEventBus.ts';
 export const changeInstanceEventBus = createEventBus<void>();
 
 // open settings and more event
-export const openViewMoreOptionEventBus = createEventBus<void>();
+export const openSettingsViewEventBus = createEventBus<void>();
+
+// close settings settings and more event
+export const closeSettingsViewEventBus = createEventBus<void>();
 
 // start the preprocessing of the current problem
 export const preprocessSignalEventBus = createEventBus<void>();
@@ -18,3 +21,4 @@ export const unitPropagationEventBus = createEventBus<UPEvent>();
 export type ActionEvent = 'record' | 'undo' | 'redo';
 
 export const userActionEventBus = createEventBus<ActionEvent>();
+
