@@ -19,8 +19,10 @@ const cd_state: NonFinalState<CD_STATE_INPUT, DPLL_CD> = {
 	neighbor: new Map().set('ucd', ucd_state)
 };
 
-export const makeMachine = (): Map<number, State<DPLL_ALGORITHM>> => {
+const makeMachine = (): Map<number, State<DPLL_ALGORITHM>> => {
 	let states = addState(cd_state);
 	states = addState(ucd_state);
 	return states;
 };
+
+export const machine = makeMachine();
