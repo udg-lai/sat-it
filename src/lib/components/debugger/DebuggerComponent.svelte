@@ -1,5 +1,10 @@
 <script lang="ts">
-	import { getClausesToCheck, getFinished } from '$lib/store/clausesToCheck.svelte.ts';
+	import {
+		getClausesToCheck,
+		getFinished,
+		getPreviousEval,
+		getStarted
+	} from '$lib/store/clausesToCheck.svelte.ts';
 	import { problemStore } from '$lib/store/problem.store.ts';
 	import { slide } from 'svelte/transition';
 	import BacktrackingDebugger from './BacktrackingDebuggerComponent.svelte';
@@ -7,31 +12,19 @@
 	import ManualDebugger from './ManualDebuggerComponent.svelte';
 	import PreprocesDebugger from './PreprocesDebuggerComponent.svelte';
 	import UnitPropagationDebugger from './UnitPropagationDebuggerComponent.svelte';
-	import { onMount } from 'svelte';
-	import { changeInstanceEventBus, preprocessSignalEventBus } from '$lib/transversal/events.ts';
 	import ResetProblemDebugger from './ResetProblemDebuggerComponent.svelte';
+	import { isUnSAT } from '$lib/transversal/interfaces/IClausePool.ts';
 
 	let defaultNextVariable: number | undefined = $derived.by(() => {
 		if ($problemStore !== undefined) return $problemStore.variables.nextVariable;
 		else return 0;
 	});
-	let enablePreproces = $state(true);
-	const enableUnitPropagtion = $derived(getClausesToCheck().size !== 0);
+
+	const enablePreproces = $derived(!getStarted());
+	const previousEval = $derived(getPreviousEval());
+	const enableUnitPropagtion = $derived(getClausesToCheck().size !== 0 && !isUnSAT(previousEval));
 	const disableButton = $derived(getFinished());
 	const finished = $derived(getFinished());
-
-	onMount(() => {
-		const unsubscribeChangeInstanceEvent = changeInstanceEventBus.subscribe(
-			() => (enablePreproces = true)
-		);
-		const unsusbscribePreprocesEvent = preprocessSignalEventBus.subscribe(
-			() => (enablePreproces = false)
-		);
-		return () => {
-			unsubscribeChangeInstanceEvent();
-			unsusbscribePreprocesEvent();
-		};
-	});
 </script>
 
 <div transition:slide|global class="flex-center debugger align-center relative flex-row gap-2">
@@ -42,12 +35,12 @@
 		<UnitPropagationDebugger />
 	{:else}
 		{#if !finished}
-			{#if defaultNextVariable}
+			{#if !isUnSAT(previousEval) && defaultNextVariable}
 				{defaultNextVariable}
 			{:else}
 				{'X'}
 			{/if}
-			<BacktrackingDebugger {defaultNextVariable} {disableButton} />
+			<BacktrackingDebugger {previousEval} {disableButton} />
 
 			<ManualDebugger {defaultNextVariable} {disableButton} />
 		{:else}

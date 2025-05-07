@@ -1,23 +1,16 @@
 import Variable from '$lib/transversal/entities/Variable.svelte.ts';
-import { v4 as uuidv4 } from 'uuid';
-import type { Comparable } from '../utils/interfaces/Comparable.ts';
 import { logFatal } from '../logging.ts';
+import type { Comparable } from '../interfaces/Comparable.ts';
 
 export type Polarity = 'Positive' | 'Negative';
 
 export default class Literal implements Comparable<Literal> {
-	private id: string;
 	private variable: Variable;
 	private polarity: Polarity;
 
 	constructor(variable: Variable, polarity: Polarity) {
-		this.id = uuidv4();
 		this.variable = variable;
 		this.polarity = polarity;
-	}
-
-	getId() {
-		return this.id;
 	}
 
 	getVariable() {
@@ -42,10 +35,14 @@ export default class Literal implements Comparable<Literal> {
 	}
 
 	toTeX(): string {
-		return [
-			this.polarity == 'Negative' ? `\\neg` : '',
-			this.getVariable().getInt().toString()
-		].join('');
+		let TeX;
+		const varId = this.variable.getInt();
+		if (this.polarity === 'Negative') {
+			TeX = `\\overline{${varId}}`;
+		} else {
+			TeX = `${varId}`;
+		}
+		return TeX;
 	}
 
 	equals(other: Literal): boolean {
