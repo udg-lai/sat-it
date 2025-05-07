@@ -1,19 +1,14 @@
 <script lang="ts">
+	import { closeSettingsViewEventBus } from '$lib/transversal/events.ts';
+	import { fly } from 'svelte/transition';
 	import BookmarkInstances from './BookmarkInstances.svelte';
 	import LegendComponent from './LegendComponent.svelte';
 	import OptionsComponent, { type OptionEmit } from './OptionsComponent.svelte';
+	import { getActiveView, setActiveView } from './settings.store.svelte.ts';
 
 	type ActiveView = 'bookmark' | 'engine' | 'legend' | 'info';
 
-	interface Props {
-		visible: boolean;
-	}
-
-	let { visible = $bindable() }: Props = $props();
-
-	let hide = $derived(!visible);
-
-	let view: ActiveView = $state('bookmark');
+	let view: ActiveView = $derived(getActiveView());
 
 	function handleOptionEvent(event: OptionEmit): void {
 		if (event === 'bookmark') {
@@ -23,11 +18,15 @@
 		} else {
 			console.log('show legend');
 		}
-		view = event;
+		if (event === 'close') {
+			closeSettingsViewEventBus.emit();
+		} else {
+			setActiveView(event);
+		}
 	}
 </script>
 
-<div class="settings" class:hide-settings={hide}>
+<div class="settings" transition:fly={{ y: '100%', duration: 500 }}>
 	<div class="setting-view">
 		<class class="setting-content">
 			{#if view}
@@ -42,7 +41,7 @@
 		</class>
 	</div>
 
-	<OptionsComponent event={handleOptionEvent} bind:visible />
+	<OptionsComponent event={handleOptionEvent} />
 </div>
 
 <style>
@@ -76,12 +75,6 @@
 		left: 0;
 		background-color: var(--main-bg-color);
 		z-index: var(--more-options-z-index);
-		transform: translateY(0%);
-		transition: transform 0.2s ease-out;
 		display: flex;
-	}
-
-	.hide-settings {
-		transform: translateY(100%);
 	}
 </style>
