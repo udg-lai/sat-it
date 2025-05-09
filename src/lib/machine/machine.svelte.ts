@@ -1,18 +1,20 @@
 import { logFatal } from '$lib/transversal/logging.ts';
 import type { DPLL_STATE_FUN, DPLL_STATE_INPUT } from './dpll/dpll-domain.ts';
 
-export type StateFun = DPLL_STATE_FUN;
+export type StateFun = DPLL_STATE_FUN | never;
 
 export type StateInput = DPLL_STATE_INPUT;
 
-export interface FinalState<F extends StateFun> {
+export interface FinalState<F extends StateFun>  {
 	id: number;
-	run: F;
+	description: string;
+	run?: F;
 }
 
 export interface NonFinalState<F extends StateFun, I extends StateInput> {
 	id: number;
-	run: F;
+	description: string;
+	run?: F;
 	transitions: Map<I, number>;
 }
 
