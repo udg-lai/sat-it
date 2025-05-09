@@ -18,19 +18,28 @@ const ucd_state: NonFinalState<DPLL_UCD, UCD_STATE_INPUT> = {
 	transitions: new Map()
 };
 
-const cd_state: NonFinalState<DPPL_EC, EC_STATE_INPUT> = {
+// searchs the empty clause
+
+const ec_state: NonFinalState<DPPL_EC, EC_STATE_INPUT> = {
 	id: 1,
 	run: emptyClayseDetection,
 	transitions: new Map().set('ucd', 2)
 };
 
+
+// const cd_state: NonFinalState<DPLL_CD, EC_STATE_INPUT> = {
+// 	id: 1,
+// 	run: emptyClayseDetection,
+// 	transitions: new Map().set('ucd', 2)
+// };
+
 // export state nodes
 
 export const states: Map<number, State<DPLL_STATE_FUN, DPLL_STATE_INPUT>> = new Map();
 
-states.set(cd_state.id, cd_state);
+states.set(ec_state.id, ec_state);
 states.set(ucd_state.id, ucd_state);
 
 // export initial node
 
-export const initial = cd_state.id;
+export const initial = ec_state.id;
