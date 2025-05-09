@@ -31,7 +31,7 @@
 	} from './debugger/events.svelte.ts';
 	import TrailEditor from './TrailEditorComponent.svelte';
 	import { changeInstanceEventBus } from '$lib/transversal/events.ts';
-	import { getCurrentState, getStateMachine } from '$lib/machine/machine.svelte.ts';
+	import { getStateMachine } from '$lib/machine/state.svelte.ts';
 
 	let expandPropagations: boolean = $state(true);
 
@@ -95,7 +95,8 @@
 
 	onMount(() => {
 		console.log($state.snapshot(getStateMachine()));
-		console.log($state.snapshot(getCurrentState()));
+		console.log($state.snapshot(getStateMachine().getActiveState()));
+		console.log($state.snapshot(getStateMachine().getNextState('ucd')));
 
 		const unsubscribeToggleEditor = editorViewEventStore.subscribe(togglePropagations);
 		const unsubscribeAssignment = assignmentEventStore.subscribe((e) => algorithmStep(e));

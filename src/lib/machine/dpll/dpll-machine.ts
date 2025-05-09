@@ -1,14 +1,13 @@
-import type { Machine, NonFinalState, State } from '../domain.svelte.ts';
-import type { DPLL_ALGORITHM, DPLL_INPUT } from './dpll-domain.ts';
-import { cd_state, ucd_state } from './dpll-states.ts';
+import { type State, StateMachine } from '../machine.svelte.ts';
+import type { DPLL_STATE_FUN, DPLL_STATE_INPUT } from './dpll-domain.ts';
+import { initial, states } from './dpll-states.ts';
 
-export const makeDPLLMachine = (): Machine => {
-	const states: Map<number, State<DPLL_ALGORITHM> | NonFinalState<DPLL_INPUT, DPLL_ALGORITHM>> =
-		new Map();
-	states.set(1, cd_state);
-	states.set(2, ucd_state);
-	return {
-		states,
-		active: 1
-	};
+export const makeDPLLMachine = (): DPLL_StateMachine => {
+	return new DPLL_StateMachine(states, initial);
 };
+
+export class DPLL_StateMachine extends StateMachine<DPLL_STATE_FUN, DPLL_STATE_INPUT> {
+	constructor(states: Map<number, State<DPLL_STATE_FUN, DPLL_STATE_INPUT>>, initial: number) {
+		super(states, initial);
+	}
+}
