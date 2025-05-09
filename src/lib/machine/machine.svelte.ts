@@ -5,7 +5,7 @@ export type StateFun = DPLL_STATE_FUN | never;
 
 export type StateInput = DPLL_STATE_INPUT;
 
-export interface FinalState<F extends StateFun>  {
+export interface FinalState<F extends StateFun> {
 	id: number;
 	description: string;
 	run?: F;
