@@ -1,19 +1,19 @@
 import type ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';
-import { Eval } from '$lib/transversal/interfaces/IClausePool.ts';
+import { type Eval, makeSat } from '$lib/transversal/interfaces/IClausePool.ts';
 
-export type DPLL_STATE_FUN = DPLL_CD | DPLL_UCD;
+export type DPLL_STATE_FUN = DPPL_EC | DPLL_UCD;
 
-export type CD_STATE_INPUT = 'ucd';
+export type EC_STATE_INPUT = 'ucd';
 
 export type UCD_STATE_INPUT = 'nothing';
 
-export type DPLL_STATE_INPUT = CD_STATE_INPUT | UCD_STATE_INPUT;
+export type DPLL_STATE_INPUT = EC_STATE_INPUT | UCD_STATE_INPUT;
 
 // conflict detection
-export type DPLL_CD = (pool: ClausePool) => Eval;
+export type DPPL_EC = (pool: ClausePool) => Eval;
 
-export const conflictDetection: DPLL_CD = (pool: ClausePool) => {
-	return Eval.SAT;
+export const emptyClayseDetection: DPPL_EC = (pool: ClausePool) => {
+	return makeSat();
 };
 
 // unit clause detection

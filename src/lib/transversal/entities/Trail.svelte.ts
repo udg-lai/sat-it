@@ -25,6 +25,10 @@ export class Trail {
 		return newTrail;
 	}
 
+	getDecisionLevel(): number {
+		return this.decisionLevel;
+	}
+
 	getAssignments(): VariableAssignment[] {
 		return [...this.assignments];
 	}

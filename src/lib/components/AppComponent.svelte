@@ -1,4 +1,14 @@
 <script lang="ts">
+	import { getStateMachine } from '$lib/machine/state.svelte.ts';
+	import {
+		getClausesToCheck,
+		getPreviousEval,
+		resetWorkingTrailPointer,
+		setWorkingTrailPointer,
+		updateFinished,
+		updatePreviousEval,
+		updateWorkingTrailPointer
+	} from '$lib/store/clausesToCheck.svelte.ts';
 	import {
 		problemStore,
 		resetProblem,
@@ -13,59 +23,155 @@
 		undo,
 		type Snapshot
 	} from '$lib/store/stack.svelte.ts';
-	import {
-		dummyAssignmentAlgorithm,
-		type DummySearchParams
-	} from '$lib/transversal/algorithms/dummy.ts';
 	import { manualAssignment, type ManualParams } from '$lib/transversal/algorithms/manual.ts';
+	import { isUnitClause, isUnSATClause } from '$lib/transversal/entities/Clause.ts';
+	import type ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';
 	import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
+	import VariablePool from '$lib/transversal/entities/VariablePool.svelte.ts';
+	import {
+		changeInstanceEventBus,
+		preprocessSignalEventBus,
+		unitPropagationEventBus,
+		userActionEventBus,
+		type ActionEvent,
+		type UPEvent
+	} from '$lib/transversal/events.ts';
+	import {
+		isSAT,
+		isUnSAT,
+		makeSat,
+		makeUnresolved,
+		makeUnSAT,
+		type Eval
+	} from '$lib/transversal/interfaces/IClausePool.ts';
+	import type {
+		Algorithm,
+		StepParams,
+		StepResult
+	} from '$lib/transversal/utils/types/algorithms.ts';
 	import { onMount } from 'svelte';
+	import type { SvelteSet } from 'svelte/reactivity';
 	import { get } from 'svelte/store';
 	import {
-		actionEvent,
 		assignmentEventStore,
 		editorViewEventStore,
-		type ActionEvent,
 		type AssignmentEvent,
 		type EditorViewEvent
 	} from './debugger/events.svelte.ts';
 	import TrailEditor from './TrailEditorComponent.svelte';
-	import { changeInstanceEventBus } from '$lib/transversal/events.ts';
-	import { getStateMachine } from '$lib/machine/state.svelte.ts';
 
 	let expandPropagations: boolean = $state(true);
 
 	let trails: Trail[] = $state(getSnapshot().snapshot);
 
+	let workingTrail: Trail | undefined = $derived(trails[trails.length - 1]);
+
+	let previousEval: Eval = $derived(getPreviousEval());
+
+	let finished: boolean = $derived.by(() => {
+		if (!workingTrail) return false;
+		const { variables, clauses } = get(problemStore);
+		const evaluation = clauses.eval();
+		return (
+			(isSAT(evaluation) && variables.allAssigned()) ||
+			(isUnSAT(evaluation) && workingTrail.getDecisionLevel() === 0)
+		);
+	});
+	$effect(() => {
+		updateFinished(finished);
+		if (finished && get(problemStore).variables.allAssigned()) updatePreviousEval(makeSat());
+	});
+
+	// Variables to take care of unit propagations
+	let clausesToCheck: SvelteSet<number> = $derived(getClausesToCheck());
+
+	function preprocessStep() {
+		const { clauses, algorithm }: Problem = get(problemStore);
+
+		const preprocessReturn = algorithm.preprocessing.conflictDetection({ clauses });
+		updatePreviousEval(preprocessReturn.evaluation);
+		if (!isUnSAT(previousEval) && algorithm.preprocessing.unitClauses) {
+			const preprocessReturn = algorithm.preprocessing.unitClauses({ clauses });
+			setWorkingTrailPointer(workingTrail, preprocessReturn.clausesToCheck);
+		}
+	}
+
 	function algorithmStep(e: AssignmentEvent): void {
 		if (e === undefined) return;
 
-		const { variables }: Problem = get(problemStore);
+		const { variables, mapping, algorithm }: Problem = get(problemStore);
+		let stepResult: StepResult;
 
 		if (e.type === 'automated') {
-			const params: DummySearchParams = {
+			const params: StepParams = {
 				variables,
-				trails
+				mapping,
+				trails,
+				previousEval
 			};
-			trails = dummyAssignmentAlgorithm(params);
+			stepResult = algorithm.step(params);
 		} else {
 			const params: ManualParams = {
 				assignment: e,
 				variables,
-				trails
+				trails,
+				mapping
 			};
-			trails = manualAssignment(params);
+			stepResult = manualAssignment(params);
+		}
+		updatePreviousEval(makeUnresolved());
+		trails = stepResult.trails;
+		setWorkingTrailPointer(workingTrail, stepResult.clausesToCheck);
+	}
+
+	function unitPropagationStep(e: UPEvent) {
+		const { variables, clauses, algorithm }: Problem = get(problemStore);
+		if (e === 'step') {
+			up(variables, clauses, algorithm);
+			if (clausesToCheck.size === 0) {
+				updateWorkingTrailPointer(variables, workingTrail as Trail);
+			}
+		} else if (e === 'following') {
+			while (clausesToCheck.size > 0 && !isUnSAT(previousEval)) {
+				up(variables, clauses, algorithm);
+			}
+			updateWorkingTrailPointer(variables, workingTrail as Trail);
+		} else if (e === 'finish') {
+			do {
+				while (clausesToCheck.size > 0 && !isUnSAT(previousEval)) {
+					up(variables, clauses, algorithm);
+				}
+			} while (
+				updateWorkingTrailPointer(variables, workingTrail as Trail) &&
+				!isUnSAT(previousEval)
+			);
 		}
 	}
 
-	function actionReaction(a: ActionEvent) {
-		if (a === undefined) return;
-		if (a.type === 'record') {
+	function up(variables: VariablePool, clauses: ClausePool, algorithm: Algorithm) {
+		const clausesIterator = clausesToCheck.values().next();
+		const clauseId = clausesIterator.value;
+		if (clauseId !== undefined) {
+			const clause = clauses.get(clauseId);
+			const evaluation = algorithm.conflictDetection({ clause });
+			clausesToCheck.delete(clauseId);
+			if (isUnitClause(evaluation.evaluation) && algorithm.UPstep !== undefined) {
+				const literalToPropagate = evaluation.evaluation.literal;
+				const upResult = algorithm.UPstep({ variables, trails, literalToPropagate, clauseId });
+				trails = upResult.trails;
+			} else if (isUnSATClause(evaluation.evaluation)) {
+				updatePreviousEval(makeUnSAT(clauseId));
+			}
+		}
+	}
+
+	function onActionEvent(a: ActionEvent) {
+		if (a === 'record') {
 			record(trails);
-		} else if (a.type === 'undo') {
+		} else if (a === 'undo') {
 			const snapshot = undo();
 			reloadFromSnapshot(snapshot);
-		} else if (a.type === 'redo') {
+		} else if (a === 'redo') {
 			const snapshot = redo();
 			reloadFromSnapshot(snapshot);
 		}
@@ -78,6 +184,7 @@
 			updateProblemFromTrail(latest);
 		} else {
 			resetProblem();
+			resetWorkingTrailPointer();
 		}
 		trails = [...snapshot];
 	}
@@ -91,6 +198,7 @@
 		resetStack();
 		const first = undo();
 		reloadFromSnapshot(first);
+		resetWorkingTrailPointer();
 	}
 
 	onMount(() => {
@@ -99,14 +207,18 @@
 		console.log($state.snapshot(getStateMachine().getNextState('ucd')));
 
 		const unsubscribeToggleEditor = editorViewEventStore.subscribe(togglePropagations);
-		const unsubscribeAssignment = assignmentEventStore.subscribe((e) => algorithmStep(e));
-		const unsubscribeActionEvent = actionEvent.subscribe(actionReaction);
+		const unsubscribeActionEvent = userActionEventBus.subscribe(onActionEvent);
 		const unsubscribeChangeInstanceEvent = changeInstanceEventBus.subscribe(reset);
+		const unsubscribeAssignment = assignmentEventStore.subscribe(algorithmStep);
+		const unsubscribeUPEvent = unitPropagationEventBus.subscribe(unitPropagationStep);
+		const unsubscribePreprocessEvent = preprocessSignalEventBus.subscribe(preprocessStep);
 		return () => {
 			unsubscribeToggleEditor();
 			unsubscribeAssignment();
 			unsubscribeActionEvent();
 			unsubscribeChangeInstanceEvent();
+			unsubscribeUPEvent();
+			unsubscribePreprocessEvent();
 		};
 	});
 </script>

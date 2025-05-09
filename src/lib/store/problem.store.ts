@@ -4,14 +4,15 @@ import VariablePool from '../transversal/entities/VariablePool.svelte.ts';
 import type { DimacsInstance } from '$lib/dimacs/dimacs-instance.interface.ts';
 import { resetStack } from './stack.svelte.ts';
 import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
+import { dpll, type Algorithm } from '$lib/transversal/utils/types/algorithms.ts';
 
-type MappingLiteral2Clauses = Map<number, Set<number>>;
+export type MappingLiteral2Clauses = Map<number, Set<number>>;
 
 export interface Problem {
 	variables: VariablePool;
 	clauses: ClausePool;
 	mapping: MappingLiteral2Clauses;
-	algorithm: () => void;
+	algorithm: Algorithm;
 }
 
 export const problemStore: Writable<Problem> = writable();
@@ -34,7 +35,7 @@ export function updateProblemDomain(instance: DimacsInstance) {
 	let newProblem: Problem;
 
 	if (previousProblem === undefined) {
-		const algorithm = () => console.log('I am dummy ;)');
+		const algorithm: Algorithm = dpll;
 		newProblem = {
 			...params,
 			algorithm
@@ -51,27 +52,28 @@ export function updateProblemDomain(instance: DimacsInstance) {
 	resetStack();
 }
 
-export function updateAlgorithm(algorithm: () => void) {
+export function updateAlgorithm(algorithm: Algorithm) {
 	const currentProblem = get(problemStore);
-	const variables = new VariablePool(currentProblem.variables.capacity);
-	problemStore.set({ ...currentProblem, variables, ...algorithm });
+	currentProblem.variables.reset();
+	problemStore.set({ ...currentProblem, ...algorithm });
 	resetStack();
 }
 
 export function updateProblemFromTrail(trail: Trail) {
 	const { variables, ...currentProblem } = get(problemStore);
-	const newVariablePool: VariablePool = new VariablePool(variables.capacity);
+	variables.reset();
 	trail.forEach((value) => {
 		const variable = value.getVariable();
-		newVariablePool.persist(variable.getInt(), variable.getAssignment());
+		variables.persist(variable.getInt(), variable.getAssignment());
 	});
-	problemStore.set({ ...currentProblem, variables: newVariablePool });
+	problemStore.set({ ...currentProblem, variables });
 }
 
 export function resetProblem() {
+	console.log('Hola bona tarda');
 	const problem: Problem = get(problemStore);
-	const variablePool = new VariablePool(problem.variables.capacity);
-	problemStore.set({ ...problem, variables: variablePool });
+	problem.variables.reset();
+	problemStore.set({ ...problem });
 }
 
 function literalToClauses(clauses: ClausePool): MappingLiteral2Clauses {

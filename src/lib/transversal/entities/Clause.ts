@@ -1,7 +1,7 @@
 import type Literal from './Literal.svelte.ts';
 import logicResolution from '../algorithms/resolution.ts';
 import { arraysEqual } from '../types/array.ts';
-import type { Comparable } from '../utils/interfaces/Comparable.ts';
+import type { Comparable } from '$lib/transversal/interfaces/Comparable.ts';
 
 class Clause implements Comparable<Clause> {
 	private static idGenerator: number = 0;
@@ -40,43 +40,26 @@ class Clause implements Comparable<Clause> {
 		this.literals.push(lit);
 	}
 
-	removeLiteral(lit: Literal) {
-		this.literals = this.literals.filter((l) => l.getId() != lit.getId());
-	}
-
 	eval(): ClauseEval {
-		let state = ClauseEval.UNRESOLVED;
+		let satisfied = false;
+		const unassignedLiterals: number[] = [];
+
 		let i = 0;
-		let unsatCount = 0;
-		while (i < this.literals.length && state !== ClauseEval.SAT) {
+		while (i < this.literals.length && !satisfied) {
 			const lit: Literal = this.literals[i];
-			if (lit.isTrue()) state = ClauseEval.SAT;
+			if (lit.isTrue()) satisfied = true;
 			else {
-				if (lit.isFalse()) unsatCount++;
+				if (!lit.isAssigned()) unassignedLiterals.push(lit.toInt());
 				i++;
 			}
 		}
-		if (state !== ClauseEval.SAT) {
-			state =
-				unsatCount == i
-					? ClauseEval.UNSAT
-					: unsatCount == i - 1
-						? ClauseEval.UNIT
-						: ClauseEval.UNRESOLVED;
-		}
+		let state: ClauseEval;
+		if (satisfied) state = makeSatClause();
+		else if (unassignedLiterals.length === 1) state = makeUnitClause(unassignedLiterals[0]);
+		else if (unassignedLiterals.length === 0) state = makeUnSATClause();
+		else state = makeUnresolvedClause();
+
 		return state;
-	}
-
-	isUndetermined(): boolean {
-		return this.eval() === ClauseEval.UNRESOLVED;
-	}
-
-	isSAT(): boolean {
-		return this.eval() === ClauseEval.SAT;
-	}
-
-	isUnSAT(): boolean {
-		return this.eval() === ClauseEval.UNSAT;
 	}
 
 	isUnit(): boolean {
@@ -95,7 +78,7 @@ class Clause implements Comparable<Clause> {
 		return [...this.literals];
 	}
 
-	private optimalCheckUnit(): boolean {
+	optimalCheckUnit(): boolean {
 		let nNotAssigned = 0;
 		let i = 0;
 		const len = this.literals.length;
@@ -127,6 +110,13 @@ class Clause implements Comparable<Clause> {
 		return this.literals.values();
 	}
 
+	map<T>(
+		callback: (literal: Literal, index: number, array: Literal[]) => T,
+		thisArg?: unknown
+	): T[] {
+		return this.literals.map(callback, thisArg);
+	}
+
 	forEach(
 		callback: (literal: Literal, index: number, array: Literal[]) => void,
 		thisArg?: unknown
@@ -135,11 +125,55 @@ class Clause implements Comparable<Clause> {
 	}
 }
 
-export enum ClauseEval {
-	UNSAT,
-	SAT,
-	UNIT,
-	UNRESOLVED
+export interface SATClause {
+	type: 'SAT';
 }
+
+export interface UnSATClause {
+	type: 'UnSAT';
+}
+
+export interface UNITClause {
+	type: 'UNIT';
+	literal: number;
+}
+
+export interface UNRESOLVEDClause {
+	type: 'UNRESOLVED';
+}
+
+export type ClauseEval = SATClause | UnSATClause | UNITClause | UNRESOLVEDClause;
+
+export const makeSatClause = (): SATClause => {
+	return { type: 'SAT' };
+};
+
+export const makeUnSATClause = (): UnSATClause => {
+	return { type: 'UnSAT' };
+};
+
+export const makeUnitClause = (literal: number): UNITClause => {
+	return { type: 'UNIT', literal };
+};
+
+export const makeUnresolvedClause = (): UNRESOLVEDClause => {
+	return { type: 'UNRESOLVED' };
+};
+
+export const isUnSATClause = (e: ClauseEval): e is UnSATClause => {
+	return e.type === 'UnSAT';
+};
+
+export const isSatClause = (e: ClauseEval): e is SATClause => {
+	return e.type === 'SAT';
+};
+
+export const isUnresolvedClause = (e: ClauseEval): e is UNRESOLVEDClause => {
+	return e.type === 'UNRESOLVED';
+};
+
+export const isUnitClause = (e: ClauseEval): e is UNITClause => {
+	return e.type === 'UNIT';
+};
 
 export default Clause;

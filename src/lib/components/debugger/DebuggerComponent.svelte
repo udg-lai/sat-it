@@ -1,29 +1,53 @@
 <script lang="ts">
+	import {
+		getClausesToCheck,
+		getFinished,
+		getPreviousEval,
+		getStarted
+	} from '$lib/store/clausesToCheck.svelte.ts';
 	import { problemStore } from '$lib/store/problem.store.ts';
+	import { slide } from 'svelte/transition';
 	import BacktrackingDebugger from './BacktrackingDebuggerComponent.svelte';
 	import GeneralDebuggerButtons from './GeneralDebuggerButtonsComponent.svelte';
-	import ManualDebuggerComponent from './ManualDebuggerComponent.svelte';
+	import ManualDebugger from './ManualDebuggerComponent.svelte';
+	import PreprocesDebugger from './PreprocesDebuggerComponent.svelte';
+	import UnitPropagationDebugger from './UnitPropagationDebuggerComponent.svelte';
+	import ResetProblemDebugger from './ResetProblemDebuggerComponent.svelte';
+	import { isUnSAT } from '$lib/transversal/interfaces/IClausePool.ts';
 
 	let defaultNextVariable: number | undefined = $derived.by(() => {
 		if ($problemStore !== undefined) return $problemStore.variables.nextVariable;
 		else return 0;
 	});
+
+	const enablePreproces = $derived(!getStarted());
+	const previousEval = $derived(getPreviousEval());
+	const enableUnitPropagtion = $derived(getClausesToCheck().size !== 0 && !isUnSAT(previousEval));
+	const disableButton = $derived(getFinished());
+	const finished = $derived(getFinished());
 </script>
 
-<div class="flex-center debugger align-center relative flex-row gap-2">
-	<div class="variable-display">
-		{#if defaultNextVariable}
-			{defaultNextVariable}
+<div transition:slide|global class="flex-center debugger align-center relative flex-row gap-2">
+	<div class="variable-display"></div>
+	{#if enablePreproces}
+		<PreprocesDebugger />
+	{:else if enableUnitPropagtion}
+		<UnitPropagationDebugger />
+	{:else}
+		{#if !finished}
+			{#if !isUnSAT(previousEval) && defaultNextVariable}
+				{defaultNextVariable}
+			{:else}
+				{'X'}
+			{/if}
+			<BacktrackingDebugger {previousEval} {disableButton} />
+
+			<ManualDebugger {defaultNextVariable} {disableButton} />
 		{:else}
-			{'X'}
+			<ResetProblemDebugger />
 		{/if}
-	</div>
-
-	<BacktrackingDebugger {defaultNextVariable} />
-
-	<ManualDebuggerComponent {defaultNextVariable} />
-
-	<GeneralDebuggerButtons />
+		<GeneralDebuggerButtons />
+	{/if}
 </div>
 
 <style>
