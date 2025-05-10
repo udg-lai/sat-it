@@ -36,7 +36,7 @@ const stateName2StateId = {
 	obtain_pending_clause_state: 4,
 	all_assigned_clause_state: 5,
 	unstack_clause_set_state: 6,
-	check_state: 7
+	conflict_detection_state: 7
 };
 
 // *** define state nodes ***
@@ -81,17 +81,24 @@ const pending_clauses_state: NonFinalState<DPLL_PENDING_CLAUSES_FUN, DPLL_PENDIN
 };
 
 const stack_clause_set_state: NonFinalState<DPLL_STACK_CLAUSE_SET_FUN, DPLL_STACK_CLAUSE_SET_INPUT> = {
-	id: stateName2StateId['ucd_state'],
+	id: stateName2StateId['stack_clause_set_state'],
 	run: stackClauseSet,
 	description: 'Stack a set of clause as pending',
 	transitions: new Map<DPLL_STACK_CLAUSE_SET_INPUT, number>().set('pending_clauses_state', stateName2StateId['pending_clauses_state'])
 };
 
-const unstack_clause_set_state: NonFinalState<DPLL_UNSTACK_CLAUSE_SET_FUN, DPLL_UNSTACK_CLAUSE_SET_INPUT> = {
-	id: stateName2StateId['ucd_state'],
+const conflict_detection_state: NonFinalState<DPLL_UNSTACK_CLAUSE_SET_FUN, DPLL_UNSTACK_CLAUSE_SET_INPUT> = {
+	id: stateName2StateId['conflict_detection_state'],
 	run: unstackClauseSet,
 	description: 'Stack a set of clause as pending',
-	transitions: new Map<DPLL_UNSTACK_CLAUSE_SET_INPUT, number>().set('check_state', stateName2StateId['check_state'])
+	transitions: new Map<DPLL_UNSTACK_CLAUSE_SET_INPUT, number>().set('check_state', stateName2StateId['conflict_detection_state'])
+}
+
+const unstack_clause_set_state: NonFinalState<DPLL_UNSTACK_CLAUSE_SET_FUN, DPLL_UNSTACK_CLAUSE_SET_INPUT> = {
+	id: stateName2StateId['unstack_clause_set_state'],
+	run: unstackClauseSet,
+	description: 'Stack a set of clause as pending',
+	transitions: new Map<DPLL_UNSTACK_CLAUSE_SET_INPUT, number>().set('check_state', stateName2StateId['conflict_detection_state'])
 };
 
 const ucd_state: NonFinalState<DPLL_UCD_FUN, DPLL_UCD_INPUT> = {

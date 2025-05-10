@@ -1,7 +1,7 @@
 import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
 import type Variable from '$lib/transversal/entities/Variable.svelte.ts';
 import type VariablePool from '$lib/transversal/entities/VariablePool.svelte.ts';
-import { makeSat, makeUnresolved, type Eval } from '$lib/transversal/interfaces/IClausePool.ts';
+import { makeSat, makeUnresolved, type AssignmentEval } from '$lib/transversal/interfaces/IClausePool.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import { problemStore } from './problem.store.ts';
 import { get } from 'svelte/store';
@@ -14,7 +14,7 @@ let started: boolean = $state(false);
 
 let finished: boolean = $state(false);
 
-let previousEval: Eval = $state(makeUnresolved());
+let previousEval: AssignmentEval = $state(makeUnresolved());
 
 export function setWorkingTrailPointer(wt: Trail | undefined, toCheck: Set<number>) {
 	workingTrailPointer = wt !== undefined ? wt.getAssignments().length - 1 : -1;
@@ -65,7 +65,7 @@ export function resetWorkingTrailPointer() {
 	finished = false;
 }
 
-export function updatePreviousEval(evaluation: Eval) {
+export function updatePreviousEval(evaluation: AssignmentEval) {
 	previousEval = evaluation;
 }
 

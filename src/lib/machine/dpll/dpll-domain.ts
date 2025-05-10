@@ -1,4 +1,5 @@
 import type { AssignmentEvent } from '$lib/components/debugger/events.svelte.ts';
+import { problemStore } from '$lib/store/problem.store.ts';
 import {
 	emptyClauseDetection as solverEmptyClauseDetection,
 	unitClauseDetection as solverUnitClauseDetection,
@@ -6,9 +7,10 @@ import {
 	stackClauseSet as solverStackClauseSet,
 	unstackClauseSet as solverUnstackClauseSet
 } from '$lib/transversal/algorithms/solver-functions.ts';
+import type { ClauseEval } from '$lib/transversal/entities/Clause.ts';
 import type ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';
 import type VariablePool from '$lib/transversal/entities/VariablePool.svelte.ts';
-import { type Eval } from '$lib/transversal/interfaces/IClausePool.ts';
+import { type AssignmentEval } from '$lib/transversal/interfaces/IClausePool.ts';
 import { SolverStateMachine } from '../SolverStateMachine.ts';
 
 // ** state inputs **
@@ -26,6 +28,8 @@ export type DPLL_ALL_ASSIGNED_INPUT = 'sat_state' | 'decide_state';
 export type DPLL_STACK_CLAUSE_SET_INPUT = 'pending_clauses_state'
 
 export type DPLL_UNSTACK_CLAUSE_SET_INPUT = 'check_state';
+
+export type DPLL_CLAUSE_DETECTION_INPUT = 'check_state';
 
 export type DPLL_INPUT = 
 	DPLL_EC_INPUT | 
@@ -50,7 +54,7 @@ export const allAssigned: DPPL_ALL_ASSIGNED_FUN = (pool: VariablePool) => {
 	return solverAllAssigned(pool);
 }
 
-export type DPPL_EC_FUN = (pool: ClausePool) => Eval;
+export type DPPL_EC_FUN = (pool: ClausePool) => AssignmentEval;
 
 export const emptyClauseDetection: DPPL_EC_FUN = (pool: ClausePool) => {
 	return solverEmptyClauseDetection(pool);
@@ -92,6 +96,14 @@ export const nextPendingClause: DPLL_PENDING_CLAUSES_FUN = (solverStateMachine: 
 	return pendingClause.length === 0 ? undefined : pendingClause[0];
 };
 
+export type DPLL_CONFLICT_DETECTION_FUN = (pool: ClausePool, clauseId: number) => ClauseEval;
+
+export const conflictDetection: DPLL_CONFLICT_DETECTION_FUN = (pool: ClausePool, clauseId: number) => {
+	const clause = pool.get(clauseId);
+	const evaluation: ClauseEval = clause.eval(); 
+	return evaluation;
+};
+
 export type DPLL_FUN = 
 	DPPL_EC_FUN | 
 	DPLL_UCD_FUN | 
@@ -99,4 +111,5 @@ export type DPLL_FUN =
 	DPLL_OBTAIN_PENDING_CLAUSE_FUN | 
 	DPPL_ALL_ASSIGNED_FUN | 
 	DPLL_STACK_CLAUSE_SET_FUN |
-	DPLL_UNSTACK_CLAUSE_SET_FUN;
+	DPLL_UNSTACK_CLAUSE_SET_FUN |
+	DPLL_CONFLICT_DETECTION_FUN;

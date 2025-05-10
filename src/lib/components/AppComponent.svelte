@@ -41,7 +41,7 @@
 		makeSat,
 		makeUnresolved,
 		makeUnSAT,
-		type Eval
+		type AssignmentEval
 	} from '$lib/transversal/interfaces/IClausePool.ts';
 	import type {
 		Algorithm,
@@ -65,7 +65,7 @@
 
 	let workingTrail: Trail | undefined = $derived(trails[trails.length - 1]);
 
-	let previousEval: Eval = $derived(getPreviousEval());
+	let previousEval: AssignmentEval = $derived(getPreviousEval());
 
 	let finished: boolean = $derived.by(() => {
 		if (!workingTrail) return false;

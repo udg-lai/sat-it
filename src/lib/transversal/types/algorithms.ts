@@ -12,14 +12,14 @@ import type Clause from '$lib/transversal/entities/Clause.ts';
 import type ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';
 import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
 import type VariablePool from '$lib/transversal/entities/VariablePool.svelte.ts';
-import type { Eval } from '../interfaces/IClausePool.ts';
+import type { AssignmentEval } from '../interfaces/IClausePool.ts';
 
 export type PreprocesCDParams = {
 	clauses: ClausePool;
 };
 
 export type PreprocesCDRetur = {
-	evaluation: Eval;
+	evaluation: AssignmentEval;
 };
 
 export type PreprocesUnitClauseParams = {
@@ -34,7 +34,7 @@ export interface StepParams {
 	variables: VariablePool;
 	mapping: MappingLiteral2Clauses;
 	trails: Trail[];
-	previousEval: Eval;
+	previousEval: AssignmentEval;
 }
 
 export type StepResult = {

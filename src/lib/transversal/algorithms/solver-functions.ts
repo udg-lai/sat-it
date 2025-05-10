@@ -2,9 +2,9 @@ import type { AssignmentEvent } from '$lib/components/debugger/events.svelte.ts'
 import type { SolverStateMachine } from '$lib/machine/SolverStateMachine.ts';
 import type ClausePool from '../entities/ClausePool.svelte.ts';
 import type VariablePool from '../entities/VariablePool.svelte.ts';
-import type { Eval } from '../interfaces/IClausePool.ts';
+import type { AssignmentEval } from '../interfaces/IClausePool.ts';
 
-export const emptyClauseDetection = (pool: ClausePool): Eval => {
+export const emptyClauseDetection = (pool: ClausePool): AssignmentEval => {
 	const evaluation = pool.eval();
 	return evaluation;
 };

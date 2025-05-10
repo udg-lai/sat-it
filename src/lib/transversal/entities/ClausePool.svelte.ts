@@ -1,4 +1,4 @@
-import type { Eval, IClausePool } from '../interfaces/IClausePool.ts';
+import type { AssignmentEval, IClausePool } from '../interfaces/IClausePool.ts';
 import type { CNF } from '../mapping/contentToSummary.ts';
 import { cnfToClauseSet } from '../utils.ts';
 import Clause, { type ClauseEval, isSatClause, isUnSATClause } from './Clause.ts';
@@ -17,7 +17,7 @@ class ClausePool implements IClausePool {
 		return new ClausePool(clauses);
 	}
 
-	eval(): Eval {
+	eval(): AssignmentEval {
 		let unsat = false;
 		let nSatisfied = 0;
 		let i = 0;
@@ -34,7 +34,7 @@ class ClausePool implements IClausePool {
 				conflicClause = clause;
 			}
 		}
-		let state: Eval;
+		let state: AssignmentEval;
 		if (unsat) {
 			state = {
 				type: 'UnSAT',

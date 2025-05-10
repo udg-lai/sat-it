@@ -4,10 +4,10 @@
 	import { emitAssignmentEvent } from './events.svelte.ts';
 	import DynamicRender from '$lib/components/DynamicRender.svelte';
 	import { userActionEventBus } from '$lib/transversal/events.ts';
-	import { isUnSAT, type Eval } from '$lib/transversal/interfaces/IClausePool.ts';
+	import { isUnSAT, type AssignmentEval } from '$lib/transversal/interfaces/IClausePool.ts';
 
 	interface Props {
-		previousEval: Eval;
+		previousEval: AssignmentEval;
 		disableButton: boolean;
 	}
 
