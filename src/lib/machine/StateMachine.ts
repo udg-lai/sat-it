@@ -1,9 +1,9 @@
 import { logFatal } from '$lib/transversal/logging.ts';
-import type { DPLL_STATE_FUN, DPLL_STATE_INPUT } from './dpll/dpll-domain.ts';
+import type { DPLL_FUN, DPLL_INPUT } from './dpll/dpll-domain.ts';
 
-export type StateFun = DPLL_STATE_FUN | never;
+export type StateFun = DPLL_FUN | never;
 
-export type StateInput = DPLL_STATE_INPUT;
+export type StateInput = DPLL_INPUT;
 
 export interface FinalState<F extends StateFun> {
 	id: number;
@@ -66,7 +66,7 @@ export abstract class StateMachine<F extends StateFun, I extends StateInput>
 		if (this.completed()) {
 			logFatal('No next state for a completed state machine');
 		} else {
-			const activeState = this.getActiveState() as NonFinalState<DPLL_STATE_FUN, DPLL_STATE_INPUT>;
+			const activeState = this.getActiveState() as NonFinalState<DPLL_FUN, DPLL_INPUT>;
 			const activeStateTransitions = activeState.transitions;
 			const nextStateId = activeStateTransitions.get(input);
 			if (nextStateId === undefined) {

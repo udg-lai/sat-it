@@ -8,6 +8,7 @@ export type ManualAssignment = {
 
 type AutomatedAssignment = {
 	type: 'automated';
+	polarity: boolean;
 };
 
 export type AssignmentEvent = AutomatedAssignment | ManualAssignment;

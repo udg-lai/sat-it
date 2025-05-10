@@ -1,5 +1,5 @@
 import { makeBacktrackingMachine } from './backtracking/backtracking-machine.ts';
-import type { DPLL_STATE_INPUT } from './dpll/dpll-domain.ts';
+import type { DPLL_INPUT } from './dpll/dpll-domain.ts';
 import { makeDPLLMachine } from './dpll/dpll-machine.ts';
 import type { StateFun, StateInput, StateMachine } from './StateMachine.ts';
 
@@ -25,11 +25,19 @@ export class SolverStateMachine implements SolverStateMachineInterface<StateFun,
 		this.pendingClauses = [];
 	}
 
-	transition(input: DPLL_STATE_INPUT): void {
+	transition(input: DPLL_INPUT): void {
 		this.stateMachine.transition(input);
 	}
 
 	getPendingClauses(): Set<number>[] {
 		return this.pendingClauses;
+	}
+
+	stackPendingClauses(clauses: Set<number>): void {
+		this.pendingClauses = [...this.pendingClauses, clauses];
+	}
+
+	unstackPendingClauses(): void {
+		this.pendingClauses = this.pendingClauses.slice(0, this.pendingClauses.length - 1);
 	}
 }
