@@ -1,16 +1,16 @@
 import { makeBacktrackingMachine } from './backtracking/backtracking-machine.ts';
 import type { DPLL_STATE_INPUT } from './dpll/dpll-domain.ts';
 import { makeDPLLMachine } from './dpll/dpll-machine.ts';
-import type { StateFun, StateInput, StateMachine } from './machine.svelte.ts';
+import type { StateFun, StateInput, StateMachine } from './StateMachine.ts';
 
-export interface SolverMachineInterface<F extends StateFun, I extends StateInput> {
+export interface SolverStateMachineInterface<F extends StateFun, I extends StateInput> {
 	stateMachine: StateMachine<F, I>;
 	pendingClauses: Set<number>[];
 	transition: (input: I) => void;
 	getPendingClauses: () => Set<number>[];
 }
 
-export class SolverMachine implements SolverMachineInterface<StateFun, StateInput> {
+export class SolverStateMachine implements SolverStateMachineInterface<StateFun, StateInput> {
 	stateMachine: StateMachine<StateFun, StateInput>;
 	pendingClauses: Set<number>[];
 

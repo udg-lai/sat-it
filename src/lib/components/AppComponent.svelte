@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { getStateMachine } from '$lib/machine/state.svelte.ts';
 	import {
 		getClausesToCheck,
 		getPreviousEval,
@@ -202,10 +201,6 @@
 	}
 
 	onMount(() => {
-		console.log($state.snapshot(getStateMachine()));
-		console.log($state.snapshot(getStateMachine().getActiveState()));
-		console.log($state.snapshot(getStateMachine().getNextState('ucd')));
-
 		const unsubscribeToggleEditor = editorViewEventStore.subscribe(togglePropagations);
 		const unsubscribeActionEvent = userActionEventBus.subscribe(onActionEvent);
 		const unsubscribeChangeInstanceEvent = changeInstanceEventBus.subscribe(reset);

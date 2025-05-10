@@ -1,4 +1,4 @@
-import { type State, StateMachine } from '../machine.svelte.ts';
+import { type State, StateMachine } from '../StateMachine.ts';
 import type { DPLL_STATE_FUN, DPLL_STATE_INPUT } from './dpll-domain.ts';
 import { initial, states } from './dpll-states.ts';
 

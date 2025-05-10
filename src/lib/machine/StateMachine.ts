@@ -39,7 +39,7 @@ export abstract class StateMachine<F extends StateFun, I extends StateInput>
 	implements StateMachineInterface<F, I>
 {
 	states: Map<number, State<F, I>>;
-	active: number = $state(-1);
+	active: number;
 
 	constructor(states: Map<number, State<F, I>>, initial: number) {
 		this.states = states;

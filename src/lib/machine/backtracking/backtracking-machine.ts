@@ -1,6 +1,6 @@
 import type { DPLL_STATE_FUN, DPLL_STATE_INPUT } from '../dpll/dpll-domain.ts';
 import { initial, states } from '../dpll/dpll-states.ts';
-import { type State, StateMachine } from '../machine.svelte.ts';
+import { type State, StateMachine } from '../StateMachine.ts';
 
 export const makeBacktrackingMachine = (): Backtracking_StateMachine => {
 	return new Backtracking_StateMachine(states, initial);
