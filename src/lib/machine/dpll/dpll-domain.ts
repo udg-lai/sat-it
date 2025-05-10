@@ -5,29 +5,42 @@ import {
 import type ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';
 import { type Eval } from '$lib/transversal/interfaces/IClausePool.ts';
 
-export type DPLL_STATE_FUN = DPPL_EC | DPLL_UCD | DPLL_PENDING_CLAUSES;
+export type DPLL_STATE_FUN = DPPL_EC_FUN | DPLL_UCD_FUN | DPLL_PENDING_CLAUSES_FUN | DPLL_OBTAIN_PENDING_CLAUSE_FUN;
 
-export type EC_STATE_INPUT = 'ucd' | 'unsat';
+export type DPLL_EC_INPUT = 'ucd_state' | 'unsat_state';
 
-export type UCD_STATE_INPUT = 'pendingClauses';
+export type DPLL_UCD_INPUT = 'pending_clauses_state';
 
-export type PENDING_CLAUSES_STATE_INPUT = 'allAssigned' | 'checkPending';
+export type DPLL_OBTAIN_PENDING_CLAUSE_INPUT = 'pending_clauses_state' | 'check_state';
 
-export type DPLL_STATE_INPUT = EC_STATE_INPUT | UCD_STATE_INPUT | PENDING_CLAUSES_STATE_INPUT;
+export type DPLL_PENDING_CLAUSES_INPUT = 'all_assigned_state' | 'obtain_pending_clause_state';
 
-// conflict detection
-export type DPPL_EC = (pool: ClausePool) => Eval;
+export type DPLL_STATE_INPUT = DPLL_EC_INPUT | DPLL_UCD_INPUT | DPLL_PENDING_CLAUSES_INPUT | DPLL_OBTAIN_PENDING_CLAUSE_INPUT; // conflict detection
 
-export const emptyClauseDetection: DPPL_EC = (pool: ClausePool) => {
+export type DPPL_EC_FUN = (pool: ClausePool) => Eval;
+
+export const emptyClauseDetection: DPPL_EC_FUN = (pool: ClausePool) => {
 	return solverEmptyClauseDetection(pool);
 };
 
-export type DPLL_PENDING_CLAUSES = (pendingClauses: Set<number>[]) => Set<number> | undefined;
+export type DPLL_PENDING_CLAUSES_FUN = (pendingClauses: Set<number>[]) => Set<number> | undefined;
+
+// we check if there are still clauses to check
+export type DPLL_OBTAIN_PENDING_CLAUSE_FUN = (clauses: Set<number>) => number | undefined;
+
+export const obtainPendingClause:  DPLL_OBTAIN_PENDING_CLAUSE_FUN = (clauses: Set<number>) => {
+		const clausesIterator = clauses.values().next();
+		const clauseId = clausesIterator.value;
+		if (clauseId !== undefined) {
+			clauses.delete(clauseId);
+		}
+		return clauseId;
+}
 
 // unit clause detection
-export type DPLL_UCD = (pool: ClausePool) => Set<number>;
+export type DPLL_UCD_FUN = (pool: ClausePool) => Set<number>;
 
-export const unitClauseDetection: DPLL_UCD = (pool: ClausePool) => {
+export const unitClauseDetection: DPLL_UCD_FUN = (pool: ClausePool) => {
 	return solverUnitClauseDetection(pool);
 };
 
