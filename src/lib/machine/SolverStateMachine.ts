@@ -1,3 +1,5 @@
+import { Queue } from '$lib/transversal/entities/Queue.ts';
+import { logFatal } from '$lib/transversal/logging.ts';
 import { makeBacktrackingMachine } from './backtracking/backtracking-machine.ts';
 import type { DPLL_INPUT } from './dpll/dpll-domain.ts';
 import { makeDPLLMachine } from './dpll/dpll-machine.ts';
@@ -5,14 +7,16 @@ import type { StateFun, StateInput, StateMachine } from './StateMachine.ts';
 
 export interface SolverStateMachineInterface<F extends StateFun, I extends StateInput> {
 	stateMachine: StateMachine<F, I>;
-	pendingClauses: Set<number>[];
+	pending: Queue<Set<number>>;
 	transition: (input: I) => void;
-	getPendingClauses: () => Set<number>[];
+	postpone(clauses: Set<number>): void;
+	consultPostponed(): Set<number>;
+	thereArePostponed(): boolean;
 }
 
 export class SolverStateMachine implements SolverStateMachineInterface<StateFun, StateInput> {
 	stateMachine: StateMachine<StateFun, StateInput>;
-	pendingClauses: Set<number>[];
+	pending: Queue<Set<number>>;
 
 	constructor(type: 'backtracking' | 'dpll' | 'cdcl') {
 		if (type === 'backtracking') {
@@ -22,22 +26,26 @@ export class SolverStateMachine implements SolverStateMachineInterface<StateFun,
 		} else {
 			this.stateMachine = makeBacktrackingMachine();
 		}
-		this.pendingClauses = [];
+		this.pending = new Queue();
 	}
 
 	transition(input: DPLL_INPUT): void {
 		this.stateMachine.transition(input);
 	}
 
-	getPendingClauses(): Set<number>[] {
-		return this.pendingClauses;
+	postpone(clauses: Set<number>): void {
+		this.pending.enqueue(clauses);
 	}
 
-	stackPendingClauses(clauses: Set<number>): void {
-		this.pendingClauses = [...this.pendingClauses, clauses];
+	resolvePostponed(): Set<number> | undefined {
+		return this.pending.dequeue();
 	}
 
-	unstackPendingClauses(): void {
-		this.pendingClauses = this.pendingClauses.slice(0, this.pendingClauses.length - 1);
+	consultPostponed(): Set<number> {
+		return this.pending.peek();
+	}
+
+	thereArePostponed(): boolean {
+		return !this.pending.isEmpty();
 	}
 }
