@@ -1,42 +1,60 @@
-import type { NonFinalState, FinalState, State } from '../StateMachine.ts';
-import { INITIAL_STATE_ID, SAT_STATE_ID, UNSAT_STATE_ID } from '../reserved.ts';
+import type { FinalState, NonFinalState, State } from '../StateMachine.ts';
+import { SAT_STATE_ID, UNSAT_STATE_ID } from '../reserved.ts';
 import {
-	unitClauseDetection,
-	type DPLL_EC_INPUT,
-	type DPPL_EC_FUN,
-	type DPLL_INPUT,
-	type DPLL_FUN,
-	type DPLL_UCD_FUN,
-	type DPLL_UCD_INPUT,
+	allAssigned,
 	emptyClauseDetection,
+	nextPendingClause,
+	nextClause,
+	queueClauseSet,
+	triggeredClauses,
+	unitClauseDetection,
+	unstackClauseSet,
+	type DPLL_ALL_VARIABLES_ASSIGNED_FUN,
+	type DPLL_ALL_VARIABLES_ASSIGNED_INPUT,
+	type DPLL_CONFLICT_DETECTION_FUN,
+	type DPLL_EMPTY_CLAUSE_FUN,
+	type DPLL_EMPTY_CLAUSE_INPUT,
+	type DPLL_FUN,
+	type DPLL_INPUT,
+	type DPLL_PEEK_PENDING_CLAUSE_SET_FUN,
 	type DPLL_PENDING_CLAUSES_FUN,
 	type DPLL_PENDING_CLAUSES_INPUT,
-	nextPendingClause,
-	type DPLL_OBTAIN_PENDING_CLAUSE_FUN,
-	type DPLL_OBTAIN_PENDING_CLAUSE_INPUT,
-	obtainPendingClause,
-	type DPLL_ALL_ASSIGNED_INPUT,
-	type DPPL_ALL_ASSIGNED_FUN,
-	allAssigned,
-	type DPLL_STACK_CLAUSE_SET_FUN,
-	stackClauseSet,
-	type DPLL_STACK_CLAUSE_SET_INPUT,
+	type DPLL_QUEUE_CLAUSE_SET_FUN,
+	type DPLL_QUEUE_CLAUSE_SET_INPUT,
+	type DPLL_TRIGGERED_CLAUSES_FUN,
+	type DPLL_TRIGGERED_CLAUSES_INPUT,
+	type DPLL_UNIT_CLAUSES_DETECTION_FUN,
+	type DPLL_UNIT_CLAUSES_DETECTION_INPUT,
 	type DPLL_UNSTACK_CLAUSE_SET_FUN,
-	unstackClauseSet,
-	type DPLL_UNSTACK_CLAUSE_SET_INPUT
+	type DPLL_UNSTACK_CLAUSE_SET_INPUT,
+	type DPLL_PEEK_PENDING_CLAUSE_SET_INPUT,
+	peekPendingClauseSet,
+	type DPLL_ALL_CLAUSES_CHECKED_INPUT,
+	type DPLL_ALL_CLAUSES_CHECKED_FUN,
+	allClausesChecked,
+	type DPLL_NEXT_CLAUSE_FUN,
+	type DPLL_NEXT_CLAUSE_INPUT,
+	type DPLL_CONFLICT_DETECTION_INPUT,
+	unsatisfiedClause
 } from './dpll-domain.ts';
 
 const stateName2StateId = {
-	ec_state: INITIAL_STATE_ID,
 	sat_state: SAT_STATE_ID,
 	unsat_state: UNSAT_STATE_ID,
-	ucd_state: 1,
-	stack_clause_set_state: 2,
-	pending_clauses_state: 3,
-	obtain_pending_clause_state: 4,
-	all_assigned_clause_state: 5,
-	unstack_clause_set_state: 6,
-	conflict_detection_state: 7
+	empty_clause_state: 0,
+	unit_clauses_detection_state: 1,
+	triggered_clauses_state: 2,
+	queue_clause_set_state: 3,
+	pending_clauses_state: 4,
+	obtain_pending_clause_state: 5,
+	all_variables_assigned_state: 6,
+	unstack_clause_set_state: 7,
+	clause_evaluation_state: 8,
+	all_clauses_checked_state: 9,
+	peek_pending_clause_set_state: 10,
+	next_clause_state: 11,
+	conflict_detection_state: 12,
+	unit_clause_state: 13
 };
 
 // *** define state nodes ***
@@ -50,86 +68,176 @@ const sat_state: FinalState<never> = {
 	description: 'SAT state'
 };
 
-const decide_state: NonFinalState<DPPL_ALL_ASSIGNED_FUN, DPLL_ALL_ASSIGNED_INPUT> = {
-	id: stateName2StateId['all_assigned_clause_state'],
-	description: 'Verify if all variables have been assigned',
-	run: allAssigned,
-	transitions: new Map<DPLL_ALL_ASSIGNED_INPUT, number>().set('sat_state', stateName2StateId['sat_state'])
+const unit_clauses_detection_state: NonFinalState<
+	DPLL_UNIT_CLAUSES_DETECTION_FUN,
+	DPLL_UNIT_CLAUSES_DETECTION_INPUT
+> = {
+	id: stateName2StateId['unit_clauses_detection_state'],
+	run: unitClauseDetection,
+	description: 'Seeks for unit clause from the clause pool',
+	transitions: new Map<DPLL_UNIT_CLAUSES_DETECTION_INPUT, number>().set(
+		'triggered_clauses_state',
+		stateName2StateId['triggered_clauses_state']
+	)
 };
 
-const all_assigned_clause_state: NonFinalState<DPPL_ALL_ASSIGNED_FUN, DPLL_ALL_ASSIGNED_INPUT> = {
-	id: stateName2StateId['all_assigned_clause_state'],
-	description: 'Verify if all variables have been assigned',
-	run: allAssigned,
-	transitions: new Map<DPLL_ALL_ASSIGNED_INPUT, number>().set('sat_state', stateName2StateId['sat_state'])
+const empty_clause_state: NonFinalState<DPLL_EMPTY_CLAUSE_FUN, DPLL_EMPTY_CLAUSE_INPUT> = {
+	id: stateName2StateId['empty_clause_state'],
+	run: emptyClauseDetection,
+	description: 'Seeks for the empty clause in the clause pool',
+	transitions: new Map<DPLL_EMPTY_CLAUSE_INPUT, number>()
+		.set('ucd_state', unit_clauses_detection_state.id)
+		.set('unsat_state', unsat_state.id)
 };
 
-const obtain_pending_clause_state: NonFinalState<DPLL_OBTAIN_PENDING_CLAUSE_FUN, DPLL_OBTAIN_PENDING_CLAUSE_INPUT> = {
+const decide_state: NonFinalState<
+	DPLL_ALL_VARIABLES_ASSIGNED_FUN,
+	DPLL_ALL_VARIABLES_ASSIGNED_INPUT
+> = {
+	id: stateName2StateId['all_variables_assigned_state'],
+	description: 'Verify if all variables have been assigned',
+	run: allAssigned,
+	transitions: new Map<DPLL_ALL_VARIABLES_ASSIGNED_INPUT, number>().set(
+		'sat_state',
+		stateName2StateId['sat_state']
+	)
+};
+
+const all_variables_assigned_state: NonFinalState<
+	DPLL_ALL_VARIABLES_ASSIGNED_FUN,
+	DPLL_ALL_VARIABLES_ASSIGNED_INPUT
+> = {
+	id: stateName2StateId['all_variables_assigned_state'],
+	description: 'Verify if all variables have been assigned',
+	run: allAssigned,
+	transitions: new Map<DPLL_ALL_VARIABLES_ASSIGNED_INPUT, number>().set(
+		'sat_state',
+		stateName2StateId['sat_state']
+	)
+};
+
+const peek_pending_clause_set_state: NonFinalState<
+	DPLL_PEEK_PENDING_CLAUSE_SET_FUN,
+	DPLL_PEEK_PENDING_CLAUSE_SET_INPUT
+> = {
 	id: stateName2StateId['obtain_pending_clause_state'],
-	description: 'Get next pending close to check',
-	run: obtainPendingClause,
-	transitions: new Map<DPLL_OBTAIN_PENDING_CLAUSE_INPUT, number>()
-		.set('pending_clauses_state', stateName2StateId['pending_clauses_state'])
-		.set('unstack_clause_set_state', stateName2StateId['unstack_clause_set_state'])
+	description: 'Get next pending clause set from the queue',
+	run: peekPendingClauseSet,
+	transitions: new Map<DPLL_PEEK_PENDING_CLAUSE_SET_INPUT, number>().set(
+		'all_clauses_checked_state',
+		stateName2StateId['all_clauses_checked_state']
+	)
 };
 
 const pending_clauses_state: NonFinalState<DPLL_PENDING_CLAUSES_FUN, DPLL_PENDING_CLAUSES_INPUT> = {
 	id: stateName2StateId['pending_clauses_state'],
-	description: 'Check if there is no more pending set of clausules to visit',
+	description: 'True if there are set of clauses postponed, false otherwise',
 	run: nextPendingClause,
-	transitions: new Map<DPLL_PENDING_CLAUSES_INPUT, number>().set('obtain_pending_clause_state', stateName2StateId['obtain_pending_clause_state'])
+	transitions: new Map<DPLL_PENDING_CLAUSES_INPUT, number>()
+		.set('peek_pending_clause_set_state', stateName2StateId['peek_pending_clause_set_state'])
+		.set('all_variables_assigned_state', stateName2StateId['all_variables_assigned_state'])
 };
 
-const stack_clause_set_state: NonFinalState<DPLL_STACK_CLAUSE_SET_FUN, DPLL_STACK_CLAUSE_SET_INPUT> = {
-	id: stateName2StateId['stack_clause_set_state'],
-	run: stackClauseSet,
-	description: 'Stack a set of clause as pending',
-	transitions: new Map<DPLL_STACK_CLAUSE_SET_INPUT, number>().set('pending_clauses_state', stateName2StateId['pending_clauses_state'])
+const all_clauses_checked_state: NonFinalState<
+	DPLL_ALL_CLAUSES_CHECKED_FUN,
+	DPLL_ALL_CLAUSES_CHECKED_INPUT
+> = {
+	id: stateName2StateId['all_clauses_checked_state'],
+	description:
+		'True if the postponed set of clauses still contain clauses to check, otherwise false',
+	run: allClausesChecked,
+	transitions: new Map<DPLL_ALL_CLAUSES_CHECKED_INPUT, number>().set(
+		'next_clause_state',
+		stateName2StateId['next_clause_state']
+	)
 };
 
-const conflict_detection_state: NonFinalState<DPLL_UNSTACK_CLAUSE_SET_FUN, DPLL_UNSTACK_CLAUSE_SET_INPUT> = {
+const next_clause_state: NonFinalState<DPLL_NEXT_CLAUSE_FUN, DPLL_NEXT_CLAUSE_INPUT> = {
+	id: stateName2StateId['next_clause_state'],
+	description: 'Returns the next clause to deal with',
+	run: nextClause,
+	transitions: new Map<DPLL_NEXT_CLAUSE_INPUT, number>().set(
+		'conflict_detection_state',
+		stateName2StateId['conflict_detection_state']
+	)
+};
+
+const conflict_detection_state: NonFinalState<
+	DPLL_CONFLICT_DETECTION_FUN,
+	DPLL_CONFLICT_DETECTION_INPUT
+> = {
 	id: stateName2StateId['conflict_detection_state'],
-	run: unstackClauseSet,
-	description: 'Stack a set of clause as pending',
-	transitions: new Map<DPLL_UNSTACK_CLAUSE_SET_INPUT, number>().set('check_state', stateName2StateId['conflict_detection_state'])
-}
+	run: unsatisfiedClause,
+	description: 'Check if current clause is unsatisfied',
+	transitions: new Map<DPLL_CONFLICT_DETECTION_INPUT, number>().set(
+		'unit_clause_state',
+		stateName2StateId['unit_clause_state']
+	)
+};
 
-const unstack_clause_set_state: NonFinalState<DPLL_UNSTACK_CLAUSE_SET_FUN, DPLL_UNSTACK_CLAUSE_SET_INPUT> = {
+const queue_clause_set_state: NonFinalState<
+	DPLL_QUEUE_CLAUSE_SET_FUN,
+	DPLL_QUEUE_CLAUSE_SET_INPUT
+> = {
+	id: stateName2StateId['queue_clause_set_state'],
+	run: queueClauseSet,
+	description: 'Stack a set of clause as pending',
+	transitions: new Map<DPLL_QUEUE_CLAUSE_SET_INPUT, number>().set(
+		'pending_clauses_state',
+		stateName2StateId['pending_clauses_state']
+	)
+};
+
+const triggered_clauses_state: NonFinalState<
+	DPLL_TRIGGERED_CLAUSES_FUN,
+	DPLL_TRIGGERED_CLAUSES_INPUT
+> = {
+	id: stateName2StateId['queue_clause_set_state'],
+	run: triggeredClauses,
+	description: 'Stack a set of clause as pending',
+	transitions: new Map<DPLL_TRIGGERED_CLAUSES_INPUT, number>()
+		.set('queue_clause_set_state', stateName2StateId['queue_clause_set_state'])
+		.set('all_variables_assigned_state', stateName2StateId['all_variables_assigned_state'])
+};
+
+const unstack_clause_set_state: NonFinalState<
+	DPLL_UNSTACK_CLAUSE_SET_FUN,
+	DPLL_UNSTACK_CLAUSE_SET_INPUT
+> = {
 	id: stateName2StateId['unstack_clause_set_state'],
 	run: unstackClauseSet,
-	description: 'Stack a set of clause as pending',
-	transitions: new Map<DPLL_UNSTACK_CLAUSE_SET_INPUT, number>().set('check_state', stateName2StateId['conflict_detection_state'])
+	description: 'Unstack the set of clause',
+	transitions: new Map<DPLL_UNSTACK_CLAUSE_SET_INPUT, number>().set(
+		'check_state',
+		stateName2StateId['clause_evaluation_state']
+	)
 };
 
-const ucd_state: NonFinalState<DPLL_UCD_FUN, DPLL_UCD_INPUT> = {
-	id: stateName2StateId['ucd_state'],
-	run: unitClauseDetection,
-	description: 'Seeks for unit clause from the clause pool',
-	transitions: new Map<DPLL_UCD_INPUT, number>().set('stack_clause_set_state', stateName2StateId['stack_clause_set_state'])
-};
-
-const ec_state: NonFinalState<DPPL_EC_FUN, DPLL_EC_INPUT> = {
-	id: stateName2StateId['ec_state'],
-	run: emptyClauseDetection,
-	description: 'Seeks for the empty clause in the clause pool',
-	transitions: new Map<DPLL_EC_INPUT, number>()
-		.set('ucd_state', ucd_state.id)
-		.set('unsat_state', unsat_state.id)
-};
+// const delete_clause_state: NonFinalState<DPLL_CONFLICT_DETECTION_FUN, DPLL_CLAUSE_EVALUATION_INPUT> = {
+// 	id: stateName2StateId['clause_evaluation_state'],
+// 	run: conflictClause,
+// 	description: `Evaluates clause`,
+// 	transitions: new Map<DPLL_CLAUSE_EVALUATION_INPUT, number>()
+// 		.set('conflict_detection_state', stateName2StateId['clause_evaluation_state'])
+// }
 
 // *** adding states to the set of states ***
 export const states: Map<number, State<DPLL_FUN, DPLL_INPUT>> = new Map();
 
-states.set(ec_state.id, ec_state);
-states.set(ucd_state.id, ucd_state);
+states.set(empty_clause_state.id, empty_clause_state);
+states.set(unit_clauses_detection_state.id, unit_clauses_detection_state);
 states.set(unsat_state.id, unsat_state);
 states.set(sat_state.id, sat_state);
 states.set(pending_clauses_state.id, pending_clauses_state);
-states.set(stack_clause_set_state.id, stack_clause_set_state);
-states.set(obtain_pending_clause_state.id, obtain_pending_clause_state);
-states.set(all_assigned_clause_state.id, all_assigned_clause_state);
+states.set(queue_clause_set_state.id, queue_clause_set_state);
+states.set(peek_pending_clause_set_state.id, peek_pending_clause_set_state);
+states.set(all_variables_assigned_state.id, all_variables_assigned_state);
 states.set(decide_state.id, decide_state);
 states.set(unstack_clause_set_state.id, unstack_clause_set_state);
+states.set(triggered_clauses_state.id, triggered_clauses_state);
+states.set(next_clause_state.id, next_clause_state);
+states.set(all_clauses_checked_state.id, all_clauses_checked_state);
+states.set(conflict_detection_state.id, conflict_detection_state);
 
 // export initial node
-export const initial = ec_state.id;
+export const initial = empty_clause_state.id;
