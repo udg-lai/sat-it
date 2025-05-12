@@ -11,6 +11,7 @@ export interface SolverStateMachineInterface<F extends StateFun, I extends State
 	transition: (input: I) => void;
 	postpone(clauses: Set<number>): void;
 	consultPostponed(): Set<number>;
+	resolvePostponed(): Set<number> | undefined;
 	thereArePostponed(): boolean;
 }
 

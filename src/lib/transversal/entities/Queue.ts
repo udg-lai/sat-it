@@ -12,6 +12,9 @@ export class Queue<T> {
 	}
 
 	dequeue(): T | undefined {
+		if (this.isEmpty()) {
+			logError('Can not dequeue and empty queue');
+		}
 		return this.items.shift();
 	}
 
