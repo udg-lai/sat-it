@@ -39,6 +39,8 @@
 
 	let nExpanded = $state(expanded ? countLevelsWithPropagations() : 0);
 
+	let trailElement: HTMLElement;
+
 	function countLevelsWithPropagations(): number {
 		const propagations: number[] = trail.getDecisions().map((_, idx) => {
 			const level = idx + 1;
@@ -56,32 +58,67 @@
 		nExpanded = Math.min(nExpanded + 1, nExpandable);
 		expanded = nExpanded === nExpandable;
 	}
+
+	function listenContentWidth(trailContent: HTMLElement) {
+		const trailContentWidthObserver = new ResizeObserver((entries) => {
+			for (const entry of entries) {
+				const contentWidth = entry.contentRect.width;
+				const trailExpectedWidth = trailElement.offsetWidth;
+				if (contentWidth > trailExpectedWidth) {
+					scrollLeft();
+				}
+			}
+		});
+		trailContentWidthObserver.observe(trailContent);
+		return {
+			destroy() {
+				trailContentWidthObserver.disconnect();
+			}
+		};
+	}
+
+	function scrollLeft(): void {
+		trailElement.scroll({ left: trailElement.scrollWidth, behavior: 'smooth' });
+	}
 </script>
 
-<div class="trail flex flex-row">
-	{#each initialPropagations as assignment}
-		{#if assignment.isK()}
-			<BacktrackingComponent {assignment} />
-		{:else}
-			<UnitPropagationComponent {assignment} />
-		{/if}
-	{/each}
+<trail bind:this={trailElement} class="trail flex flex-row">
+	<div use:listenContentWidth class="trail-content">
+		{#each initialPropagations as assignment}
+			{#if assignment.isK()}
+				<BacktrackingComponent {assignment} />
+			{:else}
+				<UnitPropagationComponent {assignment} />
+			{/if}
+		{/each}
 
-	{#each decisions as assignment (assignment.level)}
-		<DecisionLevelComponent
-			decision={assignment.assignment}
-			propagations={trail.getPropagations(assignment.level)}
-			expanded={decisionLevelExpanded}
-			emitClose={onEmitClose}
-			emitExpand={onEmitExpand}
-		/>
-	{/each}
-</div>
+		{#each decisions as assignment (assignment.level)}
+			<DecisionLevelComponent
+				decision={assignment.assignment}
+				propagations={trail.getPropagations(assignment.level)}
+				expanded={decisionLevelExpanded}
+				emitClose={onEmitClose}
+				emitExpand={onEmitExpand}
+			/>
+		{/each}
+	</div>
+</trail>
 
 <style>
 	.trail {
+		overflow-x: scroll;
 		display: flex;
+		flex: 1;
 		gap: 0.5rem;
 		align-items: center;
+		padding-right: 0.5rem;
+	}
+
+	.trail-content {
+		display: flex;
+		flex: 1;
+		gap: 0.5rem;
+		align-items: center;
+		height: 100%;
 	}
 </style>
