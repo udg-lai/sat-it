@@ -3,7 +3,6 @@ import { SAT_STATE_ID, UNSAT_STATE_ID } from '../reserved.ts';
 import {
 	allAssigned,
 	emptyClauseDetection,
-	nextPendingClause,
 	nextClause,
 	queueClauseSet,
 	triggeredClauses,
@@ -16,9 +15,8 @@ import {
 	type DPLL_EMPTY_CLAUSE_INPUT,
 	type DPLL_FUN,
 	type DPLL_INPUT,
-	type DPLL_PEEK_PENDING_CLAUSE_SET_FUN,
-	type DPLL_PENDING_CLAUSES_FUN,
-	type DPLL_PENDING_CLAUSES_INPUT,
+	type DPLL_PEEK_CLAUSE_SET_FUN,
+	type DPLL_PEEK_CLAUSE_SET_INPUT,
 	type DPLL_QUEUE_CLAUSE_SET_FUN,
 	type DPLL_QUEUE_CLAUSE_SET_INPUT,
 	type DPLL_TRIGGERED_CLAUSES_FUN,
@@ -27,7 +25,6 @@ import {
 	type DPLL_UNIT_CLAUSES_DETECTION_INPUT,
 	type DPLL_UNSTACK_CLAUSE_SET_FUN,
 	type DPLL_UNSTACK_CLAUSE_SET_INPUT,
-	type DPLL_PEEK_PENDING_CLAUSE_SET_INPUT,
 	peekPendingClauseSet,
 	type DPLL_ALL_CLAUSES_CHECKED_INPUT,
 	type DPLL_ALL_CLAUSES_CHECKED_FUN,
@@ -35,7 +32,13 @@ import {
 	type DPLL_NEXT_CLAUSE_FUN,
 	type DPLL_NEXT_CLAUSE_INPUT,
 	type DPLL_CONFLICT_DETECTION_INPUT,
-	unsatisfiedClause
+	unsatisfiedClause,
+	type DPLL_CHECK_PENDING_CLAUSES_INPUT,
+	type DPLL_CHECK_PENDING_CLAUSES_FUN,
+	thereAreJobPostponed,
+	type DPLL_DELETE_CLAUSE_FUN,
+	type DPLL_DELETE_CLAUSE_INPUT,
+	deleteClause
 } from './dpll-domain.ts';
 
 const stateName2StateId = {
@@ -45,16 +48,17 @@ const stateName2StateId = {
 	unit_clauses_detection_state: 1,
 	triggered_clauses_state: 2,
 	queue_clause_set_state: 3,
-	pending_clauses_state: 4,
+	check_pending_clauses_state: 4,
 	obtain_pending_clause_state: 5,
 	all_variables_assigned_state: 6,
 	unstack_clause_set_state: 7,
 	clause_evaluation_state: 8,
 	all_clauses_checked_state: 9,
-	peek_pending_clause_set_state: 10,
+	peek_clause_set_state: 10,
 	next_clause_state: 11,
 	conflict_detection_state: 12,
-	unit_clause_state: 13
+	unit_clause_state: 13,
+	delete_clause_state: 14
 };
 
 // *** define state nodes ***
@@ -116,26 +120,26 @@ const all_variables_assigned_state: NonFinalState<
 	)
 };
 
-const peek_pending_clause_set_state: NonFinalState<
-	DPLL_PEEK_PENDING_CLAUSE_SET_FUN,
-	DPLL_PEEK_PENDING_CLAUSE_SET_INPUT
+const check_pending_clauses_state: NonFinalState<
+	DPLL_CHECK_PENDING_CLAUSES_FUN,
+	DPLL_CHECK_PENDING_CLAUSES_INPUT
 > = {
+	id: stateName2StateId['check_pending_clauses_state'],
+	description: 'True if there are set of clauses postponed, false otherwise',
+	run: thereAreJobPostponed,
+	transitions: new Map<DPLL_CHECK_PENDING_CLAUSES_INPUT, number>()
+		.set('peek_pending_clause_set_state', stateName2StateId['peek_clause_set_state'])
+		.set('all_variables_assigned_state', stateName2StateId['all_variables_assigned_state'])
+};
+
+const peek_clause_set_state: NonFinalState<DPLL_PEEK_CLAUSE_SET_FUN, DPLL_PEEK_CLAUSE_SET_INPUT> = {
 	id: stateName2StateId['obtain_pending_clause_state'],
 	description: 'Get next pending clause set from the queue',
 	run: peekPendingClauseSet,
-	transitions: new Map<DPLL_PEEK_PENDING_CLAUSE_SET_INPUT, number>().set(
+	transitions: new Map<DPLL_PEEK_CLAUSE_SET_INPUT, number>().set(
 		'all_clauses_checked_state',
 		stateName2StateId['all_clauses_checked_state']
 	)
-};
-
-const pending_clauses_state: NonFinalState<DPLL_PENDING_CLAUSES_FUN, DPLL_PENDING_CLAUSES_INPUT> = {
-	id: stateName2StateId['pending_clauses_state'],
-	description: 'True if there are set of clauses postponed, false otherwise',
-	run: nextPendingClause,
-	transitions: new Map<DPLL_PENDING_CLAUSES_INPUT, number>()
-		.set('peek_pending_clause_set_state', stateName2StateId['peek_pending_clause_set_state'])
-		.set('all_variables_assigned_state', stateName2StateId['all_variables_assigned_state'])
 };
 
 const all_clauses_checked_state: NonFinalState<
@@ -182,10 +186,9 @@ const queue_clause_set_state: NonFinalState<
 	id: stateName2StateId['queue_clause_set_state'],
 	run: queueClauseSet,
 	description: 'Stack a set of clause as pending',
-	transitions: new Map<DPLL_QUEUE_CLAUSE_SET_INPUT, number>().set(
-		'pending_clauses_state',
-		stateName2StateId['pending_clauses_state']
-	)
+	transitions: new Map<DPLL_QUEUE_CLAUSE_SET_INPUT, number>()
+		.set('check_pending_clauses_state', stateName2StateId['check_pending_clauses_state'])
+		.set('delete_clause_state', stateName2StateId['delete_clause_state'])
 };
 
 const triggered_clauses_state: NonFinalState<
@@ -213,13 +216,15 @@ const unstack_clause_set_state: NonFinalState<
 	)
 };
 
-// const delete_clause_state: NonFinalState<DPLL_CONFLICT_DETECTION_FUN, DPLL_CLAUSE_EVALUATION_INPUT> = {
-// 	id: stateName2StateId['clause_evaluation_state'],
-// 	run: conflictClause,
-// 	description: `Evaluates clause`,
-// 	transitions: new Map<DPLL_CLAUSE_EVALUATION_INPUT, number>()
-// 		.set('conflict_detection_state', stateName2StateId['clause_evaluation_state'])
-// }
+const delete_clause_state: NonFinalState<DPLL_DELETE_CLAUSE_FUN, DPLL_DELETE_CLAUSE_INPUT> = {
+	id: stateName2StateId['delete_clause_state'],
+	run: deleteClause,
+	description: `Evaluates clause`,
+	transitions: new Map<DPLL_DELETE_CLAUSE_INPUT, number>().set(
+		'all_clauses_checked_state',
+		stateName2StateId['all_clauses_checked_state']
+	)
+};
 
 // *** adding states to the set of states ***
 export const states: Map<number, State<DPLL_FUN, DPLL_INPUT>> = new Map();
@@ -228,9 +233,9 @@ states.set(empty_clause_state.id, empty_clause_state);
 states.set(unit_clauses_detection_state.id, unit_clauses_detection_state);
 states.set(unsat_state.id, unsat_state);
 states.set(sat_state.id, sat_state);
-states.set(pending_clauses_state.id, pending_clauses_state);
+states.set(check_pending_clauses_state.id, check_pending_clauses_state);
 states.set(queue_clause_set_state.id, queue_clause_set_state);
-states.set(peek_pending_clause_set_state.id, peek_pending_clause_set_state);
+states.set(peek_clause_set_state.id, peek_clause_set_state);
 states.set(all_variables_assigned_state.id, all_variables_assigned_state);
 states.set(decide_state.id, decide_state);
 states.set(unstack_clause_set_state.id, unstack_clause_set_state);
@@ -238,6 +243,7 @@ states.set(triggered_clauses_state.id, triggered_clauses_state);
 states.set(next_clause_state.id, next_clause_state);
 states.set(all_clauses_checked_state.id, all_clauses_checked_state);
 states.set(conflict_detection_state.id, conflict_detection_state);
+states.set(delete_clause_state.id, delete_clause_state);
 
 // export initial node
 export const initial = empty_clause_state.id;

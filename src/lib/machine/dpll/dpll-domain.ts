@@ -2,14 +2,13 @@ import type { AssignmentEvent } from '$lib/components/debugger/events.svelte.ts'
 import {
 	clauseEvaluation,
 	allAssigned as solverAllAssigned,
-	clauseEvaluation as solverClauseEvaluation,
 	dequeueClauseSet as solverDequeueClauseSet,
 	emptyClauseDetection as solverEmptyClauseDetection,
 	queueClauseSet as solverQueueClauseSet,
 	triggeredClauses as solverTriggeredClauses,
 	unitClauseDetection as solverUnitClauseDetection
 } from '$lib/transversal/algorithms/solver.ts';
-import { isUnSATClause, type ClauseEval } from '$lib/transversal/entities/Clause.ts';
+import { isUnSATClause } from '$lib/transversal/entities/Clause.ts';
 import type ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';
 import type VariablePool from '$lib/transversal/entities/VariablePool.svelte.ts';
 import { type AssignmentEval } from '$lib/transversal/interfaces/IClausePool.ts';
@@ -26,21 +25,19 @@ export type DPLL_TRIGGERED_CLAUSES_INPUT =
 
 export type DPLL_UNIT_CLAUSES_DETECTION_INPUT = 'triggered_clauses_state';
 
-export type DPLL_PENDING_CLAUSES_INPUT =
+export type DPLL_CLAUSES_INPUT = 'all_variables_assigned_state' | 'peek_pending_clause_set_state';
+
+export type DPLL_PEEK_CLAUSE_SET_INPUT = 'all_clauses_checked_state';
+
+export type DPLL_CHECK_PENDING_CLAUSES_INPUT =
 	| 'all_variables_assigned_state'
 	| 'peek_pending_clause_set_state';
 
-export type DPLL_PEEK_PENDING_CLAUSE_SET_INPUT = 'all_clauses_checked_state';
-
-export type DPLL_ALL_VARIABLES_ASSIGNED_INPUT = 'sat_state' | 'decide_state';
-
-export type DPLL_QUEUE_CLAUSE_SET_INPUT = 'pending_clauses_state';
+export type DPLL_QUEUE_CLAUSE_SET_INPUT = 'check_pending_clauses_state' | 'delete_clause_state';
 
 export type DPLL_UNSTACK_CLAUSE_SET_INPUT = 'check_state';
 
-export type DPLL_DELETE_CLAUSE_INPUT = '';
-
-export type DPLL_PEEK_CLAUSE_INPUT = 'all_clauses_check';
+export type DPLL_DELETE_CLAUSE_INPUT = 'all_clauses_checked_state';
 
 export type DPLL_ALL_CLAUSES_CHECKED_INPUT = 'next_clause_state';
 
@@ -48,19 +45,21 @@ export type DPLL_NEXT_CLAUSE_INPUT = 'conflict_detection_state';
 
 export type DPLL_CONFLICT_DETECTION_INPUT = 'unit_clause_state';
 
+export type DPLL_ALL_VARIABLES_ASSIGNED_INPUT = 'sat_state' | 'decide_state';
+
 export type DPLL_INPUT =
 	| DPLL_EMPTY_CLAUSE_INPUT
 	| DPLL_UNIT_CLAUSES_DETECTION_INPUT
-	| DPLL_PENDING_CLAUSES_INPUT
-	| DPLL_PEEK_PENDING_CLAUSE_SET_INPUT
+	| DPLL_PEEK_CLAUSE_SET_INPUT
 	| DPLL_ALL_VARIABLES_ASSIGNED_INPUT
 	| DPLL_TRIGGERED_CLAUSES_INPUT
 	| DPLL_QUEUE_CLAUSE_SET_INPUT
 	| DPLL_UNSTACK_CLAUSE_SET_INPUT
-	| DPLL_PEEK_CLAUSE_INPUT
 	| DPLL_ALL_CLAUSES_CHECKED_INPUT
 	| DPLL_NEXT_CLAUSE_INPUT
-	| DPLL_CONFLICT_DETECTION_INPUT;
+	| DPLL_CONFLICT_DETECTION_INPUT
+	| DPLL_CHECK_PENDING_CLAUSES_INPUT
+	| DPLL_DELETE_CLAUSE_INPUT;
 
 // ** state functions **
 
@@ -108,14 +107,6 @@ export const unitClauseDetection: DPLL_UNIT_CLAUSES_DETECTION_FUN = (pool: Claus
 	return solverUnitClauseDetection(pool);
 };
 
-export type DPLL_PENDING_CLAUSES_FUN = (solverStateMachine: SolverStateMachine) => boolean;
-
-export const nextPendingClause: DPLL_PENDING_CLAUSES_FUN = (
-	solverStateMachine: SolverStateMachine
-) => {
-	return solverStateMachine.thereArePostponed();
-};
-
 export type DPLL_TRIGGERED_CLAUSES_FUN = (clauses: Set<number>) => boolean;
 
 export const triggeredClauses: DPLL_TRIGGERED_CLAUSES_FUN = (clauses: Set<number>) => {
@@ -125,14 +116,15 @@ export const triggeredClauses: DPLL_TRIGGERED_CLAUSES_FUN = (clauses: Set<number
 export type DPLL_DELETE_CLAUSE_FUN = (clauses: Set<number>, clauseId: number) => void;
 
 export const deleteClause: DPLL_DELETE_CLAUSE_FUN = (clauses: Set<number>, clauseId: number) => {
+	if (!clauses.has(clauseId)) {
+		logFatal('Clause not found', `Clause - ${clauseId} not found`);
+	}
 	clauses.delete(clauseId);
 };
 
-export type DPLL_PEEK_PENDING_CLAUSE_SET_FUN = (
-	solverStateMachine: SolverStateMachine
-) => Set<number>;
+export type DPLL_PEEK_CLAUSE_SET_FUN = (solverStateMachine: SolverStateMachine) => Set<number>;
 
-export const peekPendingClauseSet: DPLL_PEEK_PENDING_CLAUSE_SET_FUN = (
+export const peekPendingClauseSet: DPLL_PEEK_CLAUSE_SET_FUN = (
 	solverStateMachine: SolverStateMachine
 ) => {
 	const clauseSet: Set<number> = solverStateMachine.consultPostponed();
@@ -166,11 +158,19 @@ export const unsatisfiedClause: DPLL_CONFLICT_DETECTION_FUN = (
 	return isUnSATClause(evaluation);
 };
 
+export type DPLL_CHECK_PENDING_CLAUSES_FUN = (solverStateMachine: SolverStateMachine) => boolean;
+
+export const thereAreJobPostponed: DPLL_CHECK_PENDING_CLAUSES_FUN = (
+	solverStateMachine: SolverStateMachine
+) => {
+	return solverStateMachine.thereArePostponed();
+};
+
 export type DPLL_FUN =
 	| DPLL_EMPTY_CLAUSE_FUN
 	| DPLL_UNIT_CLAUSES_DETECTION_FUN
-	| DPLL_PENDING_CLAUSES_FUN
-	| DPLL_PEEK_PENDING_CLAUSE_SET_FUN
+	| DPLL_PEEK_CLAUSE_SET_FUN
+	| DPLL_CHECK_PENDING_CLAUSES_FUN
 	| DPLL_ALL_VARIABLES_ASSIGNED_FUN
 	| DPLL_QUEUE_CLAUSE_SET_FUN
 	| DPLL_UNSTACK_CLAUSE_SET_FUN

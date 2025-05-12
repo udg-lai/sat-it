@@ -1,5 +1,4 @@
 import { Queue } from '$lib/transversal/entities/Queue.ts';
-import { logFatal } from '$lib/transversal/logging.ts';
 import { makeBacktrackingMachine } from './backtracking/backtracking-machine.ts';
 import type { DPLL_INPUT } from './dpll/dpll-domain.ts';
 import { makeDPLLMachine } from './dpll/dpll-machine.ts';
