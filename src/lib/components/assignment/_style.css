@@ -1,10 +1,10 @@
 .literal-style {
-	width: 33px;
-	height: 33px;
+	min-width: 33px;
+	min-height: 33px;
 	position: relative;
 	display: flex;
 	justify-content: center;
-	align-items: center;
+	align-items: end;
 	border: none;
 	border-bottom: 1px solid;
 }
