@@ -55,7 +55,8 @@ import {
 	backtracking,
 	type DPLL_DECIDE_FUN,
 	type DPLL_DECIDE_INPUT,
-	decide
+	decide,
+	unitClause
 } from './dpll-domain.ts';
 
 const stateName2StateId = {
@@ -66,21 +67,20 @@ const stateName2StateId = {
 	triggered_clauses_state: 2,
 	queue_clause_set_state: 3,
 	check_pending_clauses_state: 4,
-	obtain_pending_clause_state: 5,
+	peek_clause_set_state: 5,
 	all_variables_assigned_state: 6,
 	unstack_clause_set_state: 7,
 	clause_evaluation_state: 8,
 	all_clauses_checked_state: 9,
-	peek_clause_set_state: 10,
-	next_clause_state: 11,
-	conflict_detection_state: 12,
-	unit_clause_state: 13,
-	delete_clause_state: 14,
-	unit_propagation_state: 15,
-	complementary_occurrences_state: 16,
-	decision_level_state: 17,
-	backtracking_state: 18,
-	decide_state: 19
+	next_clause_state: 10,
+	conflict_detection_state: 11,
+	unit_clause_state: 12,
+	delete_clause_state: 13,
+	unit_propagation_state: 14,
+	complementary_occurrences_state: 15,
+	decision_level_state: 16,
+	backtracking_state: 17,
+	decide_state: 18
 };
 
 // *** define state nodes ***
@@ -100,7 +100,7 @@ const unit_clauses_detection_state: NonFinalState<
 > = {
 	id: stateName2StateId['unit_clauses_detection_state'],
 	run: unitClauseDetection,
-	description: 'Seeks for unit clause from the clause pool',
+	description: 'Seeks for the problem s unit clauses',
 	transitions: new Map<DPLL_UNIT_CLAUSES_DETECTION_INPUT, number>().set(
 		'triggered_clauses_state',
 		stateName2StateId['triggered_clauses_state']
@@ -112,13 +112,13 @@ const empty_clause_state: NonFinalState<DPLL_EMPTY_CLAUSE_FUN, DPLL_EMPTY_CLAUSE
 	run: emptyClauseDetection,
 	description: 'Seeks for the empty clause in the clause pool',
 	transitions: new Map<DPLL_EMPTY_CLAUSE_INPUT, number>()
-		.set('ucd_state', unit_clauses_detection_state.id)
-		.set('unsat_state', unsat_state.id)
+		.set('unit_clauses_detection_state', stateName2StateId['unit_clauses_detection_state'])
+		.set('unsat_state', stateName2StateId['unsat_state'])
 };
 
 const decide_state: NonFinalState<DPLL_DECIDE_FUN, DPLL_DECIDE_INPUT> = {
 	id: stateName2StateId['decide_state'],
-	description: 'Executes a decide state',
+	description: 'Executes a decide step',
 	run: decide,
 	transitions: new Map<DPLL_DECIDE_INPUT, number>().set(
 		'complementary_occurrences_state',
@@ -133,10 +133,9 @@ const all_variables_assigned_state: NonFinalState<
 	id: stateName2StateId['all_variables_assigned_state'],
 	description: 'Verify if all variables have been assigned',
 	run: allAssigned,
-	transitions: new Map<DPLL_ALL_VARIABLES_ASSIGNED_INPUT, number>().set(
-		'sat_state',
-		stateName2StateId['sat_state']
-	)
+	transitions: new Map<DPLL_ALL_VARIABLES_ASSIGNED_INPUT, number>()
+		.set('sat_state', stateName2StateId['sat_state'])
+		.set('decide_state', stateName2StateId['decide_state'])
 };
 
 const check_pending_clauses_state: NonFinalState<
@@ -147,12 +146,12 @@ const check_pending_clauses_state: NonFinalState<
 	description: 'True if there are set of clauses postponed, false otherwise',
 	run: thereAreJobPostponed,
 	transitions: new Map<DPLL_CHECK_PENDING_CLAUSES_INPUT, number>()
-		.set('peek_pending_clause_set_state', stateName2StateId['peek_clause_set_state'])
+		.set('peek_clause_set_state', stateName2StateId['peek_clause_set_state'])
 		.set('all_variables_assigned_state', stateName2StateId['all_variables_assigned_state'])
 };
 
 const peek_clause_set_state: NonFinalState<DPLL_PEEK_CLAUSE_SET_FUN, DPLL_PEEK_CLAUSE_SET_INPUT> = {
-	id: stateName2StateId['obtain_pending_clause_state'],
+	id: stateName2StateId['peek_clause_set_state'],
 	description: 'Get next pending clause set from the queue',
 	run: peekPendingClauseSet,
 	transitions: new Map<DPLL_PEEK_CLAUSE_SET_INPUT, number>().set(
@@ -169,10 +168,9 @@ const all_clauses_checked_state: NonFinalState<
 	description:
 		'True if the postponed set of clauses still contain clauses to check, otherwise false',
 	run: allClausesChecked,
-	transitions: new Map<DPLL_ALL_CLAUSES_CHECKED_INPUT, number>().set(
-		'next_clause_state',
-		stateName2StateId['next_clause_state']
-	)
+	transitions: new Map<DPLL_ALL_CLAUSES_CHECKED_INPUT, number>()
+		.set('next_clause_state', stateName2StateId['next_clause_state'])
+		.set('unstack_clause_set_state', stateName2StateId['unstack_clause_set_state'])
 };
 
 const next_clause_state: NonFinalState<DPLL_NEXT_CLAUSE_FUN, DPLL_NEXT_CLAUSE_INPUT> = {
@@ -192,10 +190,9 @@ const conflict_detection_state: NonFinalState<
 	id: stateName2StateId['conflict_detection_state'],
 	run: unsatisfiedClause,
 	description: 'Check if current clause is unsatisfied',
-	transitions: new Map<DPLL_CONFLICT_DETECTION_INPUT, number>().set(
-		'unit_clause_state',
-		stateName2StateId['unit_clause_state']
-	)
+	transitions: new Map<DPLL_CONFLICT_DETECTION_INPUT, number>()
+		.set('unit_clause_state', stateName2StateId['unit_clause_state'])
+		.set('decision_level_state', stateName2StateId['decision_level_state'])
 };
 
 const unit_clause_state: NonFinalState<
@@ -203,12 +200,11 @@ const unit_clause_state: NonFinalState<
 	DPLL_UNIT_CLAUSE_DETECTION_INPUT
 > = {
 	id: stateName2StateId['unit_clause_state'],
-	run: unsatisfiedClause,
+	run: unitClause,
 	description: 'Check if current clause is unit',
-	transitions: new Map<DPLL_UNIT_CLAUSE_DETECTION_INPUT, number>().set(
-		'delete_clause_state',
-		stateName2StateId['delete_clause_state']
-	)
+	transitions: new Map<DPLL_UNIT_CLAUSE_DETECTION_INPUT, number>()
+		.set('delete_clause_state', stateName2StateId['delete_clause_state'])
+		.set('unit_propagation_state', stateName2StateId['unit_propagation_state'])
 };
 
 const unit_propagation_state: NonFinalState<
@@ -230,7 +226,7 @@ const complementary_occurrences_state: NonFinalState<
 > = {
 	id: stateName2StateId['complementary_occurrences_state'],
 	run: complementaryOccurrences,
-	description: 'Seek for the clauses where the complementary appears',
+	description: 'Get the clauses where the complementary of the last assigned literal appear',
 	transitions: new Map<DPLL_COMPLEMENTARY_OCCURRENCES_INPUT, number>().set(
 		'triggered_clauses_state',
 		stateName2StateId['triggered_clauses_state']
@@ -253,9 +249,9 @@ const triggered_clauses_state: NonFinalState<
 	DPLL_TRIGGERED_CLAUSES_FUN,
 	DPLL_TRIGGERED_CLAUSES_INPUT
 > = {
-	id: stateName2StateId['queue_clause_set_state'],
+	id: stateName2StateId['triggered_clauses_state'],
 	run: triggeredClauses,
-	description: 'Stack a set of clause as pending',
+	description: 'Checks if last assignment added clauses to revise',
 	transitions: new Map<DPLL_TRIGGERED_CLAUSES_INPUT, number>()
 		.set('queue_clause_set_state', stateName2StateId['queue_clause_set_state'])
 		.set('all_variables_assigned_state', stateName2StateId['all_variables_assigned_state'])
@@ -278,7 +274,7 @@ const unstack_clause_set_state: NonFinalState<
 const delete_clause_state: NonFinalState<DPLL_DELETE_CLAUSE_FUN, DPLL_DELETE_CLAUSE_INPUT> = {
 	id: stateName2StateId['delete_clause_state'],
 	run: deleteClause,
-	description: `Evaluates clause`,
+	description: `Deletes the clause that has been analized`,
 	transitions: new Map<DPLL_DELETE_CLAUSE_INPUT, number>().set(
 		'all_clauses_checked_state',
 		stateName2StateId['all_clauses_checked_state']
@@ -289,10 +285,9 @@ const decision_level_state: NonFinalState<DPLL_DECISION_LEVEL_FUN, DPLL_DECISION
 	id: stateName2StateId['decision_level_state'],
 	run: decisionLevel,
 	description: `Check if decision level of the latest trail is === 0`,
-	transitions: new Map<DPLL_DECISION_LEVEL_INPUT, number>().set(
-		'backtracking_state',
-		stateName2StateId['backtracking_state']
-	)
+	transitions: new Map<DPLL_DECISION_LEVEL_INPUT, number>()
+		.set('backtracking_state', stateName2StateId['backtracking_state'])
+		.set('unsat_state', stateName2StateId['unsat_state'])
 };
 
 const backtracking_state: NonFinalState<DPLL_BACKTRACKING_FUN, DPLL_BACKTRACKING_INPUT> = {

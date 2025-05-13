@@ -9,13 +9,13 @@ import { Trail } from '../entities/Trail.svelte.ts';
 import type Variable from '../entities/Variable.svelte.ts';
 import VariableAssignment from '../entities/VariableAssignment.ts';
 import type VariablePool from '../entities/VariablePool.svelte.ts';
-import type { AssignmentEval } from '../interfaces/IClausePool.ts';
+import { isUnSAT } from '../interfaces/IClausePool.ts';
 import { logFatal } from '../logging.ts';
 import { fromJust, isJust } from '../types/maybe.ts';
 
-export const emptyClauseDetection = (pool: ClausePool): AssignmentEval => {
+export const emptyClauseDetection = (pool: ClausePool): boolean => {
 	const evaluation = pool.eval();
-	return evaluation;
+	return isUnSAT(evaluation);
 };
 
 export const unitClauseDetection = (pool: ClausePool): Set<number> => {
@@ -85,13 +85,13 @@ export const unitPropagation = (
 ): number => {
 	const trail: Trail = obtainTrail(variables);
 	const clause: Clause = clauses.get(clauseId);
-	const literalToPropagate = clause.getUnassignedLiteral();
+	const literalToPropagate: number = clause.getUnassignedLiteral();
 
-	const polarity = literalToPropagate > 0;
-	const variableId = Math.abs(literalToPropagate);
+	const polarity: boolean = literalToPropagate > 0;
+	const variableId: number = Math.abs(literalToPropagate);
 
 	variables.persist(variableId, polarity);
-	const variable = variables.getCopy(variableId);
+	const variable: Variable = variables.getCopy(variableId);
 	trail.push(VariableAssignment.newUnitPropagationAssignment(variable, clauseId));
 
 	stackTrail(trail);
