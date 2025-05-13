@@ -43,17 +43,16 @@ class Clause implements Comparable<Clause> {
 
 	getUnassignedLiteral(): number {
 		let i = 0;
-		let literal = undefined
-		while(i < this.literals.length && !literal) {
-			if(!this.literals[i].isAssigned) {
+		let literal = undefined;
+		while (i < this.literals.length && !literal) {
+			if (!this.literals[i].isAssigned) {
 				literal = this.literals[i].toInt();
-			}   
-			else {
+			} else {
 				i++;
 			}
 		}
-		if(!literal) {
-			throw logFatal("Non unassigned literal was found");
+		if (!literal) {
+			throw logFatal('Non unassigned literal was found');
 		}
 		return literal;
 	}

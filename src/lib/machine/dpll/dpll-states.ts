@@ -43,7 +43,13 @@ import {
 	type DPLL_UNIT_CLAUSE_DETECTION_INPUT,
 	type DPLL_UNIT_PROPAGATION_FUN,
 	type DPLL_UNIT_PROPAGATION_INPUT,
-	unitPropagation
+	unitPropagation,
+	type DPLL_COMPLEMENTARY_OCCURRENCES_INPUT,
+	type DPLL_COMPLEMENTARY_OCCURRENCES_FUN,
+	complementaryOccurrences,
+	decisionLevel,
+	type DPLL_DECISION_LEVEL_FUN,
+	type DPLL_DECISION_LEVEL_INPUT
 } from './dpll-domain.ts';
 
 const stateName2StateId = {
@@ -65,7 +71,8 @@ const stateName2StateId = {
 	unit_clause_state: 13,
 	delete_clause_state: 14,
 	unit_propagation_state: 15,
-	complementary_occurrences_state: 16
+	complementary_occurrences_state: 16,
+	decision_level_state: 17
 };
 
 // *** define state nodes ***
@@ -212,6 +219,19 @@ const unit_propagation_state: NonFinalState<
 	)
 };
 
+const complementary_occurrences_state: NonFinalState<
+	DPLL_COMPLEMENTARY_OCCURRENCES_FUN,
+	DPLL_COMPLEMENTARY_OCCURRENCES_INPUT
+> = {
+	id: stateName2StateId['complementary_occurrences_state'],
+	run: complementaryOccurrences,
+	description: 'Seek for the clauses where the complementary appears',
+	transitions: new Map<DPLL_COMPLEMENTARY_OCCURRENCES_INPUT, number>().set(
+		'triggered_clauses_state',
+		stateName2StateId['triggered_clauses_state']
+	)
+};
+
 const queue_clause_set_state: NonFinalState<
 	DPLL_QUEUE_CLAUSE_SET_FUN,
 	DPLL_QUEUE_CLAUSE_SET_INPUT
@@ -259,6 +279,13 @@ const delete_clause_state: NonFinalState<DPLL_DELETE_CLAUSE_FUN, DPLL_DELETE_CLA
 	)
 };
 
+const decision_level_state: NonFinalState<DPLL_DECISION_LEVEL_FUN, DPLL_DECISION_LEVEL_INPUT> = {
+	id: stateName2StateId['decision_level_state'],
+	run: decisionLevel,
+	description: `Check if decision level of the latest trail is === 0`,
+	transitions: new Map<DPLL_DECISION_LEVEL_INPUT, number>()
+};
+
 // *** adding states to the set of states ***
 export const states: Map<number, State<DPLL_FUN, DPLL_INPUT>> = new Map();
 
@@ -279,6 +306,8 @@ states.set(conflict_detection_state.id, conflict_detection_state);
 states.set(delete_clause_state.id, delete_clause_state);
 states.set(unit_clause_state.id, unit_clause_state);
 states.set(unit_propagation_state.id, unit_propagation_state);
+states.set(complementary_occurrences_state.id, complementary_occurrences_state);
+states.set(decision_level_state.id, decision_level_state);
 
 // export initial node
 export const initial = empty_clause_state.id;

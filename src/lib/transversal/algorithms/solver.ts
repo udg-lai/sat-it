@@ -80,3 +80,8 @@ export const complementaryOccurrences = (
 ): Set<number> => {
 	return mapping.get(-literal) ?? new Set<number>();
 };
+
+export const decisionLevel = (): boolean => {
+	const trail: Trail = getLatestTrail() as Trail;
+	return trail.getDecisionLevel() === 0;
+};
