@@ -1,4 +1,5 @@
 import type { AssignmentEvent } from '$lib/components/debugger/events.svelte.ts';
+import type { MappingLiteral2Clauses } from '$lib/store/problem.store.ts';
 import {
 	clauseEvaluation,
 	allAssigned as solverAllAssigned,
@@ -6,10 +7,13 @@ import {
 	emptyClauseDetection as solverEmptyClauseDetection,
 	queueClauseSet as solverQueueClauseSet,
 	triggeredClauses as solverTriggeredClauses,
-	unitClauseDetection as solverUnitClauseDetection
+	unitClauseDetection as solverUnitClauseDetection,
+	unitPropagation as solverUnitPropagation,
+	complementaryOccurrences as solverComplementaryOccurrences
 } from '$lib/transversal/algorithms/solver.ts';
-import { isUnSATClause } from '$lib/transversal/entities/Clause.ts';
+import { isUnitClause, isUnSATClause, type UNITClause } from '$lib/transversal/entities/Clause.ts';
 import type ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';
+import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
 import type VariablePool from '$lib/transversal/entities/VariablePool.svelte.ts';
 import { type AssignmentEval } from '$lib/transversal/interfaces/IClausePool.ts';
 import { logFatal } from '$lib/transversal/logging.ts';
@@ -45,7 +49,13 @@ export type DPLL_NEXT_CLAUSE_INPUT = 'conflict_detection_state';
 
 export type DPLL_CONFLICT_DETECTION_INPUT = 'unit_clause_state';
 
+export type DPLL_UNIT_CLAUSE_DETECTION_INPUT = 'delete_clause_state' | 'unit_propagation_state';
+
 export type DPLL_ALL_VARIABLES_ASSIGNED_INPUT = 'sat_state' | 'decide_state';
+
+export type DPLL_UNIT_PROPAGATION_INPUT = 'complementary_occurrences_state';
+
+export type DPLL_COMPLEMENTARY_OCCURRENCES_INPUT = 'triggered_clauses_state';
 
 export type DPLL_INPUT =
 	| DPLL_EMPTY_CLAUSE_INPUT
@@ -59,7 +69,10 @@ export type DPLL_INPUT =
 	| DPLL_NEXT_CLAUSE_INPUT
 	| DPLL_CONFLICT_DETECTION_INPUT
 	| DPLL_CHECK_PENDING_CLAUSES_INPUT
-	| DPLL_DELETE_CLAUSE_INPUT;
+	| DPLL_DELETE_CLAUSE_INPUT
+	| DPLL_UNIT_CLAUSE_DETECTION_INPUT
+	| DPLL_UNIT_PROPAGATION_INPUT
+	| DPLL_COMPLEMENTARY_OCCURRENCES_INPUT;
 
 // ** state functions **
 
@@ -166,6 +179,40 @@ export const thereAreJobPostponed: DPLL_CHECK_PENDING_CLAUSES_FUN = (
 	return solverStateMachine.thereArePostponed();
 };
 
+export type DPLL_UNIT_CLAUSE_DETECTION_FUN = (pool: ClausePool, clauseId: number) => boolean;
+
+export const unitClause: DPLL_UNIT_CLAUSE_DETECTION_FUN = (pool: ClausePool, clauseId: number) => {
+	const evaluation = clauseEvaluation(pool, clauseId);
+	return isUnitClause(evaluation);
+};
+
+export type DPLL_UNIT_PROPAGATION_FUN = (
+	variables: VariablePool,
+	clauses: ClausePool,
+	clauseId: number,
+	trail: Trail
+) => number;
+
+export const unitPropagation: DPLL_UNIT_PROPAGATION_FUN = (
+	variables: VariablePool,
+	clauses: ClausePool,
+	clauseId: number
+) => {
+	return solverUnitPropagation(variables, clauses, clauseId);
+};
+
+export type DPLL_COMPLEMENTARY_OCCURRENCES_FUN = (
+	mapping: MappingLiteral2Clauses,
+	literal: number
+) => Set<number>;
+
+export const complementaryOccurrences: DPLL_COMPLEMENTARY_OCCURRENCES_FUN = (
+	mapping: MappingLiteral2Clauses,
+	literal: number
+) => {
+	return solverComplementaryOccurrences(mapping, literal);
+};
+
 export type DPLL_FUN =
 	| DPLL_EMPTY_CLAUSE_FUN
 	| DPLL_UNIT_CLAUSES_DETECTION_FUN
@@ -175,4 +222,6 @@ export type DPLL_FUN =
 	| DPLL_QUEUE_CLAUSE_SET_FUN
 	| DPLL_UNSTACK_CLAUSE_SET_FUN
 	| DPLL_DELETE_CLAUSE_FUN
-	| DPLL_CONFLICT_DETECTION_FUN;
+	| DPLL_CONFLICT_DETECTION_FUN
+	| DPLL_UNIT_CLAUSE_DETECTION_FUN
+	| DPLL_UNIT_PROPAGATION_FUN;
