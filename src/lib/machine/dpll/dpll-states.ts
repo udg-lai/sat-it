@@ -254,6 +254,7 @@ const triggered_clauses_state: NonFinalState<
 	transitions: new Map<DPLL_TRIGGERED_CLAUSES_INPUT, number>()
 		.set('queue_clause_set_state', stateName2StateId['queue_clause_set_state'])
 		.set('all_variables_assigned_state', stateName2StateId['all_variables_assigned_state'])
+		.set('delete_clause_state', stateName2StateId['delete_clause_state'])
 };
 
 const unstack_clause_set_state: NonFinalState<

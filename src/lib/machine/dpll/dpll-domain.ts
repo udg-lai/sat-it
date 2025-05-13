@@ -26,7 +26,8 @@ export type DPLL_EMPTY_CLAUSE_INPUT = 'ucd_state' | 'unsat_state';
 
 export type DPLL_TRIGGERED_CLAUSES_INPUT =
 	| 'queue_clause_set_state'
-	| 'all_variables_assigned_state';
+	| 'all_variables_assigned_state'
+	| 'delete_clause_state';
 
 export type DPLL_UNIT_CLAUSES_DETECTION_INPUT = 'triggered_clauses_state';
 
