@@ -2,6 +2,7 @@ import type { AssignmentEvent } from '$lib/components/debugger/events.svelte.ts'
 import type { SolverStateMachine } from '$lib/machine/SolverStateMachine.ts';
 import type { MappingLiteral2Clauses } from '$lib/store/problem.store.ts';
 import { getLatestTrail, stackTrail, unstackTrail } from '$lib/store/trails.svelte.ts';
+import type Clause from '../entities/Clause.ts';
 import type { ClauseEval, UNITClause } from '../entities/Clause.ts';
 import type ClausePool from '../entities/ClausePool.svelte.ts';
 import { Trail } from '../entities/Trail.svelte.ts';
@@ -53,8 +54,8 @@ export const unitPropagation = (
 	clauseId: number
 ): number => {
 	const trail: Trail = obtainTrail(variables);
-	const evaluation: UNITClause = clauseEvaluation(clauses, clauseId) as UNITClause;
-	const literalToPropagate = evaluation.literal;
+	const clause: Clause = clauses.get(clauseId);
+	const literalToPropagate = clause.getUnassignedLiteral();
 
 	const polarity = literalToPropagate > 0;
 	const variableId = Math.abs(literalToPropagate);

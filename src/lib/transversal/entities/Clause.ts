@@ -2,6 +2,7 @@ import type Literal from './Literal.svelte.ts';
 import logicResolution from '../algorithms/resolution.ts';
 import { arraysEqual } from '../types/array.ts';
 import type { Comparable } from '$lib/transversal/interfaces/Comparable.ts';
+import { logFatal } from '../logging.ts';
 
 class Clause implements Comparable<Clause> {
 	private static idGenerator: number = 0;
@@ -38,6 +39,23 @@ class Clause implements Comparable<Clause> {
 
 	addLiteral(lit: Literal) {
 		this.literals.push(lit);
+	}
+
+	getUnassignedLiteral(): number {
+		let i = 0;
+		let literal = undefined
+		while(i < this.literals.length && !literal) {
+			if(!this.literals[i].isAssigned) {
+				literal = this.literals[i].toInt();
+			}   
+			else {
+				i++;
+			}
+		}
+		if(!literal) {
+			throw logFatal("Non unassigned literal was found");
+		}
+		return literal;
 	}
 
 	eval(): ClauseEval {
