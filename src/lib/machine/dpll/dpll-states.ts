@@ -49,7 +49,13 @@ import {
 	complementaryOccurrences,
 	decisionLevel,
 	type DPLL_DECISION_LEVEL_FUN,
-	type DPLL_DECISION_LEVEL_INPUT
+	type DPLL_DECISION_LEVEL_INPUT,
+	type DPLL_BACKTRACKING_FUN,
+	type DPLL_BACKTRACKING_INPUT,
+	backtracking,
+	type DPLL_DECIDE_FUN,
+	type DPLL_DECIDE_INPUT,
+	decide
 } from './dpll-domain.ts';
 
 const stateName2StateId = {
@@ -72,7 +78,9 @@ const stateName2StateId = {
 	delete_clause_state: 14,
 	unit_propagation_state: 15,
 	complementary_occurrences_state: 16,
-	decision_level_state: 17
+	decision_level_state: 17,
+	backtracking_state: 18,
+	decide_state: 19
 };
 
 // *** define state nodes ***
@@ -108,16 +116,13 @@ const empty_clause_state: NonFinalState<DPLL_EMPTY_CLAUSE_FUN, DPLL_EMPTY_CLAUSE
 		.set('unsat_state', unsat_state.id)
 };
 
-const decide_state: NonFinalState<
-	DPLL_ALL_VARIABLES_ASSIGNED_FUN,
-	DPLL_ALL_VARIABLES_ASSIGNED_INPUT
-> = {
-	id: stateName2StateId['all_variables_assigned_state'],
-	description: 'Verify if all variables have been assigned',
-	run: allAssigned,
-	transitions: new Map<DPLL_ALL_VARIABLES_ASSIGNED_INPUT, number>().set(
-		'sat_state',
-		stateName2StateId['sat_state']
+const decide_state: NonFinalState<DPLL_DECIDE_FUN, DPLL_DECIDE_INPUT> = {
+	id: stateName2StateId['decide_state'],
+	description: 'Executes a decide state',
+	run: decide,
+	transitions: new Map<DPLL_DECIDE_INPUT, number>().set(
+		'complementary_occurrences_state',
+		stateName2StateId['complementary_occurrences_state']
 	)
 };
 
@@ -284,7 +289,20 @@ const decision_level_state: NonFinalState<DPLL_DECISION_LEVEL_FUN, DPLL_DECISION
 	id: stateName2StateId['decision_level_state'],
 	run: decisionLevel,
 	description: `Check if decision level of the latest trail is === 0`,
-	transitions: new Map<DPLL_DECISION_LEVEL_INPUT, number>()
+	transitions: new Map<DPLL_DECISION_LEVEL_INPUT, number>().set(
+		'backtracking_state',
+		stateName2StateId['backtracking_state']
+	)
+};
+
+const backtracking_state: NonFinalState<DPLL_BACKTRACKING_FUN, DPLL_BACKTRACKING_INPUT> = {
+	id: stateName2StateId['backtracking_state'],
+	run: backtracking,
+	description: `Executes a backtracking step`,
+	transitions: new Map<DPLL_BACKTRACKING_INPUT, number>().set(
+		'complementary_occurrences_state',
+		stateName2StateId['complementary_occurrences_state']
+	)
 };
 
 // *** adding states to the set of states ***
@@ -309,6 +327,7 @@ states.set(unit_clause_state.id, unit_clause_state);
 states.set(unit_propagation_state.id, unit_propagation_state);
 states.set(complementary_occurrences_state.id, complementary_occurrences_state);
 states.set(decision_level_state.id, decision_level_state);
+states.set(backtracking_state.id, backtracking_state);
 
 // export initial node
 export const initial = empty_clause_state.id;

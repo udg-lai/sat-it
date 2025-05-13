@@ -10,9 +10,11 @@ import {
 	unitClauseDetection as solverUnitClauseDetection,
 	unitPropagation as solverUnitPropagation,
 	complementaryOccurrences as solverComplementaryOccurrences,
-	decisionLevel as solverDecisionLevel
+	decisionLevel as solverDecisionLevel,
+	backtracking as solverBacktracking,
+	decide as solverDecide
 } from '$lib/transversal/algorithms/solver.ts';
-import { isUnitClause, isUnSATClause, type UNITClause } from '$lib/transversal/entities/Clause.ts';
+import { isUnitClause, isUnSATClause } from '$lib/transversal/entities/Clause.ts';
 import type ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';
 import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
 import type VariablePool from '$lib/transversal/entities/VariablePool.svelte.ts';
@@ -61,6 +63,10 @@ export type DPLL_COMPLEMENTARY_OCCURRENCES_INPUT = 'triggered_clauses_state';
 
 export type DPLL_DECISION_LEVEL_INPUT = 'backtracking_state';
 
+export type DPLL_BACKTRACKING_INPUT = 'complementary_occurrences_state';
+
+export type DPLL_DECIDE_INPUT = 'complementary_occurrences_state';
+
 export type DPLL_INPUT =
 	| DPLL_EMPTY_CLAUSE_INPUT
 	| DPLL_UNIT_CLAUSES_DETECTION_INPUT
@@ -77,14 +83,16 @@ export type DPLL_INPUT =
 	| DPLL_UNIT_CLAUSE_DETECTION_INPUT
 	| DPLL_UNIT_PROPAGATION_INPUT
 	| DPLL_COMPLEMENTARY_OCCURRENCES_INPUT
-	| DPLL_DECISION_LEVEL_INPUT;
+	| DPLL_DECISION_LEVEL_INPUT
+	| DPLL_BACKTRACKING_INPUT
+	| DPLL_DECIDE_INPUT;
 
 // ** state functions **
 
-export type DPLL_DECIDE_FUN = (pool: VariablePool, assignmentEvent: AssignmentEvent) => boolean;
+export type DPLL_DECIDE_FUN = (pool: VariablePool, assignmentEvent: AssignmentEvent) => number;
 
 export const decide: DPLL_DECIDE_FUN = (pool: VariablePool, assignmentEvent: AssignmentEvent) => {
-	return solverAllAssigned(pool);
+	return solverDecide(pool, assignmentEvent, 'dpll');
 };
 
 export type DPLL_ALL_VARIABLES_ASSIGNED_FUN = (pool: VariablePool) => boolean;
@@ -224,6 +232,12 @@ export const decisionLevel: DPLL_DECISION_LEVEL_FUN = () => {
 	return solverDecisionLevel();
 };
 
+export type DPLL_BACKTRACKING_FUN = (pool: VariablePool) => number;
+
+export const backtracking: DPLL_BACKTRACKING_FUN = (pool: VariablePool) => {
+	return solverBacktracking(pool);
+};
+
 export type DPLL_FUN =
 	| DPLL_EMPTY_CLAUSE_FUN
 	| DPLL_UNIT_CLAUSES_DETECTION_FUN
@@ -237,4 +251,6 @@ export type DPLL_FUN =
 	| DPLL_UNIT_CLAUSE_DETECTION_FUN
 	| DPLL_UNIT_PROPAGATION_FUN
 	| DPLL_COMPLEMENTARY_OCCURRENCES_FUN
-	| DPLL_DECISION_LEVEL_FUN;
+	| DPLL_DECISION_LEVEL_FUN
+	| DPLL_BACKTRACKING_FUN
+	| DPLL_DECIDE_FUN;
