@@ -9,7 +9,7 @@
 	--secondary-font-color: #110b0ba8;
 	--focus-border-color: var(--secondary-font-color);
 	--windows-padding: 0.5rem;
-	--font-size: 1rem;
+	--font-size: 13px;
 	--notification-z-index: 1000;
 	--more-options-z-index: 100;
 	--TeX-font-size: 20px;

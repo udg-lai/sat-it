@@ -2,6 +2,8 @@
 	import type VariableAssignment from '$lib/transversal/entities/VariableAssignment.ts';
 	import MathTexComponent from '$lib/components/MathTexComponent.svelte';
 	import './_style.css';
+	import { onMount } from 'svelte';
+	import { runningOnChrome } from '$lib/transversal/utils.ts';
 
 	interface Props {
 		assignment: VariableAssignment;
@@ -13,11 +15,22 @@
 	function onClick() {
 		eventClick?.();
 	}
+
+	let onChrome = $state(false);
+
+	onMount(() => {
+		onChrome = runningOnChrome();
+	});
 </script>
 
-<button class="literal-style backtracking" onclick={onClick}>
-	<MathTexComponent equation={assignment.toTeX()} />
-</button>
+<backtracking>
+	<button
+		class="literal-style backtracking {onChrome ? 'pad-chrome' : 'pad-others'}"
+		onclick={onClick}
+	>
+		<MathTexComponent equation={assignment.toTeX()} />
+	</button>
+</backtracking>
 
 <style>
 	.backtracking {
@@ -31,6 +44,6 @@
 	}
 
 	:global(mo) {
-		margin-bottom: 2px;
+		margin-bottom: 3px;
 	}
 </style>
