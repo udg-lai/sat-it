@@ -30,7 +30,7 @@ export const allAssigned = (pool: VariablePool): boolean => {
 export const decide = (
 	pool: VariablePool,
 	assignmentEvent: AssignmentEvent,
-	methode: string
+	method: string
 ): number => {
 	const trail: Trail = obtainTrail(pool);
 
@@ -42,16 +42,16 @@ export const decide = (
 		}
 		variableId = fromJust(nextVariable);
 	} else {
-		methode = 'manual';
+		method = 'manual';
 		variableId = assignmentEvent.variable;
 	}
 
 	pool.persist(variableId, assignmentEvent.polarity);
 	const variable = pool.getCopy(variableId);
-	if (methode === 'manual') {
+	if (method === 'manual') {
 		trail.push(VariableAssignment.newManualAssignment(variable));
 	} else {
-		trail.push(VariableAssignment.newAutomatedAssignment(variable, methode));
+		trail.push(VariableAssignment.newAutomatedAssignment(variable, method));
 	}
 	stackTrail(trail);
 	return assignmentEvent.polarity ? variableId : -variableId;
@@ -85,7 +85,7 @@ export const unitPropagation = (
 ): number => {
 	const trail: Trail = obtainTrail(variables);
 	const clause: Clause = clauses.get(clauseId);
-	const literalToPropagate: number = clause.getUnassignedLiteral();
+	const literalToPropagate: number = clause.findUnassignedLiteral();
 
 	const polarity: boolean = literalToPropagate > 0;
 	const variableId: number = Math.abs(literalToPropagate);
@@ -111,7 +111,7 @@ export const complementaryOccurrences = (
 	return mapping.get(-literal) ?? new Set<number>();
 };
 
-export const decisionLevel = (): boolean => {
+export const nonDecisionMade = (): boolean => {
 	const trail: Trail = getLatestTrail() as Trail;
 	return trail.getDecisionLevel() === 0;
 };

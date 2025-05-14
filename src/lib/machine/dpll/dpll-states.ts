@@ -47,9 +47,9 @@ import {
 	type DPLL_COMPLEMENTARY_OCCURRENCES_INPUT,
 	type DPLL_COMPLEMENTARY_OCCURRENCES_FUN,
 	complementaryOccurrences,
-	decisionLevel,
-	type DPLL_DECISION_LEVEL_FUN,
-	type DPLL_DECISION_LEVEL_INPUT,
+	nonDecisionMade,
+	type DPLL_CHECK_NON_DECISION_MADE_FUN,
+	type DPLL_CHECK_NON_DECISION_MADE_INPUT,
 	type DPLL_BACKTRACKING_FUN,
 	type DPLL_BACKTRACKING_INPUT,
 	backtracking,
@@ -78,7 +78,7 @@ const stateName2StateId = {
 	delete_clause_state: 13,
 	unit_propagation_state: 14,
 	complementary_occurrences_state: 15,
-	decision_level_state: 16,
+	check_non_decision_made_state: 16,
 	backtracking_state: 17,
 	decide_state: 18
 };
@@ -192,7 +192,7 @@ const conflict_detection_state: NonFinalState<
 	description: 'Check if current clause is unsatisfied',
 	transitions: new Map<DPLL_CONFLICT_DETECTION_INPUT, number>()
 		.set('unit_clause_state', stateName2StateId['unit_clause_state'])
-		.set('decision_level_state', stateName2StateId['decision_level_state'])
+		.set('decision_level_state', stateName2StateId['check_non_decision_made_state'])
 };
 
 const unit_clause_state: NonFinalState<
@@ -274,18 +274,21 @@ const unstack_clause_set_state: NonFinalState<
 const delete_clause_state: NonFinalState<DPLL_DELETE_CLAUSE_FUN, DPLL_DELETE_CLAUSE_INPUT> = {
 	id: stateName2StateId['delete_clause_state'],
 	run: deleteClause,
-	description: `Deletes the clause that has been analized`,
+	description: `Deletes the clause that has been analyzed`,
 	transitions: new Map<DPLL_DELETE_CLAUSE_INPUT, number>().set(
 		'all_clauses_checked_state',
 		stateName2StateId['all_clauses_checked_state']
 	)
 };
 
-const decision_level_state: NonFinalState<DPLL_DECISION_LEVEL_FUN, DPLL_DECISION_LEVEL_INPUT> = {
-	id: stateName2StateId['decision_level_state'],
-	run: decisionLevel,
+const check_non_decision_made_state: NonFinalState<
+	DPLL_CHECK_NON_DECISION_MADE_FUN,
+	DPLL_CHECK_NON_DECISION_MADE_INPUT
+> = {
+	id: stateName2StateId['check_non_decision_made_state'],
+	run: nonDecisionMade,
 	description: `Check if decision level of the latest trail is === 0`,
-	transitions: new Map<DPLL_DECISION_LEVEL_INPUT, number>()
+	transitions: new Map<DPLL_CHECK_NON_DECISION_MADE_INPUT, number>()
 		.set('backtracking_state', stateName2StateId['backtracking_state'])
 		.set('unsat_state', stateName2StateId['unsat_state'])
 };
@@ -321,7 +324,7 @@ states.set(delete_clause_state.id, delete_clause_state);
 states.set(unit_clause_state.id, unit_clause_state);
 states.set(unit_propagation_state.id, unit_propagation_state);
 states.set(complementary_occurrences_state.id, complementary_occurrences_state);
-states.set(decision_level_state.id, decision_level_state);
+states.set(check_non_decision_made_state.id, check_non_decision_made_state);
 states.set(backtracking_state.id, backtracking_state);
 
 // export initial node

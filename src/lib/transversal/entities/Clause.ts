@@ -41,11 +41,11 @@ class Clause implements Comparable<Clause> {
 		this.literals.push(lit);
 	}
 
-	getUnassignedLiteral(): number {
+	findUnassignedLiteral(): number {
 		let i = 0;
 		let literal = undefined;
 		while (i < this.literals.length && !literal) {
-			if (!this.literals[i].isAssigned) {
+			if (!this.literals[i].isAssigned()) {
 				literal = this.literals[i].toInt();
 			} else {
 				i++;

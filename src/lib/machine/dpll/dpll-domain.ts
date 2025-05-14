@@ -10,7 +10,7 @@ import {
 	unitClauseDetection as solverUnitClauseDetection,
 	unitPropagation as solverUnitPropagation,
 	complementaryOccurrences as solverComplementaryOccurrences,
-	decisionLevel as solverDecisionLevel,
+	nonDecisionMade as solverNonDecisionMade,
 	backtracking as solverBacktracking,
 	decide as solverDecide
 } from '$lib/transversal/algorithms/solver.ts';
@@ -31,8 +31,6 @@ export type DPLL_TRIGGERED_CLAUSES_INPUT =
 	| 'delete_clause_state';
 
 export type DPLL_UNIT_CLAUSES_DETECTION_INPUT = 'triggered_clauses_state';
-
-export type DPLL_CLAUSES_INPUT = 'all_variables_assigned_state' | 'peek_clause_set_state';
 
 export type DPLL_PEEK_CLAUSE_SET_INPUT = 'all_clauses_checked_state';
 
@@ -60,7 +58,7 @@ export type DPLL_UNIT_PROPAGATION_INPUT = 'complementary_occurrences_state';
 
 export type DPLL_COMPLEMENTARY_OCCURRENCES_INPUT = 'triggered_clauses_state';
 
-export type DPLL_DECISION_LEVEL_INPUT = 'backtracking_state' | 'unsat_state';
+export type DPLL_CHECK_NON_DECISION_MADE_INPUT = 'backtracking_state' | 'unsat_state';
 
 export type DPLL_BACKTRACKING_INPUT = 'complementary_occurrences_state';
 
@@ -82,7 +80,7 @@ export type DPLL_INPUT =
 	| DPLL_UNIT_CLAUSE_DETECTION_INPUT
 	| DPLL_UNIT_PROPAGATION_INPUT
 	| DPLL_COMPLEMENTARY_OCCURRENCES_INPUT
-	| DPLL_DECISION_LEVEL_INPUT
+	| DPLL_CHECK_NON_DECISION_MADE_INPUT
 	| DPLL_BACKTRACKING_INPUT
 	| DPLL_DECIDE_INPUT;
 
@@ -225,10 +223,10 @@ export const complementaryOccurrences: DPLL_COMPLEMENTARY_OCCURRENCES_FUN = (
 	return solverComplementaryOccurrences(mapping, literal);
 };
 
-export type DPLL_DECISION_LEVEL_FUN = () => boolean;
+export type DPLL_CHECK_NON_DECISION_MADE_FUN = () => boolean;
 
-export const decisionLevel: DPLL_DECISION_LEVEL_FUN = () => {
-	return solverDecisionLevel();
+export const nonDecisionMade: DPLL_CHECK_NON_DECISION_MADE_FUN = () => {
+	return solverNonDecisionMade();
 };
 
 export type DPLL_BACKTRACKING_FUN = (pool: VariablePool) => number;
@@ -250,6 +248,6 @@ export type DPLL_FUN =
 	| DPLL_UNIT_CLAUSE_DETECTION_FUN
 	| DPLL_UNIT_PROPAGATION_FUN
 	| DPLL_COMPLEMENTARY_OCCURRENCES_FUN
-	| DPLL_DECISION_LEVEL_FUN
+	| DPLL_CHECK_NON_DECISION_MADE_FUN
 	| DPLL_BACKTRACKING_FUN
 	| DPLL_DECIDE_FUN;
