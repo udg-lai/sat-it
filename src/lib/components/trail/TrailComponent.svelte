@@ -116,9 +116,9 @@
 
 	.trail-content {
 		display: flex;
+		height: 100%;
 		flex: 1;
 		gap: 0.5rem;
 		align-items: center;
-		height: 100%;
 	}
 </style>
