@@ -1,5 +1,4 @@
 import type { AssignmentEvent } from '$lib/components/debugger/events.svelte.ts';
-import type { SolverStateMachine } from '$lib/machine/SolverStateMachine.ts';
 import type { MappingLiteral2Clauses } from '$lib/store/problem.store.ts';
 import { getLatestTrail, stackTrail, unstackTrail } from '$lib/store/trails.svelte.ts';
 import type Clause from '../entities/Clause.ts';
@@ -55,17 +54,6 @@ export const decide = (
 	}
 	stackTrail(trail);
 	return assignmentEvent.polarity ? variableId : -variableId;
-};
-
-export const queueClauseSet = (clauses: Set<number>, solverStateMachine: SolverStateMachine) => {
-	if (clauses.size === 0) {
-		logFatal('Empty set of clauses are not thought to be queued');
-	}
-	solverStateMachine.postpone(clauses);
-};
-
-export const dequeueClauseSet = (solverStateMachine: SolverStateMachine) => {
-	solverStateMachine.resolvePostponed();
 };
 
 export const clauseEvaluation = (pool: ClausePool, clauseId: number): ClauseEval => {

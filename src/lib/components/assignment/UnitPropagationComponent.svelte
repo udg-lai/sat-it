@@ -38,17 +38,19 @@
 			})
 			.join('\\: \\:')
 	);
-	
+
 	let onChrome = $state(false);
 
 	onMount(() => {
 		onChrome = runningOnChrome();
 	});
-
 </script>
 
 <unit-propagation>
-	<button id={buttonId}  class="literal-style decision unit-propagation {onChrome ? 'pad-chrome' : 'pad-others'}">
+	<button
+		id={buttonId}
+		class="literal-style decision unit-propagation {onChrome ? 'pad-chrome' : 'pad-others'}"
+	>
 		<MathTexComponent equation={assignment.toTeX()} />
 	</button>
 </unit-propagation>
@@ -64,4 +66,3 @@
 		color: black;
 	}
 </style>
-

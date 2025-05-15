@@ -21,3 +21,9 @@ export const unitPropagationEventBus = createEventBus<UPEvent>();
 export type ActionEvent = 'record' | 'undo' | 'redo';
 
 export const userActionEventBus = createEventBus<ActionEvent>();
+
+// decision that user can take for the state machine
+
+export type StateMachineEvent = 'step' | 'solve_trail' | 'solve_all';
+
+export const stateMachineEventBus = createEventBus<StateMachineEvent>();
