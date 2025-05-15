@@ -1,12 +1,16 @@
 import { logFatal } from '$lib/transversal/logging.ts';
 import type { NonFinalState } from '../StateMachine.ts';
 import type {
+    DPLL_ALL_CLAUSES_CHECKED_FUN,
+	DPLL_ALL_CLAUSES_CHECKED_INPUT,
 	DPLL_ALL_VARIABLES_ASSIGNED_FUN,
 	DPLL_ALL_VARIABLES_ASSIGNED_INPUT,
 	DPLL_CHECK_PENDING_CLAUSES_FUN,
 	DPLL_CHECK_PENDING_CLAUSES_INPUT,
 	DPLL_EMPTY_CLAUSE_FUN,
 	DPLL_EMPTY_CLAUSE_INPUT,
+	DPLL_PEEK_CLAUSE_SET_FUN,
+	DPLL_PEEK_CLAUSE_SET_INPUT,
 	DPLL_QUEUE_CLAUSE_SET_FUN,
 	DPLL_QUEUE_CLAUSE_SET_INPUT,
 	DPLL_UNIT_CLAUSES_DETECTION_FUN,
@@ -30,6 +34,8 @@ export const initialTransition = (solver: DPLL_SolverStateMachine): void => {
 		allVariablesAssignedTransition(stateMachine);
 		return;
 	}
+    const clausesToCheck = peekClauseSetTransition(stateMachine, solver);
+    allClausesCheckedTransition(stateMachine, clausesToCheck);
 };
 
 const ecTransition = (stateMachine: DPLL_StateMachine): void => {
@@ -116,3 +122,39 @@ const checkPendingClausesSetTransition = (
 	else stateMachine.transition('all_variables_assigned_state');
 	return result;
 };
+
+const peekClauseSetTransition = (
+    stateMachine: DPLL_StateMachine,
+	solver: DPLL_SolverStateMachine
+): Set<number> => {
+    const peekClauseSetState = stateMachine.getActiveState() as NonFinalState<
+		DPLL_PEEK_CLAUSE_SET_FUN,
+		DPLL_PEEK_CLAUSE_SET_INPUT
+	>;
+	if (peekClauseSetState.run === undefined) {
+		logFatal(
+			'Function call error',
+			'There should be a function in the Peek Clause Set state'
+		);
+	}
+	const result: Set<number> = peekClauseSetState.run(solver);
+	stateMachine.transition('all_clauses_checked_state');
+    return result;
+}
+
+const allClausesCheckedTransition = (stateMachine: DPLL_StateMachine, clauses: Set<number>): boolean => {
+    const allClausesCheckedState = stateMachine.getActiveState() as NonFinalState<
+		DPLL_ALL_CLAUSES_CHECKED_FUN,
+		DPLL_ALL_CLAUSES_CHECKED_INPUT
+	>;
+	if (allClausesCheckedState.run === undefined) {
+		logFatal(
+			'Function call error',
+			'There should be a function in the All Clausees Checked state'
+		);
+	}
+	const result: boolean = allClausesCheckedState.run(clauses);
+	if(result) stateMachine.transition('unstack_clause_set_state');
+    else stateMachine.transition('next_clause_state');
+    return result;
+}

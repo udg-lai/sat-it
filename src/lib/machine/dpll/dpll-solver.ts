@@ -36,9 +36,9 @@ export class DPLL_SolverStateMachine extends SolverStateMachine {
 		if (input === 'step') {
 			initialTransition(this);
 		} else if (input === 'solve_trail') {
-            console.log("Empty block")
+			console.log('Empty block');
 		} else if (input === 'solve_all') {
-            console.log("Empty block")
+			console.log('Empty block');
 		} else {
 			logFatal('Non expected input for DPLL Solver State Machine');
 		}
