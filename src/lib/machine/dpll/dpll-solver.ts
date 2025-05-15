@@ -3,6 +3,7 @@ import type { StateMachineEvent } from '$lib/transversal/events.ts';
 import { logFatal } from '$lib/transversal/logging.ts';
 import { SolverStateMachine } from '../SolverStateMachine.ts';
 import { initialTransition } from './dpll-solver-transitions.ts';
+import { dpll_stateName2StateId } from './dpll-states.ts';
 
 export const makeDPLLSolver = (): DPLL_SolverStateMachine => {
 	return new DPLL_SolverStateMachine('dpll');
@@ -34,11 +35,28 @@ export class DPLL_SolverStateMachine extends SolverStateMachine {
 
 	transition(input: StateMachineEvent): void {
 		if (input === 'step') {
-			initialTransition(this);
+			//If recieve a step, the state machine can be waitting in 4 possible states
+			//The initial state
+			const activeId: number = this.stateMachine.active;
+			if (activeId === dpll_stateName2StateId.empty_clause_state) {
+				initialTransition(this);
+			}
+			//Waitting to analize the next clause of the clauses to revise
+			else if (activeId === dpll_stateName2StateId.next_clause_state) {
+                console.log('TODO');
+			}
+			//Waitting to decide a variables
+			else if (activeId === dpll_stateName2StateId.decide_state) {
+                console.log('TODO');
+			}
+			//Waitting to backtrack an assignment
+			else if (activeId === dpll_stateName2StateId.backtracking_state) {
+                console.log('TODO');
+			}
 		} else if (input === 'solve_trail') {
-			console.log('Empty block');
+			console.log('TODO');
 		} else if (input === 'solve_all') {
-			console.log('Empty block');
+			console.log('TODO');
 		} else {
 			logFatal('Non expected input for DPLL Solver State Machine');
 		}

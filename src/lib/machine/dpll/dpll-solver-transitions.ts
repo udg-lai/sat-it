@@ -35,7 +35,10 @@ export const initialTransition = (solver: DPLL_SolverStateMachine): void => {
 		return;
 	}
     const clausesToCheck = peekClauseSetTransition(stateMachine, solver);
-    allClausesCheckedTransition(stateMachine, clausesToCheck);
+    const allClausesChecked = allClausesCheckedTransition(stateMachine, clausesToCheck);
+    if(allClausesChecked) {
+        logFatal('This is not a possibility in this case');
+    }
 };
 
 const ecTransition = (stateMachine: DPLL_StateMachine): void => {
