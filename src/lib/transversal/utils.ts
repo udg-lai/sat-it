@@ -33,3 +33,8 @@ function literalSetToClause(literals: number[], variables: VariablePool): Clause
 export function cnfToClauseSet(cnf: CNF, variables: VariablePool): Clause[] {
 	return cnf.map((literals) => literalSetToClause(literals, variables));
 }
+
+export const runningOnChrome = (): boolean => {
+	const isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
+	return isChrome;
+};

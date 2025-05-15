@@ -59,12 +59,15 @@
 		expanded = nExpanded === nExpandable;
 	}
 
+	let contentOverflow = $state(false);
+
 	function listenContentWidth(trailContent: HTMLElement) {
 		const trailContentWidthObserver = new ResizeObserver((entries) => {
 			for (const entry of entries) {
 				const contentWidth = entry.contentRect.width;
 				const trailExpectedWidth = trailElement.offsetWidth;
-				if (contentWidth > trailExpectedWidth) {
+				contentOverflow = contentWidth > trailExpectedWidth;
+				if (contentOverflow) {
 					scrollLeft();
 				}
 			}
@@ -80,10 +83,51 @@
 	function scrollLeft(): void {
 		trailElement.scroll({ left: trailElement.scrollWidth, behavior: 'smooth' });
 	}
+
+	let isMiddleClicking = $state(false);
+	let lastX = 0;
+
+	let grabCursor = $derived(contentOverflow && !isMiddleClicking);
+	let grabbingCursor = $derived(contentOverflow && isMiddleClicking);
+
+	function handleMouseDown(e: MouseEvent): void {
+		if (e.button === 1) {
+			e.preventDefault(); // prevent browser auto-scroll
+			isMiddleClicking = true;
+			lastX = e.clientX;
+
+			// Add global listeners
+			window.addEventListener('mousemove', handleMouseMove);
+			window.addEventListener('mouseup', handleMouseUp);
+		}
+	}
+
+	function handleMouseMove(e: MouseEvent): void {
+		if (!isMiddleClicking) return;
+
+		const deltaX = e.clientX - lastX;
+		trailElement.scrollLeft -= deltaX; // reverse for natural drag feel
+		lastX = e.clientX;
+	}
+
+	function handleMouseUp(e: MouseEvent): void {
+		if (e.button === 1) {
+			isMiddleClicking = false;
+			window.removeEventListener('mousemove', handleMouseMove);
+			window.removeEventListener('mouseup', handleMouseUp);
+		}
+	}
 </script>
 
-<trail bind:this={trailElement} class="trail flex flex-row">
-	<div use:listenContentWidth class="trail-content">
+<trail
+	bind:this={trailElement}
+	class="trail flex flex-row"
+	style="cursor: {grabCursor ? 'grab' : grabbingCursor ? 'grabbing' : 'unset'}"
+	role="button"
+	tabindex="0"
+	onmousedown={handleMouseDown}
+>
+	<div class="trail-content" use:listenContentWidth>
 		{#each initialPropagations as assignment}
 			{#if assignment.isK()}
 				<BacktrackingComponent {assignment} />
@@ -112,6 +156,14 @@
 		gap: 0.5rem;
 		align-items: center;
 		padding-right: 0.5rem;
+		-ms-overflow-style: none; /* Internet Explorer 10+ */
+		scrollbar-width: none; /* Firefox */
+		cursor: unset;
+	}
+
+	.trail::-webkit-scrollbar {
+		display: none;
+		/* Safari and Chrome */
 	}
 
 	.trail-content {
