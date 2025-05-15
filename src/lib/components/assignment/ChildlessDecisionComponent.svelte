@@ -2,17 +2,29 @@
 	import type VariableAssignment from '$lib/transversal/entities/VariableAssignment.ts';
 	import MathTexComponent from '$lib/components/MathTexComponent.svelte';
 	import './_style.css';
+	import { onMount } from 'svelte';
+	import { runningOnChrome } from '$lib/transversal/utils.ts';
 
 	interface Props {
 		assignment: VariableAssignment;
 	}
 
 	let { assignment }: Props = $props();
+
+	let onChrome = $state(false);
+
+	onMount(() => {
+		onChrome = runningOnChrome();
+	});
 </script>
 
-<button class="literal-style decision level-expanded childless">
-	<MathTexComponent equation={assignment.toTeX()} />
-</button>
+<childless-decision>
+	<button
+		class="literal-style decision level-expanded childless {onChrome ? 'pad-chrome' : 'pad-others'}"
+	>
+		<MathTexComponent equation={assignment.toTeX()} />
+	</button>
+</childless-decision>
 
 <style>
 	.decision {

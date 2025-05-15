@@ -39,6 +39,8 @@
 
 	let nExpanded = $state(expanded ? countLevelsWithPropagations() : 0);
 
+	let trailElement: HTMLElement;
+
 	function countLevelsWithPropagations(): number {
 		const propagations: number[] = trail.getDecisions().map((_, idx) => {
 			const level = idx + 1;
@@ -56,32 +58,119 @@
 		nExpanded = Math.min(nExpanded + 1, nExpandable);
 		expanded = nExpanded === nExpandable;
 	}
+
+	let contentOverflow = $state(false);
+
+	function listenContentWidth(trailContent: HTMLElement) {
+		const trailContentWidthObserver = new ResizeObserver((entries) => {
+			for (const entry of entries) {
+				const contentWidth = entry.contentRect.width;
+				const trailExpectedWidth = trailElement.offsetWidth;
+				contentOverflow = contentWidth > trailExpectedWidth;
+				if (contentOverflow) {
+					scrollLeft();
+				}
+			}
+		});
+		trailContentWidthObserver.observe(trailContent);
+		return {
+			destroy() {
+				trailContentWidthObserver.disconnect();
+			}
+		};
+	}
+
+	function scrollLeft(): void {
+		trailElement.scroll({ left: trailElement.scrollWidth, behavior: 'smooth' });
+	}
+
+	let isMiddleClicking = $state(false);
+	let lastX = 0;
+
+	let grabCursor = $derived(contentOverflow && !isMiddleClicking);
+	let grabbingCursor = $derived(contentOverflow && isMiddleClicking);
+
+	function handleMouseDown(e: MouseEvent): void {
+		if (e.button === 1) {
+			e.preventDefault(); // prevent browser auto-scroll
+			isMiddleClicking = true;
+			lastX = e.clientX;
+
+			// Add global listeners
+			window.addEventListener('mousemove', handleMouseMove);
+			window.addEventListener('mouseup', handleMouseUp);
+		}
+	}
+
+	function handleMouseMove(e: MouseEvent): void {
+		if (!isMiddleClicking) return;
+
+		const deltaX = e.clientX - lastX;
+		trailElement.scrollLeft -= deltaX; // reverse for natural drag feel
+		lastX = e.clientX;
+	}
+
+	function handleMouseUp(e: MouseEvent): void {
+		if (e.button === 1) {
+			isMiddleClicking = false;
+			window.removeEventListener('mousemove', handleMouseMove);
+			window.removeEventListener('mouseup', handleMouseUp);
+		}
+	}
 </script>
 
-<div class="trail flex flex-row">
-	{#each initialPropagations as assignment}
-		{#if assignment.isK()}
-			<BacktrackingComponent {assignment} />
-		{:else}
-			<UnitPropagationComponent {assignment} />
-		{/if}
-	{/each}
+<trail
+	bind:this={trailElement}
+	class="trail flex flex-row"
+	style="cursor: {grabCursor ? 'grab' : grabbingCursor ? 'grabbing' : 'unset'}"
+	role="button"
+	tabindex="0"
+	onmousedown={handleMouseDown}
+>
+	<div class="trail-content" use:listenContentWidth>
+		{#each initialPropagations as assignment}
+			{#if assignment.isK()}
+				<BacktrackingComponent {assignment} />
+			{:else}
+				<UnitPropagationComponent {assignment} />
+			{/if}
+		{/each}
 
-	{#each decisions as assignment (assignment.level)}
-		<DecisionLevelComponent
-			decision={assignment.assignment}
-			propagations={trail.getPropagations(assignment.level)}
-			expanded={decisionLevelExpanded}
-			emitClose={onEmitClose}
-			emitExpand={onEmitExpand}
-		/>
-	{/each}
-</div>
+		{#each decisions as assignment (assignment.level)}
+			<DecisionLevelComponent
+				decision={assignment.assignment}
+				propagations={trail.getPropagations(assignment.level)}
+				expanded={decisionLevelExpanded}
+				emitClose={onEmitClose}
+				emitExpand={onEmitExpand}
+			/>
+		{/each}
+	</div>
+</trail>
 
 <style>
 	.trail {
+		overflow-x: scroll;
 		display: flex;
+		flex: 1;
 		gap: 0.5rem;
 		align-items: center;
+		padding-right: 0.5rem;
+		-ms-overflow-style: none; /* Internet Explorer 10+ */
+		scrollbar-width: none; /* Firefox */
+		cursor: unset;
+	}
+
+	.trail::-webkit-scrollbar {
+		display: none;
+		/* Safari and Chrome */
+	}
+
+	.trail-content {
+		display: flex;
+		flex: 1;
+		gap: 0.5rem;
+		align-items: center;
+		height: 100%;
 	}
 </style>

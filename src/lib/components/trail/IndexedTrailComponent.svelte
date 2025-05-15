@@ -23,7 +23,7 @@
 	let disabled = $derived(noDecisions || allDecisions || noPropagations);
 </script>
 
-<div class="line">
+<indexed-trail class="line">
 	<button
 		class="enumerate transition"
 		onmouseenter={() => (hoverIndex = true)}
@@ -44,10 +44,14 @@
 		</span>
 	</button>
 	<TrailComponent {trail} bind:expanded />
-</div>
+	<div class="notification">
+		<p>content</p>
+	</div>
+</indexed-trail>
 
 <style>
 	.line {
+		width: 100%;
 		display: flex;
 		position: relative;
 	}
@@ -72,5 +76,14 @@
 		width: 4rem;
 		height: 4rem;
 		position: relative;
+	}
+
+	.notification {
+		width: 6rem;
+		background-color: darkgrey;
+		padding: 1rem;
+		display: flex;
+		justify-content: center;
+		align-items: center;
 	}
 </style>

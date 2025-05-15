@@ -25,10 +25,10 @@
 		});
 	});
 
-	let lastTrail: HTMLDivElement;
+	let editorElement: HTMLDivElement;
 
 	$effect(() => {
-		if (trails) scrollToBottom(lastTrail);
+		if (trails) scrollToBottom(editorElement);
 	});
 
 	const scrollToBottom = async (node: HTMLDivElement) => {
@@ -36,8 +36,8 @@
 	};
 </script>
 
-<div bind:this={lastTrail} class="trail-visualizer flex flex-row">
-	<div class="trails flex flex-col">
+<div bind:this={editorElement} class="trail-visualizer flex flex-row">
+	<trails class="trails flex flex-col">
 		{#each indexedTrails as indexedTrail (indexedTrail.index)}
 			<IndexedTrailComponent
 				trail={indexedTrail.trail}
@@ -45,11 +45,12 @@
 				expanded={indexedTrail.expandPropagations}
 			/>
 		{/each}
-	</div>
+	</trails>
 </div>
 
 <style>
 	.trails {
+		width: 100%;
 		height: 100%;
 		gap: 0.5rem;
 		display: flex;

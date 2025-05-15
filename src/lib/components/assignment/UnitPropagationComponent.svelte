@@ -8,6 +8,8 @@
 	import { problemStore } from '$lib/store/problem.store.ts';
 	import { logFatal } from '$lib/transversal/logging.ts';
 	import { Popover } from 'flowbite-svelte';
+	import { runningOnChrome } from '$lib/transversal/utils.ts';
+	import { onMount } from 'svelte';
 
 	interface Props {
 		assignment: VariableAssignment;
@@ -36,11 +38,20 @@
 			})
 			.join('\\: \\:')
 	);
+	
+	let onChrome = $state(false);
+
+	onMount(() => {
+		onChrome = runningOnChrome();
+	});
+
 </script>
 
-<button id={buttonId} class="literal-style decision unit-propagation">
-	<MathTexComponent equation={assignment.toTeX()} />
-</button>
+<unit-propagation>
+	<button id={buttonId}  class="literal-style decision unit-propagation {onChrome ? 'pad-chrome' : 'pad-others'}">
+		<MathTexComponent equation={assignment.toTeX()} />
+	</button>
+</unit-propagation>
 
 <Popover triggeredBy={'#' + buttonId} class="si-venga" trigger="click" placement="top">
 	<MathTexComponent equation={conflictClauseString} />
@@ -53,3 +64,4 @@
 		color: black;
 	}
 </style>
+
