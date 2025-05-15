@@ -9,10 +9,12 @@
 	--secondary-font-color: #110b0ba8;
 	--focus-border-color: var(--secondary-font-color);
 	--windows-padding: 0.5rem;
-	--font-size: 13px;
+	--font-size: 14px;
 	--notification-z-index: 1000;
 	--more-options-z-index: 100;
-	--TeX-font-size: 20px;
+	--TeX-font-size: 1.2rem;
+	--backtracking-color: rgb(117, 68, 255);
+	--unsatisfied-color: #f77777;
 }
 
 html,

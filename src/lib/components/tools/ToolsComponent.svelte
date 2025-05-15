@@ -6,6 +6,7 @@
 		FileCirclePlusOutline
 	} from 'flowbite-svelte-icons';
 	import { onMount } from 'svelte';
+	import SolutionSummary from '../SolutionSummary.svelte';
 	import './_styles.css';
 	import Button from './Button.svelte';
 
@@ -171,7 +172,11 @@
 		{#each tools as { name, active } (name)}
 			{#if active}
 				<div class="view">
-					{#if name === 'viewA'}{:else}
+					{#if name === 'viewA'}
+						<p>view A</p>
+					{:else if name === 'viewB'}
+						<SolutionSummary />
+					{:else}
 						{@render notImplementedYet()}
 					{/if}
 				</div>

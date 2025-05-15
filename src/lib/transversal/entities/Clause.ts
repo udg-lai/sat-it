@@ -123,6 +123,10 @@ class Clause implements Comparable<Clause> {
 		return arraysEqual(c1.sort(), c2.sort());
 	}
 
+	nLiterals(): number {
+		return this.literals.length;
+	}
+
 	[Symbol.iterator]() {
 		return this.literals.values();
 	}
