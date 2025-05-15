@@ -13,6 +13,8 @@
 	--notification-z-index: 1000;
 	--more-options-z-index: 100;
 	--TeX-font-size: 1.2rem;
+	--backtracking-color: rgb(117, 68, 255);
+	--unsatisfied-color: #f77777;
 }
 
 html,

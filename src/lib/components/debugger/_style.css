@@ -34,8 +34,8 @@
 }
 
 .bkt-btn {
-	color: #f77777;
-	border-color: #f77777;
+	color: var(--backtracking-color);
+	border-color: var(--backtracking-color);
 	transition: border-color 0.3s ease;
 	border-style: dashed;
 }
