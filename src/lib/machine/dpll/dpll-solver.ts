@@ -43,15 +43,15 @@ export class DPLL_SolverStateMachine extends SolverStateMachine {
 			}
 			//Waitting to analize the next clause of the clauses to revise
 			else if (activeId === dpll_stateName2StateId.next_clause_state) {
-                console.log('TODO');
+				console.log('TODO');
 			}
 			//Waitting to decide a variables
 			else if (activeId === dpll_stateName2StateId.decide_state) {
-                console.log('TODO');
+				console.log('TODO');
 			}
 			//Waitting to backtrack an assignment
 			else if (activeId === dpll_stateName2StateId.backtracking_state) {
-                console.log('TODO');
+				console.log('TODO');
 			}
 		} else if (input === 'solve_trail') {
 			console.log('TODO');
