@@ -4,7 +4,7 @@ import { logFatal } from '$lib/transversal/logging.ts';
 import { SolverStateMachine } from '../SolverStateMachine.ts';
 import type { DPLL_FUN, DPLL_INPUT } from './dpll-domain.ts';
 import { makeDPLLMachine } from './dpll-machine.ts';
-import { initialTransition } from './dpll-solver-transitions.ts';
+import { analizeClause, backtracking, decide, initialTransition } from './dpll-solver-transitions.ts';
 import { dpll_stateName2StateId } from './dpll-states.ts';
 
 export const makeDPLLSolver = (): DPLL_SolverStateMachine => {
@@ -46,15 +46,15 @@ export class DPLL_SolverStateMachine extends SolverStateMachine<DPLL_FUN, DPLL_I
 			}
 			//Waitting to analize the next clause of the clauses to revise
 			else if (activeId === dpll_stateName2StateId.next_clause_state) {
-				console.log('TODO');
+				analizeClause(this);
 			}
 			//Waitting to decide a variables
 			else if (activeId === dpll_stateName2StateId.decide_state) {
-				console.log('TODO');
+				decide(this);
 			}
 			//Waitting to backtrack an assignment
 			else if (activeId === dpll_stateName2StateId.backtracking_state) {
-				console.log('TODO');
+				backtracking(this);
 			}
 		} else if (input === 'solve_trail') {
 			console.log('TODO');

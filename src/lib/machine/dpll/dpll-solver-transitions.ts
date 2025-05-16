@@ -5,6 +5,8 @@ import type {
 	DPLL_ALL_CLAUSES_CHECKED_INPUT,
 	DPLL_ALL_VARIABLES_ASSIGNED_FUN,
 	DPLL_ALL_VARIABLES_ASSIGNED_INPUT,
+	DPLL_BACKTRACKING_FUN,
+	DPLL_BACKTRACKING_INPUT,
 	DPLL_CHECK_NON_DECISION_MADE_FUN,
 	DPLL_CHECK_NON_DECISION_MADE_INPUT,
 	DPLL_CHECK_PENDING_CLAUSES_FUN,
@@ -13,6 +15,8 @@ import type {
 	DPLL_COMPLEMENTARY_OCCURRENCES_INPUT,
 	DPLL_CONFLICT_DETECTION_FUN,
 	DPLL_CONFLICT_DETECTION_INPUT,
+	DPLL_DECIDE_FUN,
+	DPLL_DECIDE_INPUT,
 	DPLL_DELETE_CLAUSE_FUN,
 	DPLL_DELETE_CLAUSE_INPUT,
 	DPLL_EMPTY_CLAUSE_FUN,
@@ -42,6 +46,10 @@ export const initialTransition = (solver: DPLL_SolverStateMachine): void => {
 	ecTransition(stateMachine);
 	if (stateMachine.completed()) return;
 	const complementaryClauses: Set<number> = ucdTransition(stateMachine);
+	conflictDetectionBlock(solver, stateMachine, complementaryClauses);
+};
+
+const conflictDetectionBlock = (solver: DPLL_SolverStateMachine, stateMachine: DPLL_StateMachine, complementaryClauses: Set<number>): void => {
 	const triggeredClauses: boolean = triggeredClausesTransition(stateMachine, complementaryClauses);
 	if (!triggeredClauses) {
 		allVariablesAssignedTransition(stateMachine);
@@ -58,7 +66,7 @@ export const initialTransition = (solver: DPLL_SolverStateMachine): void => {
 	if (allClausesChecked) {
 		logFatal('This is not a possibility in this case');
 	}
-};
+}
 
 const ecTransition = (stateMachine: DPLL_StateMachine): void => {
 	if (stateMachine.active !== 0) {
@@ -204,28 +212,30 @@ export const analizeClause = (solver: DPLL_SolverStateMachine): void => {
 		return;
 	}
 	const unitClause: boolean = unitClauseDetectionTransition(stateMachine, clauseId);
-	if (!unitClause) {
-		deleteClauseTransition(stateMachine, clauseSet, clauseId);
-		const allChecked: boolean = allClausesCheckedTransition(stateMachine, clauseSet);
-		if (!allChecked) return;
-		dequeueClauseSetTransition(stateMachine, solver);
-		const pendingClausesSet: boolean = checkPendingClausesSetTransition(stateMachine, solver);
-		if (!pendingClausesSet) {
-			allVariablesAssignedTransition(stateMachine);
-			return;
-		}
-		const clausesToCheck = peekClauseSetTransition(stateMachine, solver);
-		const allClausesChecked = allClausesCheckedTransition(stateMachine, clausesToCheck);
-		if (allClausesChecked) {
-			logFatal('This is not a possibility in this case');
-		}
-	} else {
+	if (unitClause) {
 		const literalToPropagate: number = unitPropagationTransition(stateMachine, clauseId);
 		const complementaryClauses: Set<number> = complementaryOccurrencesTransition(
 			stateMachine,
 			literalToPropagate
 		);
-		trigger;
+		const triggeredClauses: boolean = triggeredClausesTransition(stateMachine, complementaryClauses);
+		if (triggeredClauses) {
+			queueClauseSetTransition(stateMachine, solver, complementaryClauses);
+		}
+	}
+	deleteClauseTransition(stateMachine, clauseSet, clauseId);
+	const allChecked: boolean = allClausesCheckedTransition(stateMachine, clauseSet);
+	if (!allChecked) return;
+	dequeueClauseSetTransition(stateMachine, solver);
+	const pendingClausesSet: boolean = checkPendingClausesSetTransition(stateMachine, solver);
+	if (!pendingClausesSet) {
+		allVariablesAssignedTransition(stateMachine);
+		return;
+	}
+	const clausesToCheck = peekClauseSetTransition(stateMachine, solver);
+	const allClausesChecked = allClausesCheckedTransition(stateMachine, clausesToCheck);
+	if (allClausesChecked) {
+		logFatal('This is not a possibility in this case');
 	}
 };
 
@@ -354,3 +364,48 @@ const complementaryOccurrencesTransition = (
 	stateMachine.transition('triggered_clauses_state');
 	return clauses;
 };
+
+export const decide = (solver: DPLL_SolverStateMachine): void => {
+	const stateMachine: DPLL_StateMachine = solver.stateMachine;
+	const literalToPropagate: number = decideTransition(stateMachine);
+	const complementaryClauses: Set<number> = complementaryOccurrencesTransition(
+			stateMachine,
+			literalToPropagate
+		);
+	conflictDetectionBlock(solver, stateMachine, complementaryClauses);
+}
+
+
+const decideTransition = (stateMachine: DPLL_StateMachine): number => {
+	const decideState = stateMachine.getActiveState() as NonFinalState<
+		DPLL_DECIDE_FUN,
+		DPLL_DECIDE_INPUT
+	>;
+	if (decideState.run === undefined) {
+		logFatal('Function call error', 'There should be a function in the Decide state');
+	}
+	//I have to think how to send the assignment event
+	const literalToPropagate: number =  3 //decideState.run();
+	stateMachine.transition('complementary_occurrences_state');
+	return literalToPropagate;
+}
+
+export const backtracking = (solver: DPLL_SolverStateMachine): void => {
+	const stateMachine: DPLL_StateMachine = solver.stateMachine;
+	const literalToPropagate = backtrackingTransition(stateMachine);
+	const complementaryClauses: Set<number> = complementaryOccurrencesTransition(stateMachine, literalToPropagate);
+	conflictDetectionBlock(solver, stateMachine, complementaryClauses);
+}
+
+const backtrackingTransition = (stateMachine: DPLL_StateMachine): number => {
+	const backtrackingState = stateMachine.getActiveState() as NonFinalState<
+		DPLL_BACKTRACKING_FUN,
+		DPLL_BACKTRACKING_INPUT
+	>;
+	if (backtrackingState.run === undefined) {
+		logFatal('Function call error', 'There should be a function in the Decide state');
+	}
+	const literalToPropagate: number = backtrackingState.run();
+	stateMachine.transition('complementary_occurrences_state');
+	return literalToPropagate;
+}
