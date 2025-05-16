@@ -1,5 +1,5 @@
 import { logFatal } from '$lib/transversal/logging.ts';
-import type { NonFinalState } from '../StateMachine.ts';
+import { type NonFinalState } from '../StateMachine.ts';
 import type {
 	DPLL_ALL_CLAUSES_CHECKED_FUN,
 	DPLL_ALL_CLAUSES_CHECKED_INPUT,
@@ -9,8 +9,12 @@ import type {
 	DPLL_CHECK_NON_DECISION_MADE_INPUT,
 	DPLL_CHECK_PENDING_CLAUSES_FUN,
 	DPLL_CHECK_PENDING_CLAUSES_INPUT,
+	DPLL_COMPLEMENTARY_OCCURRENCES_FUN,
+	DPLL_COMPLEMENTARY_OCCURRENCES_INPUT,
 	DPLL_CONFLICT_DETECTION_FUN,
 	DPLL_CONFLICT_DETECTION_INPUT,
+	DPLL_DELETE_CLAUSE_FUN,
+	DPLL_DELETE_CLAUSE_INPUT,
 	DPLL_EMPTY_CLAUSE_FUN,
 	DPLL_EMPTY_CLAUSE_INPUT,
 	DPLL_NEXT_CLAUSE_FUN,
@@ -19,10 +23,16 @@ import type {
 	DPLL_PEEK_CLAUSE_SET_INPUT,
 	DPLL_QUEUE_CLAUSE_SET_FUN,
 	DPLL_QUEUE_CLAUSE_SET_INPUT,
+	DPLL_TRIGGERED_CLAUSES_FUN,
+	DPLL_TRIGGERED_CLAUSES_INPUT,
 	DPLL_UNIT_CLAUSE_DETECTION_FUN,
 	DPLL_UNIT_CLAUSE_DETECTION_INPUT,
 	DPLL_UNIT_CLAUSES_DETECTION_FUN,
-	DPLL_UNIT_CLAUSES_DETECTION_INPUT
+	DPLL_UNIT_CLAUSES_DETECTION_INPUT,
+	DPLL_UNIT_PROPAGATION_FUN,
+	DPLL_UNIT_PROPAGATION_INPUT,
+	DPLL_UNSTACK_CLAUSE_SET_FUN,
+	DPLL_UNSTACK_CLAUSE_SET_INPUT
 } from './dpll-domain.ts';
 import type { DPLL_StateMachine } from './dpll-machine.ts';
 import type { DPLL_SolverStateMachine } from './dpll-solver.ts';
@@ -31,12 +41,13 @@ export const initialTransition = (solver: DPLL_SolverStateMachine): void => {
 	const stateMachine: DPLL_StateMachine = solver.stateMachine;
 	ecTransition(stateMachine);
 	if (stateMachine.completed()) return;
-	const clausesToQueue: Set<number> = ucdTransition(stateMachine);
-	if (clausesToQueue.size === 0) {
+	const complementaryClauses: Set<number> = ucdTransition(stateMachine);
+	const triggeredClauses: boolean = triggeredClausesTransition(stateMachine, complementaryClauses);
+	if (!triggeredClauses) {
 		allVariablesAssignedTransition(stateMachine);
 		return;
 	}
-	queueClauseSetTransition(stateMachine, solver, clausesToQueue);
+	queueClauseSetTransition(stateMachine, solver, complementaryClauses);
 	const pendingClausesSet: boolean = checkPendingClausesSetTransition(stateMachine, solver);
 	if (!pendingClausesSet) {
 		allVariablesAssignedTransition(stateMachine);
@@ -80,8 +91,24 @@ const ucdTransition = (stateMachine: DPLL_StateMachine): Set<number> => {
 		);
 	}
 	const result: Set<number> = ucdState.run();
-	if (result.size === 0) stateMachine.transition('all_variables_assigned_state');
-	else stateMachine.transition('queue_clause_set_state');
+	stateMachine.transition('triggered_clauses_state');
+	return result;
+};
+
+const triggeredClausesTransition = (
+	stateMachine: DPLL_StateMachine,
+	complementaryClauses: Set<number>
+): boolean => {
+	const triggeredClausesState = stateMachine.getActiveState() as NonFinalState<
+		DPLL_TRIGGERED_CLAUSES_FUN,
+		DPLL_TRIGGERED_CLAUSES_INPUT
+	>;
+	if (triggeredClausesState.run === undefined) {
+		logFatal('Function call error', 'There should be a function in the Triggered Clauses state');
+	}
+	const result: boolean = triggeredClausesState.run(complementaryClauses);
+	if (result) stateMachine.transition('queue_clause_set_state');
+	else stateMachine.transition('all_variables_assigned_state');
 	return result;
 };
 
@@ -171,16 +198,36 @@ export const analizeClause = (solver: DPLL_SolverStateMachine): void => {
 	const stateMachine: DPLL_StateMachine = solver.stateMachine;
 	const clauseSet: Set<number> = solver.consultPostponed();
 	const clauseId: number = nextClauseTransition(stateMachine, clauseSet);
-	const conflict: boolean = conflictDetectionTransition(stateMachine,clauseId);
-	if(conflict) {
+	const conflict: boolean = conflictDetectionTransition(stateMachine, clauseId);
+	if (conflict) {
 		decisionLevelTransition(stateMachine);
 		return;
 	}
-	const unitClause:boolean = unitClauseDetectionTransition(stateMachine,clauseId);
-	if(!unitClause) {
-		//TODO
+	const unitClause: boolean = unitClauseDetectionTransition(stateMachine, clauseId);
+	if (!unitClause) {
+		deleteClauseTransition(stateMachine, clauseSet, clauseId);
+		const allChecked: boolean = allClausesCheckedTransition(stateMachine, clauseSet);
+		if (!allChecked) return;
+		dequeueClauseSetTransition(stateMachine, solver);
+		const pendingClausesSet: boolean = checkPendingClausesSetTransition(stateMachine, solver);
+		if (!pendingClausesSet) {
+			allVariablesAssignedTransition(stateMachine);
+			return;
+		}
+		const clausesToCheck = peekClauseSetTransition(stateMachine, solver);
+		const allClausesChecked = allClausesCheckedTransition(stateMachine, clausesToCheck);
+		if (allClausesChecked) {
+			logFatal('This is not a possibility in this case');
+		}
+	} else {
+		const literalToPropagate: number = unitPropagationTransition(stateMachine, clauseId);
+		const complementaryClauses: Set<number> = complementaryOccurrencesTransition(
+			stateMachine,
+			literalToPropagate
+		);
+		trigger;
 	}
-}
+};
 
 const nextClauseTransition = (stateMachine: DPLL_StateMachine, clauseSet: Set<number>): number => {
 	const nextCluaseState = stateMachine.getActiveState() as NonFinalState<
@@ -193,36 +240,117 @@ const nextClauseTransition = (stateMachine: DPLL_StateMachine, clauseSet: Set<nu
 	const clauseId: number = nextCluaseState.run(clauseSet);
 	stateMachine.transition('conflict_detection_state');
 	return clauseId;
-}
+};
 
-const conflictDetectionTransition = (stateMachine: DPLL_StateMachine, clauseId: number): boolean => {
-	const conflictDetectionState = stateMachine.getActiveState() as NonFinalState<DPLL_CONFLICT_DETECTION_FUN, DPLL_CONFLICT_DETECTION_INPUT>
+const conflictDetectionTransition = (
+	stateMachine: DPLL_StateMachine,
+	clauseId: number
+): boolean => {
+	const conflictDetectionState = stateMachine.getActiveState() as NonFinalState<
+		DPLL_CONFLICT_DETECTION_FUN,
+		DPLL_CONFLICT_DETECTION_INPUT
+	>;
 	if (conflictDetectionState.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Conflict Detection state');
 	}
 	const result: boolean = conflictDetectionState.run(clauseId);
-	if(result) stateMachine.transition('decision_level_state');
+	if (result) stateMachine.transition('decision_level_state');
 	else stateMachine.transition('unit_clauses_detection_state');
 	return result;
-}
+};
 
 const decisionLevelTransition = (stateMachine: DPLL_StateMachine): void => {
-	const decisionLevelState = stateMachine.getActiveState() as NonFinalState<DPLL_CHECK_NON_DECISION_MADE_FUN, DPLL_CHECK_NON_DECISION_MADE_INPUT>
+	const decisionLevelState = stateMachine.getActiveState() as NonFinalState<
+		DPLL_CHECK_NON_DECISION_MADE_FUN,
+		DPLL_CHECK_NON_DECISION_MADE_INPUT
+	>;
 	if (decisionLevelState.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Decision Level state');
 	}
 	const result: boolean = decisionLevelState.run();
-	if(result) stateMachine.transition('unsat_state');
+	if (result) stateMachine.transition('unsat_state');
 	else stateMachine.transition('backtracking_state');
-}
+};
 
-const unitClauseDetectionTransition = (stateMachine: DPLL_StateMachine, clauseId: number): boolean => {
-	const unitClauseDetectionState = stateMachine.getActiveState() as NonFinalState<DPLL_UNIT_CLAUSE_DETECTION_FUN, DPLL_UNIT_CLAUSE_DETECTION_INPUT>
+const unitClauseDetectionTransition = (
+	stateMachine: DPLL_StateMachine,
+	clauseId: number
+): boolean => {
+	const unitClauseDetectionState = stateMachine.getActiveState() as NonFinalState<
+		DPLL_UNIT_CLAUSE_DETECTION_FUN,
+		DPLL_UNIT_CLAUSE_DETECTION_INPUT
+	>;
 	if (unitClauseDetectionState.run === undefined) {
-		logFatal('Function call error', 'There should be a function in the Unit Clause Detection state');
+		logFatal(
+			'Function call error',
+			'There should be a function in the Unit Clause Detection state'
+		);
 	}
 	const result: boolean = unitClauseDetectionState.run(clauseId);
-	if(result) stateMachine.transition('unit_propagation_state');
+	if (result) stateMachine.transition('unit_propagation_state');
 	else stateMachine.transition('delete_clause_state');
 	return result;
-}
+};
+
+const deleteClauseTransition = (
+	stateMachine: DPLL_StateMachine,
+	clauseSet: Set<number>,
+	clauseId: number
+): void => {
+	const deleteClauseState = stateMachine.getActiveState() as NonFinalState<
+		DPLL_DELETE_CLAUSE_FUN,
+		DPLL_DELETE_CLAUSE_INPUT
+	>;
+	if (deleteClauseState.run === undefined) {
+		logFatal('Function call error', 'There should be a function in the Delete Clause state');
+	}
+	deleteClauseState.run(clauseSet, clauseId);
+	stateMachine.transition('all_clauses_checked_state');
+};
+
+const dequeueClauseSetTransition = (
+	stateMachine: DPLL_StateMachine,
+	solver: DPLL_SolverStateMachine
+): void => {
+	const dequeueClauseSetState = stateMachine.getActiveState() as NonFinalState<
+		DPLL_UNSTACK_CLAUSE_SET_FUN,
+		DPLL_UNSTACK_CLAUSE_SET_INPUT
+	>;
+	if (dequeueClauseSetState.run === undefined) {
+		logFatal('Function call error', 'There should be a function in the Dequeue Clause Set state');
+	}
+	dequeueClauseSetState.run(solver);
+	stateMachine.transition('check_pending_clauses_state');
+};
+
+const unitPropagationTransition = (stateMachine: DPLL_StateMachine, clauseId: number): number => {
+	const unitPropagationState = stateMachine.getActiveState() as NonFinalState<
+		DPLL_UNIT_PROPAGATION_FUN,
+		DPLL_UNIT_PROPAGATION_INPUT
+	>;
+	if (unitPropagationState.run === undefined) {
+		logFatal('Function call error', 'There should be a function in the Unit Propagation state');
+	}
+	const literalToPropagate: number = unitPropagationState.run(clauseId);
+	stateMachine.transition('complementary_occurrences_state');
+	return literalToPropagate;
+};
+
+const complementaryOccurrencesTransition = (
+	stateMachine: DPLL_StateMachine,
+	literalToPropagate: number
+): Set<number> => {
+	const complementaryOccurrencesState = stateMachine.getActiveState() as NonFinalState<
+		DPLL_COMPLEMENTARY_OCCURRENCES_FUN,
+		DPLL_COMPLEMENTARY_OCCURRENCES_INPUT
+	>;
+	if (complementaryOccurrencesState.run === undefined) {
+		logFatal(
+			'Function call error',
+			'There should be a function in the Complementary Occurrences state'
+		);
+	}
+	const clauses: Set<number> = complementaryOccurrencesState.run(literalToPropagate);
+	stateMachine.transition('triggered_clauses_state');
+	return clauses;
+};

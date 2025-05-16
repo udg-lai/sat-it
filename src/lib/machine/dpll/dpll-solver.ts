@@ -15,7 +15,7 @@ export class DPLL_SolverStateMachine extends SolverStateMachine<DPLL_FUN, DPLL_I
 	pending: Queue<Set<number>>;
 
 	constructor() {
-		super()
+		super();
 		this.stateMachine = makeDPLLMachine();
 		this.pending = new Queue();
 	}
