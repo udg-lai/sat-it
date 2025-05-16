@@ -8,20 +8,11 @@ export interface SolverStateMachineInterface<F extends StateFun, I extends State
 	transition: (input: StateMachineEvent) => void;
 }
 
-export abstract class SolverStateMachine
-	implements SolverStateMachineInterface<StateFun, StateInput>
+export abstract class SolverStateMachine<F extends StateFun, I extends StateInput>
+	implements SolverStateMachineInterface<F, I>
 {
-	stateMachine: StateMachine<StateFun, StateInput>;
-
-	constructor(type: 'backtracking' | 'dpll' | 'cdcl') {
-		if (type === 'backtracking') {
-			this.stateMachine = makeBacktrackingMachine();
-		} else if (type === 'dpll') {
-			this.stateMachine = makeDPLLMachine();
-		} else {
-			this.stateMachine = makeBacktrackingMachine();
-		}
-	}
-
+	//With the exclamation mark, we assure that the stateMachine atribute will be assigned before its use
+	stateMachine!: StateMachine<F, I>;
+	
 	abstract transition(input: StateMachineEvent): void;
 }

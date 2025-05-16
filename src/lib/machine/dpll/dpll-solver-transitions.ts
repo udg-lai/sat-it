@@ -5,14 +5,22 @@ import type {
 	DPLL_ALL_CLAUSES_CHECKED_INPUT,
 	DPLL_ALL_VARIABLES_ASSIGNED_FUN,
 	DPLL_ALL_VARIABLES_ASSIGNED_INPUT,
+	DPLL_CHECK_NON_DECISION_MADE_FUN,
+	DPLL_CHECK_NON_DECISION_MADE_INPUT,
 	DPLL_CHECK_PENDING_CLAUSES_FUN,
 	DPLL_CHECK_PENDING_CLAUSES_INPUT,
+	DPLL_CONFLICT_DETECTION_FUN,
+	DPLL_CONFLICT_DETECTION_INPUT,
 	DPLL_EMPTY_CLAUSE_FUN,
 	DPLL_EMPTY_CLAUSE_INPUT,
+	DPLL_NEXT_CLAUSE_FUN,
+	DPLL_NEXT_CLAUSE_INPUT,
 	DPLL_PEEK_CLAUSE_SET_FUN,
 	DPLL_PEEK_CLAUSE_SET_INPUT,
 	DPLL_QUEUE_CLAUSE_SET_FUN,
 	DPLL_QUEUE_CLAUSE_SET_INPUT,
+	DPLL_UNIT_CLAUSE_DETECTION_FUN,
+	DPLL_UNIT_CLAUSE_DETECTION_INPUT,
 	DPLL_UNIT_CLAUSES_DETECTION_FUN,
 	DPLL_UNIT_CLAUSES_DETECTION_INPUT
 } from './dpll-domain.ts';
@@ -158,3 +166,63 @@ const allClausesCheckedTransition = (
 	else stateMachine.transition('next_clause_state');
 	return result;
 };
+
+export const analizeClause = (solver: DPLL_SolverStateMachine): void => {
+	const stateMachine: DPLL_StateMachine = solver.stateMachine;
+	const clauseSet: Set<number> = solver.consultPostponed();
+	const clauseId: number = nextClauseTransition(stateMachine, clauseSet);
+	const conflict: boolean = conflictDetectionTransition(stateMachine,clauseId);
+	if(conflict) {
+		decisionLevelTransition(stateMachine);
+		return;
+	}
+	const unitClause:boolean = unitClauseDetectionTransition(stateMachine,clauseId);
+	if(!unitClause) {
+		//TODO
+	}
+}
+
+const nextClauseTransition = (stateMachine: DPLL_StateMachine, clauseSet: Set<number>): number => {
+	const nextCluaseState = stateMachine.getActiveState() as NonFinalState<
+		DPLL_NEXT_CLAUSE_FUN,
+		DPLL_NEXT_CLAUSE_INPUT
+	>;
+	if (nextCluaseState.run === undefined) {
+		logFatal('Function call error', 'There should be a function in the Next Clause state');
+	}
+	const clauseId: number = nextCluaseState.run(clauseSet);
+	stateMachine.transition('conflict_detection_state');
+	return clauseId;
+}
+
+const conflictDetectionTransition = (stateMachine: DPLL_StateMachine, clauseId: number): boolean => {
+	const conflictDetectionState = stateMachine.getActiveState() as NonFinalState<DPLL_CONFLICT_DETECTION_FUN, DPLL_CONFLICT_DETECTION_INPUT>
+	if (conflictDetectionState.run === undefined) {
+		logFatal('Function call error', 'There should be a function in the Conflict Detection state');
+	}
+	const result: boolean = conflictDetectionState.run(clauseId);
+	if(result) stateMachine.transition('decision_level_state');
+	else stateMachine.transition('unit_clauses_detection_state');
+	return result;
+}
+
+const decisionLevelTransition = (stateMachine: DPLL_StateMachine): void => {
+	const decisionLevelState = stateMachine.getActiveState() as NonFinalState<DPLL_CHECK_NON_DECISION_MADE_FUN, DPLL_CHECK_NON_DECISION_MADE_INPUT>
+	if (decisionLevelState.run === undefined) {
+		logFatal('Function call error', 'There should be a function in the Decision Level state');
+	}
+	const result: boolean = decisionLevelState.run();
+	if(result) stateMachine.transition('unsat_state');
+	else stateMachine.transition('backtracking_state');
+}
+
+const unitClauseDetectionTransition = (stateMachine: DPLL_StateMachine, clauseId: number): boolean => {
+	const unitClauseDetectionState = stateMachine.getActiveState() as NonFinalState<DPLL_UNIT_CLAUSE_DETECTION_FUN, DPLL_UNIT_CLAUSE_DETECTION_INPUT>
+	if (unitClauseDetectionState.run === undefined) {
+		logFatal('Function call error', 'There should be a function in the Unit Clause Detection state');
+	}
+	const result: boolean = unitClauseDetectionState.run(clauseId);
+	if(result) stateMachine.transition('unit_propagation_state');
+	else stateMachine.transition('delete_clause_state');
+	return result;
+}

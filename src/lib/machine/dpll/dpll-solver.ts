@@ -2,18 +2,21 @@ import { Queue } from '$lib/transversal/entities/Queue.ts';
 import type { StateMachineEvent } from '$lib/transversal/events.ts';
 import { logFatal } from '$lib/transversal/logging.ts';
 import { SolverStateMachine } from '../SolverStateMachine.ts';
+import type { DPLL_FUN, DPLL_INPUT } from './dpll-domain.ts';
+import { makeDPLLMachine } from './dpll-machine.ts';
 import { initialTransition } from './dpll-solver-transitions.ts';
 import { dpll_stateName2StateId } from './dpll-states.ts';
 
 export const makeDPLLSolver = (): DPLL_SolverStateMachine => {
-	return new DPLL_SolverStateMachine('dpll');
+	return new DPLL_SolverStateMachine();
 };
 
-export class DPLL_SolverStateMachine extends SolverStateMachine {
+export class DPLL_SolverStateMachine extends SolverStateMachine<DPLL_FUN, DPLL_INPUT> {
 	pending: Queue<Set<number>>;
 
-	constructor(type: 'dpll') {
-		super(type);
+	constructor() {
+		super()
+		this.stateMachine = makeDPLLMachine();
 		this.pending = new Queue();
 	}
 
@@ -34,8 +37,8 @@ export class DPLL_SolverStateMachine extends SolverStateMachine {
 	}
 
 	transition(input: StateMachineEvent): void {
+		//If recieve a step, the state machine can be waitting in 4 possible states
 		if (input === 'step') {
-			//If recieve a step, the state machine can be waitting in 4 possible states
 			//The initial state
 			const activeId: number = this.stateMachine.active;
 			if (activeId === dpll_stateName2StateId.empty_clause_state) {
