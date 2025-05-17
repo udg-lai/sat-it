@@ -222,7 +222,6 @@ export const analizeClause = (solver: DPLL_SolverStateMachine): void => {
 	const clauseSet: Set<number> = solver.consultPostponed();
 	const clauseId: number = nextClauseTransition(stateMachine, clauseSet);
 	const conflict: boolean = conflictDetectionTransition(stateMachine, clauseId);
-	console.log('Hola');
 	if (conflict) {
 		decisionLevelTransition(stateMachine);
 		return;
@@ -246,7 +245,7 @@ export const analizeClause = (solver: DPLL_SolverStateMachine): void => {
 	deleteClauseTransition(stateMachine, clauseSet, clauseId);
 	const allChecked: boolean = allClausesCheckedTransition(stateMachine, clauseSet);
 	if (!allChecked) return;
-	dequeueClauseSetTransition(stateMachine, solver);
+	unstackClauseSetTransition(stateMachine, solver);
 	const pendingClausesSet: boolean = checkPendingClausesSetTransition(stateMachine, solver);
 	if (!pendingClausesSet) {
 		allVariablesAssignedTransition(stateMachine);
@@ -335,7 +334,7 @@ const deleteClauseTransition = (
 	stateMachine.transition('all_clauses_checked_state');
 };
 
-const dequeueClauseSetTransition = (
+const unstackClauseSetTransition = (
 	stateMachine: DPLL_StateMachine,
 	solver: DPLL_SolverStateMachine
 ): void => {
@@ -378,7 +377,6 @@ const complementaryOccurrencesTransition = (
 		);
 	}
 	const clauses: Set<number> = complementaryOccurrencesState.run(literalToPropagate);
-
 	stateMachine.transition('triggered_clauses_state');
 	return clauses;
 };
@@ -410,6 +408,7 @@ const decideTransition = (stateMachine: DPLL_StateMachine): number => {
 export const backtracking = (solver: DPLL_SolverStateMachine): void => {
 	const stateMachine: DPLL_StateMachine = solver.stateMachine;
 	const literalToPropagate = backtrackingTransition(stateMachine);
+	console.log('This is the literal to propagate', literalToPropagate);
 	const complementaryClauses: Set<number> = complementaryOccurrencesTransition(
 		stateMachine,
 		literalToPropagate

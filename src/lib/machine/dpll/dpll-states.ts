@@ -263,8 +263,8 @@ const unstack_clause_set_state: NonFinalState<
 	run: unstackClauseSet,
 	description: 'Unstack the set of clause',
 	transitions: new Map<DPLL_UNSTACK_CLAUSE_SET_INPUT, number>().set(
-		'check_state',
-		dpll_stateName2StateId['clause_evaluation_state']
+		'check_pending_clauses_state',
+		dpll_stateName2StateId['check_pending_clauses_state']
 	)
 };
 

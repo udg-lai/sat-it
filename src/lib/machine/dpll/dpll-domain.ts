@@ -37,7 +37,7 @@ export type DPLL_CHECK_PENDING_CLAUSES_INPUT =
 
 export type DPLL_QUEUE_CLAUSE_SET_INPUT = 'check_pending_clauses_state' | 'delete_clause_state';
 
-export type DPLL_UNSTACK_CLAUSE_SET_INPUT = 'check_state';
+export type DPLL_UNSTACK_CLAUSE_SET_INPUT = 'check_pending_clauses_state';
 
 export type DPLL_DELETE_CLAUSE_INPUT = 'all_clauses_checked_state';
 
