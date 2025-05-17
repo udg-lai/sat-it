@@ -1,10 +1,10 @@
 <script lang="ts">
 	import './_style.css';
 	import { CaretRightOutline, CodeMergeOutline } from 'flowbite-svelte-icons';
-	import { emitAssignmentEvent } from './events.svelte.ts';
 	import DynamicRender from '$lib/components/DynamicRender.svelte';
-	import { userActionEventBus } from '$lib/transversal/events.ts';
+	import { stateMachineEventBus, userActionEventBus } from '$lib/transversal/events.ts';
 	import { isUnSAT, type AssignmentEval } from '$lib/transversal/interfaces/IClausePool.ts';
+	import { updateAssignment } from '$lib/store/assignment.svelte.ts';
 
 	interface Props {
 		previousEval: AssignmentEval;
@@ -23,7 +23,8 @@
 		class="btn general-btn"
 		class:invalidOption={disableButton}
 		onclick={() => {
-			emitAssignmentEvent({ type: 'automated' });
+			updateAssignment('automated');
+			stateMachineEventBus.emit('step');
 			userActionEventBus.emit('record');
 		}}
 		title="Decide"
@@ -36,8 +37,7 @@
 		class="btn general-btn bkt-btn"
 		class:invalidOption={disableButton}
 		onclick={() => {
-			emitAssignmentEvent({ type: 'automated' });
-			userActionEventBus.emit('record');
+			stateMachineEventBus.emit('step');
 		}}
 		title="Backtrack"
 		disabled={disableButton}

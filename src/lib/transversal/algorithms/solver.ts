@@ -1,4 +1,5 @@
 import type { AssignmentEvent } from '$lib/components/debugger/events.svelte.ts';
+import { getAssignment } from '$lib/store/assignment.svelte.ts';
 import type { MappingLiteral2Clauses } from '$lib/store/problem.store.ts';
 import { getLatestTrail, stackTrail, unstackTrail } from '$lib/store/trails.svelte.ts';
 import type Clause from '../entities/Clause.ts';
@@ -26,12 +27,9 @@ export const allAssigned = (pool: VariablePool): boolean => {
 	return pool.allAssigned();
 };
 
-export const decide = (
-	pool: VariablePool,
-	assignmentEvent: AssignmentEvent,
-	method: string
-): number => {
+export const decide = (pool: VariablePool, method: string): number => {
 	const trail: Trail = obtainTrail(pool);
+	const assignmentEvent: AssignmentEvent = getAssignment();
 
 	let variableId: number;
 	if (assignmentEvent.type === 'automated') {

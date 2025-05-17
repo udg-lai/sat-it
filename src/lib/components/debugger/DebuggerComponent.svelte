@@ -14,6 +14,7 @@
 	import UnitPropagationDebugger from './UnitPropagationDebuggerComponent.svelte';
 	import ResetProblemDebugger from './ResetProblemDebuggerComponent.svelte';
 	import { isUnSAT } from '$lib/transversal/interfaces/IClausePool.ts';
+	import { stateMachineEventBus } from '$lib/transversal/events.ts';
 
 	let defaultNextVariable: number | undefined = $derived.by(() => {
 		if ($problemStore !== undefined) return $problemStore.variables.nextVariable;
@@ -29,6 +30,14 @@
 
 <div transition:slide|global class="flex-center debugger align-center relative flex-row gap-2">
 	<div class="variable-display"></div>
+	<button
+		onclick={() => {
+			stateMachineEventBus.emit('step');
+		}}
+	>
+		Hola
+	</button>
+	<!--
 	{#if enablePreproces}
 		<PreprocesDebugger />
 	{:else if enableUnitPropagtion}
@@ -48,6 +57,7 @@
 		{/if}
 		<GeneralDebuggerButtons />
 	{/if}
+	-->
 </div>
 
 <style>

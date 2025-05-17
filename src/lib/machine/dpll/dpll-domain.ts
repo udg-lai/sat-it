@@ -1,4 +1,3 @@
-import type { AssignmentEvent } from '$lib/components/debugger/events.svelte.ts';
 import { problemStore, type MappingLiteral2Clauses } from '$lib/store/problem.store.ts';
 import {
 	clauseEvaluation,
@@ -48,7 +47,7 @@ export type DPLL_NEXT_CLAUSE_INPUT = 'conflict_detection_state';
 
 export type DPLL_CONFLICT_DETECTION_INPUT = 'unit_clause_state' | 'decision_level_state';
 
-export type DPLL_UNIT_CLAUSE_DETECTION_INPUT = 'delete_clause_state' | 'unit_propagation_state';
+export type DPLL_UNIT_CLAUSE_INPUT = 'delete_clause_state' | 'unit_propagation_state';
 
 export type DPLL_ALL_VARIABLES_ASSIGNED_INPUT = 'sat_state' | 'decide_state';
 
@@ -75,7 +74,7 @@ export type DPLL_INPUT =
 	| DPLL_CONFLICT_DETECTION_INPUT
 	| DPLL_CHECK_PENDING_CLAUSES_INPUT
 	| DPLL_DELETE_CLAUSE_INPUT
-	| DPLL_UNIT_CLAUSE_DETECTION_INPUT
+	| DPLL_UNIT_CLAUSE_INPUT
 	| DPLL_UNIT_PROPAGATION_INPUT
 	| DPLL_COMPLEMENTARY_OCCURRENCES_INPUT
 	| DPLL_CHECK_NON_DECISION_MADE_INPUT
@@ -84,11 +83,11 @@ export type DPLL_INPUT =
 
 // ** state functions **
 
-export type DPLL_DECIDE_FUN = (assignmentEvent: AssignmentEvent) => number;
+export type DPLL_DECIDE_FUN = () => number;
 
-export const decide: DPLL_DECIDE_FUN = (assignmentEvent: AssignmentEvent) => {
+export const decide: DPLL_DECIDE_FUN = () => {
 	const pool: VariablePool = get(problemStore).variables;
-	return solverDecide(pool, assignmentEvent, 'dpll');
+	return solverDecide(pool, 'dpll');
 };
 
 export type DPLL_ALL_VARIABLES_ASSIGNED_FUN = () => boolean;
@@ -108,7 +107,7 @@ export const emptyClauseDetection: DPLL_EMPTY_CLAUSE_FUN = () => {
 export type DPLL_QUEUE_CLAUSE_SET_FUN = (
 	clauses: Set<number>,
 	solverStateMachine: DPLL_SolverStateMachine
-) => void;
+) => number;
 
 export const queueClauseSet: DPLL_QUEUE_CLAUSE_SET_FUN = (
 	clauses: Set<number>,
@@ -117,7 +116,8 @@ export const queueClauseSet: DPLL_QUEUE_CLAUSE_SET_FUN = (
 	if (clauses.size === 0) {
 		logFatal('Empty set of clauses are not thought to be queued');
 	}
-	return solverStateMachine.postpone(clauses);
+	solverStateMachine.postpone(clauses);
+	return solverStateMachine.leftToPostpone();
 };
 
 export type DPLL_UNSTACK_CLAUSE_SET_FUN = (solverStateMachine: DPLL_SolverStateMachine) => void;
@@ -194,9 +194,9 @@ export const thereAreJobPostponed: DPLL_CHECK_PENDING_CLAUSES_FUN = (
 	return solverStateMachine.thereArePostponed();
 };
 
-export type DPLL_UNIT_CLAUSE_DETECTION_FUN = (clauseId: number) => boolean;
+export type DPLL_UNIT_CLAUSE_FUN = (clauseId: number) => boolean;
 
-export const unitClause: DPLL_UNIT_CLAUSE_DETECTION_FUN = (clauseId: number) => {
+export const unitClause: DPLL_UNIT_CLAUSE_FUN = (clauseId: number) => {
 	const pool: ClausePool = get(problemStore).clauses;
 	const evaluation: ClauseEval = clauseEvaluation(pool, clauseId);
 	return isUnitClause(evaluation);
@@ -240,7 +240,7 @@ export type DPLL_FUN =
 	| DPLL_UNSTACK_CLAUSE_SET_FUN
 	| DPLL_DELETE_CLAUSE_FUN
 	| DPLL_CONFLICT_DETECTION_FUN
-	| DPLL_UNIT_CLAUSE_DETECTION_FUN
+	| DPLL_UNIT_CLAUSE_FUN
 	| DPLL_UNIT_PROPAGATION_FUN
 	| DPLL_COMPLEMENTARY_OCCURRENCES_FUN
 	| DPLL_CHECK_NON_DECISION_MADE_FUN

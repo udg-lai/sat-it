@@ -4,6 +4,8 @@ import type { StateFun, StateInput, StateMachine } from './StateMachine.ts';
 export interface SolverStateMachineInterface<F extends StateFun, I extends StateInput> {
 	stateMachine: StateMachine<F, I>;
 	transition: (input: StateMachineEvent) => void;
+	getActiveStateId: () => number;
+	updateActiveState: (newActiveState: number) => void;
 }
 
 export abstract class SolverStateMachine<F extends StateFun, I extends StateInput>
@@ -13,4 +15,12 @@ export abstract class SolverStateMachine<F extends StateFun, I extends StateInpu
 	stateMachine!: StateMachine<F, I>;
 
 	abstract transition(input: StateMachineEvent): void;
+
+	getActiveStateId(): number {
+		return this.stateMachine.active;
+	}
+
+	updateActiveState(newActiveState: number): void {
+		this.stateMachine.active = newActiveState;
+	}
 }

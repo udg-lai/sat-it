@@ -68,6 +68,12 @@ export abstract class StateMachine<F extends StateFun, I extends StateInput>
 		} else {
 			const activeState = this.getActiveState() as NonFinalState<DPLL_FUN, DPLL_INPUT>;
 			const activeStateTransitions = activeState.transitions;
+			console.log(
+				'Printem els active States de',
+				activeState.id,
+				'Son els següents:',
+				activeStateTransitions
+			);
 			const nextStateId = activeStateTransitions.get(input);
 			if (nextStateId === undefined) {
 				logFatal('Unexpected input to active state');
