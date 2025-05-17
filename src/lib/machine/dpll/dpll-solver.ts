@@ -50,7 +50,6 @@ export class DPLL_SolverStateMachine extends SolverStateMachine<DPLL_FUN, DPLL_I
 		if (input === 'step') {
 			//The initial state
 			const activeId: number = this.stateMachine.active;
-			console.log('El fucking active id', activeId);
 			if (activeId === dpll_stateName2StateId.empty_clause_state) {
 				initialTransition(this);
 			}

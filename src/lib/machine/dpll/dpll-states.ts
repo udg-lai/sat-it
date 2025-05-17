@@ -56,7 +56,10 @@ import {
 	type DPLL_DECIDE_FUN,
 	type DPLL_DECIDE_INPUT,
 	decide,
-	unitClause
+	unitClause,
+	type DPLL_EMPTY_CLAUSE_SET_FUN,
+	type DPLL_EMPTY_CLAUSE_SET_INPUT,
+	emptyClauseSet
 } from './dpll-domain.ts';
 
 export const dpll_stateName2StateId = {
@@ -80,7 +83,8 @@ export const dpll_stateName2StateId = {
 	complementary_occurrences_state: 15,
 	decision_level_state: 16,
 	backtracking_state: 17,
-	decide_state: 18
+	decide_state: 18,
+	empty_clause_set_state: 19
 };
 
 // *** define state nodes ***
@@ -192,7 +196,7 @@ const conflict_detection_state: NonFinalState<
 	description: 'Check if current clause is unsatisfied',
 	transitions: new Map<DPLL_CONFLICT_DETECTION_INPUT, number>()
 		.set('unit_clause_state', dpll_stateName2StateId['unit_clause_state'])
-		.set('decision_level_state', dpll_stateName2StateId['decision_level_state'])
+		.set('empty_clause_set_state', dpll_stateName2StateId['empty_clause_set_state'])
 };
 
 const unit_clause_state: NonFinalState<DPLL_UNIT_CLAUSE_FUN, DPLL_UNIT_CLAUSE_INPUT> = {
@@ -300,6 +304,19 @@ const backtracking_state: NonFinalState<DPLL_BACKTRACKING_FUN, DPLL_BACKTRACKING
 	)
 };
 
+const empty_clause_set_state: NonFinalState<
+	DPLL_EMPTY_CLAUSE_SET_FUN,
+	DPLL_EMPTY_CLAUSE_SET_INPUT
+> = {
+	id: dpll_stateName2StateId['empty_clause_set_state'],
+	run: emptyClauseSet,
+	description: `Emties the queue of clauses to check`,
+	transitions: new Map<DPLL_EMPTY_CLAUSE_SET_INPUT, number>().set(
+		'decision_level_state',
+		dpll_stateName2StateId['decision_level_state']
+	)
+};
+
 // *** adding states to the set of states ***
 export const states: Map<number, State<DPLL_FUN, DPLL_INPUT>> = new Map();
 
@@ -323,6 +340,7 @@ states.set(unit_propagation_state.id, unit_propagation_state);
 states.set(complementary_occurrences_state.id, complementary_occurrences_state);
 states.set(decision_level_state.id, decision_level_state);
 states.set(backtracking_state.id, backtracking_state);
+states.set(empty_clause_set_state.id, empty_clause_set_state);
 
 // export initial node
 export const initial = empty_clause_state.id;

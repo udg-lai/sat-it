@@ -94,7 +94,14 @@ export const complementaryOccurrences = (
 	mapping: MappingLiteral2Clauses,
 	literal: number
 ): Set<number> => {
-	return mapping.get(-literal) ?? new Set<number>();
+	const mappingReturn: Set<number> | undefined = mapping.get(-literal);
+	const complementaryOccurrences: Set<number> = new Set<number>();
+	if (mappingReturn !== undefined) {
+		for (const clause of mappingReturn) {
+			complementaryOccurrences.add(clause);
+		}
+	}
+	return complementaryOccurrences;
 };
 
 export const nonDecisionMade = (): boolean => {
@@ -115,7 +122,7 @@ export const backtracking = (pool: VariablePool): number => {
 	trail.updateFollowUpIndex();
 
 	stackTrail(trail);
-	return polarity ? -lastVariable.getInt() : lastVariable.getInt();
+	return polarity ? lastVariable.getInt() : -lastVariable.getInt();
 };
 
 const disposeUntilDecision = (trail: Trail, variables: VariablePool): VariableAssignment => {

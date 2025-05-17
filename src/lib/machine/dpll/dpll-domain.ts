@@ -45,7 +45,7 @@ export type DPLL_ALL_CLAUSES_CHECKED_INPUT = 'next_clause_state' | 'unstack_clau
 
 export type DPLL_NEXT_CLAUSE_INPUT = 'conflict_detection_state';
 
-export type DPLL_CONFLICT_DETECTION_INPUT = 'unit_clause_state' | 'decision_level_state';
+export type DPLL_CONFLICT_DETECTION_INPUT = 'unit_clause_state' | 'empty_clause_set_state';
 
 export type DPLL_UNIT_CLAUSE_INPUT = 'delete_clause_state' | 'unit_propagation_state';
 
@@ -60,6 +60,8 @@ export type DPLL_CHECK_NON_DECISION_MADE_INPUT = 'backtracking_state' | 'unsat_s
 export type DPLL_BACKTRACKING_INPUT = 'complementary_occurrences_state';
 
 export type DPLL_DECIDE_INPUT = 'complementary_occurrences_state';
+
+export type DPLL_EMPTY_CLAUSE_SET_INPUT = 'decision_level_state';
 
 export type DPLL_INPUT =
 	| DPLL_EMPTY_CLAUSE_INPUT
@@ -79,7 +81,8 @@ export type DPLL_INPUT =
 	| DPLL_COMPLEMENTARY_OCCURRENCES_INPUT
 	| DPLL_CHECK_NON_DECISION_MADE_INPUT
 	| DPLL_BACKTRACKING_INPUT
-	| DPLL_DECIDE_INPUT;
+	| DPLL_DECIDE_INPUT
+	| DPLL_EMPTY_CLAUSE_SET_INPUT;
 
 // ** state functions **
 
@@ -230,6 +233,16 @@ export const backtracking: DPLL_BACKTRACKING_FUN = () => {
 	return solverBacktracking(pool);
 };
 
+export type DPLL_EMPTY_CLAUSE_SET_FUN = (solverStateMachine: DPLL_SolverStateMachine) => void;
+
+export const emptyClauseSet: DPLL_EMPTY_CLAUSE_SET_FUN = (
+	solverStateMachine: DPLL_SolverStateMachine
+) => {
+	while (solverStateMachine.leftToPostpone()) {
+		solverStateMachine.resolvePostponed();
+	}
+};
+
 export type DPLL_FUN =
 	| DPLL_EMPTY_CLAUSE_FUN
 	| DPLL_UNIT_CLAUSES_DETECTION_FUN
@@ -245,4 +258,5 @@ export type DPLL_FUN =
 	| DPLL_COMPLEMENTARY_OCCURRENCES_FUN
 	| DPLL_CHECK_NON_DECISION_MADE_FUN
 	| DPLL_BACKTRACKING_FUN
-	| DPLL_DECIDE_FUN;
+	| DPLL_DECIDE_FUN
+	| DPLL_EMPTY_CLAUSE_SET_FUN;

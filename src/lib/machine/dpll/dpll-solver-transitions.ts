@@ -1,7 +1,4 @@
-import { problemStore } from '$lib/store/problem.store.ts';
-import { getTrails } from '$lib/store/trails.svelte.ts';
 import { logFatal } from '$lib/transversal/logging.ts';
-import { get } from 'svelte/store';
 import { type NonFinalState } from '../StateMachine.ts';
 import type {
 	DPLL_ALL_CLAUSES_CHECKED_FUN,
@@ -24,6 +21,8 @@ import type {
 	DPLL_DELETE_CLAUSE_INPUT,
 	DPLL_EMPTY_CLAUSE_FUN,
 	DPLL_EMPTY_CLAUSE_INPUT,
+	DPLL_EMPTY_CLAUSE_SET_FUN,
+	DPLL_EMPTY_CLAUSE_SET_INPUT,
 	DPLL_NEXT_CLAUSE_FUN,
 	DPLL_NEXT_CLAUSE_INPUT,
 	DPLL_PEEK_CLAUSE_SET_FUN,
@@ -223,6 +222,7 @@ export const analizeClause = (solver: DPLL_SolverStateMachine): void => {
 	const clauseId: number = nextClauseTransition(stateMachine, clauseSet);
 	const conflict: boolean = conflictDetectionTransition(stateMachine, clauseId);
 	if (conflict) {
+		emptyClauseSetTransition(stateMachine, solver);
 		decisionLevelTransition(stateMachine);
 		return;
 	}
@@ -283,7 +283,7 @@ const conflictDetectionTransition = (
 		logFatal('Function call error', 'There should be a function in the Conflict Detection state');
 	}
 	const result: boolean = conflictDetectionState.run(clauseId);
-	if (result) stateMachine.transition('decision_level_state');
+	if (result) stateMachine.transition('empty_clause_set_state');
 	else stateMachine.transition('unit_clause_state');
 	return result;
 };
@@ -408,7 +408,6 @@ const decideTransition = (stateMachine: DPLL_StateMachine): number => {
 export const backtracking = (solver: DPLL_SolverStateMachine): void => {
 	const stateMachine: DPLL_StateMachine = solver.stateMachine;
 	const literalToPropagate = backtrackingTransition(stateMachine);
-	console.log('This is the literal to propagate', literalToPropagate);
 	const complementaryClauses: Set<number> = complementaryOccurrencesTransition(
 		stateMachine,
 		literalToPropagate
@@ -427,4 +426,19 @@ const backtrackingTransition = (stateMachine: DPLL_StateMachine): number => {
 	const literalToPropagate: number = backtrackingState.run();
 	stateMachine.transition('complementary_occurrences_state');
 	return literalToPropagate;
+};
+
+const emptyClauseSetTransition = (
+	stateMachine: DPLL_StateMachine,
+	solver: DPLL_SolverStateMachine
+): void => {
+	const emptyClauseSetState = stateMachine.getActiveState() as NonFinalState<
+		DPLL_EMPTY_CLAUSE_SET_FUN,
+		DPLL_EMPTY_CLAUSE_SET_INPUT
+	>;
+	if (emptyClauseSetState.run === undefined) {
+		logFatal('Function call error', 'There should be a function in the Empty Clause Set state');
+	}
+	emptyClauseSetState.run(solver);
+	stateMachine.transition('decision_level_state');
 };
