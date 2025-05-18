@@ -14,7 +14,7 @@
 	onclick={() => {
 		stateMachineEventBus.emit('step');
 	}}
-	title="Start Preproces"
+	title="Step"
 >
 	<DynamicRender component={CaretRightOutline} props={assignmentProps} />
 </button>

@@ -244,6 +244,7 @@ export const emptyClauseSet: DPLL_EMPTY_CLAUSE_SET_FUN = (
 	while (solverStateMachine.leftToPostpone()) {
 		solverStateMachine.resolvePostponed();
 	}
+	updateClausesToCheck(new Set<number>());
 };
 
 export type DPLL_FUN =

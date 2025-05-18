@@ -48,8 +48,8 @@ export class DPLL_SolverStateMachine extends SolverStateMachine<DPLL_FUN, DPLL_I
 	transition(input: StateMachineEvent): void {
 		//If recieve a step, the state machine can be waitting in 4 possible states
 		if (input === 'step') {
-			//The initial state
 			const activeId: number = this.stateMachine.active;
+			//The initial state
 			if (activeId === dpll_stateName2StateId.empty_clause_state) {
 				initialTransition(this);
 			}
@@ -64,6 +64,15 @@ export class DPLL_SolverStateMachine extends SolverStateMachine<DPLL_FUN, DPLL_I
 			//Waitting to backtrack an assignment
 			else if (activeId === dpll_stateName2StateId.backtracking_state) {
 				backtracking(this);
+			}
+		} else if (input === 'followingVariable') {
+			const initialSize: number = this.pending.size();
+			while (initialSize === this.pending.size()) {
+				analizeClause(this);
+			}
+		} else if (input === 'finishUP') {
+			while (!this.pending.isEmpty()) {
+				analizeClause(this);
 			}
 		} else if (input === 'solve_trail') {
 			console.log('TODO');
