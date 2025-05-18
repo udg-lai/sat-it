@@ -1,3 +1,4 @@
+import { updateActiveState } from '$lib/store/clausesToCheck.svelte.ts';
 import { logFatal } from '$lib/transversal/logging.ts';
 import type { DPLL_FUN, DPLL_INPUT } from './dpll/dpll-domain.ts';
 
@@ -88,6 +89,7 @@ export abstract class StateMachine<F extends StateFun, I extends StateInput>
 		} else {
 			const nextState = this.getNextState(input);
 			this.active = nextState.id;
+			updateActiveState(this.active);
 		}
 	}
 }

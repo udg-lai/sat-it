@@ -1,10 +1,6 @@
 <script lang="ts">
-	import {
-		resetWorkingTrailPointer,
-		updateFinished,
-		updatePreviousEval
-	} from '$lib/store/clausesToCheck.svelte.ts';
-	import { problemStore, resetProblem, updateProblemFromTrail } from '$lib/store/problem.store.ts';
+	import { resetWorkingTrailPointer } from '$lib/store/clausesToCheck.svelte.ts';
+	import { resetProblem, updateProblemFromTrail } from '$lib/store/problem.store.ts';
 	import { record, redo, resetStack, undo, type Snapshot } from '$lib/store/stack.svelte.ts';
 	import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
 	import {
@@ -14,10 +10,7 @@
 		type ActionEvent,
 		type StateMachineEvent
 	} from '$lib/transversal/events.ts';
-	import { isSAT, isUnSAT, makeSat } from '$lib/transversal/interfaces/IClausePool.ts';
 	import { onMount } from 'svelte';
-
-	import { get } from 'svelte/store';
 	import { editorViewEventStore, type EditorViewEvent } from './debugger/events.svelte.ts';
 	import TrailEditor from './TrailEditorComponent.svelte';
 	import {
@@ -32,23 +25,7 @@
 
 	let trails: Trail[] = $derived(getTrails());
 
-	let workingTrail: Trail | undefined = $derived(trails[trails.length - 1]);
-
 	let stateMachine: SolverStateMachine<StateFun, StateInput> = $derived(getSolverStateMachine());
-
-	let finished: boolean = $derived.by(() => {
-		if (!workingTrail) return false;
-		const { variables, clauses } = get(problemStore);
-		const evaluation = clauses.eval();
-		return (
-			(isSAT(evaluation) && variables.allAssigned()) ||
-			(isUnSAT(evaluation) && workingTrail.getDecisionLevel() === 0)
-		);
-	});
-	$effect(() => {
-		updateFinished(finished);
-		if (finished && get(problemStore).variables.allAssigned()) updatePreviousEval(makeSat());
-	});
 
 	function onActionEvent(a: ActionEvent) {
 		if (a === 'record') {

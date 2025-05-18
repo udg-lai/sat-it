@@ -3,22 +3,21 @@
 	import { CaretRightOutline, CodeMergeOutline } from 'flowbite-svelte-icons';
 	import DynamicRender from '$lib/components/DynamicRender.svelte';
 	import { stateMachineEventBus, userActionEventBus } from '$lib/transversal/events.ts';
-	import { isUnSAT, type AssignmentEval } from '$lib/transversal/interfaces/IClausePool.ts';
 	import { updateAssignment } from '$lib/store/assignment.svelte.ts';
 
 	interface Props {
-		previousEval: AssignmentEval;
+		backtrackingState: boolean;
 		disableButton: boolean;
 	}
 
-	let { previousEval, disableButton }: Props = $props();
+	let { backtrackingState, disableButton }: Props = $props();
 
 	const assignmentProps = {
 		class: 'h-8 w-8'
 	};
 </script>
 
-{#if !isUnSAT(previousEval)}
+{#if !backtrackingState}
 	<button
 		class="btn general-btn"
 		class:invalidOption={disableButton}

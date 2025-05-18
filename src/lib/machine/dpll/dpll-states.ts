@@ -1,5 +1,10 @@
 import type { FinalState, NonFinalState, State } from '../StateMachine.ts';
-import { SAT_STATE_ID, UNSAT_STATE_ID } from '../reserved.ts';
+import {
+	BACKTRACKING_STATE_ID,
+	DECIDE_STATE_ID,
+	SAT_STATE_ID,
+	UNSAT_STATE_ID
+} from '../reserved.ts';
 import {
 	allAssigned,
 	emptyClauseDetection,
@@ -82,8 +87,8 @@ export const dpll_stateName2StateId = {
 	unit_propagation_state: 14,
 	complementary_occurrences_state: 15,
 	decision_level_state: 16,
-	backtracking_state: 17,
-	decide_state: 18,
+	backtracking_state: BACKTRACKING_STATE_ID,
+	decide_state: DECIDE_STATE_ID,
 	empty_clause_set_state: 19
 };
 

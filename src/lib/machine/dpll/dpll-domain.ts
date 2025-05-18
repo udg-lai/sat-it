@@ -17,6 +17,7 @@ import type VariablePool from '$lib/transversal/entities/VariablePool.svelte.ts'
 import { logFatal } from '$lib/transversal/logging.ts';
 import { get } from 'svelte/store';
 import type { DPLL_SolverStateMachine } from './dpll-solver.ts';
+import { checkedClause, updateClausesToCheck } from '$lib/store/clausesToCheck.svelte.ts';
 
 // ** state inputs **
 
@@ -151,6 +152,7 @@ export const deleteClause: DPLL_DELETE_CLAUSE_FUN = (clauses: Set<number>, claus
 		logFatal('Clause not found', `Clause - ${clauseId} not found`);
 	}
 	clauses.delete(clauseId);
+	checkedClause(clauseId);
 };
 
 export type DPLL_PEEK_CLAUSE_SET_FUN = (solverStateMachine: DPLL_SolverStateMachine) => Set<number>;
@@ -159,6 +161,7 @@ export const peekPendingClauseSet: DPLL_PEEK_CLAUSE_SET_FUN = (
 	solverStateMachine: DPLL_SolverStateMachine
 ) => {
 	const clauseSet: Set<number> = solverStateMachine.consultPostponed();
+	updateClausesToCheck(clauseSet);
 	return clauseSet;
 };
 

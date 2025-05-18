@@ -1,63 +1,49 @@
 <script lang="ts">
-	import {
-		getClausesToCheck,
-		getFinished,
-		getPreviousEval,
-		getStarted
-	} from '$lib/store/clausesToCheck.svelte.ts';
+	import { getActiveState, getClausesToCheck } from '$lib/store/clausesToCheck.svelte.ts';
 	import { problemStore } from '$lib/store/problem.store.ts';
 	import { slide } from 'svelte/transition';
 	import BacktrackingDebugger from './BacktrackingDebuggerComponent.svelte';
 	import GeneralDebuggerButtons from './GeneralDebuggerButtonsComponent.svelte';
 	import ManualDebugger from './ManualDebuggerComponent.svelte';
-	import PreprocesDebugger from './PreprocesDebuggerComponent.svelte';
+	import StateMachineStepDebugger from './StateMachineStep.svelte';
 	import UnitPropagationDebugger from './UnitPropagationDebuggerComponent.svelte';
 	import ResetProblemDebugger from './ResetProblemDebuggerComponent.svelte';
-	import { isUnSAT } from '$lib/transversal/interfaces/IClausePool.ts';
-	import { stateMachineEventBus } from '$lib/transversal/events.ts';
+	import { BACKTRACKING_STATE_ID, UNSAT_STATE_ID } from '$lib/machine/reserved.ts';
 
 	let defaultNextVariable: number | undefined = $derived.by(() => {
 		if ($problemStore !== undefined) return $problemStore.variables.nextVariable;
 		else return 0;
 	});
 
-	const enablePreproces = $derived(!getStarted());
-	const previousEval = $derived(getPreviousEval());
-	const enableUnitPropagtion = $derived(getClausesToCheck().size !== 0 && !isUnSAT(previousEval));
-	const disableButton = $derived(getFinished());
-	const finished = $derived(getFinished());
+	const activeId = $derived(getActiveState());
+
+	const enablePreproces = $derived(activeId === 0);
+	const backtrackingState = $derived(activeId === BACKTRACKING_STATE_ID);
+	const enableUnitPropagtion = $derived(getClausesToCheck().size !== 0);
+	const finished = $derived(activeId === UNSAT_STATE_ID || activeId === UNSAT_STATE_ID);
 </script>
 
 <div transition:slide|global class="flex-center debugger align-center relative flex-row gap-2">
 	<div class="variable-display"></div>
-	<button
-		onclick={() => {
-			stateMachineEventBus.emit('step');
-		}}
-	>
-		Hola
-	</button>
-	<!--
 	{#if enablePreproces}
-		<PreprocesDebugger />
+		<StateMachineStepDebugger />
 	{:else if enableUnitPropagtion}
 		<UnitPropagationDebugger />
 	{:else}
 		{#if !finished}
-			{#if !isUnSAT(previousEval) && defaultNextVariable}
+			{#if !backtrackingState && defaultNextVariable}
 				{defaultNextVariable}
 			{:else}
 				{'X'}
 			{/if}
-			<BacktrackingDebugger {previousEval} {disableButton} />
+			<BacktrackingDebugger {backtrackingState} disableButton={finished} />
 
-			<ManualDebugger {defaultNextVariable} {disableButton} />
+			<ManualDebugger {defaultNextVariable} disableButton={finished} />
 		{:else}
 			<ResetProblemDebugger />
 		{/if}
 		<GeneralDebuggerButtons />
 	{/if}
-	-->
 </div>
 
 <style>
