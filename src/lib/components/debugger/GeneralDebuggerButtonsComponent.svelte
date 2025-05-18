@@ -13,7 +13,7 @@
 	} from 'flowbite-svelte-icons';
 	import { getStackLength, getStackPointer } from '$lib/store/stack.svelte.ts';
 	import { browser } from '$app/environment';
-	import { userActionEventBus } from '$lib/transversal/events.ts';
+	import { stateMachineEventBus, userActionEventBus } from '$lib/transversal/events.ts';
 
 	let expanded = $state(false);
 	let textCollapse = $derived(expanded ? 'Collapse Propagations' : 'Expand Propagations');
@@ -67,11 +67,19 @@
 	}
 </script>
 
-<button class="btn general-btn" title="Solve trail">
+<button
+	class="btn general-btn"
+	title="Solve trail"
+	onclick={() => stateMachineEventBus.emit('solve_trail')}
+>
 	<DynamicRender component={ArrowRightOutline} props={generalProps} />
 </button>
 
-<button class="btn general-btn" title="Solve">
+<button
+	class="btn general-btn"
+	title="Solve"
+	onclick={() => stateMachineEventBus.emit('solve_all')}
+>
 	<DynamicRender component={BarsOutline} props={generalProps} />
 </button>
 

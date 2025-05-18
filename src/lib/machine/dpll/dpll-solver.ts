@@ -48,7 +48,34 @@ export class DPLL_SolverStateMachine extends SolverStateMachine<DPLL_FUN, DPLL_I
 	transition(input: StateMachineEvent): void {
 		//If recieve a step, the state machine can be waitting in 4 possible states
 		if (input === 'step') {
-			const activeId: number = this.stateMachine.active;
+			this.steplogic()
+		} else if (input === 'followingVariable') {
+			const initialSize: number = this.pending.size();
+			while (initialSize === this.pending.size()) {
+				analizeClause(this);
+			}
+		} else if (input === 'finishUP') {
+			while (!this.pending.isEmpty()) {
+				analizeClause(this);
+			}
+		} else if (input === 'solve_trail') {
+			let activeId: number = this.stateMachine.active;
+			while(activeId !== dpll_stateName2StateId.backtracking_state && activeId !== dpll_stateName2StateId.sat_state && activeId !== dpll_stateName2StateId.unsat_state) {
+				this.steplogic();
+				activeId = this.stateMachine.active;
+			}
+		} else if (input === 'solve_all') {
+			let activeId: number = this.stateMachine.active;
+			while(activeId !== dpll_stateName2StateId.sat_state && activeId !== dpll_stateName2StateId.unsat_state) {
+				this.steplogic();
+				activeId = this.stateMachine.active;
+			}
+		} else {
+			logFatal('Non expected input for DPLL Solver State Machine');
+		}
+	}
+	steplogic(): void {
+		const activeId: number = this.stateMachine.active;
 			//The initial state
 			if (activeId === dpll_stateName2StateId.empty_clause_state) {
 				initialTransition(this);
@@ -65,21 +92,5 @@ export class DPLL_SolverStateMachine extends SolverStateMachine<DPLL_FUN, DPLL_I
 			else if (activeId === dpll_stateName2StateId.backtracking_state) {
 				backtracking(this);
 			}
-		} else if (input === 'followingVariable') {
-			const initialSize: number = this.pending.size();
-			while (initialSize === this.pending.size()) {
-				analizeClause(this);
-			}
-		} else if (input === 'finishUP') {
-			while (!this.pending.isEmpty()) {
-				analizeClause(this);
-			}
-		} else if (input === 'solve_trail') {
-			console.log('TODO');
-		} else if (input === 'solve_all') {
-			console.log('TODO');
-		} else {
-			logFatal('Non expected input for DPLL Solver State Machine');
-		}
 	}
 }

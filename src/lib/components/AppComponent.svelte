@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { resetWorkingTrailPointer } from '$lib/store/clausesToCheck.svelte.ts';
+	import { resetWorkingTrailPointer, updateActiveState } from '$lib/store/clausesToCheck.svelte.ts';
 	import { resetProblem, updateProblemFromTrail } from '$lib/store/problem.store.ts';
 	import { record, redo, resetStack, undo, type Snapshot } from '$lib/store/stack.svelte.ts';
 	import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
@@ -54,6 +54,7 @@
 		}
 		updateTrails([...snapshot]);
 		updateSolverStateMachine(activeState);
+		updateActiveState(activeState);
 	}
 
 	function togglePropagations(e: EditorViewEvent) {

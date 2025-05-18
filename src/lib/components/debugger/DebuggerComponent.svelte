@@ -8,7 +8,7 @@
 	import StateMachineStepDebugger from './StateMachineStep.svelte';
 	import UnitPropagationDebugger from './UnitPropagationDebuggerComponent.svelte';
 	import ResetProblemDebugger from './ResetProblemDebuggerComponent.svelte';
-	import { BACKTRACKING_STATE_ID, UNSAT_STATE_ID } from '$lib/machine/reserved.ts';
+	import { BACKTRACKING_STATE_ID, SAT_STATE_ID, UNSAT_STATE_ID } from '$lib/machine/reserved.ts';
 
 	let defaultNextVariable: number | undefined = $derived.by(() => {
 		if ($problemStore !== undefined) return $problemStore.variables.nextVariable;
@@ -20,7 +20,11 @@
 	const enablePreproces = $derived(activeId === 0);
 	const backtrackingState = $derived(activeId === BACKTRACKING_STATE_ID);
 	const enableUnitPropagtion = $derived(getClausesToCheck().size !== 0);
-	const finished = $derived(activeId === UNSAT_STATE_ID || activeId === UNSAT_STATE_ID);
+	const finished = $derived(activeId === UNSAT_STATE_ID || activeId === SAT_STATE_ID);
+
+	$effect(() => {
+		console.log(activeId);
+	})
 </script>
 
 <div transition:slide|global class="flex-center debugger align-center relative flex-row gap-2">
