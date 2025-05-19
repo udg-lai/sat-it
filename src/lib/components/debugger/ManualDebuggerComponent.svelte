@@ -16,9 +16,10 @@
 		defaultNextVariable: number | undefined;
 		finished: boolean;
 		cdMode: boolean;
+		backtrackingState: boolean;
 	}
 
-	let { defaultNextVariable, finished, cdMode: upMode }: Props = $props();
+	let { defaultNextVariable, finished, cdMode, backtrackingState }: Props = $props();
 
 	const generalProps = {
 		class: 'h-8 w-8'
@@ -63,10 +64,10 @@
 
 <button
 	class="btn general-btn"
-	class:invalidOption={defaultNextVariable === undefined || finished || upMode}
+	class:invalidOption={defaultNextVariable === undefined || finished || cdMode || backtrackingState}
 	title="Manual Decision"
 	onclick={() => (manualDecisionModal = true)}
-	disabled={defaultNextVariable === undefined || finished || upMode}
+	disabled={defaultNextVariable === undefined || finished || cdMode || backtrackingState}
 >
 	<DynamicRender component={PenOutline} props={generalProps} />
 </button>

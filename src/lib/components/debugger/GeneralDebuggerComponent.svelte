@@ -13,6 +13,7 @@
 	import { getStackLength, getStackPointer } from '$lib/store/stack.svelte.ts';
 	import { browser } from '$app/environment';
 	import { stateMachineEventBus, userActionEventBus } from '$lib/transversal/events.ts';
+	import { updateAssignment } from '$lib/store/assignment.svelte.ts';
 
 	interface Props {
 		finished: boolean;
@@ -77,6 +78,7 @@
 	class:invalidOption={finished}
 	title="Solve trail"
 	onclick={() => {
+		updateAssignment('automated');
 		stateMachineEventBus.emit('solve_trail');
 		userActionEventBus.emit('record');
 	}}
@@ -90,6 +92,7 @@
 	class:invalidOption={finished}
 	title="Solve"
 	onclick={() => {
+		updateAssignment('automated');
 		stateMachineEventBus.emit('solve_all');
 		userActionEventBus.emit('record');
 	}}

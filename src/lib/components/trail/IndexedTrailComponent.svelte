@@ -2,6 +2,7 @@
 	import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
 	import { ChevronLeftOutline, ChevronRightOutline } from 'flowbite-svelte-icons';
 	import TrailComponent from './TrailComponent.svelte';
+	import InformationComponent from './InformationComponent.svelte';
 
 	interface Props {
 		trail: Trail;
@@ -44,9 +45,7 @@
 		</span>
 	</button>
 	<TrailComponent {trail} bind:expanded />
-	<div class="notification">
-		<p>content</p>
-	</div>
+	<InformationComponent {trail} />
 </indexed-trail>
 
 <style>
@@ -76,14 +75,5 @@
 		width: 4rem;
 		height: 4rem;
 		position: relative;
-	}
-
-	.notification {
-		width: 6rem;
-		background-color: darkgrey;
-		padding: 1rem;
-		display: flex;
-		justify-content: center;
-		align-items: center;
 	}
 </style>

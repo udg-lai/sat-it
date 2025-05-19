@@ -63,6 +63,7 @@
 	:global(.si-venga) {
 		background-color: var(--main-bg-color);
 		border-color: var(--border-color);
+		z-index: 5;
 		color: black;
 	}
 </style>

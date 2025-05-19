@@ -13,10 +13,10 @@ export const unstackTrail = (): void => {
 	trails = trails.slice(0, length - 1);
 };
 
-export const getTrails = (): Trail[] => {
-	return trails;
-};
-
 export const updateTrails = (snapshot: Trail[]): void => {
 	trails = snapshot.map((trail) => trail.copy());
+};
+
+export const updateLastTrailEnding = (clauseId: number): void => {
+	trails[trails.length - 1].updateTrailEnding(clauseId);
 };

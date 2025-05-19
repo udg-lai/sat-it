@@ -38,7 +38,7 @@
 			{/if}
 			<AutomaticDebugger {backtrackingState} {finished} {cdMode} />
 
-			<ManualDebugger {defaultNextVariable} {finished} {cdMode} />
+			<ManualDebugger {defaultNextVariable} {finished} {cdMode} {backtrackingState} />
 		{:else}
 			<ResetProblemDebugger />
 		{/if}

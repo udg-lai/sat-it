@@ -43,6 +43,7 @@ import type {
 import type { DPLL_StateMachine } from './dpll-state-machine.ts';
 import type { DPLL_SolverMachine } from './dpll-solver-machine.ts';
 import type { SvelteSet } from 'svelte/reactivity';
+import { updateLastTrailEnding } from '$lib/store/trails.svelte.ts';
 
 export const initialTransition = (solver: DPLL_SolverMachine): void => {
 	const stateMachine: DPLL_StateMachine = solver.stateMachine;
@@ -223,6 +224,7 @@ export const analyzeClause = (solver: DPLL_SolverMachine): void => {
 	const clauseId: number = nextClauseTransition(stateMachine, clauseSet);
 	const conflict: boolean = conflictDetectionTransition(stateMachine, clauseId);
 	if (conflict) {
+		updateLastTrailEnding(clauseId);
 		emptyClauseSetTransition(stateMachine, solver);
 		decisionLevelTransition(stateMachine);
 		return;
