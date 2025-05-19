@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { resetWorkingTrailPointer, updateActiveState } from '$lib/store/clausesToCheck.svelte.ts';
+	import { resetWorkingTrailPointer } from '$lib/store/clausesToCheck.svelte.ts';
 	import { resetProblem, updateProblemFromTrail } from '$lib/store/problem.store.ts';
 	import { record, redo, resetStack, undo, type Snapshot } from '$lib/store/stack.svelte.ts';
 	import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
@@ -14,9 +14,9 @@
 	import { editorViewEventStore, type EditorViewEvent } from './debugger/events.svelte.ts';
 	import TrailEditor from './TrailEditorComponent.svelte';
 	import { getSolverMachine, updateSolverMachine } from '$lib/store/stateMachine.svelte.ts';
-	import type { StateFun, StateInput } from '$lib/machine/StateMachine.ts';
-	import type { SolverMachine } from '$lib/machine/SolverMachine.ts';
+	import type { SolverMachine } from '$lib/machine/SolverMachine.svelte.ts';
 	import { getTrails, updateTrails } from '$lib/store/trails.svelte.ts';
+	import type { StateFun, StateInput } from '$lib/machine/StateMachine.svelte.ts';
 
 	let expandPropagations: boolean = $state(true);
 
@@ -26,7 +26,7 @@
 
 	function onActionEvent(a: ActionEvent) {
 		if (a === 'record') {
-			record(trails, solverMachine.getActiveState());
+			record(trails, solverMachine.getActiveStateId());
 		} else if (a === 'undo') {
 			const snapshot = undo();
 			reloadFromSnapshot(snapshot);
@@ -51,7 +51,6 @@
 		}
 		updateTrails([...snapshot]);
 		updateSolverMachine(activeState);
-		updateActiveState(activeState);
 	}
 
 	function togglePropagations(e: EditorViewEvent) {

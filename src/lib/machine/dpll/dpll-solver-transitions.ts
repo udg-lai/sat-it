@@ -1,5 +1,5 @@
 import { logFatal } from '$lib/transversal/logging.ts';
-import { type NonFinalState } from '../StateMachine.ts';
+import { type NonFinalState } from '../StateMachine.svelte.ts';
 import type {
 	DPLL_ALL_CLAUSES_CHECKED_FUN,
 	DPLL_ALL_CLAUSES_CHECKED_INPUT,
@@ -79,7 +79,7 @@ const conflictDetectionBlock = (
 };
 
 const ecTransition = (stateMachine: DPLL_StateMachine): void => {
-	if (stateMachine.active !== 0) {
+	if (stateMachine.getActiveId() !== 0) {
 		logFatal(
 			'Fail Initial',
 			'Trying to use initialTransition in a state that is not the initial one'

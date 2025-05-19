@@ -1,11 +1,11 @@
 import type { StateMachineEvent } from '$lib/transversal/events.ts';
-import type { StateFun, StateInput, StateMachine } from './StateMachine.ts';
+import type { StateFun, StateInput, StateMachine } from './StateMachine.svelte.ts';
 
 export interface SolverStateInterface<F extends StateFun, I extends StateInput> {
 	stateMachine: StateMachine<F, I>;
 	transition: (input: StateMachineEvent) => void;
-	getActiveState: () => number;
-	updateActiveState: (id: number) => void;
+	getActiveStateId: () => number;
+	updateActiveStateId: (id: number) => void;
 }
 
 export abstract class SolverMachine<F extends StateFun, I extends StateInput>
@@ -16,11 +16,11 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 
 	abstract transition(input: StateMachineEvent): void;
 
-	getActiveState(): number {
-		return this.stateMachine.active;
+	getActiveStateId(): number {
+		return this.stateMachine.getActiveId();
 	}
 
-	updateActiveState(id: number): void {
-		this.stateMachine.active = id;
+	updateActiveStateId(id: number): void {
+		this.stateMachine.setActiveId(id);
 	}
 }

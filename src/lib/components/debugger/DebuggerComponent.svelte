@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getActiveState, getClausesToCheck } from '$lib/store/clausesToCheck.svelte.ts';
+	import { getClausesToCheck } from '$lib/store/clausesToCheck.svelte.ts';
 	import { problemStore } from '$lib/store/problem.store.ts';
 	import { slide } from 'svelte/transition';
 	import BacktrackingDebugger from './BacktrackingDebuggerComponent.svelte';
@@ -9,13 +9,14 @@
 	import UnitPropagationDebugger from './UnitPropagationDebuggerComponent.svelte';
 	import ResetProblemDebugger from './ResetProblemDebuggerComponent.svelte';
 	import { BACKTRACKING_STATE_ID, SAT_STATE_ID, UNSAT_STATE_ID } from '$lib/machine/reserved.ts';
+	import { getSolverMachine } from '$lib/store/stateMachine.svelte.ts';
 
 	let defaultNextVariable: number | undefined = $derived.by(() => {
 		if ($problemStore !== undefined) return $problemStore.variables.nextVariable;
 		else return 0;
 	});
 
-	const activeId = $derived(getActiveState());
+	const activeId = $derived(getSolverMachine().getActiveStateId());
 
 	const enablePreproces = $derived(activeId === 0);
 	const backtrackingState = $derived(activeId === BACKTRACKING_STATE_ID);

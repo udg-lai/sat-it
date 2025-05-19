@@ -8,8 +8,6 @@ let clausesToCheck: SvelteSet<number> = $state(new SvelteSet<number>());
 
 let workingTrailPointer: number = $state(-1);
 
-let activeState: number = $state(0);
-
 export function setWorkingTrailPointer(wt: Trail | undefined, toCheck: Set<number>) {
 	workingTrailPointer = wt !== undefined ? wt.getAssignments().length - 1 : -1;
 	updateClausesToCheck(toCheck);
@@ -44,10 +42,6 @@ export function updateClausesToCheck(toCheck: Set<number>) {
 	}
 }
 
-export function updateActiveState(newState: number) {
-	activeState = newState;
-}
-
 export function checkedClause(clause: number) {
 	clausesToCheck.delete(clause);
 }
@@ -60,5 +54,3 @@ export function resetWorkingTrailPointer() {
 export const getClausesToCheck = () => clausesToCheck;
 
 export const getWorkingTrailPointer = () => workingTrailPointer;
-
-export const getActiveState = () => activeState;
