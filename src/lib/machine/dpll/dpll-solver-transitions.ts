@@ -216,7 +216,7 @@ const allClausesCheckedTransition = (
 	return result;
 };
 
-export const analizeClause = (solver: DPLL_SolverMachine): void => {
+export const analyzeClause = (solver: DPLL_SolverMachine): void => {
 	const stateMachine: DPLL_StateMachine = solver.stateMachine;
 	const clauseSet: Set<number> = solver.consultPostponed();
 	const clauseId: number = nextClauseTransition(stateMachine, clauseSet);

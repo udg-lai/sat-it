@@ -241,7 +241,7 @@ export type DPLL_EMPTY_CLAUSE_SET_FUN = (solverStateMachine: DPLL_SolverMachine)
 export const emptyClauseSet: DPLL_EMPTY_CLAUSE_SET_FUN = (
 	solverStateMachine: DPLL_SolverMachine
 ) => {
-	while (solverStateMachine.leftToPostpone()) {
+	while (solverStateMachine.leftToPostpone() > 0) {
 		solverStateMachine.resolvePostponed();
 	}
 	updateClausesToCheck(new Set<number>());

@@ -5,7 +5,7 @@ import { SolverMachine } from '../SolverMachine.ts';
 import type { DPLL_FUN, DPLL_INPUT } from './dpll-domain.ts';
 import { makeDPLLMachine } from './dpll-state-machine.ts';
 import {
-	analizeClause,
+	analyzeClause,
 	backtracking,
 	decide,
 	initialTransition
@@ -46,58 +46,61 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 	}
 
 	transition(input: StateMachineEvent): void {
-		//If recieve a step, the state machine can be waitting in 4 possible states
+		//If receive a step, the state machine can be waiting in 4 possible states
 		if (input === 'step') {
-			this.steplogic();
+			this.logicStep();
 		} else if (input === 'followingVariable') {
 			const currentSet: Set<number> = this.consultPostponed();
 			while (currentSet.size !== 0) {
-				analizeClause(this);
+				analyzeClause(this);
 			}
 		} else if (input === 'finishUP') {
 			while (!this.pending.isEmpty()) {
-				analizeClause(this);
+				analyzeClause(this);
 			}
 		} else if (input === 'solve_trail') {
-			let activeId: number = this.stateMachine.active;
-			while (
-				activeId !== dpll_stateName2StateId.backtracking_state &&
-				activeId !== dpll_stateName2StateId.sat_state &&
-				activeId !== dpll_stateName2StateId.unsat_state
-			) {
-				this.steplogic();
-				activeId = this.stateMachine.active;
+			while (!this.onBacktrackingState() && !this.onFinalState()) {
+				this.logicStep();
 			}
 		} else if (input === 'solve_all') {
-			let activeId: number = this.stateMachine.active;
-			while (
-				activeId !== dpll_stateName2StateId.sat_state &&
-				activeId !== dpll_stateName2StateId.unsat_state
-			) {
-				this.steplogic();
-				activeId = this.stateMachine.active;
+			while (!this.onFinalState()) {
+				this.logicStep();
 			}
 		} else {
 			logFatal('Non expected input for DPLL Solver State Machine');
 		}
 	}
-	steplogic(): void {
+
+	logicStep(): void {
 		const activeId: number = this.stateMachine.active;
 		//The initial state
 		if (activeId === dpll_stateName2StateId.empty_clause_state) {
 			initialTransition(this);
 		}
-		//Waitting to analize the next clause of the clauses to revise
+		//Waiting to analyze the next clause of the clauses to revise
 		else if (activeId === dpll_stateName2StateId.next_clause_state) {
-			analizeClause(this);
+			analyzeClause(this);
 		}
-		//Waitting to decide a variables
+		//Waiting to decide a variables
 		else if (activeId === dpll_stateName2StateId.decide_state) {
 			decide(this);
 		}
-		//Waitting to backtrack an assignment
+		//Waiting to backtrack an assignment
 		else if (activeId === dpll_stateName2StateId.backtracking_state) {
 			backtracking(this);
 		}
+	}
+
+	private onFinalState(): boolean {
+		const activeId: number = this.stateMachine.active;
+		return (
+			activeId === dpll_stateName2StateId.sat_state ||
+			activeId === dpll_stateName2StateId.unsat_state
+		);
+	}
+
+	private onBacktrackingState(): boolean {
+		const activeId: number = this.stateMachine.active;
+		return activeId === dpll_stateName2StateId.backtracking_state;
 	}
 }
