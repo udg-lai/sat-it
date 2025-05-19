@@ -1,9 +1,9 @@
 import { Queue } from '$lib/transversal/entities/Queue.ts';
 import type { StateMachineEvent } from '$lib/transversal/events.ts';
 import { logFatal } from '$lib/transversal/logging.ts';
-import { SolverStateMachine } from '../SolverStateMachine.ts';
+import { SolverMachine } from '../SolverMachine.ts';
 import type { DPLL_FUN, DPLL_INPUT } from './dpll-domain.ts';
-import { makeDPLLMachine } from './dpll-machine.ts';
+import { makeDPLLMachine } from './dpll-state-machine.ts';
 import {
 	analizeClause,
 	backtracking,
@@ -12,11 +12,11 @@ import {
 } from './dpll-solver-transitions.ts';
 import { dpll_stateName2StateId } from './dpll-states.ts';
 
-export const makeDPLLSolver = (): DPLL_SolverStateMachine => {
-	return new DPLL_SolverStateMachine();
+export const makeDPLLSolver = (): DPLL_SolverMachine => {
+	return new DPLL_SolverMachine();
 };
 
-export class DPLL_SolverStateMachine extends SolverStateMachine<DPLL_FUN, DPLL_INPUT> {
+export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 	pending: Queue<Set<number>>;
 
 	constructor() {

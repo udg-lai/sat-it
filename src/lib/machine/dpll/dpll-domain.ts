@@ -16,7 +16,7 @@ import type ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';
 import type VariablePool from '$lib/transversal/entities/VariablePool.svelte.ts';
 import { logFatal } from '$lib/transversal/logging.ts';
 import { get } from 'svelte/store';
-import type { DPLL_SolverStateMachine } from './dpll-solver.ts';
+import type { DPLL_SolverMachine } from './dpll-solver-machine.ts';
 import { checkedClause, updateClausesToCheck } from '$lib/store/clausesToCheck.svelte.ts';
 
 // ** state inputs **
@@ -110,12 +110,12 @@ export const emptyClauseDetection: DPLL_EMPTY_CLAUSE_FUN = () => {
 
 export type DPLL_QUEUE_CLAUSE_SET_FUN = (
 	clauses: Set<number>,
-	solverStateMachine: DPLL_SolverStateMachine
+	solverStateMachine: DPLL_SolverMachine
 ) => number;
 
 export const queueClauseSet: DPLL_QUEUE_CLAUSE_SET_FUN = (
 	clauses: Set<number>,
-	solverStateMachine: DPLL_SolverStateMachine
+	solverStateMachine: DPLL_SolverMachine
 ) => {
 	if (clauses.size === 0) {
 		logFatal('Empty set of clauses are not thought to be queued');
@@ -124,10 +124,10 @@ export const queueClauseSet: DPLL_QUEUE_CLAUSE_SET_FUN = (
 	return solverStateMachine.leftToPostpone();
 };
 
-export type DPLL_UNSTACK_CLAUSE_SET_FUN = (solverStateMachine: DPLL_SolverStateMachine) => void;
+export type DPLL_UNSTACK_CLAUSE_SET_FUN = (solverStateMachine: DPLL_SolverMachine) => void;
 
 export const unstackClauseSet: DPLL_UNSTACK_CLAUSE_SET_FUN = (
-	solverStateMachine: DPLL_SolverStateMachine
+	solverStateMachine: DPLL_SolverMachine
 ) => {
 	return solverStateMachine.resolvePostponed();
 };
@@ -155,10 +155,10 @@ export const deleteClause: DPLL_DELETE_CLAUSE_FUN = (clauses: Set<number>, claus
 	checkedClause(clauseId);
 };
 
-export type DPLL_PEEK_CLAUSE_SET_FUN = (solverStateMachine: DPLL_SolverStateMachine) => Set<number>;
+export type DPLL_PEEK_CLAUSE_SET_FUN = (solverStateMachine: DPLL_SolverMachine) => Set<number>;
 
 export const peekPendingClauseSet: DPLL_PEEK_CLAUSE_SET_FUN = (
-	solverStateMachine: DPLL_SolverStateMachine
+	solverStateMachine: DPLL_SolverMachine
 ) => {
 	const clauseSet: Set<number> = solverStateMachine.consultPostponed();
 	updateClausesToCheck(clauseSet);
@@ -191,11 +191,11 @@ export const unsatisfiedClause: DPLL_CONFLICT_DETECTION_FUN = (clauseId: number)
 };
 
 export type DPLL_CHECK_PENDING_CLAUSES_FUN = (
-	solverStateMachine: DPLL_SolverStateMachine
+	solverStateMachine: DPLL_SolverMachine
 ) => boolean;
 
 export const thereAreJobPostponed: DPLL_CHECK_PENDING_CLAUSES_FUN = (
-	solverStateMachine: DPLL_SolverStateMachine
+	solverStateMachine: DPLL_SolverMachine
 ) => {
 	return solverStateMachine.thereArePostponed();
 };
@@ -236,10 +236,10 @@ export const backtracking: DPLL_BACKTRACKING_FUN = () => {
 	return solverBacktracking(pool);
 };
 
-export type DPLL_EMPTY_CLAUSE_SET_FUN = (solverStateMachine: DPLL_SolverStateMachine) => void;
+export type DPLL_EMPTY_CLAUSE_SET_FUN = (solverStateMachine: DPLL_SolverMachine) => void;
 
 export const emptyClauseSet: DPLL_EMPTY_CLAUSE_SET_FUN = (
-	solverStateMachine: DPLL_SolverStateMachine
+	solverStateMachine: DPLL_SolverMachine
 ) => {
 	while (solverStateMachine.leftToPostpone()) {
 		solverStateMachine.resolvePostponed();

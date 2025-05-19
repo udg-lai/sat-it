@@ -1,26 +1,27 @@
-import { DPLL_SolverStateMachine, makeDPLLSolver } from '$lib/machine/dpll/dpll-solver.ts';
-import { SolverStateMachine } from '$lib/machine/SolverStateMachine.ts';
+import { DPLL_SolverMachine, makeDPLLSolver } from '$lib/machine/dpll/dpll-solver-machine.ts';
+import { SolverMachine } from '$lib/machine/SolverMachine.ts';
 import type { StateFun, StateInput } from '$lib/machine/StateMachine.ts';
 import { logFatal } from '$lib/transversal/logging.ts';
 
-let solverStateMachine: SolverStateMachine<StateFun, StateInput> = $state(
-	new DPLL_SolverStateMachine()
+let solverMachine: SolverMachine<StateFun, StateInput> = $state(
+	new DPLL_SolverMachine()
 );
 
 export const setSolverStateMachine = (algorithm: 'backtracking' | 'dpll' | 'cdcl') => {
 	if (algorithm === 'backtracking') {
-		solverStateMachine = makeDPLLSolver();
+		solverMachine = makeDPLLSolver();
 	} else if (algorithm === 'dpll') {
-		solverStateMachine = makeDPLLSolver();
+		solverMachine = makeDPLLSolver();
 	} else if (algorithm === 'cdcl') {
-		solverStateMachine = makeDPLLSolver();
+		solverMachine = makeDPLLSolver();
 	} else {
-		logFatal('No SolverStateMachine was creted');
+		logFatal('No SolverStateMachine was created');
 	}
 };
 
-export const updateSolverStateMachine = (activeState: number): void => {
-	solverStateMachine.stateMachine.active = activeState;
+export const updateSolverMachine = (stateId: number): void => {
+	solverMachine.updateActiveState(stateId);
 };
 
-export const getSolverStateMachine = () => solverStateMachine;
+export const getSolverMachine = () => solverMachine;
+

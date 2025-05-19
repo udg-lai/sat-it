@@ -14,22 +14,22 @@
 	import { editorViewEventStore, type EditorViewEvent } from './debugger/events.svelte.ts';
 	import TrailEditor from './TrailEditorComponent.svelte';
 	import {
-		getSolverStateMachine,
-		updateSolverStateMachine
+		getSolverMachine,
+		updateSolverMachine
 	} from '$lib/store/stateMachine.svelte.ts';
 	import type { StateFun, StateInput } from '$lib/machine/StateMachine.ts';
-	import type { SolverStateMachine } from '$lib/machine/SolverStateMachine.ts';
+	import type { SolverMachine } from '$lib/machine/SolverMachine.ts';
 	import { getTrails, updateTrails } from '$lib/store/trails.svelte.ts';
 
 	let expandPropagations: boolean = $state(true);
 
 	let trails: Trail[] = $derived(getTrails());
 
-	let stateMachine: SolverStateMachine<StateFun, StateInput> = $derived(getSolverStateMachine());
+	let solverMachine: SolverMachine<StateFun, StateInput> = $derived(getSolverMachine());
 
 	function onActionEvent(a: ActionEvent) {
 		if (a === 'record') {
-			record(trails, stateMachine.getActiveStateId());
+			record(trails, solverMachine.getActiveState());
 		} else if (a === 'undo') {
 			const snapshot = undo();
 			reloadFromSnapshot(snapshot);
@@ -40,7 +40,7 @@
 	}
 
 	function stateMachineEvent(s: StateMachineEvent) {
-		stateMachine.transition(s);
+		solverMachine.transition(s);
 	}
 
 	function reloadFromSnapshot({ snapshot, activeState }: Snapshot): void {
@@ -53,7 +53,7 @@
 			resetWorkingTrailPointer();
 		}
 		updateTrails([...snapshot]);
-		updateSolverStateMachine(activeState);
+		updateSolverMachine(activeState);
 		updateActiveState(activeState);
 	}
 
@@ -73,13 +73,13 @@
 		const unsubscribeToggleEditor = editorViewEventStore.subscribe(togglePropagations);
 		const unsubscribeActionEvent = userActionEventBus.subscribe(onActionEvent);
 		const unsubscribeChangeInstanceEvent = changeInstanceEventBus.subscribe(reset);
-		const unsubscirbeStateMachineEvent = stateMachineEventBus.subscribe(stateMachineEvent);
+		const unsubscribeStateMachineEvent = stateMachineEventBus.subscribe(stateMachineEvent);
 
 		return () => {
 			unsubscribeToggleEditor();
 			unsubscribeActionEvent();
 			unsubscribeChangeInstanceEvent();
-			unsubscirbeStateMachineEvent();
+			unsubscribeStateMachineEvent();
 		};
 	});
 </script>
