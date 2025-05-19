@@ -6,7 +6,7 @@
 		literal: Literal;
 	}
 
-	let { literal}: Props = $props();
+	let { literal }: Props = $props();
 </script>
 
 <div

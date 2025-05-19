@@ -2,7 +2,7 @@
 	import VirtualList from 'svelte-tiny-virtual-list';
 
 	interface Props {
-		items: any[];
+		items: unknown[];
 		itemSize: number;
 	}
 
@@ -13,7 +13,7 @@
 		const previewObserver = new ResizeObserver((entries) => {
 			for (const entry of entries) {
 				virtualHeight = entry.contentRect.height - itemSize / 2;
-        virtualHeight = Math.max(virtualHeight, 0);
+				virtualHeight = Math.max(virtualHeight, 0);
 			}
 		});
 		previewObserver.observe(htmlElement);
@@ -33,16 +33,11 @@
 		itemCount={items.length}
 		{itemSize}
 	>
-	<div
-			slot="item"
-			class="item-list"
-			let:index
-			let:style
-			{style}
-		>
+		<div slot="item" class="item-list" let:index let:style {style}>
 			<!-- Slot for custom item rendering -->
-			<slot name="item" item={items[index]} index={index} />
-	</VirtualList>
+			<slot name="item" item={items[index]} {index} />
+		</div></VirtualList
+	>
 </div>
 
 <style>

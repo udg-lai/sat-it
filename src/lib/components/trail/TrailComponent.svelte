@@ -49,22 +49,21 @@
 
 	function onEmitClose(): void {
 		nExpanded = Math.max(nExpanded - 1, 0);
-		if(nExpanded === 0) expanded = false;
+		if (nExpanded === 0) expanded = false;
 	}
 
 	function onEmitExpand(): void {
 		nExpanded = Math.min(nExpanded + 1, nExpandable);
-		if(nExpanded === nExpandable) expanded = true;
+		if (nExpanded === nExpandable) expanded = true;
 	}
 
 	$effect(() => {
 		if (expanded === false) {
 			nExpanded = 0;
 		} else {
-			nExpanded = nExpandable
+			nExpanded = nExpandable;
 		}
 	});
-
 
 	let contentOverflow = $state(false);
 
@@ -147,7 +146,7 @@
 			<DecisionLevelComponent
 				decision={assignment.assignment}
 				propagations={trail.getPropagations(assignment.level)}
-				expanded={expanded}
+				{expanded}
 				emitClose={onEmitClose}
 				emitExpand={onEmitExpand}
 			/>
