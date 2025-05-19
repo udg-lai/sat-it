@@ -6,6 +6,7 @@ export interface SolverStateInterface<F extends StateFun, I extends StateInput> 
 	transition: (input: StateMachineEvent) => void;
 	getActiveStateId: () => number;
 	updateActiveStateId: (id: number) => void;
+	updateFromRecord: (record: Record<string, unknown>) => void;
 }
 
 export abstract class SolverMachine<F extends StateFun, I extends StateInput>
@@ -15,6 +16,7 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 	stateMachine!: StateMachine<F, I>;
 
 	abstract transition(input: StateMachineEvent): void;
+	abstract updateFromRecord(record: Record<string, unknown>): void;
 
 	getActiveStateId(): number {
 		return this.stateMachine.getActiveId();

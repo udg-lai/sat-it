@@ -28,10 +28,10 @@
 		if (a === 'record') {
 			record(trails, solverMachine.getActiveStateId());
 		} else if (a === 'undo') {
-			const snapshot = undo();
+			const snapshot: Snapshot = undo();
 			reloadFromSnapshot(snapshot);
 		} else if (a === 'redo') {
-			const snapshot = redo();
+			const snapshot: Snapshot = redo();
 			reloadFromSnapshot(snapshot);
 		}
 	}
@@ -40,7 +40,7 @@
 		solverMachine.transition(s);
 	}
 
-	function reloadFromSnapshot({ snapshot, activeState }: Snapshot): void {
+	function reloadFromSnapshot({ snapshot, activeState, record }: Snapshot): void {
 		const len = snapshot.length;
 		if (len > 0) {
 			const latest = snapshot[len - 1];
@@ -50,7 +50,7 @@
 			resetWorkingTrailPointer();
 		}
 		updateTrails([...snapshot]);
-		updateSolverMachine(activeState);
+		updateSolverMachine(activeState, record);
 	}
 
 	function togglePropagations(e: EditorViewEvent) {

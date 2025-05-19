@@ -17,8 +17,14 @@ export const setSolverStateMachine = (algorithm: 'backtracking' | 'dpll' | 'cdcl
 	}
 };
 
-export const updateSolverMachine = (stateId: number): void => {
+export const updateSolverMachine = (
+	stateId: number,
+	record: Record<string, unknown> | undefined
+): void => {
 	solverMachine.updateActiveStateId(stateId);
+	if (record) {
+		solverMachine.updateFromRecord(record);
+	}
 };
 
 export const getSolverMachine = () => solverMachine;

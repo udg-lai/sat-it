@@ -45,6 +45,8 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 		return this.pending.size();
 	}
 
+	updateFromRecord(record: Record<string, unknown>): void {}
+
 	transition(input: StateMachineEvent): void {
 		//If receive a step, the state machine can be waiting in 4 possible states
 		if (input === 'step') {
@@ -72,7 +74,7 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 	}
 
 	logicStep(): void {
-		const activeId: number = this.stateMachine.active;
+		const activeId: number = this.stateMachine.getActiveId();
 		//The initial state
 		if (activeId === dpll_stateName2StateId.empty_clause_state) {
 			initialTransition(this);
@@ -92,7 +94,7 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 	}
 
 	private onFinalState(): boolean {
-		const activeId: number = this.stateMachine.active;
+		const activeId: number = this.stateMachine.getActiveId();
 		return (
 			activeId === dpll_stateName2StateId.sat_state ||
 			activeId === dpll_stateName2StateId.unsat_state
@@ -100,7 +102,7 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 	}
 
 	private onBacktrackingState(): boolean {
-		const activeId: number = this.stateMachine.active;
+		const activeId: number = this.stateMachine.getActiveId();
 		return activeId === dpll_stateName2StateId.backtracking_state;
 	}
 }
