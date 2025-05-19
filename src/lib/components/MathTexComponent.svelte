@@ -3,7 +3,7 @@
 
 	interface Props {
 		equation: string;
-		fontSize?: string
+		fontSize?: string;
 	}
 
 	let { equation, fontSize = 'var(--TeX-font-size)' }: Props = $props();
