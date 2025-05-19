@@ -36,4 +36,8 @@ export class Queue<T> {
 	clear(): void {
 		this.items = [];
 	}
+
+	toArray(): T[] {
+		return [...this.items];
+	}
 }

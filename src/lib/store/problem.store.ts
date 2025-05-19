@@ -4,9 +4,10 @@ import VariablePool from '../transversal/entities/VariablePool.svelte.ts';
 import type { DimacsInstance } from '$lib/dimacs/dimacs-instance.interface.ts';
 import { resetStack } from './stack.svelte.ts';
 import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
-import { type Algorithm } from '$lib/transversal/utils/types/algorithms.ts';
 
 export type MappingLiteral2Clauses = Map<number, Set<number>>;
+
+export type Algorithm = 'backtracking' | 'dpll' | 'cdcl';
 
 export interface Problem {
 	variables: VariablePool;

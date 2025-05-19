@@ -1,6 +1,8 @@
 <script lang="ts">
-	import { resetWorkingTrailPointer } from '$lib/store/clausesToCheck.svelte.ts';
-	import { resetProblem, updateProblemFromTrail } from '$lib/store/problem.store.ts';
+	import {
+		resetProblem,
+		updateProblemFromTrail
+	} from '$lib/store/problem.store.ts';
 	import { record, redo, resetStack, undo, type Snapshot } from '$lib/store/stack.svelte.ts';
 	import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
 	import {
@@ -26,7 +28,7 @@
 
 	function onActionEvent(a: ActionEvent) {
 		if (a === 'record') {
-			record(trails, solverMachine.getActiveStateId());
+			record(trails, solverMachine.getActiveStateId(), solverMachine.getRecord());
 		} else if (a === 'undo') {
 			const snapshot: Snapshot = undo();
 			reloadFromSnapshot(snapshot);
@@ -47,7 +49,6 @@
 			updateProblemFromTrail(latest);
 		} else {
 			resetProblem();
-			resetWorkingTrailPointer();
 		}
 		updateTrails([...snapshot]);
 		updateSolverMachine(activeState, record);
@@ -62,7 +63,6 @@
 		resetStack();
 		const first = undo();
 		reloadFromSnapshot(first);
-		resetWorkingTrailPointer();
 	}
 
 	onMount(() => {

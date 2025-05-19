@@ -16,6 +16,7 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 	stateMachine!: StateMachine<F, I>;
 
 	abstract transition(input: StateMachineEvent): void;
+	abstract getRecord(): Record<string, unknown>;
 	abstract updateFromRecord(record: Record<string, unknown>): void;
 
 	getActiveStateId(): number {

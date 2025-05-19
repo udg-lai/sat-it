@@ -11,13 +11,14 @@ import {
 	initialTransition
 } from './dpll-solver-transitions.ts';
 import { dpll_stateName2StateId } from './dpll-states.ts';
+import { SvelteSet } from 'svelte/reactivity';
 
 export const makeDPLLSolver = (): DPLL_SolverMachine => {
 	return new DPLL_SolverMachine();
 };
 
 export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
-	pending: Queue<Set<number>>;
+	pending: Queue<SvelteSet<number>>;
 
 	constructor() {
 		super();
@@ -25,15 +26,15 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 		this.pending = new Queue();
 	}
 
-	postpone(clauses: Set<number>): void {
+	postpone(clauses: SvelteSet<number>): void {
 		this.pending.enqueue(clauses);
 	}
 
-	resolvePostponed(): Set<number> | undefined {
+	resolvePostponed(): SvelteSet<number> | undefined {
 		return this.pending.dequeue();
 	}
 
-	consultPostponed(): Set<number> {
+	consultPostponed(): SvelteSet<number> {
 		return this.pending.peek();
 	}
 
@@ -45,7 +46,25 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 		return this.pending.size();
 	}
 
-	updateFromRecord(record: Record<string, unknown>): void {}
+	getQueue(): Queue<SvelteSet<number>> {
+		const returnQueue: Queue<SvelteSet<number>> = new Queue();
+
+		for (const originalSet of this.pending.toArray()) {
+			const copiedSet = new SvelteSet<number>(originalSet);
+			returnQueue.enqueue(copiedSet);
+		}
+
+		return returnQueue;
+	}
+	getRecord(): Record<string, unknown> {
+		return {
+			queue: this.getQueue()
+		};
+	}
+
+	updateFromRecord(record: Record<string, unknown>): void {
+		this.pending = record['queue'] as Queue<SvelteSet<number>>;
+	}
 
 	transition(input: StateMachineEvent): void {
 		//If receive a step, the state machine can be waiting in 4 possible states

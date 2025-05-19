@@ -1,3 +1,4 @@
+import { SvelteSet } from 'svelte/reactivity';
 import type { AssignmentEval, IClausePool } from '../interfaces/IClausePool.ts';
 import type { CNF } from '../mapping/contentToSummary.ts';
 import { cnfToClauseSet } from '../utils.ts';
@@ -60,8 +61,8 @@ class ClausePool implements IClausePool {
 		}
 	}
 
-	getUnitClauses(): Set<number> {
-		const S = new Set<number>();
+	getUnitClauses(): SvelteSet<number> {
+		const S = new SvelteSet<number>();
 		for (const c of this.getClauses()) {
 			if (c.optimalCheckUnit()) S.add(c.getId());
 		}
