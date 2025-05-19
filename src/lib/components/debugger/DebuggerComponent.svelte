@@ -22,10 +22,7 @@
 	const backtrackingState = $derived(activeId === BACKTRACKING_STATE_ID);
 	const enableUnitPropagtion = $derived(getClausesToCheck().size !== 0);
 	const finished = $derived(activeId === UNSAT_STATE_ID || activeId === SAT_STATE_ID);
-
-	$effect(() => {
-		console.log(activeId);
-	});
+	
 </script>
 
 <div transition:slide|global class="flex-center debugger align-center relative flex-row gap-2">

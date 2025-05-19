@@ -18,5 +18,5 @@ export const getTrails = (): Trail[] => {
 };
 
 export const updateTrails = (snapshot: Trail[]): void => {
-	trails = [...snapshot];
+	trails = snapshot.map((trail) => trail.copy());
 };

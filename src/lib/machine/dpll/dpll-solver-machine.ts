@@ -12,6 +12,7 @@ import {
 } from './dpll-solver-transitions.ts';
 import { dpll_stateName2StateId } from './dpll-states.ts';
 import { SvelteSet } from 'svelte/reactivity';
+import { updateClausesToCheck } from '$lib/store/clausesToCheck.svelte.ts';
 
 export const makeDPLLSolver = (): DPLL_SolverMachine => {
 	return new DPLL_SolverMachine();
@@ -63,7 +64,12 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 	}
 
 	updateFromRecord(record: Record<string, unknown>): void {
-		this.pending = record['queue'] as Queue<SvelteSet<number>>;
+		const pendingClauses = (record['queue'] as Queue<SvelteSet<number>>);
+		for(const pending of pendingClauses.toArray()) {
+			const copiedSet = new SvelteSet<number>(pending)
+			this.pending.enqueue(copiedSet);
+		}
+		if(!this.pending.isEmpty()) updateClausesToCheck(this.pending.peek());
 	}
 
 	transition(input: StateMachineEvent): void {

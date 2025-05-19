@@ -1,14 +1,11 @@
 <script>
 	// @ts-nocheck
-	import { ArrowRightOutline, ReplyOutline, CaretRightOutline } from 'flowbite-svelte-icons';
+	import {  ForwardOutline, ChevronDoubleRightOutline, CaretRightOutline } from 'flowbite-svelte-icons';
 	import DynamicRender from '../DynamicRender.svelte';
 	import { stateMachineEventBus } from '$lib/transversal/events.ts';
 
 	const assignmentProps = {
 		class: 'h-8 w-8'
-	};
-	const reverseProps = {
-		class: 'h-8 w-8 transform -scale-x-100'
 	};
 </script>
 
@@ -29,7 +26,7 @@
 		stateMachineEventBus.emit('followingVariable');
 	}}
 >
-	<DynamicRender component={ReplyOutline} props={reverseProps} />
+	<DynamicRender component={ForwardOutline} props={assignmentProps} />
 </button>
 
 <button
@@ -39,5 +36,5 @@
 		stateMachineEventBus.emit('finishUP');
 	}}
 >
-	<DynamicRender component={ArrowRightOutline} props={assignmentProps} />
+	<DynamicRender component={ChevronDoubleRightOutline} props={assignmentProps} />
 </button>
