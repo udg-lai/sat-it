@@ -1,4 +1,4 @@
-import type { FinalState, NonFinalState, State } from '../StateMachine.ts';
+import type { FinalState, NonFinalState, State } from '../StateMachine.svelte.ts';
 import {
 	BACKTRACKING_STATE_ID,
 	DECIDE_STATE_ID,

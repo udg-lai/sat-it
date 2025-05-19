@@ -1,5 +1,5 @@
 import { logFatal } from '$lib/transversal/logging.ts';
-import { type NonFinalState } from '../StateMachine.ts';
+import { type NonFinalState } from '../StateMachine.svelte.ts';
 import type {
 	DPLL_ALL_CLAUSES_CHECKED_FUN,
 	DPLL_ALL_CLAUSES_CHECKED_INPUT,
@@ -40,10 +40,10 @@ import type {
 	DPLL_UNSTACK_CLAUSE_SET_FUN,
 	DPLL_UNSTACK_CLAUSE_SET_INPUT
 } from './dpll-domain.ts';
-import type { DPLL_StateMachine } from './dpll-machine.ts';
-import type { DPLL_SolverStateMachine } from './dpll-solver.ts';
+import type { DPLL_StateMachine } from './dpll-state-machine.ts';
+import type { DPLL_SolverMachine } from './dpll-solver-machine.ts';
 
-export const initialTransition = (solver: DPLL_SolverStateMachine): void => {
+export const initialTransition = (solver: DPLL_SolverMachine): void => {
 	const stateMachine: DPLL_StateMachine = solver.stateMachine;
 	ecTransition(stateMachine);
 	if (stateMachine.completed()) return;
@@ -52,7 +52,7 @@ export const initialTransition = (solver: DPLL_SolverStateMachine): void => {
 };
 
 const conflictDetectionBlock = (
-	solver: DPLL_SolverStateMachine,
+	solver: DPLL_SolverMachine,
 	stateMachine: DPLL_StateMachine,
 	complementaryClauses: Set<number>
 ): void => {
@@ -79,7 +79,7 @@ const conflictDetectionBlock = (
 };
 
 const ecTransition = (stateMachine: DPLL_StateMachine): void => {
-	if (stateMachine.active !== 0) {
+	if (stateMachine.getActiveId() !== 0) {
 		logFatal(
 			'Fail Initial',
 			'Trying to use initialTransition in a state that is not the initial one'
@@ -115,7 +115,7 @@ const ucdTransition = (stateMachine: DPLL_StateMachine): Set<number> => {
 
 const triggeredClausesTransition = (
 	stateMachine: DPLL_StateMachine,
-	solver: DPLL_SolverStateMachine,
+	solver: DPLL_SolverMachine,
 	complementaryClauses: Set<number>
 ): boolean => {
 	const triggeredClausesState = stateMachine.getActiveState() as NonFinalState<
@@ -151,7 +151,7 @@ const allVariablesAssignedTransition = (stateMachine: DPLL_StateMachine): void =
 
 const queueClauseSetTransition = (
 	stateMachine: DPLL_StateMachine,
-	solver: DPLL_SolverStateMachine,
+	solver: DPLL_SolverMachine,
 	clauseSet: Set<number>
 ): void => {
 	const queueClauseSetState = stateMachine.getActiveState() as NonFinalState<
@@ -168,7 +168,7 @@ const queueClauseSetTransition = (
 
 const checkPendingClausesSetTransition = (
 	stateMachine: DPLL_StateMachine,
-	solver: DPLL_SolverStateMachine
+	solver: DPLL_SolverMachine
 ): boolean => {
 	const checkPendingClausesSetState = stateMachine.getActiveState() as NonFinalState<
 		DPLL_CHECK_PENDING_CLAUSES_FUN,
@@ -185,7 +185,7 @@ const checkPendingClausesSetTransition = (
 
 const peekClauseSetTransition = (
 	stateMachine: DPLL_StateMachine,
-	solver: DPLL_SolverStateMachine
+	solver: DPLL_SolverMachine
 ): Set<number> => {
 	const peekClauseSetState = stateMachine.getActiveState() as NonFinalState<
 		DPLL_PEEK_CLAUSE_SET_FUN,
@@ -216,7 +216,7 @@ const allClausesCheckedTransition = (
 	return result;
 };
 
-export const analizeClause = (solver: DPLL_SolverStateMachine): void => {
+export const analyzeClause = (solver: DPLL_SolverMachine): void => {
 	const stateMachine: DPLL_StateMachine = solver.stateMachine;
 	const clauseSet: Set<number> = solver.consultPostponed();
 	const clauseId: number = nextClauseTransition(stateMachine, clauseSet);
@@ -336,7 +336,7 @@ const deleteClauseTransition = (
 
 const unstackClauseSetTransition = (
 	stateMachine: DPLL_StateMachine,
-	solver: DPLL_SolverStateMachine
+	solver: DPLL_SolverMachine
 ): void => {
 	const dequeueClauseSetState = stateMachine.getActiveState() as NonFinalState<
 		DPLL_UNSTACK_CLAUSE_SET_FUN,
@@ -381,7 +381,7 @@ const complementaryOccurrencesTransition = (
 	return clauses;
 };
 
-export const decide = (solver: DPLL_SolverStateMachine): void => {
+export const decide = (solver: DPLL_SolverMachine): void => {
 	const stateMachine: DPLL_StateMachine = solver.stateMachine;
 	const literalToPropagate: number = decideTransition(stateMachine);
 	const complementaryClauses: Set<number> = complementaryOccurrencesTransition(
@@ -405,7 +405,7 @@ const decideTransition = (stateMachine: DPLL_StateMachine): number => {
 	return literalToPropagate;
 };
 
-export const backtracking = (solver: DPLL_SolverStateMachine): void => {
+export const backtracking = (solver: DPLL_SolverMachine): void => {
 	const stateMachine: DPLL_StateMachine = solver.stateMachine;
 	const literalToPropagate = backtrackingTransition(stateMachine);
 	const complementaryClauses: Set<number> = complementaryOccurrencesTransition(
@@ -430,7 +430,7 @@ const backtrackingTransition = (stateMachine: DPLL_StateMachine): number => {
 
 const emptyClauseSetTransition = (
 	stateMachine: DPLL_StateMachine,
-	solver: DPLL_SolverStateMachine
+	solver: DPLL_SolverMachine
 ): void => {
 	const emptyClauseSetState = stateMachine.getActiveState() as NonFinalState<
 		DPLL_EMPTY_CLAUSE_SET_FUN,

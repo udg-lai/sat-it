@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { resetWorkingTrailPointer, updateActiveState } from '$lib/store/clausesToCheck.svelte.ts';
+	import { resetWorkingTrailPointer } from '$lib/store/clausesToCheck.svelte.ts';
 	import { resetProblem, updateProblemFromTrail } from '$lib/store/problem.store.ts';
 	import { record, redo, resetStack, undo, type Snapshot } from '$lib/store/stack.svelte.ts';
 	import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
@@ -13,37 +13,34 @@
 	import { onMount } from 'svelte';
 	import { editorViewEventStore, type EditorViewEvent } from './debugger/events.svelte.ts';
 	import TrailEditor from './TrailEditorComponent.svelte';
-	import {
-		getSolverStateMachine,
-		updateSolverStateMachine
-	} from '$lib/store/stateMachine.svelte.ts';
-	import type { StateFun, StateInput } from '$lib/machine/StateMachine.ts';
-	import type { SolverStateMachine } from '$lib/machine/SolverStateMachine.ts';
+	import { getSolverMachine, updateSolverMachine } from '$lib/store/stateMachine.svelte.ts';
+	import type { SolverMachine } from '$lib/machine/SolverMachine.svelte.ts';
 	import { getTrails, updateTrails } from '$lib/store/trails.svelte.ts';
+	import type { StateFun, StateInput } from '$lib/machine/StateMachine.svelte.ts';
 
 	let expandPropagations: boolean = $state(true);
 
 	let trails: Trail[] = $derived(getTrails());
 
-	let stateMachine: SolverStateMachine<StateFun, StateInput> = $derived(getSolverStateMachine());
+	let solverMachine: SolverMachine<StateFun, StateInput> = $derived(getSolverMachine());
 
 	function onActionEvent(a: ActionEvent) {
 		if (a === 'record') {
-			record(trails, stateMachine.getActiveStateId());
+			record(trails, solverMachine.getActiveStateId());
 		} else if (a === 'undo') {
-			const snapshot = undo();
+			const snapshot: Snapshot = undo();
 			reloadFromSnapshot(snapshot);
 		} else if (a === 'redo') {
-			const snapshot = redo();
+			const snapshot: Snapshot = redo();
 			reloadFromSnapshot(snapshot);
 		}
 	}
 
 	function stateMachineEvent(s: StateMachineEvent) {
-		stateMachine.transition(s);
+		solverMachine.transition(s);
 	}
 
-	function reloadFromSnapshot({ snapshot, activeState }: Snapshot): void {
+	function reloadFromSnapshot({ snapshot, activeState, record }: Snapshot): void {
 		const len = snapshot.length;
 		if (len > 0) {
 			const latest = snapshot[len - 1];
@@ -53,8 +50,7 @@
 			resetWorkingTrailPointer();
 		}
 		updateTrails([...snapshot]);
-		updateSolverStateMachine(activeState);
-		updateActiveState(activeState);
+		updateSolverMachine(activeState, record);
 	}
 
 	function togglePropagations(e: EditorViewEvent) {
@@ -73,13 +69,13 @@
 		const unsubscribeToggleEditor = editorViewEventStore.subscribe(togglePropagations);
 		const unsubscribeActionEvent = userActionEventBus.subscribe(onActionEvent);
 		const unsubscribeChangeInstanceEvent = changeInstanceEventBus.subscribe(reset);
-		const unsubscirbeStateMachineEvent = stateMachineEventBus.subscribe(stateMachineEvent);
+		const unsubscribeStateMachineEvent = stateMachineEventBus.subscribe(stateMachineEvent);
 
 		return () => {
 			unsubscribeToggleEditor();
 			unsubscribeActionEvent();
 			unsubscribeChangeInstanceEvent();
-			unsubscirbeStateMachineEvent();
+			unsubscribeStateMachineEvent();
 		};
 	});
 </script>
