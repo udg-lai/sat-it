@@ -14,6 +14,7 @@
 	}
 
 	let { decision, propagations = [], expanded, emitClose, emitExpand }: Props = $props();
+
 </script>
 
 {#if propagations?.length === 0}

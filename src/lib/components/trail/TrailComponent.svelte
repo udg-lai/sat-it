@@ -17,8 +17,6 @@
 
 	let { trail, expanded = $bindable(false) }: Props = $props();
 
-	let decisionLevelExpanded = $derived(expanded);
-
 	let initialPropagations = $derived(trail.getInitialPropagations());
 
 	let decisions: DecisionLevel[] = $derived(
@@ -51,13 +49,22 @@
 
 	function onEmitClose(): void {
 		nExpanded = Math.max(nExpanded - 1, 0);
-		expanded = nExpanded === nExpandable;
+		if(nExpanded === 0) expanded = false;
 	}
 
 	function onEmitExpand(): void {
 		nExpanded = Math.min(nExpanded + 1, nExpandable);
-		expanded = nExpanded === nExpandable;
+		if(nExpanded === nExpandable) expanded = true;
 	}
+
+	$effect(() => {
+		if (expanded === false) {
+			nExpanded = 0;
+		} else {
+			nExpanded = nExpandable
+		}
+	});
+
 
 	let contentOverflow = $state(false);
 
@@ -140,7 +147,7 @@
 			<DecisionLevelComponent
 				decision={assignment.assignment}
 				propagations={trail.getPropagations(assignment.level)}
-				expanded={decisionLevelExpanded}
+				expanded={expanded}
 				emitClose={onEmitClose}
 				emitExpand={onEmitExpand}
 			/>
