@@ -7,10 +7,11 @@
 
 	interface Props {
 		backtrackingState: boolean;
-		disableButton: boolean;
+		finished: boolean;
+		cdMode: boolean;
 	}
 
-	let { backtrackingState, disableButton }: Props = $props();
+	let { backtrackingState, finished, cdMode: upMode }: Props = $props();
 
 	const assignmentProps = {
 		class: 'h-8 w-8'
@@ -20,26 +21,26 @@
 {#if !backtrackingState}
 	<button
 		class="btn general-btn"
-		class:invalidOption={disableButton}
+		class:invalidOption={finished || upMode}
 		onclick={() => {
 			updateAssignment('automated');
 			stateMachineEventBus.emit('step');
 			userActionEventBus.emit('record');
 		}}
 		title="Decide"
-		disabled={disableButton}
+		disabled={finished || upMode}
 	>
 		<DynamicRender component={CaretRightOutline} props={assignmentProps} />
 	</button>
 {:else}
 	<button
 		class="btn general-btn bkt-btn"
-		class:invalidOption={disableButton}
+		class:invalidOption={finished || upMode}
 		onclick={() => {
 			stateMachineEventBus.emit('step');
 		}}
 		title="Backtrack"
-		disabled={disableButton}
+		disabled={finished || upMode}
 	>
 		<DynamicRender component={CodeMergeOutline} props={assignmentProps} />
 	</button>

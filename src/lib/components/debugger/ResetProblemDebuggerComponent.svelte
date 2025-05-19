@@ -7,6 +7,12 @@
 	};
 </script>
 
-<button class="btn general-btn" title="Reset" onclick={() => {changeInstanceEventBus.emit()}}>
+<button
+	class="btn general-btn"
+	title="Reset"
+	onclick={() => {
+		changeInstanceEventBus.emit();
+	}}
+>
 	<DynamicRender component={RefreshOutline} props={resetProps} />
 </button>

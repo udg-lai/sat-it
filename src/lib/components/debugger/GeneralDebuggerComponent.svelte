@@ -1,6 +1,5 @@
 <script lang="ts">
 	import './_style.css';
-
 	import { onDestroy, onMount } from 'svelte';
 	import { emitEditorViewEvent } from './events.svelte.ts';
 	import DynamicRender from '$lib/components/DynamicRender.svelte';
@@ -14,6 +13,12 @@
 	import { getStackLength, getStackPointer } from '$lib/store/stack.svelte.ts';
 	import { browser } from '$app/environment';
 	import { stateMachineEventBus, userActionEventBus } from '$lib/transversal/events.ts';
+
+	interface Props {
+		finished: boolean;
+	}
+
+	let { finished }: Props = $props();
 
 	let expanded = $state(false);
 	let textCollapse = $derived(expanded ? 'Collapse Propagations' : 'Expand Propagations');
@@ -69,22 +74,26 @@
 
 <button
 	class="btn general-btn"
+	class:invalidOption={finished}
 	title="Solve trail"
 	onclick={() => {
 		stateMachineEventBus.emit('solve_trail');
 		userActionEventBus.emit('record');
 	}}
+	disabled={finished}
 >
 	<DynamicRender component={ArrowRightOutline} props={generalProps} />
 </button>
 
 <button
 	class="btn general-btn"
+	class:invalidOption={finished}
 	title="Solve"
 	onclick={() => {
 		stateMachineEventBus.emit('solve_all');
 		userActionEventBus.emit('record');
 	}}
+	disabled={finished}
 >
 	<DynamicRender component={BarsOutline} props={generalProps} />
 </button>

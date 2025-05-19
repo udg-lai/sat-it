@@ -1,12 +1,11 @@
 <script lang="ts">
 	import { getClausesToCheck } from '$lib/store/clausesToCheck.svelte.ts';
 	import { problemStore } from '$lib/store/problem.store.ts';
-	import { slide } from 'svelte/transition';
-	import BacktrackingDebugger from './BacktrackingDebuggerComponent.svelte';
-	import GeneralDebuggerButtons from './GeneralDebuggerButtonsComponent.svelte';
+	import AutomaticDebugger from './AutomaticDebuggerComponent.svelte';
+	import GeneralDebuggerButtons from './GeneralDebuggerComponent.svelte';
 	import ManualDebugger from './ManualDebuggerComponent.svelte';
-	import InitialStepDebugger from './InitialStep.svelte';
-	import UnitPropagationDebugger from './UnitPropagationDebuggerComponent.svelte';
+	import InitialStepDebugger from './InitialStepDebuggerComponent.svelte';
+	import ConflictDetectionDebugger from './ConflictDetectionDebuggerComponent.svelte';
 	import ResetProblemDebugger from './ResetProblemDebuggerComponent.svelte';
 	import { BACKTRACKING_STATE_ID, SAT_STATE_ID, UNSAT_STATE_ID } from '$lib/machine/reserved.ts';
 	import { getSolverMachine } from '$lib/store/stateMachine.svelte.ts';
@@ -20,31 +19,31 @@
 
 	const enablePreproces = $derived(activeId === 0);
 	const backtrackingState = $derived(activeId === BACKTRACKING_STATE_ID);
-	const enableUnitPropagtion = $derived(getClausesToCheck().size !== 0);
+	const cdMode = $derived(getClausesToCheck().size !== 0);
 	const finished = $derived(activeId === UNSAT_STATE_ID || activeId === SAT_STATE_ID);
-	
 </script>
 
-<div transition:slide|global class="flex-center debugger align-center relative flex-row gap-2">
+<div class="flex-center debugger align-center relative flex-row gap-2">
 	<div class="variable-display"></div>
 	{#if enablePreproces}
 		<InitialStepDebugger />
-	{:else if enableUnitPropagtion}
-		<UnitPropagationDebugger />
 	{:else}
-		{#if !finished}
+		{#if cdMode}
+			<ConflictDetectionDebugger {cdMode} />
+		{:else if !finished}
 			{#if !backtrackingState && defaultNextVariable}
 				{defaultNextVariable}
 			{:else}
 				{'X'}
 			{/if}
-			<BacktrackingDebugger {backtrackingState} disableButton={finished} />
+			<AutomaticDebugger {backtrackingState} {finished} {cdMode} />
 
-			<ManualDebugger {defaultNextVariable} disableButton={finished} />
+			<ManualDebugger {defaultNextVariable} {finished} {cdMode} />
 		{:else}
 			<ResetProblemDebugger />
 		{/if}
-		<GeneralDebuggerButtons />
+
+		<GeneralDebuggerButtons {finished} />
 	{/if}
 </div>
 
@@ -61,7 +60,7 @@
 	}
 
 	.variable-display {
-		width: 50px;
+		width: 8rem;
 		text-align: center;
 		color: grey;
 	}

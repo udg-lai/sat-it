@@ -64,12 +64,13 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 	}
 
 	updateFromRecord(record: Record<string, unknown>): void {
-		const pendingClauses = (record['queue'] as Queue<SvelteSet<number>>);
-		for(const pending of pendingClauses.toArray()) {
-			const copiedSet = new SvelteSet<number>(pending)
+		const pendingClauses = record['queue'] as Queue<SvelteSet<number>>;
+		this.pending.clear();
+		for (const pending of pendingClauses.toArray()) {
+			const copiedSet = new SvelteSet<number>(pending);
 			this.pending.enqueue(copiedSet);
 		}
-		if(!this.pending.isEmpty()) updateClausesToCheck(this.pending.peek());
+		if (!this.pending.isEmpty()) updateClausesToCheck(this.pending.peek());
 	}
 
 	transition(input: StateMachineEvent): void {

@@ -14,10 +14,11 @@
 
 	interface Props {
 		defaultNextVariable: number | undefined;
-		disableButton: boolean;
+		finished: boolean;
+		cdMode: boolean;
 	}
 
-	let { defaultNextVariable, disableButton }: Props = $props();
+	let { defaultNextVariable, finished, cdMode: upMode }: Props = $props();
 
 	const generalProps = {
 		class: 'h-8 w-8'
@@ -62,10 +63,10 @@
 
 <button
 	class="btn general-btn"
-	class:invalidOption={defaultNextVariable === undefined || disableButton}
+	class:invalidOption={defaultNextVariable === undefined || finished || upMode}
 	title="Manual Decision"
 	onclick={() => (manualDecisionModal = true)}
-	disabled={defaultNextVariable === undefined || disableButton}
+	disabled={defaultNextVariable === undefined || finished || upMode}
 >
 	<DynamicRender component={PenOutline} props={generalProps} />
 </button>
