@@ -3,9 +3,7 @@ import { SolverMachine } from '$lib/machine/SolverMachine.ts';
 import type { StateFun, StateInput } from '$lib/machine/StateMachine.ts';
 import { logFatal } from '$lib/transversal/logging.ts';
 
-let solverMachine: SolverMachine<StateFun, StateInput> = $state(
-	new DPLL_SolverMachine()
-);
+let solverMachine: SolverMachine<StateFun, StateInput> = $state(new DPLL_SolverMachine());
 
 export const setSolverStateMachine = (algorithm: 'backtracking' | 'dpll' | 'cdcl') => {
 	if (algorithm === 'backtracking') {
@@ -24,4 +22,3 @@ export const updateSolverMachine = (stateId: number): void => {
 };
 
 export const getSolverMachine = () => solverMachine;
-

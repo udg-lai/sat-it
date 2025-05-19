@@ -13,10 +13,7 @@
 	import { onMount } from 'svelte';
 	import { editorViewEventStore, type EditorViewEvent } from './debugger/events.svelte.ts';
 	import TrailEditor from './TrailEditorComponent.svelte';
-	import {
-		getSolverMachine,
-		updateSolverMachine
-	} from '$lib/store/stateMachine.svelte.ts';
+	import { getSolverMachine, updateSolverMachine } from '$lib/store/stateMachine.svelte.ts';
 	import type { StateFun, StateInput } from '$lib/machine/StateMachine.ts';
 	import type { SolverMachine } from '$lib/machine/SolverMachine.ts';
 	import { getTrails, updateTrails } from '$lib/store/trails.svelte.ts';

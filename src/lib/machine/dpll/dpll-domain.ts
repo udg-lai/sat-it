@@ -190,9 +190,7 @@ export const unsatisfiedClause: DPLL_CONFLICT_DETECTION_FUN = (clauseId: number)
 	return isUnSATClause(evaluation);
 };
 
-export type DPLL_CHECK_PENDING_CLAUSES_FUN = (
-	solverStateMachine: DPLL_SolverMachine
-) => boolean;
+export type DPLL_CHECK_PENDING_CLAUSES_FUN = (solverStateMachine: DPLL_SolverMachine) => boolean;
 
 export const thereAreJobPostponed: DPLL_CHECK_PENDING_CLAUSES_FUN = (
 	solverStateMachine: DPLL_SolverMachine
