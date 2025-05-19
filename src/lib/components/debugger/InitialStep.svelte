@@ -3,6 +3,7 @@
 	import { CaretRightOutline } from 'flowbite-svelte-icons';
 	import DynamicRender from '../DynamicRender.svelte';
 	import { stateMachineEventBus } from '$lib/transversal/events.ts';
+	import { resetStack } from '$lib/store/stack.svelte.ts';
 
 	const assignmentProps = {
 		class: 'h-8 w-8'
@@ -12,6 +13,7 @@
 <button
 	class="btn general-btn"
 	onclick={() => {
+		resetStack();
 		stateMachineEventBus.emit('step');
 	}}
 	title="Step"

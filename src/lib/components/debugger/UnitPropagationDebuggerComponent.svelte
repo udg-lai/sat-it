@@ -1,8 +1,7 @@
 <script>
 	// @ts-nocheck
-	import { ArrowRightOutline, ReplyOutline } from 'flowbite-svelte-icons';
+	import { ArrowRightOutline, ReplyOutline, CaretRightOutline } from 'flowbite-svelte-icons';
 	import DynamicRender from '../DynamicRender.svelte';
-	import StateMachineStepDebugger from './StateMachineStep.svelte';
 	import { stateMachineEventBus } from '$lib/transversal/events.ts';
 
 	const assignmentProps = {
@@ -13,7 +12,15 @@
 	};
 </script>
 
-<StateMachineStepDebugger />
+<button
+	class="btn general-btn"
+	onclick={() => {
+		stateMachineEventBus.emit('step');
+	}}
+	title="Step"
+>
+	<DynamicRender component={CaretRightOutline} props={assignmentProps} />
+</button>
 
 <button
 	class="btn general-btn"

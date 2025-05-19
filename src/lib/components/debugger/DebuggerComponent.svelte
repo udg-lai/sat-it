@@ -5,7 +5,7 @@
 	import BacktrackingDebugger from './BacktrackingDebuggerComponent.svelte';
 	import GeneralDebuggerButtons from './GeneralDebuggerButtonsComponent.svelte';
 	import ManualDebugger from './ManualDebuggerComponent.svelte';
-	import StateMachineStepDebugger from './StateMachineStep.svelte';
+	import InitialStepDebugger from './InitialStep.svelte';
 	import UnitPropagationDebugger from './UnitPropagationDebuggerComponent.svelte';
 	import ResetProblemDebugger from './ResetProblemDebuggerComponent.svelte';
 	import { BACKTRACKING_STATE_ID, SAT_STATE_ID, UNSAT_STATE_ID } from '$lib/machine/reserved.ts';
@@ -24,13 +24,13 @@
 
 	$effect(() => {
 		console.log(activeId);
-	})
+	});
 </script>
 
 <div transition:slide|global class="flex-center debugger align-center relative flex-row gap-2">
 	<div class="variable-display"></div>
 	{#if enablePreproces}
-		<StateMachineStepDebugger />
+		<InitialStepDebugger />
 	{:else if enableUnitPropagtion}
 		<UnitPropagationDebugger />
 	{:else}

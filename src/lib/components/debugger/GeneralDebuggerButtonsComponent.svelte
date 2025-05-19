@@ -70,7 +70,10 @@
 <button
 	class="btn general-btn"
 	title="Solve trail"
-	onclick={() => stateMachineEventBus.emit('solve_trail')}
+	onclick={() => {
+		stateMachineEventBus.emit('solve_trail');
+		userActionEventBus.emit('record');
+	}}
 >
 	<DynamicRender component={ArrowRightOutline} props={generalProps} />
 </button>
@@ -78,7 +81,10 @@
 <button
 	class="btn general-btn"
 	title="Solve"
-	onclick={() => stateMachineEventBus.emit('solve_all')}
+	onclick={() => {
+		stateMachineEventBus.emit('solve_all');
+		userActionEventBus.emit('record');
+	}}
 >
 	<DynamicRender component={BarsOutline} props={generalProps} />
 </button>
