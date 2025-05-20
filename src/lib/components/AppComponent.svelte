@@ -16,7 +16,11 @@
 	import type { SolverMachine } from '$lib/machine/SolverMachine.svelte.ts';
 	import { getTrails, updateTrails } from '$lib/store/trails.svelte.ts';
 	import type { StateFun, StateInput } from '$lib/machine/StateMachine.svelte.ts';
-	import { getStatistics, resetStatistics, updateStatistics } from '$lib/store/statistics.svelte.ts';
+	import {
+		getStatistics,
+		resetStatistics,
+		updateStatistics
+	} from '$lib/store/statistics.svelte.ts';
 
 	let expandPropagations: boolean = $state(true);
 

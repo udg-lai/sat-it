@@ -8,7 +8,13 @@ export interface Snapshot {
 	record?: Record<string, unknown>;
 }
 
-let stack: Snapshot[] = $state([{ snapshot: [], activeState: 0 , statistics: {noDecisions: 0, noBacktrackings: 0,	noUnitPropagations: 0}}]);
+let stack: Snapshot[] = $state([
+	{
+		snapshot: [],
+		activeState: 0,
+		statistics: { noDecisions: 0, noBacktrackings: 0, noUnitPropagations: 0 }
+	}
+]);
 
 let stackPointer: number = $state(0);
 
@@ -21,7 +27,12 @@ export function resetStack() {
 	stackPointer = 0;
 }
 
-export function record(trails: Trail[], activeState: number, statistics: Statistics, record?: Record<string, unknown>) {
+export function record(
+	trails: Trail[],
+	activeState: number,
+	statistics: Statistics,
+	record?: Record<string, unknown>
+) {
 	const snapshot: Snapshot = {
 		snapshot: trails.map((trail) => trail.copy()),
 		activeState: activeState,
