@@ -27,10 +27,6 @@
 			.join('\\: \\:');
 	});
 
-	$effect(() => {
-		console.log(clause);
-	})
-
 	const activeId = $derived(getSolverMachine().getActiveStateId());
 	const satState = $derived(activeId === SAT_STATE_ID);
 	const unsatState = $derived(activeId === UNSAT_STATE_ID);
