@@ -18,6 +18,8 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 	abstract transition(input: StateMachineEvent): void;
 	abstract getRecord(): Record<string, unknown>;
 	abstract updateFromRecord(record: Record<string, unknown> | undefined): void;
+	abstract getFirstStateId(): number;
+	abstract getBacktrackingStateId(): number;
 
 	getActiveStateId(): number {
 		return this.stateMachine.getActiveId();

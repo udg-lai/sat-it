@@ -17,9 +17,10 @@
 
 	interface Props {
 		finished: boolean;
+		backtrackingState: boolean;
 	}
 
-	let { finished }: Props = $props();
+	let { finished, backtrackingState }: Props = $props();
 
 	let expanded = $state(false);
 	let textCollapse = $derived(expanded ? 'Collapse Propagations' : 'Expand Propagations');
@@ -75,28 +76,28 @@
 
 <button
 	class="btn general-btn"
-	class:invalidOption={finished}
+	class:invalidOption={finished || backtrackingState}
 	title="Solve trail"
 	onclick={() => {
 		updateAssignment('automated');
 		stateMachineEventBus.emit('solve_trail');
 		userActionEventBus.emit('record');
 	}}
-	disabled={finished}
+	disabled={finished || backtrackingState}
 >
 	<DynamicRender component={ArrowRightOutline} props={generalProps} />
 </button>
 
 <button
 	class="btn general-btn"
-	class:invalidOption={finished}
+	class:invalidOption={finished || backtrackingState}
 	title="Solve"
 	onclick={() => {
 		updateAssignment('automated');
 		stateMachineEventBus.emit('solve_all');
 		userActionEventBus.emit('record');
 	}}
-	disabled={finished}
+	disabled={finished || backtrackingState}
 >
 	<DynamicRender component={BarsOutline} props={generalProps} />
 </button>

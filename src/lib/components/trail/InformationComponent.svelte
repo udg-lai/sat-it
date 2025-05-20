@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { SAT_STATE_ID } from '$lib/machine/reserved.ts';
+	import { SAT_STATE_ID, UNSAT_STATE_ID } from '$lib/machine/reserved.ts';
 	import { nanoid } from 'nanoid';
 	import { problemStore } from '$lib/store/problem.store.ts';
 	import { getSolverMachine } from '$lib/store/stateMachine.svelte.ts';
@@ -29,6 +29,7 @@
 
 	const activeId = $derived(getSolverMachine().getActiveStateId());
 	const satState = $derived(activeId === SAT_STATE_ID);
+	const unsatState = $derived(activeId === UNSAT_STATE_ID);
 </script>
 
 <button
@@ -37,7 +38,9 @@
 	class:unsat={clause !== undefined}
 	class:sat={clause === undefined && satState}
 >
-	{#if clause !== undefined}
+	{#if unsatState}
+		<p>UNSAT</p>
+	{:else if clause !== undefined}
 		<p>CONFLICT</p>
 	{:else if satState}
 		<p>SAT</p>

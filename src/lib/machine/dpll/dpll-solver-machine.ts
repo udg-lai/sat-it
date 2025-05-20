@@ -57,10 +57,19 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 
 		return returnQueue;
 	}
+
 	getRecord(): Record<string, unknown> {
 		return {
 			queue: this.getQueue()
 		};
+	}
+
+	getFirstStateId(): number {
+		return dpll_stateName2StateId['empty_clause_state'];
+	}
+
+	getBacktrackingStateId(): number {
+		return dpll_stateName2StateId['backtracking_state'];
 	}
 
 	updateFromRecord(record: Record<string, unknown> | undefined): void {
