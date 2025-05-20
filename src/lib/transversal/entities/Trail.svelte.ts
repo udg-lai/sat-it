@@ -9,6 +9,7 @@ export class Trail {
 	private followUPIndex: number = -1;
 	private decisionLevel: number = 0;
 	private trailCapacity: number = 0;
+	private trailEnding: number = $state(-1);
 
 	constructor(trailCapacity: number = 0) {
 		this.trailCapacity = trailCapacity;
@@ -22,7 +23,12 @@ export class Trail {
 		newTrail.followUPIndex = this.followUPIndex;
 		newTrail.decisionLevel = this.decisionLevel;
 		newTrail.trailCapacity = this.trailCapacity;
+		newTrail.trailEnding = this.trailEnding;
 		return newTrail;
+	}
+
+	getDecisionLevel(): number {
+		return this.decisionLevel;
 	}
 
 	getAssignments(): VariableAssignment[] {
@@ -43,6 +49,14 @@ export class Trail {
 		} else {
 			return this.getLevelPropagations(level);
 		}
+	}
+
+	getTrailEnding(): number {
+		return this.trailEnding;
+	}
+
+	updateTrailEnding(clauseId: number = -1): void {
+		this.trailEnding = clauseId;
 	}
 
 	hasPropagations(level: number): boolean {

@@ -1,8 +1,7 @@
 <script lang="ts">
 	import './_style.css';
-
 	import { onDestroy, onMount } from 'svelte';
-	import { emitActionEvent, emitEditorViewEvent } from './events.svelte.ts';
+	import { emitEditorViewEvent } from './events.svelte.ts';
 	import DynamicRender from '$lib/components/DynamicRender.svelte';
 	import {
 		ArrowRightOutline,
@@ -13,6 +12,15 @@
 	} from 'flowbite-svelte-icons';
 	import { getStackLength, getStackPointer } from '$lib/store/stack.svelte.ts';
 	import { browser } from '$app/environment';
+	import { stateMachineEventBus, userActionEventBus } from '$lib/transversal/events.ts';
+	import { updateAssignment } from '$lib/store/assignment.svelte.ts';
+
+	interface Props {
+		finished: boolean;
+		backtrackingState: boolean;
+	}
+
+	let { finished, backtrackingState }: Props = $props();
 
 	let expanded = $state(false);
 	let textCollapse = $derived(expanded ? 'Collapse Propagations' : 'Expand Propagations');
@@ -58,19 +66,39 @@
 
 		if (isUndo) {
 			event.preventDefault();
-			emitActionEvent({ type: 'undo' });
+			userActionEventBus.emit('undo');
 		} else if (isRedo) {
 			event.preventDefault();
-			emitActionEvent({ type: 'redo' });
+			userActionEventBus.emit('redo');
 		}
 	}
 </script>
 
-<button class="btn general-btn" title="Solve trail">
+<button
+	class="btn general-btn"
+	class:invalidOption={finished || backtrackingState}
+	title="Solve trail"
+	onclick={() => {
+		updateAssignment('automated');
+		stateMachineEventBus.emit('solve_trail');
+		userActionEventBus.emit('record');
+	}}
+	disabled={finished || backtrackingState}
+>
 	<DynamicRender component={ArrowRightOutline} props={generalProps} />
 </button>
 
-<button class="btn general-btn" title="Solve">
+<button
+	class="btn general-btn"
+	class:invalidOption={finished || backtrackingState}
+	title="Solve"
+	onclick={() => {
+		updateAssignment('automated');
+		stateMachineEventBus.emit('solve_all');
+		userActionEventBus.emit('record');
+	}}
+	disabled={finished || backtrackingState}
+>
 	<DynamicRender component={BarsOutline} props={generalProps} />
 </button>
 
@@ -79,7 +107,7 @@
 	class:invalidOption={!btnUndoActive}
 	title="Undo"
 	disabled={!btnUndoActive}
-	onclick={() => emitActionEvent({ type: 'undo' })}
+	onclick={() => userActionEventBus.emit('undo')}
 >
 	<DynamicRender component={ReplyOutline} props={generalProps} />
 </button>
@@ -88,7 +116,7 @@
 	class="btn general-btn"
 	class:invalidOption={!btnRedoActive}
 	title="Redo"
-	onclick={() => emitActionEvent({ type: 'redo' })}
+	onclick={() => userActionEventBus.emit('redo')}
 	disabled={!btnRedoActive}
 >
 	<DynamicRender component={ReplyOutline} props={reverseProps} />

@@ -29,7 +29,7 @@
 						{index + 1}.
 					</span>
 				</div>
-				<ClauseComponent clause={item} />
+				<ClauseComponent clause={item as Clause} />
 			</div>
 		</div>
 	</FlexVirtualList>
@@ -59,7 +59,6 @@
 		height: 100%;
 		flex-direction: row;
 		gap: 0.5rem;
-		opacity: 0.5;
 		align-items: end;
 	}
 
@@ -69,5 +68,6 @@
 		align-items: end;
 		justify-content: center;
 		font-size: 1rem;
+		opacity: 0.5;
 	}
 </style>

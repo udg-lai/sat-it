@@ -8,6 +8,7 @@ export type ManualAssignment = {
 
 type AutomatedAssignment = {
 	type: 'automated';
+	polarity: boolean;
 };
 
 export type AssignmentEvent = AutomatedAssignment | ManualAssignment;
@@ -26,24 +27,4 @@ export const editorViewEventStore: Writable<EditorViewEvent> = writable();
 
 export const emitEditorViewEvent = () => {
 	editorViewEventStore.update(() => ({ expand: undefined }));
-};
-
-type RecordAction = {
-	type: 'record';
-};
-
-type UndoAction = {
-	type: 'undo';
-};
-
-type RedoAction = {
-	type: 'redo';
-};
-
-export type ActionEvent = RecordAction | UndoAction | RedoAction;
-
-export const actionEvent: Writable<ActionEvent> = writable();
-
-export const emitActionEvent = (action: ActionEvent) => {
-	actionEvent.set({ ...action });
 };

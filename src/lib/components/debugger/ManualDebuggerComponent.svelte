@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { problemStore } from '$lib/store/problem.store.ts';
-	import { logError, logInfo } from '$lib/transversal/logging.ts';
+	import { logInfo } from '$lib/transversal/logging.ts';
 	import { Modal } from 'flowbite-svelte';
 	import {
 		CaretRightOutline,
@@ -9,13 +9,17 @@
 		PenOutline
 	} from 'flowbite-svelte-icons';
 	import DynamicRender from '../DynamicRender.svelte';
-	import { emitActionEvent, emitAssignmentEvent } from './events.svelte.ts';
+	import { stateMachineEventBus, userActionEventBus } from '$lib/transversal/events.ts';
+	import { updateAssignment } from '$lib/store/assignment.svelte.ts';
 
 	interface Props {
 		defaultNextVariable: number | undefined;
+		finished: boolean;
+		cdMode: boolean;
+		backtrackingState: boolean;
 	}
 
-	let { defaultNextVariable }: Props = $props();
+	let { defaultNextVariable, finished, cdMode, backtrackingState }: Props = $props();
 
 	const generalProps = {
 		class: 'h-8 w-8'
@@ -31,7 +35,7 @@
 	let userNextVariable: number | undefined = $state(undefined);
 
 	let isVariableValid: boolean = $derived.by(() => {
-		if (userNextVariable === undefined) return true;
+		if (userNextVariable === undefined) return false;
 		else {
 			if (userNextVariable < 1 || userNextVariable > maxValue) return false;
 			else {
@@ -45,21 +49,11 @@
 		if (!isVariableValid) {
 			logInfo('Invalid Variable', 'The variable you are trying to assign is already assigned');
 		} else {
-			if (
-				(userNextVariable === undefined && polarity) ||
-				(userNextVariable !== undefined && userNextVariable === defaultNextVariable && polarity)
-			) {
-				emitAssignmentEvent({ type: 'automated' });
-			} else if (defaultNextVariable !== undefined && userNextVariable === undefined && !polarity) {
-				emitAssignmentEvent({ type: 'manual', variable: defaultNextVariable, polarity: polarity });
-			} else if (userNextVariable !== undefined) {
-				emitAssignmentEvent({ type: 'manual', variable: userNextVariable, polarity: polarity });
-			} else {
-				logError('Could not control case of assignment');
-			}
+			updateAssignment('manual', polarity, userNextVariable as number);
+			stateMachineEventBus.emit('step');
+			userActionEventBus.emit('record');
+			resetState();
 		}
-		emitActionEvent({ type: 'record' });
-		resetState();
 	}
 
 	function resetState(): void {
@@ -70,10 +64,10 @@
 
 <button
 	class="btn general-btn"
-	class:invalidOption={defaultNextVariable === undefined}
+	class:invalidOption={defaultNextVariable === undefined || finished || cdMode || backtrackingState}
 	title="Manual Decision"
 	onclick={() => (manualDecisionModal = true)}
-	disabled={defaultNextVariable === undefined}
+	disabled={defaultNextVariable === undefined || finished || cdMode || backtrackingState}
 >
 	<DynamicRender component={PenOutline} props={generalProps} />
 </button>

@@ -1,7 +1,8 @@
-import { Eval, type IClausePool } from '../interfaces/IClausePool.ts';
+import { SvelteSet } from 'svelte/reactivity';
+import type { AssignmentEval, IClausePool } from '../interfaces/IClausePool.ts';
 import type { CNF } from '../mapping/contentToSummary.ts';
 import { cnfToClauseSet } from '../utils.ts';
-import Clause, { ClauseEval } from './Clause.ts';
+import Clause, { type ClauseEval, isSatClause, isUnSATClause } from './Clause.ts';
 import type VariablePool from './VariablePool.svelte.ts';
 
 class ClausePool implements IClausePool {
@@ -17,21 +18,34 @@ class ClausePool implements IClausePool {
 		return new ClausePool(clauses);
 	}
 
-	eval(): Eval {
+	eval(): AssignmentEval {
 		let unsat = false;
 		let nSatisfied = 0;
 		let i = 0;
+		let conflicClause: Clause | undefined = undefined;
 		while (i < this.clauses.length && !unsat) {
 			const clause: Clause = this.clauses[i];
 			const clauseEval: ClauseEval = clause.eval();
-			unsat = clauseEval === ClauseEval.UNSAT;
+			unsat = isUnSATClause(clauseEval);
 			if (!unsat) {
-				const sat = clauseEval === ClauseEval.SAT;
+				const sat = isSatClause(clauseEval);
 				if (sat) nSatisfied++;
 				i++;
+			} else {
+				conflicClause = clause;
 			}
 		}
-		const state: Eval = unsat ? Eval.UNSAT : nSatisfied == i ? Eval.SAT : Eval.UNRESOLVED;
+		let state: AssignmentEval;
+		if (unsat) {
+			state = {
+				type: 'UnSAT',
+				conflictClause: conflicClause?.getId() as number
+			};
+		} else if (nSatisfied === i) {
+			state = { type: 'SAT' };
+		} else {
+			state = { type: 'UNRESOLVED' };
+		}
 		return state;
 	}
 
@@ -47,10 +61,10 @@ class ClausePool implements IClausePool {
 		}
 	}
 
-	getUnitClauses(): Set<Clause> {
-		const S = new Set<Clause>();
+	getUnitClauses(): SvelteSet<number> {
+		const S = new SvelteSet<number>();
 		for (const c of this.getClauses()) {
-			if (c.isUnit()) S.add(c);
+			if (c.optimalCheckUnit()) S.add(c.getId());
 		}
 		return S;
 	}

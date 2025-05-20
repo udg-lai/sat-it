@@ -1,4 +1,4 @@
-import type { IVariablePool } from '../utils/interfaces/IVariablePool.ts';
+import type { IVariablePool } from '../interfaces/IVariablePool.ts';
 import { logError } from '../logging.ts';
 import { makeJust, makeNothing, type Maybe } from '../types/maybe.ts';
 import Variable from './Variable.svelte.ts';
@@ -12,6 +12,13 @@ class VariablePool implements IVariablePool {
 	constructor(nVariables: number) {
 		this.variables = new Array(nVariables).fill(null).map((_, index) => new Variable(index + 1));
 		this.capacity = nVariables;
+		this.pointer = 0;
+	}
+
+	reset(): void {
+		this.variables.forEach((variable) => {
+			variable.unassign();
+		});
 		this.pointer = 0;
 	}
 

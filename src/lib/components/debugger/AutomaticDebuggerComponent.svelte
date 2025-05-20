@@ -1,39 +1,46 @@
 <script lang="ts">
 	import './_style.css';
 	import { CaretRightOutline, CodeMergeOutline } from 'flowbite-svelte-icons';
-	import { emitActionEvent, emitAssignmentEvent } from './events.svelte.ts';
 	import DynamicRender from '$lib/components/DynamicRender.svelte';
+	import { stateMachineEventBus, userActionEventBus } from '$lib/transversal/events.ts';
+	import { updateAssignment } from '$lib/store/assignment.svelte.ts';
 
 	interface Props {
-		defaultNextVariable: number | undefined;
+		backtrackingState: boolean;
+		finished: boolean;
+		cdMode: boolean;
 	}
 
-	let { defaultNextVariable }: Props = $props();
+	let { backtrackingState, finished, cdMode: upMode }: Props = $props();
 
 	const assignmentProps = {
 		class: 'h-8 w-8'
 	};
 </script>
 
-{#if defaultNextVariable}
+{#if !backtrackingState}
 	<button
 		class="btn general-btn"
+		class:invalidOption={finished || upMode}
 		onclick={() => {
-			emitAssignmentEvent({ type: 'automated' });
-			emitActionEvent({ type: 'record' });
+			updateAssignment('automated');
+			stateMachineEventBus.emit('step');
+			userActionEventBus.emit('record');
 		}}
 		title="Decide"
+		disabled={finished || upMode}
 	>
 		<DynamicRender component={CaretRightOutline} props={assignmentProps} />
 	</button>
 {:else}
 	<button
 		class="btn general-btn bkt-btn"
+		class:invalidOption={finished || upMode}
 		onclick={() => {
-			emitAssignmentEvent({ type: 'automated' });
-			emitActionEvent({ type: 'record' });
+			stateMachineEventBus.emit('step');
 		}}
 		title="Backtrack"
+		disabled={finished || upMode}
 	>
 		<DynamicRender component={CodeMergeOutline} props={assignmentProps} />
 	</button>
