@@ -9,7 +9,7 @@ export class Trail {
 	private followUPIndex: number = -1;
 	private decisionLevel: number = 0;
 	private trailCapacity: number = 0;
-	private trailEnding: number = -1;
+	private trailEnding: number = $state(-1);
 
 	constructor(trailCapacity: number = 0) {
 		this.trailCapacity = trailCapacity;
