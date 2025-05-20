@@ -1,10 +1,11 @@
 import type Clause from '$lib/transversal/entities/Clause.ts';
+import type { SvelteSet } from 'svelte/reactivity';
 
 export interface IClausePool {
 	eval(): AssignmentEval;
 	addClause(clause: Clause): void;
 	get(clause: number): Clause;
-	getUnitClauses(): Set<number>;
+	getUnitClauses(): SvelteSet<number>;
 	getClauses(): Clause[];
 	size(): number;
 }

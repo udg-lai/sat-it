@@ -2,8 +2,8 @@
 	import './_style.css';
 	import { CaretRightOutline } from 'flowbite-svelte-icons';
 	import DynamicRender from '../DynamicRender.svelte';
-	import { preprocessSignalEventBus } from '$lib/transversal/events.ts';
-	import { updateStarted } from '$lib/store/clausesToCheck.svelte.ts';
+	import { stateMachineEventBus } from '$lib/transversal/events.ts';
+	import { resetStack } from '$lib/store/stack.svelte.ts';
 
 	const assignmentProps = {
 		class: 'h-8 w-8'
@@ -13,10 +13,10 @@
 <button
 	class="btn general-btn"
 	onclick={() => {
-		preprocessSignalEventBus.emit();
-		updateStarted(true);
+		resetStack();
+		stateMachineEventBus.emit('step');
 	}}
-	title="Start Preproces"
+	title="Step"
 >
 	<DynamicRender component={CaretRightOutline} props={assignmentProps} />
 </button>

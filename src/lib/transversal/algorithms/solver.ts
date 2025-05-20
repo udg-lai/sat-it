@@ -1,7 +1,8 @@
 import type { AssignmentEvent } from '$lib/components/debugger/events.svelte.ts';
-import type { SolverStateMachine } from '$lib/machine/SolverStateMachine.ts';
+import { getAssignment } from '$lib/store/assignment.svelte.ts';
 import type { MappingLiteral2Clauses } from '$lib/store/problem.store.ts';
 import { getLatestTrail, stackTrail, unstackTrail } from '$lib/store/trails.svelte.ts';
+import { SvelteSet } from 'svelte/reactivity';
 import type Clause from '../entities/Clause.ts';
 import type { ClauseEval } from '../entities/Clause.ts';
 import type ClausePool from '../entities/ClausePool.svelte.ts';
@@ -18,8 +19,8 @@ export const emptyClauseDetection = (pool: ClausePool): boolean => {
 	return isUnSAT(evaluation);
 };
 
-export const unitClauseDetection = (pool: ClausePool): Set<number> => {
-	const unitClauses: Set<number> = pool.getUnitClauses();
+export const unitClauseDetection = (pool: ClausePool): SvelteSet<number> => {
+	const unitClauses: SvelteSet<number> = pool.getUnitClauses();
 	return unitClauses;
 };
 
@@ -27,12 +28,9 @@ export const allAssigned = (pool: VariablePool): boolean => {
 	return pool.allAssigned();
 };
 
-export const decide = (
-	pool: VariablePool,
-	assignmentEvent: AssignmentEvent,
-	method: string
-): number => {
+export const decide = (pool: VariablePool, method: string): number => {
 	const trail: Trail = obtainTrail(pool);
+	const assignmentEvent: AssignmentEvent = getAssignment();
 
 	let variableId: number;
 	if (assignmentEvent.type === 'automated') {
@@ -57,24 +55,13 @@ export const decide = (
 	return assignmentEvent.polarity ? variableId : -variableId;
 };
 
-export const queueClauseSet = (clauses: Set<number>, solverStateMachine: SolverStateMachine) => {
-	if (clauses.size === 0) {
-		logFatal('Empty set of clauses are not thought to be queued');
-	}
-	solverStateMachine.postpone(clauses);
-};
-
-export const dequeueClauseSet = (solverStateMachine: SolverStateMachine) => {
-	solverStateMachine.resolvePostponed();
-};
-
 export const clauseEvaluation = (pool: ClausePool, clauseId: number): ClauseEval => {
 	const clause = pool.get(clauseId);
 	const evaluation: ClauseEval = clause.eval();
 	return evaluation;
 };
 
-export const triggeredClauses = (clauses: Set<number>): boolean => {
+export const triggeredClauses = (clauses: SvelteSet<number>): boolean => {
 	return clauses.size !== 0;
 };
 
@@ -107,8 +94,15 @@ const obtainTrail = (variables: VariablePool): Trail => {
 export const complementaryOccurrences = (
 	mapping: MappingLiteral2Clauses,
 	literal: number
-): Set<number> => {
-	return mapping.get(-literal) ?? new Set<number>();
+): SvelteSet<number> => {
+	const mappingReturn: Set<number> | undefined = mapping.get(-literal);
+	const complementaryOccurrences: SvelteSet<number> = new SvelteSet<number>();
+	if (mappingReturn !== undefined) {
+		for (const clause of mappingReturn) {
+			complementaryOccurrences.add(clause);
+		}
+	}
+	return complementaryOccurrences;
 };
 
 export const nonDecisionMade = (): boolean => {
@@ -118,6 +112,7 @@ export const nonDecisionMade = (): boolean => {
 
 export const backtracking = (pool: VariablePool): number => {
 	const trail: Trail = (getLatestTrail() as Trail).copy();
+	trail.updateTrailEnding();
 	const lastVariableAssignment: VariableAssignment = disposeUntilDecision(trail, pool);
 
 	const lastVariable: Variable = lastVariableAssignment.getVariable();
@@ -129,7 +124,7 @@ export const backtracking = (pool: VariablePool): number => {
 	trail.updateFollowUpIndex();
 
 	stackTrail(trail);
-	return polarity ? -lastVariable.getInt() : lastVariable.getInt();
+	return polarity ? lastVariable.getInt() : -lastVariable.getInt();
 };
 
 const disposeUntilDecision = (trail: Trail, variables: VariablePool): VariableAssignment => {

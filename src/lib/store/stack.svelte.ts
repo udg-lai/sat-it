@@ -2,9 +2,11 @@ import { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
 
 export interface Snapshot {
 	snapshot: Trail[];
+	activeState: number;
+	record?: Record<string, unknown>;
 }
 
-let stack: Snapshot[] = $state([{ snapshot: [] }]);
+let stack: Snapshot[] = $state([{ snapshot: [], activeState: 0 }]);
 
 let stackPointer: number = $state(0);
 
@@ -17,9 +19,11 @@ export function resetStack() {
 	stackPointer = 0;
 }
 
-export function record(trails: Trail[]) {
+export function record(trails: Trail[], activeState: number, record?: Record<string, unknown>) {
 	const snapshot: Snapshot = {
-		snapshot: trails.map((trail) => trail.copy())
+		snapshot: trails.map((trail) => trail.copy()),
+		activeState: activeState,
+		record
 	};
 	stack = stack.slice(0, stackPointer + 1);
 	stack = [...stack, snapshot];

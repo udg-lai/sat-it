@@ -27,9 +27,9 @@ const isFinalState = <F extends StateFun, I extends StateInput>(
 export type State<F extends StateFun, I extends StateInput> = NonFinalState<F, I> | FinalState<F>;
 
 export interface StateMachineInterface<F extends StateFun, I extends StateInput> {
-	states: Map<number, State<F, I>>;
-	active: number;
 	completed: () => boolean;
+	getActiveId: () => number;
+	setActiveId: (id: number) => void;
 	getActiveState: () => State<F, I>;
 	getNextState: (input: I) => State<F, I>;
 	transition: (input: I) => void;
@@ -38,8 +38,8 @@ export interface StateMachineInterface<F extends StateFun, I extends StateInput>
 export abstract class StateMachine<F extends StateFun, I extends StateInput>
 	implements StateMachineInterface<F, I>
 {
-	states: Map<number, State<F, I>>;
-	active: number;
+	private states: Map<number, State<F, I>>;
+	private active: number = $state(-1);
 
 	constructor(states: Map<number, State<F, I>>, initial: number) {
 		this.states = states;
@@ -60,6 +60,14 @@ export abstract class StateMachine<F extends StateFun, I extends StateInput>
 			);
 		}
 		return activeState;
+	}
+
+	getActiveId(): number {
+		return this.active;
+	}
+
+	setActiveId(id: number): void {
+		this.active = id;
 	}
 
 	getNextState(input: I): State<F, I> {

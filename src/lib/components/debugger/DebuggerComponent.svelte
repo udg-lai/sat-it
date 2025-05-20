@@ -1,52 +1,49 @@
 <script lang="ts">
-	import {
-		getClausesToCheck,
-		getFinished,
-		getPreviousEval,
-		getStarted
-	} from '$lib/store/clausesToCheck.svelte.ts';
+	import { getClausesToCheck } from '$lib/store/clausesToCheck.svelte.ts';
 	import { problemStore } from '$lib/store/problem.store.ts';
-	import { slide } from 'svelte/transition';
-	import BacktrackingDebugger from './BacktrackingDebuggerComponent.svelte';
-	import GeneralDebuggerButtons from './GeneralDebuggerButtonsComponent.svelte';
+	import AutomaticDebugger from './AutomaticDebuggerComponent.svelte';
+	import GeneralDebuggerButtons from './GeneralDebuggerComponent.svelte';
 	import ManualDebugger from './ManualDebuggerComponent.svelte';
-	import PreprocesDebugger from './PreprocesDebuggerComponent.svelte';
-	import UnitPropagationDebugger from './UnitPropagationDebuggerComponent.svelte';
+	import InitialStepDebugger from './InitialStepDebuggerComponent.svelte';
+	import ConflictDetectionDebugger from './ConflictDetectionDebuggerComponent.svelte';
 	import ResetProblemDebugger from './ResetProblemDebuggerComponent.svelte';
-	import { isUnSAT } from '$lib/transversal/interfaces/IClausePool.ts';
+	import { SAT_STATE_ID, UNSAT_STATE_ID } from '$lib/machine/reserved.ts';
+	import { getSolverMachine } from '$lib/store/stateMachine.svelte.ts';
 
 	let defaultNextVariable: number | undefined = $derived.by(() => {
 		if ($problemStore !== undefined) return $problemStore.variables.nextVariable;
 		else return 0;
 	});
 
-	const enablePreproces = $derived(!getStarted());
-	const previousEval = $derived(getPreviousEval());
-	const enableUnitPropagtion = $derived(getClausesToCheck().size !== 0 && !isUnSAT(previousEval));
-	const disableButton = $derived(getFinished());
-	const finished = $derived(getFinished());
+	const solverMachine = $derived(getSolverMachine());
+	const activeId: number = $derived(solverMachine.getActiveStateId());
+	const enablePreproces = $derived(activeId === solverMachine.getFirstStateId());
+	const backtrackingState = $derived(activeId === solverMachine.getBacktrackingStateId());
+	const cdMode = $derived(getClausesToCheck().size !== 0);
+	const finished = $derived(activeId === UNSAT_STATE_ID || activeId === SAT_STATE_ID);
 </script>
 
-<div transition:slide|global class="flex-center debugger align-center relative flex-row gap-2">
+<div class="flex-center debugger align-center relative flex-row gap-2">
 	<div class="variable-display"></div>
 	{#if enablePreproces}
-		<PreprocesDebugger />
-	{:else if enableUnitPropagtion}
-		<UnitPropagationDebugger />
+		<InitialStepDebugger />
 	{:else}
-		{#if !finished}
-			{#if !isUnSAT(previousEval) && defaultNextVariable}
+		{#if cdMode}
+			<ConflictDetectionDebugger {cdMode} />
+		{:else if !finished}
+			{#if !backtrackingState && defaultNextVariable}
 				{defaultNextVariable}
 			{:else}
 				{'X'}
 			{/if}
-			<BacktrackingDebugger {previousEval} {disableButton} />
+			<AutomaticDebugger {backtrackingState} {finished} {cdMode} />
 
-			<ManualDebugger {defaultNextVariable} {disableButton} />
+			<ManualDebugger {defaultNextVariable} {finished} {cdMode} {backtrackingState} />
 		{:else}
 			<ResetProblemDebugger />
 		{/if}
-		<GeneralDebuggerButtons />
+
+		<GeneralDebuggerButtons {finished} {backtrackingState} />
 	{/if}
 </div>
 
@@ -63,7 +60,7 @@
 	}
 
 	.variable-display {
-		width: 50px;
+		width: 8rem;
 		text-align: center;
 		color: grey;
 	}

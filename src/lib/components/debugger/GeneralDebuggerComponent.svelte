@@ -1,6 +1,5 @@
 <script lang="ts">
 	import './_style.css';
-
 	import { onDestroy, onMount } from 'svelte';
 	import { emitEditorViewEvent } from './events.svelte.ts';
 	import DynamicRender from '$lib/components/DynamicRender.svelte';
@@ -13,7 +12,15 @@
 	} from 'flowbite-svelte-icons';
 	import { getStackLength, getStackPointer } from '$lib/store/stack.svelte.ts';
 	import { browser } from '$app/environment';
-	import { userActionEventBus } from '$lib/transversal/events.ts';
+	import { stateMachineEventBus, userActionEventBus } from '$lib/transversal/events.ts';
+	import { updateAssignment } from '$lib/store/assignment.svelte.ts';
+
+	interface Props {
+		finished: boolean;
+		backtrackingState: boolean;
+	}
+
+	let { finished, backtrackingState }: Props = $props();
 
 	let expanded = $state(false);
 	let textCollapse = $derived(expanded ? 'Collapse Propagations' : 'Expand Propagations');
@@ -67,11 +74,31 @@
 	}
 </script>
 
-<button class="btn general-btn" title="Solve trail">
+<button
+	class="btn general-btn"
+	class:invalidOption={finished || backtrackingState}
+	title="Solve trail"
+	onclick={() => {
+		updateAssignment('automated');
+		stateMachineEventBus.emit('solve_trail');
+		userActionEventBus.emit('record');
+	}}
+	disabled={finished || backtrackingState}
+>
 	<DynamicRender component={ArrowRightOutline} props={generalProps} />
 </button>
 
-<button class="btn general-btn" title="Solve">
+<button
+	class="btn general-btn"
+	class:invalidOption={finished || backtrackingState}
+	title="Solve"
+	onclick={() => {
+		updateAssignment('automated');
+		stateMachineEventBus.emit('solve_all');
+		userActionEventBus.emit('record');
+	}}
+	disabled={finished || backtrackingState}
+>
 	<DynamicRender component={BarsOutline} props={generalProps} />
 </button>
 
