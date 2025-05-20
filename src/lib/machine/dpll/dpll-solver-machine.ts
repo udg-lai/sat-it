@@ -64,9 +64,9 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 	}
 
 	updateFromRecord(record: Record<string, unknown> | undefined): void {
-		if(record === undefined) {
+		if (record === undefined) {
 			this.pending = new Queue();
-			updateClausesToCheck(new SvelteSet<number>())
+			updateClausesToCheck(new SvelteSet<number>());
 			return;
 		}
 		const pendingClauses = record['queue'] as Queue<SvelteSet<number>>;
