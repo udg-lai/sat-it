@@ -37,6 +37,8 @@
 
 	let nExpanded = $state(expanded ? countLevelsWithPropagations() : 0);
 
+	let contentWidth: number = $state(0);
+
 	let trailElement: HTMLElement;
 
 	function countLevelsWithPropagations(): number {
@@ -70,7 +72,7 @@
 	function listenContentWidth(trailContent: HTMLElement) {
 		const trailContentWidthObserver = new ResizeObserver((entries) => {
 			for (const entry of entries) {
-				const contentWidth = entry.contentRect.width;
+				contentWidth = entry.contentRect.width;
 				const trailExpectedWidth = trailElement.offsetWidth;
 				contentOverflow = contentWidth > trailExpectedWidth;
 				if (contentOverflow) {
@@ -97,7 +99,7 @@
 	let grabbingCursor = $derived(contentOverflow && isMiddleClicking);
 
 	function handleMouseDown(e: MouseEvent): void {
-		if (e.button === 1) {
+		if (e.button === 0) {
 			e.preventDefault(); // prevent browser auto-scroll
 			isMiddleClicking = true;
 			lastX = e.clientX;
@@ -117,7 +119,7 @@
 	}
 
 	function handleMouseUp(e: MouseEvent): void {
-		if (e.button === 1) {
+		if (e.button === 0) {
 			isMiddleClicking = false;
 			window.removeEventListener('mousemove', handleMouseMove);
 			window.removeEventListener('mouseup', handleMouseUp);
@@ -125,15 +127,20 @@
 	}
 </script>
 
-<trail
-	bind:this={trailElement}
-	class="trail flex flex-row"
-	style="cursor: {grabCursor ? 'grab' : grabbingCursor ? 'grabbing' : 'unset'}"
-	role="button"
-	tabindex="0"
-	onmousedown={handleMouseDown}
->
-	<div class="trail-content" use:listenContentWidth>
+<trail class="trail flex flex-row" role="button" tabindex="0" bind:this={trailElement}>
+	<div
+		class="trail-content"
+		style="cursor: {grabCursor
+			? 'grab'
+			: grabbingCursor
+				? 'grabbing'
+				: 'unset'}; width: {contentWidth}px;"
+		onmousedown={handleMouseDown}
+		role="button"
+		tabindex="0"
+	></div>
+
+	<div class="trail-assigments" use:listenContentWidth>
 		{#each initialPropagations as assignment}
 			{#if assignment.isK()}
 				<BacktrackingComponent {assignment} />
@@ -159,11 +166,11 @@
 		overflow-x: scroll;
 		display: flex;
 		flex: 1;
-		gap: 0.5rem;
-		align-items: center;
 		-ms-overflow-style: none; /* Internet Explorer 10+ */
 		scrollbar-width: none; /* Firefox */
 		cursor: unset;
+		height: var(--trail-height);
+		flex-direction: column;
 	}
 
 	.trail::-webkit-scrollbar {
@@ -174,8 +181,13 @@
 	.trail-content {
 		display: flex;
 		flex: 1;
+	}
+
+	.trail-assigments {
+		display: flex;
 		gap: 0.5rem;
 		align-items: center;
-		height: 100%;
+		height: var(--trail-content-height);
+		width: max-content;
 	}
 </style>

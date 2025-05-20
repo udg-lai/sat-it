@@ -31,7 +31,7 @@
 
 <button
 	class="btn general-btn"
-	title="Following Variable"
+	title="Next variable"
 	class:invalidOption={!upMode}
 	onclick={() => {
 		stateMachineEventBus.emit('followingVariable');
