@@ -55,7 +55,7 @@
 	</button>
 </unit-propagation>
 
-<Popover triggeredBy={'#' + buttonId} class="app-popover" trigger="click" placement="top">
+<Popover triggeredBy={'#' + buttonId} class="app-popover" trigger="click" placement="bottom">
 	<MathTexComponent equation={conflictClauseString} fontSize="var(--popover-font-size)" />
 </Popover>
 

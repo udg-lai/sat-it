@@ -48,7 +48,7 @@
 	{/if}
 </button>
 
-<Popover triggeredBy={'#' + buttonId} class="app-popover" trigger="click" placement="top">
+<Popover triggeredBy={'#' + buttonId} class="app-popover" trigger="click" placement="bottom">
 	<MathTexComponent equation={clause as string} fontSize="var(--popover-font-size)" />
 </Popover>
 
