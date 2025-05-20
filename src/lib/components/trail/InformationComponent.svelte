@@ -35,8 +35,9 @@
 <button
 	id={buttonId}
 	class="notification"
-	class:unsat={clause !== undefined}
-	class:sat={clause === undefined && satState}
+	class:conflict={clause !== undefined}
+	class:unsat={unsatState}
+	class:sat={satState && clause === undefined}
 >
 	{#if unsatState}
 		<p>UNSAT</p>
@@ -57,16 +58,21 @@
 		width: 6rem;
 		padding: 1rem;
 		display: flex;
-		justify-content: center;
+		justify-content: left;
 		align-items: center;
 	}
-	.notification.unsat {
-		pointer-events: auto;
+
+	.notification.conflict {
+		color: var(--backtracking-color);
 		cursor: zoom-in;
-		background-color: #fdaeae;
+		pointer-events: auto;
+	}
+
+	.notification.unsat {
+		color: var(--unsatisfied-color);
 	}
 	.notification.sat {
 		cursor: default;
-		background-color: #9ccef1;
+		color: var(--satisfied-color);
 	}
 </style>
