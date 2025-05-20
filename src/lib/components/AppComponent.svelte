@@ -16,6 +16,7 @@
 	import type { SolverMachine } from '$lib/machine/SolverMachine.svelte.ts';
 	import { getTrails, updateTrails } from '$lib/store/trails.svelte.ts';
 	import type { StateFun, StateInput } from '$lib/machine/StateMachine.svelte.ts';
+	import { resetStatistics } from '$lib/store/statistics.svelte.ts';
 
 	let expandPropagations: boolean = $state(true);
 
@@ -58,6 +59,7 @@
 
 	function reset(): void {
 		resetStack();
+		resetStatistics();
 		const first = undo();
 		reloadFromSnapshot(first);
 	}

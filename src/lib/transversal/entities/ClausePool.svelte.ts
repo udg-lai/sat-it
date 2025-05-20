@@ -2,7 +2,13 @@ import { SvelteSet } from 'svelte/reactivity';
 import type { AssignmentEval, IClausePool } from '../interfaces/IClausePool.ts';
 import type { CNF } from '../mapping/contentToSummary.ts';
 import { cnfToClauseSet } from '../utils.ts';
-import Clause, { type ClauseEval, isSatClause, isUnSATClause } from './Clause.ts';
+import Clause, {
+	type ClauseEval,
+	isSatClause,
+	isUnitClause,
+	isUnresolvedClause,
+	isUnSATClause
+} from './Clause.ts';
 import type VariablePool from './VariablePool.svelte.ts';
 
 class ClausePool implements IClausePool {
@@ -71,6 +77,15 @@ class ClausePool implements IClausePool {
 
 	getClauses(): Clause[] {
 		return this.clauses;
+	}
+
+	leftToSatisfy(): number {
+		let leftToSatisfy: number = 0;
+		this.clauses.forEach((clause) => {
+			const evaluation: ClauseEval = clause.eval();
+			if (isUnresolvedClause(evaluation) || isUnitClause(evaluation)) leftToSatisfy += 1;
+		});
+		return leftToSatisfy;
 	}
 
 	size(): number {

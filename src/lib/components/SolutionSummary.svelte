@@ -3,6 +3,7 @@
 	import type Clause from '$lib/transversal/entities/Clause.ts';
 	import FlexVirtualList from './FlexVirtualList.svelte';
 	import ClauseComponent from './ClauseComponent.svelte';
+	import StatisticsComponent from './StatisticsComponent.svelte';
 
 	interface Props {
 		clauseHeight?: number;
@@ -33,7 +34,9 @@
 			</div>
 		</div>
 	</FlexVirtualList>
-	<div class="statistics"></div>
+	<div class="statistics">
+		<StatisticsComponent />
+	</div>
 </solution-summary>
 
 <style>
@@ -50,7 +53,6 @@
 	.statistics {
 		height: max(10vh, 10rem);
 		width: 100%;
-		background-color: red;
 	}
 
 	.enumerate-clause {
