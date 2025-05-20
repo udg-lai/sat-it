@@ -3,7 +3,7 @@ import { logFatal } from '../logging.ts';
 
 export default class Variable implements Comparable<Variable> {
 	private id: number;
-	private assignment: boolean | undefined;
+	private assignment: boolean | undefined = $state();
 
 	constructor(id: number, assignment: boolean | undefined = undefined) {
 		if (id < 0) throw 'ERROR: variable ID should be >= 0';

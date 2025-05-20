@@ -161,7 +161,6 @@
 		flex: 1;
 		gap: 0.5rem;
 		align-items: center;
-		padding-right: 0.5rem;
 		-ms-overflow-style: none; /* Internet Explorer 10+ */
 		scrollbar-width: none; /* Firefox */
 		cursor: unset;

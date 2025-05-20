@@ -24,11 +24,11 @@
 	}
 
 	.false {
-		color: #d62728;
+		color: var(--unsatisfied-color);
 	}
 
 	.true {
-		color: #1f77b4;
+		color: var(--satisfied-color);
 	}
 
 	.literal-component {
