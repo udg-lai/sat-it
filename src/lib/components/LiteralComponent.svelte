@@ -4,15 +4,13 @@
 
 	interface Props {
 		literal: Literal;
-		height?: string;
 	}
 
-	let { literal, height }: Props = $props();
+	let { literal }: Props = $props();
 </script>
 
 <div
 	class="literal-component"
-	style="--literal-height:{height ?? '25px'}"
 	class:undefined={!literal.isAssigned()}
 	class:true={literal.isTrue()}
 	class:false={literal.isFalse()}

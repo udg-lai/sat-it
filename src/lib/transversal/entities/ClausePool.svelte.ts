@@ -6,10 +6,10 @@ import Clause, { type ClauseEval, isSatClause, isUnSATClause } from './Clause.ts
 import type VariablePool from './VariablePool.svelte.ts';
 
 class ClausePool implements IClausePool {
-	private collection: Clause[];
+	private clauses: Clause[];
 
 	constructor(clauses: Clause[] = []) {
-		this.collection = clauses;
+		this.clauses = clauses;
 	}
 
 	static buildFrom(cnf: CNF, variables: VariablePool): ClausePool {
@@ -23,8 +23,8 @@ class ClausePool implements IClausePool {
 		let nSatisfied = 0;
 		let i = 0;
 		let conflicClause: Clause | undefined = undefined;
-		while (i < this.collection.length && !unsat) {
-			const clause: Clause = this.collection[i];
+		while (i < this.clauses.length && !unsat) {
+			const clause: Clause = this.clauses[i];
 			const clauseEval: ClauseEval = clause.eval();
 			unsat = isUnSATClause(clauseEval);
 			if (!unsat) {
@@ -50,14 +50,14 @@ class ClausePool implements IClausePool {
 	}
 
 	addClause(clause: Clause): void {
-		this.collection.push(clause);
+		this.clauses.push(clause);
 	}
 
 	get(i: number): Clause {
-		if (i < 0 || i >= this.collection.length) {
+		if (i < 0 || i >= this.clauses.length) {
 			throw '[ERROR]: accessing out of range for consulting a clause in the CNF';
 		} else {
-			return this.collection[i];
+			return this.clauses[i];
 		}
 	}
 
@@ -70,11 +70,11 @@ class ClausePool implements IClausePool {
 	}
 
 	getClauses(): Clause[] {
-		return this.collection;
+		return this.clauses;
 	}
 
 	size(): number {
-		return this.collection.length;
+		return this.clauses.length;
 	}
 }
 

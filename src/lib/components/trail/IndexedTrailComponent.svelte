@@ -34,9 +34,9 @@
 	>
 		<span class="line-item chakra-petch-medium" class:line-item-active={hoverIndex}>
 			{#if disabled}
-				<p>{index}</p>
+				<p>{index}.</p>
 			{:else if !hoverIndex}
-				<p>{index}</p>
+				<p>{index}.</p>
 			{:else if expanded}
 				<ChevronLeftOutline slot="icon" class="h-8 w-8" />
 			{:else}
@@ -75,5 +75,9 @@
 		width: 4rem;
 		height: 4rem;
 		position: relative;
+	}
+
+	.enumerate p {
+		font-size: 1rem;
 	}
 </style>

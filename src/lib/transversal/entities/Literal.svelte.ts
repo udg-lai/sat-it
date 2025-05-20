@@ -35,14 +35,8 @@ export default class Literal implements Comparable<Literal> {
 	}
 
 	toTeX(): string {
-		let TeX;
-		const varId = this.variable.getInt();
-		if (this.polarity === 'Negative') {
-			TeX = `\\overline{${varId}}`;
-		} else {
-			TeX = `${varId}`;
-		}
-		return TeX;
+		const variable = this.variable.getInt();
+		return this.polarity == 'Negative' ? `\\overline{${variable}}` : `${variable}`;
 	}
 
 	equals(other: Literal): boolean {

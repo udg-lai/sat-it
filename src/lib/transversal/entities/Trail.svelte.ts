@@ -23,7 +23,7 @@ export class Trail {
 		newTrail.followUPIndex = this.followUPIndex;
 		newTrail.decisionLevel = this.decisionLevel;
 		newTrail.trailCapacity = this.trailCapacity;
-		newTrail.trailEnding = -1;
+		newTrail.trailEnding = this.trailEnding;
 		return newTrail;
 	}
 
@@ -55,7 +55,7 @@ export class Trail {
 		return this.trailEnding;
 	}
 
-	updateTrailEnding(clauseId: number): void {
+	updateTrailEnding(clauseId: number = -1): void {
 		this.trailEnding = clauseId;
 	}
 
