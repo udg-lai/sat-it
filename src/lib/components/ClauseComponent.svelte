@@ -8,20 +8,15 @@
 	}
 
 	let { clause }: Props = $props();
-
-	let height: string = '25px';
 </script>
 
 <div class="clause-style">
-	<div class="bracket" style="--clause-height:{height}">
-		<MathTexComponent equation={'\\bigl\\{'} />
-	</div>
-	{#each clause as lit}
-		<LiteralComponent literal={lit} {height} />
+	{#each clause as lit, i (i)}
+		<LiteralComponent literal={lit} />
+		{#if i < clause.nLiterals() - 1}
+			<MathTexComponent equation={'\\lor'} fontSize={'1rem'} />
+		{/if}
 	{/each}
-	<div class="bracket" style="--clause-height:{height}">
-		<MathTexComponent equation={'\\bigl\\}'} />
-	</div>
 </div>
 
 <style>
@@ -29,13 +24,6 @@
 		display: flex;
 		flex-direction: row;
 		gap: 0.5rem;
-		align-items: center;
-	}
-
-	.bracket {
-		height: var(--clause-height);
-		display: flex;
-		flex-direction: column;
-		justify-content: end;
+		align-items: end;
 	}
 </style>

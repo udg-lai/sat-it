@@ -6,7 +6,7 @@
 		fontSize?: string;
 	}
 
-	let { equation, fontSize }: Props = $props();
+	let { equation, fontSize = 'var(--TeX-font-size)' }: Props = $props();
 
 	const equationHtml = $derived(
 		katex.renderToString(equation, {
@@ -16,7 +16,7 @@
 	);
 </script>
 
-<span style="--math-font-size:{fontSize ?? '--TeX-font-size'}">
+<span style="--fontSize:{fontSize}">
 	{@html equationHtml}
 </span>
 
@@ -24,7 +24,7 @@
 	span {
 		display: table;
 		margin: 0;
-		font-size: var(--math-font-size);
+		font-size: var(--fontSize);
 		text-align: center;
 		vertical-align: center;
 	}

@@ -6,6 +6,7 @@
 		FileCirclePlusOutline
 	} from 'flowbite-svelte-icons';
 	import { onMount } from 'svelte';
+	import SolutionSummary from '../SolutionSummary.svelte';
 	import './_styles.css';
 	import Button from './Button.svelte';
 	import ClausesToCheckComponent from './ClausesToCheckComponent.svelte';
@@ -174,6 +175,8 @@
 				<div class="view">
 					{#if name === 'viewA'}
 						{@render snippetClausesToCheck()}
+					{:else if name === 'viewB'}
+						<SolutionSummary />
 					{:else}
 						{@render notImplementedYet()}
 					{/if}
