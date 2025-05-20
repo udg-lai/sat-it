@@ -53,6 +53,7 @@
 		width: 100%;
 		display: flex;
 		position: relative;
+		align-items: end;
 	}
 
 	.line span {
@@ -73,7 +74,7 @@
 		display: flex;
 		justify-content: center;
 		width: 4rem;
-		height: 4rem;
+		height: var(--trail-content-height);
 		position: relative;
 	}
 

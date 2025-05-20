@@ -55,15 +55,24 @@
 	</button>
 </unit-propagation>
 
-<Popover triggeredBy={'#' + buttonId} class="si-venga" trigger="click" placement="top">
-	<MathTexComponent equation={conflictClauseString} />
+<Popover triggeredBy={'#' + buttonId} class="app-popover" trigger="click" placement="bottom">
+	<MathTexComponent equation={conflictClauseString} fontSize="var(--popover-font-size)" />
 </Popover>
 
 <style>
-	:global(.si-venga) {
+	:global(.app-popover) {
 		background-color: var(--main-bg-color);
 		border-color: var(--border-color);
 		z-index: 5;
 		color: black;
+		padding: 0.4rem 0.5rem;
+	}
+
+	:global(.app-popover > .py-2) {
+		padding: 0rem;
+	}
+
+	:global(.app-popover > .px-3) {
+		padding: 0rem;
 	}
 </style>

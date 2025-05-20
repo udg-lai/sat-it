@@ -16,6 +16,9 @@
 	--backtracking-color: #8a3ffc;
 	--unsatisfied-color: #d12771;
 	--satisfied-color: #24a148;
+	--trail-height: 5rem;
+	--trail-content-height: 3rem;
+	--popover-font-size: 0.8rem;
 }
 
 html,

@@ -48,23 +48,24 @@
 	{/if}
 </button>
 
-<Popover triggeredBy={'#' + buttonId} class="si-venga" trigger="click" placement="bottom">
-	<MathTexComponent equation={clause as string} />
+<Popover triggeredBy={'#' + buttonId} class="app-popover" trigger="click" placement="bottom">
+	<MathTexComponent equation={clause as string} fontSize="var(--popover-font-size)" />
 </Popover>
 
 <style>
 	.notification {
 		pointer-events: none;
 		width: 6rem;
-		padding: 1rem;
+		padding-left: 1rem;
 		display: flex;
 		justify-content: left;
 		align-items: center;
+		height: var(--trail-content-height);
 	}
 
 	.notification.conflict {
 		color: var(--backtracking-color);
-		cursor: zoom-in;
+		cursor: pointer;
 		pointer-events: auto;
 	}
 
@@ -74,5 +75,21 @@
 	.notification.sat {
 		cursor: default;
 		color: var(--satisfied-color);
+	}
+
+	:global(.app-popover) {
+		background-color: var(--main-bg-color);
+		border-color: var(--border-color);
+		z-index: 5;
+		color: black;
+		padding: 0.4rem 0.5rem;
+	}
+
+	:global(.app-popover > .py-2) {
+		padding: 0rem;
+	}
+
+	:global(.app-popover > .px-3) {
+		padding: 0rem;
 	}
 </style>
