@@ -22,9 +22,7 @@ export const updateSolverMachine = (
 	record: Record<string, unknown> | undefined
 ): void => {
 	solverMachine.updateActiveStateId(stateId);
-	if (record) {
-		solverMachine.updateFromRecord(record);
-	}
+	solverMachine.updateFromRecord(record);
 };
 
 export const getSolverMachine = () => solverMachine;
