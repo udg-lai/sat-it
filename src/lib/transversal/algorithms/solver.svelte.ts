@@ -13,6 +13,11 @@ import type VariablePool from '../entities/VariablePool.svelte.ts';
 import { isUnSAT } from '../interfaces/IClausePool.ts';
 import { logFatal } from '../logging.ts';
 import { fromJust, isJust } from '../types/maybe.ts';
+import {
+	increaseNoBacktrackings,
+	increaseNoDecisions,
+	increaseNoUnitPropgations
+} from '$lib/store/statistics.svelte.ts';
 
 export const emptyClauseDetection = (pool: ClausePool): boolean => {
 	const evaluation = pool.eval();
@@ -51,6 +56,8 @@ export const decide = (pool: VariablePool, method: string): number => {
 	} else {
 		trail.push(VariableAssignment.newAutomatedAssignment(variable, method));
 	}
+
+	increaseNoDecisions();
 	stackTrail(trail);
 	return assignmentEvent.polarity ? variableId : -variableId;
 };
@@ -81,6 +88,7 @@ export const unitPropagation = (
 	const variable: Variable = variables.getCopy(variableId);
 	trail.push(VariableAssignment.newUnitPropagationAssignment(variable, clauseId));
 
+	increaseNoUnitPropgations();
 	stackTrail(trail);
 	return literalToPropagate;
 };
@@ -123,6 +131,7 @@ export const backtracking = (pool: VariablePool): number => {
 	trail.push(VariableAssignment.newBacktrackingAssignment(variable));
 	trail.updateFollowUpIndex();
 
+	increaseNoBacktrackings();
 	stackTrail(trail);
 	return polarity ? lastVariable.getInt() : -lastVariable.getInt();
 };
