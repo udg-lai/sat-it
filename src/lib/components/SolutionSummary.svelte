@@ -51,7 +51,7 @@
 	}
 
 	.statistics {
-		height: max(10vh, 10rem);
+		height: max(6vh, 6rem);
 		width: 100%;
 	}
 
