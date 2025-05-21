@@ -33,7 +33,7 @@
 		border-top: 1px;
 		flex: 1 1 0;
 		text-align: center;
-		min-width: 5rem; /* Adjust as needed for consistency */
+		min-width: 5rem;
 		max-width: 12rem;
 		min-height: 1rem;
 	}
