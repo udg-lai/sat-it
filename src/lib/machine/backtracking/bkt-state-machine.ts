@@ -2,7 +2,7 @@ import { initial, states } from './bkt-states.ts';
 import { type State, StateMachine } from '../StateMachine.svelte.ts';
 import type { BKT_FUN, BKT_INPUT } from './bkt-domain.ts';
 
-export const makeBacktrackingMachine = (): Backtracking_StateMachine => {
+export const makeBKTMachine = (): Backtracking_StateMachine => {
 	return new Backtracking_StateMachine(states, initial);
 };
 

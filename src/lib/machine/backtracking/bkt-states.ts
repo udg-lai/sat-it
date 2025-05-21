@@ -7,16 +7,31 @@ import {
 import type { FinalState, NonFinalState, State } from '../StateMachine.svelte.ts';
 import {
 	allAssigned,
+	allClausesChecked,
+	complementaryOccurrences,
 	decide,
 	emptyClauseDetection,
+	nextClause,
+	queueClauseSet,
+	triggeredClauses,
+	type BKT_ALL_CLAUSES_CHECKED_FUN,
+	type BKT_ALL_CLAUSES_CHECKED_INPUT,
 	type BKT_ALL_VARIABLES_ASSIGNED_FUN,
 	type BKT_ALL_VARIABLES_ASSIGNED_INPUT,
+	type BKT_COMPLEMENTARY_OCCURRENCES_FUN,
+	type BKT_COMPLEMENTARY_OCCURRENCES_INPUT,
 	type BKT_DECIDE_FUN,
 	type BKT_DECIDE_INPUT,
 	type BKT_EMPTY_CLAUSE_FUN,
 	type BKT_EMPTY_CLAUSE_INPUT,
 	type BKT_FUN,
-	type BKT_INPUT
+	type BKT_INPUT,
+	type BKT_NEXT_CLAUSE_FUN,
+	type BKT_NEXT_CLAUSE_INPUT,
+	type BKT_QUEUE_CLAUSE_SET_FUN,
+	type BKT_QUEUE_CLAUSE_SET_INPUT,
+	type BKT_TRIGGERED_CLAUSES_FUN,
+	type BKT_TRIGGERED_CLAUSES_INPUT
 } from './bkt-domain.ts';
 
 export const bkt_stateName2StateId = {
@@ -26,7 +41,12 @@ export const bkt_stateName2StateId = {
 	bkt_state: BACKTRACKING_STATE_ID,
 	empty_clause_state: 0,
 	all_variables_assigned_state: 1,
-	complementary_occurrences_state: 2
+	complementary_occurrences_state: 2,
+	triggered_clauses_state: 3,
+	queue_clause_set_state: 4,
+	all_clauses_checked_state: 5,
+	next_clause_state: 6,
+	conflict_detection_state: 7
 };
 
 // ** define state nodes **
@@ -72,12 +92,76 @@ const decide_state: NonFinalState<BKT_DECIDE_FUN, BKT_DECIDE_INPUT> = {
 	)
 };
 
+const complementary_occurrences_state: NonFinalState<
+	BKT_COMPLEMENTARY_OCCURRENCES_FUN,
+	BKT_COMPLEMENTARY_OCCURRENCES_INPUT
+> = {
+	id: bkt_stateName2StateId['complementary_occurrences_state'],
+	run: complementaryOccurrences,
+	description: 'Get the clauses where the complementary of the last assigned literal appear',
+	transitions: new Map<BKT_COMPLEMENTARY_OCCURRENCES_INPUT, number>().set(
+		'triggered_clauses_state',
+		bkt_stateName2StateId['triggered_clauses_state']
+	)
+};
+
+const triggered_clauses_state: NonFinalState<
+	BKT_TRIGGERED_CLAUSES_FUN,
+	BKT_TRIGGERED_CLAUSES_INPUT
+> = {
+	id: bkt_stateName2StateId['triggered_clauses_state'],
+	run: triggeredClauses,
+	description: 'Checks if last assignment added clauses to revise',
+	transitions: new Map<BKT_TRIGGERED_CLAUSES_INPUT, number>()
+		.set('queue_clause_set_state', bkt_stateName2StateId['queue_clause_set_state'])
+		.set('all_variables_assigned_state', bkt_stateName2StateId['all_variables_assigned_state'])
+};
+
+const queue_clause_set_state: NonFinalState<BKT_QUEUE_CLAUSE_SET_FUN, BKT_QUEUE_CLAUSE_SET_INPUT> =
+	{
+		id: bkt_stateName2StateId['queue_clause_set_state'],
+		run: queueClauseSet,
+		description: 'Stack a set of clause as pending',
+		transitions: new Map<BKT_QUEUE_CLAUSE_SET_INPUT, number>().set(
+			'all_clauses_checked_state',
+			bkt_stateName2StateId['all_clauses_checked_state']
+		)
+	};
+
+const all_clauses_checked_state: NonFinalState<
+	BKT_ALL_CLAUSES_CHECKED_FUN,
+	BKT_ALL_CLAUSES_CHECKED_INPUT
+> = {
+	id: bkt_stateName2StateId['all_clauses_checked_state'],
+	description:
+		'True if the postponed set of clauses still contain clauses to check, otherwise false',
+	run: allClausesChecked,
+	transitions: new Map<BKT_ALL_CLAUSES_CHECKED_INPUT, number>()
+		.set('next_clause_state', bkt_stateName2StateId['next_clause_state'])
+		.set('all_variables_assigned_state', bkt_stateName2StateId['all_variables_assigned_state'])
+};
+
+const next_clause_state: NonFinalState<BKT_NEXT_CLAUSE_FUN, BKT_NEXT_CLAUSE_INPUT> = {
+	id: bkt_stateName2StateId['next_clause_state'],
+	description: 'Returns the next clause to deal with',
+	run: nextClause,
+	transitions: new Map<BKT_NEXT_CLAUSE_INPUT, number>().set(
+		'conflict_detection_state',
+		bkt_stateName2StateId['conflict_detection_state']
+	)
+};
+
 export const states: Map<number, State<BKT_FUN, BKT_INPUT>> = new Map();
 
 states.set(empty_clause_state.id, empty_clause_state);
 states.set(all_variables_assigned_state.id, all_variables_assigned_state);
 states.set(decide_state.id, decide_state);
+states.set(complementary_occurrences_state.id, complementary_occurrences_state);
+states.set(triggered_clauses_state.id, triggered_clauses_state);
 states.set(sat_state.id, sat_state);
 states.set(unsat_state.id, unsat_state);
+states.set(queue_clause_set_state.id, queue_clause_set_state);
+states.set(all_clauses_checked_state.id, all_clauses_checked_state);
+states.set(next_clause_state.id, next_clause_state);
 
 export const initial = empty_clause_state.id;
