@@ -1,9 +1,10 @@
 import { logFatal } from '$lib/transversal/logging.ts';
+import type { BKT_FUN, BKT_INPUT } from './backtracking/bkt-domain.ts';
 import type { DPLL_FUN, DPLL_INPUT } from './dpll/dpll-domain.ts';
 
-export type StateFun = DPLL_FUN | never;
+export type StateFun = BKT_FUN | DPLL_FUN | never;
 
-export type StateInput = DPLL_INPUT;
+export type StateInput = BKT_INPUT | DPLL_INPUT;
 
 export interface FinalState<F extends StateFun> {
 	id: number;
