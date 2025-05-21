@@ -10,7 +10,7 @@ import {
 	decide,
 	initialTransition
 } from './dpll-solver-transitions.ts';
-import { dpll_stateName2StateId } from './dpll-states.ts';
+import { dpll_stateName2StateId, initial } from './dpll-states.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import { updateClausesToCheck } from '$lib/store/clausesToCheck.svelte.ts';
 
@@ -65,7 +65,7 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 	}
 
 	getFirstStateId(): number {
-		return dpll_stateName2StateId['empty_clause_state'];
+		return initial;
 	}
 
 	getBacktrackingStateId(): number {
@@ -94,11 +94,11 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 		} else if (input === 'followingVariable') {
 			const currentSet: Set<number> = this.consultPostponed();
 			while (currentSet.size !== 0) {
-				analyzeClause(this);
+				this.logicStep();
 			}
 		} else if (input === 'finishUP') {
 			while (!this.pending.isEmpty()) {
-				analyzeClause(this);
+				this.logicStep();
 			}
 		} else if (input === 'solve_trail') {
 			while (!this.onBacktrackingState() && !this.onFinalState()) {
@@ -113,7 +113,7 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 		}
 	}
 
-	logicStep(): void {
+	private logicStep(): void {
 		const activeId: number = this.stateMachine.getActiveId();
 		//The initial state
 		if (activeId === dpll_stateName2StateId.empty_clause_state) {

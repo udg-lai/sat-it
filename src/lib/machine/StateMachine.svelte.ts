@@ -75,7 +75,7 @@ export abstract class StateMachine<F extends StateFun, I extends StateInput>
 		if (this.completed()) {
 			logFatal('No next state for a completed state machine');
 		} else {
-			const activeState = this.getActiveState() as NonFinalState<DPLL_FUN, DPLL_INPUT>;
+			const activeState = this.getActiveState() as NonFinalState<F, I>;
 			const activeStateTransitions = activeState.transitions;
 			const nextStateId = activeStateTransitions.get(input);
 			if (nextStateId === undefined) {

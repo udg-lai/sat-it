@@ -188,20 +188,18 @@ const delete_clause_state: NonFinalState<BKT_DELETE_CLAUSE_FUN, BKT_DELETE_CLAUS
 	)
 };
 
-const empty_clause_set_state: NonFinalState<BKT_EMPTY_CLAUSE_SET_FUN, BKT_EMPTY_CLAUSE_SET_INPUT> = {
-	id: bkt_stateName2StateId['empty_clause_set_state'],
-	run: emptyClauseSet,
-	description: `Emties the queue of clauses to check`,
-	transitions: new Map<BKT_EMPTY_CLAUSE_SET_INPUT, number>().set(
-		'decision_level_state',
-		bkt_stateName2StateId['decision_level_state']
-	)
-};
+const empty_clause_set_state: NonFinalState<BKT_EMPTY_CLAUSE_SET_FUN, BKT_EMPTY_CLAUSE_SET_INPUT> =
+	{
+		id: bkt_stateName2StateId['empty_clause_set_state'],
+		run: emptyClauseSet,
+		description: `Emties the queue of clauses to check`,
+		transitions: new Map<BKT_EMPTY_CLAUSE_SET_INPUT, number>().set(
+			'decision_level_state',
+			bkt_stateName2StateId['decision_level_state']
+		)
+	};
 
-const decision_level_state: NonFinalState<
-	BKT_DECISION_LEVEL_FUN,
-	BKT_DECISION_LEVEL_INPUT
-> = {
+const decision_level_state: NonFinalState<BKT_DECISION_LEVEL_FUN, BKT_DECISION_LEVEL_INPUT> = {
 	id: bkt_stateName2StateId['decision_level_state'],
 	run: nonDecisionMade,
 	description: `Check if decision level of the latest trail is === 0`,
