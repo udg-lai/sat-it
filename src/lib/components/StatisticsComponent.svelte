@@ -11,12 +11,10 @@
 	const decisions: number = $derived(getNoDecisions());
 	const backtrackings: number = $derived(getNoBacktarcking());
 	const unitPropagations: number = $derived(getNoUnitPropagations());
-	const variablesToAssign: number = $derived(
-		$problemStore.variables.nonAssignedVariables().length
-	);
+	const variablesToAssign: number = $derived($problemStore.variables.nonAssignedVariables().length);
 	const variablesProgress: number = $derived.by(() => {
 		const total = $problemStore.variables.nVariables();
-		const assigned = total - variablesToAssign; 
+		const assigned = total - variablesToAssign;
 		return (assigned / total) * 100;
 	});
 	const clausesLeft: number = $derived($problemStore.clauses.leftToSatisfy());
@@ -30,11 +28,25 @@
 <div class="h-full space-y-3 border-t">
 	<div class="flex place-content-start items-center pt-3">
 		<span class="metric-left">Variables left: {variablesToAssign}</span>
-		<Progressbar progress={variablesProgress} animate tweenDuration={1500} easing={sineOut} size="h-2" color="green"/>
+		<Progressbar
+			progress={variablesProgress}
+			animate
+			tweenDuration={1500}
+			easing={sineOut}
+			size="h-2"
+			color="green"
+		/>
 	</div>
 	<div class="flex place-content-start items-center">
 		<span class="metric-left">Clauses left: {clausesLeft}</span>
-		<Progressbar progress={clausesProgress} animate tweenDuration={1500} easing={sineOut} size="h-2" color="green"/>
+		<Progressbar
+			progress={clausesProgress}
+			animate
+			tweenDuration={1500}
+			easing={sineOut}
+			size="h-2"
+			color="green"
+		/>
 	</div>
 	<div class="flex place-content-around">
 		<span class="metric">Decisions: {decisions}</span>
