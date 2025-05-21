@@ -40,7 +40,7 @@
 		border-left: 1px transparent;
 		border-right: 1px transparent;
 		border-style: dashed;
-		cursor: help;
+		cursor: unset;
 	}
 
 	:global(mo) {
