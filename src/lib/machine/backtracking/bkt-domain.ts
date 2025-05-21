@@ -1,35 +1,36 @@
-// **state inputs **
-
 import { problemStore, type MappingLiteral2Clauses } from '$lib/store/problem.store.ts';
 import {
 	emptyClauseDetection as solverEmptyClauseDetection,
 	allAssigned as solverAllAssigned,
 	decide as solverDecide,
 	complementaryOccurrences as solverComplementaryOccurrences,
-	triggeredClauses as solverTriggeredClauses
+	triggeredClauses as solverTriggeredClauses,
+	clauseEvaluation as solverClauseEvaluation,
+	nonDecisionMade as solverNonDecisionMade
 } from '$lib/transversal/algorithms/solver.ts';
 import type ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';
 import type VariablePool from '$lib/transversal/entities/VariablePool.svelte.ts';
-import type { SvelteSet } from 'svelte/reactivity';
+import { SvelteSet } from 'svelte/reactivity';
 import { get } from 'svelte/store';
 import type { BKT_SolverMachine } from './bkt-solver-machine.ts';
 import { logFatal } from '$lib/transversal/logging.ts';
+import { isUnSATClause, type ClauseEval } from '$lib/transversal/entities/Clause.ts';
+import { updateClausesToCheck } from '$lib/store/clausesToCheck.svelte.ts';
+
+// **state inputs **
 
 export type BKT_EMPTY_CLAUSE_INPUT = 'all_variables_assigned_state' | 'unsat_state';
-
 export type BKT_ALL_VARIABLES_ASSIGNED_INPUT = 'sat_state' | 'decide_state';
-
 export type BKT_DECIDE_INPUT = 'complementary_occurrences_state';
-
 export type BKT_COMPLEMENTARY_OCCURRENCES_INPUT = 'triggered_clauses_state';
-
 export type BKT_TRIGGERED_CLAUSES_INPUT = 'queue_clause_set_state' | 'all_variables_assigned_state';
-
 export type BKT_QUEUE_CLAUSE_SET_INPUT = 'all_clauses_checked_state';
-
 export type BKT_ALL_CLAUSES_CHECKED_INPUT = 'next_clause_state' | 'all_variables_assigned_state';
-
 export type BKT_NEXT_CLAUSE_INPUT = 'conflict_detection_state';
+export type BKT_CONFLICT_DETECTION_INPUT = 'delete_clause_state' | 'empty_clause_set_state';
+export type BKT_DELETE_CLAUSE_INPUT = 'all_clauses_checked_state';
+export type BKT_EMPTY_CLAUSE_SET_INPUT = 'decision_level_state';
+export type BKT_DECISION_LEVEL_INPUT = 'bkt_state' | 'unsat_state';
 
 export type BKT_INPUT =
 	| BKT_EMPTY_CLAUSE_INPUT
@@ -39,7 +40,11 @@ export type BKT_INPUT =
 	| BKT_TRIGGERED_CLAUSES_INPUT
 	| BKT_QUEUE_CLAUSE_SET_INPUT
 	| BKT_ALL_CLAUSES_CHECKED_INPUT
-	| BKT_NEXT_CLAUSE_INPUT;
+	| BKT_NEXT_CLAUSE_INPUT
+	| BKT_CONFLICT_DETECTION_INPUT
+	| BKT_DELETE_CLAUSE_INPUT
+	| BKT_EMPTY_CLAUSE_SET_INPUT
+	| BKT_DECISION_LEVEL_INPUT;
 
 // ** state functions **
 
@@ -111,6 +116,40 @@ export const nextClause: BKT_NEXT_CLAUSE_FUN = (solverStateMachine: BKT_SolverMa
 	return clauseId as number;
 };
 
+export type BKT_CONFLICT_DETECTION_FUN = (clauseId: number) => boolean;
+
+export const unsatisfiedClause: BKT_CONFLICT_DETECTION_FUN = (clauseId: number) => {
+	const pool: ClausePool = get(problemStore).clauses;
+	const evaluation: ClauseEval = solverClauseEvaluation(pool, clauseId);
+	return isUnSATClause(evaluation);
+};
+
+export type BKT_DELETE_CLAUSE_FUN = (
+	solverStateMachine: BKT_SolverMachine,
+	clauseId: number
+) => void;
+
+export const deleteClause: BKT_DELETE_CLAUSE_FUN = (
+	solverStateMachine: BKT_SolverMachine,
+	clauseId: number
+) => {
+	solverStateMachine.remove(clauseId);
+};
+
+export type BKT_EMPTY_CLAUSE_SET_FUN = (solverStateMachine: BKT_SolverMachine) => void;
+
+export const emptyClauseSet: BKT_EMPTY_CLAUSE_SET_FUN = (solverStateMachine: BKT_SolverMachine) => {
+	solverStateMachine.clear();
+	//I DON'T KNOW IF I REALLY NEED THIS CODELINE
+	updateClausesToCheck(new SvelteSet<number>());
+};
+
+export type BKT_DECISION_LEVEL_FUN = () => boolean;
+
+export const nonDecisionMade: BKT_DECISION_LEVEL_FUN = () => {
+	return solverNonDecisionMade();
+};
+
 export type BKT_FUN =
 	| BKT_EMPTY_CLAUSE_FUN
 	| BKT_ALL_VARIABLES_ASSIGNED_FUN
@@ -119,4 +158,8 @@ export type BKT_FUN =
 	| BKT_TRIGGERED_CLAUSES_FUN
 	| BKT_QUEUE_CLAUSE_SET_FUN
 	| BKT_ALL_CLAUSES_CHECKED_FUN
-	| BKT_NEXT_CLAUSE_FUN;
+	| BKT_NEXT_CLAUSE_FUN
+	| BKT_CONFLICT_DETECTION_FUN
+	| BKT_DELETE_CLAUSE_FUN
+	| BKT_EMPTY_CLAUSE_SET_FUN
+	| BKT_DECISION_LEVEL_FUN;

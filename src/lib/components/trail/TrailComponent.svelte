@@ -95,7 +95,7 @@
 	function handleWheel(e: WheelEvent): void {
 		if (!contentOverflow) return;
 		e.preventDefault();
-		trailElement.scrollBy({ left: e.deltaY, behavior: 'smooth'});
+		trailElement.scrollBy({ left: e.deltaY, behavior: 'smooth' });
 	}
 </script>
 
