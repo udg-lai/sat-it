@@ -65,7 +65,7 @@ import {
 	type DPLL_EMPTY_CLAUSE_SET_FUN,
 	type DPLL_EMPTY_CLAUSE_SET_INPUT,
 	emptyClauseSet
-} from './dpll-domain.ts';
+} from './dpll-domain.svelte.ts';
 
 export const dpll_stateName2StateId = {
 	sat_state: SAT_STATE_ID,

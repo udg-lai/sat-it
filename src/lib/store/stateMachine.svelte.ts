@@ -1,4 +1,7 @@
-import { DPLL_SolverMachine, makeDPLLSolver } from '$lib/machine/dpll/dpll-solver-machine.ts';
+import {
+	DPLL_SolverMachine,
+	makeDPLLSolver
+} from '$lib/machine/dpll/dpll-solver-machine.svelte.ts';
 import { SolverMachine } from '$lib/machine/SolverMachine.svelte.ts';
 import type { StateFun, StateInput } from '$lib/machine/StateMachine.svelte.ts';
 import { logFatal } from '$lib/transversal/logging.ts';

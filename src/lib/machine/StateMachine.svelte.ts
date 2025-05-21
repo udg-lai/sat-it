@@ -1,5 +1,5 @@
 import { logFatal } from '$lib/transversal/logging.ts';
-import type { DPLL_FUN, DPLL_INPUT } from './dpll/dpll-domain.ts';
+import type { DPLL_FUN, DPLL_INPUT } from './dpll/dpll-domain.svelte.ts';
 
 export type StateFun = DPLL_FUN | never;
 

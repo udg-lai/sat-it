@@ -2,17 +2,18 @@ import { Queue } from '$lib/transversal/entities/Queue.ts';
 import type { StateMachineEvent } from '$lib/transversal/events.ts';
 import { logFatal } from '$lib/transversal/logging.ts';
 import { SolverMachine } from '../SolverMachine.svelte.ts';
-import type { DPLL_FUN, DPLL_INPUT } from './dpll-domain.ts';
-import { makeDPLLMachine } from './dpll-state-machine.ts';
+import type { DPLL_FUN, DPLL_INPUT } from './dpll-domain.svelte.ts';
+import { makeDPLLMachine } from './dpll-state-machine.svelte.ts';
 import {
 	analyzeClause,
 	backtracking,
 	decide,
 	initialTransition
-} from './dpll-solver-transitions.ts';
-import { dpll_stateName2StateId } from './dpll-states.ts';
+} from './dpll-solver-transitions.svelte.ts';
+import { dpll_stateName2StateId } from './dpll-states.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import { updateClausesToCheck } from '$lib/store/clausesToCheck.svelte.ts';
+import { tick } from 'svelte';
 
 export const makeDPLLSolver = (): DPLL_SolverMachine => {
 	return new DPLL_SolverMachine();
@@ -87,7 +88,7 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 		if (!this.pending.isEmpty()) updateClausesToCheck(this.pending.peek());
 	}
 
-	transition(input: StateMachineEvent): void {
+	async transition(input: StateMachineEvent): Promise<void> {
 		//If receive a step, the state machine can be waiting in 4 possible states
 		if (input === 'step') {
 			this.logicStep();
@@ -105,9 +106,7 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 				this.logicStep();
 			}
 		} else if (input === 'solve_all') {
-			while (!this.onFinalState()) {
-				this.logicStep();
-			}
+			await this.solveAllStepByStep();
 		} else {
 			logFatal('Non expected input for DPLL Solver State Machine');
 		}
@@ -131,6 +130,17 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 		else if (activeId === dpll_stateName2StateId.backtracking_state) {
 			backtracking(this);
 		}
+	}
+
+	private async solveAllStepByStep(): Promise<void> {
+		const times: number[] = [];
+		while (!this.onFinalState()) {
+			this.logicStep();
+			await tick();
+			console.log('State machine activeId: ', this.stateMachine.getActiveId());
+			await new Promise((r) => times.push(setTimeout(r, 10)));
+		}
+		times.forEach(clearTimeout);
 	}
 
 	private onFinalState(): boolean {

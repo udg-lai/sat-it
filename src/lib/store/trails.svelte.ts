@@ -6,6 +6,7 @@ let trails: Trail[] = $state(getSnapshot().snapshot);
 export const getLatestTrail = (): Trail | undefined => trails[trails.length - 1];
 
 export const stackTrail = (trail: Trail): void => {
+	console.log('stacking trail', trail);
 	trails = [...trails, trail];
 };
 
