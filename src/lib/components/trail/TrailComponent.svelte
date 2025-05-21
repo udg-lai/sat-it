@@ -76,7 +76,7 @@
 				const trailExpectedWidth = trailElement.offsetWidth;
 				contentOverflow = contentWidth > trailExpectedWidth;
 				if (contentOverflow) {
-					scrollLeft();
+					scrollToEnd();
 				}
 			}
 		});
@@ -88,56 +88,24 @@
 		};
 	}
 
-	function scrollLeft(): void {
+	function scrollToEnd(): void {
 		trailElement.scroll({ left: trailElement.scrollWidth, behavior: 'smooth' });
 	}
 
-	let isMiddleClicking = $state(false);
-	let lastX = 0;
-
-	let grabCursor = $derived(contentOverflow && !isMiddleClicking);
-	let grabbingCursor = $derived(contentOverflow && isMiddleClicking);
-
-	function handleMouseDown(e: MouseEvent): void {
-		if (e.button === 0) {
-			e.preventDefault(); // prevent browser auto-scroll
-			isMiddleClicking = true;
-			lastX = e.clientX;
-
-			// Add global listeners
-			window.addEventListener('mousemove', handleMouseMove);
-			window.addEventListener('mouseup', handleMouseUp);
-		}
-	}
-
-	function handleMouseMove(e: MouseEvent): void {
-		if (!isMiddleClicking) return;
-
-		const deltaX = e.clientX - lastX;
-		trailElement.scrollLeft -= deltaX; // reverse for natural drag feel
-		lastX = e.clientX;
-	}
-
-	function handleMouseUp(e: MouseEvent): void {
-		if (e.button === 0) {
-			isMiddleClicking = false;
-			window.removeEventListener('mousemove', handleMouseMove);
-			window.removeEventListener('mouseup', handleMouseUp);
-		}
+	function handleWheel(e: WheelEvent): void {
+		if (!contentOverflow) return;
+		e.preventDefault();
+		trailElement.scrollBy({ left: e.deltaY, behavior: 'smooth'});
 	}
 </script>
 
 <trail class="trail flex flex-row" role="button" tabindex="0" bind:this={trailElement}>
 	<div
 		class="trail-content"
-		style="cursor: {grabCursor
-			? 'grab'
-			: grabbingCursor
-				? 'grabbing'
-				: 'unset'}; width: {contentWidth}px;"
-		onmousedown={handleMouseDown}
+		style="cursor: {contentOverflow ? 'e-resize' : 'unset'}; width: {contentWidth}px;"
 		role="button"
 		tabindex="0"
+		onwheel={handleWheel}
 	></div>
 
 	<div class="trail-assigments" use:listenContentWidth>

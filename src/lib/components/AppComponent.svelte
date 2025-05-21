@@ -16,6 +16,11 @@
 	import type { SolverMachine } from '$lib/machine/SolverMachine.svelte.ts';
 	import { getTrails, updateTrails } from '$lib/store/trails.svelte.ts';
 	import type { StateFun, StateInput } from '$lib/machine/StateMachine.svelte.ts';
+	import {
+		getStatistics,
+		resetStatistics,
+		updateStatistics
+	} from '$lib/store/statistics.svelte.ts';
 
 	let expandPropagations: boolean = $state(true);
 
@@ -25,7 +30,7 @@
 
 	function onActionEvent(a: ActionEvent) {
 		if (a === 'record') {
-			record(trails, solverMachine.getActiveStateId(), solverMachine.getRecord());
+			record(trails, solverMachine.getActiveStateId(), getStatistics(), solverMachine.getRecord());
 		} else if (a === 'undo') {
 			const snapshot: Snapshot = undo();
 			reloadFromSnapshot(snapshot);
@@ -39,7 +44,7 @@
 		solverMachine.transition(s);
 	}
 
-	function reloadFromSnapshot({ snapshot, activeState, record }: Snapshot): void {
+	function reloadFromSnapshot({ snapshot, activeState, statistics, record }: Snapshot): void {
 		const len = snapshot.length;
 		if (len > 0) {
 			const latest = snapshot[len - 1];
@@ -48,6 +53,7 @@
 			resetProblem();
 		}
 		updateTrails([...snapshot]);
+		updateStatistics(statistics);
 		updateSolverMachine(activeState, record);
 	}
 
@@ -58,6 +64,7 @@
 
 	function reset(): void {
 		resetStack();
+		resetStatistics();
 		const first = undo();
 		reloadFromSnapshot(first);
 	}

@@ -61,6 +61,10 @@ class VariablePool implements IVariablePool {
 		return this.variables.filter((v) => v.isAssigned()).map((v) => v.getInt());
 	}
 
+	nonAssignedVariables(): number[] {
+		return this.variables.filter((v) => !v.isAssigned()).map((v) => v.getInt());
+	}
+
 	assignVariable(id: number, evaluation: boolean): void {
 		const idx = this.checkIndex(id);
 		this.variables[idx].assign(evaluation);
