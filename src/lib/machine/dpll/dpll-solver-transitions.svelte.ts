@@ -39,16 +39,16 @@ import type {
 	DPLL_UNIT_PROPAGATION_INPUT,
 	DPLL_UNSTACK_CLAUSE_SET_FUN,
 	DPLL_UNSTACK_CLAUSE_SET_INPUT
-} from './dpll-domain.ts';
-import type { DPLL_StateMachine } from './dpll-state-machine.ts';
-import type { DPLL_SolverMachine } from './dpll-solver-machine.ts';
+} from './dpll-domain.svelte.ts';
+import type { DPLL_StateMachine } from './dpll-state-machine.svelte.ts';
+import type { DPLL_SolverMachine } from './dpll-solver-machine.svelte.ts';
 import type { SvelteSet } from 'svelte/reactivity';
 import { updateLastTrailEnding } from '$lib/store/trails.svelte.ts';
 
 export const initialTransition = (solver: DPLL_SolverMachine): void => {
 	const stateMachine: DPLL_StateMachine = solver.stateMachine;
 	ecTransition(stateMachine);
-	if (stateMachine.completed()) return;
+	if (stateMachine.onFinalState()) return;
 	const complementaryClauses: SvelteSet<number> = ucdTransition(stateMachine);
 	conflictDetectionBlock(solver, stateMachine, complementaryClauses);
 };

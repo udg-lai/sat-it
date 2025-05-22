@@ -1,30 +1,31 @@
-import { Queue } from '$lib/transversal/entities/Queue.ts';
+import { Queue } from '$lib/transversal/entities/Queue.svelte.ts';
 import type { StateMachineEvent } from '$lib/transversal/events.ts';
 import { logFatal } from '$lib/transversal/logging.ts';
 import { SolverMachine } from '../SolverMachine.svelte.ts';
-import type { DPLL_FUN, DPLL_INPUT } from './dpll-domain.ts';
-import { makeDPLLMachine } from './dpll-state-machine.ts';
+import type { DPLL_FUN, DPLL_INPUT } from './dpll-domain.svelte.ts';
+import { makeDPLLMachine } from './dpll-state-machine.svelte.ts';
 import {
 	analyzeClause,
 	backtracking,
 	decide,
 	initialTransition
-} from './dpll-solver-transitions.ts';
-import { dpll_stateName2StateId } from './dpll-states.ts';
+} from './dpll-solver-transitions.svelte.ts';
+import { dpll_stateName2StateId } from './dpll-states.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import { updateClausesToCheck } from '$lib/store/clausesToCheck.svelte.ts';
+import { tick } from 'svelte';
+import { getStepDelay } from '$lib/store/delay-ms.svelte.ts';
 
 export const makeDPLLSolver = (): DPLL_SolverMachine => {
 	return new DPLL_SolverMachine();
 };
 
 export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
-	pending: Queue<SvelteSet<number>>;
+	pending: Queue<SvelteSet<number>> = $state(new Queue<SvelteSet<number>>());
 
 	constructor() {
-		super();
-		this.stateMachine = makeDPLLMachine();
-		this.pending = new Queue();
+		super(makeDPLLMachine());
+		this.pending = new Queue<SvelteSet<number>>();
 	}
 
 	postpone(clauses: SvelteSet<number>): void {
@@ -64,14 +65,6 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 		};
 	}
 
-	getFirstStateId(): number {
-		return dpll_stateName2StateId['empty_clause_state'];
-	}
-
-	getBacktrackingStateId(): number {
-		return dpll_stateName2StateId['backtracking_state'];
-	}
-
 	updateFromRecord(record: Record<string, unknown> | undefined): void {
 		if (record === undefined) {
 			this.pending = new Queue();
@@ -87,33 +80,24 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 		if (!this.pending.isEmpty()) updateClausesToCheck(this.pending.peek());
 	}
 
-	transition(input: StateMachineEvent): void {
+	async transition(input: StateMachineEvent): Promise<void> {
 		//If receive a step, the state machine can be waiting in 4 possible states
 		if (input === 'step') {
-			this.logicStep();
-		} else if (input === 'followingVariable') {
-			const currentSet: Set<number> = this.consultPostponed();
-			while (currentSet.size !== 0) {
-				analyzeClause(this);
-			}
+			this.step();
+		} else if (input === 'nextVariable') {
+			await this.solveToNextVariableStepByStep();
 		} else if (input === 'finishUP') {
-			while (!this.pending.isEmpty()) {
-				analyzeClause(this);
-			}
+			await this.solveUPStepByStep();
 		} else if (input === 'solve_trail') {
-			while (!this.onBacktrackingState() && !this.onFinalState()) {
-				this.logicStep();
-			}
+			await this.solveTrailStepByStep();
 		} else if (input === 'solve_all') {
-			while (!this.onFinalState()) {
-				this.logicStep();
-			}
+			await this.solveAllStepByStep();
 		} else {
 			logFatal('Non expected input for DPLL Solver State Machine');
 		}
 	}
 
-	logicStep(): void {
+	step(): void {
 		const activeId: number = this.stateMachine.getActiveId();
 		//The initial state
 		if (activeId === dpll_stateName2StateId.empty_clause_state) {
@@ -133,16 +117,38 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 		}
 	}
 
-	private onFinalState(): boolean {
-		const activeId: number = this.stateMachine.getActiveId();
-		return (
-			activeId === dpll_stateName2StateId.sat_state ||
-			activeId === dpll_stateName2StateId.unsat_state
-		);
+	private async solveToNextVariableStepByStep(): Promise<void> {
+		if (!this.assertPreAuto()) {
+			return;
+		}
+		this.setFlagsPreAuto();
+		const times: number[] = [];
+		const postponedClauses: Set<number> = this.consultPostponed();
+		while (postponedClauses.size !== 0 && !this.forcedStop) {
+			this.step();
+			await tick();
+			await new Promise((r) => times.push(setTimeout(r, getStepDelay())));
+		}
+		times.forEach(clearTimeout);
+		this.setFlagsPostAuto();
 	}
 
-	private onBacktrackingState(): boolean {
-		const activeId: number = this.stateMachine.getActiveId();
-		return activeId === dpll_stateName2StateId.backtracking_state;
+	private async solveUPStepByStep(): Promise<void> {
+		if (!this.assertPreAuto()) {
+			return;
+		}
+		this.setFlagsPreAuto();
+		const times: number[] = [];
+		while (!this.pending.isEmpty() && !this.forcedStop) {
+			this.step();
+			await tick();
+			await new Promise((r) => times.push(setTimeout(r, getStepDelay())));
+		}
+		times.forEach(clearTimeout);
+		this.setFlagsPostAuto();
+	}
+
+	detectingConflict(): boolean {
+		return !this.pending.isEmpty();
 	}
 }

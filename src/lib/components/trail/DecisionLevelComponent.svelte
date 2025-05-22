@@ -21,7 +21,7 @@
 {:else}
 	<DecisionComponent assignment={decision} bind:expanded {emitClose} {emitExpand} />
 	{#if expanded}
-		{#each propagations as assignment}
+		{#each propagations as assignment (assignment.toInt())}
 			{#if assignment.isK()}
 				<BacktrackingComponent {assignment} />
 			{:else}

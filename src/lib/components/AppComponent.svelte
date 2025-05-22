@@ -40,8 +40,8 @@
 		}
 	}
 
-	function stateMachineEvent(s: StateMachineEvent) {
-		solverMachine.transition(s);
+	async function stateMachineEvent(s: StateMachineEvent) {
+		await solverMachine.transition(s);
 	}
 
 	function reloadFromSnapshot({ snapshot, activeState, statistics, record }: Snapshot): void {

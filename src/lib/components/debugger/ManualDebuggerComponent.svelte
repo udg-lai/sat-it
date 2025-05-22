@@ -22,7 +22,7 @@
 	let { defaultNextVariable, finished, cdMode, backtrackingState }: Props = $props();
 
 	const generalProps = {
-		class: 'h-8 w-8'
+		size: 'md'
 	};
 
 	let manualDecisionModal = $state(false);

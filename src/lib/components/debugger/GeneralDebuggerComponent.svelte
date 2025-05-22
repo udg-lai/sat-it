@@ -29,11 +29,12 @@
 	let btnUndoActive = $derived(getStackPointer() > 0);
 
 	const generalProps = {
-		class: 'h-8 w-8'
+		size: 'md'
 	};
 
 	const reverseProps = {
-		class: 'h-8 w-8 transform -scale-x-100'
+		class: 'transform -scale-x-100',
+		size: 'md'
 	};
 
 	onMount(() => {

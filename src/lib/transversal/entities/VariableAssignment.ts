@@ -122,6 +122,15 @@ export default class VariableAssignment {
 		this.variable.unassign();
 	}
 
+	toInt(): number {
+		const assignment = this.variable.getAssignment();
+		if (assignment) {
+			return this.variable.getInt();
+		} else {
+			return this.variable.getInt() * -1;
+		}
+	}
+
 	toTeX(): string {
 		if (this.variable.isNotAssigned()) {
 			logFatal(

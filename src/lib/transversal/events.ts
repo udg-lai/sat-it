@@ -16,11 +16,6 @@ export const userActionEventBus = createEventBus<ActionEvent>();
 
 // decision that user can take for the state machine
 
-export type StateMachineEvent =
-	| 'step'
-	| 'solve_trail'
-	| 'solve_all'
-	| 'followingVariable'
-	| 'finishUP';
+export type StateMachineEvent = 'step' | 'solve_trail' | 'solve_all' | 'nextVariable' | 'finishUP';
 
 export const stateMachineEventBus = createEventBus<StateMachineEvent>();
