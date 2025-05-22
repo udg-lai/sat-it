@@ -8,6 +8,7 @@ import type { FinalState, NonFinalState, State } from '../StateMachine.svelte.ts
 import {
 	allAssigned,
 	allClausesChecked,
+	backtracking,
 	complementaryOccurrences,
 	decide,
 	deleteClause,
@@ -22,6 +23,8 @@ import {
 	type BKT_ALL_CLAUSES_CHECKED_INPUT,
 	type BKT_ALL_VARIABLES_ASSIGNED_FUN,
 	type BKT_ALL_VARIABLES_ASSIGNED_INPUT,
+	type BKT_BACKTRACKING_FUN,
+	type BKT_BACKTRACKING_INPUT,
 	type BKT_COMPLEMENTARY_OCCURRENCES_FUN,
 	type BKT_COMPLEMENTARY_OCCURRENCES_INPUT,
 	type BKT_CONFLICT_DETECTION_FUN,
@@ -44,13 +47,13 @@ import {
 	type BKT_QUEUE_CLAUSE_SET_INPUT,
 	type BKT_TRIGGERED_CLAUSES_FUN,
 	type BKT_TRIGGERED_CLAUSES_INPUT
-} from './bkt-domain.ts';
+} from './bkt-domain.svelte.ts';
 
 export const bkt_stateName2StateId = {
 	sat_state: SAT_STATE_ID,
 	unsat_state: UNSAT_STATE_ID,
 	decide_state: DECIDE_STATE_ID,
-	bkt_state: BACKTRACKING_STATE_ID,
+	backtracking_state: BACKTRACKING_STATE_ID,
 	empty_clause_state: 0,
 	all_variables_assigned_state: 1,
 	complementary_occurrences_state: 2,
@@ -204,8 +207,18 @@ const decision_level_state: NonFinalState<BKT_DECISION_LEVEL_FUN, BKT_DECISION_L
 	run: nonDecisionMade,
 	description: `Check if decision level of the latest trail is === 0`,
 	transitions: new Map<BKT_DECISION_LEVEL_INPUT, number>()
-		.set('bkt_state', bkt_stateName2StateId['bkt_state'])
+		.set('backtracking_state', bkt_stateName2StateId['backtracking_state'])
 		.set('unsat_state', bkt_stateName2StateId['unsat_state'])
+};
+
+const backtracking_state: NonFinalState<BKT_BACKTRACKING_FUN, BKT_BACKTRACKING_INPUT> = {
+	id: bkt_stateName2StateId['backtracking_state'],
+	run: backtracking,
+	description: `Executes a backtracking step`,
+	transitions: new Map<BKT_BACKTRACKING_INPUT, number>().set(
+		'complementary_occurrences_state',
+		bkt_stateName2StateId['complementary_occurrences_state']
+	)
 };
 
 export const states: Map<number, State<BKT_FUN, BKT_INPUT>> = new Map();
@@ -224,5 +237,8 @@ states.set(empty_clause_set_state.id, empty_clause_set_state);
 states.set(decision_level_state.id, decision_level_state);
 states.set(sat_state.id, sat_state);
 states.set(unsat_state.id, unsat_state);
+states.set(backtracking_state.id, backtracking_state);
 
 export const initial = empty_clause_state.id;
+
+export const conflict = backtracking_state.id;

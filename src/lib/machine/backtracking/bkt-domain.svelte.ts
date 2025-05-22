@@ -6,13 +6,14 @@ import {
 	complementaryOccurrences as solverComplementaryOccurrences,
 	triggeredClauses as solverTriggeredClauses,
 	clauseEvaluation as solverClauseEvaluation,
-	nonDecisionMade as solverNonDecisionMade
-} from '$lib/transversal/algorithms/solver.ts';
+	nonDecisionMade as solverNonDecisionMade,
+	backtracking as solverBacktracking
+} from '$lib/transversal/algorithms/solver.svelte.ts';
 import type ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';
 import type VariablePool from '$lib/transversal/entities/VariablePool.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import { get } from 'svelte/store';
-import type { BKT_SolverMachine } from './bkt-solver-machine.ts';
+import type { BKT_SolverMachine } from './bkt-solver-machine.svelte.ts';
 import { logFatal } from '$lib/transversal/logging.ts';
 import { isUnSATClause, type ClauseEval } from '$lib/transversal/entities/Clause.ts';
 import { updateClausesToCheck } from '$lib/store/clausesToCheck.svelte.ts';
@@ -30,7 +31,8 @@ export type BKT_NEXT_CLAUSE_INPUT = 'conflict_detection_state';
 export type BKT_CONFLICT_DETECTION_INPUT = 'delete_clause_state' | 'empty_clause_set_state';
 export type BKT_DELETE_CLAUSE_INPUT = 'all_clauses_checked_state';
 export type BKT_EMPTY_CLAUSE_SET_INPUT = 'decision_level_state';
-export type BKT_DECISION_LEVEL_INPUT = 'bkt_state' | 'unsat_state';
+export type BKT_DECISION_LEVEL_INPUT = 'backtracking_state' | 'unsat_state';
+export type BKT_BACKTRACKING_INPUT = 'complementary_occurrences_state';
 
 export type BKT_INPUT =
 	| BKT_EMPTY_CLAUSE_INPUT
@@ -150,6 +152,13 @@ export const nonDecisionMade: BKT_DECISION_LEVEL_FUN = () => {
 	return solverNonDecisionMade();
 };
 
+export type BKT_BACKTRACKING_FUN = () => number;
+
+export const backtracking: BKT_BACKTRACKING_FUN = () => {
+	const pool: VariablePool = get(problemStore).variables;
+	return solverBacktracking(pool);
+};
+
 export type BKT_FUN =
 	| BKT_EMPTY_CLAUSE_FUN
 	| BKT_ALL_VARIABLES_ASSIGNED_FUN
@@ -162,4 +171,5 @@ export type BKT_FUN =
 	| BKT_CONFLICT_DETECTION_FUN
 	| BKT_DELETE_CLAUSE_FUN
 	| BKT_EMPTY_CLAUSE_SET_FUN
-	| BKT_DECISION_LEVEL_FUN;
+	| BKT_DECISION_LEVEL_FUN
+	| BKT_BACKTRACKING_FUN;

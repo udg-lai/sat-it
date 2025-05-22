@@ -14,7 +14,7 @@
 	let { backtrackingState, finished, cdMode: upMode }: Props = $props();
 
 	const assignmentProps = {
-		class: 'h-8 w-8'
+		size: 'md'
 	};
 </script>
 

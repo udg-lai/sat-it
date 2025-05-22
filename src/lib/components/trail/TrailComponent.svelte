@@ -17,7 +17,7 @@
 
 	let { trail, expanded = $bindable(false) }: Props = $props();
 
-	let initialPropagations = $derived(trail.getInitialPropagations());
+	let initialPropagations: VariableAssignment[] = $derived(trail.getInitialPropagations());
 
 	let decisions: DecisionLevel[] = $derived(
 		trail.getDecisions().map((a, idx) => {
@@ -109,7 +109,7 @@
 	></div>
 
 	<div class="trail-assigments" use:listenContentWidth>
-		{#each initialPropagations as assignment}
+		{#each initialPropagations as assignment (assignment.toInt())}
 			{#if assignment.isK()}
 				<BacktrackingComponent {assignment} />
 			{:else}
@@ -117,10 +117,10 @@
 			{/if}
 		{/each}
 
-		{#each decisions as assignment (assignment.level)}
+		{#each decisions as { level, assignment } (level)}
 			<DecisionLevelComponent
-				decision={assignment.assignment}
-				propagations={trail.getPropagations(assignment.level)}
+				decision={assignment}
+				propagations={trail.getPropagations(level)}
 				{expanded}
 				emitClose={onEmitClose}
 				emitExpand={onEmitExpand}

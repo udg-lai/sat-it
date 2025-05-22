@@ -13,7 +13,7 @@
 	let { cdMode: upMode }: Props = $props();
 
 	const assignmentProps = {
-		class: 'h-8 w-8'
+		size: 'md'
 	};
 </script>
 
@@ -34,7 +34,7 @@
 	title="Next variable"
 	class:invalidOption={!upMode}
 	onclick={() => {
-		stateMachineEventBus.emit('followingVariable');
+		stateMachineEventBus.emit('nextVariable');
 	}}
 	disabled={!upMode}
 >

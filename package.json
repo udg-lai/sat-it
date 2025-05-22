@@ -66,7 +66,6 @@
 	},
 	"dependencies": {
 		"katex": "^0.16.21",
-		"svelte-tiny-virtual-list": "^2.1.2",
-		"uuid": "^11.0.5"
+		"svelte-tiny-virtual-list": "^2.1.2"
 	}
 }

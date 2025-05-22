@@ -1,21 +1,23 @@
 import { logError } from '../logging.ts';
 
 export class Queue<T> {
-	private items: T[] = [];
+	private items: T[] = $state([]);
 
 	constructor() {
 		this.items = [];
 	}
 
 	enqueue(item: T): void {
-		this.items.push(item);
+		this.items = [...this.items, item];
 	}
 
 	dequeue(): T | undefined {
 		if (this.isEmpty()) {
 			logError('Can not dequeue and empty queue');
 		}
-		return this.items.shift();
+		const head = this.items.shift();
+		this.items = [...this.items];
+		return head;
 	}
 
 	peek(): T {

@@ -10,13 +10,13 @@ import {
 	nonDecisionMade as solverNonDecisionMade,
 	backtracking as solverBacktracking,
 	decide as solverDecide
-} from '$lib/transversal/algorithms/solver.ts';
+} from '$lib/transversal/algorithms/solver.svelte.ts';
 import { isUnitClause, isUnSATClause, type ClauseEval } from '$lib/transversal/entities/Clause.ts';
 import type ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';
 import type VariablePool from '$lib/transversal/entities/VariablePool.svelte.ts';
 import { logFatal } from '$lib/transversal/logging.ts';
 import { get } from 'svelte/store';
-import type { DPLL_SolverMachine } from './dpll-solver-machine.ts';
+import type { DPLL_SolverMachine } from './dpll-solver-machine.svelte.ts';
 import { updateClausesToCheck } from '$lib/store/clausesToCheck.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
 
