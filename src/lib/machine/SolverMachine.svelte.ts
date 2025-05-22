@@ -1,8 +1,8 @@
 import type { StateMachineEvent } from '$lib/transversal/events.ts';
 import { tick } from 'svelte';
 import type { StateFun, StateInput, StateMachine } from './StateMachine.svelte.ts';
-import { getStepDelay } from '$lib/store/parameters.svelte.ts';
 import { logWarning } from '$lib/transversal/logging.ts';
+import { getStepDelay } from '$lib/store/delay-ms.svelte.ts';
 
 export interface SolverStateInterface<F extends StateFun, I extends StateInput> {
 	stateMachine: StateMachine<F, I>;
@@ -11,8 +11,8 @@ export interface SolverStateInterface<F extends StateFun, I extends StateInput> 
 	getActiveStateId: () => number;
 	updateActiveStateId: (id: number) => void;
 	updateFromRecord: (record: Record<string, unknown>) => void;
-	isRunningOnAuto: () => boolean;
-	stopAuto: () => void;
+	isInAutoMode: () => boolean;
+	stopAutoMode: () => void;
 	completed: () => boolean;
 	onConflictState: () => boolean;
 	onInitialState: () => boolean;
@@ -39,7 +39,7 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 
 	abstract updateFromRecord(record: Record<string, unknown> | undefined): void;
 
-	isRunningOnAuto(): boolean {
+	isInAutoMode(): boolean {
 		return this.runningOnAuto;
 	}
 
@@ -71,7 +71,7 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 		return false;
 	}
 
-	stopAuto(): void {
+	stopAutoMode(): void {
 		this.forcedStop = true;
 	}
 
@@ -118,7 +118,7 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 
 	protected assertPreAuto(): boolean {
 		let assert = true;
-		if (this.isRunningOnAuto()) {
+		if (this.isInAutoMode()) {
 			logWarning('Solver machine', 'Solver is already running on auto');
 			assert = false;
 		}

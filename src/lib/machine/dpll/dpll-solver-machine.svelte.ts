@@ -14,7 +14,7 @@ import { dpll_stateName2StateId } from './dpll-states.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import { updateClausesToCheck } from '$lib/store/clausesToCheck.svelte.ts';
 import { tick } from 'svelte';
-import { getStepDelay } from '$lib/store/parameters.svelte.ts';
+import { getStepDelay } from '$lib/store/delay-ms.svelte.ts';
 
 export const makeDPLLSolver = (): DPLL_SolverMachine => {
 	return new DPLL_SolverMachine();

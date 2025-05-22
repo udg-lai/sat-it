@@ -1,15 +1,21 @@
-let stepDelay: number = $state(1);
+export const MIN_DELAY: number = 1;
+export const MAX_DELAY: number = 10;
+export const STEP_DELAY: number = 0.5;
 
-export const getStepDelay = () => stepDelay;
+let baselineDelay: number = $state(3);
 
-export const setStepDelay = (delay: number) => {
-	stepDelay = delay;
+export const getBaselineDelay = () => baselineDelay;
+
+export const setBaselineDelay = (delay: number): void => {
+	baselineDelay = Math.min(Math.max(delay, MIN_DELAY), MAX_DELAY);
 };
 
-let defaultPolarity: boolean = $state(true);
+export const DEFAULT_POLARITY = true;
 
-export const updateDefaultPolarity = (): void => {
-	defaultPolarity = !defaultPolarity;
+let baselinePolarity: boolean = $state(DEFAULT_POLARITY);
+
+export const setBaselinePolarity = (): void => {
+	baselinePolarity = !baselinePolarity;
 };
 
-export const getDefaultPolarity = () => defaultPolarity;
+export const getBaselinePolarity = () => baselinePolarity;

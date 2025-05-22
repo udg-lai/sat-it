@@ -4,6 +4,7 @@
 	import { problemStore } from '$lib/store/problem.store.ts';
 	import { getSolverMachine } from '$lib/store/stateMachine.svelte.ts';
 	import AutomaticDebugger from './AutomaticDebuggerComponent.svelte';
+	import AutoModeComponent from './AutoModeComponent.svelte';
 	import ConflictDetectionDebugger from './ConflictDetectionDebuggerComponent.svelte';
 	import GeneralDebuggerButtons from './GeneralDebuggerComponent.svelte';
 	import InitialStepDebugger from './InitialStepDebuggerComponent.svelte';
@@ -20,39 +21,44 @@
 	let enableBacktracking = $derived(solverMachine.onConflictState());
 	let enableConflictDetection = $derived(solverMachine.detectingConflict());
 	let finished = $derived(solverMachine.completed());
-	let runningOnAuto = $derived(solverMachine.isRunningOnAuto());
+	let inAutoMode = $derived(solverMachine.isInAutoMode());
 </script>
 
 <div class="flex-center debugger align-center relative flex-row gap-2">
-	<div class="variable-display"></div>
-	{#if enablePreprocess}
-		<InitialStepDebugger />
+	{#if inAutoMode}
+		<AutoModeComponent />
 	{:else}
-		{#if enableConflictDetection}
-			<ConflictDetectionDebugger cdMode={enableConflictDetection} />
-		{:else if !finished}
-			{#if !enableBacktracking && defaultNextVariable}
-				{defaultNextVariable}
-			{:else}
-				{'X'}
-			{/if}
-			<AutomaticDebugger
-				backtrackingState={enableBacktracking}
-				{finished}
-				cdMode={enableConflictDetection}
-			/>
+		<div class="variable-display"></div>
 
-			<ManualDebugger
-				{defaultNextVariable}
-				{finished}
-				cdMode={enableConflictDetection}
-				backtrackingState={enableBacktracking}
-			/>
+		{#if enablePreprocess}
+			<InitialStepDebugger />
 		{:else}
-			<ResetProblemDebugger />
-		{/if}
+			{#if enableConflictDetection}
+				<ConflictDetectionDebugger cdMode={enableConflictDetection} />
+			{:else if !finished}
+				{#if !enableBacktracking && defaultNextVariable}
+					{defaultNextVariable}
+				{:else}
+					{'X'}
+				{/if}
+				<AutomaticDebugger
+					backtrackingState={enableBacktracking}
+					{finished}
+					cdMode={enableConflictDetection}
+				/>
 
-		<GeneralDebuggerButtons {finished} backtrackingState={enableBacktracking} />
+				<ManualDebugger
+					{defaultNextVariable}
+					{finished}
+					cdMode={enableConflictDetection}
+					backtrackingState={enableBacktracking}
+				/>
+			{:else}
+				<ResetProblemDebugger />
+			{/if}
+
+			<GeneralDebuggerButtons {finished} backtrackingState={enableBacktracking} />
+		{/if}
 	{/if}
 </div>
 

@@ -1,5 +1,5 @@
 import { logFatal } from '$lib/transversal/logging.ts';
-import { getDefaultPolarity } from './parameters.svelte.ts';
+import { getBaselinePolarity } from './parameters.svelte.ts';
 
 export type ManualAssignment = {
 	type: 'manual';
@@ -14,7 +14,7 @@ type AutomatedAssignment = {
 
 export type AssignmentEvent = AutomatedAssignment | ManualAssignment;
 
-let assignment: AssignmentEvent = $state({ type: 'automated', polarity: getDefaultPolarity() });
+let assignment: AssignmentEvent = $state({ type: 'automated', polarity: getBaselinePolarity() });
 
 export const updateAssignment = (
 	newType: 'manual' | 'automated',
@@ -22,7 +22,7 @@ export const updateAssignment = (
 	newVariable?: number
 ): void => {
 	if (newType === 'automated') {
-		newPolarity = getDefaultPolarity();
+		newPolarity = getBaselinePolarity();
 		assignment = { type: newType, polarity: newPolarity };
 	} else {
 		if (newVariable === undefined || newPolarity === undefined) {

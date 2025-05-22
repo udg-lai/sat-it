@@ -13,10 +13,6 @@
 		expandPropagations: boolean;
 	}
 
-	//	trail-editor {
-	//		height: 100%;
-	//		width: 100%;
-	//	}
 	let { trails, expandPropagations }: Props = $props();
 
 	let indexedTrails: IndexedTrail[] = $derived.by(() => {
@@ -51,23 +47,6 @@
 		{/each}
 	</trails>
 </div>
-
-<!--
-<trail-editor>
-	<FlexVirtualList items={indexedTrails} itemSize={70}>
-		<div slot="item" let:item let:index>
-			<IndexedTrailComponent
-				trail={(item as IndexedTrail).trail}
-				index={(item as IndexedTrail).index}
-				expanded={(item as IndexedTrail).expandPropagations}
-			/>
-		</div>
-	</FlexVirtualList>
-
-</trail-editor>
-
-
--->
 
 <style>
 	.trails {

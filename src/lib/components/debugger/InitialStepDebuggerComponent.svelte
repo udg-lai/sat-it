@@ -6,7 +6,7 @@
 	import { resetStack } from '$lib/store/stack.svelte.ts';
 
 	const assignmentProps = {
-		class: 'h-8 w-8'
+		size: 'md'
 	};
 </script>
 
