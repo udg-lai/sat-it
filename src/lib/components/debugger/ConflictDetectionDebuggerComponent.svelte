@@ -34,7 +34,7 @@
 	title="Next variable"
 	class:invalidOption={!upMode}
 	onclick={() => {
-		stateMachineEventBus.emit('followingVariable');
+		stateMachineEventBus.emit('nextVariable');
 	}}
 	disabled={!upMode}
 >

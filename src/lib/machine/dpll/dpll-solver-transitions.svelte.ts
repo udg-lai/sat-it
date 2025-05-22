@@ -48,7 +48,7 @@ import { updateLastTrailEnding } from '$lib/store/trails.svelte.ts';
 export const initialTransition = (solver: DPLL_SolverMachine): void => {
 	const stateMachine: DPLL_StateMachine = solver.stateMachine;
 	ecTransition(stateMachine);
-	if (stateMachine.completed()) return;
+	if (stateMachine.onFinalState()) return;
 	const complementaryClauses: SvelteSet<number> = ucdTransition(stateMachine);
 	conflictDetectionBlock(solver, stateMachine, complementaryClauses);
 };

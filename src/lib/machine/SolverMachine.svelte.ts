@@ -1,12 +1,20 @@
 import type { StateMachineEvent } from '$lib/transversal/events.ts';
+import { tick } from 'svelte';
 import type { StateFun, StateInput, StateMachine } from './StateMachine.svelte.ts';
+import { getStepDelay } from '$lib/store/parameters.svelte.ts';
+import { logWarning } from '$lib/transversal/logging.ts';
 
 export interface SolverStateInterface<F extends StateFun, I extends StateInput> {
 	stateMachine: StateMachine<F, I>;
+	runningOnAuto: boolean;
 	transition: (input: StateMachineEvent) => Promise<void>;
 	getActiveStateId: () => number;
 	updateActiveStateId: (id: number) => void;
 	updateFromRecord: (record: Record<string, unknown>) => void;
+	isRunningOnAuto: () => boolean;
+	stopAuto: () => void;
+	completed: () => boolean;
+	onConflictState: () => boolean;
 }
 
 export abstract class SolverMachine<F extends StateFun, I extends StateInput>
@@ -14,12 +22,27 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 {
 	//With the exclamation mark, we assure that the stateMachine attribute will be assigned before its use
 	stateMachine!: StateMachine<F, I>;
+	runningOnAuto: boolean = $state(false);
+	forcedStop: boolean = $state(false);
+
+	constructor(stateMachine: StateMachine<F, I>, runningOnAuto: boolean = false) {
+		this.stateMachine = stateMachine;
+		this.runningOnAuto = runningOnAuto;
+	}
 
 	abstract transition(input: StateMachineEvent): Promise<void>;
+
 	abstract getRecord(): Record<string, unknown>;
+
 	abstract updateFromRecord(record: Record<string, unknown> | undefined): void;
+
 	abstract getFirstStateId(): number;
+
 	abstract getBacktrackingStateId(): number;
+
+	isRunningOnAuto(): boolean {
+		return this.runningOnAuto;
+	}
 
 	getActiveStateId(): number {
 		return this.stateMachine.getActiveId();
@@ -27,5 +50,74 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 
 	updateActiveStateId(id: number): void {
 		this.stateMachine.setActiveId(id);
+	}
+
+	completed(): boolean {
+		return this.stateMachine.onFinalState();
+	}
+
+	onConflictState(): boolean {
+		return this.stateMachine.getConflictState().id === this.stateMachine.getActiveId();
+	}
+
+	stopAuto(): void {
+		this.forcedStop = true;
+	}
+
+	protected abstract step(): void;
+
+	protected async solveAllStepByStep(): Promise<void> {
+		if (!this.assertPreAuto()) {
+			return;
+		}
+		this.setFlagsPreAuto();
+		const times: number[] = [];
+		while (!this.completed() && !this.forcedStop) {
+			this.step();
+			await tick();
+			console.log('State machine activeId: ', this.stateMachine.getActiveId());
+			await new Promise((r) => times.push(setTimeout(r, getStepDelay())));
+		}
+		times.forEach(clearTimeout);
+		this.setFlagsPostAuto();
+	}
+
+	protected async solveTrailStepByStep(): Promise<void> {
+		if (!this.assertPreAuto()) {
+			return;
+		}
+		this.setFlagsPreAuto();
+		const times: number[] = [];
+		while (!this.completed() && !this.onConflictState() && !this.forcedStop) {
+			this.step();
+			await tick();
+			console.log('State machine activeId: ', this.stateMachine.getActiveId());
+			await new Promise((r) => times.push(setTimeout(r, getStepDelay())));
+		}
+		times.forEach(clearTimeout);
+		this.setFlagsPostAuto();
+	}
+
+	protected setFlagsPreAuto(): void {
+		this.forcedStop = false;
+		this.runningOnAuto = true;
+	}
+
+	protected setFlagsPostAuto(): void {
+		this.runningOnAuto = false;
+	}
+
+	protected assertPreAuto(): boolean {
+		let assert = true;
+		if (this.isRunningOnAuto()) {
+			logWarning('Solver machine', 'Solver is already running on auto');
+			assert = false;
+		}
+		if (this.stateMachine.onFinalState()) {
+			this.runningOnAuto = false;
+			logWarning('Solver machine', 'Solver is already completed');
+			assert = false;
+		}
+		return assert;
 	}
 }

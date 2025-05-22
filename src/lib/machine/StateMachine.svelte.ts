@@ -27,12 +27,14 @@ const isFinalState = <F extends StateFun, I extends StateInput>(
 export type State<F extends StateFun, I extends StateInput> = NonFinalState<F, I> | FinalState<F>;
 
 export interface StateMachineInterface<F extends StateFun, I extends StateInput> {
-	completed: () => boolean;
+	onFinalState: () => boolean;
 	getActiveId: () => number;
 	setActiveId: (id: number) => void;
 	getActiveState: () => State<F, I>;
 	getNextState: (input: I) => State<F, I>;
 	transition: (input: I) => void;
+	getInitialState: () => State<F, I>;
+	getConflictState: () => State<F, I>;
 }
 
 export abstract class StateMachine<F extends StateFun, I extends StateInput>
@@ -40,13 +42,17 @@ export abstract class StateMachine<F extends StateFun, I extends StateInput>
 {
 	private states: Map<number, State<F, I>>;
 	private active: number = $state(-1);
+	private initial: number = -1;
+	private conflict: number = -1;
 
-	constructor(states: Map<number, State<F, I>>, initial: number) {
+	constructor(states: Map<number, State<F, I>>, initial: number, conflict: number) {
 		this.states = states;
+		this.initial = initial;
 		this.active = initial;
+		this.conflict = conflict;
 	}
 
-	completed(): boolean {
+	onFinalState(): boolean {
 		const activeState = this.getActiveState();
 		return isFinalState(activeState);
 	}
@@ -70,8 +76,24 @@ export abstract class StateMachine<F extends StateFun, I extends StateInput>
 		this.active = id;
 	}
 
+	getInitialState(): State<F, I> {
+		const initialState = this.states.get(this.initial);
+		if (initialState === undefined) {
+			logFatal('Initial state not found');
+		}
+		return initialState;
+	}
+
+	getConflictState(): State<F, I> {
+		const conflictState = this.states.get(this.conflict);
+		if (conflictState === undefined) {
+			logFatal('Conflict state not found');
+		}
+		return conflictState;
+	}
+
 	getNextState(input: I): State<F, I> {
-		if (this.completed()) {
+		if (this.onFinalState()) {
 			logFatal('No next state for a completed state machine');
 		} else {
 			const activeState = this.getActiveState() as NonFinalState<DPLL_FUN, DPLL_INPUT>;
@@ -91,7 +113,7 @@ export abstract class StateMachine<F extends StateFun, I extends StateInput>
 	}
 
 	transition(input: I): void {
-		if (this.completed()) {
+		if (this.onFinalState()) {
 			logFatal('Already in a final state');
 		} else {
 			const nextState = this.getNextState(input);

@@ -14,6 +14,7 @@ import { dpll_stateName2StateId } from './dpll-states.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import { updateClausesToCheck } from '$lib/store/clausesToCheck.svelte.ts';
 import { tick } from 'svelte';
+import { getStepDelay } from '$lib/store/parameters.svelte.ts';
 
 export const makeDPLLSolver = (): DPLL_SolverMachine => {
 	return new DPLL_SolverMachine();
@@ -23,8 +24,7 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 	pending: Queue<SvelteSet<number>>;
 
 	constructor() {
-		super();
-		this.stateMachine = makeDPLLMachine();
+		super(makeDPLLMachine(), false);
 		this.pending = new Queue();
 	}
 
@@ -91,20 +91,13 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 	async transition(input: StateMachineEvent): Promise<void> {
 		//If receive a step, the state machine can be waiting in 4 possible states
 		if (input === 'step') {
-			this.logicStep();
-		} else if (input === 'followingVariable') {
-			const currentSet: Set<number> = this.consultPostponed();
-			while (currentSet.size !== 0) {
-				analyzeClause(this);
-			}
+			this.step();
+		} else if (input === 'nextVariable') {
+			await this.solveToNextVariableStepByStep();
 		} else if (input === 'finishUP') {
-			while (!this.pending.isEmpty()) {
-				analyzeClause(this);
-			}
+			await this.solveUPStepByStep();
 		} else if (input === 'solve_trail') {
-			while (!this.onBacktrackingState() && !this.onFinalState()) {
-				this.logicStep();
-			}
+			await this.solveTrailStepByStep();
 		} else if (input === 'solve_all') {
 			await this.solveAllStepByStep();
 		} else {
@@ -112,7 +105,7 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 		}
 	}
 
-	logicStep(): void {
+	step(): void {
 		const activeId: number = this.stateMachine.getActiveId();
 		//The initial state
 		if (activeId === dpll_stateName2StateId.empty_clause_state) {
@@ -132,27 +125,36 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 		}
 	}
 
-	private async solveAllStepByStep(): Promise<void> {
+	private async solveToNextVariableStepByStep(): Promise<void> {
+		if (!this.assertPreAuto()) {
+			return;
+		}
+		this.setFlagsPreAuto();
 		const times: number[] = [];
-		while (!this.onFinalState()) {
-			this.logicStep();
+		const postponedClauses: Set<number> = this.consultPostponed();
+		while (postponedClauses.size !== 0 && !this.forcedStop) {
+			this.step();
 			await tick();
 			console.log('State machine activeId: ', this.stateMachine.getActiveId());
-			await new Promise((r) => times.push(setTimeout(r, 10)));
+			await new Promise((r) => times.push(setTimeout(r, getStepDelay())));
 		}
 		times.forEach(clearTimeout);
+		this.setFlagsPostAuto();
 	}
 
-	private onFinalState(): boolean {
-		const activeId: number = this.stateMachine.getActiveId();
-		return (
-			activeId === dpll_stateName2StateId.sat_state ||
-			activeId === dpll_stateName2StateId.unsat_state
-		);
-	}
-
-	private onBacktrackingState(): boolean {
-		const activeId: number = this.stateMachine.getActiveId();
-		return activeId === dpll_stateName2StateId.backtracking_state;
+	private async solveUPStepByStep(): Promise<void> {
+		if (!this.assertPreAuto()) {
+			return;
+		}
+		this.setFlagsPreAuto();
+		const times: number[] = [];
+		while (!this.pending.isEmpty() && !this.forcedStop) {
+			this.step();
+			await tick();
+			console.log('State machine activeId: ', this.stateMachine.getActiveId());
+			await new Promise((r) => times.push(setTimeout(r, getStepDelay())));
+		}
+		times.forEach(clearTimeout);
+		this.setFlagsPostAuto();
 	}
 }
