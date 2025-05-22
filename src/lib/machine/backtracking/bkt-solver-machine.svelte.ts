@@ -6,16 +6,16 @@ import type { StateMachineEvent } from '$lib/transversal/events.ts';
 import { logError, logFatal } from '$lib/transversal/logging.ts';
 import { bkt_stateName2StateId } from './bkt-states.svelte.ts';
 import { updateClausesToCheck } from '$lib/store/clausesToCheck.svelte.ts';
-import { initialTransition } from './bkt-solver-transitions.svelte.ts';
+import { analyzeClause, backtracking, decide, initialTransition } from './bkt-solver-transitions.svelte.ts';
 import { tick } from 'svelte';
 import { getStepDelay } from '$lib/store/delay-ms.svelte.ts';
 
-export const makeDPLLSolver = (): BKT_SolverMachine => {
+export const makeBKTSolver = (): BKT_SolverMachine => {
 	return new BKT_SolverMachine();
 };
 
 export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
-	pending: SvelteSet<number>;
+	pending: SvelteSet<number> = $state(new SvelteSet<number>());
 
 	constructor() {
 		super(makeBKTMachine());
@@ -28,7 +28,8 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 	}
 
 	enqueue(clauses: SvelteSet<number>): void {
-		for (const clause of clauses) {
+		this.clear()
+		for(const clause of clauses) {
 			this.pending.add(clause);
 		}
 	}
@@ -95,24 +96,17 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 
 	step(): void {
 		const activeId: number = this.stateMachine.getActiveId();
-		//The initial state
 		if (activeId === bkt_stateName2StateId.empty_clause_state) {
 			initialTransition(this);
 		}
-		//Waiting to analyze the next clause of the clauses to revise
 		else if (activeId === bkt_stateName2StateId.next_clause_state) {
-			console.log('TODO');
-			//analyzeClause(this);
+			analyzeClause(this);
 		}
-		//Waiting to decide a variables
 		else if (activeId === bkt_stateName2StateId.decide_state) {
-			console.log('TODO');
-			//decide(this);
+			decide(this);
 		}
-		//Waiting to backtrack an assignment
 		else if (activeId === bkt_stateName2StateId.backtracking_state) {
-			console.log('TODO');
-			//backtracking(this);
+			backtracking(this);
 		}
 	}
 
@@ -130,5 +124,9 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 		}
 		times.forEach(clearTimeout);
 		this.setFlagsPostAuto();
+	}
+
+	detectingConflict(): boolean {
+		return !this.isEmpty();
 	}
 }

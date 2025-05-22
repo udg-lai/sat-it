@@ -16,6 +16,7 @@ import {
 	emptyClauseSet,
 	nextClause,
 	nonDecisionMade,
+	peekPendingSet,
 	queueClauseSet,
 	triggeredClauses,
 	unsatisfiedClause,
@@ -37,12 +38,14 @@ import {
 	type BKT_DELETE_CLAUSE_INPUT,
 	type BKT_EMPTY_CLAUSE_FUN,
 	type BKT_EMPTY_CLAUSE_INPUT,
-	type BKT_EMPTY_CLAUSE_SET_FUN,
-	type BKT_EMPTY_CLAUSE_SET_INPUT,
+	type BKT_EMPTY_PENDING_SET_FUN,
+	type BKT_EMPTY_PENDING_SET_INPUT,
 	type BKT_FUN,
 	type BKT_INPUT,
 	type BKT_NEXT_CLAUSE_FUN,
 	type BKT_NEXT_CLAUSE_INPUT,
+	type BKT_PEEK_PENDING_SET_FUN,
+	type BKT_PEEK_PENDING_SET_INPUT,
 	type BKT_QUEUE_CLAUSE_SET_FUN,
 	type BKT_QUEUE_CLAUSE_SET_INPUT,
 	type BKT_TRIGGERED_CLAUSES_FUN,
@@ -59,12 +62,13 @@ export const bkt_stateName2StateId = {
 	complementary_occurrences_state: 2,
 	triggered_clauses_state: 3,
 	queue_clause_set_state: 4,
-	all_clauses_checked_state: 5,
-	next_clause_state: 6,
-	conflict_detection_state: 7,
-	delete_clause_state: 8,
-	empty_clause_set_state: 9,
-	decision_level_state: 10
+	peek_pending_set_state: 5,
+	all_clauses_checked_state: 6,
+	next_clause_state: 7,
+	conflict_detection_state: 8,
+	delete_clause_state: 9,
+	empty_pending_set_state: 10,
+	decision_level_state: 11
 };
 
 // ** define state nodes **
@@ -141,10 +145,20 @@ const queue_clause_set_state: NonFinalState<BKT_QUEUE_CLAUSE_SET_FUN, BKT_QUEUE_
 		run: queueClauseSet,
 		description: 'Stack a set of clause as pending',
 		transitions: new Map<BKT_QUEUE_CLAUSE_SET_INPUT, number>().set(
-			'all_clauses_checked_state',
-			bkt_stateName2StateId['all_clauses_checked_state']
+			'peek_pending_set_state',
+			bkt_stateName2StateId['peek_pending_set_state']
 		)
 	};
+
+const peek_clause_set_state: NonFinalState<BKT_PEEK_PENDING_SET_FUN, BKT_PEEK_PENDING_SET_INPUT> = {
+	id: bkt_stateName2StateId['peek_pending_set_state'],
+	description: 'Get next pending clause set from the queue',
+	run: peekPendingSet,
+	transitions: new Map<BKT_PEEK_PENDING_SET_INPUT, number>().set(
+		'all_clauses_checked_state',
+		bkt_stateName2StateId['all_clauses_checked_state']
+	)
+};
 
 const all_clauses_checked_state: NonFinalState<
 	BKT_ALL_CLAUSES_CHECKED_FUN,
@@ -178,7 +192,7 @@ const conflict_detection_state: NonFinalState<
 	description: 'Check if current clause is unsatisfied',
 	transitions: new Map<BKT_CONFLICT_DETECTION_INPUT, number>()
 		.set('delete_clause_state', bkt_stateName2StateId['delete_clause_state'])
-		.set('empty_clause_set_state', bkt_stateName2StateId['empty_clause_set_state'])
+		.set('empty_pending_set_state', bkt_stateName2StateId['empty_pending_set_state'])
 };
 
 const delete_clause_state: NonFinalState<BKT_DELETE_CLAUSE_FUN, BKT_DELETE_CLAUSE_INPUT> = {
@@ -191,12 +205,12 @@ const delete_clause_state: NonFinalState<BKT_DELETE_CLAUSE_FUN, BKT_DELETE_CLAUS
 	)
 };
 
-const empty_clause_set_state: NonFinalState<BKT_EMPTY_CLAUSE_SET_FUN, BKT_EMPTY_CLAUSE_SET_INPUT> =
+const empty_pending_set_state: NonFinalState<BKT_EMPTY_PENDING_SET_FUN, BKT_EMPTY_PENDING_SET_INPUT> =
 	{
-		id: bkt_stateName2StateId['empty_clause_set_state'],
+		id: bkt_stateName2StateId['empty_pending_set_state'],
 		run: emptyClauseSet,
 		description: `Emties the queue of clauses to check`,
-		transitions: new Map<BKT_EMPTY_CLAUSE_SET_INPUT, number>().set(
+		transitions: new Map<BKT_EMPTY_PENDING_SET_INPUT, number>().set(
 			'decision_level_state',
 			bkt_stateName2StateId['decision_level_state']
 		)
@@ -229,11 +243,12 @@ states.set(decide_state.id, decide_state);
 states.set(complementary_occurrences_state.id, complementary_occurrences_state);
 states.set(triggered_clauses_state.id, triggered_clauses_state);
 states.set(queue_clause_set_state.id, queue_clause_set_state);
+states.set(peek_clause_set_state.id, peek_clause_set_state);
 states.set(conflict_detection_state.id, conflict_detection_state);
 states.set(all_clauses_checked_state.id, all_clauses_checked_state);
 states.set(next_clause_state.id, next_clause_state);
 states.set(delete_clause_state.id, delete_clause_state);
-states.set(empty_clause_set_state.id, empty_clause_set_state);
+states.set(empty_pending_set_state.id, empty_pending_set_state);
 states.set(decision_level_state.id, decision_level_state);
 states.set(sat_state.id, sat_state);
 states.set(unsat_state.id, unsat_state);

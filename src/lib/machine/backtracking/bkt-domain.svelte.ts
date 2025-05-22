@@ -25,12 +25,13 @@ export type BKT_ALL_VARIABLES_ASSIGNED_INPUT = 'sat_state' | 'decide_state';
 export type BKT_DECIDE_INPUT = 'complementary_occurrences_state';
 export type BKT_COMPLEMENTARY_OCCURRENCES_INPUT = 'triggered_clauses_state';
 export type BKT_TRIGGERED_CLAUSES_INPUT = 'queue_clause_set_state' | 'all_variables_assigned_state';
-export type BKT_QUEUE_CLAUSE_SET_INPUT = 'all_clauses_checked_state';
+export type BKT_QUEUE_CLAUSE_SET_INPUT = 'peek_pending_set_state';
+export type BKT_PEEK_PENDING_SET_INPUT = 'all_clauses_checked_state';
 export type BKT_ALL_CLAUSES_CHECKED_INPUT = 'next_clause_state' | 'all_variables_assigned_state';
 export type BKT_NEXT_CLAUSE_INPUT = 'conflict_detection_state';
-export type BKT_CONFLICT_DETECTION_INPUT = 'delete_clause_state' | 'empty_clause_set_state';
+export type BKT_CONFLICT_DETECTION_INPUT = 'delete_clause_state' | 'empty_pending_set_state';
 export type BKT_DELETE_CLAUSE_INPUT = 'all_clauses_checked_state';
-export type BKT_EMPTY_CLAUSE_SET_INPUT = 'decision_level_state';
+export type BKT_EMPTY_PENDING_SET_INPUT = 'decision_level_state';
 export type BKT_DECISION_LEVEL_INPUT = 'backtracking_state' | 'unsat_state';
 export type BKT_BACKTRACKING_INPUT = 'complementary_occurrences_state';
 
@@ -41,11 +42,12 @@ export type BKT_INPUT =
 	| BKT_COMPLEMENTARY_OCCURRENCES_INPUT
 	| BKT_TRIGGERED_CLAUSES_INPUT
 	| BKT_QUEUE_CLAUSE_SET_INPUT
+	| BKT_PEEK_PENDING_SET_INPUT
 	| BKT_ALL_CLAUSES_CHECKED_INPUT
 	| BKT_NEXT_CLAUSE_INPUT
 	| BKT_CONFLICT_DETECTION_INPUT
 	| BKT_DELETE_CLAUSE_INPUT
-	| BKT_EMPTY_CLAUSE_SET_INPUT
+	| BKT_EMPTY_PENDING_SET_INPUT
 	| BKT_DECISION_LEVEL_INPUT;
 
 // ** state functions **
@@ -99,21 +101,31 @@ export const queueClauseSet: BKT_QUEUE_CLAUSE_SET_FUN = (
 	solverStateMachine.enqueue(clauses);
 };
 
-export type BKT_ALL_CLAUSES_CHECKED_FUN = (solverStateMachine: BKT_SolverMachine) => boolean;
+export type BKT_PEEK_PENDING_SET_FUN = (
+	solverStateMachine: BKT_SolverMachine
+) => SvelteSet<number>;
 
-export const allClausesChecked: BKT_ALL_CLAUSES_CHECKED_FUN = (
+export const peekPendingSet: BKT_PEEK_PENDING_SET_FUN = (
 	solverStateMachine: BKT_SolverMachine
 ) => {
-	return solverStateMachine.pending.size === 0;
+	const pendingSet: SvelteSet<number> = solverStateMachine.consultPending();
+	updateClausesToCheck(pendingSet);
+	return pendingSet
 };
 
-export type BKT_NEXT_CLAUSE_FUN = (solverStateMachine: BKT_SolverMachine) => number;
+export type BKT_ALL_CLAUSES_CHECKED_FUN = (pendingSet: SvelteSet<number>) => boolean;
 
-export const nextClause: BKT_NEXT_CLAUSE_FUN = (solverStateMachine: BKT_SolverMachine) => {
-	if (solverStateMachine.pending.size === 0) {
+export const allClausesChecked: BKT_ALL_CLAUSES_CHECKED_FUN = (pendingSet: SvelteSet<number>) => {
+	return pendingSet.size === 0;
+};
+
+export type BKT_NEXT_CLAUSE_FUN = (pendingSet: SvelteSet<number>) => number;
+
+export const nextClause: BKT_NEXT_CLAUSE_FUN = (pendingSet: SvelteSet<number>) => {
+	if (pendingSet.size === 0) {
 		logFatal('A non empty set was expected');
 	}
-	const clausesIterator = solverStateMachine.pending.values().next();
+	const clausesIterator = pendingSet.values().next();
 	const clauseId = clausesIterator.value;
 	return clauseId as number;
 };
@@ -127,20 +139,23 @@ export const unsatisfiedClause: BKT_CONFLICT_DETECTION_FUN = (clauseId: number) 
 };
 
 export type BKT_DELETE_CLAUSE_FUN = (
-	solverStateMachine: BKT_SolverMachine,
+	pending: SvelteSet<number>,
 	clauseId: number
 ) => void;
 
 export const deleteClause: BKT_DELETE_CLAUSE_FUN = (
-	solverStateMachine: BKT_SolverMachine,
+	pending: SvelteSet<number>,
 	clauseId: number
 ) => {
-	solverStateMachine.remove(clauseId);
+	if (!pending.has(clauseId)) {
+		logFatal('Clause not found', `Clause - ${clauseId} not found`);
+	}
+	pending.delete(clauseId);
 };
 
-export type BKT_EMPTY_CLAUSE_SET_FUN = (solverStateMachine: BKT_SolverMachine) => void;
+export type BKT_EMPTY_PENDING_SET_FUN = (solverStateMachine: BKT_SolverMachine) => void;
 
-export const emptyClauseSet: BKT_EMPTY_CLAUSE_SET_FUN = (solverStateMachine: BKT_SolverMachine) => {
+export const emptyClauseSet: BKT_EMPTY_PENDING_SET_FUN = (solverStateMachine: BKT_SolverMachine) => {
 	solverStateMachine.clear();
 	//I DON'T KNOW IF I REALLY NEED THIS CODELINE
 	updateClausesToCheck(new SvelteSet<number>());
@@ -166,10 +181,11 @@ export type BKT_FUN =
 	| BKT_COMPLEMENTARY_OCCURRENCES_FUN
 	| BKT_TRIGGERED_CLAUSES_FUN
 	| BKT_QUEUE_CLAUSE_SET_FUN
+	| BKT_PEEK_PENDING_SET_FUN
 	| BKT_ALL_CLAUSES_CHECKED_FUN
 	| BKT_NEXT_CLAUSE_FUN
 	| BKT_CONFLICT_DETECTION_FUN
 	| BKT_DELETE_CLAUSE_FUN
-	| BKT_EMPTY_CLAUSE_SET_FUN
+	| BKT_EMPTY_PENDING_SET_FUN
 	| BKT_DECISION_LEVEL_FUN
 	| BKT_BACKTRACKING_FUN;

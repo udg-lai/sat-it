@@ -405,7 +405,6 @@ const decideTransition = (stateMachine: DPLL_StateMachine): number => {
 	if (decideState.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Decide state');
 	}
-	//I have to think how to send the assignment event
 	const literalToPropagate: number = decideState.run();
 	stateMachine.transition('complementary_occurrences_state');
 	return literalToPropagate;

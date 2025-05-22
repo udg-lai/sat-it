@@ -36,7 +36,7 @@ export function updateProblemDomain(instance: DimacsInstance) {
 	let newProblem: Problem;
 
 	if (previousProblem === undefined) {
-		const algorithm: Algorithm = 'dpll';
+		const algorithm: Algorithm = 'backtracking';
 		newProblem = {
 			...params,
 			algorithm
