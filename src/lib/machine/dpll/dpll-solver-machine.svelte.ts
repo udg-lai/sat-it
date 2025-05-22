@@ -1,4 +1,4 @@
-import { Queue } from '$lib/transversal/entities/Queue.ts';
+import { Queue } from '$lib/transversal/entities/Queue.svelte.ts';
 import type { StateMachineEvent } from '$lib/transversal/events.ts';
 import { logFatal } from '$lib/transversal/logging.ts';
 import { SolverMachine } from '../SolverMachine.svelte.ts';
@@ -21,11 +21,11 @@ export const makeDPLLSolver = (): DPLL_SolverMachine => {
 };
 
 export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
-	pending: Queue<SvelteSet<number>>;
+	pending: Queue<SvelteSet<number>> = $state(new Queue<SvelteSet<number>>());
 
 	constructor() {
 		super(makeDPLLMachine(), false);
-		this.pending = new Queue();
+		this.pending = new Queue<SvelteSet<number>>();
 	}
 
 	postpone(clauses: SvelteSet<number>): void {
@@ -63,14 +63,6 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 		return {
 			queue: this.getQueue()
 		};
-	}
-
-	getFirstStateId(): number {
-		return dpll_stateName2StateId['empty_clause_state'];
-	}
-
-	getBacktrackingStateId(): number {
-		return dpll_stateName2StateId['backtracking_state'];
 	}
 
 	updateFromRecord(record: Record<string, unknown> | undefined): void {
@@ -135,7 +127,6 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 		while (postponedClauses.size !== 0 && !this.forcedStop) {
 			this.step();
 			await tick();
-			console.log('State machine activeId: ', this.stateMachine.getActiveId());
 			await new Promise((r) => times.push(setTimeout(r, getStepDelay())));
 		}
 		times.forEach(clearTimeout);
@@ -151,10 +142,13 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 		while (!this.pending.isEmpty() && !this.forcedStop) {
 			this.step();
 			await tick();
-			console.log('State machine activeId: ', this.stateMachine.getActiveId());
 			await new Promise((r) => times.push(setTimeout(r, getStepDelay())));
 		}
 		times.forEach(clearTimeout);
 		this.setFlagsPostAuto();
+	}
+
+	detectingConflict(): boolean {
+		return !this.pending.isEmpty();
 	}
 }

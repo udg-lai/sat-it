@@ -1,49 +1,58 @@
 <script lang="ts">
-	import { getClausesToCheck } from '$lib/store/clausesToCheck.svelte.ts';
+	import type { SolverMachine } from '$lib/machine/SolverMachine.svelte.ts';
+	import type { StateFun, StateInput } from '$lib/machine/StateMachine.svelte.ts';
 	import { problemStore } from '$lib/store/problem.store.ts';
-	import AutomaticDebugger from './AutomaticDebuggerComponent.svelte';
-	import GeneralDebuggerButtons from './GeneralDebuggerComponent.svelte';
-	import ManualDebugger from './ManualDebuggerComponent.svelte';
-	import InitialStepDebugger from './InitialStepDebuggerComponent.svelte';
-	import ConflictDetectionDebugger from './ConflictDetectionDebuggerComponent.svelte';
-	import ResetProblemDebugger from './ResetProblemDebuggerComponent.svelte';
-	import { SAT_STATE_ID, UNSAT_STATE_ID } from '$lib/machine/reserved.ts';
 	import { getSolverMachine } from '$lib/store/stateMachine.svelte.ts';
+	import AutomaticDebugger from './AutomaticDebuggerComponent.svelte';
+	import ConflictDetectionDebugger from './ConflictDetectionDebuggerComponent.svelte';
+	import GeneralDebuggerButtons from './GeneralDebuggerComponent.svelte';
+	import InitialStepDebugger from './InitialStepDebuggerComponent.svelte';
+	import ManualDebugger from './ManualDebuggerComponent.svelte';
+	import ResetProblemDebugger from './ResetProblemDebuggerComponent.svelte';
 
 	let defaultNextVariable: number | undefined = $derived.by(() => {
 		if ($problemStore !== undefined) return $problemStore.variables.nextVariable;
 		else return 0;
 	});
 
-	const solverMachine = $derived(getSolverMachine());
-	const activeId: number = $derived(solverMachine.getActiveStateId());
-	const enablePreproces = $derived(activeId === solverMachine.getFirstStateId());
-	const backtrackingState = $derived(activeId === solverMachine.getBacktrackingStateId());
-	const cdMode = $derived(getClausesToCheck().size !== 0);
-	const finished = $derived(activeId === UNSAT_STATE_ID || activeId === SAT_STATE_ID);
+	let solverMachine: SolverMachine<StateFun, StateInput> = $derived(getSolverMachine());
+	let enablePreprocess = $derived(solverMachine.onInitialState());
+	let enableBacktracking = $derived(solverMachine.onConflictState());
+	let enableConflictDetection = $derived(solverMachine.detectingConflict());
+	let finished = $derived(solverMachine.completed());
+	let runningOnAuto = $derived(solverMachine.isRunningOnAuto());
 </script>
 
 <div class="flex-center debugger align-center relative flex-row gap-2">
 	<div class="variable-display"></div>
-	{#if enablePreproces}
+	{#if enablePreprocess}
 		<InitialStepDebugger />
 	{:else}
-		{#if cdMode}
-			<ConflictDetectionDebugger {cdMode} />
+		{#if enableConflictDetection}
+			<ConflictDetectionDebugger cdMode={enableConflictDetection} />
 		{:else if !finished}
-			{#if !backtrackingState && defaultNextVariable}
+			{#if !enableBacktracking && defaultNextVariable}
 				{defaultNextVariable}
 			{:else}
 				{'X'}
 			{/if}
-			<AutomaticDebugger {backtrackingState} {finished} {cdMode} />
+			<AutomaticDebugger
+				backtrackingState={enableBacktracking}
+				{finished}
+				cdMode={enableConflictDetection}
+			/>
 
-			<ManualDebugger {defaultNextVariable} {finished} {cdMode} {backtrackingState} />
+			<ManualDebugger
+				{defaultNextVariable}
+				{finished}
+				cdMode={enableConflictDetection}
+				backtrackingState={enableBacktracking}
+			/>
 		{:else}
 			<ResetProblemDebugger />
 		{/if}
 
-		<GeneralDebuggerButtons {finished} {backtrackingState} />
+		<GeneralDebuggerButtons {finished} backtrackingState={enableBacktracking} />
 	{/if}
 </div>
 

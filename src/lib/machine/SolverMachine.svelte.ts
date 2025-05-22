@@ -15,6 +15,9 @@ export interface SolverStateInterface<F extends StateFun, I extends StateInput> 
 	stopAuto: () => void;
 	completed: () => boolean;
 	onConflictState: () => boolean;
+	onInitialState: () => boolean;
+	onFinalState: () => boolean;
+	detectingConflict: () => boolean;
 }
 
 export abstract class SolverMachine<F extends StateFun, I extends StateInput>
@@ -36,10 +39,6 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 
 	abstract updateFromRecord(record: Record<string, unknown> | undefined): void;
 
-	abstract getFirstStateId(): number;
-
-	abstract getBacktrackingStateId(): number;
-
 	isRunningOnAuto(): boolean {
 		return this.runningOnAuto;
 	}
@@ -57,7 +56,19 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 	}
 
 	onConflictState(): boolean {
-		return this.stateMachine.getConflictState().id === this.stateMachine.getActiveId();
+		return this.stateMachine.onConflictState();
+	}
+
+	onFinalState(): boolean {
+		return this.stateMachine.onFinalState();
+	}
+
+	onInitialState(): boolean {
+		return this.stateMachine.onInitialState();
+	}
+
+	detectingConflict(): boolean {
+		return false;
 	}
 
 	stopAuto(): void {
@@ -75,7 +86,6 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 		while (!this.completed() && !this.forcedStop) {
 			this.step();
 			await tick();
-			console.log('State machine activeId: ', this.stateMachine.getActiveId());
 			await new Promise((r) => times.push(setTimeout(r, getStepDelay())));
 		}
 		times.forEach(clearTimeout);
@@ -91,7 +101,6 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 		while (!this.completed() && !this.onConflictState() && !this.forcedStop) {
 			this.step();
 			await tick();
-			console.log('State machine activeId: ', this.stateMachine.getActiveId());
 			await new Promise((r) => times.push(setTimeout(r, getStepDelay())));
 		}
 		times.forEach(clearTimeout);

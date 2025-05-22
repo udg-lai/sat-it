@@ -27,14 +27,14 @@ const isFinalState = <F extends StateFun, I extends StateInput>(
 export type State<F extends StateFun, I extends StateInput> = NonFinalState<F, I> | FinalState<F>;
 
 export interface StateMachineInterface<F extends StateFun, I extends StateInput> {
-	onFinalState: () => boolean;
 	getActiveId: () => number;
 	setActiveId: (id: number) => void;
 	getActiveState: () => State<F, I>;
 	getNextState: (input: I) => State<F, I>;
 	transition: (input: I) => void;
-	getInitialState: () => State<F, I>;
-	getConflictState: () => State<F, I>;
+	onFinalState: () => boolean;
+	onInitialState: () => boolean;
+	onConflictState: () => boolean;
 }
 
 export abstract class StateMachine<F extends StateFun, I extends StateInput>
@@ -57,6 +57,14 @@ export abstract class StateMachine<F extends StateFun, I extends StateInput>
 		return isFinalState(activeState);
 	}
 
+	onInitialState(): boolean {
+		return this.getActiveState().id === this.initial;
+	}
+
+	onConflictState(): boolean {
+		return this.getActiveState().id === this.conflict;
+	}
+
 	getActiveState(): State<F, I> {
 		const activeState: State<F, I> | undefined = this.states.get(this.active);
 		if (activeState === undefined) {
@@ -74,22 +82,6 @@ export abstract class StateMachine<F extends StateFun, I extends StateInput>
 
 	setActiveId(id: number): void {
 		this.active = id;
-	}
-
-	getInitialState(): State<F, I> {
-		const initialState = this.states.get(this.initial);
-		if (initialState === undefined) {
-			logFatal('Initial state not found');
-		}
-		return initialState;
-	}
-
-	getConflictState(): State<F, I> {
-		const conflictState = this.states.get(this.conflict);
-		if (conflictState === undefined) {
-			logFatal('Conflict state not found');
-		}
-		return conflictState;
 	}
 
 	getNextState(input: I): State<F, I> {
