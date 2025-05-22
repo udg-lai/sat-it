@@ -4,6 +4,7 @@ import VariablePool from '../transversal/entities/VariablePool.svelte.ts';
 import type { DimacsInstance } from '$lib/dimacs/dimacs-instance.interface.ts';
 import { resetStack } from './stack.svelte.ts';
 import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
+import { setSolverStateMachine } from './stateMachine.svelte.ts';
 
 export type MappingLiteral2Clauses = Map<number, Set<number>>;
 
@@ -36,13 +37,15 @@ export function updateProblemDomain(instance: DimacsInstance) {
 	let newProblem: Problem;
 
 	if (previousProblem === undefined) {
-		const algorithm: Algorithm = 'backtracking';
+		const algorithm: Algorithm = 'dpll';
+		setSolverStateMachine(algorithm);
 		newProblem = {
 			...params,
 			algorithm
 		};
 	} else {
 		const { algorithm } = previousProblem;
+		setSolverStateMachine(algorithm);
 		newProblem = {
 			...params,
 			algorithm
@@ -56,6 +59,7 @@ export function updateProblemDomain(instance: DimacsInstance) {
 export function updateAlgorithm(algorithm: Algorithm) {
 	const currentProblem = get(problemStore);
 	currentProblem.variables.reset();
+	setSolverStateMachine(algorithm);
 	problemStore.set({ ...currentProblem, algorithm });
 	resetStack();
 }

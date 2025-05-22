@@ -101,16 +101,12 @@ export const queueClauseSet: BKT_QUEUE_CLAUSE_SET_FUN = (
 	solverStateMachine.enqueue(clauses);
 };
 
-export type BKT_PEEK_PENDING_SET_FUN = (
-	solverStateMachine: BKT_SolverMachine
-) => SvelteSet<number>;
+export type BKT_PEEK_PENDING_SET_FUN = (solverStateMachine: BKT_SolverMachine) => SvelteSet<number>;
 
-export const peekPendingSet: BKT_PEEK_PENDING_SET_FUN = (
-	solverStateMachine: BKT_SolverMachine
-) => {
+export const peekPendingSet: BKT_PEEK_PENDING_SET_FUN = (solverStateMachine: BKT_SolverMachine) => {
 	const pendingSet: SvelteSet<number> = solverStateMachine.consultPending();
 	updateClausesToCheck(pendingSet);
-	return pendingSet
+	return pendingSet;
 };
 
 export type BKT_ALL_CLAUSES_CHECKED_FUN = (pendingSet: SvelteSet<number>) => boolean;
@@ -138,10 +134,7 @@ export const unsatisfiedClause: BKT_CONFLICT_DETECTION_FUN = (clauseId: number) 
 	return isUnSATClause(evaluation);
 };
 
-export type BKT_DELETE_CLAUSE_FUN = (
-	pending: SvelteSet<number>,
-	clauseId: number
-) => void;
+export type BKT_DELETE_CLAUSE_FUN = (pending: SvelteSet<number>, clauseId: number) => void;
 
 export const deleteClause: BKT_DELETE_CLAUSE_FUN = (
 	pending: SvelteSet<number>,
@@ -155,7 +148,9 @@ export const deleteClause: BKT_DELETE_CLAUSE_FUN = (
 
 export type BKT_EMPTY_PENDING_SET_FUN = (solverStateMachine: BKT_SolverMachine) => void;
 
-export const emptyClauseSet: BKT_EMPTY_PENDING_SET_FUN = (solverStateMachine: BKT_SolverMachine) => {
+export const emptyClauseSet: BKT_EMPTY_PENDING_SET_FUN = (
+	solverStateMachine: BKT_SolverMachine
+) => {
 	solverStateMachine.clear();
 	//I DON'T KNOW IF I REALLY NEED THIS CODELINE
 	updateClausesToCheck(new SvelteSet<number>());

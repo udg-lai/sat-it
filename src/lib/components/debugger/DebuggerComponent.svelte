@@ -22,13 +22,6 @@
 	let enableConflictDetection = $derived(solverMachine.detectingConflict());
 	let finished = $derived(solverMachine.completed());
 	let inAutoMode = $derived(solverMachine.isInAutoMode());
-
-	$effect(() => {
-		console.log("Preproces", enablePreprocess);
-		console.log("Backtracking", enableBacktracking);
-		console.log("Conflict Detection", enableConflictDetection);
-		console.log("Finished", finished);
-	})
 </script>
 
 <div class="flex-center debugger align-center relative flex-row gap-2">

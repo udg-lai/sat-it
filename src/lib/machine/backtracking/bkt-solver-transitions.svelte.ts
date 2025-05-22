@@ -1,7 +1,36 @@
 import { logFatal } from '$lib/transversal/logging.ts';
 import type { SvelteSet } from 'svelte/reactivity';
 import type { NonFinalState } from '../StateMachine.svelte.ts';
-import type { BKT_ALL_CLAUSES_CHECKED_FUN, BKT_ALL_CLAUSES_CHECKED_INPUT, BKT_ALL_VARIABLES_ASSIGNED_FUN, BKT_ALL_VARIABLES_ASSIGNED_INPUT, BKT_BACKTRACKING_FUN, BKT_BACKTRACKING_INPUT, BKT_COMPLEMENTARY_OCCURRENCES_FUN, BKT_COMPLEMENTARY_OCCURRENCES_INPUT, BKT_CONFLICT_DETECTION_FUN, BKT_CONFLICT_DETECTION_INPUT, BKT_DECIDE_FUN, BKT_DECIDE_INPUT, BKT_DECISION_LEVEL_FUN, BKT_DECISION_LEVEL_INPUT, BKT_DELETE_CLAUSE_FUN, BKT_DELETE_CLAUSE_INPUT, BKT_EMPTY_CLAUSE_FUN, BKT_EMPTY_CLAUSE_INPUT, BKT_EMPTY_PENDING_SET_FUN, BKT_EMPTY_PENDING_SET_INPUT, BKT_NEXT_CLAUSE_FUN, BKT_NEXT_CLAUSE_INPUT, BKT_PEEK_PENDING_SET_FUN, BKT_PEEK_PENDING_SET_INPUT, BKT_QUEUE_CLAUSE_SET_FUN, BKT_QUEUE_CLAUSE_SET_INPUT, BKT_TRIGGERED_CLAUSES_FUN, BKT_TRIGGERED_CLAUSES_INPUT } from './bkt-domain.svelte.ts';
+import type {
+	BKT_ALL_CLAUSES_CHECKED_FUN,
+	BKT_ALL_CLAUSES_CHECKED_INPUT,
+	BKT_ALL_VARIABLES_ASSIGNED_FUN,
+	BKT_ALL_VARIABLES_ASSIGNED_INPUT,
+	BKT_BACKTRACKING_FUN,
+	BKT_BACKTRACKING_INPUT,
+	BKT_COMPLEMENTARY_OCCURRENCES_FUN,
+	BKT_COMPLEMENTARY_OCCURRENCES_INPUT,
+	BKT_CONFLICT_DETECTION_FUN,
+	BKT_CONFLICT_DETECTION_INPUT,
+	BKT_DECIDE_FUN,
+	BKT_DECIDE_INPUT,
+	BKT_DECISION_LEVEL_FUN,
+	BKT_DECISION_LEVEL_INPUT,
+	BKT_DELETE_CLAUSE_FUN,
+	BKT_DELETE_CLAUSE_INPUT,
+	BKT_EMPTY_CLAUSE_FUN,
+	BKT_EMPTY_CLAUSE_INPUT,
+	BKT_EMPTY_PENDING_SET_FUN,
+	BKT_EMPTY_PENDING_SET_INPUT,
+	BKT_NEXT_CLAUSE_FUN,
+	BKT_NEXT_CLAUSE_INPUT,
+	BKT_PEEK_PENDING_SET_FUN,
+	BKT_PEEK_PENDING_SET_INPUT,
+	BKT_QUEUE_CLAUSE_SET_FUN,
+	BKT_QUEUE_CLAUSE_SET_INPUT,
+	BKT_TRIGGERED_CLAUSES_FUN,
+	BKT_TRIGGERED_CLAUSES_INPUT
+} from './bkt-domain.svelte.ts';
 import type { BKT_SolverMachine } from './bkt-solver-machine.svelte.ts';
 import type { BKT_StateMachine } from './bkt-state-machine.svelte.ts';
 import { updateLastTrailEnding } from '$lib/store/trails.svelte.ts';
@@ -28,7 +57,7 @@ export const analyzeClause = (solver: BKT_SolverMachine): void => {
 	const allChecked: boolean = allClausesCheckedTransition(stateMachine, pendingSet);
 	if (!allChecked) return;
 	allVariablesAssignedTransition(stateMachine);
-}
+};
 
 export const decide = (solver: BKT_SolverMachine): void => {
 	const stateMachine: BKT_StateMachine = solver.stateMachine;
@@ -50,11 +79,12 @@ export const backtracking = (solver: BKT_SolverMachine): void => {
 	conflictDetectionBlock(solver, stateMachine, complementaryClauses);
 };
 
-const conflictDetectionBlock = (solver: BKT_SolverMachine, stateMachine: BKT_StateMachine, complementaryClauses: SvelteSet<number>): void => {
-	const triggeredClauses: boolean = triggeredClausesTransition(
-		stateMachine,
-		complementaryClauses
-	);
+const conflictDetectionBlock = (
+	solver: BKT_SolverMachine,
+	stateMachine: BKT_StateMachine,
+	complementaryClauses: SvelteSet<number>
+): void => {
+	const triggeredClauses: boolean = triggeredClausesTransition(stateMachine, complementaryClauses);
 	if (!triggeredClauses) {
 		allVariablesAssignedTransition(stateMachine);
 		return;
@@ -62,10 +92,10 @@ const conflictDetectionBlock = (solver: BKT_SolverMachine, stateMachine: BKT_Sta
 	queueClauseSetTransition(stateMachine, solver, complementaryClauses);
 	const pendingSet: SvelteSet<number> = peekPedningSetTransition(stateMachine, solver);
 	const allChecked: boolean = allClausesCheckedTransition(stateMachine, pendingSet);
-	if(allChecked) {
+	if (allChecked) {
 		logFatal('This is not a possibility in this case');
 	}
-}
+};
 
 const ecTransition = (stateMachine: BKT_StateMachine): void => {
 	if (stateMachine.getActiveId() !== 0) {
@@ -102,7 +132,10 @@ const allVariablesAssignedTransition = (stateMachine: BKT_StateMachine): void =>
 	else stateMachine.transition('decide_state');
 };
 
-const nextClauseTransition = (stateMachine: BKT_StateMachine, pendingSet: SvelteSet<number>): number => {
+const nextClauseTransition = (
+	stateMachine: BKT_StateMachine,
+	pendingSet: SvelteSet<number>
+): number => {
 	const nextCluaseState = stateMachine.getActiveState() as NonFinalState<
 		BKT_NEXT_CLAUSE_FUN,
 		BKT_NEXT_CLAUSE_INPUT
@@ -113,7 +146,7 @@ const nextClauseTransition = (stateMachine: BKT_StateMachine, pendingSet: Svelte
 	const clauseId: number = nextCluaseState.run(pendingSet);
 	stateMachine.transition('conflict_detection_state');
 	return clauseId;
-}
+};
 
 const conflictDetectionTransition = (stateMachine: BKT_StateMachine, clauseId: number): boolean => {
 	const conflictDetectionState = stateMachine.getActiveState() as NonFinalState<
@@ -127,7 +160,7 @@ const conflictDetectionTransition = (stateMachine: BKT_StateMachine, clauseId: n
 	if (result) stateMachine.transition('empty_pending_set_state');
 	else stateMachine.transition('delete_clause_state');
 	return result;
-}
+};
 
 const emptyPendingSetTransition = (
 	stateMachine: BKT_StateMachine,
@@ -173,7 +206,10 @@ const deleteClauseTransition = (
 	stateMachine.transition('all_clauses_checked_state');
 };
 
-const allClausesCheckedTransition = (stateMachine: BKT_StateMachine, pendingSet: SvelteSet<number>): boolean => {
+const allClausesCheckedTransition = (
+	stateMachine: BKT_StateMachine,
+	pendingSet: SvelteSet<number>
+): boolean => {
 	const allClausesCheckedState = stateMachine.getActiveState() as NonFinalState<
 		BKT_ALL_CLAUSES_CHECKED_FUN,
 		BKT_ALL_CLAUSES_CHECKED_INPUT
@@ -232,19 +268,22 @@ const complementaryOccurrencesTransition = (
 	return clauses;
 };
 
-const triggeredClausesTransition = (stateMachine: BKT_StateMachine, complementaryClauses: SvelteSet<number>): boolean => {
+const triggeredClausesTransition = (
+	stateMachine: BKT_StateMachine,
+	complementaryClauses: SvelteSet<number>
+): boolean => {
 	const triggeredClausesState = stateMachine.getActiveState() as NonFinalState<
-			BKT_TRIGGERED_CLAUSES_FUN,
-			BKT_TRIGGERED_CLAUSES_INPUT
-		>;
-		if (triggeredClausesState.run === undefined) {
-			logFatal('Function call error', 'There should be a function in the Triggered Clauses state');
-		}
-		const result: boolean = triggeredClausesState.run(complementaryClauses);
-		if(result) stateMachine.transition('queue_clause_set_state');
-		else stateMachine.transition('all_variables_assigned_state');
-		return result;
-}
+		BKT_TRIGGERED_CLAUSES_FUN,
+		BKT_TRIGGERED_CLAUSES_INPUT
+	>;
+	if (triggeredClausesState.run === undefined) {
+		logFatal('Function call error', 'There should be a function in the Triggered Clauses state');
+	}
+	const result: boolean = triggeredClausesState.run(complementaryClauses);
+	if (result) stateMachine.transition('queue_clause_set_state');
+	else stateMachine.transition('all_variables_assigned_state');
+	return result;
+};
 
 const queueClauseSetTransition = (
 	stateMachine: BKT_StateMachine,

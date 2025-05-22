@@ -6,7 +6,12 @@ import type { StateMachineEvent } from '$lib/transversal/events.ts';
 import { logError, logFatal } from '$lib/transversal/logging.ts';
 import { bkt_stateName2StateId } from './bkt-states.svelte.ts';
 import { updateClausesToCheck } from '$lib/store/clausesToCheck.svelte.ts';
-import { analyzeClause, backtracking, decide, initialTransition } from './bkt-solver-transitions.svelte.ts';
+import {
+	analyzeClause,
+	backtracking,
+	decide,
+	initialTransition
+} from './bkt-solver-transitions.svelte.ts';
 import { tick } from 'svelte';
 import { getStepDelay } from '$lib/store/delay-ms.svelte.ts';
 
@@ -28,8 +33,8 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 	}
 
 	enqueue(clauses: SvelteSet<number>): void {
-		this.clear()
-		for(const clause of clauses) {
+		this.clear();
+		for (const clause of clauses) {
 			this.pending.add(clause);
 		}
 	}
@@ -98,14 +103,11 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 		const activeId: number = this.stateMachine.getActiveId();
 		if (activeId === bkt_stateName2StateId.empty_clause_state) {
 			initialTransition(this);
-		}
-		else if (activeId === bkt_stateName2StateId.next_clause_state) {
+		} else if (activeId === bkt_stateName2StateId.next_clause_state) {
 			analyzeClause(this);
-		}
-		else if (activeId === bkt_stateName2StateId.decide_state) {
+		} else if (activeId === bkt_stateName2StateId.decide_state) {
 			decide(this);
-		}
-		else if (activeId === bkt_stateName2StateId.backtracking_state) {
+		} else if (activeId === bkt_stateName2StateId.backtracking_state) {
 			backtracking(this);
 		}
 	}
