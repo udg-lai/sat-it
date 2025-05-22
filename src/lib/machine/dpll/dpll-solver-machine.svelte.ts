@@ -24,7 +24,7 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 	pending: Queue<SvelteSet<number>> = $state(new Queue<SvelteSet<number>>());
 
 	constructor() {
-		super(makeDPLLMachine(), false);
+		super(makeDPLLMachine());
 		this.pending = new Queue<SvelteSet<number>>();
 	}
 

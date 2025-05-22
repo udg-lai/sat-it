@@ -28,9 +28,10 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 	runningOnAuto: boolean = $state(false);
 	forcedStop: boolean = $state(false);
 
-	constructor(stateMachine: StateMachine<F, I>, runningOnAuto: boolean = false) {
+	constructor(stateMachine: StateMachine<F, I>) {
 		this.stateMachine = stateMachine;
-		this.runningOnAuto = runningOnAuto;
+		this.runningOnAuto = false;
+		this.forcedStop = false;
 	}
 
 	abstract transition(input: StateMachineEvent): Promise<void>;
