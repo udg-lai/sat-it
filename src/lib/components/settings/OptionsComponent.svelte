@@ -72,9 +72,7 @@
 		onclick={() => event?.('close')}
 		btnClass="bottomNavItem"
 	>
-		<ArrowDownToBracketOutline
-			class={`settings-icones group-hover:text-primary-600`}
-		/>
+		<ArrowDownToBracketOutline class={`settings-icones group-hover:text-primary-600`} />
 		<Tooltip arrow={false}>Hide</Tooltip>
 	</BottomNavItem>
 

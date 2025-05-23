@@ -125,7 +125,7 @@
 		flex: 1;
 		transition:
 			color 0.2s,
-			background-color 0.2s,
+			background-color 0.2s;
 	}
 
 	li {
@@ -147,7 +147,7 @@
 
 	.item:hover {
 		background-color: var(--icone-light);
-		color: var(--icone-strong)
+		color: var(--icone-strong);
 	}
 
 	.item.selected {
