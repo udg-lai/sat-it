@@ -8,6 +8,8 @@
 	import { get } from 'svelte/store';
 	import { Popover } from 'flowbite-svelte';
 	import MathTexComponent from '../MathTexComponent.svelte';
+	import DynamicRender from '../DynamicRender.svelte';
+	import { CheckOutline, CloseOutline, HammerOutline } from 'flowbite-svelte-icons';
 
 	interface Props {
 		trail: Trail;
@@ -15,6 +17,10 @@
 	let { trail }: Props = $props();
 
 	let buttonId: string = 'btn-' + nanoid();
+
+	const iconProps = {
+		class: 'h-7 w-7 cursor-pointer'
+	};
 
 	const clause: string | undefined = $derived.by(() => {
 		const trailEndingClause: number = trail.getTrailEnding();
@@ -40,11 +46,11 @@
 	class:sat={satState && clause === undefined}
 >
 	{#if unsatState}
-		<p>UNSAT</p>
+		<DynamicRender component={CloseOutline} props={iconProps} />
 	{:else if clause !== undefined}
-		<p>CONFLICT</p>
+		<DynamicRender component={HammerOutline} props={iconProps} />
 	{:else if satState}
-		<p>SAT</p>
+		<DynamicRender component={CheckOutline} props={iconProps} />
 	{/if}
 </button>
 
@@ -55,7 +61,7 @@
 <style>
 	.notification {
 		pointer-events: none;
-		width: 6rem;
+		width: 4rem;
 		padding-left: 1rem;
 		display: flex;
 		justify-content: left;
