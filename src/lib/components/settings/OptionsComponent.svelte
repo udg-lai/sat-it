@@ -12,10 +12,11 @@
 		ExclamationCircleOutline,
 		PlusOutline
 	} from 'flowbite-svelte-icons';
+	import { getActiveView, type ActiveView } from './settings.store.svelte.ts';
 
 	export type OptionEmit = 'bookmark' | 'engine' | 'info' | 'close';
 
-	let selected: OptionEmit = $state('bookmark');
+	const selected: ActiveView = $derived(getActiveView());
 
 	interface Props {
 		event?: (emit: OptionEmit) => void;
@@ -68,14 +69,11 @@
 	<BottomNavItem
 		btnName="Hide"
 		appBtnPosition="left"
-		onclick={() => {
-			selected = 'close';
-			event?.('close');
-		}}
+		onclick={() => event?.('close')}
 		btnClass="bottomNavItem"
 	>
 		<ArrowDownToBracketOutline
-			class={`settings-icones group-hover:text-primary-600 ${selected === 'close' ? 'active' : ''}`}
+			class={`settings-icones group-hover:text-primary-600`}
 		/>
 		<Tooltip arrow={false}>Hide</Tooltip>
 	</BottomNavItem>
@@ -84,10 +82,7 @@
 		btnName="Legend"
 		btnClass="bottomNavItem"
 		appBtnPosition="middle"
-		onclick={() => {
-			selected = 'info';
-			event?.('info');
-		}}
+		onclick={() => event?.('info')}
 	>
 		<ExclamationCircleOutline
 			class={`settings-icones group-hover:text-primary-600 ${selected === 'info' ? 'active' : ''}`}
@@ -119,10 +114,7 @@
 		btnName="Instances"
 		btnClass="bottomNavItem"
 		appBtnPosition="middle"
-		onclick={() => {
-			selected = 'bookmark';
-			event?.('bookmark');
-		}}
+		onclick={() => event?.('bookmark')}
 	>
 		<BookOpenOutline
 			class={`settings-icones group-hover:text-primary-600 ${selected === 'bookmark' ? 'active' : ''}`}
@@ -134,10 +126,7 @@
 		btnName="Engine"
 		btnClass="bottomNavItem"
 		appBtnPosition="right"
-		onclick={() => {
-			selected = 'engine';
-			event?.('engine');
-		}}
+		onclick={() => event?.('engine')}
 	>
 		<AdjustmentsVerticalOutline
 			class={`settings-icones group-hover:text-primary-600 ${selected === 'engine' ? 'active' : ''}`}
