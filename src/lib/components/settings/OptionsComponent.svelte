@@ -160,7 +160,7 @@
 		transition: color 0.3s ease;
 		outline: none;
 	}
-	:global(.active) {
+	:global(.settings-icones.active) {
 		color: var(--icone-strong);
 	}
 </style>
