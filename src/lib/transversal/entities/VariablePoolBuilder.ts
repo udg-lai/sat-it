@@ -1,5 +1,5 @@
 import VariablePool from './VariablePool.svelte.ts';
-import { type IVariablePool } from '../utils/interfaces/IVariablePool.ts';
+import { type IVariablePool } from '../interfaces/IVariablePool.ts';
 
 export type PoolType = 'VariableCollection' | 'VariablePool';
 

@@ -1,5 +1,4 @@
 import ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';
-import { get, writable, type Writable } from 'svelte/store';
 import VariablePool from '../transversal/entities/VariablePool.svelte.ts';
 import type { DimacsInstance } from '$lib/dimacs/dimacs-instance.interface.ts';
 import { resetStack } from './stack.svelte.ts';
@@ -16,7 +15,12 @@ export interface Problem {
 	algorithm: Algorithm;
 }
 
-export const problemStore: Writable<Problem> = writable();
+let problemStore: Problem = $state({
+	variables: new VariablePool(0),
+	clauses: new ClausePool(),
+	mapping: new Map<number, Set<number>>(),
+	algorithm: 'backtracking'
+});
 
 export function updateProblemDomain(instance: DimacsInstance) {
 	const { varCount, cnf: clauses } = instance.summary;
@@ -25,55 +29,43 @@ export function updateProblemDomain(instance: DimacsInstance) {
 	const clausePool: ClausePool = ClausePool.buildFrom(clauses, variablePool);
 	const mapping: MappingLiteral2Clauses = literalToClauses(clausePool);
 
-	const previousProblem = get(problemStore);
-
 	const params = {
 		variables: variablePool,
 		clauses: clausePool,
 		mapping
 	};
 
-	let newProblem: Problem;
+	const { algorithm } = problemStore;
+	const newProblem: Problem = {
+		...params,
+		algorithm
+	};
 
-	if (previousProblem === undefined) {
-		const algorithm: Algorithm = 'dpll';
-		newProblem = {
-			...params,
-			algorithm
-		};
-	} else {
-		const { algorithm } = previousProblem;
-		newProblem = {
-			...params,
-			algorithm
-		};
-	}
-
-	problemStore.set(newProblem);
+	problemStore = newProblem;
 	resetStack();
 }
 
 export function updateAlgorithm(algorithm: Algorithm) {
-	const currentProblem = get(problemStore);
+	const currentProblem = problemStore;
 	currentProblem.variables.reset();
-	problemStore.set({ ...currentProblem, algorithm });
+	problemStore = { ...currentProblem, algorithm };
 	resetStack();
 }
 
 export function updateProblemFromTrail(trail: Trail) {
-	const { variables, ...currentProblem } = get(problemStore);
+	const { variables, ...currentProblem } = problemStore;
 	variables.reset();
 	trail.forEach((value) => {
 		const variable = value.getVariable();
 		variables.persist(variable.getInt(), variable.getAssignment());
 	});
-	problemStore.set({ ...currentProblem, variables });
+	problemStore = { ...currentProblem, variables };
 }
 
 export function resetProblem() {
-	const problem: Problem = get(problemStore);
+	const problem: Problem = problemStore;
 	problem.variables.reset();
-	problemStore.set({ ...problem });
+	problemStore = { ...problem };
 }
 
 function literalToClauses(clauses: ClausePool): MappingLiteral2Clauses {
@@ -91,6 +83,7 @@ function literalToClauses(clauses: ClausePool): MappingLiteral2Clauses {
 			}
 		});
 	});
-
 	return mapping;
 }
+
+export const getProblemStore = () => problemStore;

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { SolverMachine } from '$lib/machine/SolverMachine.svelte.ts';
 	import type { StateFun, StateInput } from '$lib/machine/StateMachine.svelte.ts';
-	import { problemStore } from '$lib/store/problem.store.ts';
+	import { getProblemStore, type Problem } from '$lib/store/problem.svelte.ts';
 	import { getSolverMachine } from '$lib/store/stateMachine.svelte.ts';
 	import AutomaticDebugger from './AutomaticDebuggerComponent.svelte';
 	import AutoModeComponent from './AutoModeComponent.svelte';
@@ -11,10 +11,8 @@
 	import ManualDebugger from './ManualDebuggerComponent.svelte';
 	import ResetProblemDebugger from './ResetProblemDebuggerComponent.svelte';
 
-	let defaultNextVariable: number | undefined = $derived.by(() => {
-		if ($problemStore !== undefined) return $problemStore.variables.nextVariable;
-		else return 0;
-	});
+	const problem: Problem = $derived(getProblemStore());
+	let defaultNextVariable: number | undefined = $derived(problem.variables.nextVariable);
 
 	let solverMachine: SolverMachine<StateFun, StateInput> = $derived(getSolverMachine());
 	let enablePreprocess = $derived(solverMachine.onInitialState());

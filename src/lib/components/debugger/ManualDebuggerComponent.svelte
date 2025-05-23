@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { problemStore } from '$lib/store/problem.store.ts';
+	import { getProblemStore, type Problem } from '$lib/store/problem.svelte.ts';
 	import { logInfo } from '$lib/transversal/logging.ts';
 	import { Modal } from 'flowbite-svelte';
 	import {
@@ -24,13 +24,10 @@
 	const generalProps = {
 		size: 'md'
 	};
-
+	const problem: Problem = $derived(getProblemStore());
 	let manualDecisionModal = $state(false);
 	let polarity: boolean = $state(true);
-	let maxValue: number = $derived.by(() => {
-		if ($problemStore !== undefined) return $problemStore.variables.nVariables();
-		else return 0;
-	});
+	let maxValue: number = $derived(problem.variables.nVariables());
 
 	let userNextVariable: number | undefined = $state(undefined);
 
@@ -39,7 +36,7 @@
 		else {
 			if (userNextVariable < 1 || userNextVariable > maxValue) return false;
 			else {
-				const assignedVariables = $problemStore.variables.assignedVariables();
+				const assignedVariables = problem.variables.assignedVariables();
 				return !assignedVariables.includes(userNextVariable);
 			}
 		}

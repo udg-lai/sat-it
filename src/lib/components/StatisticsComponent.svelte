@@ -1,19 +1,17 @@
 <script lang="ts">
-	import { problemStore } from '$lib/store/problem.store.ts';
+	import { getProblemStore, type Problem } from '$lib/store/problem.svelte.ts';
 	import {
-		getNoBacktarcking,
+		getNoConflicts,
 		getNoDecisions,
 		getNoUnitPropagations
 	} from '$lib/store/statistics.svelte.ts';
-	import { get } from 'svelte/store';
 
+	const problem: Problem = $derived(getProblemStore());
 	const decisions: number = $derived(getNoDecisions());
-	const backtrackings: number = $derived(getNoBacktarcking());
+	const conflicts: number = $derived(getNoConflicts());
 	const unitPropagations: number = $derived(getNoUnitPropagations());
-	const variablesToAssign: number = $derived(
-		get(problemStore).variables.nonAssignedVariables().length
-	);
-	const clausesLeft: number = $derived(get(problemStore).clauses.leftToSatisfy());
+	const variablesToAssign: number = $derived(problem.variables.nonAssignedVariables().length);
+	const clausesLeft: number = $derived(problem.clauses.leftToSatisfy());
 </script>
 
 <div class="h-full space-y-5 border-t">
@@ -23,7 +21,7 @@
 	</div>
 	<div class="flex place-content-around">
 		<span class="metric">Decisions: {decisions}</span>
-		<span class="metric">Backtrackings: {backtrackings}</span>
+		<span class="metric">Conflicts: {conflicts}</span>
 		<span class="metric">Unit propagations: {unitPropagations}</span>
 	</div>
 </div>
