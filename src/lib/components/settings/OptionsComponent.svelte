@@ -15,6 +15,8 @@
 
 	export type OptionEmit = 'bookmark' | 'engine' | 'info' | 'close';
 
+	let selected: OptionEmit = $state('bookmark');
+
 	interface Props {
 		event?: (emit: OptionEmit) => void;
 	}
@@ -66,10 +68,10 @@
 	<BottomNavItem
 		btnName="Hide"
 		appBtnPosition="left"
-		onclick={() => event?.('close')}
+		onclick={() => { selected = 'close'; event?.('close') }}
 		btnClass="bottomNavItem"
 	>
-		<ArrowDownToBracketOutline class="mb-1 h-6 w-6 text-gray-500 group-hover:text-primary-600" />
+		<ArrowDownToBracketOutline class={`settings-icones group-hover:text-primary-600 ${selected === 'close' ? 'active' : ''}`} />
 		<Tooltip arrow={false}>Hide</Tooltip>
 	</BottomNavItem>
 
@@ -77,9 +79,9 @@
 		btnName="Legend"
 		btnClass="bottomNavItem"
 		appBtnPosition="middle"
-		onclick={() => event?.('info')}
+		onclick={() => { selected = 'info'; event?.('info') }}
 	>
-		<ExclamationCircleOutline class="mb-1 h-6 w-6 text-gray-500 group-hover:text-primary-600" />
+		<ExclamationCircleOutline class={`settings-icones group-hover:text-primary-600 ${selected === 'info' ? 'active' : ''}`}/>
 		<Tooltip arrow={false}>Legend</Tooltip>
 	</BottomNavItem>
 
@@ -98,7 +100,7 @@
 				bind:this={inputRef}
 				onchange={uploadFiles}
 			/>
-			<PlusOutline class="text-white" />
+			<PlusOutline class="text-white"/>
 			<Tooltip arrow={false}>Add instance</Tooltip>
 		</BottomNavItem>
 	</div>
@@ -107,9 +109,9 @@
 		btnName="Instances"
 		btnClass="bottomNavItem"
 		appBtnPosition="middle"
-		onclick={() => event?.('bookmark')}
+		onclick={() => { selected = 'bookmark'; event?.('bookmark') }}
 	>
-		<BookOpenOutline class="mb-1 h-6 w-6 text-gray-500 group-hover:text-primary-600" />
+		<BookOpenOutline class={`settings-icones group-hover:text-primary-600 ${selected === 'bookmark' ? 'active' : ''}`} />
 		<Tooltip arrow={false}>Instances</Tooltip>
 	</BottomNavItem>
 
@@ -117,9 +119,9 @@
 		btnName="Engine"
 		btnClass="bottomNavItem"
 		appBtnPosition="right"
-		onclick={() => event?.('engine')}
+		onclick={() => { selected = 'engine'; event?.('engine') }}
 	>
-		<AdjustmentsVerticalOutline class="mb-1 h-6 w-6 text-gray-500 group-hover:text-primary-600" />
+		<AdjustmentsVerticalOutline class={`settings-icones group-hover:text-primary-600 ${selected === 'engine' ? 'active' : ''}`} />
 		<Tooltip arrow={false}>Engine</Tooltip>
 	</BottomNavItem>
 </BottomNav>
@@ -140,5 +142,15 @@
 	:global(.tooltip) {
 		background-color: var(--main-bg-color);
 		color: black;
+	}
+	:global(.settings-icones) {
+		margin-bottom: 2px;
+		height: 24px;
+		width: 24px;
+		color: var(--icone-unselected);
+		transition: color 0.3s ease;
+	}
+	:global(.active) {
+		color: var(--icone-strong);
 	}
 </style>
