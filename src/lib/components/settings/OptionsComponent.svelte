@@ -57,18 +57,29 @@
 	}
 </script>
 
-<BottomNav position="absolute" navType="application" classOuter="bottomNavStyle" classInner="grid-cols-5">
-	<BottomNavItem btnName="Hide" appBtnPosition="left" onclick={() => event?.('close')} btnClass="bottomNavItem">
-		<ArrowDownToBracketOutline
-			class="mb-1 h-6 w-6 text-gray-500 group-hover:text-primary-600"
-		/>
+<BottomNav
+	position="absolute"
+	navType="application"
+	classOuter="bottomNavStyle"
+	classInner="grid-cols-5"
+>
+	<BottomNavItem
+		btnName="Hide"
+		appBtnPosition="left"
+		onclick={() => event?.('close')}
+		btnClass="bottomNavItem"
+	>
+		<ArrowDownToBracketOutline class="mb-1 h-6 w-6 text-gray-500 group-hover:text-primary-600" />
 		<Tooltip arrow={false}>Hide</Tooltip>
 	</BottomNavItem>
 
-	<BottomNavItem btnName="Legend" btnClass="bottomNavItem" appBtnPosition="middle" onclick={() => event?.('info')}>
-		<ExclamationCircleOutline
-			class="mb-1 h-6 w-6 text-gray-500 group-hover:text-primary-600"
-		/>
+	<BottomNavItem
+		btnName="Legend"
+		btnClass="bottomNavItem"
+		appBtnPosition="middle"
+		onclick={() => event?.('info')}
+	>
+		<ExclamationCircleOutline class="mb-1 h-6 w-6 text-gray-500 group-hover:text-primary-600" />
 		<Tooltip arrow={false}>Legend</Tooltip>
 	</BottomNavItem>
 
@@ -92,17 +103,23 @@
 		</BottomNavItem>
 	</div>
 
-	<BottomNavItem btnName="Instances" btnClass="bottomNavItem" appBtnPosition="middle" onclick={() => event?.('bookmark')}>
-		<BookOpenOutline
-			class="mb-1 h-6 w-6 text-gray-500 group-hover:text-primary-600"
-		/>
+	<BottomNavItem
+		btnName="Instances"
+		btnClass="bottomNavItem"
+		appBtnPosition="middle"
+		onclick={() => event?.('bookmark')}
+	>
+		<BookOpenOutline class="mb-1 h-6 w-6 text-gray-500 group-hover:text-primary-600" />
 		<Tooltip arrow={false}>Instances</Tooltip>
 	</BottomNavItem>
 
-	<BottomNavItem btnName="Engine" btnClass="bottomNavItem" appBtnPosition="right" onclick={() => event?.('engine')}>
-		<AdjustmentsVerticalOutline
-			class="mb-1 h-6 w-6 text-gray-500 group-hover:text-primary-600"
-		/>
+	<BottomNavItem
+		btnName="Engine"
+		btnClass="bottomNavItem"
+		appBtnPosition="right"
+		onclick={() => event?.('engine')}
+	>
+		<AdjustmentsVerticalOutline class="mb-1 h-6 w-6 text-gray-500 group-hover:text-primary-600" />
 		<Tooltip arrow={false}>Engine</Tooltip>
 	</BottomNavItem>
 </BottomNav>
@@ -110,10 +127,9 @@
 <style>
 	:global(.bottomNavStyle) {
 		background-color: white;
-		border-color: var(--border-color) ;
+		border-color: var(--border-color);
 		color: black;
-		transition:
-			background-color 0.3s ease,
+		transition: background-color 0.3s ease;
 	}
 	:global(.bottomNavItem:hover) {
 		background-color: var(--main-bg-color);
@@ -123,7 +139,6 @@
 	}
 	:global(.tooltip) {
 		background-color: var(--main-bg-color);
-		color:black;
+		color: black;
 	}
-
 </style>
