@@ -20,10 +20,10 @@
 	--trail-content-height: 3rem;
 	--popover-font-size: 0.8rem;
 	--button-size: 40px;
-	--icone-unselected: #828282;
-	--icone-base: #8a3ffc;
-	--icone-light: #e5d9ff;
-	--icone-strong: #5c23a7;
+	--icon-unselected: #828282;
+	--icon-base: #8a3ffc;
+	--icon-light: #e5d9ff;
+	--icon-strong: #5c23a7;
 }
 
 html,
