@@ -169,6 +169,7 @@
 		width: 24px;
 		color: var(--icone-unselected);
 		transition: color 0.3s ease;
+		outline: none;
 	}
 	:global(.active) {
 		color: var(--icone-strong);
