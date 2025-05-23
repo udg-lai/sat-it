@@ -15,7 +15,7 @@
 	import SettingsComponent from '$lib/components/settings/SettingsComponent.svelte';
 	import { disableContextMenu } from '$lib/transversal/utils.ts';
 	import { logError } from '$lib/transversal/logging.ts';
-
+	
 	let renderSettings = $state(true);
 
 	onMount(() => {
