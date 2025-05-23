@@ -3,7 +3,7 @@
 	import DynamicRender from '../DynamicRender.svelte';
 	import { changeInstanceEventBus } from '$lib/transversal/events.ts';
 	const resetProps = {
-		class: 'h-8 w-8'
+		size: 'md'
 	};
 </script>
 
