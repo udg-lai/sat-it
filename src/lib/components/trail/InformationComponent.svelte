@@ -22,10 +22,10 @@
 		class: 'h-7 w-7 cursor-pointer'
 	};
 
+	const clauseId: number = $derived(trail.getTrailEnding());
 	const clause: string | undefined = $derived.by(() => {
-		const trailEndingClause: number = trail.getTrailEnding();
-		if (trailEndingClause === -1) return undefined;
-		const clause: Clause = get(problemStore).clauses.get(trailEndingClause);
+		if (clauseId === -1) return undefined;
+		const clause: Clause = get(problemStore).clauses.get(clauseId);
 		return clause
 			.map((literal) => {
 				return literal.toTeX();
@@ -55,7 +55,11 @@
 </button>
 
 <Popover triggeredBy={'#' + buttonId} class="app-popover" trigger="click" placement="bottom">
-	<MathTexComponent equation={clause as string} fontSize="var(--popover-font-size)" />
+	<div class="popover-content">
+		<span class="clause-id">{clauseId}.</span>
+		<MathTexComponent equation={clause as string} fontSize="var(--popover-font-size)" />
+	</div>
+	
 </Popover>
 
 <style>
@@ -86,9 +90,19 @@
 	:global(.app-popover) {
 		background-color: var(--main-bg-color);
 		border-color: var(--border-color);
-		z-index: 5;
 		color: black;
-		padding: 0.4rem 0.5rem;
+		padding: 0.3rem 0.5rem;
+	}
+	:global(.app-popover .popover-content) {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		font-size: var(--popover-font-size);
+		gap: 0.5rem;
+	}
+	
+	:global(.app-popover .clause-id) {
+		color: var(--clause-id-color);
 	}
 
 	:global(.app-popover > .py-2) {
