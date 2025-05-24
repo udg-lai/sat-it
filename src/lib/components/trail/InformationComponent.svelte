@@ -59,7 +59,6 @@
 		<span class="clause-id">{clauseId}.</span>
 		<MathTexComponent equation={clause as string} fontSize="var(--popover-font-size)" />
 	</div>
-	
 </Popover>
 
 <style>
@@ -100,7 +99,7 @@
 		font-size: var(--popover-font-size);
 		gap: 0.5rem;
 	}
-	
+
 	:global(.app-popover .clause-id) {
 		color: var(--clause-id-color);
 	}
