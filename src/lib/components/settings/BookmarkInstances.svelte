@@ -146,12 +146,12 @@
 	}
 
 	.item:hover {
-		background-color: var(--icone-light);
-		color: var(--icone-strong);
+		background-color: var(--icon-light);
+		color: var(--icon-strong);
 	}
 
 	.item.selected {
-		color: var(--icone-base);
+		color: var(--icon-base);
 	}
 
 	.item p {

@@ -154,11 +154,11 @@
 		margin-bottom: 2px;
 		height: 24px;
 		width: 24px;
-		color: var(--icone-unselected);
+		color: var(--icon-unselected);
 		transition: color 0.3s ease;
 		outline: none;
 	}
 	:global(.settings-icones.active) {
-		color: var(--icone-strong);
+		color: var(--icon-strong);
 	}
 </style>
