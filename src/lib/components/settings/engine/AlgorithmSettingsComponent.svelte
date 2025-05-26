@@ -1,6 +1,5 @@
 <script lang="ts">
 	import DynamicRender from '$lib/components/DynamicRender.svelte';
-	import { getBaselinePolarity, setBaselinePolarity } from '$lib/store/parameters.svelte.ts';
 	import { getProblemStore, updateAlgorithm, type Algorithm } from '$lib/store/problem.svelte.ts';
 	import { changeAlgorithmEventBus } from '$lib/transversal/events.ts';
 	import { CodePullRequestOutline } from 'flowbite-svelte-icons';
@@ -18,27 +17,19 @@
 	let currentAlgorithm: Algorithm = $state(getProblemStore().algorithm);
 	const availableAlgorithms: Algorithm[] = ['backtracking', 'dpll', 'cdcl'];
 	const showCDCL: boolean = $derived(currentAlgorithm === 'cdcl');
-
-	const baselinePolarity: boolean = $derived(getBaselinePolarity());
-
-	function togglePolarity(value: boolean) {
-		if (value !== baselinePolarity) {
-			setBaselinePolarity();
-		}
-	}
 </script>
 
 <div class={headingClass}>
 	<DynamicRender component={CodePullRequestOutline} props={iconClass} />
-	<span class="pt-1">Algorithm Settings</span>
+	<span class="pt-1">Algorithm</span>
 </div>
-<div class="{bodyClass} gap-3">
+<div class={bodyClass}>
 	<algorithm class={elementClass}>
 		<selector class="flex items-center gap-4">
 			<label for="algorithm" class="whitespace-nowrap text-gray-900">Algorithm:</label>
 			<select
 				id="algorithm"
-				class="flex-1 rounded-lg border-none outline-none focus:outline-none focus:ring-0"
+				class="flex-1 rounded-lg border-none text-right outline-none focus:outline-none focus:ring-0"
 				onchange={() => {
 					updateAlgorithm(currentAlgorithm);
 					changeAlgorithmEventBus.emit();
@@ -59,31 +50,4 @@
 			<div class="mt-4 h-[20rem] w-full rounded-lg bg-[var(--main-bg-color)]"></div>
 		</div>
 	</algorithm>
-	<polarity class={elementClass}>
-		<div class="flex w-full items-center justify-between">
-			<span class="pr-2">Polarity:</span>
-			<div class="inline-flex rounded-lg" role="group">
-				<button
-					class={`border border-gray-200 px-4 py-2 transition-colors duration-300 ${
-						baselinePolarity
-							? 'bg-[var(--icon-base)] text-white'
-							: 'bg-white hover:bg-[var(--icon-light)]'
-					} rounded-l-lg`}
-					onclick={() => togglePolarity(true)}
-				>
-					True
-				</button>
-				<button
-					class={`border border-gray-200 px-4 py-2 transition-colors duration-300 ${
-						!baselinePolarity
-							? 'bg-[var(--icon-base)] text-white'
-							: 'bg-white hover:bg-[var(--icon-light)]'
-					} rounded-r-lg`}
-					onclick={() => togglePolarity(false)}
-				>
-					False
-				</button>
-			</div>
-		</div>
-	</polarity>
 </div>

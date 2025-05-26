@@ -13,6 +13,6 @@
 
 <div class={headingClass}>
 	<DynamicRender component={BugOutline} props={iconClass} />
-	<span class="pt-1">Debugging Settings</span>
+	<span class="pt-1">Breakpoints</span>
 </div>
 <div class={bodyClass}></div>
