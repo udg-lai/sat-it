@@ -39,21 +39,21 @@
 		<label for="baselineDelay" class="whitespace-nowrap text-gray-900">Delay:</label>
 		<div class="flex items-center gap-2">
 			<button
-				onclick={() => baselineDelay = Math.max(MIN_DELAY, baselineDelay - 1)}
-				class="{elementClass}"
+				onclick={() => (baselineDelay = Math.max(MIN_DELAY, baselineDelay - 1))}
+				class={elementClass}
 			>
 				−
 			</button>
 			<input
 				id="baselineDelay"
 				type="number"
-				class="w-20 text-center border border-gray-300 rounded bg-gray-100"
+				class="w-20 rounded border border-gray-300 bg-gray-100 text-center"
 				bind:value={baselineDelay}
 				readonly
 			/>
 			<button
-				onclick={() => baselineDelay = Math.min(MAX_DELAY, baselineDelay + 1)}
-				class="{elementClass}"
+				onclick={() => (baselineDelay = Math.min(MAX_DELAY, baselineDelay + 1))}
+				class={elementClass}
 			>
 				+
 			</button>
