@@ -1,4 +1,4 @@
-import type { IClausePool } from '../utils/interfaces/IClausePool.ts';
+import type { IClausePool } from '../interfaces/IClausePool.ts';
 import type Clause from './Clause.ts';
 import ClausePool from './ClausePool.svelte.ts';
 

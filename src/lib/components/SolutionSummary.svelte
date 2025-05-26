@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { problemStore } from '$lib/store/problem.store.ts';
+	import { getProblemStore, type Problem } from '$lib/store/problem.svelte.ts';
 	import type Clause from '$lib/transversal/entities/Clause.ts';
 	import FlexVirtualList from './FlexVirtualList.svelte';
 	import ClauseComponent from './ClauseComponent.svelte';
@@ -11,14 +11,9 @@
 
 	let { clauseHeight = 50 }: Props = $props();
 
-	let clauses = $derived.by(() => {
-		const problem = $problemStore;
-		if (problem === undefined) return [];
-		else {
-			const allClauses: Clause[] = problem.clauses.getClauses();
-			return allClauses;
-		}
-	});
+	const problem: Problem = $derived(getProblemStore());
+
+	let clauses = $derived(problem.clauses.getClauses());
 </script>
 
 <solution-summary>

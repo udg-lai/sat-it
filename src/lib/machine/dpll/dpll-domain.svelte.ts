@@ -1,4 +1,8 @@
-import { problemStore, type MappingLiteral2Clauses } from '$lib/store/problem.store.ts';
+import {
+	getProblemStore,
+	type MappingLiteral2Clauses,
+	type Problem
+} from '$lib/store/problem.svelte.ts';
 import {
 	clauseEvaluation,
 	allAssigned as solverAllAssigned,
@@ -15,11 +19,11 @@ import { isUnitClause, isUnSATClause, type ClauseEval } from '$lib/transversal/e
 import type ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';
 import type VariablePool from '$lib/transversal/entities/VariablePool.svelte.ts';
 import { logFatal } from '$lib/transversal/logging.ts';
-import { get } from 'svelte/store';
 import type { DPLL_SolverMachine } from './dpll-solver-machine.svelte.ts';
 import { updateClausesToCheck } from '$lib/store/clausesToCheck.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
 
+const problem: Problem = $derived(getProblemStore());
 // ** state inputs **
 
 export type DPLL_EMPTY_CLAUSE_INPUT = 'unit_clauses_detection_state' | 'unsat_state';
@@ -91,21 +95,21 @@ export type DPLL_INPUT =
 export type DPLL_DECIDE_FUN = () => number;
 
 export const decide: DPLL_DECIDE_FUN = () => {
-	const pool: VariablePool = get(problemStore).variables;
+	const pool: VariablePool = problem.variables;
 	return solverDecide(pool, 'dpll');
 };
 
 export type DPLL_ALL_VARIABLES_ASSIGNED_FUN = () => boolean;
 
 export const allAssigned: DPLL_ALL_VARIABLES_ASSIGNED_FUN = () => {
-	const pool = get(problemStore).variables;
+	const pool = problem.variables;
 	return solverAllAssigned(pool);
 };
 
 export type DPLL_EMPTY_CLAUSE_FUN = () => boolean;
 
 export const emptyClauseDetection: DPLL_EMPTY_CLAUSE_FUN = () => {
-	const pool: ClausePool = get(problemStore).clauses;
+	const pool: ClausePool = problem.clauses;
 	return solverEmptyClauseDetection(pool);
 };
 
@@ -136,7 +140,7 @@ export const unstackClauseSet: DPLL_UNSTACK_CLAUSE_SET_FUN = (
 export type DPLL_UNIT_CLAUSES_DETECTION_FUN = () => SvelteSet<number>;
 
 export const unitClauseDetection: DPLL_UNIT_CLAUSES_DETECTION_FUN = () => {
-	const pool: ClausePool = get(problemStore).clauses;
+	const pool: ClausePool = problem.clauses;
 	return solverUnitClauseDetection(pool);
 };
 
@@ -190,7 +194,7 @@ export const nextClause: DPLL_NEXT_CLAUSE_FUN = (clauses: SvelteSet<number>) => 
 export type DPLL_CONFLICT_DETECTION_FUN = (clauseId: number) => boolean;
 
 export const unsatisfiedClause: DPLL_CONFLICT_DETECTION_FUN = (clauseId: number) => {
-	const pool: ClausePool = get(problemStore).clauses;
+	const pool: ClausePool = problem.clauses;
 	const evaluation: ClauseEval = clauseEvaluation(pool, clauseId);
 	return isUnSATClause(evaluation);
 };
@@ -206,7 +210,7 @@ export const thereAreJobPostponed: DPLL_CHECK_PENDING_CLAUSES_FUN = (
 export type DPLL_UNIT_CLAUSE_FUN = (clauseId: number) => boolean;
 
 export const unitClause: DPLL_UNIT_CLAUSE_FUN = (clauseId: number) => {
-	const pool: ClausePool = get(problemStore).clauses;
+	const pool: ClausePool = problem.clauses;
 	const evaluation: ClauseEval = clauseEvaluation(pool, clauseId);
 	return isUnitClause(evaluation);
 };
@@ -214,15 +218,15 @@ export const unitClause: DPLL_UNIT_CLAUSE_FUN = (clauseId: number) => {
 export type DPLL_UNIT_PROPAGATION_FUN = (clauseId: number) => number;
 
 export const unitPropagation: DPLL_UNIT_PROPAGATION_FUN = (clauseId: number) => {
-	const variables: VariablePool = get(problemStore).variables;
-	const clauses: ClausePool = get(problemStore).clauses;
+	const variables: VariablePool = problem.variables;
+	const clauses: ClausePool = problem.clauses;
 	return solverUnitPropagation(variables, clauses, clauseId);
 };
 
 export type DPLL_COMPLEMENTARY_OCCURRENCES_FUN = (literal: number) => SvelteSet<number>;
 
 export const complementaryOccurrences: DPLL_COMPLEMENTARY_OCCURRENCES_FUN = (literal: number) => {
-	const mapping: MappingLiteral2Clauses = get(problemStore).mapping;
+	const mapping: MappingLiteral2Clauses = problem.mapping;
 	return solverComplementaryOccurrences(mapping, literal);
 };
 
@@ -235,7 +239,7 @@ export const nonDecisionMade: DPLL_CHECK_NON_DECISION_MADE_FUN = () => {
 export type DPLL_BACKTRACKING_FUN = () => number;
 
 export const backtracking: DPLL_BACKTRACKING_FUN = () => {
-	const pool: VariablePool = get(problemStore).variables;
+	const pool: VariablePool = problem.variables;
 	return solverBacktracking(pool);
 };
 

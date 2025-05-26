@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { resetProblem, updateProblemFromTrail } from '$lib/store/problem.store.ts';
+	import { resetProblem, updateProblemFromTrail } from '$lib/store/problem.svelte.ts';
 	import { record, redo, resetStack, undo, type Snapshot } from '$lib/store/stack.svelte.ts';
 	import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
 	import {
