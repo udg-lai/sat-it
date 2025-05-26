@@ -73,22 +73,21 @@
 	const b1: VariableBreakpoint = {
 		type: 'variable',
 		variableId: 1
-	}
+	};
 
 	const b2: VariableBreakpoint = {
 		type: 'variable',
 		variableId: 2
-	}
+	};
 
 	const b3: VariableBreakpoint = {
 		type: 'variable',
 		variableId: 18
-	}
+	};
 
-
-	addBreakpoint(b1)
-	addBreakpoint(b2)
-	addBreakpoint(b3)
+	// addBreakpoint(b1)
+	// addBreakpoint(b2)
+	addBreakpoint(b3);
 
 	onMount(() => {
 		const unsubscribeToggleEditor = editorViewEventStore.subscribe(togglePropagations);

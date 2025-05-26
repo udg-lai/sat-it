@@ -47,7 +47,7 @@ export const afterDecision = (assignment: number): void => {
 			solverMachine.stopAutoMode();
 		}
 	}
-}
+};
 
 export const decide = (pool: VariablePool, algorithm: string): number => {
 	const trail: Trail = obtainTrail(pool);
@@ -146,7 +146,7 @@ const doAssignment = (variableId: number, polarity: boolean): void => {
 
 	variables.persist(variableId, polarity);
 
-	const breakpointVariable: boolean = checkBreakpoint({ type: 'variable', id: variableId })
+	const breakpointVariable: boolean = checkBreakpoint({ type: 'variable', id: variableId });
 	if (breakpointVariable) {
 		logInfo('Breakpoint', `Variable ${variableId} assignment triggered a breakpoint`);
 	}
@@ -157,7 +157,7 @@ const doAssignment = (variableId: number, polarity: boolean): void => {
 		const clausesSet: Set<number> | undefined = mapping.get(lit);
 		if (clausesSet !== undefined) {
 			for (const clauseId of clausesSet) {
-				breakpointClause = checkBreakpoint({ type: 'clause', id: clauseId })
+				breakpointClause = checkBreakpoint({ type: 'clause', id: clauseId });
 				if (breakpointClause) {
 					logInfo('Breakpoint', `Clause ${clauseId} assignment triggered a breakpoint`);
 				}
@@ -169,7 +169,7 @@ const doAssignment = (variableId: number, polarity: boolean): void => {
 	if (solverMachine.isInAutoMode() && (breakpointVariable || breakpointClause)) {
 		solverMachine.stopAutoMode();
 	}
-}
+};
 
 export const backtracking = (pool: VariablePool): number => {
 	const trail: Trail = (getLatestTrail() as Trail).copy();

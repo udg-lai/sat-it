@@ -19,12 +19,17 @@
 	--clause-id-color: #00000099;
 	--trail-height: 5rem;
 	--trail-content-height: 3rem;
+	--trail-literal-min-width: var(--button-size);
 	--popover-font-size: 0.9rem;
 	--button-size: 40px;
 	--icon-unselected: #828282;
 	--icon-base: #8a3ffc;
 	--icon-light: #e5d9ff;
 	--icon-strong: #5c23a7;
+	--button-color: #cacaca30;
+	--button-hover-color: #cacaca60;
+	--button-active-color: #cacaca90;
+	--button-border-color: #afafaf;
 }
 
 html,

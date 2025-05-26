@@ -25,43 +25,35 @@
 <debugger>
 	{#if inAutoMode}
 		<AutoModeComponent />
+	{:else if enablePreprocess}
+		<InitialStepDebugger />
 	{:else}
-		{#if enablePreprocess}
-			<InitialStepDebugger />
+		{#if enableConflictDetection}
+			<ConflictDetectionDebugger cdMode={enableConflictDetection} />
+		{:else if !finished}
+			<AutomaticDebugger
+				backtrackingState={enableBacktracking}
+				{finished}
+				cdMode={enableConflictDetection}
+				nextVariable={defaultNextVariable && !enableBacktracking ? defaultNextVariable : undefined}
+			/>
+
+			<ManualDebugger
+				{defaultNextVariable}
+				{finished}
+				cdMode={enableConflictDetection}
+				backtrackingState={enableBacktracking}
+			/>
 		{:else}
-			{#if enableConflictDetection}
-				<ConflictDetectionDebugger cdMode={enableConflictDetection} />
-			{:else if !finished}
-				<AutomaticDebugger
-					backtrackingState={enableBacktracking}
-					{finished}
-					cdMode={enableConflictDetection}
-				/>
-
-				{#if !enableBacktracking && defaultNextVariable}
-					{defaultNextVariable}
-				{:else}
-					{'X'}
-				{/if}
-
-				<ManualDebugger
-					{defaultNextVariable}
-					{finished}
-					cdMode={enableConflictDetection}
-					backtrackingState={enableBacktracking}
-				/>
-			{:else}
-				<ResetProblemDebugger />
-			{/if}
-
-			<GeneralDebuggerButtons {finished} backtrackingState={enableBacktracking} />
+			<ResetProblemDebugger />
 		{/if}
+
+		<GeneralDebuggerButtons {finished} backtrackingState={enableBacktracking} />
 	{/if}
 </debugger>
 
 <style>
 	debugger {
-		padding: 0 calc(var(--windows-padding) + 1rem);
 		width: 100%;
 		height: var(--debugger-height);
 		display: flex;
@@ -71,6 +63,9 @@
 		border-color: var(--border-color);
 		border-style: solid;
 		gap: 0.5rem;
+		padding-left: calc(
+			var(--windows-padding) + var(--button-size) + var(--windows-padding) + 0.5rem
+		);
 	}
 
 	:root {

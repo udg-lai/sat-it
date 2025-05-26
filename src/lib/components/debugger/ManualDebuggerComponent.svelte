@@ -29,7 +29,7 @@
 	let polarity: boolean = $state(true);
 	let maxValue: number = $derived(problem.variables.nVariables());
 
-	let userNextVariable: number | undefined = $state(undefined);
+	let userNextVariable: number | undefined = $state(defaultNextVariable);
 
 	let isVariableValid: boolean = $derived.by(() => {
 		if (userNextVariable === undefined) return false;
@@ -78,12 +78,10 @@
 			<span>Variable:</span>
 			<input
 				bind:value={userNextVariable}
+				placeholder={defaultNextVariable ? defaultNextVariable.toString() : 'X'}
 				type="number"
 				class="variable-selector w-[128px]"
 				class:invalidOption={!isVariableValid}
-				placeholder={defaultNextVariable
-					? defaultNextVariable.toString()
-					: 'No more variables to assign'}
 				disabled={defaultNextVariable === undefined}
 				min="1"
 				max={maxValue}

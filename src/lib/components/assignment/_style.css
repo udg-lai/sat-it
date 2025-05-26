@@ -4,8 +4,8 @@
 }
 
 .literal-style {
-	min-width: 33px;
-	width: 33px;
+	min-width: var(--trail-literal-min-width);
+	width: var(--trail-literal-min-width);
 	min-height: 33px;
 	height: 33px;
 	position: relative;
