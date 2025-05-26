@@ -17,6 +17,7 @@
 	};
 </script>
 
+<conflict-detection-debugger>
 <button
 	class="btn general-btn"
 	class:invalidOption={!upMode}
@@ -52,3 +53,12 @@
 >
 	<DynamicRender component={ChevronDoubleRightOutline} props={assignmentProps} />
 </button>
+</conflict-detection-debugger>
+
+<style>
+	conflict-detection-debugger {
+		display: flex;
+		flex-direction: row;
+		gap: 0.5rem;
+	}
+</style>

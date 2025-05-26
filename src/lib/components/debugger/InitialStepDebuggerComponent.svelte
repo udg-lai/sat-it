@@ -10,13 +10,15 @@
 	};
 </script>
 
-<button
-	class="btn general-btn"
-	onclick={() => {
-		resetStack();
-		stateMachineEventBus.emit('step');
-	}}
-	title="Step"
->
-	<DynamicRender component={CaretRightOutline} props={assignmentProps} />
-</button>
+<init-step>
+	<button
+		class="btn general-btn"
+		onclick={() => {
+			resetStack();
+			stateMachineEventBus.emit('step');
+		}}
+		title="Step"
+	>
+		<DynamicRender component={CaretRightOutline} props={assignmentProps} />
+	</button>
+</init-step>

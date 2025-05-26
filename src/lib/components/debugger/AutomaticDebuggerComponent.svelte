@@ -18,30 +18,40 @@
 	};
 </script>
 
-{#if !backtrackingState}
-	<button
-		class="btn general-btn"
-		class:invalidOption={finished || upMode}
-		onclick={() => {
-			updateAssignment('automated');
-			stateMachineEventBus.emit('step');
-			userActionEventBus.emit('record');
-		}}
-		title="Decide"
-		disabled={finished || upMode}
-	>
-		<DynamicRender component={CaretRightOutline} props={assignmentProps} />
-	</button>
-{:else}
-	<button
-		class="btn general-btn bkt-btn"
-		class:invalidOption={finished || upMode}
-		onclick={() => {
-			stateMachineEventBus.emit('step');
-		}}
-		title="Backtrack"
-		disabled={finished || upMode}
-	>
-		<DynamicRender component={CodeMergeOutline} props={assignmentProps} />
-	</button>
-{/if}
+<automatic-debugger>
+	{#if !backtrackingState}
+		<button
+			class="btn general-btn"
+			class:invalidOption={finished || upMode}
+			onclick={() => {
+				updateAssignment('automated');
+				stateMachineEventBus.emit('step');
+				userActionEventBus.emit('record');
+			}}
+			title="Decide"
+			disabled={finished || upMode}
+		>
+			<DynamicRender component={CaretRightOutline} props={assignmentProps} />
+		</button>
+	{:else}
+		<button
+			class="btn general-btn bkt-btn"
+			class:invalidOption={finished || upMode}
+			onclick={() => {
+				stateMachineEventBus.emit('step');
+			}}
+			title="Backtrack"
+			disabled={finished || upMode}
+		>
+			<DynamicRender component={CodeMergeOutline} props={assignmentProps} />
+		</button>
+	{/if}
+</automatic-debugger>
+
+<style>
+	automatic-debugger {
+		display: flex;
+		flex-direction: row;
+		gap: 0.5rem;
+	}
+</style>

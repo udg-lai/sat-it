@@ -22,28 +22,27 @@
 	let inAutoMode = $derived(solverMachine.isInAutoMode());
 </script>
 
-<div class="flex-center debugger align-center relative flex-row gap-2">
+<debugger>
 	{#if inAutoMode}
 		<AutoModeComponent />
 	{:else}
-		<div class="variable-display"></div>
-
 		{#if enablePreprocess}
 			<InitialStepDebugger />
 		{:else}
 			{#if enableConflictDetection}
 				<ConflictDetectionDebugger cdMode={enableConflictDetection} />
 			{:else if !finished}
-				{#if !enableBacktracking && defaultNextVariable}
-					{defaultNextVariable}
-				{:else}
-					{'X'}
-				{/if}
 				<AutomaticDebugger
 					backtrackingState={enableBacktracking}
 					{finished}
 					cdMode={enableConflictDetection}
 				/>
+
+				{#if !enableBacktracking && defaultNextVariable}
+					{defaultNextVariable}
+				{:else}
+					{'X'}
+				{/if}
 
 				<ManualDebugger
 					{defaultNextVariable}
@@ -58,24 +57,20 @@
 			<GeneralDebuggerButtons {finished} backtrackingState={enableBacktracking} />
 		{/if}
 	{/if}
-</div>
+</debugger>
 
 <style>
-	.debugger {
+	debugger {
+		padding: 0 calc(var(--windows-padding) + 1rem);
 		width: 100%;
 		height: var(--debugger-height);
 		display: flex;
 		align-items: center;
-		justify-content: center;
+		justify-content: left;
 		border-bottom: 1px;
 		border-color: var(--border-color);
 		border-style: solid;
-	}
-
-	.variable-display {
-		width: 8rem;
-		text-align: center;
-		color: grey;
+		gap: 0.5rem;
 	}
 
 	:root {

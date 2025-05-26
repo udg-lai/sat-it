@@ -54,6 +54,7 @@
 		display: flex;
 		position: relative;
 		align-items: end;
+		gap: 0.5rem;
 	}
 
 	.line span {
@@ -73,8 +74,8 @@
 	.enumerate {
 		display: flex;
 		justify-content: center;
-		width: 4rem;
-		height: var(--trail-content-height);
+		width: var(--button-size);
+		height: var(--button-size);
 		position: relative;
 	}
 

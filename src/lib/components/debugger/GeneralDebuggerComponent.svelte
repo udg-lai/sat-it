@@ -75,57 +75,67 @@
 	}
 </script>
 
-<button
-	class="btn general-btn"
-	class:invalidOption={finished || backtrackingState}
-	title="Solve trail"
-	onclick={() => {
-		updateAssignment('automated');
-		stateMachineEventBus.emit('solve_trail');
-		userActionEventBus.emit('record');
-	}}
-	disabled={finished || backtrackingState}
->
-	<DynamicRender component={ArrowRightOutline} props={generalProps} />
-</button>
+<general-debugger>
+	<button
+		class="btn general-btn"
+		class:invalidOption={finished || backtrackingState}
+		title="Solve trail"
+		onclick={() => {
+			updateAssignment('automated');
+			stateMachineEventBus.emit('solve_trail');
+			userActionEventBus.emit('record');
+		}}
+		disabled={finished || backtrackingState}
+	>
+		<DynamicRender component={ArrowRightOutline} props={generalProps} />
+	</button>
 
-<button
-	class="btn general-btn"
-	class:invalidOption={finished || backtrackingState}
-	title="Solve"
-	onclick={() => {
-		updateAssignment('automated');
-		stateMachineEventBus.emit('solve_all');
-		userActionEventBus.emit('record');
-	}}
-	disabled={finished || backtrackingState}
->
-	<DynamicRender component={BarsOutline} props={generalProps} />
-</button>
+	<button
+		class="btn general-btn"
+		class:invalidOption={finished || backtrackingState}
+		title="Solve"
+		onclick={() => {
+			updateAssignment('automated');
+			stateMachineEventBus.emit('solve_all');
+			userActionEventBus.emit('record');
+		}}
+		disabled={finished || backtrackingState}
+	>
+		<DynamicRender component={BarsOutline} props={generalProps} />
+	</button>
 
-<button
-	class="btn general-btn"
-	class:invalidOption={!btnUndoActive}
-	title="Undo"
-	disabled={!btnUndoActive}
-	onclick={() => userActionEventBus.emit('undo')}
->
-	<DynamicRender component={ReplyOutline} props={generalProps} />
-</button>
+	<button
+		class="btn general-btn"
+		class:invalidOption={!btnUndoActive}
+		title="Undo"
+		disabled={!btnUndoActive}
+		onclick={() => userActionEventBus.emit('undo')}
+	>
+		<DynamicRender component={ReplyOutline} props={generalProps} />
+	</button>
 
-<button
-	class="btn general-btn"
-	class:invalidOption={!btnRedoActive}
-	title="Redo"
-	onclick={() => userActionEventBus.emit('redo')}
-	disabled={!btnRedoActive}
->
-	<DynamicRender component={ReplyOutline} props={reverseProps} />
-</button>
+	<button
+		class="btn general-btn"
+		class:invalidOption={!btnRedoActive}
+		title="Redo"
+		onclick={() => userActionEventBus.emit('redo')}
+		disabled={!btnRedoActive}
+	>
+		<DynamicRender component={ReplyOutline} props={reverseProps} />
+	</button>
 
-<button class="btn general-btn" title={textCollapse} onclick={toggleExpand}>
-	<DynamicRender
-		component={expanded ? ChevronRightOutline : ChevronLeftOutline}
-		props={generalProps}
-	/>
-</button>
+	<button class="btn general-btn" title={textCollapse} onclick={toggleExpand}>
+		<DynamicRender
+			component={expanded ? ChevronRightOutline : ChevronLeftOutline}
+			props={generalProps}
+		/>
+	</button>
+</general-debugger>
+
+<style>
+	general-debugger {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+</style>
