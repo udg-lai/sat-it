@@ -1,6 +1,6 @@
 <script lang="ts">
-	import DynamicRender from "$lib/components/DynamicRender.svelte";
-	import { CogOutline } from "flowbite-svelte-icons";
+	import DynamicRender from '$lib/components/DynamicRender.svelte';
+	import { CogOutline } from 'flowbite-svelte-icons';
 
 	interface Props {
 		headingClass: string;
@@ -12,9 +12,7 @@
 </script>
 
 <div class={headingClass}>
-  <DynamicRender component={CogOutline} props={iconClass} />
-  <span class="pt-1">General Settings</span>
+	<DynamicRender component={CogOutline} props={iconClass} />
+	<span class="pt-1">General Settings</span>
 </div>
-<div class={bodyClass}>
-
-</div>
+<div class={bodyClass}></div>

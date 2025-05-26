@@ -1,6 +1,6 @@
 <script lang="ts">
-	import DynamicRender from "$lib/components/DynamicRender.svelte";
-	import { CodePullRequestOutline } from "flowbite-svelte-icons";
+	import DynamicRender from '$lib/components/DynamicRender.svelte';
+	import { CodePullRequestOutline } from 'flowbite-svelte-icons';
 
 	interface Props {
 		headingClass: string;
@@ -12,9 +12,7 @@
 </script>
 
 <div class={headingClass}>
-  <DynamicRender component={CodePullRequestOutline} props={iconClass} />
-  <span class="pt-1">Algorithm Settings</span>
+	<DynamicRender component={CodePullRequestOutline} props={iconClass} />
+	<span class="pt-1">Algorithm Settings</span>
 </div>
-<div class={bodyClass}>
-
-</div>
+<div class={bodyClass}></div>

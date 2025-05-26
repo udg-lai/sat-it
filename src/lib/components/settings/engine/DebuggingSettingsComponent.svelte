@@ -1,7 +1,6 @@
 <script lang="ts">
-	import DynamicRender from "$lib/components/DynamicRender.svelte";
-	import { BugOutline } from "flowbite-svelte-icons";
-
+	import DynamicRender from '$lib/components/DynamicRender.svelte';
+	import { BugOutline } from 'flowbite-svelte-icons';
 
 	interface Props {
 		headingClass: string;
