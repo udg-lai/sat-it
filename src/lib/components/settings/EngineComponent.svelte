@@ -6,7 +6,7 @@
 	const headingClass: string =
 		'h-20 w-full flex items-center justify-center gap-2 text-lg border-b';
 	const iconClass = { size: 'xl' };
-	const bodyClass: string = 'h-full w-full p-4';
+	const bodyClass: string = 'h-full w-full p-4 flex flex-col';
 </script>
 
 <div class="grid h-full w-full grid-cols-3 divide-x-4">
