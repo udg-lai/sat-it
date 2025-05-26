@@ -123,6 +123,9 @@
 		position: relative;
 		padding: 2rem;
 		flex: 1;
+		transition:
+			color 0.2s,
+			background-color 0.2s;
 	}
 
 	li {
@@ -143,11 +146,12 @@
 	}
 
 	.item:hover {
-		background-color: rgba(239, 85, 47, 0.4);
+		background-color: var(--icon-light);
+		color: var(--icon-strong);
 	}
 
 	.item.selected {
-		color: rgba(239, 85, 47);
+		color: var(--icon-base);
 	}
 
 	.item p {

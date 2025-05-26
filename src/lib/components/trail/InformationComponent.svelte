@@ -1,11 +1,10 @@
 <script lang="ts">
 	import { SAT_STATE_ID, UNSAT_STATE_ID } from '$lib/machine/reserved.ts';
 	import { nanoid } from 'nanoid';
-	import { problemStore } from '$lib/store/problem.store.ts';
+	import { getProblemStore, type Problem } from '$lib/store/problem.svelte.ts';
 	import { getSolverMachine } from '$lib/store/stateMachine.svelte.ts';
 	import type Clause from '$lib/transversal/entities/Clause.ts';
 	import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
-	import { get } from 'svelte/store';
 	import { Popover } from 'flowbite-svelte';
 	import MathTexComponent from '../MathTexComponent.svelte';
 	import DynamicRender from '../DynamicRender.svelte';
@@ -18,6 +17,7 @@
 
 	let buttonId: string = 'btn-' + nanoid();
 
+	const problem: Problem = $derived(getProblemStore());
 	const iconProps = {
 		class: 'h-7 w-7 cursor-pointer'
 	};
@@ -25,7 +25,7 @@
 	const clauseId: number = $derived(trail.getTrailEnding());
 	const clause: string | undefined = $derived.by(() => {
 		if (clauseId === -1) return undefined;
-		const clause: Clause = get(problemStore).clauses.get(clauseId);
+		const clause: Clause = problem.clauses.get(clauseId);
 		return clause
 			.map((literal) => {
 				return literal.toTeX();

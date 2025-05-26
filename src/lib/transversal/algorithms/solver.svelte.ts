@@ -1,6 +1,6 @@
 import type { AssignmentEvent } from '$lib/components/debugger/events.svelte.ts';
 import { getAssignment } from '$lib/store/assignment.svelte.ts';
-import type { MappingLiteral2Clauses } from '$lib/store/problem.store.ts';
+import type { MappingLiteral2Clauses } from '$lib/store/problem.svelte.ts';
 import { getLatestTrail, stackTrail, unstackTrail } from '$lib/store/trails.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import type Clause from '../entities/Clause.ts';
@@ -14,7 +14,7 @@ import { isUnSAT } from '../interfaces/IClausePool.ts';
 import { logFatal } from '../logging.ts';
 import { fromJust, isJust } from '../types/maybe.ts';
 import {
-	increaseNoBacktrackings,
+	increaseNoConflicts,
 	increaseNoDecisions,
 	increaseNoUnitPropgations
 } from '$lib/store/statistics.svelte.ts';
@@ -131,7 +131,7 @@ export const backtracking = (pool: VariablePool): number => {
 	trail.push(VariableAssignment.newBacktrackingAssignment(variable));
 	trail.updateFollowUpIndex();
 
-	increaseNoBacktrackings();
+	increaseNoConflicts();
 	stackTrail(trail);
 	return polarity ? lastVariable.getInt() : -lastVariable.getInt();
 };

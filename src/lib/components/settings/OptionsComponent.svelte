@@ -12,8 +12,11 @@
 		ExclamationCircleOutline,
 		PlusOutline
 	} from 'flowbite-svelte-icons';
+	import { getActiveView, type ActiveView } from './settings.store.svelte.ts';
 
 	export type OptionEmit = 'bookmark' | 'engine' | 'info' | 'close';
+
+	const selected: ActiveView = $derived(getActiveView());
 
 	interface Props {
 		event?: (emit: OptionEmit) => void;
@@ -57,17 +60,30 @@
 	}
 </script>
 
-<BottomNav position="absolute" navType="application" classInner="grid-cols-5">
-	<BottomNavItem btnName="Hide" appBtnPosition="left" onclick={() => event?.('close')}>
-		<ArrowDownToBracketOutline
-			class="mb-1 h-6 w-6 text-gray-500 group-hover:text-primary-600 dark:text-gray-400 dark:group-hover:text-primary-500"
-		/>
+<BottomNav
+	position="absolute"
+	navType="application"
+	classOuter="bottomNavStyle"
+	classInner="grid-cols-5"
+>
+	<BottomNavItem
+		btnName="Hide"
+		appBtnPosition="left"
+		onclick={() => event?.('close')}
+		btnClass="bottomNavItem"
+	>
+		<ArrowDownToBracketOutline class={`settings-icones group-hover:text-primary-600`} />
 		<Tooltip arrow={false}>Hide</Tooltip>
 	</BottomNavItem>
 
-	<BottomNavItem btnName="Legend" appBtnPosition="middle" onclick={() => event?.('info')}>
+	<BottomNavItem
+		btnName="Legend"
+		btnClass="bottomNavItem"
+		appBtnPosition="middle"
+		onclick={() => event?.('info')}
+	>
 		<ExclamationCircleOutline
-			class="mb-1 h-6 w-6 text-gray-500 group-hover:text-primary-600 dark:text-gray-400 dark:group-hover:text-primary-500"
+			class={`settings-icones group-hover:text-primary-600 ${selected === 'info' ? 'active' : ''}`}
 		/>
 		<Tooltip arrow={false}>Legend</Tooltip>
 	</BottomNavItem>
@@ -76,7 +92,7 @@
 		<BottomNavItem
 			btnName="Add instance"
 			appBtnPosition="middle"
-			btnClass="inline-flex items-center justify-center w-10 h-10 font-medium bg-primary-600 rounded-full hover:bg-primary-700 group focus:ring-4 focus:ring-primary-300 focus:outline-hidden dark:focus:ring-primary-800"
+			btnClass="inline-flex items-center justify-center w-10 h-10 font-medium bg-primary-600 rounded-full hover:bg-primary-700 group focus:ring-4 focus:ring-primary-300 focus:outline-hidden bottomNavCenter"
 			onclick={() => inputRef.click()}
 		>
 			<input
@@ -92,17 +108,57 @@
 		</BottomNavItem>
 	</div>
 
-	<BottomNavItem btnName="Instances" appBtnPosition="middle" onclick={() => event?.('bookmark')}>
+	<BottomNavItem
+		btnName="Instances"
+		btnClass="bottomNavItem"
+		appBtnPosition="middle"
+		onclick={() => event?.('bookmark')}
+	>
 		<BookOpenOutline
-			class="mb-1 h-6 w-6 text-gray-500 group-hover:text-primary-600 dark:text-gray-400 dark:group-hover:text-primary-500"
+			class={`settings-icones group-hover:text-primary-600 ${selected === 'bookmark' ? 'active' : ''}`}
 		/>
 		<Tooltip arrow={false}>Instances</Tooltip>
 	</BottomNavItem>
 
-	<BottomNavItem btnName="Engine" appBtnPosition="right" onclick={() => event?.('engine')}>
+	<BottomNavItem
+		btnName="Engine"
+		btnClass="bottomNavItem"
+		appBtnPosition="right"
+		onclick={() => event?.('engine')}
+	>
 		<AdjustmentsVerticalOutline
-			class="mb-1 h-6 w-6 text-gray-500 group-hover:text-primary-600 dark:text-gray-400 dark:group-hover:text-primary-500"
+			class={`settings-icones group-hover:text-primary-600 ${selected === 'engine' ? 'active' : ''}`}
 		/>
 		<Tooltip arrow={false}>Engine</Tooltip>
 	</BottomNavItem>
 </BottomNav>
+
+<style>
+	:global(.bottomNavStyle) {
+		background-color: white;
+		border-color: var(--border-color);
+		color: black;
+		transition: background-color 0.3s ease;
+	}
+	:global(.bottomNavItem:hover) {
+		background-color: var(--main-bg-color);
+	}
+	:global(.bottomNavCenter:hover) {
+		background-color: var(--backtracking-color);
+	}
+	:global(.tooltip) {
+		background-color: var(--main-bg-color);
+		color: black;
+	}
+	:global(.settings-icones) {
+		margin-bottom: 2px;
+		height: 24px;
+		width: 24px;
+		color: var(--icon-unselected);
+		transition: color 0.3s ease;
+		outline: none;
+	}
+	:global(.settings-icones.active) {
+		color: var(--icon-strong);
+	}
+</style>
