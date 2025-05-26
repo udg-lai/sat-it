@@ -42,7 +42,7 @@
 				onchange={() => {
 					updateAlgorithm(currentAlgorithm);
 					changeAlgorithmEventBus.emit();
-					}}
+				}}
 				bind:value={currentAlgorithm}
 			>
 				{#each availableAlgorithms as algorithm}

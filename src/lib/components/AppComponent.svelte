@@ -3,7 +3,7 @@
 	import { record, redo, resetStack, undo, type Snapshot } from '$lib/store/stack.svelte.ts';
 	import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
 	import {
-	changeAlgorithmEventBus,
+		changeAlgorithmEventBus,
 		changeInstanceEventBus,
 		stateMachineEventBus,
 		userActionEventBus,
