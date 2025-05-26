@@ -1,6 +1,6 @@
 import type { AssignmentEvent } from '$lib/components/debugger/events.svelte.ts';
 import { getAssignment } from '$lib/store/assignment.svelte.ts';
-import type { MappingLiteral2Clauses } from '$lib/store/problem.svelte.ts';
+import { getProblemStore, type MappingLiteral2Clauses } from '$lib/store/problem.svelte.ts';
 import { getLatestTrail, stackTrail, unstackTrail } from '$lib/store/trails.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import type Clause from '../entities/Clause.ts';
@@ -18,6 +18,8 @@ import {
 	increaseNoDecisions,
 	increaseNoUnitPropgations
 } from '$lib/store/statistics.svelte.ts';
+import { getSolverMachine } from '$lib/store/stateMachine.svelte.ts';
+import { checkBreakpoint } from '$lib/store/breakpoints.svelte.ts';
 
 export const emptyClauseDetection = (pool: ClausePool): boolean => {
 	const evaluation = pool.eval();
@@ -33,9 +35,24 @@ export const allAssigned = (pool: VariablePool): boolean => {
 	return pool.allAssigned();
 };
 
-export const decide = (pool: VariablePool, method: string): number => {
+export const afterDecision = (assignment: number): void => {
+	const solverMachine = $derived(getSolverMachine());
+	if (solverMachine.isInAutoMode()) {
+		const variableId: number = Math.abs(assignment);
+		const breakpoint: boolean = checkBreakpoint({
+			type: 'variable',
+			id: variableId
+		});
+		if (breakpoint) {
+			solverMachine.stopAutoMode();
+		}
+	}
+}
+
+export const decide = (pool: VariablePool, algorithm: string): number => {
 	const trail: Trail = obtainTrail(pool);
 	const assignmentEvent: AssignmentEvent = getAssignment();
+	let manualAssignment: boolean = false;
 
 	let variableId: number;
 	if (assignmentEvent.type === 'automated') {
@@ -45,20 +62,22 @@ export const decide = (pool: VariablePool, method: string): number => {
 		}
 		variableId = fromJust(nextVariable);
 	} else {
-		method = 'manual';
+		manualAssignment = true;
 		variableId = assignmentEvent.variable;
 	}
 
 	pool.persist(variableId, assignmentEvent.polarity);
 	const variable = pool.getCopy(variableId);
-	if (method === 'manual') {
+	if (manualAssignment) {
 		trail.push(VariableAssignment.newManualAssignment(variable));
 	} else {
-		trail.push(VariableAssignment.newAutomatedAssignment(variable, method));
+		trail.push(VariableAssignment.newAutomatedAssignment(variable, algorithm));
 	}
 
 	increaseNoDecisions();
+
 	stackTrail(trail);
+
 	return assignmentEvent.polarity ? variableId : -variableId;
 };
 
@@ -117,6 +136,34 @@ export const nonDecisionMade = (): boolean => {
 	const trail: Trail = getLatestTrail() as Trail;
 	return trail.getDecisionLevel() === 0;
 };
+
+const doAssignment = (variableId: number, polarity: boolean): void => {
+	const { variables, mapping  } = getProblemStore();
+
+	variables.persist(variableId, polarity);
+	
+	const solverMachine = getSolverMachine();
+	if (solverMachine.isInAutoMode()) {
+		// Check if the assignment is inside of the breakpoint pool
+		if (checkBreakpoint({ type: 'variable', id: variableId })) {
+			solverMachine.stopAutoMode();
+		} else {
+			// Check if any clause where the variable appears is inside the breakpoint pool
+			const literal: number = polarity ? variableId : -variableId;
+			for (const lit of [literal, -literal]) {
+				const clausesSet: Set<number> | undefined = mapping.get(lit);
+				if (clausesSet !== undefined) {
+					for (const clauseId of clausesSet) {
+						if (checkBreakpoint({ type: 'clause', id: clauseId })) {
+							solverMachine.stopAutoMode();
+							return;
+						}
+					}
+				}
+			}
+		}
+	}
+}
 
 export const backtracking = (pool: VariablePool): number => {
 	const trail: Trail = (getLatestTrail() as Trail).copy();

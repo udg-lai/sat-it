@@ -21,6 +21,7 @@
 		resetStatistics,
 		updateStatistics
 	} from '$lib/store/statistics.svelte.ts';
+	import { addBreakpoint, type VariableBreakpoint } from '$lib/store/breakpoints.svelte.ts';
 
 	let expandPropagations: boolean = $state(true);
 
@@ -68,6 +69,19 @@
 		const first = undo();
 		reloadFromSnapshot(first);
 	}
+
+	const b1: VariableBreakpoint = {
+		type: 'variable',
+		variableId: 1
+	}
+
+	const b2: VariableBreakpoint = {
+		type: 'variable',
+		variableId: 2
+	}
+
+	addBreakpoint(b1)
+	addBreakpoint(b2)
 
 	onMount(() => {
 		const unsubscribeToggleEditor = editorViewEventStore.subscribe(togglePropagations);
