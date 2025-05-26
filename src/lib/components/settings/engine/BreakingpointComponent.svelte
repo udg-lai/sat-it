@@ -15,8 +15,8 @@
 	const elementClass: string =
 		'rounded-lg bg-[var(--main-bg-color)] border border-[var(--border-color)] p-2';
 
-	let breakpointVariables: SvelteSet<number> = new SvelteSet<number>();
-	let breakpointClauses: SvelteSet<number> = new SvelteSet<number>();
+	let breakpointVariables: SvelteSet<number> = $state(new SvelteSet<number>());
+	let breakpointClauses: SvelteSet<number> = $state(new SvelteSet<number>());
 
 	let variableToAdd: number = $state(0);
 	let clauseToAdd: number = $state(1);
@@ -42,8 +42,8 @@
 	$effect(() => {
 		breakpointVariables.forEach((variable) => {
 			console.log(variable);
-		})
-	})
+		});
+	});
 </script>
 
 <div class={headingClass}>
@@ -65,7 +65,7 @@
 	</variables>
 	<variables-display class="{elementClass} h-80"> </variables-display>
 	<clauses class="{elementClass} flex items-center justify-between">
-		<label for="baselineDelay" class="whitespace-nowrap text-gray-900">Variable:</label>
+		<label for="baselineDelay" class="whitespace-nowrap text-gray-900">Clause:</label>
 		<input
 			id="baselineDelay"
 			type="number"

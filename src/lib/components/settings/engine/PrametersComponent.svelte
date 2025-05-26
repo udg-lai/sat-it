@@ -5,10 +5,8 @@
 		getBaselinePolarity,
 		MAX_DELAY,
 		MIN_DELAY,
-		setBaselineDelay,
 		setBaselinePolarity
 	} from '$lib/store/parameters.svelte.ts';
-	import { logError } from '$lib/transversal/logging.ts';
 	import { CogOutline } from 'flowbite-svelte-icons';
 
 	interface Props {
@@ -23,15 +21,6 @@
 
 	let baselineDelay: number = $state(getBaselineDelay());
 
-	function updateBaselineDelay(newValue: number) {
-		if (!isNaN(newValue) && newValue >= MIN_DELAY) {
-			setBaselineDelay(newValue);
-		} else {
-			logError('Delay error', 'The entered delay is not acceptable');
-			baselineDelay = getBaselineDelay();
-		}
-	}
-
 	const baselinePolarity: boolean = $derived(getBaselinePolarity());
 
 	function togglePolarity(value: boolean) {
@@ -43,20 +32,32 @@
 
 <div class={headingClass}>
 	<DynamicRender component={CogOutline} props={iconClass} />
-	<span class="pt-1">General</span>
+	<span class="pt-1">Parameters</span>
 </div>
 <div class={bodyClass}>
-	<div class="{elementClass} flex items-center justify-between">
+	<div class="{elementClass} flex items-center justify-between gap-2">
 		<label for="baselineDelay" class="whitespace-nowrap text-gray-900">Delay:</label>
-		<input
-			id="baselineDelay"
-			type="number"
-			class="w-32 rounded-lg border border-gray-300 bg-white p-2 text-right focus:outline-none focus:ring-0"
-			bind:value={baselineDelay}
-			onchange={() => updateBaselineDelay(baselineDelay)}
-			min={MIN_DELAY}
-			max={MAX_DELAY}
-		/>
+		<div class="flex items-center gap-2">
+			<button
+				onclick={() => baselineDelay = Math.max(MIN_DELAY, baselineDelay - 1)}
+				class="{elementClass}"
+			>
+				−
+			</button>
+			<input
+				id="baselineDelay"
+				type="number"
+				class="w-20 text-center border border-gray-300 rounded bg-gray-100"
+				bind:value={baselineDelay}
+				readonly
+			/>
+			<button
+				onclick={() => baselineDelay = Math.min(MAX_DELAY, baselineDelay + 1)}
+				class="{elementClass}"
+			>
+				+
+			</button>
+		</div>
 	</div>
 	<polarity class={elementClass}>
 		<div class="flex w-full items-center justify-between">

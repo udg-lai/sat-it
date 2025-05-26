@@ -1,7 +1,7 @@
 <script lang="ts">
-	import AlgorithmSettingsComponent from './engine/AlgorithmSettingsComponent.svelte';
-	import DebuggingSettingsComponent from './engine/DebuggingSettingsComponent.svelte';
-	import GeneralSettingsComponent from './engine/GeneralSettingsComponent.svelte';
+	import AlgorithmComponent from './engine/AlgorithmComponent.svelte';
+	import BreakingpointComponent from './engine/BreakingpointComponent.svelte';
+	import ParametersComponent from './engine/PrametersComponent.svelte';
 
 	const headingClass: string =
 		'h-20 w-full flex items-center justify-center gap-2 text-lg border-b';
@@ -11,12 +11,12 @@
 
 <div class="grid h-full w-full grid-cols-3 divide-x-4">
 	<div class="flex flex-col">
-		<AlgorithmSettingsComponent {headingClass} {iconClass} {bodyClass} />
+		<AlgorithmComponent {headingClass} {iconClass} {bodyClass} />
 	</div>
 	<div class="flex flex-col">
-		<DebuggingSettingsComponent {headingClass} {iconClass} {bodyClass} />
+		<BreakingpointComponent {headingClass} {iconClass} {bodyClass} />
 	</div>
 	<div class="flex flex-col">
-		<GeneralSettingsComponent {headingClass} {iconClass} {bodyClass} />
+		<ParametersComponent {headingClass} {iconClass} {bodyClass} />
 	</div>
 </div>
