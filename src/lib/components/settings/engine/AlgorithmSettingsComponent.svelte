@@ -2,6 +2,7 @@
 	import DynamicRender from '$lib/components/DynamicRender.svelte';
 	import { getBaselinePolarity, setBaselinePolarity } from '$lib/store/parameters.svelte.ts';
 	import { getProblemStore, updateAlgorithm, type Algorithm } from '$lib/store/problem.svelte.ts';
+	import { changeAlgorithmEventBus } from '$lib/transversal/events.ts';
 	import { CodePullRequestOutline } from 'flowbite-svelte-icons';
 
 	interface Props {
@@ -38,7 +39,10 @@
 			<select
 				id="algorithm"
 				class="flex-1 rounded-lg border-none outline-none focus:outline-none focus:ring-0"
-				onchange={() => updateAlgorithm(currentAlgorithm)}
+				onchange={() => {
+					updateAlgorithm(currentAlgorithm);
+					changeAlgorithmEventBus.emit();
+					}}
 				bind:value={currentAlgorithm}
 			>
 				{#each availableAlgorithms as algorithm}

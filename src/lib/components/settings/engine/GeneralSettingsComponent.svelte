@@ -31,14 +31,12 @@
 	<span class="pt-1">General Settings</span>
 </div>
 <div class={bodyClass}>
-	<div
-		class='{elementClass} flex items-center justify-between'
-	>
+	<div class="{elementClass} flex items-center justify-between">
 		<label for="baselineDelay" class="whitespace-nowrap text-gray-900">Delay:</label>
 		<input
 			id="baselineDelay"
 			type="number"
-			class="w-32 rounded-lg border border-gray-300 bg-white p-2 text-sm text-gray-900 focus:outline-none focus:ring-0"
+			class="w-32 rounded-lg border border-gray-300 bg-white p-2 focus:outline-none focus:ring-0"
 			bind:value={baselineDelay}
 			onchange={() => updateBaselineDelay(baselineDelay)}
 		/>

@@ -3,6 +3,7 @@
 	import { record, redo, resetStack, undo, type Snapshot } from '$lib/store/stack.svelte.ts';
 	import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
 	import {
+	changeAlgorithmEventBus,
 		changeInstanceEventBus,
 		stateMachineEventBus,
 		userActionEventBus,
@@ -74,12 +75,14 @@
 		const unsubscribeActionEvent = userActionEventBus.subscribe(onActionEvent);
 		const unsubscribeChangeInstanceEvent = changeInstanceEventBus.subscribe(reset);
 		const unsubscribeStateMachineEvent = stateMachineEventBus.subscribe(stateMachineEvent);
+		const unsubscribeChangeAlgorithmEvent = changeAlgorithmEventBus.subscribe(reset);
 
 		return () => {
 			unsubscribeToggleEditor();
 			unsubscribeActionEvent();
 			unsubscribeChangeInstanceEvent();
 			unsubscribeStateMachineEvent();
+			unsubscribeChangeAlgorithmEvent();
 		};
 	});
 </script>

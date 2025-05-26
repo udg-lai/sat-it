@@ -19,3 +19,6 @@ export const userActionEventBus = createEventBus<ActionEvent>();
 export type StateMachineEvent = 'step' | 'solve_trail' | 'solve_all' | 'nextVariable' | 'finishUP';
 
 export const stateMachineEventBus = createEventBus<StateMachineEvent>();
+
+// observable of algorithm changes
+export const changeAlgorithmEventBus = createEventBus<void>();
