@@ -3,6 +3,7 @@
 	import {
 		getBaselineDelay,
 		getBaselinePolarity,
+		MAX_DELAY,
 		MIN_DELAY,
 		setBaselineDelay,
 		setBaselinePolarity
@@ -44,7 +45,7 @@
 	<DynamicRender component={CogOutline} props={iconClass} />
 	<span class="pt-1">General</span>
 </div>
-<div class="{bodyClass} gap-3">
+<div class={bodyClass}>
 	<div class="{elementClass} flex items-center justify-between">
 		<label for="baselineDelay" class="whitespace-nowrap text-gray-900">Delay:</label>
 		<input
@@ -53,6 +54,8 @@
 			class="w-32 rounded-lg border border-gray-300 bg-white p-2 text-right focus:outline-none focus:ring-0"
 			bind:value={baselineDelay}
 			onchange={() => updateBaselineDelay(baselineDelay)}
+			min={MIN_DELAY}
+			max={MAX_DELAY}
 		/>
 	</div>
 	<polarity class={elementClass}>
