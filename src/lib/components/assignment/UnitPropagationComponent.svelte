@@ -32,6 +32,8 @@
 		}
 	});
 
+	const conflictClauseId: number = $derived(propagatedClause.getId());
+
 	const conflictClauseString: string = $derived(
 		propagatedClause
 			.map((literal) => {
@@ -57,7 +59,10 @@
 </unit-propagation>
 
 <Popover triggeredBy={'#' + buttonId} class="app-popover" trigger="click" placement="bottom">
-	<MathTexComponent equation={conflictClauseString} fontSize="var(--popover-font-size)" />
+	<div class="popover-content">
+		<span class="clause-id">{conflictClauseId}.</span>
+		<MathTexComponent equation={conflictClauseString} fontSize="var(--popover-font-size)" />
+	</div>
 </Popover>
 
 <style>
@@ -67,6 +72,18 @@
 		z-index: 5;
 		color: black;
 		padding: 0.4rem 0.5rem;
+	}
+
+	:global(.app-popover .popover-content) {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		font-size: var(--popover-font-size);
+		gap: 0.5rem;
+	}
+
+	:global(.app-popover .clause-id) {
+		color: var(--clause-id-color);
 	}
 
 	:global(.app-popover > .py-2) {
