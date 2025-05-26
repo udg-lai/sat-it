@@ -38,6 +38,12 @@
 			logError('Breakpoint Clauses', 'The clause you wanted to include is not in the problem');
 		}
 	};
+
+	$effect(() => {
+		breakpointVariables.forEach((variable) => {
+			console.log(variable);
+		})
+	})
 </script>
 
 <div class={headingClass}>
