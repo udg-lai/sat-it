@@ -6,7 +6,12 @@
 		instanceStore,
 		type InteractiveInstance
 	} from '$lib/store/instances.store.ts';
-	import { DatabaseOutline, ExclamationCircleOutline, LockOutline, TrashBinOutline } from 'flowbite-svelte-icons';
+	import {
+		DatabaseOutline,
+		ExclamationCircleOutline,
+		LockOutline,
+		TrashBinOutline
+	} from 'flowbite-svelte-icons';
 	import { onMount } from 'svelte';
 	import ViewerComponent from './ViewerComponent.svelte';
 	import { logInfo } from '$lib/transversal/logging.ts';
@@ -60,7 +65,7 @@
 							onmouseleave={() => (previewingInstance = getActiveInstance())}
 							onclick={() => {
 								toSafeInstanceName = instance.name;
-								if(getTrails().length !== 0) resetModal = true;
+								if (getTrails().length !== 0) resetModal = true;
 								else {
 									onActivateInstance(toSafeInstanceName as string);
 									toSafeInstanceName = undefined;
@@ -92,19 +97,22 @@
 	</div>
 </div>
 
-<Modal bind:open={resetModal} size="xs" class='modal-style' dismissable={false}>
+<Modal bind:open={resetModal} size="xs" class="modal-style" dismissable={false}>
 	<div class="text-center">
 		<ExclamationCircleOutline class="mx-auto mb-4 h-12 w-12 text-red-600" />
 		<h3 class="mb-5 text-lg font-normal text-gray-600">
 			By changing the problem, all your trail progress will be lost. Are you sure?
 		</h3>
-		<button class='btn mr-4' onclick={() => {
-			onActivateInstance(toSafeInstanceName as string);
-			toSafeInstanceName = undefined;
-			resetModal = false;
-		}}>Yes, I'm sure</button>
 		<button
-			class='btn'
+			class="btn mr-4"
+			onclick={() => {
+				onActivateInstance(toSafeInstanceName as string);
+				toSafeInstanceName = undefined;
+				resetModal = false;
+			}}>Yes, I'm sure</button
+		>
+		<button
+			class="btn"
 			onclick={() => {
 				toSafeInstanceName = undefined;
 				resetModal = false;

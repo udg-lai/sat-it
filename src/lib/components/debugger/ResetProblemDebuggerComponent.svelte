@@ -7,7 +7,7 @@
 		size: 'md'
 	};
 
-	let resetModal: boolean = $state(false)
+	let resetModal: boolean = $state(false);
 </script>
 
 <button
@@ -19,22 +19,25 @@
 >
 	<DynamicRender component={RefreshOutline} props={resetProps} />
 
-	<Modal bind:open={resetModal} size="xs" class='modal-style' dismissable={false}>
-	<div class="text-center">
-		<ExclamationCircleOutline class="mx-auto mb-4 h-12 w-12 text-red-600" />
-		<h3 class="mb-5 text-lg font-normal text-gray-600">
-			By resetting the problem, all your trail progress will be lost. Are you sure?
-		</h3>
-		<button class='btn mr-4' onclick={() => {
-			changeInstanceEventBus.emit();
-			resetModal = false;
-		}}>Yes, I'm sure</button>
-		<button
-			class='btn'
-			onclick={() => {
-				resetModal = false;
-			}}>No, cancel</button
-		>
-	</div>
-</Modal>
+	<Modal bind:open={resetModal} size="xs" class="modal-style" dismissable={false}>
+		<div class="text-center">
+			<ExclamationCircleOutline class="mx-auto mb-4 h-12 w-12 text-red-600" />
+			<h3 class="mb-5 text-lg font-normal text-gray-600">
+				By resetting the problem, all your trail progress will be lost. Are you sure?
+			</h3>
+			<button
+				class="btn mr-4"
+				onclick={() => {
+					changeInstanceEventBus.emit();
+					resetModal = false;
+				}}>Yes, I'm sure</button
+			>
+			<button
+				class="btn"
+				onclick={() => {
+					resetModal = false;
+				}}>No, cancel</button
+			>
+		</div>
+	</Modal>
 </button>

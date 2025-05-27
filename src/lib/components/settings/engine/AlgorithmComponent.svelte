@@ -41,7 +41,7 @@
 				id="algorithm"
 				class="flex-1 rounded-lg border-none text-right outline-none focus:outline-none focus:ring-0"
 				onchange={() => {
-					if(getTrails().length !== 0) resetModal = true;
+					if (getTrails().length !== 0) resetModal = true;
 				}}
 				bind:value={currentAlgorithm}
 			>
@@ -67,9 +67,9 @@
 		<h3 class="mb-5 text-lg font-normal text-gray-600">
 			By changing the algorithm, all your trail progress will be lost. Are you sure?
 		</h3>
-		<button class='btn mr-4' onclick={confirmUpdate}>Yes, I'm sure</button>
+		<button class="btn mr-4" onclick={confirmUpdate}>Yes, I'm sure</button>
 		<button
-			class='btn'
+			class="btn"
 			onclick={() => {
 				resetModal = false;
 				currentAlgorithm = getProblemStore().algorithm;
