@@ -5,6 +5,7 @@
 		getBaselinePolarity,
 		MAX_DELAY,
 		MIN_DELAY,
+		setBaselineDelay,
 		setBaselinePolarity
 	} from '$lib/store/parameters.svelte.ts';
 	import { CogOutline } from 'flowbite-svelte-icons';
@@ -39,21 +40,29 @@
 		<label for="baselineDelay" class="whitespace-nowrap text-gray-900">Delay:</label>
 		<div class="flex items-center gap-2">
 			<button
-				onclick={() => (baselineDelay = Math.max(MIN_DELAY, baselineDelay - 1))}
-				class={elementClass}
+				onclick={() => {
+					baselineDelay = Math.max(MIN_DELAY, baselineDelay - 1);
+					setBaselineDelay(baselineDelay);
+				}}
+				class='delay-buttons'
+				class:inactive = {baselineDelay === MIN_DELAY}
 			>
 				−
 			</button>
 			<input
 				id="baselineDelay"
 				type="number"
-				class="w-20 rounded border border-gray-300 bg-gray-100 text-center"
+				class="w-20 border border-[var(--border-color)] rounded text-center py-0 leading-none"
 				bind:value={baselineDelay}
 				readonly
 			/>
 			<button
-				onclick={() => (baselineDelay = Math.min(MAX_DELAY, baselineDelay + 1))}
-				class={elementClass}
+				onclick={() => {
+					baselineDelay = Math.min(MAX_DELAY, baselineDelay + 1);
+					setBaselineDelay(baselineDelay);
+				}}
+				class='delay-buttons'
+				class:inactive = {baselineDelay === MAX_DELAY}
 			>
 				+
 			</button>
@@ -87,3 +96,30 @@
 		</div>
 	</polarity>
 </div>
+
+<style>
+	.delay-buttons {
+		height: 100%;
+		width: 2rem;
+		border: solid;
+		border-color: var(--border-color);
+		border-radius: 0.5rem;
+		border-width: 1px;
+		background-color: white;
+		transition: 
+			background-color 300ms;
+	}
+
+	.delay-buttons:hover {
+		background-color: var(--main-bg-color);
+	}
+
+	.delay-buttons:active {
+		background-color: var(--lighter-bg-color);
+	}
+
+	.delay-buttons.inactive {
+		background-color: var(--border-color);
+		pointer-events: none;
+	}
+</style>

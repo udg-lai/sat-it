@@ -4,7 +4,7 @@
 	import ParametersComponent from './engine/PrametersComponent.svelte';
 
 	const headingClass: string =
-		'h-20 w-full flex items-center justify-center gap-2 text-lg border-b';
+		'h-20 w-full flex items-center justify-center gap-2 text-md border-b';
 	const iconClass = { size: 'xl' };
 	const bodyClass: string = 'h-full w-full p-4 flex flex-col gap-3';
 </script>
