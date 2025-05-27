@@ -44,15 +44,15 @@
 					baselineDelay = Math.max(MIN_DELAY, baselineDelay - 1);
 					setBaselineDelay(baselineDelay);
 				}}
-				class='delay-buttons'
-				class:inactive = {baselineDelay === MIN_DELAY}
+				class="delay-buttons"
+				class:inactive={baselineDelay === MIN_DELAY}
 			>
 				−
 			</button>
 			<input
 				id="baselineDelay"
 				type="number"
-				class="w-20 border border-[var(--border-color)] rounded text-center py-0 leading-none"
+				class="w-20 rounded border border-[var(--border-color)] py-0 text-center leading-none"
 				bind:value={baselineDelay}
 				readonly
 			/>
@@ -61,8 +61,8 @@
 					baselineDelay = Math.min(MAX_DELAY, baselineDelay + 1);
 					setBaselineDelay(baselineDelay);
 				}}
-				class='delay-buttons'
-				class:inactive = {baselineDelay === MAX_DELAY}
+				class="delay-buttons"
+				class:inactive={baselineDelay === MAX_DELAY}
 			>
 				+
 			</button>
@@ -106,8 +106,7 @@
 		border-radius: 0.5rem;
 		border-width: 1px;
 		background-color: white;
-		transition: 
-			background-color 300ms;
+		transition: background-color 300ms;
 	}
 
 	.delay-buttons:hover {
