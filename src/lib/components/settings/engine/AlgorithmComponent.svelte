@@ -1,14 +1,18 @@
 <script lang="ts">
 	import DynamicRender from '$lib/components/DynamicRender.svelte';
 	import { getProblemStore, updateAlgorithm, type Algorithm } from '$lib/store/problem.svelte.ts';
+	import { getTrails } from '$lib/store/trails.svelte.ts';
 	import { changeAlgorithmEventBus } from '$lib/transversal/events.ts';
-	import { CodePullRequestOutline } from 'flowbite-svelte-icons';
+	import { Modal } from 'flowbite-svelte';
+	import { CodePullRequestOutline, ExclamationCircleOutline } from 'flowbite-svelte-icons';
 
 	interface Props {
 		headingClass: string;
 		iconClass: { size: string };
 		bodyClass: string;
 	}
+
+	let resetModal: boolean = $state(false);
 
 	let { headingClass, iconClass, bodyClass }: Props = $props();
 	const elementClass: string =
@@ -17,6 +21,12 @@
 	let currentAlgorithm: Algorithm = $state(getProblemStore().algorithm);
 	const availableAlgorithms: Algorithm[] = ['backtracking', 'dpll', 'cdcl'];
 	const showCDCL: boolean = $derived(currentAlgorithm === 'cdcl');
+
+	const confirmUpdate = () => {
+		resetModal = false;
+		updateAlgorithm(currentAlgorithm);
+		changeAlgorithmEventBus.emit();
+	};
 </script>
 
 <div class={headingClass}>
@@ -31,8 +41,7 @@
 				id="algorithm"
 				class="flex-1 rounded-lg border-none text-right outline-none focus:outline-none focus:ring-0"
 				onchange={() => {
-					updateAlgorithm(currentAlgorithm);
-					changeAlgorithmEventBus.emit();
+					if (getTrails().length !== 0) resetModal = true;
 				}}
 				bind:value={currentAlgorithm}
 			>
@@ -51,3 +60,35 @@
 		</div>
 	</algorithm>
 </div>
+
+<Modal bind:open={resetModal} size="xs" class="modal-style" dismissable={false}>
+	<div class="text-center">
+		<ExclamationCircleOutline class="mx-auto mb-4 h-12 w-12 text-red-600" />
+		<h3 class="mb-5 text-lg font-normal text-gray-600">
+			By changing the algorithm, all your trail progress will be lost. Are you sure?
+		</h3>
+		<button class="btn mr-4" onclick={confirmUpdate}>Yes, I'm sure</button>
+		<button
+			class="btn"
+			onclick={() => {
+				resetModal = false;
+				currentAlgorithm = getProblemStore().algorithm;
+			}}>No, cancel</button
+		>
+	</div>
+</Modal>
+
+<style>
+	.modal-style {
+		background-color: var(--main-bg-color);
+		color: black;
+	}
+
+	.btn {
+		border: solid;
+		border-width: 1px;
+		border-radius: 0.5rem;
+		border-color: var(--border-color);
+		padding: 0.75rem;
+	}
+</style>

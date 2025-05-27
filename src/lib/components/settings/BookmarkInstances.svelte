@@ -6,12 +6,22 @@
 		instanceStore,
 		type InteractiveInstance
 	} from '$lib/store/instances.store.ts';
-	import { DatabaseOutline, LockOutline, TrashBinOutline } from 'flowbite-svelte-icons';
+	import {
+		DatabaseOutline,
+		ExclamationCircleOutline,
+		LockOutline,
+		TrashBinOutline
+	} from 'flowbite-svelte-icons';
 	import { onMount } from 'svelte';
 	import ViewerComponent from './ViewerComponent.svelte';
 	import { logInfo } from '$lib/transversal/logging.ts';
+	import { Modal } from 'flowbite-svelte';
+	import { getTrails } from '$lib/store/trails.svelte.ts';
 
 	let previewingInstance: InteractiveInstance | undefined = $state(undefined);
+	let resetModal: boolean = $state(false);
+
+	let toSafeInstanceName: string | undefined = $state(undefined);
 
 	onMount(() => {
 		const unsubscribe = instanceStore.subscribe(() => (previewingInstance = getActiveInstance()));
@@ -47,12 +57,20 @@
 			<ul class="items scrollable">
 				{#each $instanceStore as instance}
 					<li>
+						<!---HERE IS WHERE THE MODAL SHOULD BE CALLED-->
 						<button
 							class="item"
 							class:selected={instance.active}
 							onmouseenter={() => (previewingInstance = instance)}
 							onmouseleave={() => (previewingInstance = getActiveInstance())}
-							onclick={() => onActivateInstance(instance.name)}
+							onclick={() => {
+								toSafeInstanceName = instance.name;
+								if (getTrails().length !== 0) resetModal = true;
+								else {
+									onActivateInstance(toSafeInstanceName as string);
+									toSafeInstanceName = undefined;
+								}
+							}}
 						>
 							<p>{instance.name}</p>
 						</button>
@@ -78,6 +96,30 @@
 		{/if}
 	</div>
 </div>
+
+<Modal bind:open={resetModal} size="xs" class="modal-style" dismissable={false}>
+	<div class="text-center">
+		<ExclamationCircleOutline class="mx-auto mb-4 h-12 w-12 text-red-600" />
+		<h3 class="mb-5 text-lg font-normal text-gray-600">
+			By changing the problem, all your trail progress will be lost. Are you sure?
+		</h3>
+		<button
+			class="btn mr-4"
+			onclick={() => {
+				onActivateInstance(toSafeInstanceName as string);
+				toSafeInstanceName = undefined;
+				resetModal = false;
+			}}>Yes, I'm sure</button
+		>
+		<button
+			class="btn"
+			onclick={() => {
+				toSafeInstanceName = undefined;
+				resetModal = false;
+			}}>No, cancel</button
+		>
+	</div>
+</Modal>
 
 <style>
 	.bookmark {
@@ -163,5 +205,18 @@
 		padding-left: 5px;
 		--tw-grayscale: 0%;
 		--tw-contrast: 1;
+	}
+
+	:global(.modal-style) {
+		background-color: var(--main-bg-color);
+		color: black;
+	}
+
+	:global(.btn) {
+		border: solid;
+		border-width: 1px;
+		border-radius: 0.5rem;
+		border-color: var(--border-color);
+		padding: 0.75rem;
 	}
 </style>
