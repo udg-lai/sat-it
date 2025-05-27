@@ -28,17 +28,17 @@
 	const probelm: Problem = $derived(getProblemStore());
 
 	const addVariable = (): void => {
-		if(variableToAdd === undefined) return;
+		if (variableToAdd === undefined) return;
 		if (!isNaN(variableToAdd) && probelm.variables.getVariablesIDs().includes(variableToAdd)) {
 			breakpointVariables.add(variableToAdd);
-			breakpointVariables = breakpointVariables
+			breakpointVariables = breakpointVariables;
 		} else {
 			logError('Breakpoint Variables', 'The variable you wanted to include is not in the problem');
 		}
 	};
 
 	const addClause = (): void => {
-		if(clauseToAdd === undefined) return;
+		if (clauseToAdd === undefined) return;
 		if (!isNaN(clauseToAdd) && clauseToAdd <= probelm.clauses.size() && 0 < clauseToAdd) {
 			breakpointClauses.add(clauseToAdd);
 			breakpointClauses = breakpointClauses;
@@ -59,13 +59,13 @@
 	<span class="pt-1">Breakpoints</span>
 </div>
 <div class="{bodyClass} flex flex-col">
-	<div class="flex flex-col flex-1 gap-3">
+	<div class="flex flex-1 flex-col gap-3">
 		<variables class="{elementClass} flex items-center justify-between">
 			<label for="baselineDelay" class="whitespace-nowrap text-gray-900">Variable:</label>
 			<input
 				id="baselineDelay"
 				type="number"
-				class='w-32 rounded-lg border border-[var(--border-color)] text-right focus:outline-none focus:ring-0'
+				class="w-32 rounded-lg border border-[var(--border-color)] text-right focus:outline-none focus:ring-0"
 				bind:value={variableToAdd}
 				onchange={addVariable}
 				min={0}
@@ -80,7 +80,7 @@
 							breakpointVariables.delete(item as number);
 							breakpointVariables = breakpointVariables;
 						}}
-						class="text-right w-full hover:text-red-300 bg-white p-2 rounded-lg"
+						class="w-full rounded-lg bg-white p-2 text-right hover:text-red-300"
 					>
 						{item}
 					</button>
@@ -88,20 +88,20 @@
 			</FlexVirtualList>
 		</variables-display>
 	</div>
-	<div class="flex flex-col flex-1 gap-3">
+	<div class="flex flex-1 flex-col gap-3">
 		<clauses class="{elementClass} flex items-center justify-between">
 			<label for="baselineDelay" class="whitespace-nowrap">Clause:</label>
 			<input
 				id="baselineDelay"
 				type="number"
-				class='w-32 rounded-lg border border-[var(--border-color)] text-right focus:outline-none focus:ring-0'
+				class="w-32 rounded-lg border border-[var(--border-color)] text-right focus:outline-none focus:ring-0"
 				bind:value={clauseToAdd}
 				onchange={addClause}
 				min={1}
 				max={probelm.clauses.size()}
 			/>
 		</clauses>
-		<clauses-display class="{elementClass} flex flex-1 flex-col ">
+		<clauses-display class="{elementClass} flex flex-1 flex-col">
 			<FlexVirtualList items={showClauses} itemSize={25}>
 				<div slot="item" let:item class="h-max">
 					<button
@@ -109,7 +109,7 @@
 							breakpointClauses.delete(item as number);
 							breakpointClauses = breakpointClauses;
 						}}
-						class="text-right w-full hover:text-red-300 bg-white p-2 rounded-lg"
+						class="w-full rounded-lg bg-white p-2 text-right hover:text-red-300"
 					>
 						{item}
 					</button>
