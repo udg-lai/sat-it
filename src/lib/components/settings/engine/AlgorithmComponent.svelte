@@ -1,10 +1,10 @@
 <script lang="ts">
 	import DynamicRender from '$lib/components/DynamicRender.svelte';
 	import { getProblemStore, updateAlgorithm, type Algorithm } from '$lib/store/problem.svelte.ts';
+	import { getTrails } from '$lib/store/trails.svelte.ts';
 	import { changeAlgorithmEventBus } from '$lib/transversal/events.ts';
 	import { Modal } from 'flowbite-svelte';
 	import { CodePullRequestOutline, ExclamationCircleOutline } from 'flowbite-svelte-icons';
-	import { slide } from 'svelte/transition';
 
 	interface Props {
 		headingClass: string;
@@ -41,7 +41,7 @@
 				id="algorithm"
 				class="flex-1 rounded-lg border-none text-right outline-none focus:outline-none focus:ring-0"
 				onchange={() => {
-					resetModal = true;
+					if(getTrails().length !== 0) resetModal = true;
 				}}
 				bind:value={currentAlgorithm}
 			>
@@ -61,15 +61,15 @@
 	</algorithm>
 </div>
 
-<Modal bind:open={resetModal} size="xs" autoclose transition={slide}>
+<Modal bind:open={resetModal} size="xs" class="modal-style" dismissable={false}>
 	<div class="text-center">
-		<ExclamationCircleOutline class="mx-auto mb-4 h-12 w-12 text-gray-400" />
-		<h3 class="mb-5 text-lg font-normal text-gray-500">
-			By doing action, all your trail progress will be lost. Are you sure?
+		<ExclamationCircleOutline class="mx-auto mb-4 h-12 w-12 text-red-600" />
+		<h3 class="mb-5 text-lg font-normal text-gray-600">
+			By changing the algorithm, all your trail progress will be lost. Are you sure?
 		</h3>
-		<button color="red" class="me-2" onclick={confirmUpdate}>Yes, I'm sure</button>
+		<button class='btn mr-4' onclick={confirmUpdate}>Yes, I'm sure</button>
 		<button
-			color="alternative"
+			class='btn'
 			onclick={() => {
 				resetModal = false;
 				currentAlgorithm = getProblemStore().algorithm;
@@ -77,3 +77,18 @@
 		>
 	</div>
 </Modal>
+
+<style>
+	.modal-style {
+		background-color: var(--main-bg-color);
+		color: black;
+	}
+
+	.btn {
+		border: solid;
+		border-width: 1px;
+		border-radius: 0.5rem;
+		border-color: var(--border-color);
+		padding: 0.75rem;
+	}
+</style>
