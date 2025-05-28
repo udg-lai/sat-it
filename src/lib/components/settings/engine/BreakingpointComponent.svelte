@@ -1,4 +1,5 @@
 <script lang="ts">
+	import './_style.css';
 	import DynamicRender from '$lib/components/DynamicRender.svelte';
 	import {
 		addBreakpoint,
@@ -11,12 +12,10 @@
 	import { SvelteSet } from 'svelte/reactivity';
 
 	interface Props {
-		headingClass: string;
 		iconClass: { size: string };
-		bodyClass: string;
 	}
 
-	let { headingClass, iconClass, bodyClass }: Props = $props();
+	let { iconClass }: Props = $props();
 	const elementClass: string =
 		'rounded-lg bg-[var(--main-bg-color)] border border-[var(--border-color)] p-2';
 
@@ -44,53 +43,51 @@
 	});
 </script>
 
-<div class={headingClass}>
+<div class="heading-class">
 	<DynamicRender component={BugOutline} props={iconClass} />
 	<span class="pt-1">Breakpoints</span>
 </div>
-<div class="{bodyClass} flex flex-col">
-	<div class="flex flex-1 flex-col gap-3">
-		<variables class="{elementClass} flex items-center justify-between">
-			<label for="baselineDelay" class="whitespace-nowrap text-gray-900">Variable:</label>
-			<input
-				id="baselineDelay"
-				type="number"
-				class="w-32 rounded-lg border border-[var(--border-color)] text-right focus:outline-none focus:ring-0"
-				bind:value={variableToAdd}
-				onchange={addVariable}
-				min={0}
-				max={probelm.variables.capacity}
-			/>
-		</variables>
-		<variables-display class="breakpoint-display">
-			<div class="{elementClass} scroll-container">
-				<ul class="items scrollable">
-					{#each showVariables as variable}
-						<li>
-							<button
-								onclick={() => {
-									removeBreakpoint({ type: 'variable', variableId: variable });
-								}}
-								class="w-full rounded-lg bg-white p-2 text-right hover:text-red-600"
-							>
-								{variable}
-							</button>
-						</li>
-					{/each}
-				</ul>
-			</div>
-		</variables-display>
-	</div>
+<div class="body-class">
+	<variables class="{elementClass} flex items-center justify-between">
+		<label for="baselineDelay" class="whitespace-nowrap text-gray-900">Variable:</label>
+		<input
+			id="baselineDelay"
+			type="number"
+			class="w-32 rounded-lg border border-[var(--border-color)] text-right focus:outline-none focus:ring-0"
+			bind:value={variableToAdd}
+			onchange={addVariable}
+			min={0}
+			max={probelm.variables.capacity}
+		/>
+	</variables>
+	<variables-display class="breakpoint-display">
+		<div class="{elementClass} scroll-container">
+			<ul class="items scrollable">
+				{#each showVariables as variable}
+					<li>
+						<button
+							onclick={() => {
+								removeBreakpoint({ type: 'variable', variableId: variable });
+							}}
+							class="w-full rounded-lg bg-white p-2 text-right hover:text-red-600"
+						>
+							{variable}
+						</button>
+					</li>
+				{/each}
+			</ul>
+		</div>
+	</variables-display>
 </div>
 
 <style>
 	.breakpoint-display {
-		height: 100%;
+		height: 90%;
 		width: 100%;
 	}
 
 	.scroll-container {
-		height: 92%;
+		height: 100%;
 		width: 100%;
 		overflow: auto;
 		scrollbar-width: none;

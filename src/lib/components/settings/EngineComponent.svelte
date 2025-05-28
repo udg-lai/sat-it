@@ -3,23 +3,20 @@
 	import BreakingpointComponent from './engine/BreakingpointComponent.svelte';
 	import ParametersComponent from './engine/PrametersComponent.svelte';
 
-	const headingClass: string =
-		'h-20 w-full flex items-center justify-center gap-2 text-md border-b';
 	const iconClass = { size: 'xl' };
-	const bodyClass: string = 'h-full w-full p-4 flex flex-col gap-3 overflow-hidden';
 </script>
 
 <div class="container">
 	<div class="content-container">
-		<AlgorithmComponent {headingClass} {iconClass} {bodyClass} />
+		<AlgorithmComponent {iconClass} />
 	</div>
 	<div class="division-container"></div>
 	<div class="content-container">
-		<BreakingpointComponent {headingClass} {iconClass} {bodyClass} />
+		<BreakingpointComponent {iconClass} />
 	</div>
 	<div class="division-container"></div>
 	<div class="content-container">
-		<ParametersComponent {headingClass} {iconClass} {bodyClass} />
+		<ParametersComponent {iconClass} />
 	</div>
 </div>
 

@@ -11,12 +11,10 @@
 	import { CogOutline } from 'flowbite-svelte-icons';
 
 	interface Props {
-		headingClass: string;
 		iconClass: { size: string };
-		bodyClass: string;
 	}
 
-	let { headingClass, iconClass, bodyClass }: Props = $props();
+	let { iconClass }: Props = $props();
 	const elementClass: string =
 		'rounded-lg bg-[var(--main-bg-color)] border border-[var(--border-color)] p-2';
 
@@ -31,11 +29,11 @@
 	}
 </script>
 
-<div class={headingClass}>
+<div class="heading-class">
 	<DynamicRender component={CogOutline} props={iconClass} />
 	<span class="pt-1">Parameters</span>
 </div>
-<div class={bodyClass}>
+<div class="body-class">
 	<div class="{elementClass} flex items-center justify-between gap-2">
 		<label for="baselineDelay" class="whitespace-nowrap text-gray-900">Delay:</label>
 		<div class="flex items-center gap-2">

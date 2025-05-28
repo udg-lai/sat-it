@@ -7,14 +7,12 @@
 	import { CodePullRequestOutline, ExclamationCircleOutline } from 'flowbite-svelte-icons';
 
 	interface Props {
-		headingClass: string;
 		iconClass: { size: string };
-		bodyClass: string;
 	}
 
 	let resetModal: boolean = $state(false);
 
-	let { headingClass, iconClass, bodyClass }: Props = $props();
+	let { iconClass }: Props = $props();
 	const elementClass: string =
 		'rounded-lg bg-[var(--main-bg-color)] border border-[var(--border-color)] p-2';
 
@@ -29,11 +27,11 @@
 	};
 </script>
 
-<div class={headingClass}>
+<div class="heading-class">
 	<DynamicRender component={CodePullRequestOutline} props={iconClass} />
 	<span class="pt-1">Algorithm</span>
 </div>
-<div class={bodyClass}>
+<div class="body-class">
 	<algorithm class={elementClass}>
 		<selector class="flex items-center gap-4">
 			<label for="algorithm" class="whitespace-nowrap text-gray-900">Algorithm:</label>
