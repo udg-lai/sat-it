@@ -13,11 +13,11 @@
 	<div class="content-container">
 		<AlgorithmComponent {headingClass} {iconClass} {bodyClass} />
 	</div>
-	<div class="divsion-container"></div>
+	<div class="division-container"></div>
 	<div class="content-container">
 		<BreakingpointComponent {headingClass} {iconClass} {bodyClass} />
 	</div>
-	<div class="divsion-container"></div>
+	<div class="division-container"></div>
 	<div class="content-container">
 		<ParametersComponent {headingClass} {iconClass} {bodyClass} />
 	</div>
@@ -30,7 +30,7 @@
 		display: flex;
 		flex-direction: row;
 	}
-	.divsion-container {
+	.division-container {
 		height: 100%;
 		width: 2px;
 		background-color: var(--border-color);

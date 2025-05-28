@@ -48,37 +48,39 @@
 	<DynamicRender component={BugOutline} props={iconClass} />
 	<span class="pt-1">Breakpoints</span>
 </div>
-<div class="{bodyClass} flex flex-1 flex-col">
-	<variables class="{elementClass} flex items-center justify-between">
-		<label for="baselineDelay" class="whitespace-nowrap text-gray-900">Variable:</label>
-		<input
-			id="baselineDelay"
-			type="number"
-			class="w-32 rounded-lg border border-[var(--border-color)] text-right focus:outline-none focus:ring-0"
-			bind:value={variableToAdd}
-			onchange={addVariable}
-			min={0}
-			max={probelm.variables.capacity}
-		/>
-	</variables>
-	<variables-display class="breakpoint-display">
-		<div class="{elementClass} scroll-container">
-			<ul class="items scrollable">
-				{#each showVariables as variable}
-					<li>
-						<button
-							onclick={() => {
-								removeBreakpoint({ type: 'variable', variableId: variable });
-							}}
-							class="w-full rounded-lg bg-white p-2 text-right hover:text-red-600"
-						>
-							{variable}
-						</button>
-					</li>
-				{/each}
-			</ul>
-		</div>
-	</variables-display>
+<div class="{bodyClass} flex flex-col">
+	<div class="flex flex-1 flex-col gap-3">
+		<variables class="{elementClass} flex items-center justify-between">
+			<label for="baselineDelay" class="whitespace-nowrap text-gray-900">Variable:</label>
+			<input
+				id="baselineDelay"
+				type="number"
+				class="w-32 rounded-lg border border-[var(--border-color)] text-right focus:outline-none focus:ring-0"
+				bind:value={variableToAdd}
+				onchange={addVariable}
+				min={0}
+				max={probelm.variables.capacity}
+			/>
+		</variables>
+		<variables-display class="breakpoint-display">
+			<div class="{elementClass} scroll-container">
+				<ul class="items scrollable">
+					{#each showVariables as variable}
+						<li>
+							<button
+								onclick={() => {
+									removeBreakpoint({ type: 'variable', variableId: variable });
+								}}
+								class="w-full rounded-lg bg-white p-2 text-right hover:text-red-600"
+							>
+								{variable}
+							</button>
+						</li>
+					{/each}
+				</ul>
+			</div>
+		</variables-display>
+	</div>
 </div>
 
 <style>
