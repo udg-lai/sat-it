@@ -35,20 +35,6 @@ export const allAssigned = (pool: VariablePool): boolean => {
 	return pool.allAssigned();
 };
 
-export const afterDecision = (assignment: number): void => {
-	const solverMachine = $derived(getSolverMachine());
-	if (solverMachine.isInAutoMode()) {
-		const variableId: number = Math.abs(assignment);
-		const breakpoint: boolean = checkBreakpoint({
-			type: 'variable',
-			id: variableId
-		});
-		if (breakpoint) {
-			solverMachine.stopAutoMode();
-		}
-	}
-};
-
 export const decide = (pool: VariablePool, algorithm: string): number => {
 	const trail: Trail = obtainTrail(pool);
 	const assignmentEvent: AssignmentEvent = getAssignment();
