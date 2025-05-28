@@ -104,20 +104,24 @@
 			By changing the problem, all your trail progress will be lost. Are you sure?
 		</h3>
 		<button
-			class="btn mr-4"
+			class="btn btn-modal mr-4"
 			onclick={() => {
 				onActivateInstance(toSafeInstanceName as string);
 				toSafeInstanceName = undefined;
 				resetModal = false;
-			}}>Yes, I'm sure</button
+			}}
 		>
+			<span>Yes, change</span>
+		</button>
 		<button
 			class="btn"
 			onclick={() => {
 				toSafeInstanceName = undefined;
 				resetModal = false;
-			}}>No, cancel</button
+			}}
 		>
+			<span>No, cancel</span>
+		</button>
 	</div>
 </Modal>
 

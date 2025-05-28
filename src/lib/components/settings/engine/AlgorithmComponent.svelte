@@ -73,8 +73,10 @@
 			onclick={() => {
 				resetModal = false;
 				currentAlgorithm = getProblemStore().algorithm;
-			}}>No, cancel</button
+			}}
 		>
+			<span>No, cancel</span>
+		</button>
 	</div>
 </Modal>
 
