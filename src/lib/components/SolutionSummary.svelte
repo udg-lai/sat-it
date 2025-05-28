@@ -13,16 +13,16 @@
 
 	const problem: Problem = $derived(getProblemStore());
 
-	let clauses = $derived(problem.clauses.getClauses());
+	let clauses: Clause[] = $derived(problem.clauses.getClauses());
 </script>
 
 <solution-summary>
 	<FlexVirtualList items={clauses} itemSize={clauseHeight}>
-		<div slot="item" let:item let:index class="clause">
+		<div slot="item" let:item class="clause">
 			<div class="enumerate-clause">
 				<div class="enumerate">
 					<span>
-						{index + 1}.
+						{(item as Clause).getId()}.
 					</span>
 				</div>
 				<ClauseComponent clause={item as Clause} />

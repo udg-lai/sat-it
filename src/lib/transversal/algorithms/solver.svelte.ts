@@ -1,25 +1,25 @@
 import type { AssignmentEvent } from '$lib/components/debugger/events.svelte.ts';
 import { getAssignment } from '$lib/store/assignment.svelte.ts';
+import { checkBreakpoint } from '$lib/store/breakpoints.svelte.ts';
 import { getProblemStore, type MappingLiteral2Clauses } from '$lib/store/problem.svelte.ts';
+import { getSolverMachine } from '$lib/store/stateMachine.svelte.ts';
+import {
+	increaseNoConflicts,
+	increaseNoDecisions,
+	increaseNoUnitPropgations as increaseNoUnitPropagations
+} from '$lib/store/statistics.svelte.ts';
 import { getLatestTrail, stackTrail, unstackTrail } from '$lib/store/trails.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import type Clause from '../entities/Clause.ts';
-import type { ClauseEval } from '../entities/Clause.ts';
+import { isSatClause, type ClauseEval } from '../entities/Clause.ts';
 import type ClausePool from '../entities/ClausePool.svelte.ts';
 import { Trail } from '../entities/Trail.svelte.ts';
 import type Variable from '../entities/Variable.svelte.ts';
 import VariableAssignment from '../entities/VariableAssignment.ts';
 import type VariablePool from '../entities/VariablePool.svelte.ts';
 import { isUnSAT } from '../interfaces/IClausePool.ts';
-import { logFatal, logInfo } from '../logging.ts';
+import { logBreakpoint, logFatal } from '../logging.ts';
 import { fromJust, isJust } from '../types/maybe.ts';
-import {
-	increaseNoConflicts,
-	increaseNoDecisions,
-	increaseNoUnitPropgations
-} from '$lib/store/statistics.svelte.ts';
-import { getSolverMachine } from '$lib/store/stateMachine.svelte.ts';
-import { checkBreakpoint } from '$lib/store/breakpoints.svelte.ts';
 
 export const emptyClauseDetection = (pool: ClausePool): boolean => {
 	const evaluation = pool.eval();
@@ -109,7 +109,7 @@ export const unitPropagation = (
 	const variable: Variable = variables.getCopy(variableId);
 	trail.push(VariableAssignment.newUnitPropagationAssignment(variable, clauseId));
 
-	increaseNoUnitPropgations();
+	increaseNoUnitPropagations();
 	stackTrail(trail);
 	return literalToPropagate;
 };
@@ -140,33 +140,36 @@ export const nonDecisionMade = (): boolean => {
 };
 
 const doAssignment = (variableId: number, polarity: boolean): void => {
-	const { variables, mapping } = getProblemStore();
+	const { clauses, variables, mapping } = getProblemStore();
 
-	console.log('Assigning variable:', variableId, 'with polarity:', polarity);
-
+	const solverMachine = getSolverMachine();
+	const runningInAutoMode: boolean = solverMachine.isInAutoMode();
 	variables.persist(variableId, polarity);
 
 	const breakpointVariable: boolean = checkBreakpoint({ type: 'variable', id: variableId });
 	if (breakpointVariable) {
-		logInfo('Breakpoint', `Variable ${variableId} assignment triggered a breakpoint`);
+		logBreakpoint('Variable breakpoint', `Variable ${variableId} assigned`);
 	}
 
-	let breakpointClause: boolean = false;
 	const literal: number = polarity ? variableId : -variableId;
-	for (const lit of [literal, -literal]) {
-		const clausesSet: Set<number> | undefined = mapping.get(lit);
-		if (clausesSet !== undefined) {
-			for (const clauseId of clausesSet) {
-				breakpointClause = checkBreakpoint({ type: 'clause', id: clauseId });
-				if (breakpointClause) {
-					logInfo('Breakpoint', `Clause ${clauseId} assignment triggered a breakpoint`);
-				}
+	const clausesToCheck = mapping.get(literal);
+	let breakpointClause: boolean = false;
+	if (clausesToCheck !== undefined) {
+		for (const clauseId of clausesToCheck) {
+			if (!checkBreakpoint({ type: 'clause', id: clauseId })) {
+				continue;
+			}
+			const clauseEval: ClauseEval = clauseEvaluation(clauses, clauseId);
+			if (isSatClause(clauseEval)) {
+				breakpointClause = true;
+				logBreakpoint(
+					'Clause breakpoint',
+					`Clause ${clauseId} satisfied by variable ${variableId}`
+				);
 			}
 		}
 	}
-
-	const solverMachine = getSolverMachine();
-	if (solverMachine.isInAutoMode() && (breakpointVariable || breakpointClause)) {
+	if (runningInAutoMode && (breakpointVariable || breakpointClause)) {
 		solverMachine.stopAutoMode();
 	}
 };

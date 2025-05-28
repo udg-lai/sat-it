@@ -57,11 +57,6 @@
 		gap: 0.5rem;
 	}
 
-	.line span {
-		position: absolute;
-		align-self: center;
-	}
-
 	.line-item {
 		font-size: 1.5rem;
 		opacity: 0.5;
@@ -77,6 +72,7 @@
 		width: var(--button-size);
 		height: var(--button-size);
 		position: relative;
+		align-items: center;
 	}
 
 	.enumerate p {
