@@ -29,6 +29,16 @@ export const addBreakpoint = (breakpoint: Breakpoint): void => {
 	}
 };
 
+export const removeBreakpoint = (breakpoint: Breakpoint): void => {
+	if (breakpoint.type === 'variable') {
+		variableBreakpoint.delete(breakpoint.variableId);
+	} else if (breakpoint.type === 'clause') {
+		clauseBreakpoint.delete(breakpoint.clauseId);
+	}
+};
+
+export const getBreakpoints = () => variableBreakpoint;
+
 export const checkBreakpoint = (assignment: Assignment): boolean => {
 	let checkVariableId: boolean = false;
 	let checkClauseId: boolean = false;
