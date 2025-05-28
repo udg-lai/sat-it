@@ -9,14 +9,35 @@
 	const bodyClass: string = 'h-full w-full p-4 flex flex-col gap-3 overflow-hidden';
 </script>
 
-<div class="grid h-full w-full grid-cols-3 divide-x-4">
-	<div class="flex flex-col overflow-hidden">
+<div class="container">
+	<div class="content-container">
 		<AlgorithmComponent {headingClass} {iconClass} {bodyClass} />
 	</div>
-	<div class="flex flex-col overflow-hidden">
+	<div class="divsion-container"></div>
+	<div class="content-container">
 		<BreakingpointComponent {headingClass} {iconClass} {bodyClass} />
 	</div>
-	<div class="flex flex-col overflow-hidden">
+	<div class="divsion-container"></div>
+	<div class="content-container">
 		<ParametersComponent {headingClass} {iconClass} {bodyClass} />
 	</div>
 </div>
+
+<style>
+	.container {
+		height: 100%;
+		width: 100%;
+		display: flex;
+		flex-direction: row;
+	}
+	.divsion-container {
+		height: 100%;
+		width: 2px;
+		background-color: var(--border-color);
+	}
+	.content-container {
+		display: flex;
+		flex: 1;
+		flex-direction: column;
+	}
+</style>

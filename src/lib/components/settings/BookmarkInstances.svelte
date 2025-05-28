@@ -57,7 +57,6 @@
 			<ul class="items scrollable">
 				{#each $instanceStore as instance}
 					<li>
-						<!---HERE IS WHERE THE MODAL SHOULD BE CALLED-->
 						<button
 							class="item"
 							class:selected={instance.active}

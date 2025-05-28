@@ -48,7 +48,7 @@
 	<DynamicRender component={BugOutline} props={iconClass} />
 	<span class="pt-1">Breakpoints</span>
 </div>
-<div class="{bodyClass} flex flex-1 flex-col gap-3">
+<div class="{bodyClass} flex flex-1 flex-col">
 	<variables class="{elementClass} flex items-center justify-between">
 		<label for="baselineDelay" class="whitespace-nowrap text-gray-900">Variable:</label>
 		<input
