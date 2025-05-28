@@ -12,12 +12,21 @@ export function logWarning(title: string, description: string): void {
 }
 
 export function logInfo(title: string, description?: string): void {
-	console.info('title:\n', title, '\ndescription:\n', description);
 	addToast({
 		type: 'info',
 		title: formatText(title),
 		description: formatText(description),
 		dismissible: true
+	});
+}
+
+export function logBreakpoint(title: string, description?: string): void {
+	addToast({
+		type: 'breakpoint',
+		title: formatText(title),
+		description: formatText(description),
+		dismissible: true,
+		timeout: 12000
 	});
 }
 

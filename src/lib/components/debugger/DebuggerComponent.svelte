@@ -22,60 +22,50 @@
 	let inAutoMode = $derived(solverMachine.isInAutoMode());
 </script>
 
-<div class="flex-center debugger align-center relative flex-row gap-2">
+<debugger>
 	{#if inAutoMode}
 		<AutoModeComponent />
+	{:else if enablePreprocess}
+		<InitialStepDebugger />
 	{:else}
-		<div class="variable-display"></div>
+		{#if enableConflictDetection}
+			<ConflictDetectionDebugger cdMode={enableConflictDetection} />
+		{:else if !finished}
+			<AutomaticDebugger
+				backtrackingState={enableBacktracking}
+				{finished}
+				cdMode={enableConflictDetection}
+				nextVariable={defaultNextVariable && !enableBacktracking ? defaultNextVariable : undefined}
+			/>
 
-		{#if enablePreprocess}
-			<InitialStepDebugger />
+			<ManualDebugger
+				{defaultNextVariable}
+				{finished}
+				cdMode={enableConflictDetection}
+				backtrackingState={enableBacktracking}
+			/>
 		{:else}
-			{#if enableConflictDetection}
-				<ConflictDetectionDebugger cdMode={enableConflictDetection} />
-			{:else if !finished}
-				{#if !enableBacktracking && defaultNextVariable}
-					{defaultNextVariable}
-				{:else}
-					{'X'}
-				{/if}
-				<AutomaticDebugger
-					backtrackingState={enableBacktracking}
-					{finished}
-					cdMode={enableConflictDetection}
-				/>
-
-				<ManualDebugger
-					{defaultNextVariable}
-					{finished}
-					cdMode={enableConflictDetection}
-					backtrackingState={enableBacktracking}
-				/>
-			{:else}
-				<ResetProblemDebugger />
-			{/if}
-
-			<GeneralDebuggerButtons {finished} backtrackingState={enableBacktracking} />
+			<ResetProblemDebugger />
 		{/if}
+
+		<GeneralDebuggerButtons {finished} backtrackingState={enableBacktracking} />
 	{/if}
-</div>
+</debugger>
 
 <style>
-	.debugger {
+	debugger {
 		width: 100%;
 		height: var(--debugger-height);
 		display: flex;
 		align-items: center;
-		justify-content: center;
+		justify-content: left;
 		border-bottom: 1px;
 		border-color: var(--border-color);
 		border-style: solid;
-	}
-
-	.variable-display {
-		width: 8rem;
-		text-align: center;
-		color: grey;
+		gap: 0.5rem;
+		padding-left: calc(
+			var(--windows-padding) + var(--button-size) + var(--windows-padding) + 0.5rem
+		);
 	}
 
 	:root {

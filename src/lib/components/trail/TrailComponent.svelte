@@ -157,5 +157,6 @@
 		align-items: center;
 		height: var(--trail-content-height);
 		width: max-content;
+		align-items: center;
 	}
 </style>

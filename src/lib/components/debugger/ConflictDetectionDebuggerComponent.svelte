@@ -17,38 +17,48 @@
 	};
 </script>
 
-<button
-	class="btn general-btn"
-	class:invalidOption={!upMode}
-	title="Step"
-	onclick={() => {
-		stateMachineEventBus.emit('step');
-	}}
-	disabled={!upMode}
->
-	<DynamicRender component={CaretRightOutline} props={assignmentProps} />
-</button>
+<conflict-detection-debugger>
+	<button
+		class="btn general-btn"
+		class:invalidOption={!upMode}
+		title="Step"
+		onclick={() => {
+			stateMachineEventBus.emit('step');
+		}}
+		disabled={!upMode}
+	>
+		<DynamicRender component={CaretRightOutline} props={assignmentProps} />
+	</button>
 
-<button
-	class="btn general-btn"
-	title="Next variable"
-	class:invalidOption={!upMode}
-	onclick={() => {
-		stateMachineEventBus.emit('nextVariable');
-	}}
-	disabled={!upMode}
->
-	<DynamicRender component={ForwardOutline} props={assignmentProps} />
-</button>
+	<button
+		class="btn general-btn"
+		title="Next variable"
+		class:invalidOption={!upMode}
+		onclick={() => {
+			stateMachineEventBus.emit('nextVariable');
+		}}
+		disabled={!upMode}
+	>
+		<DynamicRender component={ForwardOutline} props={assignmentProps} />
+	</button>
 
-<button
-	class="btn general-btn"
-	title="Finish unit propagations"
-	class:invalidOption={!upMode}
-	onclick={() => {
-		stateMachineEventBus.emit('finishUP');
-	}}
-	disabled={!upMode}
->
-	<DynamicRender component={ChevronDoubleRightOutline} props={assignmentProps} />
-</button>
+	<button
+		class="btn general-btn"
+		title="Finish unit propagations"
+		class:invalidOption={!upMode}
+		onclick={() => {
+			stateMachineEventBus.emit('finishUP');
+		}}
+		disabled={!upMode}
+	>
+		<DynamicRender component={ChevronDoubleRightOutline} props={assignmentProps} />
+	</button>
+</conflict-detection-debugger>
+
+<style>
+	conflict-detection-debugger {
+		display: flex;
+		flex-direction: row;
+		gap: 0.5rem;
+	}
+</style>

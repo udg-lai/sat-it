@@ -1,10 +1,10 @@
 .toasts {
 	position: fixed;
-	top: 10px;
-	right: 10px;
+	top: 0.5rem;
+	right: 0.5rem;
 	display: flex;
 	flex-direction: column;
-	gap: 10px; /* Ensures spacing between notifications */
+	gap: 0.5rem;
 	z-index: var(--notification-z-index);
 }
 

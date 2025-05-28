@@ -99,6 +99,7 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 
 	step(): void {
 		const activeId: number = this.stateMachine.getActiveId();
+
 		//The initial state
 		if (activeId === dpll_stateName2StateId.empty_clause_state) {
 			initialTransition(this);
