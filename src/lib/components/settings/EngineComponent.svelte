@@ -5,17 +5,19 @@
 
 	const iconClass = { size: 'xl' };
 </script>
-	<div class="content-container">
-		<AlgorithmComponent {iconClass} />
-	</div>
-	<div class="division-container"></div>
-	<div class="content-container">
-		<BreakingpointComponent {iconClass} />
-	</div>
-	<div class="division-container"></div>
-	<div class="content-container">
-		<ParametersComponent {iconClass} />
-	</div>
+
+<div class="content-container">
+	<AlgorithmComponent {iconClass} />
+</div>
+<div class="division-container"></div>
+<div class="content-container">
+	<BreakingpointComponent {iconClass} />
+</div>
+<div class="division-container"></div>
+<div class="content-container">
+	<ParametersComponent {iconClass} />
+</div>
+
 <style>
 	.division-container {
 		height: 100%;

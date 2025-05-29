@@ -85,7 +85,7 @@
 		border-radius: 10px;
 		background-color: white;
 		padding: 0.5rem;
-		transition: 
+		transition:
 			color 300ms,
 			background-color 300ms;
 	}
