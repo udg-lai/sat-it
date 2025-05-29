@@ -61,7 +61,7 @@
 		}
 
 		variableToAdd = value;
-	}
+	};
 </script>
 
 <div class="heading-class">
