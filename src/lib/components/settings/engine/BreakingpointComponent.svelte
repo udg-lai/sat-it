@@ -35,12 +35,6 @@
 		}
 		variableToAdd = undefined;
 	};
-
-	$effect(() => {
-		showVariables.forEach((variable) => {
-			console.log(variable);
-		});
-	});
 </script>
 
 <div class="heading-class">
@@ -69,7 +63,7 @@
 							onclick={() => {
 								removeBreakpoint({ type: 'variable', variableId: variable });
 							}}
-							class="w-full rounded-lg bg-white p-2 text-right hover:text-red-600"
+							class="variable-text"
 						>
 							{variable}
 						</button>
@@ -84,6 +78,20 @@
 	.breakpoint-display {
 		height: 90%;
 		width: 100%;
+	}
+
+	.variable-text {
+		width: 100%;
+		border-radius: 10px;
+		background-color: white;
+		padding: 0.5rem;
+		transition: 
+			color 300ms,
+			background-color 300ms;
+	}
+	.variable-text:hover {
+		background-color: rgb(255, 185, 185);
+		color: rgb(202, 53, 53);
 	}
 
 	.scroll-container {

@@ -34,7 +34,7 @@
 <div class="body-class">
 	<algorithm class={elementClass}>
 		<selector class="flex items-center gap-4">
-			<label for="algorithm" class="whitespace-nowrap text-gray-900">Algorithm:</label>
+			<label for="algorithm">Algorithm:</label>
 			<select
 				id="algorithm"
 				class="flex-1 rounded-lg border-none text-right outline-none focus:outline-none focus:ring-0"

@@ -5,8 +5,6 @@
 
 	const iconClass = { size: 'xl' };
 </script>
-
-<div class="container">
 	<div class="content-container">
 		<AlgorithmComponent {iconClass} />
 	</div>
@@ -18,21 +16,14 @@
 	<div class="content-container">
 		<ParametersComponent {iconClass} />
 	</div>
-</div>
-
 <style>
-	.container {
-		height: 100%;
-		width: 100%;
-		display: flex;
-		flex-direction: row;
-	}
 	.division-container {
 		height: 100%;
 		width: 2px;
 		background-color: var(--border-color);
 	}
 	.content-container {
+		height: 100%;
 		display: flex;
 		flex: 1;
 		flex-direction: column;
