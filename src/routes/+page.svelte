@@ -15,6 +15,7 @@
 	import SettingsComponent from '$lib/components/settings/SettingsComponent.svelte';
 	import { disableContextMenu } from '$lib/transversal/utils.ts';
 	import { logError } from '$lib/transversal/logging.ts';
+	import { beforeNavigate } from '$app/navigation';
 
 	let renderSettings = $state(true);
 
@@ -37,6 +38,13 @@
 			unsubscribeCloseSettings();
 		};
 	});
+
+	beforeNavigate(( nav ) => {
+		if(nav.type === 'leave') {
+			nav.cancel();
+		}
+	});
+
 </script>
 
 <svelte:body oncontextmenu={disableContextMenu} />
