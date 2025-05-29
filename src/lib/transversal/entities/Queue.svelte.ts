@@ -1,4 +1,4 @@
-import { logError } from '../logging.ts';
+import { logError } from '$lib/store/toasts.ts';
 
 export class Queue<T> {
 	private items: T[] = $state([]);

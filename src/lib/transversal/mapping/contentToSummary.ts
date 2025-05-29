@@ -14,7 +14,7 @@ import {
 	type Maybe
 } from '$lib/transversal/types/maybe.ts';
 import { type ErrorMessage } from '$lib/transversal/types/types.ts';
-import { logFatal } from '../logging.ts';
+import { logFatal } from '$lib/store/toasts.ts';
 
 export type RawClause = number[]; // this contains the eos '0'
 export type LiteralSet = number[]; // this contains just the literals

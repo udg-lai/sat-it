@@ -4,7 +4,7 @@ import {
 } from '$lib/machine/dpll/dpll-solver-machine.svelte.ts';
 import { SolverMachine } from '$lib/machine/SolverMachine.svelte.ts';
 import type { StateFun, StateInput } from '$lib/machine/StateMachine.svelte.ts';
-import { logFatal } from '$lib/transversal/logging.ts';
+import { logFatal } from '$lib/store/toasts.ts';
 
 let solverMachine: SolverMachine<StateFun, StateInput> = $state(new DPLL_SolverMachine());
 

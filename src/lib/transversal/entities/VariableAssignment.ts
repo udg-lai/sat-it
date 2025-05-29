@@ -1,4 +1,4 @@
-import { logFatal } from '../logging.ts';
+import { logFatal } from '$lib/store/toasts.ts';
 import type Variable from './Variable.svelte.ts';
 
 type Automated = {

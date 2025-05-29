@@ -6,10 +6,10 @@
 	import type Clause from '$lib/transversal/entities/Clause.ts';
 	import { isUnitPropagationReason } from '$lib/transversal/entities/VariableAssignment.ts';
 	import { getProblemStore, type Problem } from '$lib/store/problem.svelte.ts';
-	import { logFatal } from '$lib/transversal/logging.ts';
 	import { Popover } from 'flowbite-svelte';
 	import { runningOnChrome } from '$lib/transversal/utils.ts';
 	import { onMount } from 'svelte';
+	import { logFatal } from '$lib/store/toasts.ts';
 
 	interface Props {
 		assignment: VariableAssignment;
