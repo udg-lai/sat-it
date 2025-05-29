@@ -1,5 +1,6 @@
 import { logFatal } from '$lib/transversal/logging.ts';
 import type { DPLL_FUN, DPLL_INPUT } from './dpll/dpll-domain.svelte.ts';
+import { UNSAT_STATE_ID } from './reserved.ts';
 
 export type StateFun = DPLL_FUN | never;
 
@@ -63,6 +64,10 @@ export abstract class StateMachine<F extends StateFun, I extends StateInput>
 
 	onConflictState(): boolean {
 		return this.getActiveState().id === this.conflict;
+	}
+
+	onUnsatState(): boolean {
+		return this.getActiveState().id === UNSAT_STATE_ID;
 	}
 
 	getActiveState(): State<F, I> {

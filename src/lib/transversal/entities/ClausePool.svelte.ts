@@ -5,8 +5,6 @@ import { cnfToClauseSet } from '../utils.ts';
 import Clause, {
 	type ClauseEval,
 	isSatClause,
-	isUnitClause,
-	isUnresolvedClause,
 	isUnSATClause
 } from './Clause.ts';
 import type VariablePool from './VariablePool.svelte.ts';
@@ -83,7 +81,7 @@ class ClausePool implements IClausePool {
 		let leftToSatisfy: number = 0;
 		this.clauses.forEach((clause) => {
 			const evaluation: ClauseEval = clause.eval();
-			if (isUnresolvedClause(evaluation) || isUnitClause(evaluation)) leftToSatisfy += 1;
+			if (!isSatClause(evaluation)) leftToSatisfy += 1;
 		});
 		return leftToSatisfy;
 	}

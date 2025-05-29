@@ -1,5 +1,5 @@
 import { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
-import type { Statistics } from './statistics.svelte.ts';
+import { type Statistics } from './statistics.svelte.ts';
 
 export interface Snapshot {
 	snapshot: Trail[];

@@ -74,15 +74,15 @@
 		reloadFromSnapshot(first);
 	}
 
-//	const b1: VariableBreakpoint = {
-//		type: 'variable',
-//		variableId: 1
-//	};
-//
-//	const b2: VariableBreakpoint = {
-//		type: 'variable',
-//		variableId: 2
-//	};
+	//	const b1: VariableBreakpoint = {
+	//		type: 'variable',
+	//		variableId: 1
+	//	};
+	//
+	//	const b2: VariableBreakpoint = {
+	//		type: 'variable',
+	//		variableId: 2
+	//	};
 
 	const b3: VariableBreakpoint = {
 		type: 'variable',
