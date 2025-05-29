@@ -1,6 +1,6 @@
 import type { AssignmentEvent } from '$lib/components/debugger/events.svelte.ts';
 import { getAssignment } from '$lib/store/assignment.svelte.ts';
-import { checkBreakpoint } from '$lib/store/breakpoints.svelte.ts';
+import { markedAsBreakpoint, type Assignment } from '$lib/store/breakpoints.svelte.ts';
 import { getProblemStore, type MappingLiteral2Clauses } from '$lib/store/problem.svelte.ts';
 import { getSolverMachine } from '$lib/store/stateMachine.svelte.ts';
 import {
@@ -126,39 +126,29 @@ export const nonDecisionMade = (): boolean => {
 };
 
 const doAssignment = (variableId: number, polarity: boolean): void => {
-	const { clauses, variables, mapping } = getProblemStore();
+	const { variables} = getProblemStore();
 
-	const solverMachine = getSolverMachine();
-	const runningInAutoMode: boolean = solverMachine.isInAutoMode();
 	variables.persist(variableId, polarity);
 
-	const breakpointVariable: boolean = checkBreakpoint({ type: 'variable', id: variableId });
-	if (breakpointVariable) {
-		logBreakpoint('Variable breakpoint', `Variable ${variableId} assigned`);
+	const assignment: Assignment = {
+		type: 'variable',
+		id: variableId
 	}
 
-	const literal: number = polarity ? variableId : -variableId;
-	const clausesToCheck = mapping.get(literal);
-	let breakpointClause: boolean = false;
-	if (clausesToCheck !== undefined) {
-		for (const clauseId of clausesToCheck) {
-			if (!checkBreakpoint({ type: 'clause', id: clauseId })) {
-				continue;
-			}
-			const clauseEval: ClauseEval = clauseEvaluation(clauses, clauseId);
-			if (isSatClause(clauseEval)) {
-				breakpointClause = true;
-				logBreakpoint(
-					'Clause breakpoint',
-					`Clause ${clauseId} satisfied by variable ${variableId}`
-				);
-			}
-		}
+	afterAssignment(assignment);
+};
+
+const afterAssignment = (assignment: Assignment): void => {
+	const solverMachine = getSolverMachine();
+	const runningInAutoMode: boolean = solverMachine.isInAutoMode();
+	const isBreakpoint: boolean = markedAsBreakpoint(assignment);
+	if (isBreakpoint) {
+		logBreakpoint('Variable breakpoint', `Variable ${assignment.id} assigned`);
 	}
-	if (runningInAutoMode && (breakpointVariable || breakpointClause)) {
+	if (runningInAutoMode && (isBreakpoint)) {
 		solverMachine.stopAutoMode();
 	}
-};
+}
 
 export const backtracking = (pool: VariablePool): number => {
 	const trail: Trail = (getLatestTrail() as Trail).copy();

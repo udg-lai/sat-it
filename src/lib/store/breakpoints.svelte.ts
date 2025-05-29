@@ -1,11 +1,10 @@
+import { logError } from '$lib/store/toasts.ts';
 import { SvelteSet } from 'svelte/reactivity';
 
 const variableBreakpoint: SvelteSet<number> = $state(new SvelteSet<number>());
 
-const clauseBreakpoint: SvelteSet<number> = $state(new SvelteSet<number>());
-
 export type Assignment = {
-	type: 'variable' | 'clause';
+	type: 'variable';
 	id: number;
 };
 
@@ -14,28 +13,22 @@ export type VariableBreakpoint = {
 	variableId: number;
 };
 
-export type ClauseBreakpoint = {
-	type: 'clause';
-	clauseId: number;
-};
-
-export type Breakpoint = VariableBreakpoint | ClauseBreakpoint;
+export type Breakpoint = VariableBreakpoint;
 
 export const addBreakpoint = (breakpoint: Breakpoint): void => {
 	if (breakpoint.type === 'variable') {
 		variableBreakpoint.add(breakpoint.variableId);
-	} else if (breakpoint.type === 'clause') {
-		clauseBreakpoint.add(breakpoint.clauseId);
+	} else {
+		logError('Unsupported breakpoint type:', breakpoint.type);
 	}
 };
 
-export const checkBreakpoint = (assignment: Assignment): boolean => {
+export const markedAsBreakpoint = (assignment: Assignment): boolean => {
 	let checkVariableId: boolean = false;
-	let checkClauseId: boolean = false;
 	if (assignment.type === 'variable') {
 		checkVariableId = variableBreakpoint.has(assignment.id);
-	} else if (assignment.type === 'clause') {
-		checkClauseId = clauseBreakpoint.has(assignment.id);
+	} else {
+		logError('Unsupported assignment type:', assignment.type);
 	}
-	return checkClauseId || checkVariableId;
+	return checkVariableId;
 };
