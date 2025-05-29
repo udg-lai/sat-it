@@ -26,17 +26,42 @@
 
 	let variableToAdd: number | undefined = $state();
 
-	const probelm: Problem = $derived(getProblemStore());
+	const problem: Problem = $derived(getProblemStore());
 
 	const addVariable = (): void => {
 		if (variableToAdd === undefined) return;
-		if (!isNaN(variableToAdd) && probelm.variables.getVariablesIDs().includes(variableToAdd)) {
+		if (!isNaN(variableToAdd) && problem.variables.getVariablesIDs().includes(variableToAdd)) {
 			addBreakpoint({ type: 'variable', variableId: variableToAdd });
 		} else {
 			logError('Breakpoint Variables', 'The variable you wanted to include is not in the problem');
 		}
 		variableToAdd = undefined;
 	};
+
+	const validateInput = (event: Event): void => {
+		const input: HTMLInputElement = event.target as HTMLInputElement;
+		const value: number = Number(input.value);
+
+		if (isNaN(value)) {
+			variableToAdd = undefined;
+			input.value = '';
+			return;
+		}
+
+		const min: number = 1;
+		const max: number = problem.variables.capacity;
+
+		if (value < min || value > max) {
+			variableToAdd = undefined;
+			input.setCustomValidity(`Value must be between ${min} and ${max}`);
+			input.reportValidity();
+			return;
+		} else {
+			input.setCustomValidity('');
+		}
+
+		variableToAdd = value;
+	}
 </script>
 
 <div class="heading-class">
@@ -52,8 +77,9 @@
 			class="w-32 rounded-lg border border-[var(--border-color)] text-right focus:outline-none focus:ring-0"
 			bind:value={variableToAdd}
 			onchange={addVariable}
-			min={0}
-			max={probelm.variables.capacity}
+			oninput={validateInput}
+			min={1}
+			max={problem.variables.capacity}
 		/>
 	</variables>
 	<variables-display class="breakpoint-display">
