@@ -20,7 +20,9 @@
 		'rounded-lg bg-[var(--main-bg-color)] border border-[var(--border-color)] p-2';
 
 	let breakpointVariables: SvelteSet<number> = $derived(getBreakpoints());
-	const showVariables: number[] = $derived(Array.from(breakpointVariables.values()));
+	const showVariables: number[] = $derived(
+		Array.from(breakpointVariables.values()).sort((a, b) => a - b)
+	);
 
 	let variableToAdd: number | undefined = $state();
 
