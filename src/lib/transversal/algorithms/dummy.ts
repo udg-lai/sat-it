@@ -1,7 +1,7 @@
 import VariableAssignment from '../entities/VariableAssignment.ts';
 import { Trail } from '../entities/Trail.svelte.ts';
 import type VariablePool from '../entities/VariablePool.svelte.ts';
-import { logFatal } from '../logging.ts';
+import { logFatal } from '$lib/store/toasts.ts';
 import { fromJust, isJust } from '../types/maybe.ts';
 
 export interface DummySearchParams {

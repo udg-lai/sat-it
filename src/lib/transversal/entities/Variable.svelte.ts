@@ -1,5 +1,5 @@
 import type { Comparable } from '../interfaces/Comparable.ts';
-import { logFatal } from '../logging.ts';
+import { logFatal } from '$lib/store/toasts.ts';
 
 export default class Variable implements Comparable<Variable> {
 	private id: number;

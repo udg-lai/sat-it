@@ -9,7 +9,7 @@
 	import { DatabaseOutline, LockOutline, TrashBinOutline } from 'flowbite-svelte-icons';
 	import { onMount } from 'svelte';
 	import ViewerComponent from './ViewerComponent.svelte';
-	import { logInfo } from '$lib/transversal/logging.ts';
+	import { logInfo } from '$lib/store/toasts.ts';
 
 	let previewingInstance: InteractiveInstance | undefined = $state(undefined);
 

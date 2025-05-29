@@ -3,7 +3,7 @@
 	import ToolsComponent from '$lib/components/tools/ToolsComponent.svelte';
 	import ScrollableComponent from '$lib/components/ScrollableComponent.svelte';
 	import ToastComponent from '$lib/components/ToastComponent.svelte';
-	import { toasts } from '$lib/store/toasts.store.ts';
+	import { toasts } from '$lib/store/toasts.ts';
 	import {
 		initializeInstancesStore,
 		setDefaultInstanceToSolve
@@ -14,7 +14,7 @@
 	import { closeSettingsViewEventBus, openSettingsViewEventBus } from '$lib/transversal/events.ts';
 	import SettingsComponent from '$lib/components/settings/SettingsComponent.svelte';
 	import { disableContextMenu } from '$lib/transversal/utils.ts';
-	import { logError } from '$lib/transversal/logging.ts';
+	import { logError } from '$lib/store/toasts.ts';
 
 	let renderSettings = $state(true);
 

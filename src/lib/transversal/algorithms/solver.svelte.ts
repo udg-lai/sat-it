@@ -6,19 +6,19 @@ import { getSolverMachine } from '$lib/store/stateMachine.svelte.ts';
 import {
 	increaseNoConflicts,
 	increaseNoDecisions,
-	increaseNoUnitPropgations as increaseNoUnitPropagations
+	increaseNoUnitPropagations as increaseNoUnitPropagations
 } from '$lib/store/statistics.svelte.ts';
+import { logBreakpoint, logFatal } from '$lib/store/toasts.ts';
 import { getLatestTrail, stackTrail, unstackTrail } from '$lib/store/trails.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import type Clause from '../entities/Clause.ts';
-import { isSatClause, type ClauseEval } from '../entities/Clause.ts';
+import { type ClauseEval } from '../entities/Clause.ts';
 import type ClausePool from '../entities/ClausePool.svelte.ts';
 import { Trail } from '../entities/Trail.svelte.ts';
 import type Variable from '../entities/Variable.svelte.ts';
 import VariableAssignment from '../entities/VariableAssignment.ts';
 import type VariablePool from '../entities/VariablePool.svelte.ts';
 import { isUnSAT } from '../interfaces/IClausePool.ts';
-import { logBreakpoint, logFatal } from '../logging.ts';
 import { fromJust, isJust } from '../types/maybe.ts';
 
 export const emptyClauseDetection = (pool: ClausePool): boolean => {
@@ -126,14 +126,14 @@ export const nonDecisionMade = (): boolean => {
 };
 
 const doAssignment = (variableId: number, polarity: boolean): void => {
-	const { variables} = getProblemStore();
+	const { variables } = getProblemStore();
 
 	variables.persist(variableId, polarity);
 
 	const assignment: Assignment = {
 		type: 'variable',
 		id: variableId
-	}
+	};
 
 	afterAssignment(assignment);
 };
@@ -145,10 +145,10 @@ const afterAssignment = (assignment: Assignment): void => {
 	if (isBreakpoint) {
 		logBreakpoint('Variable breakpoint', `Variable ${assignment.id} assigned`);
 	}
-	if (runningInAutoMode && (isBreakpoint)) {
+	if (runningInAutoMode && isBreakpoint) {
 		solverMachine.stopAutoMode();
 	}
-}
+};
 
 export const backtracking = (pool: VariablePool): number => {
 	const trail: Trail = (getLatestTrail() as Trail).copy();
