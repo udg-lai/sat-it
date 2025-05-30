@@ -36,18 +36,18 @@
 <div class="h-full space-y-5 border-t border-[var(--border-color)]">
 	<div class="flex place-content-around pt-3">
 		<div class="metric">
-			Decision Level: 
+			Decision Level:
 			<span class="statistic-value">{decisionLevelCurrentTrail}</span>
 		</div>
 		{#if !finished}
 			<div class="metric">
-				Clauses left: 
+				Clauses left:
 				<span class="statistic-value">{clausesLeft}</span>
 			</div>
 		{/if}
 		{#if unsat}
 			<div class="metric">
-				Minimum Clauses: 
+				Minimum Clauses:
 				<span class="statistic-value">{minimumClausesLeft}</span>
 			</div>
 		{/if}
