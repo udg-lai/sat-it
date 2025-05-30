@@ -33,30 +33,55 @@
 	const unsat: boolean = $derived(getSolverMachine().onUnsatState());
 </script>
 
-<div class="h-full space-y-5 border-t">
+<div class="h-full space-y-5 border-t border-[var(--border-color)]">
 	<div class="flex place-content-around pt-3">
-		<span class="metric">Decision Level: {decisionLevelCurrentTrail}</span>
+		<div class="metric">
+			Decision Level: 
+			<span class="statistic-value">{decisionLevelCurrentTrail}</span>
+		</div>
 		{#if !finished}
-			<span class="metric">Clauses left: {clausesLeft}</span>
+			<div class="metric">
+				Clauses left: 
+				<span class="statistic-value">{clausesLeft}</span>
+			</div>
 		{/if}
 		{#if unsat}
-			<span class="metric">Minimum Clauses: {minimumClausesLeft}</span>
+			<div class="metric">
+				Minimum Clauses: 
+				<span class="statistic-value">{minimumClausesLeft}</span>
+			</div>
 		{/if}
 	</div>
 	<div class="flex place-content-around">
-		<span class="metric">Decisions: {decisions}</span>
-		<span class="metric">Conflicts: {conflicts}</span>
-		<span class="metric">Unit propagations: {unitPropagations}</span>
+		<div class="metric">
+			<span>Decisions:</span>
+			<span class="statistic-value">{decisions}</span>
+		</div>
+		<div class="metric">
+			<span>Conflicts:</span>
+			<span class="statistic-value">{conflicts}</span>
+		</div>
+		<div class="metric">
+			<span>Unit propagations:</span>
+			<span class="statistic-value">{unitPropagations}</span>
+		</div>
 	</div>
 </div>
 
 <style>
 	.metric {
-		border-top: 1px;
-		flex: 1 1 0;
-		text-align: center;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 1px 5px;
+		flex: 1;
 		min-width: 5rem;
 		max-width: 12rem;
-		min-height: 1rem;
+		background-color: white;
+		border-radius: 5px;
+		border: 1px solid var(--border-color);
+	}
+	.statistic-value {
+		text-align: right;
 	}
 </style>
