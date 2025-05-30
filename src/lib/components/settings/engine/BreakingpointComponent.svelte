@@ -148,6 +148,5 @@
 	li {
 		display: flex;
 		width: 100%;
-		
 	}
 </style>
