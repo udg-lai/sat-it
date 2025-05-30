@@ -1,7 +1,7 @@
 <script lang="ts">
-	import AlgorithmComponent from './engine/AlgorithmComponent.svelte';
-	import BreakingpointComponent from './engine/BreakingpointComponent.svelte';
-	import ParametersComponent from './engine/PrametersComponent.svelte';
+	import AlgorithmComponent from './AlgorithmComponent.svelte';
+	import BreakingpointComponent from './BreakingpointComponent.svelte';
+	import ParametersComponent from './PrametersComponent.svelte';
 
 	const iconClass = { size: 'xl' };
 </script>

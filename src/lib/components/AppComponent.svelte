@@ -22,7 +22,7 @@
 	import { onMount } from 'svelte';
 	import { editorViewEventStore, type EditorViewEvent } from './debugger/events.svelte.ts';
 	import TrailEditor from './TrailEditorComponent.svelte';
-	import { addBreakpoint, type VariableBreakpoint } from '$lib/store/breakpoints.svelte.ts';
+	import { addBreakpoint, clearBreakpoints, type VariableBreakpoint } from '$lib/store/breakpoints.svelte.ts';
 
 	let expandPropagations: boolean = $state(true);
 
@@ -67,8 +67,14 @@
 	function reset(): void {
 		resetStack();
 		resetStatistics();
+		clearBreakpoints();
 		const first = undo();
 		reloadFromSnapshot(first);
+	}
+
+	function fullyReset(): void {
+		clearBreakpoints();
+		reset();
 	}
 
 	const b3: VariableBreakpoint = {
@@ -81,8 +87,8 @@
 	onMount(() => {
 		const unsubscribeToggleEditor = editorViewEventStore.subscribe(togglePropagations);
 		const unsubscribeActionEvent = userActionEventBus.subscribe(onActionEvent);
-		const unsubscribeChangeInstanceEvent = changeInstanceEventBus.subscribe(reset);
 		const unsubscribeStateMachineEvent = stateMachineEventBus.subscribe(stateMachineEvent);
+		const unsubscribeChangeInstanceEvent = changeInstanceEventBus.subscribe(fullyReset);
 		const unsubscribeChangeAlgorithmEvent = changeAlgorithmEventBus.subscribe(reset);
 
 		return () => {

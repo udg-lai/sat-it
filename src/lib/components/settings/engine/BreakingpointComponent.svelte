@@ -53,7 +53,7 @@
 
 		if (value < min || value > max) {
 			variableToAdd = undefined;
-			input.setCustomValidity(`Value must be between ${min} and ${max}`);
+			input.setCustomValidity(`Variables range between ${min} and ${max}`);
 			input.reportValidity();
 			return;
 		} else {

@@ -42,3 +42,7 @@ export const removeBreakpoint = (breakpoint: Breakpoint): void => {
 };
 
 export const getBreakpoints = () => variableBreakpoint;
+
+export const clearBreakpoints = (): void => {
+	variableBreakpoint.clear();
+}
