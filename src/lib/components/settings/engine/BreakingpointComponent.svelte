@@ -112,14 +112,19 @@
 		width: 100%;
 		border-radius: 10px;
 		background-color: white;
+		border: solid;
+		border-width: 1px;
+		border-color: var(--border-color);
 		padding: 0.5rem;
 		transition:
 			color 300ms,
-			background-color 300ms;
+			background-color 300ms,
+			border-color 300ms;
 	}
 	.variable-text:hover {
 		background-color: rgb(255, 185, 185);
 		color: rgb(202, 53, 53);
+		border-color: rgb(245, 42, 42);
 	}
 
 	.scroll-container {
@@ -143,5 +148,6 @@
 	li {
 		display: flex;
 		width: 100%;
+		
 	}
 </style>

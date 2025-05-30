@@ -71,7 +71,7 @@
 			<span class="pr-2">Polarity:</span>
 			<div class="inline-flex rounded-lg" role="group">
 				<button
-					class={`border border-gray-200 px-4 py-2 transition-colors duration-300 ${
+					class={`border border-[var(--border-color)] px-4 py-2 transition-colors duration-300 ${
 						baselinePolarity
 							? 'bg-[var(--icon-base)] text-white'
 							: 'bg-white hover:bg-[var(--icon-light)]'
@@ -81,7 +81,7 @@
 					True
 				</button>
 				<button
-					class={`border border-gray-200 px-4 py-2 transition-colors duration-300 ${
+					class={`border border-[var(--border-color)] px-4 py-2 transition-colors duration-300 ${
 						!baselinePolarity
 							? 'bg-[var(--icon-base)] text-white'
 							: 'bg-white hover:bg-[var(--icon-light)]'

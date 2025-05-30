@@ -37,7 +37,7 @@
 			<label for="algorithm">Algorithm:</label>
 			<select
 				id="algorithm"
-				class="flex-1 rounded-lg border-none text-right outline-none focus:outline-none focus:ring-0"
+				class="flex-1 rounded-lg border-[var(--border-color)] text-right outline-none focus:outline-none focus:ring-0 "
 				onchange={() => {
 					if (getTrails().length !== 0) resetModal = true;
 				}}
