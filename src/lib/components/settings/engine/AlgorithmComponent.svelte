@@ -63,7 +63,7 @@
 	<div class="text-center">
 		<ExclamationCircleOutline class="mx-auto mb-4 h-12 w-12 text-red-600" />
 		<h3 class="mb-5 text-lg font-normal text-gray-600">
-			By changing the algorithm, all your trail progress will be lost. Are you sure?
+			By changing the algorithm, all the assignments made will be erased. Are you sure?
 		</h3>
 		<button class="btn mr-4" onclick={confirmUpdate}>Yes, I'm sure</button>
 		<button
