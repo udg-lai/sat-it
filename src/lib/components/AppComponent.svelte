@@ -3,6 +3,7 @@
 	import { record, redo, resetStack, undo, type Snapshot } from '$lib/store/stack.svelte.ts';
 	import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
 	import {
+		changeAlgorithmEventBus,
 		changeInstanceEventBus,
 		stateMachineEventBus,
 		userActionEventBus,
@@ -74,15 +75,15 @@
 		reloadFromSnapshot(first);
 	}
 
-//	const b1: VariableBreakpoint = {
-//		type: 'variable',
-//		variableId: 1
-//	};
-//
-//	const b2: VariableBreakpoint = {
-//		type: 'variable',
-//		variableId: 2
-//	};
+	//	const b1: VariableBreakpoint = {
+	//		type: 'variable',
+	//		variableId: 1
+	//	};
+	//
+	//	const b2: VariableBreakpoint = {
+	//		type: 'variable',
+	//		variableId: 2
+	//	};
 
 	const b3: VariableBreakpoint = {
 		type: 'variable',
@@ -104,12 +105,14 @@
 		const unsubscribeActionEvent = userActionEventBus.subscribe(onActionEvent);
 		const unsubscribeChangeInstanceEvent = changeInstanceEventBus.subscribe(reset);
 		const unsubscribeStateMachineEvent = stateMachineEventBus.subscribe(stateMachineEvent);
+		const unsubscribeChangeAlgorithmEvent = changeAlgorithmEventBus.subscribe(reset);
 
 		return () => {
 			unsubscribeToggleEditor();
 			unsubscribeActionEvent();
 			unsubscribeChangeInstanceEvent();
 			unsubscribeStateMachineEvent();
+			unsubscribeChangeAlgorithmEvent();
 		};
 	});
 </script>
