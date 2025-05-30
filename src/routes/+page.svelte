@@ -38,12 +38,11 @@
 		};
 	});
 
-	beforeNavigate(( nav ) => {
-		if(nav.type === 'leave') {
+	beforeNavigate((nav) => {
+		if (nav.type === 'leave') {
 			nav.cancel();
 		}
 	});
-
 </script>
 
 <svelte:body oncontextmenu={disableContextMenu} />
