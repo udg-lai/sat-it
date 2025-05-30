@@ -5,6 +5,7 @@
 :root {
 	--border-color: #cacaca;
 	--main-bg-color: #f2f4f8;
+	--lighter-bg-color: #f8f8f8;
 	--main-font-color: #121212;
 	--secondary-font-color: #110b0ba8;
 	--focus-border-color: var(--secondary-font-color);

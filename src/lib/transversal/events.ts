@@ -21,5 +21,8 @@ export type StateMachineEvent = 'step' | 'solve_trail' | 'solve_all' | 'nextVari
 
 export const stateMachineEventBus = createEventBus<StateMachineEvent>();
 
+// observable of algorithm changes
+export const changeAlgorithmEventBus = createEventBus<void>();
+
 // event bus for breakpoints
 export const breakpointEvent = createEventBus<Breakpoint>();

@@ -5,10 +5,12 @@ import {
 import { SolverMachine } from '$lib/machine/SolverMachine.svelte.ts';
 import type { StateFun, StateInput } from '$lib/machine/StateMachine.svelte.ts';
 import { logFatal } from '$lib/store/toasts.ts';
+import { getProblemStore, type Algorithm } from './problem.svelte.ts';
 
 let solverMachine: SolverMachine<StateFun, StateInput> = $state(new DPLL_SolverMachine());
 
-export const setSolverStateMachine = (algorithm: 'backtracking' | 'dpll' | 'cdcl') => {
+export const setSolverStateMachine = () => {
+	const algorithm: Algorithm = getProblemStore().algorithm;
 	if (algorithm === 'backtracking') {
 		solverMachine = makeDPLLSolver();
 	} else if (algorithm === 'dpll') {

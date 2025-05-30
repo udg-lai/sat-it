@@ -32,3 +32,13 @@ export const markedAsBreakpoint = (assignment: Assignment): boolean => {
 	}
 	return checkVariableId;
 };
+
+export const removeBreakpoint = (breakpoint: Breakpoint): void => {
+	if (breakpoint.type === 'variable') {
+		variableBreakpoint.delete(breakpoint.variableId);
+	} else {
+		logError('Unsupported breakpoint type:', breakpoint.type);
+	}
+};
+
+export const getBreakpoints = () => variableBreakpoint;
