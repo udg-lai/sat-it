@@ -1,3 +1,4 @@
+import type { Breakpoint } from '$lib/store/breakpoints.svelte.ts';
 import { createEventBus } from './createEventBus.ts';
 
 // observable of instance changes
@@ -19,3 +20,9 @@ export const userActionEventBus = createEventBus<ActionEvent>();
 export type StateMachineEvent = 'step' | 'solve_trail' | 'solve_all' | 'nextVariable' | 'finishUP';
 
 export const stateMachineEventBus = createEventBus<StateMachineEvent>();
+
+// observable of algorithm changes
+export const changeAlgorithmEventBus = createEventBus<void>();
+
+// event bus for breakpoints
+export const breakpointEvent = createEventBus<Breakpoint>();

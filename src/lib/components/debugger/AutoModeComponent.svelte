@@ -31,12 +31,12 @@
 </script>
 
 <auto-mode>
-	<div class="range">
-		<Range id="range-steps" {min} {max} bind:value={delay} {step} size="sm" />
-	</div>
 	<button class="btn general-btn" onclick={() => solverMachine.stopAutoMode()} title="Stop">
 		<DynamicRender component={StopOutline} props={{ size: 'md' }} />
 	</button>
+	<div class="range">
+		<Range id="range-steps" {min} {max} bind:value={delay} {step} size="sm" />
+	</div>
 </auto-mode>
 
 <style>

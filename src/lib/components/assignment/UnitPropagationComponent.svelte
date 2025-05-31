@@ -5,7 +5,7 @@
 	import './_style.css';
 	import type Clause from '$lib/transversal/entities/Clause.ts';
 	import { isUnitPropagationReason } from '$lib/transversal/entities/VariableAssignment.ts';
-	import { problemStore } from '$lib/store/problem.store.ts';
+	import { getProblemStore, type Problem } from '$lib/store/problem.svelte.ts';
 	import { logFatal } from '$lib/transversal/logging.ts';
 	import { Popover } from 'flowbite-svelte';
 	import { runningOnChrome } from '$lib/transversal/utils.ts';
@@ -18,11 +18,12 @@
 	let { assignment }: Props = $props();
 	let buttonId: string = 'btn-' + nanoid();
 
+	const problem: Problem = $derived(getProblemStore());
 	const propagatedClause: Clause = $derived.by(() => {
 		if (assignment.isUP()) {
 			const reason = assignment.getReason();
 			if (isUnitPropagationReason(reason)) {
-				return $problemStore.clauses.get(reason.clauseId);
+				return problem.clauses.get(reason.clauseId);
 			} else {
 				logFatal('Reason error', 'The reason is not a backtracking');
 			}
@@ -30,6 +31,8 @@
 			logFatal('Reason error', 'The variable assignment is not a backtracking');
 		}
 	});
+
+	const conflictClauseId: number = $derived(propagatedClause.getId());
 
 	const conflictClauseString: string = $derived(
 		propagatedClause
@@ -56,7 +59,10 @@
 </unit-propagation>
 
 <Popover triggeredBy={'#' + buttonId} class="app-popover" trigger="click" placement="bottom">
-	<MathTexComponent equation={conflictClauseString} fontSize="var(--popover-font-size)" />
+	<div class="popover-content">
+		<span class="clause-id">{conflictClauseId}.</span>
+		<MathTexComponent equation={conflictClauseString} fontSize="var(--popover-font-size)" />
+	</div>
 </Popover>
 
 <style>
@@ -66,6 +72,18 @@
 		z-index: 5;
 		color: black;
 		padding: 0.4rem 0.5rem;
+	}
+
+	:global(.app-popover .popover-content) {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		font-size: var(--popover-font-size);
+		gap: 0.5rem;
+	}
+
+	:global(.app-popover .clause-id) {
+		color: var(--clause-id-color);
 	}
 
 	:global(.app-popover > .py-2) {

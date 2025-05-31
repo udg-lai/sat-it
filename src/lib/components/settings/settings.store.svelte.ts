@@ -1,4 +1,4 @@
-type ActiveView = 'bookmark' | 'engine' | 'legend' | 'info';
+export type ActiveView = 'bookmark' | 'engine' | 'legend' | 'info';
 
 let activeView: ActiveView = $state('bookmark');
 

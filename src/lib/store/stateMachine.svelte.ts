@@ -6,10 +6,12 @@ import { makeDPLLSolver } from '$lib/machine/dpll/dpll-solver-machine.svelte.ts'
 import { SolverMachine } from '$lib/machine/SolverMachine.svelte.ts';
 import type { StateFun, StateInput } from '$lib/machine/StateMachine.svelte.ts';
 import { logFatal } from '$lib/transversal/logging.ts';
+import { getProblemStore, type Algorithm } from './problem.svelte.ts';
 
 let solverMachine: SolverMachine<StateFun, StateInput> = $state(new BKT_SolverMachine());
 
-export const setSolverStateMachine = (algorithm: 'backtracking' | 'dpll' | 'cdcl') => {
+export const setSolverStateMachine = () => {
+	const algorithm: Algorithm = getProblemStore().algorithm;
 	if (algorithm === 'backtracking') {
 		solverMachine = makeBKTSolver();
 	} else if (algorithm === 'dpll') {

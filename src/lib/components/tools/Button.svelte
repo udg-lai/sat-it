@@ -41,8 +41,8 @@
 	.button-high-contrast:hover {
 		border-width: 1px;
 		border-style: dashed;
-		border-color: var(--focus-border-color);
-		color: var(--main-font-color);
+		border-color: var(--icone-strong);
+		color: var(--icone-strong);
 	}
 
 	.button-high-contrast:active {
@@ -50,7 +50,7 @@
 	}
 
 	.button-high-contrast.active {
-		color: var(--main-font-color);
+		color: var(--icone-strong);
 	}
 
 	.side-bar {
@@ -60,6 +60,6 @@
 	}
 
 	.side-bar.active {
-		background-color: var(--main-font-color);
+		background-color: var(--icone-strong);
 	}
 </style>

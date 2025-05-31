@@ -1,4 +1,4 @@
-import { problemStore, type MappingLiteral2Clauses } from '$lib/store/problem.store.ts';
+import { getProblemStore, type MappingLiteral2Clauses } from '$lib/store/problem.svelte.ts';
 import {
 	emptyClauseDetection as solverEmptyClauseDetection,
 	allAssigned as solverAllAssigned,
@@ -12,7 +12,6 @@ import {
 import type ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';
 import type VariablePool from '$lib/transversal/entities/VariablePool.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
-import { get } from 'svelte/store';
 import type { BKT_SolverMachine } from './bkt-solver-machine.svelte.ts';
 import { logFatal } from '$lib/transversal/logging.ts';
 import { isUnSATClause, type ClauseEval } from '$lib/transversal/entities/Clause.ts';
@@ -55,28 +54,28 @@ export type BKT_INPUT =
 export type BKT_EMPTY_CLAUSE_FUN = () => boolean;
 
 export const emptyClauseDetection: BKT_EMPTY_CLAUSE_FUN = () => {
-	const pool: ClausePool = get(problemStore).clauses;
+	const pool: ClausePool = getProblemStore().clauses;
 	return solverEmptyClauseDetection(pool);
 };
 
 export type BKT_ALL_VARIABLES_ASSIGNED_FUN = () => boolean;
 
 export const allAssigned: BKT_ALL_VARIABLES_ASSIGNED_FUN = () => {
-	const pool = get(problemStore).variables;
+	const pool = getProblemStore().variables;
 	return solverAllAssigned(pool);
 };
 
 export type BKT_DECIDE_FUN = () => number;
 
 export const decide: BKT_DECIDE_FUN = () => {
-	const pool: VariablePool = get(problemStore).variables;
-	return solverDecide(pool, 'dpll');
+	const pool: VariablePool = getProblemStore().variables;
+	return solverDecide(pool, 'backtracking');
 };
 
 export type BKT_COMPLEMENTARY_OCCURRENCES_FUN = (literal: number) => SvelteSet<number>;
 
 export const complementaryOccurrences: BKT_COMPLEMENTARY_OCCURRENCES_FUN = (literal: number) => {
-	const mapping: MappingLiteral2Clauses = get(problemStore).mapping;
+	const mapping: MappingLiteral2Clauses = getProblemStore().mapping;
 	return solverComplementaryOccurrences(mapping, literal);
 };
 
@@ -129,7 +128,7 @@ export const nextClause: BKT_NEXT_CLAUSE_FUN = (pendingSet: SvelteSet<number>) =
 export type BKT_CONFLICT_DETECTION_FUN = (clauseId: number) => boolean;
 
 export const unsatisfiedClause: BKT_CONFLICT_DETECTION_FUN = (clauseId: number) => {
-	const pool: ClausePool = get(problemStore).clauses;
+	const pool: ClausePool = getProblemStore().clauses;
 	const evaluation: ClauseEval = solverClauseEvaluation(pool, clauseId);
 	return isUnSATClause(evaluation);
 };
@@ -165,7 +164,7 @@ export const nonDecisionMade: BKT_DECISION_LEVEL_FUN = () => {
 export type BKT_BACKTRACKING_FUN = () => number;
 
 export const backtracking: BKT_BACKTRACKING_FUN = () => {
-	const pool: VariablePool = get(problemStore).variables;
+	const pool: VariablePool = getProblemStore().variables;
 	return solverBacktracking(pool);
 };
 

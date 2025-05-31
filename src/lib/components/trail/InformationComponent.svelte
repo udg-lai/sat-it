@@ -1,13 +1,14 @@
 <script lang="ts">
 	import { SAT_STATE_ID, UNSAT_STATE_ID } from '$lib/machine/reserved.ts';
 	import { nanoid } from 'nanoid';
-	import { problemStore } from '$lib/store/problem.store.ts';
+	import { getProblemStore, type Problem } from '$lib/store/problem.svelte.ts';
 	import { getSolverMachine } from '$lib/store/stateMachine.svelte.ts';
 	import type Clause from '$lib/transversal/entities/Clause.ts';
 	import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
-	import { get } from 'svelte/store';
 	import { Popover } from 'flowbite-svelte';
 	import MathTexComponent from '../MathTexComponent.svelte';
+	import DynamicRender from '../DynamicRender.svelte';
+	import { CheckOutline, CloseOutline, HammerOutline } from 'flowbite-svelte-icons';
 
 	interface Props {
 		trail: Trail;
@@ -16,10 +17,15 @@
 
 	let buttonId: string = 'btn-' + nanoid();
 
+	const problem: Problem = $derived(getProblemStore());
+	const iconProps = {
+		class: 'h-7 w-7 cursor-pointer'
+	};
+
+	const clauseId: number = $derived(trail.getTrailEnding());
 	const clause: string | undefined = $derived.by(() => {
-		const trailEndingClause: number = trail.getTrailEnding();
-		if (trailEndingClause === -1) return undefined;
-		const clause: Clause = get(problemStore).clauses.get(trailEndingClause);
+		if (clauseId === -1) return undefined;
+		const clause: Clause = problem.clauses.get(clauseId);
 		return clause
 			.map((literal) => {
 				return literal.toTeX();
@@ -40,22 +46,25 @@
 	class:sat={satState && clause === undefined}
 >
 	{#if unsatState}
-		<p>UNSAT</p>
+		<DynamicRender component={CloseOutline} props={iconProps} />
 	{:else if clause !== undefined}
-		<p>CONFLICT</p>
+		<DynamicRender component={HammerOutline} props={iconProps} />
 	{:else if satState}
-		<p>SAT</p>
+		<DynamicRender component={CheckOutline} props={iconProps} />
 	{/if}
 </button>
 
 <Popover triggeredBy={'#' + buttonId} class="app-popover" trigger="click" placement="bottom">
-	<MathTexComponent equation={clause as string} fontSize="var(--popover-font-size)" />
+	<div class="popover-content">
+		<span class="clause-id">{clauseId}.</span>
+		<MathTexComponent equation={clause as string} fontSize="var(--popover-font-size)" />
+	</div>
 </Popover>
 
 <style>
 	.notification {
 		pointer-events: none;
-		width: 6rem;
+		width: 4rem;
 		padding-left: 1rem;
 		display: flex;
 		justify-content: left;
@@ -80,9 +89,19 @@
 	:global(.app-popover) {
 		background-color: var(--main-bg-color);
 		border-color: var(--border-color);
-		z-index: 5;
 		color: black;
-		padding: 0.4rem 0.5rem;
+		padding: 0.3rem 0.5rem;
+	}
+	:global(.app-popover .popover-content) {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		font-size: var(--popover-font-size);
+		gap: 0.5rem;
+	}
+
+	:global(.app-popover .clause-id) {
+		color: var(--clause-id-color);
 	}
 
 	:global(.app-popover > .py-2) {

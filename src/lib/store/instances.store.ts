@@ -3,7 +3,7 @@ import { changeInstanceEventBus } from '$lib/transversal/events.ts';
 import fetchInstances from '$lib/transversal/bootstrap-instances.ts';
 import { logError, logInfo, logWarning } from '$lib/transversal/logging.ts';
 import { get, writable, type Writable } from 'svelte/store';
-import { updateProblemDomain } from './problem.store.ts';
+import { updateProblemDomain } from './problem.svelte.ts';
 
 export interface InteractiveInstance extends DimacsInstance {
 	removable: boolean;

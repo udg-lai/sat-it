@@ -54,11 +54,7 @@
 		display: flex;
 		position: relative;
 		align-items: end;
-	}
-
-	.line span {
-		position: absolute;
-		align-self: center;
+		gap: 0.5rem;
 	}
 
 	.line-item {
@@ -73,9 +69,10 @@
 	.enumerate {
 		display: flex;
 		justify-content: center;
-		width: 4rem;
-		height: var(--trail-content-height);
+		width: var(--button-size);
+		height: var(--button-size);
 		position: relative;
+		align-items: center;
 	}
 
 	.enumerate p {

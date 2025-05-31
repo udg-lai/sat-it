@@ -5,6 +5,7 @@
 :root {
 	--border-color: #cacaca;
 	--main-bg-color: #f2f4f8;
+	--lighter-bg-color: #f8f8f8;
 	--main-font-color: #121212;
 	--secondary-font-color: #110b0ba8;
 	--focus-border-color: var(--secondary-font-color);
@@ -16,10 +17,20 @@
 	--backtracking-color: #8a3ffc;
 	--unsatisfied-color: #d12771;
 	--satisfied-color: #24a148;
+	--clause-id-color: #00000099;
 	--trail-height: 5rem;
-	--trail-content-height: 3rem;
-	--popover-font-size: 0.8rem;
+	--trail-content-height: 4rem;
+	--trail-literal-min-width: var(--button-size);
+	--popover-font-size: 0.9rem;
 	--button-size: 40px;
+	--icon-unselected: #828282;
+	--icon-base: #8a3ffc;
+	--icon-light: #e5d9ff;
+	--icon-strong: #5c23a7;
+	--button-color: #cacaca30;
+	--button-hover-color: #cacaca60;
+	--button-active-color: #cacaca90;
+	--button-border-color: #afafaf;
 }
 
 html,

@@ -5,7 +5,7 @@
 	import LegendComponent from './LegendComponent.svelte';
 	import OptionsComponent, { type OptionEmit } from './OptionsComponent.svelte';
 	import { getActiveView, setActiveView } from './settings.store.svelte.ts';
-	import EngingeComponent from './EngingeComponent.svelte';
+	import EngineComponent from './EngineComponent.svelte';
 
 	type ActiveView = 'bookmark' | 'engine' | 'legend' | 'info';
 
@@ -34,7 +34,7 @@
 				{#if view === 'bookmark'}
 					<BookmarkInstances />
 				{:else if view === 'engine'}
-					<EngingeComponent />
+					<EngineComponent />
 				{:else}
 					<LegendComponent />
 				{/if}
