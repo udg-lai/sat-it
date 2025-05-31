@@ -45,4 +45,4 @@ export const getBreakpoints = () => variableBreakpoint;
 
 export const clearBreakpoints = (): void => {
 	variableBreakpoint.clear();
-}
+};

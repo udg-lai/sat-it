@@ -22,7 +22,11 @@
 	import { onMount } from 'svelte';
 	import { editorViewEventStore, type EditorViewEvent } from './debugger/events.svelte.ts';
 	import TrailEditor from './TrailEditorComponent.svelte';
-	import { addBreakpoint, clearBreakpoints, type VariableBreakpoint } from '$lib/store/breakpoints.svelte.ts';
+	import {
+		addBreakpoint,
+		clearBreakpoints,
+		type VariableBreakpoint
+	} from '$lib/store/breakpoints.svelte.ts';
 
 	let expandPropagations: boolean = $state(true);
 
