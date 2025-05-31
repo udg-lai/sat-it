@@ -12,13 +12,6 @@
 	let view: ActiveView = $derived(getActiveView());
 
 	function handleOptionEvent(event: OptionEmit): void {
-		if (event === 'bookmark') {
-			console.log('show list');
-		} else if (event === 'engine') {
-			console.log('show engine');
-		} else {
-			console.log('show legend');
-		}
 		if (event === 'close') {
 			closeSettingsViewEventBus.emit();
 		} else {

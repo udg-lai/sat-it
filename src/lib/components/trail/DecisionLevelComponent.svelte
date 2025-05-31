@@ -8,20 +8,20 @@
 	interface Props {
 		decision: VariableAssignment;
 		propagations?: VariableAssignment[];
-		expanded: boolean;
-		emitExpand?: () => void;
-		emitClose?: () => void;
 	}
 
-	let { decision, propagations = [], expanded, emitClose, emitExpand }: Props = $props();
+	let { decision, propagations = [] }: Props = $props();
+
+	let expanded: boolean = $state(true);
+
 </script>
 
 {#if propagations?.length === 0}
 	<ChildlessDecisionComponent assignment={decision} />
 {:else}
-	<DecisionComponent assignment={decision} bind:expanded {emitClose} {emitExpand} />
+	<DecisionComponent assignment={decision} bind:expanded />
 	{#if expanded}
-		{#each propagations as assignment (assignment.toInt())}
+		{#each propagations as assignment (assignment.variableId())}
 			{#if assignment.isK()}
 				<BacktrackingComponent {assignment} />
 			{:else}

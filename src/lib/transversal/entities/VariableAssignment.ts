@@ -131,6 +131,10 @@ export default class VariableAssignment {
 		}
 	}
 
+	variableId(): number {
+		return this.variable.getInt();
+	}
+
 	toTeX(): string {
 		if (this.variable.isNotAssigned()) {
 			logFatal(

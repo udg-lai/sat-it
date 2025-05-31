@@ -4,18 +4,14 @@
 	import BacktrackingComponent from '../assignment/BacktrackingComponent.svelte';
 	import UnitPropagationComponent from '../assignment/UnitPropagationComponent.svelte';
 	import DecisionLevelComponent from './DecisionLevelComponent.svelte';
-
-	interface DecisionLevel {
-		assignment: VariableAssignment;
-		level: number;
-	}
+	import { setLastTrailContentWidth } from './state.svelte.ts';
 
 	interface Props {
 		trail: Trail;
-		expanded: boolean;
+		isLast?: boolean
 	}
 
-	let { trail, expanded = $bindable(false) }: Props = $props();
+	let { trail, isLast = true }: Props = $props();
 
 	let initialPropagations: VariableAssignment[] = $derived(trail.getInitialPropagations());
 
@@ -28,88 +24,45 @@
 		})
 	);
 
-	let nExpandable = $derived.by(() => {
-		const levels: number[] = decisions.map(({ level }) => {
-			return trail.hasPropagations(level) ? 1 : 0;
-		});
-		return levels.reduce((a, b) => a + b, 0);
+	let trailElement: HTMLElement | undefined = $state(undefined);
+
+	let trailWidth: number = $derived.by(() => {
+		if (trailElement === undefined) return 0;
+		return trailElement.getBoundingClientRect().width;
 	});
 
-	let nExpanded = $state(expanded ? countLevelsWithPropagations() : 0);
+	let contentWidth: number = $state(-1)
 
-	let contentWidth: number = $state(0);
-
-	let trailElement: HTMLElement;
-
-	function countLevelsWithPropagations(): number {
-		const propagations: number[] = trail.getDecisions().map((_, idx) => {
-			const level = idx + 1;
-			return trail.hasPropagations(level) ? 1 : 0;
-		});
-		return propagations.reduce((a, b) => a + b, 0);
-	}
-
-	function onEmitClose(): void {
-		nExpanded = Math.max(nExpanded - 1, 0);
-		if (nExpanded === 0) expanded = false;
-	}
-
-	function onEmitExpand(): void {
-		nExpanded = Math.min(nExpanded + 1, nExpandable);
-		if (nExpanded === nExpandable) expanded = true;
-	}
-
-	$effect(() => {
-		if (expanded === false) {
-			nExpanded = 0;
-		} else {
-			nExpanded = nExpandable;
-		}
+	let translateX: number = $derived.by(() => {
+		let offset = trailWidth - contentWidth;
+		return offset < 0 ? offset : 0;
 	});
 
-	let contentOverflow = $state(false);
-
-	function listenContentWidth(trailContent: HTMLElement) {
-		const trailContentWidthObserver = new ResizeObserver((entries) => {
+	function listenContentWidth(element: HTMLElement) {
+		const widthObserver = new ResizeObserver((entries) => {
 			for (const entry of entries) {
 				contentWidth = entry.contentRect.width;
-				const trailExpectedWidth = trailElement.offsetWidth;
-				contentOverflow = contentWidth > trailExpectedWidth;
-				if (contentOverflow) {
-					scrollToEnd();
-				}
 			}
 		});
-		trailContentWidthObserver.observe(trailContent);
+		widthObserver.observe(element);
 		return {
 			destroy() {
-				trailContentWidthObserver.disconnect();
+				widthObserver.disconnect();
 			}
 		};
 	}
 
-	function scrollToEnd(): void {
-		trailElement.scroll({ left: trailElement.scrollWidth, behavior: 'smooth' });
-	}
-
-	function handleWheel(e: WheelEvent): void {
-		if (!contentOverflow) return;
-		e.preventDefault();
-		trailElement.scrollBy({ left: e.deltaY, behavior: 'smooth' });
-	}
+	$effect(() => {
+		if (isLast) {
+			setLastTrailContentWidth(contentWidth);
+		}
+	})
 </script>
 
-<trail class="trail flex flex-row" role="button" tabindex="0" bind:this={trailElement}>
-	<div
-		class="trail-content"
-		style="cursor: {contentOverflow ? 'e-resize' : 'unset'}; width: {contentWidth}px;"
-		role="button"
-		tabindex="0"
-		onwheel={handleWheel}
-	></div>
-
-	<div class="trail-assigments" use:listenContentWidth>
-		{#each initialPropagations as assignment (assignment.toInt())}
+<trail class="trail" class:last-trail={isLast} bind:this={trailElement}>
+	translate: {translateX}  - contentWidth: {contentWidth}  - trailWidth: {trailWidth}
+	<div class="trail-content" style="--translate-x: {translateX}px" use:listenContentWidth>
+		{#each initialPropagations as assignment (assignment.variableId())}
 			{#if assignment.isK()}
 				<BacktrackingComponent {assignment} />
 			{:else}
@@ -121,9 +74,6 @@
 			<DecisionLevelComponent
 				decision={assignment}
 				propagations={trail.getPropagations(level)}
-				{expanded}
-				emitClose={onEmitClose}
-				emitExpand={onEmitExpand}
 			/>
 		{/each}
 	</div>
@@ -131,14 +81,14 @@
 
 <style>
 	.trail {
-		overflow-x: scroll;
-		display: flex;
-		flex: 1;
-		-ms-overflow-style: none; /* Internet Explorer 10+ */
-		scrollbar-width: none; /* Firefox */
-		cursor: unset;
+		display: block;
+		position: relative;
 		height: var(--trail-height);
-		flex-direction: column;
+		width: 100%;
+	}
+
+	.last-trail {
+		width: 80%;
 	}
 
 	.trail::-webkit-scrollbar {
@@ -147,16 +97,13 @@
 	}
 
 	.trail-content {
-		display: flex;
-		flex: 1;
-	}
-
-	.trail-assigments {
+		position: absolute;
 		display: flex;
 		gap: 0.5rem;
 		align-items: center;
 		height: var(--trail-content-height);
 		width: max-content;
 		align-items: center;
+		transform: translateX(var(--translate-x));
 	}
 </style>
