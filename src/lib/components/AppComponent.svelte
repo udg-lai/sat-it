@@ -4,7 +4,7 @@
 	import type { StateFun, StateInput } from '$lib/machine/StateMachine.svelte.ts';
 	import { resetProblem, updateProblemFromTrail } from '$lib/store/problem.svelte.ts';
 	import { record, redo, resetStack, undo, type Snapshot } from '$lib/store/stack.svelte.ts';
-	import { getSolverMachine, updateSolverMachine } from '$lib/store/stateMachine.svelte.ts';
+	import { getSolverMachine, setSolverStateMachine, updateSolverMachine } from '$lib/store/stateMachine.svelte.ts';
 	import {
 		getStatistics,
 		resetStatistics,
@@ -64,6 +64,7 @@
 	}
 
 	function reset(): void {
+		setSolverStateMachine();
 		resetStack();
 		resetStatistics();
 		const first = undo();

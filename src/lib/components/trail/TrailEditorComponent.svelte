@@ -1,7 +1,6 @@
 <script lang="ts">
-	import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
-	import { getLastTrailContentWidth } from './state.svelte.ts';
 	import TrailLineComponent from '$lib/components/trail/TailLineComponent.svelte';
+	import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
 
 	interface Props {
 		trails: Trail[];
@@ -20,9 +19,8 @@
 </script>
 
 <div bind:this={editorElement} class="trail-visualizer flex flex-row">
-	{getLastTrailContentWidth()}
 	<trails class="trails flex flex-col">
-		{#if init && init.length > 0}getLastTrailContentWidth
+		{#if init && init.length > 0}
 			{#each init as trail, index}
 				<TrailLineComponent
 					trail={trail}

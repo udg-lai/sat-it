@@ -12,17 +12,13 @@
 </script>
 
 <trail-line class="line">
-	<div class="enumerate">
+	<enumerate>
 		<span class="line-item chakra-petch-medium">
 			<p>{index}.</p>
 		</span>
-	</div>
-	<div class="trail">
-		<TrailComponent {trail} {isLast}/>
-	</div>
-	<div class="information">
-		<InformationComponent {trail} />
-	</div>
+	</enumerate>
+	<TrailComponent {trail} {isLast} />
+	<InformationComponent {trail} />
 </trail-line>
 
 <style>
@@ -39,7 +35,7 @@
 		opacity: 0.5;
 	}
 
-	.enumerate {
+	enumerate {
 		display: flex;
 		justify-content: center;
 		width: var(--button-size);
@@ -50,17 +46,7 @@
 		background-color: red;
 	}
 
-	.enumerate p {
+	enumerate p {
 		font-size: 1rem;
-	}
-
-	.information {
-		right: 0;
-		z-index: 100
-	}
-
-	.trail {
-		width: 100%;
-		z-index: 1;
 	}
 </style>

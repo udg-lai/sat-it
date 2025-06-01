@@ -4,7 +4,7 @@
 	import BacktrackingComponent from '../assignment/BacktrackingComponent.svelte';
 	import UnitPropagationComponent from '../assignment/UnitPropagationComponent.svelte';
 	import DecisionLevelComponent from './DecisionLevelComponent.svelte';
-	import { setLastTrailContentWidth } from './state.svelte.ts';
+	import { setLastTrailContentWidth } from './_state.svelte.ts';
 
 	interface Props {
 		trail: Trail;
@@ -60,7 +60,6 @@
 </script>
 
 <trail class="trail" class:last-trail={isLast} bind:this={trailElement}>
-	translate: {translateX}  - contentWidth: {contentWidth}  - trailWidth: {trailWidth}
 	<div class="trail-content" style="--translate-x: {translateX}px" use:listenContentWidth>
 		{#each initialPropagations as assignment (assignment.variableId())}
 			{#if assignment.isK()}
@@ -85,6 +84,7 @@
 		position: relative;
 		height: var(--trail-height);
 		width: 100%;
+		overflow-x: scroll;
 	}
 
 	.last-trail {
