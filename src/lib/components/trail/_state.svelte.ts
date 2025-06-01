@@ -1,7 +1,5 @@
-let lastTrailContentWidth = $state(0);
+let trailOverflow = $state(0);
 
-export let getLastTrailContentWidth = () => lastTrailContentWidth;
+export let getTrailOverflow = () => trailOverflow;
 
-export let setLastTrailContentWidth = (width: number) => {
-  lastTrailContentWidth = width;
-};
+export let setTrailOverflow = (width: number) =>  trailOverflow = width;

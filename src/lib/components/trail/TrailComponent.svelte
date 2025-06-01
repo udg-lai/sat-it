@@ -4,11 +4,16 @@
 	import BacktrackingComponent from '../assignment/BacktrackingComponent.svelte';
 	import UnitPropagationComponent from '../assignment/UnitPropagationComponent.svelte';
 	import DecisionLevelComponent from './DecisionLevelComponent.svelte';
-	import { setLastTrailContentWidth } from './_state.svelte.ts';
+	import { getTrailOverflow, setTrailOverflow } from './_state.svelte.ts';
+
+	interface DecisionLevel {
+		assignment: VariableAssignment;
+		level: number;
+	}
 
 	interface Props {
 		trail: Trail;
-		isLast?: boolean
+		isLast?: boolean;
 	}
 
 	let { trail, isLast = true }: Props = $props();
@@ -31,12 +36,19 @@
 		return trailElement.getBoundingClientRect().width;
 	});
 
-	let contentWidth: number = $state(-1)
-
-	let translateX: number = $derived.by(() => {
-		let offset = trailWidth - contentWidth;
-		return offset < 0 ? offset : 0;
+	let trailOverflow: number = $derived.by(() => {
+		let diff: number = 0;
+		if (trailElement !== undefined) {
+			diff = trailElement.clientWidth - contentWidth;
+		}
+		let overflow: number = 0;
+		if (diff < 0) {
+			overflow = Math.abs(diff);
+		}
+		return overflow;
 	});
+
+	let contentWidth: number = $state(-1);
 
 	function listenContentWidth(element: HTMLElement) {
 		const widthObserver = new ResizeObserver((entries) => {
@@ -52,15 +64,39 @@
 		};
 	}
 
-	$effect(() => {
+	function scrollEnd() {
+		trailElement?.scrollTo({
+			left: trailElement.scrollWidth,
+			behavior: 'smooth'
+		});
+	}
+
+	function scrollWidth(overflow: number) {
+		trailElement?.scrollTo({
+			left: overflow,
+			behavior: 'smooth'
+		});
+	}
+
+	function rearrangeTrailScroll() {
 		if (isLast) {
-			setLastTrailContentWidth(contentWidth);
+			setTrailOverflow(trailOverflow);
+			console.log('Setting trail overflow:', trailOverflow);
+			scrollEnd();
+		} else {
+			const overflow = getTrailOverflow();
+			console.log('Rearranging trail scroll with overflow:', overflow);
+			scrollWidth(overflow);
 		}
-	})
+	}
+
+	$effect(() => {
+		rearrangeTrailScroll();
+	});
 </script>
 
 <trail class="trail" class:last-trail={isLast} bind:this={trailElement}>
-	<div class="trail-content" style="--translate-x: {translateX}px" use:listenContentWidth>
+	<div class="trail-content" use:listenContentWidth>
 		{#each initialPropagations as assignment (assignment.variableId())}
 			{#if assignment.isK()}
 				<BacktrackingComponent {assignment} />
@@ -70,10 +106,7 @@
 		{/each}
 
 		{#each decisions as { level, assignment } (level)}
-			<DecisionLevelComponent
-				decision={assignment}
-				propagations={trail.getPropagations(level)}
-			/>
+			<DecisionLevelComponent decision={assignment} propagations={trail.getPropagations(level)} />
 		{/each}
 	</div>
 </trail>
@@ -91,19 +124,12 @@
 		width: 80%;
 	}
 
-	.trail::-webkit-scrollbar {
-		display: none;
-		/* Safari and Chrome */
-	}
-
 	.trail-content {
-		position: absolute;
 		display: flex;
 		gap: 0.5rem;
 		align-items: center;
 		height: var(--trail-content-height);
 		width: max-content;
 		align-items: center;
-		transform: translateX(var(--translate-x));
 	}
 </style>
