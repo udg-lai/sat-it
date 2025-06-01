@@ -1,9 +1,10 @@
 import { logFatal } from '$lib/transversal/logging.ts';
+import type { BKT_FUN, BKT_INPUT } from './backtracking/bkt-domain.svelte.ts';
 import type { DPLL_FUN, DPLL_INPUT } from './dpll/dpll-domain.svelte.ts';
 
-export type StateFun = DPLL_FUN | never;
+export type StateFun = BKT_FUN | DPLL_FUN | never;
 
-export type StateInput = DPLL_INPUT;
+export type StateInput = BKT_INPUT | DPLL_INPUT;
 
 export interface FinalState<F extends StateFun> {
 	id: number;
@@ -88,7 +89,7 @@ export abstract class StateMachine<F extends StateFun, I extends StateInput>
 		if (this.onFinalState()) {
 			logFatal('No next state for a completed state machine');
 		} else {
-			const activeState = this.getActiveState() as NonFinalState<DPLL_FUN, DPLL_INPUT>;
+			const activeState = this.getActiveState() as NonFinalState<F, I>;
 			const activeStateTransitions = activeState.transitions;
 			const nextStateId = activeStateTransitions.get(input);
 			if (nextStateId === undefined) {

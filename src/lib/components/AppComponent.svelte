@@ -13,7 +13,11 @@
 	import { onMount } from 'svelte';
 	import { editorViewEventStore, type EditorViewEvent } from './debugger/events.svelte.ts';
 	import TrailEditor from './TrailEditorComponent.svelte';
-	import { getSolverMachine, updateSolverMachine } from '$lib/store/stateMachine.svelte.ts';
+	import {
+		getSolverMachine,
+		setSolverStateMachine,
+		updateSolverMachine
+	} from '$lib/store/stateMachine.svelte.ts';
 	import type { SolverMachine } from '$lib/machine/SolverMachine.svelte.ts';
 	import { getTrails, updateTrails } from '$lib/store/trails.svelte.ts';
 	import type { StateFun, StateInput } from '$lib/machine/StateMachine.svelte.ts';
@@ -69,6 +73,7 @@
 	}
 
 	function reset(): void {
+		setSolverStateMachine();
 		resetStack();
 		resetStatistics();
 		const first = undo();
