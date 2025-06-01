@@ -1,7 +1,6 @@
 <script lang="ts">
 	import DynamicRender from '$lib/components/DynamicRender.svelte';
 	import { getProblemStore, updateAlgorithm, type Algorithm } from '$lib/store/problem.svelte.ts';
-	import { getTrails } from '$lib/store/trails.svelte.ts';
 	import { changeAlgorithmEventBus } from '$lib/transversal/events.ts';
 	import { Modal } from 'flowbite-svelte';
 	import { CodePullRequestOutline, ExclamationCircleOutline } from 'flowbite-svelte-icons';
@@ -9,8 +8,6 @@
 	interface Props {
 		iconClass: { size: string };
 	}
-
-	let resetModal: boolean = $state(false);
 
 	let { iconClass }: Props = $props();
 	const elementClass: string =
@@ -25,6 +22,8 @@
 		updateAlgorithm(currentAlgorithm);
 		changeAlgorithmEventBus.emit();
 	};
+
+	let resetModal: boolean = $state(false);
 </script>
 
 <div class="heading-class">
@@ -38,9 +37,7 @@
 			<select
 				id="algorithm"
 				class="flex-1 rounded-lg border-[var(--border-color)] text-right outline-none focus:outline-none focus:ring-0"
-				onchange={() => {
-					if (getTrails().length !== 0) resetModal = true;
-				}}
+				onchange={() => (resetModal = true)}
 				bind:value={currentAlgorithm}
 			>
 				{#each availableAlgorithms as algorithm}
