@@ -1,6 +1,19 @@
 <script lang="ts">
+	import type { SolverMachine } from '$lib/machine/SolverMachine.svelte.ts';
+	import type { StateFun, StateInput } from '$lib/machine/StateMachine.svelte.ts';
 	import { resetProblem, updateProblemFromTrail } from '$lib/store/problem.svelte.ts';
 	import { record, redo, resetStack, undo, type Snapshot } from '$lib/store/stack.svelte.ts';
+	import {
+		getSolverMachine,
+		setSolverStateMachine,
+		updateSolverMachine
+	} from '$lib/store/stateMachine.svelte.ts';
+	import {
+		getStatistics,
+		resetStatistics,
+		updateStatistics
+	} from '$lib/store/statistics.svelte.ts';
+	import { getTrails, updateTrails } from '$lib/store/trails.svelte.ts';
 	import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
 	import {
 		changeAlgorithmEventBus,
@@ -13,24 +26,6 @@
 	import { onMount } from 'svelte';
 	import { editorViewEventStore, type EditorViewEvent } from './debugger/events.svelte.ts';
 	import TrailEditor from './TrailEditorComponent.svelte';
-	import {
-		getSolverMachine,
-		setSolverStateMachine,
-		updateSolverMachine
-	} from '$lib/store/stateMachine.svelte.ts';
-	import type { SolverMachine } from '$lib/machine/SolverMachine.svelte.ts';
-	import { getTrails, updateTrails } from '$lib/store/trails.svelte.ts';
-	import type { StateFun, StateInput } from '$lib/machine/StateMachine.svelte.ts';
-	import {
-		getStatistics,
-		resetStatistics,
-		updateStatistics
-	} from '$lib/store/statistics.svelte.ts';
-	import {
-		addBreakpoint,
-		type ClauseBreakpoint,
-		type VariableBreakpoint
-	} from '$lib/store/breakpoints.svelte.ts';
 
 	let expandPropagations: boolean = $state(true);
 
@@ -79,31 +74,6 @@
 		const first = undo();
 		reloadFromSnapshot(first);
 	}
-
-	//	const b1: VariableBreakpoint = {
-	//		type: 'variable',
-	//		variableId: 1
-	//	};
-	//
-	//	const b2: VariableBreakpoint = {
-	//		type: 'variable',
-	//		variableId: 2
-	//	};
-
-	const b3: VariableBreakpoint = {
-		type: 'variable',
-		variableId: 18
-	};
-
-	const b4: ClauseBreakpoint = {
-		type: 'clause',
-		clauseId: 9
-	};
-
-	// addBreakpoint(b1)
-	// addBreakpoint(b2)
-	addBreakpoint(b3);
-	addBreakpoint(b4);
 
 	onMount(() => {
 		const unsubscribeToggleEditor = editorViewEventStore.subscribe(togglePropagations);

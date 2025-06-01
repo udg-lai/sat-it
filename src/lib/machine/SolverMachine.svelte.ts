@@ -73,7 +73,6 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 	}
 
 	stopAutoMode(): void {
-		console.debug('SolverMachine', 'forcing stop');
 		this.forcedStop = true;
 	}
 

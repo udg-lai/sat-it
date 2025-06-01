@@ -11,6 +11,9 @@ import { getProblemStore, type Algorithm } from './problem.svelte.ts';
 let solverMachine: SolverMachine<StateFun, StateInput> = $state(new BKT_SolverMachine());
 
 export const setSolverStateMachine = () => {
+	if (solverMachine) {
+		solverMachine.stopAutoMode();
+	}
 	const algorithm: Algorithm = getProblemStore().algorithm;
 	if (algorithm === 'backtracking') {
 		solverMachine = makeBKTSolver();
