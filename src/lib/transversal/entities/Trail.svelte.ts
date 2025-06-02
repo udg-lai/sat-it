@@ -1,7 +1,7 @@
-import { getProblemStore } from '$lib/store/problem.svelte.ts';
 import type VariableAssignment from '$lib/transversal/entities/VariableAssignment.ts';
 import { logFatal } from '$lib/store/toasts.ts';
 import type Clause from './Clause.ts';
+import { updateClausesLeft } from '$lib/store/statistics.svelte.ts';
 
 export class Trail {
 	private assignments: VariableAssignment[] = [];
@@ -11,7 +11,6 @@ export class Trail {
 	private decisionLevel: number = 0;
 	private trailCapacity: number = 0;
 	private trailEnding: number = $state(-1);
-	private clausesLeft: number = getProblemStore().clauses.leftToSatisfy();
 
 	constructor(trailCapacity: number = 0) {
 		this.trailCapacity = trailCapacity;
@@ -26,7 +25,6 @@ export class Trail {
 		newTrail.decisionLevel = this.decisionLevel;
 		newTrail.trailCapacity = this.trailCapacity;
 		newTrail.trailEnding = this.trailEnding;
-		newTrail.clausesLeft = this.clausesLeft;
 		return newTrail;
 	}
 
@@ -58,10 +56,6 @@ export class Trail {
 		return this.trailEnding;
 	}
 
-	getClausesLeft(): number {
-		return this.clausesLeft;
-	}
-
 	updateTrailEnding(clauseId: number = -1): void {
 		this.trailEnding = clauseId;
 	}
@@ -78,7 +72,7 @@ export class Trail {
 			if (assignment.isD()) {
 				this.registerNewDecisionLevel();
 			}
-			this.updateClausesLeft();
+			updateClausesLeft();
 		}
 	}
 
@@ -87,7 +81,7 @@ export class Trail {
 		if (returnValue?.isD()) {
 			this.deleteCurrentDecisionLevel();
 		}
-		this.updateClausesLeft();
+		updateClausesLeft();
 		return returnValue;
 	}
 
@@ -172,10 +166,5 @@ export class Trail {
 	private hasDecisions(): boolean {
 		const levels = this.getDecisionLevelMarks();
 		return levels.length > 0;
-	}
-
-	private updateClausesLeft() {
-		const cls: number = getProblemStore().clauses.leftToSatisfy();
-		if (cls < this.clausesLeft) this.clausesLeft = cls;
 	}
 }

@@ -2,9 +2,11 @@
 	import { getProblemStore, type Problem } from '$lib/store/problem.svelte.ts';
 	import { getSolverMachine } from '$lib/store/stateMachine.svelte.ts';
 	import {
+		getClauesLeft,
 		getNoConflicts,
 		getNoDecisions,
-		getNoUnitPropagations
+		getNoUnitPropagations,
+		type ClauseCountEntry
 	} from '$lib/store/statistics.svelte.ts';
 	import { getLatestTrail, getTrails } from '$lib/store/trails.svelte.ts';
 	import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
@@ -21,12 +23,15 @@
 	});
 	const clausesLeft: number = $derived(problem.clauses.leftToSatisfy());
 	const minimumClausesLeft: number | undefined = $derived.by(() => {
-		const trails: Trail[] = getTrails();
+		const collection: ClauseCountEntry = getClauesLeft();
 		let minimum: number | undefined = undefined;
-		trails.forEach((trail) => {
-			if (minimum === undefined || trail.getClausesLeft() < minimum)
-				minimum = trail.getClausesLeft();
-		});
+		for (let i = 0; i < getTrails().length; i++) {
+			if (
+				(collection[i] !== undefined && minimum === undefined) ||
+				(minimum !== undefined && collection[i] < minimum)
+			)
+				minimum = collection[i];
+		}
 		return minimum;
 	});
 	const finished: boolean = $derived(getSolverMachine().onFinalState());
