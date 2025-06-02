@@ -1,7 +1,6 @@
 <script lang="ts">
 	import './_style.css';
 	import { onDestroy, onMount } from 'svelte';
-	import { emitEditorViewEvent } from './events.svelte.ts';
 	import DynamicRender from '$lib/components/DynamicRender.svelte';
 	import {
 		ArrowRightOutline,
@@ -12,8 +11,13 @@
 	} from 'flowbite-svelte-icons';
 	import { getStackLength, getStackPointer } from '$lib/store/stack.svelte.ts';
 	import { browser } from '$app/environment';
-	import { stateMachineEventBus, userActionEventBus } from '$lib/transversal/events.ts';
+	import {
+		stateMachineEventBus,
+		toggleTrailExpandEventBus,
+		userActionEventBus
+	} from '$lib/transversal/events.ts';
 	import { updateAssignment } from '$lib/store/assignment.svelte.ts';
+	import { getTrailsExpanded, setTrailsExpanded } from './_state.svelte.ts';
 
 	interface Props {
 		finished: boolean;
@@ -22,7 +26,7 @@
 
 	let { finished, backtrackingState }: Props = $props();
 
-	let expanded = $state(false);
+	let expanded = $derived(getTrailsExpanded());
 	let textCollapse = $derived(expanded ? 'Collapse Propagations' : 'Expand Propagations');
 
 	let btnRedoActive = $derived(getStackPointer() < getStackLength() - 1);
@@ -50,8 +54,7 @@
 	});
 
 	function toggleExpand() {
-		expanded = !expanded;
-		emitEditorViewEvent();
+		setTrailsExpanded(!expanded);
 	}
 
 	function handleKeyDown(event: KeyboardEvent) {
@@ -84,6 +87,7 @@
 			updateAssignment('automated');
 			stateMachineEventBus.emit('solve_trail');
 			userActionEventBus.emit('record');
+			toggleTrailExpandEventBus.emit(true);
 		}}
 		disabled={finished || backtrackingState}
 	>
@@ -98,6 +102,7 @@
 			updateAssignment('automated');
 			stateMachineEventBus.emit('solve_all');
 			userActionEventBus.emit('record');
+			toggleTrailExpandEventBus.emit(true);
 		}}
 		disabled={finished || backtrackingState}
 	>
@@ -126,7 +131,7 @@
 
 	<button class="btn general-btn" title={textCollapse} onclick={toggleExpand}>
 		<DynamicRender
-			component={expanded ? ChevronRightOutline : ChevronLeftOutline}
+			component={expanded ? ChevronLeftOutline : ChevronRightOutline}
 			props={generalProps}
 		/>
 	</button>

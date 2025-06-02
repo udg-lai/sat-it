@@ -64,9 +64,7 @@
 		border-color: var(--border-color);
 		border-style: solid;
 		gap: 0.5rem;
-		padding-left: calc(
-			var(--windows-padding) + var(--button-size) + var(--windows-padding) + 0.5rem
-		);
+		padding-left: calc(var(--windows-padding) + 15px);
 	}
 
 	:root {

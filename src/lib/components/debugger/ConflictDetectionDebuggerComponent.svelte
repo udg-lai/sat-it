@@ -5,7 +5,7 @@
 		CaretRightOutline
 	} from 'flowbite-svelte-icons';
 	import DynamicRender from '../DynamicRender.svelte';
-	import { stateMachineEventBus } from '$lib/transversal/events.ts';
+	import { stateMachineEventBus, toggleTrailExpandEventBus } from '$lib/transversal/events.ts';
 	interface Props {
 		cdMode: boolean;
 	}
@@ -35,6 +35,7 @@
 		title="Next variable"
 		class:invalidOption={!upMode}
 		onclick={() => {
+			toggleTrailExpandEventBus.emit(true);
 			stateMachineEventBus.emit('nextVariable');
 		}}
 		disabled={!upMode}
@@ -44,9 +45,10 @@
 
 	<button
 		class="btn general-btn"
-		title="Finish unit propagations"
+		title="Finish UPs"
 		class:invalidOption={!upMode}
 		onclick={() => {
+			toggleTrailExpandEventBus.emit(true);
 			stateMachineEventBus.emit('finishUP');
 		}}
 		disabled={!upMode}

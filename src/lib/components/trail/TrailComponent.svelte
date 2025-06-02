@@ -13,10 +13,11 @@
 
 	interface Props {
 		trail: Trail;
+		expanded: boolean;
 		isLast?: boolean;
 	}
 
-	let { trail, isLast = true }: Props = $props();
+	let { trail, expanded, isLast = true }: Props = $props();
 
 	let initialPropagations: VariableAssignment[] = $derived(trail.getInitialPropagations());
 
@@ -47,7 +48,7 @@
 	}
 </script>
 
-<trail class="trail" class:last-trail={isLast} use:listenContentWidth>
+<trail class="trail" use:listenContentWidth>
 	{#each initialPropagations as assignment (assignment.variableId())}
 		{#if assignment.isK()}
 			<BacktrackingComponent {assignment} />
@@ -57,7 +58,11 @@
 	{/each}
 
 	{#each decisions as { level, assignment } (level)}
-		<DecisionLevelComponent decision={assignment} propagations={trail.getPropagations(level)} />
+		<DecisionLevelComponent
+			decision={assignment}
+			propagations={trail.getPropagations(level)}
+			{expanded}
+		/>
 	{/each}
 </trail>
 
@@ -68,11 +73,7 @@
 		display: flex;
 		flex-direction: row;
 		gap: 0.5rem;
-		align-items: center;
+		align-items: start;
 		width: fit-content;
-	}
-
-	.last-trail {
-		background-color: red;
 	}
 </style>

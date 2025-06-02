@@ -7,18 +7,17 @@
 
 	interface Props {
 		decision: VariableAssignment;
+		expanded: boolean;
 		propagations?: VariableAssignment[];
 	}
 
-	let { decision, propagations = [] }: Props = $props();
-
-	let expanded: boolean = $state(true);
+	let { decision, expanded, propagations = [] }: Props = $props();
 </script>
 
 {#if propagations?.length === 0}
 	<ChildlessDecisionComponent assignment={decision} />
 {:else}
-	<DecisionComponent assignment={decision} bind:expanded />
+	<DecisionComponent {expanded} assignment={decision} />
 	{#if expanded}
 		{#each propagations as assignment (assignment.variableId())}
 			{#if assignment.isK()}
