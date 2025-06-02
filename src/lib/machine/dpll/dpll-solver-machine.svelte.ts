@@ -1,6 +1,6 @@
 import { Queue } from '$lib/transversal/entities/Queue.svelte.ts';
 import type { StateMachineEvent } from '$lib/transversal/events.ts';
-import { logFatal } from '$lib/transversal/logging.ts';
+import { logFatal } from '$lib/store/toasts.ts';
 import { SolverMachine } from '../SolverMachine.svelte.ts';
 import type { DPLL_FUN, DPLL_INPUT } from './dpll-domain.svelte.ts';
 import { makeDPLLMachine } from './dpll-state-machine.svelte.ts';

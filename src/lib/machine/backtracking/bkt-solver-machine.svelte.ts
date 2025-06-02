@@ -3,7 +3,7 @@ import { SolverMachine } from '../SolverMachine.svelte.ts';
 import type { BKT_FUN, BKT_INPUT } from './bkt-domain.svelte.ts';
 import { makeBKTMachine } from './bkt-state-machine.svelte.ts';
 import type { StateMachineEvent } from '$lib/transversal/events.ts';
-import { logError, logFatal } from '$lib/transversal/logging.ts';
+import { logError, logFatal } from '$lib/store/toasts.ts';
 import { bkt_stateName2StateId } from './bkt-states.svelte.ts';
 import { updateClausesToCheck } from '$lib/store/clausesToCheck.svelte.ts';
 import {

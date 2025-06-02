@@ -13,7 +13,7 @@ import type ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';
 import type VariablePool from '$lib/transversal/entities/VariablePool.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import type { BKT_SolverMachine } from './bkt-solver-machine.svelte.ts';
-import { logFatal } from '$lib/transversal/logging.ts';
+import { logFatal } from '$lib/store/toasts.ts';
 import { isUnSATClause, type ClauseEval } from '$lib/transversal/entities/Clause.ts';
 import { updateClausesToCheck } from '$lib/store/clausesToCheck.svelte.ts';
 

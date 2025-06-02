@@ -352,3 +352,7 @@ export const initial = empty_clause_state.id;
 
 // export conflict node
 export const conflict = backtracking_state.id;
+
+export const sat = sat_state.id;
+
+export const unsat = unsat_state.id;

@@ -2,6 +2,7 @@
 	import TrailEditor from '$lib/components/trail/TrailEditorComponent.svelte';
 	import type { SolverMachine } from '$lib/machine/SolverMachine.svelte.ts';
 	import type { StateFun, StateInput } from '$lib/machine/StateMachine.svelte.ts';
+	import { clearBreakpoints } from '$lib/store/breakpoints.svelte.ts';
 	import { resetProblem, updateProblemFromTrail } from '$lib/store/problem.svelte.ts';
 	import { record, redo, resetStack, undo, type Snapshot } from '$lib/store/stack.svelte.ts';
 	import {
@@ -75,11 +76,16 @@
 		reloadFromSnapshot(first);
 	}
 
+	function fullyReset(): void {
+		clearBreakpoints();
+		reset();
+	}
+
 	onMount(() => {
 		const unsubscribeToggleEditor = editorViewEventStore.subscribe(togglePropagations);
 		const unsubscribeActionEvent = userActionEventBus.subscribe(onActionEvent);
-		const unsubscribeChangeInstanceEvent = changeInstanceEventBus.subscribe(reset);
 		const unsubscribeStateMachineEvent = stateMachineEventBus.subscribe(stateMachineEvent);
+		const unsubscribeChangeInstanceEvent = changeInstanceEventBus.subscribe(fullyReset);
 		const unsubscribeChangeAlgorithmEvent = changeAlgorithmEventBus.subscribe(reset);
 
 		return () => {

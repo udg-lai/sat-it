@@ -1,19 +1,18 @@
 <script lang="ts">
-	import ToolsComponent from '$lib/components/tools/ToolsComponent.svelte';
+	import { beforeNavigate } from '$app/navigation';
+	import AppComponent from '$lib/components/AppComponent.svelte';
+	import DebuggerComponent from '$lib/components/debugger/DebuggerComponent.svelte';
+	import SettingsComponent from '$lib/components/settings/SettingsComponent.svelte';
 	import ToastComponent from '$lib/components/ToastComponent.svelte';
-	import { toasts } from '$lib/store/toasts.store.ts';
+	import ToolsComponent from '$lib/components/tools/ToolsComponent.svelte';
 	import {
 		initializeInstancesStore,
 		setDefaultInstanceToSolve
 	} from '$lib/store/instances.store.ts';
-	import { onMount } from 'svelte';
-	import AppComponent from '$lib/components/AppComponent.svelte';
-	import DebuggerComponent from '$lib/components/debugger/DebuggerComponent.svelte';
+	import { logError, toasts } from '$lib/store/toasts.ts';
 	import { closeSettingsViewEventBus, openSettingsViewEventBus } from '$lib/transversal/events.ts';
-	import SettingsComponent from '$lib/components/settings/SettingsComponent.svelte';
 	import { disableContextMenu } from '$lib/transversal/utils.ts';
-	import { logError } from '$lib/transversal/logging.ts';
-	import { beforeNavigate } from '$app/navigation';
+	import { onMount } from 'svelte';
 
 	let renderSettings = $state(true);
 

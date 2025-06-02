@@ -1,4 +1,4 @@
-import { logFatal } from '$lib/transversal/logging.ts';
+import { logFatal } from '$lib/store/toasts.ts';
 import type { SvelteSet } from 'svelte/reactivity';
 import type { NonFinalState } from '../StateMachine.svelte.ts';
 import type {

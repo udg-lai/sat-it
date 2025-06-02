@@ -7,9 +7,9 @@
 		removeBreakpoint
 	} from '$lib/store/breakpoints.svelte.ts';
 	import { getProblemStore, type Problem } from '$lib/store/problem.svelte.ts';
-	import { logError } from '$lib/transversal/logging.ts';
 	import { BugOutline } from 'flowbite-svelte-icons';
 	import { SvelteSet } from 'svelte/reactivity';
+	import { logError } from '$lib/store/toasts.ts';
 
 	interface Props {
 		iconClass: { size: string };
@@ -53,7 +53,7 @@
 
 		if (value < min || value > max) {
 			variableToAdd = undefined;
-			input.setCustomValidity(`Value must be between ${min} and ${max}`);
+			input.setCustomValidity(`Variables range between ${min} and ${max}`);
 			input.reportValidity();
 			return;
 		} else {

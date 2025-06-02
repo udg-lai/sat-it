@@ -1,24 +1,24 @@
 import type { AssignmentEvent } from '$lib/components/debugger/events.svelte.ts';
 import { getAssignment } from '$lib/store/assignment.svelte.ts';
-import { checkBreakpoint } from '$lib/store/breakpoints.svelte.ts';
+import { markedAsBreakpoint, type Assignment } from '$lib/store/breakpoints.svelte.ts';
 import { getProblemStore, type MappingLiteral2Clauses } from '$lib/store/problem.svelte.ts';
 import { getSolverMachine } from '$lib/store/stateMachine.svelte.ts';
 import {
 	increaseNoConflicts,
 	increaseNoDecisions,
-	increaseNoUnitPropgations as increaseNoUnitPropagations
+	increaseNoUnitPropagations as increaseNoUnitPropagations
 } from '$lib/store/statistics.svelte.ts';
+import { logBreakpoint, logFatal } from '$lib/store/toasts.ts';
 import { getLatestTrail, stackTrail, unstackTrail } from '$lib/store/trails.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import type Clause from '../entities/Clause.ts';
-import { isSatClause, type ClauseEval } from '../entities/Clause.ts';
+import { type ClauseEval } from '../entities/Clause.ts';
 import type ClausePool from '../entities/ClausePool.svelte.ts';
 import { Trail } from '../entities/Trail.svelte.ts';
 import type Variable from '../entities/Variable.svelte.ts';
 import VariableAssignment from '../entities/VariableAssignment.ts';
 import type VariablePool from '../entities/VariablePool.svelte.ts';
 import { isUnSAT } from '../interfaces/IClausePool.ts';
-import { logBreakpoint, logFatal } from '../logging.ts';
 import { fromJust, isJust } from '../types/maybe.ts';
 
 export const emptyClauseDetection = (pool: ClausePool): boolean => {
@@ -126,36 +126,26 @@ export const nonDecisionMade = (): boolean => {
 };
 
 const doAssignment = (variableId: number, polarity: boolean): void => {
-	const { clauses, variables, mapping } = getProblemStore();
+	const { variables } = getProblemStore();
 
-	const solverMachine = getSolverMachine();
-	const runningInAutoMode: boolean = solverMachine.isInAutoMode();
 	variables.persist(variableId, polarity);
 
-	const breakpointVariable: boolean = checkBreakpoint({ type: 'variable', id: variableId });
-	if (breakpointVariable) {
-		logBreakpoint('Variable breakpoint', `Variable ${variableId} assigned`);
-	}
+	const assignment: Assignment = {
+		type: 'variable',
+		id: variableId
+	};
 
-	const literal: number = polarity ? variableId : -variableId;
-	const clausesToCheck = mapping.get(literal);
-	let breakpointClause: boolean = false;
-	if (clausesToCheck !== undefined) {
-		for (const clauseId of clausesToCheck) {
-			if (!checkBreakpoint({ type: 'clause', id: clauseId })) {
-				continue;
-			}
-			const clauseEval: ClauseEval = clauseEvaluation(clauses, clauseId);
-			if (isSatClause(clauseEval)) {
-				breakpointClause = true;
-				logBreakpoint(
-					'Clause breakpoint',
-					`Clause ${clauseId} satisfied by variable ${variableId}`
-				);
-			}
-		}
+	afterAssignment(assignment);
+};
+
+const afterAssignment = (assignment: Assignment): void => {
+	const solverMachine = getSolverMachine();
+	const runningInAutoMode: boolean = solverMachine.isInAutoMode();
+	const isBreakpoint: boolean = markedAsBreakpoint(assignment);
+	if (isBreakpoint) {
+		logBreakpoint('Variable breakpoint', `Variable ${assignment.id} assigned`);
 	}
-	if (runningInAutoMode && (breakpointVariable || breakpointClause)) {
+	if (runningInAutoMode && isBreakpoint) {
 		solverMachine.stopAutoMode();
 	}
 };
