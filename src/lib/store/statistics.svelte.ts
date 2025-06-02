@@ -31,8 +31,8 @@ export const increaseNoUnitPropagations = (): void => {
 
 export const updateClausesLeft = (): void => {
 	const nClauses: number = getProblemStore().clauses.leftToSatisfy();
-	const nTrails: number = getTrails().length;
-	clausesLeft[nTrails] = nClauses;
+	const nTrail: number = getTrails().length-1;
+	clausesLeft[nTrail] = nClauses;
 };
 
 export const updateStatistics = (newStatistics: Statistics): void => {
@@ -60,4 +60,4 @@ export const getStatistics = () => {
 export const getNoDecisions = () => noDecisions;
 export const getNoConflicts = () => noConflicts;
 export const getNoUnitPropagations = () => noUnitPropagations;
-export const getClauesLeft = () => clausesLeft;
+export const getClausesLeft = () => clausesLeft;

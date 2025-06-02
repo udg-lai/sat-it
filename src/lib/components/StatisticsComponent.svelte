@@ -2,7 +2,7 @@
 	import { getProblemStore, type Problem } from '$lib/store/problem.svelte.ts';
 	import { getSolverMachine } from '$lib/store/stateMachine.svelte.ts';
 	import {
-		getClauesLeft,
+		getClausesLeft,
 		getNoConflicts,
 		getNoDecisions,
 		getNoUnitPropagations,
@@ -23,7 +23,7 @@
 	});
 	const clausesLeft: number = $derived(problem.clauses.leftToSatisfy());
 	const minimumClausesLeft: number | undefined = $derived.by(() => {
-		const collection: ClauseCountEntry = getClauesLeft();
+		const collection: ClauseCountEntry = getClausesLeft();
 		let minimum: number | undefined = undefined;
 		for (let i = 0; i < getTrails().length; i++) {
 			if (
