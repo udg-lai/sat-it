@@ -3,6 +3,7 @@
 	import { onMount } from 'svelte';
 	import TrailComponent from './TrailComponent.svelte';
 	import { trailTrackingEventBus } from '$lib/transversal/events.ts';
+	import InformationComponent from './InformationComponent.svelte';
 
 	interface Props {
 		trails: Trail[];
@@ -57,20 +58,28 @@
 <trail-editor bind:this={editorElement}>
 	<editor-leaf use:listenContentHeight>
 		<editor-indexes class="enumerate">
-			{#each indexes as index}
+			{#each indexes as index (index)}
 				<div class="item">
-					<span>{index}</span>
+					<span>{index}.</span>
 				</div>
 			{/each}
 		</editor-indexes>
 
 		<trails-leaf bind:this={trailsLeafElement}>
 			<editor-trails>
-				{#each trails as trail, index}
+				{#each trails as trail, index (index)}
 					<TrailComponent {trail} isLast={trails.length === index + 1} />
 				{/each}
 			</editor-trails>
 		</trails-leaf>
+
+		<editor-info>
+			{#each trails as trail, index (index)}
+			<div class="item">
+				<InformationComponent trail={trail} />
+			</div>
+			{/each}
+		</editor-info>
 	</editor-leaf>
 </trail-editor>
 
@@ -84,14 +93,13 @@
 
 	editor-leaf {
 		display: grid;
-		grid-template-columns: var(--trail-height) 1fr;
+		grid-template-columns: var(--trail-height) 1fr var(--trail-height);
 		height: fit-content;
 	}
 
 	editor-indexes {
 		display: flex;
 		flex-direction: column;
-		padding-right: 0.5rem;
 	}
 
 	trails-leaf {
@@ -106,10 +114,15 @@
 		width: max-content;
 	}
 
-	.enumerate .item {
+	.item {
 		height: var(--trail-height);
+		width: var(--trail-height);
 		display: flex;
-		align-items: center;
+		align-items: end;
 		justify-content: center;
+	}
+
+	.item span {
+		opacity: var(--opacity-50);
 	}
 </style>

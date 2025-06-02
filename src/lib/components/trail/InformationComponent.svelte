@@ -64,12 +64,11 @@
 <style>
 	.notification {
 		pointer-events: none;
-		width: 4rem;
-		padding-left: 1rem;
+		width: var(--trail-literal-min-width);
+		height: var(--trail-literal-min-width);
 		display: flex;
-		justify-content: left;
-		align-items: center;
-		height: var(--trail-content-height);
+		justify-content: center;
+		align-items: end;
 	}
 
 	.notification.conflict {
