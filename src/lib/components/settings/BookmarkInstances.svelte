@@ -6,12 +6,20 @@
 		instanceStore,
 		type InteractiveInstance
 	} from '$lib/store/instances.store.ts';
-	import { DatabaseOutline, LockOutline, TrashBinOutline } from 'flowbite-svelte-icons';
+	import { logInfo } from '$lib/store/toasts.ts';
+	import { Modal } from 'flowbite-svelte';
+	import {
+		DatabaseOutline,
+		ExclamationCircleOutline,
+		LockOutline,
+		TrashBinOutline
+	} from 'flowbite-svelte-icons';
 	import { onMount } from 'svelte';
 	import ViewerComponent from './ViewerComponent.svelte';
-	import { logInfo } from '$lib/transversal/logging.ts';
 
 	let previewingInstance: InteractiveInstance | undefined = $state(undefined);
+	let openModal: boolean = $state(false);
+	let instanceClicked: string = $state('');
 
 	onMount(() => {
 		const unsubscribe = instanceStore.subscribe(() => (previewingInstance = getActiveInstance()));
@@ -19,6 +27,12 @@
 			unsubscribe();
 		};
 	});
+
+	function onClick(instanceName: string) {
+		if (instanceClicked === instanceName) return;
+		openModal = true;
+		instanceClicked = instanceName;
+	}
 
 	function onActivateInstance(instanceName: string): void {
 		const currentInstance = getActiveInstance();
@@ -52,7 +66,7 @@
 							class:selected={instance.active}
 							onmouseenter={() => (previewingInstance = instance)}
 							onmouseleave={() => (previewingInstance = getActiveInstance())}
-							onclick={() => onActivateInstance(instance.name)}
+							onclick={() => onClick(instance.name)}
 						>
 							<p>{instance.name}</p>
 						</button>
@@ -78,6 +92,32 @@
 		{/if}
 	</div>
 </div>
+
+<Modal bind:open={openModal} size="xs" class="modal-style" dismissable={false}>
+	<div class="text-center">
+		<ExclamationCircleOutline class="mx-auto mb-4 h-12 w-12 text-red-600" />
+		<h3 class="mb-5 text-lg font-normal text-gray-600">
+			By changing the problem, all the assignments made will be erased. Are you sure?
+		</h3>
+		<button
+			class="btn btn-modal mr-4"
+			onclick={() => {
+				onActivateInstance(instanceClicked);
+				openModal = false;
+			}}
+		>
+			<span>Yes, change</span>
+		</button>
+		<button
+			class="btn"
+			onclick={() => {
+				openModal = false;
+			}}
+		>
+			<span>No, cancel</span>
+		</button>
+	</div>
+</Modal>
 
 <style>
 	.bookmark {
@@ -163,5 +203,18 @@
 		padding-left: 5px;
 		--tw-grayscale: 0%;
 		--tw-contrast: 1;
+	}
+
+	:global(.modal-style) {
+		background-color: var(--main-bg-color);
+		color: black;
+	}
+
+	:global(.btn) {
+		border: solid;
+		border-width: 1px;
+		border-radius: 0.5rem;
+		border-color: var(--border-color);
+		padding: 0.75rem;
 	}
 </style>

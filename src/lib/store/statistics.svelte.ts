@@ -16,7 +16,7 @@ export const increaseNoConflicts = (): void => {
 	noConflicts += 1;
 };
 
-export const increaseNoUnitPropgations = (): void => {
+export const increaseNoUnitPropagations = (): void => {
 	noUnitPropagations += 1;
 };
 

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { getProblemStore, type Problem } from '$lib/store/problem.svelte.ts';
-	import { logInfo } from '$lib/transversal/logging.ts';
+	import { logInfo } from '$lib/store/toasts.ts';
 	import { Modal } from 'flowbite-svelte';
 	import {
 		CaretRightOutline,

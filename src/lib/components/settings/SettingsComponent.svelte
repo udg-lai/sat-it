@@ -5,19 +5,13 @@
 	import LegendComponent from './LegendComponent.svelte';
 	import OptionsComponent, { type OptionEmit } from './OptionsComponent.svelte';
 	import { getActiveView, setActiveView } from './settings.store.svelte.ts';
+	import EngineComponent from './engine/EngineComponent.svelte';
 
 	type ActiveView = 'bookmark' | 'engine' | 'legend' | 'info';
 
 	let view: ActiveView = $derived(getActiveView());
 
 	function handleOptionEvent(event: OptionEmit): void {
-		if (event === 'bookmark') {
-			console.log('show list');
-		} else if (event === 'engine') {
-			console.log('show engine');
-		} else {
-			console.log('show legend');
-		}
 		if (event === 'close') {
 			closeSettingsViewEventBus.emit();
 		} else {
@@ -33,7 +27,7 @@
 				{#if view === 'bookmark'}
 					<BookmarkInstances />
 				{:else if view === 'engine'}
-					<p>engine</p>
+					<EngineComponent />
 				{:else}
 					<LegendComponent />
 				{/if}

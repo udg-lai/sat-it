@@ -1,6 +1,6 @@
 import { getProblemStore } from '$lib/store/problem.svelte.ts';
 import type VariableAssignment from '$lib/transversal/entities/VariableAssignment.ts';
-import { logFatal } from '../logging.ts';
+import { logFatal } from '$lib/store/toasts.ts';
 import type Clause from './Clause.ts';
 
 export class Trail {
