@@ -18,10 +18,10 @@ import {
 import { isUnitClause, isUnSATClause, type ClauseEval } from '$lib/transversal/entities/Clause.ts';
 import type ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';
 import type VariablePool from '$lib/transversal/entities/VariablePool.svelte.ts';
-import { logFatal } from '$lib/transversal/logging.ts';
 import type { DPLL_SolverMachine } from './dpll-solver-machine.svelte.ts';
 import { updateClausesToCheck } from '$lib/store/clausesToCheck.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
+import { logFatal } from '$lib/store/toasts.ts';
 
 const problem: Problem = $derived(getProblemStore());
 // ** state inputs **

@@ -5,7 +5,7 @@
 	import LegendComponent from './LegendComponent.svelte';
 	import OptionsComponent, { type OptionEmit } from './OptionsComponent.svelte';
 	import { getActiveView, setActiveView } from './settings.store.svelte.ts';
-	import EngineComponent from './EngineComponent.svelte';
+	import EngineComponent from './engine/EngineComponent.svelte';
 
 	type ActiveView = 'bookmark' | 'engine' | 'legend' | 'info';
 

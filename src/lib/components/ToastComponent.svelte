@@ -1,6 +1,12 @@
 <script lang="ts">
-	import { dismissToast, type Toast as NotificationToast } from '$lib/store/toasts.store.ts';
-	import { CloseCircleOutline, ExclamationCircleOutline, FlagOutline } from 'flowbite-svelte-icons';
+	import { dismissToast, type Toast as NotificationToast } from '$lib/store/toasts.ts';
+	import {
+		CheckOutline,
+		CloseCircleOutline,
+		CloseOutline,
+		ExclamationCircleOutline,
+		FlagOutline
+	} from 'flowbite-svelte-icons';
 	import { onMount } from 'svelte';
 
 	interface Props {
@@ -34,8 +40,12 @@
 		<ExclamationCircleOutline color="orange" slot="icon" class="h-5 w-5" />
 	{:else if toast.type === 'info'}
 		<ExclamationCircleOutline color="blue" slot="icon" class="h-5 w-5" />
-	{:else}
+	{:else if toast.type === 'breakpoint'}
 		<FlagOutline color="purple" class="h-5 w-5" />
+	{:else if toast.type === 'sat'}
+		<CheckOutline color="green" slot="icon" class="h-5 w-5" />
+	{:else}
+		<CloseOutline color="red" slot="icon" class="h-5 w-5" />
 	{/if}
 
 	<div class="flex items-center">

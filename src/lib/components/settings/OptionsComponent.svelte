@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { DimacsInstance } from '$lib/dimacs/dimacs-instance.interface.ts';
 	import { addInstance } from '$lib/store/instances.store.ts';
-	import { logError } from '$lib/transversal/logging.ts';
+	import { logError } from '$lib/store/toasts.ts';
 	import claims2html from '$lib/transversal/mapping/claimsToHtml.ts';
 	import parser from '$lib/transversal/mapping/contentToSummary.ts';
 	import { BottomNav, BottomNavItem, Tooltip } from 'flowbite-svelte';

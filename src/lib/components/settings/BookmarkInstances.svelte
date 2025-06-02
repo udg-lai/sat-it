@@ -6,6 +6,8 @@
 		instanceStore,
 		type InteractiveInstance
 	} from '$lib/store/instances.store.ts';
+	import { logInfo } from '$lib/store/toasts.ts';
+	import { Modal } from 'flowbite-svelte';
 	import {
 		DatabaseOutline,
 		ExclamationCircleOutline,
@@ -14,8 +16,6 @@
 	} from 'flowbite-svelte-icons';
 	import { onMount } from 'svelte';
 	import ViewerComponent from './ViewerComponent.svelte';
-	import { logInfo } from '$lib/transversal/logging.ts';
-	import { Modal } from 'flowbite-svelte';
 
 	let previewingInstance: InteractiveInstance | undefined = $state(undefined);
 	let openModal: boolean = $state(false);
@@ -29,6 +29,7 @@
 	});
 
 	function onClick(instanceName: string) {
+		if (instanceClicked === instanceName) return;
 		openModal = true;
 		instanceClicked = instanceName;
 	}
