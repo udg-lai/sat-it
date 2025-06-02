@@ -1,18 +1,22 @@
 import {
-	DPLL_SolverMachine,
-	makeDPLLSolver
-} from '$lib/machine/dpll/dpll-solver-machine.svelte.ts';
+	BKT_SolverMachine,
+	makeBKTSolver
+} from '$lib/machine/backtracking/bkt-solver-machine.svelte.ts';
+import { makeDPLLSolver } from '$lib/machine/dpll/dpll-solver-machine.svelte.ts';
 import { SolverMachine } from '$lib/machine/SolverMachine.svelte.ts';
 import type { StateFun, StateInput } from '$lib/machine/StateMachine.svelte.ts';
 import { logFatal } from '$lib/store/toasts.ts';
 import { getProblemStore, type Algorithm } from './problem.svelte.ts';
 
-let solverMachine: SolverMachine<StateFun, StateInput> = $state(new DPLL_SolverMachine());
+let solverMachine: SolverMachine<StateFun, StateInput> = $state(new BKT_SolverMachine());
 
 export const setSolverStateMachine = () => {
+	if (solverMachine) {
+		solverMachine.stopAutoMode();
+	}
 	const algorithm: Algorithm = getProblemStore().algorithm;
 	if (algorithm === 'backtracking') {
-		solverMachine = makeDPLLSolver();
+		solverMachine = makeBKTSolver();
 	} else if (algorithm === 'dpll') {
 		solverMachine = makeDPLLSolver();
 	} else if (algorithm === 'cdcl') {

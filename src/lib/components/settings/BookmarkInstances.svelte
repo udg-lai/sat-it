@@ -7,7 +7,6 @@
 		type InteractiveInstance
 	} from '$lib/store/instances.store.ts';
 	import { logInfo } from '$lib/store/toasts.ts';
-	import { getTrails } from '$lib/store/trails.svelte.ts';
 	import { Modal } from 'flowbite-svelte';
 	import {
 		DatabaseOutline,
@@ -19,9 +18,8 @@
 	import ViewerComponent from './ViewerComponent.svelte';
 
 	let previewingInstance: InteractiveInstance | undefined = $state(undefined);
-	let resetModal: boolean = $state(false);
-
-	let toSafeInstanceName: string | undefined = $state(undefined);
+	let openModal: boolean = $state(false);
+	let instanceClicked: string = $state('');
 
 	onMount(() => {
 		const unsubscribe = instanceStore.subscribe(() => (previewingInstance = getActiveInstance()));
@@ -29,6 +27,12 @@
 			unsubscribe();
 		};
 	});
+
+	function onClick(instanceName: string) {
+		if (instanceClicked === instanceName) return;
+		openModal = true;
+		instanceClicked = instanceName;
+	}
 
 	function onActivateInstance(instanceName: string): void {
 		const currentInstance = getActiveInstance();
@@ -62,14 +66,7 @@
 							class:selected={instance.active}
 							onmouseenter={() => (previewingInstance = instance)}
 							onmouseleave={() => (previewingInstance = getActiveInstance())}
-							onclick={() => {
-								toSafeInstanceName = instance.name;
-								if (getTrails().length !== 0) resetModal = true;
-								else {
-									onActivateInstance(toSafeInstanceName as string);
-									toSafeInstanceName = undefined;
-								}
-							}}
+							onclick={() => onClick(instance.name)}
 						>
 							<p>{instance.name}</p>
 						</button>
@@ -96,7 +93,7 @@
 	</div>
 </div>
 
-<Modal bind:open={resetModal} size="xs" class="modal-style" dismissable={false}>
+<Modal bind:open={openModal} size="xs" class="modal-style" dismissable={false}>
 	<div class="text-center">
 		<ExclamationCircleOutline class="mx-auto mb-4 h-12 w-12 text-red-600" />
 		<h3 class="mb-5 text-lg font-normal text-gray-600">
@@ -105,9 +102,8 @@
 		<button
 			class="btn btn-modal mr-4"
 			onclick={() => {
-				onActivateInstance(toSafeInstanceName as string);
-				toSafeInstanceName = undefined;
-				resetModal = false;
+				onActivateInstance(instanceClicked);
+				openModal = false;
 			}}
 		>
 			<span>Yes, change</span>
@@ -115,8 +111,7 @@
 		<button
 			class="btn"
 			onclick={() => {
-				toSafeInstanceName = undefined;
-				resetModal = false;
+				openModal = false;
 			}}
 		>
 			<span>No, cancel</span>

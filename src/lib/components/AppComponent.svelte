@@ -1,9 +1,14 @@
 <script lang="ts">
 	import type { SolverMachine } from '$lib/machine/SolverMachine.svelte.ts';
 	import type { StateFun, StateInput } from '$lib/machine/StateMachine.svelte.ts';
+	import { clearBreakpoints } from '$lib/store/breakpoints.svelte.ts';
 	import { resetProblem, updateProblemFromTrail } from '$lib/store/problem.svelte.ts';
 	import { record, redo, resetStack, undo, type Snapshot } from '$lib/store/stack.svelte.ts';
-	import { getSolverMachine, updateSolverMachine } from '$lib/store/stateMachine.svelte.ts';
+	import {
+		getSolverMachine,
+		setSolverStateMachine,
+		updateSolverMachine
+	} from '$lib/store/stateMachine.svelte.ts';
 	import {
 		getStatistics,
 		resetStatistics,
@@ -22,11 +27,6 @@
 	import { onMount } from 'svelte';
 	import { editorViewEventStore, type EditorViewEvent } from './debugger/events.svelte.ts';
 	import TrailEditor from './TrailEditorComponent.svelte';
-	import {
-		addBreakpoint,
-		clearBreakpoints,
-		type VariableBreakpoint
-	} from '$lib/store/breakpoints.svelte.ts';
 
 	let expandPropagations: boolean = $state(true);
 
@@ -69,9 +69,9 @@
 	}
 
 	function reset(): void {
+		setSolverStateMachine();
 		resetStack();
 		resetStatistics();
-		clearBreakpoints();
 		const first = undo();
 		reloadFromSnapshot(first);
 	}
@@ -80,13 +80,6 @@
 		clearBreakpoints();
 		reset();
 	}
-
-	const b3: VariableBreakpoint = {
-		type: 'variable',
-		variableId: 18
-	};
-
-	addBreakpoint(b3);
 
 	onMount(() => {
 		const unsubscribeToggleEditor = editorViewEventStore.subscribe(togglePropagations);
