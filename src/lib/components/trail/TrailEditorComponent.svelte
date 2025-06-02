@@ -100,7 +100,7 @@
 			{#each indexes as index (index)}
 				<div class="item">
 					<div class="enumerate-item">
-						<span>{index}.</span>
+						<span>{index + 1}.</span>
 					</div>
 				</div>
 			{/each}
