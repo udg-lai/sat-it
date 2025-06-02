@@ -10,34 +10,54 @@
 
 	let { trails }: Props = $props();
 
+	let indexes: number[] = $derived.by(() => {
+		return trails.map((_, index) => index);
+	});
+
 	let editorElement: HTMLDivElement;
 	let trailsLeafElement: HTMLElement;
-	let editorTrailsElement: HTMLElement;
 
-	const scrollToBottom = async (node: HTMLDivElement) => {
-		node.scroll({ top: node.scrollHeight, behavior: 'smooth' });
+	const scrollToBottom = (editorElement: HTMLElement) => {
+		editorElement.scrollTo({ top: editorElement.scrollHeight, behavior: 'smooth' });
 	};
 
 	function rearrangeTrailEditor(reference: number) {
-		        const scrollLeft = Math.max(0, reference - (trailsLeafElement.offsetWidth * 2 / 3));
+		const scrollLeft = Math.max(0, reference - (trailsLeafElement.offsetWidth * 2) / 3);
 		trailsLeafElement.scrollTo({
 			left: scrollLeft,
 			behavior: 'smooth'
 		});
 	}
 
+	function listenContentHeight(element: HTMLElement) {
+		const heightObserver = new ResizeObserver((entries) => {
+			for (const entry of entries) {
+				const contentHeight: number = entry.contentRect.height;
+				if (contentHeight > editorElement.offsetHeight) {
+					scrollToBottom(editorElement);
+				}
+			}
+		});
+		heightObserver.observe(element);
+		return {
+			destroy() {
+				heightObserver.disconnect();
+			}
+		};
+	}
+
 	onMount(() => {
-		const unsubscribeTrailTracking = trailTrackingEventBus.subscribe(rearrangeTrailEditor)
+		const unsubscribeTrailTracking = trailTrackingEventBus.subscribe(rearrangeTrailEditor);
 		return () => {
 			unsubscribeTrailTracking();
 		};
-	})
+	});
 </script>
 
 <trail-editor bind:this={editorElement}>
-	<editor-leaf>
+	<editor-leaf use:listenContentHeight>
 		<editor-indexes class="enumerate">
-			{#each trails as trail, index}
+			{#each indexes as index}
 				<div class="item">
 					<span>{index}</span>
 				</div>
@@ -45,10 +65,10 @@
 		</editor-indexes>
 
 		<trails-leaf bind:this={trailsLeafElement}>
-			<editor-trails bind:this={editorTrailsElement}>
-					{#each trails as trail, index}
-						<TrailComponent {trail} isLast={trails.length === index + 1} />
-					{/each}
+			<editor-trails>
+				{#each trails as trail, index}
+					<TrailComponent {trail} isLast={trails.length === index + 1} />
+				{/each}
 			</editor-trails>
 		</trails-leaf>
 	</editor-leaf>
@@ -58,14 +78,14 @@
 	trail-editor {
 		display: block;
 		height: 100%;
+		overflow-y: auto;
+		overflow-x: hidden;
 	}
 
 	editor-leaf {
 		display: grid;
-		grid-template-columns: var(--trail-height) 1fr; /* indexes | trails */
-		height: 100%;
-		overflow-y: auto; /* vertical scroll for the whole area */
-		overflow-x: hidden;
+		grid-template-columns: var(--trail-height) 1fr;
+		height: fit-content;
 	}
 
 	editor-indexes {
@@ -75,15 +95,15 @@
 	}
 
 	trails-leaf {
-		overflow-x: auto; /* horizontal scroll */
+		overflow-x: auto;
 		overflow-y: hidden;
-		height: fit-content; /* only as tall as content */
+		height: fit-content;
 	}
 
 	editor-trails {
 		display: flex;
 		flex-direction: column;
-		width: max-content; /* allows horizontal scrolling */
+		width: max-content;
 	}
 
 	.enumerate .item {

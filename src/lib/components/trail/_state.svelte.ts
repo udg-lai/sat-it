@@ -1,10 +1,10 @@
-import { trailTrackingEventBus } from "$lib/transversal/events.ts";
+import { trailTrackingEventBus } from '$lib/transversal/events.ts';
 
 let lastTrailSize = $state(0);
 
-export let getLastTrailSize = () => lastTrailSize;
+export const getLastTrailSize = () => lastTrailSize;
 
-export let setLastTrailSize = (width: number) => {
-    lastTrailSize = width;
-    trailTrackingEventBus.emit(lastTrailSize);
-}
+export const setLastTrailSize = (width: number) => {
+	lastTrailSize = width;
+	trailTrackingEventBus.emit(lastTrailSize);
+};

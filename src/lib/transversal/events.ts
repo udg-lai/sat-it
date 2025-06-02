@@ -29,4 +29,3 @@ export const breakpointEvent = createEventBus<Breakpoint>();
 
 // event bus for trail size changes
 export const trailTrackingEventBus = createEventBus<number>();
-

@@ -13,7 +13,6 @@
 	let { decision, propagations = [] }: Props = $props();
 
 	let expanded: boolean = $state(true);
-
 </script>
 
 {#if propagations?.length === 0}
