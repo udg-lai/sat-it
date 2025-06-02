@@ -1,5 +1,4 @@
 import { getProblemStore } from './problem.svelte.ts';
-import { getTrails } from './trails.svelte.ts';
 
 export interface ClauseCountEntry {
 	[key: number]: number;
@@ -11,7 +10,6 @@ export interface Statistics {
 	noUnitPropagations: number;
 	clausesLeft: ClauseCountEntry;
 }
-
 let noDecisions: number = $state(0);
 let noConflicts: number = $state(0);
 let noUnitPropagations: number = $state(0);
@@ -29,9 +27,8 @@ export const increaseNoUnitPropagations = (): void => {
 	noUnitPropagations += 1;
 };
 
-export const updateClausesLeft = (): void => {
+export const updateClausesLeft = (nTrail: number): void => {
 	const nClauses: number = getProblemStore().clauses.leftToSatisfy();
-	const nTrail: number = getTrails().length-1;
 	clausesLeft[nTrail] = nClauses;
 };
 

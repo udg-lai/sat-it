@@ -1,7 +1,6 @@
 import type VariableAssignment from '$lib/transversal/entities/VariableAssignment.ts';
 import { logFatal } from '$lib/store/toasts.ts';
 import type Clause from './Clause.ts';
-import { updateClausesLeft } from '$lib/store/statistics.svelte.ts';
 
 export class Trail {
 	private assignments: VariableAssignment[] = [];
@@ -72,7 +71,6 @@ export class Trail {
 			if (assignment.isD()) {
 				this.registerNewDecisionLevel();
 			}
-			updateClausesLeft();
 		}
 	}
 
@@ -81,7 +79,6 @@ export class Trail {
 		if (returnValue?.isD()) {
 			this.deleteCurrentDecisionLevel();
 		}
-		updateClausesLeft();
 		return returnValue;
 	}
 

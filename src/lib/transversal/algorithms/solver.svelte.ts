@@ -6,10 +6,11 @@ import { getSolverMachine } from '$lib/store/stateMachine.svelte.ts';
 import {
 	increaseNoConflicts,
 	increaseNoDecisions,
-	increaseNoUnitPropagations as increaseNoUnitPropagations
+	increaseNoUnitPropagations as increaseNoUnitPropagations,
+	updateClausesLeft
 } from '$lib/store/statistics.svelte.ts';
 import { logBreakpoint, logFatal } from '$lib/store/toasts.ts';
-import { getLatestTrail, stackTrail, unstackTrail } from '$lib/store/trails.svelte.ts';
+import { getLatestTrail, getTrails, stackTrail, unstackTrail } from '$lib/store/trails.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import type Clause from '../entities/Clause.ts';
 import { type ClauseEval } from '../entities/Clause.ts';
@@ -148,6 +149,7 @@ const afterAssignment = (assignment: Assignment): void => {
 	if (runningInAutoMode && isBreakpoint) {
 		solverMachine.stopAutoMode();
 	}
+	updateClausesLeft(getTrails().length);
 };
 
 export const backtracking = (pool: VariablePool): number => {
