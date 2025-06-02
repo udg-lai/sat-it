@@ -115,9 +115,8 @@
 	.trail {
 		display: block;
 		position: relative;
-		height: var(--trail-height);
+		min-height: var(--trail-height);
 		width: 100%;
-		overflow-x: scroll;
 	}
 
 	.last-trail {
