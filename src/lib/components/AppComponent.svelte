@@ -1,4 +1,5 @@
 <script lang="ts">
+	import TrailEditor from '$lib/components/trail/TrailEditorComponent.svelte';
 	import type { SolverMachine } from '$lib/machine/SolverMachine.svelte.ts';
 	import type { StateFun, StateInput } from '$lib/machine/StateMachine.svelte.ts';
 	import { clearBreakpoints } from '$lib/store/breakpoints.svelte.ts';
@@ -26,7 +27,6 @@
 	} from '$lib/transversal/events.ts';
 	import { onMount } from 'svelte';
 	import { editorViewEventStore, type EditorViewEvent } from './debugger/events.svelte.ts';
-	import TrailEditor from './TrailEditorComponent.svelte';
 
 	let expandPropagations: boolean = $state(true);
 
@@ -98,4 +98,4 @@
 	});
 </script>
 
-<TrailEditor {trails} {expandPropagations} />
+<TrailEditor {trails} />

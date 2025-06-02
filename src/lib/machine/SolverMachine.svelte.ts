@@ -86,7 +86,6 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 		const times: number[] = [];
 		while (!this.completed() && !this.forcedStop) {
 			this.step();
-			console.log('forcedStop', this.forcedStop);
 			await tick();
 			await new Promise((r) => times.push(setTimeout(r, getStepDelay())));
 		}
@@ -102,7 +101,6 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 		const times: number[] = [];
 		while (!this.completed() && !this.onConflictState() && !this.forcedStop) {
 			this.step();
-			console.log('forcedStop', this.forcedStop);
 			await tick();
 			await new Promise((r) => times.push(setTimeout(r, getStepDelay())));
 		}
