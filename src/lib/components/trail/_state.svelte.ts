@@ -1,5 +1,10 @@
-let trailOverflow = $state(0);
+import { trailTrackingEventBus } from "$lib/transversal/events.ts";
 
-export let getTrailOverflow = () => trailOverflow;
+let lastTrailSize = $state(0);
 
-export let setTrailOverflow = (width: number) =>  trailOverflow = width;
+export let getLastTrailSize = () => lastTrailSize;
+
+export let setLastTrailSize = (width: number) => {
+    lastTrailSize = width;
+    trailTrackingEventBus.emit(lastTrailSize);
+}

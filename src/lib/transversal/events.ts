@@ -26,3 +26,7 @@ export const changeAlgorithmEventBus = createEventBus<void>();
 
 // event bus for breakpoints
 export const breakpointEvent = createEventBus<Breakpoint>();
+
+// event bus for trail size changes
+export const trailTrackingEventBus = createEventBus<number>();
+

@@ -11,7 +11,7 @@ export function createEventBus<T>() {
 			};
 		},
 		emit(event: T) {
-			subscribers.forEach((fn) => fn(event));
+			subscribers.forEach((fn: Subscriber) => fn(event));
 		}
 	};
 }

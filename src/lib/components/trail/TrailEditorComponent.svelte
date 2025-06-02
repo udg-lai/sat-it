@@ -1,6 +1,8 @@
 <script lang="ts">
 	import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
+	import { onMount } from 'svelte';
 	import TrailComponent from './TrailComponent.svelte';
+	import { trailTrackingEventBus } from '$lib/transversal/events.ts';
 
 	interface Props {
 		trails: Trail[];
@@ -8,47 +10,45 @@
 
 	let { trails }: Props = $props();
 
-	let last: Trail | undefined = $derived(trails[trails.length - 1]);
-	let init: Trail[] | undefined = $derived(trails.slice(0, -1));
-
 	let editorElement: HTMLDivElement;
+	let trailsLeafElement: HTMLElement;
+	let editorTrailsElement: HTMLElement;
 
 	const scrollToBottom = async (node: HTMLDivElement) => {
 		node.scroll({ top: node.scrollHeight, behavior: 'smooth' });
 	};
+
+	function rearrangeTrailEditor(reference: number) {
+		        const scrollLeft = Math.max(0, reference - (trailsLeafElement.offsetWidth * 2 / 3));
+		trailsLeafElement.scrollTo({
+			left: scrollLeft,
+			behavior: 'smooth'
+		});
+	}
+
+	onMount(() => {
+		const unsubscribeTrailTracking = trailTrackingEventBus.subscribe(rearrangeTrailEditor)
+		return () => {
+			unsubscribeTrailTracking();
+		};
+	})
 </script>
 
 <trail-editor bind:this={editorElement}>
 	<editor-leaf>
-		<editor-indexes>
-			{#if init && init.length > 0}
-				<div class="enumerate">
-					{#each init as trail, index}
-						<div class="item">
-							<span>{index}</span>
-						</div>
-					{/each}
+		<editor-indexes class="enumerate">
+			{#each trails as trail, index}
+				<div class="item">
+					<span>{index}</span>
 				</div>
-			{/if}
-			{#if last}
-				<div class="enumerate">
-					<div class="item">
-						<span>{trails.length}</span>
-					</div>
-				</div>
-			{/if}
+			{/each}
 		</editor-indexes>
 
-		<trails-leaf>
-			<editor-trails>
-				{#if init && init.length > 0}
-					{#each init as trail, index}
-						<TrailComponent {trail} isLast={false} />
+		<trails-leaf bind:this={trailsLeafElement}>
+			<editor-trails bind:this={editorTrailsElement}>
+					{#each trails as trail, index}
+						<TrailComponent {trail} isLast={trails.length === index + 1} />
 					{/each}
-				{/if}
-				{#if last}
-					<TrailComponent trail={last} isLast={true} />
-				{/if}
 			</editor-trails>
 		</trails-leaf>
 	</editor-leaf>
