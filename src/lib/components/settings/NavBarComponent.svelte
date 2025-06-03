@@ -1,9 +1,9 @@
 <script lang="ts">
 	import type { DimacsInstance } from '$lib/dimacs/dimacs-instance.interface.ts';
 	import { addInstance } from '$lib/store/instances.store.ts';
-	import { logError } from '$lib/store/toasts.ts';
+	import { logError, logInfo } from '$lib/store/toasts.ts';
 	import claims2html from '$lib/transversal/mapping/claimsToHtml.ts';
-	import parser from '$lib/transversal/mapping/contentToSummary.ts';
+	import parser, { type Summary } from '$lib/transversal/mapping/contentToSummary.ts';
 	import { BottomNav, BottomNavItem, Tooltip } from 'flowbite-svelte';
 	import {
 		AdjustmentsVerticalOutline,
@@ -42,15 +42,32 @@
 		}
 	}
 
+	function notifySimplifiedCNF(summary: Summary): void {
+		const { nTautology, nClauseSimplified } = summary;
+
+		if (nTautology > 0) {
+			const title = `Instance contains tautological clauses`;
+			const description = `${nTautology} clauses have been removed.`;
+			logInfo(title, description);
+		}
+
+		if (nClauseSimplified > 0) {
+			const title = `Instance contains clauses with repeated literals`;
+			const description = `${nClauseSimplified} clauses has been simplified.`;
+			logInfo(title, description);
+		}
+	}
+
 	function saveInstance(name: string, content: string): void {
 		try {
-			const summary = parser({ name: name, content });
+			const summary: Summary = parser({ name: name, content });
 			const instance: DimacsInstance = {
 				name: name.toLowerCase(),
 				content,
 				summary,
 				html: claims2html(summary.claims)
 			};
+			notifySimplifiedCNF(summary);
 			addInstance(instance);
 		} catch (error) {
 			const title = `Instance ${name} contains an error`;
