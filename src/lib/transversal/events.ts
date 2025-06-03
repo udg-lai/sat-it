@@ -21,5 +21,14 @@ export type StateMachineEvent = 'step' | 'solve_trail' | 'solve_all' | 'nextVari
 
 export const stateMachineEventBus = createEventBus<StateMachineEvent>();
 
+// observable of algorithm changes
+export const changeAlgorithmEventBus = createEventBus<void>();
+
 // event bus for breakpoints
 export const breakpointEvent = createEventBus<Breakpoint>();
+
+// event bus for trail size changes
+export const trailTrackingEventBus = createEventBus<number>();
+
+// event bus for collapse/expand of the trails
+export const toggleTrailExpandEventBus = createEventBus<boolean>();

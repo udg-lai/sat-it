@@ -1,7 +1,7 @@
 import type { StateMachineEvent } from '$lib/transversal/events.ts';
 import { tick } from 'svelte';
 import type { StateFun, StateInput, StateMachine } from './StateMachine.svelte.ts';
-import { logWarning } from '$lib/transversal/logging.ts';
+import { logWarning } from '$lib/store/toasts.ts';
 import { getStepDelay } from '$lib/store/delay-ms.svelte.ts';
 
 export interface SolverStateInterface<F extends StateFun, I extends StateInput> {
@@ -73,7 +73,6 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 	}
 
 	stopAutoMode(): void {
-		console.debug('SolverMachine', 'forcing stop');
 		this.forcedStop = true;
 	}
 
@@ -87,7 +86,6 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 		const times: number[] = [];
 		while (!this.completed() && !this.forcedStop) {
 			this.step();
-			console.log('forcedStop', this.forcedStop);
 			await tick();
 			await new Promise((r) => times.push(setTimeout(r, getStepDelay())));
 		}
@@ -103,7 +101,6 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 		const times: number[] = [];
 		while (!this.completed() && !this.onConflictState() && !this.forcedStop) {
 			this.step();
-			console.log('forcedStop', this.forcedStop);
 			await tick();
 			await new Promise((r) => times.push(setTimeout(r, getStepDelay())));
 		}

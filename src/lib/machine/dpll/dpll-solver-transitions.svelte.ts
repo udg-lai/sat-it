@@ -1,4 +1,6 @@
-import { logFatal } from '$lib/transversal/logging.ts';
+import { logFatal } from '$lib/store/toasts.ts';
+import { updateLastTrailEnding } from '$lib/store/trails.svelte.ts';
+import type { SvelteSet } from 'svelte/reactivity';
 import { type NonFinalState } from '../StateMachine.svelte.ts';
 import type {
 	DPLL_ALL_CLAUSES_CHECKED_FUN,
@@ -40,10 +42,8 @@ import type {
 	DPLL_UNSTACK_CLAUSE_SET_FUN,
 	DPLL_UNSTACK_CLAUSE_SET_INPUT
 } from './dpll-domain.svelte.ts';
-import type { DPLL_StateMachine } from './dpll-state-machine.svelte.ts';
 import type { DPLL_SolverMachine } from './dpll-solver-machine.svelte.ts';
-import type { SvelteSet } from 'svelte/reactivity';
-import { updateLastTrailEnding } from '$lib/store/trails.svelte.ts';
+import type { DPLL_StateMachine } from './dpll-state-machine.svelte.ts';
 
 export const initialTransition = (solver: DPLL_SolverMachine): void => {
 	const stateMachine: DPLL_StateMachine = solver.stateMachine;
@@ -81,6 +81,7 @@ const conflictDetectionBlock = (
 };
 
 const ecTransition = (stateMachine: DPLL_StateMachine): void => {
+	console.log('ecTransition');
 	if (stateMachine.getActiveId() !== 0) {
 		logFatal(
 			'Fail Initial',
@@ -93,10 +94,14 @@ const ecTransition = (stateMachine: DPLL_StateMachine): void => {
 	>;
 	if (ecState.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Empty Clause state');
+	} else {
+		const result: boolean = ecState.run();
+		if (result) {
+			stateMachine.transition('unsat_state');
+		} else {
+			stateMachine.transition('unit_clauses_detection_state');
+		}
 	}
-	const result: boolean = ecState.run();
-	if (result) stateMachine.transition('unsat_state');
-	else stateMachine.transition('unit_clauses_detection_state');
 };
 
 const ucdTransition = (stateMachine: DPLL_StateMachine): SvelteSet<number> => {
@@ -405,7 +410,6 @@ const decideTransition = (stateMachine: DPLL_StateMachine): number => {
 	if (decideState.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Decide state');
 	}
-	//I have to think how to send the assignment event
 	const literalToPropagate: number = decideState.run();
 	stateMachine.transition('complementary_occurrences_state');
 	return literalToPropagate;

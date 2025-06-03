@@ -66,6 +66,7 @@
 	debugger {
 		width: 100%;
 		height: var(--debugger-height);
+		min-height: var(--debugger-height);
 		display: flex;
 		align-items: center;
 		justify-content: left;
@@ -73,9 +74,7 @@
 		border-color: var(--border-color);
 		border-style: solid;
 		gap: 0.5rem;
-		padding-left: calc(
-			var(--windows-padding) + var(--button-size) + var(--windows-padding) + 0.5rem
-		);
+		padding-left: calc(var(--windows-padding) + 15px);
 	}
 
 	:root {

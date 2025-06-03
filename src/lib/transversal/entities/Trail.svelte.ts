@@ -1,10 +1,10 @@
 import type VariableAssignment from '$lib/transversal/entities/VariableAssignment.ts';
-import { logFatal } from '../logging.ts';
+import { logFatal } from '$lib/store/toasts.ts';
 import type Clause from './Clause.ts';
 
 export class Trail {
-	private assignments: VariableAssignment[] = [];
-	private decisionLevelBookmark: number[] = [-1];
+	private assignments: VariableAssignment[] = $state([]);
+	private decisionLevelBookmark: number[] = $state([-1]);
 	private learned: Clause[] = [];
 	private followUPIndex: number = -1;
 	private decisionLevel: number = 0;

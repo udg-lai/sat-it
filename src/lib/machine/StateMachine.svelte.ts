@@ -1,9 +1,10 @@
-import { logFatal } from '$lib/transversal/logging.ts';
+import { logFatal, logSAT, logUnSAT } from '$lib/store/toasts.ts';
+import type { BKT_FUN, BKT_INPUT } from './backtracking/bkt-domain.svelte.ts';
 import type { DPLL_FUN, DPLL_INPUT } from './dpll/dpll-domain.svelte.ts';
 
-export type StateFun = DPLL_FUN | never;
+export type StateFun = BKT_FUN | DPLL_FUN | never;
 
-export type StateInput = DPLL_INPUT;
+export type StateInput = BKT_INPUT | DPLL_INPUT;
 
 export interface FinalState<F extends StateFun> {
 	id: number;
@@ -44,12 +45,22 @@ export abstract class StateMachine<F extends StateFun, I extends StateInput>
 	private active: number = $state(-1);
 	private initial: number = -1;
 	private conflict: number = -1;
+	private sat: number = -1;
+	private unsat: number = -1;
 
-	constructor(states: Map<number, State<F, I>>, initial: number, conflict: number) {
+	constructor(
+		states: Map<number, State<F, I>>,
+		initial: number,
+		conflict: number,
+		sat: number,
+		unsat: number
+	) {
 		this.states = states;
 		this.initial = initial;
 		this.active = initial;
 		this.conflict = conflict;
+		this.sat = sat;
+		this.unsat = unsat;
 	}
 
 	onFinalState(): boolean {
@@ -88,7 +99,7 @@ export abstract class StateMachine<F extends StateFun, I extends StateInput>
 		if (this.onFinalState()) {
 			logFatal('No next state for a completed state machine');
 		} else {
-			const activeState = this.getActiveState() as NonFinalState<DPLL_FUN, DPLL_INPUT>;
+			const activeState = this.getActiveState() as NonFinalState<F, I>;
 			const activeStateTransitions = activeState.transitions;
 			const nextStateId = activeStateTransitions.get(input);
 			if (nextStateId === undefined) {
@@ -110,6 +121,19 @@ export abstract class StateMachine<F extends StateFun, I extends StateInput>
 		} else {
 			const nextState = this.getNextState(input);
 			this.active = nextState.id;
+			if (this.onFinalState()) {
+				this.notifyFinalState();
+			}
+		}
+	}
+
+	private notifyFinalState(): void {
+		console.log('notifiying final state');
+		const stateId = this.getActiveState().id;
+		if (stateId === this.sat) {
+			logSAT('The problem has been satisfied');
+		} else if (stateId === this.unsat) {
+			logUnSAT('The problem is unsatisfiable');
 		}
 	}
 }

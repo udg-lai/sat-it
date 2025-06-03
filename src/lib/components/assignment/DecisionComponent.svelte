@@ -8,20 +8,9 @@
 	interface Props {
 		assignment: VariableAssignment;
 		expanded: boolean;
-		emitExpand?: () => void;
-		emitClose?: () => void;
 	}
 
-	let { assignment, expanded = $bindable(), emitClose, emitExpand }: Props = $props();
-
-	function onClick() {
-		expanded = !expanded;
-		if (expanded) {
-			emitExpand?.();
-		} else {
-			emitClose?.();
-		}
-	}
+	let { assignment, expanded }: Props = $props();
 
 	let onChrome = $state(false);
 
@@ -34,7 +23,6 @@
 	<button
 		class="literal-style decision {onChrome ? 'pad-chrome' : 'pad-others'}"
 		class:level-expanded={expanded}
-		onclick={onClick}
 	>
 		<MathTexComponent equation={assignment.toTeX()} />
 	</button>

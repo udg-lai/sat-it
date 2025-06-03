@@ -1,4 +1,4 @@
-import { logFatal } from '../logging.ts';
+import { logFatal } from '$lib/store/toasts.ts';
 import { fromJust, isJust, makeJust, makeNothing, type Maybe } from '../types/maybe.ts';
 import type { Claim, RawClause } from './contentToSummary.ts';
 

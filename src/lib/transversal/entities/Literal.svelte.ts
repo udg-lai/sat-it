@@ -1,5 +1,5 @@
 import Variable from '$lib/transversal/entities/Variable.svelte.ts';
-import { logFatal } from '../logging.ts';
+import { logFatal } from '$lib/store/toasts.ts';
 import type { Comparable } from '../interfaces/Comparable.ts';
 
 export type Polarity = 'Positive' | 'Negative';

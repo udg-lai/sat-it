@@ -1,5 +1,5 @@
 import type { IVariablePool } from '../interfaces/IVariablePool.ts';
-import { logError } from '../logging.ts';
+import { logError } from '$lib/store/toasts.ts';
 import { makeJust, makeNothing, type Maybe } from '../types/maybe.ts';
 import Variable from './Variable.svelte.ts';
 
