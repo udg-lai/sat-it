@@ -21,9 +21,12 @@
 	--trail-height: 5rem;
 	--trail-content-height: 4rem;
 	--trail-gap: 1rem;
-	--trail-literal-min-width: var(--button-size);
+	--trail-literal-min-width: var(--trail-literal-large-width);
+	--trail-literal-standard: 40px;
+	--trail-literal-large-width: 45px;
 	--popover-font-size: 0.9rem;
 	--button-size: 40px;
+
 	--icon-unselected: #828282;
 	--icon-base: #8a3ffc;
 	--icon-light: #e5d9ff;
@@ -33,6 +36,7 @@
 	--button-active-color: #cacaca90;
 	--button-border-color: #afafaf;
 	--opacity-50: 0.5;
+	--tail-component-width: ;
 }
 
 html,

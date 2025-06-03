@@ -4,6 +4,7 @@ import fetchInstances from '$lib/transversal/bootstrap-instances.ts';
 import { logError, logInfo, logWarning } from '$lib/store/toasts.ts';
 import { get, writable, type Writable } from 'svelte/store';
 import { updateProblemDomain } from './problem.svelte.ts';
+import { modifyLiteralWidth } from '$lib/transversal/utils.ts';
 
 export interface InteractiveInstance extends DimacsInstance {
 	removable: boolean;
@@ -122,6 +123,7 @@ export function deleteInstanceByName(name: string): void {
 }
 
 function afterActivateInstance(instance: DimacsInstance): void {
+	modifyLiteralWidth(instance.summary.varCount);
 	updateProblemDomain(instance);
 	changeInstanceEventBus.emit();
 }
