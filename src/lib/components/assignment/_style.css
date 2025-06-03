@@ -6,8 +6,8 @@
 .literal-style {
 	min-width: var(--trail-literal-min-width);
 	width: var(--trail-literal-min-width);
-	min-height: var(--trail-literal-min-width);
-	height: var(--trail-literal-min-width);
+	min-height: var(--trail-literal-standard);
+	height: var(--trail-literal-standard);
 	position: relative;
 	display: flex;
 	justify-content: center;

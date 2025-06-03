@@ -3,9 +3,6 @@
 	import type { StateFun, StateInput } from '$lib/machine/StateMachine.svelte.ts';
 	import { getProblemStore, type Problem } from '$lib/store/problem.svelte.ts';
 	import { getSolverMachine } from '$lib/store/stateMachine.svelte.ts';
-	import Variable from '$lib/transversal/entities/Variable.svelte.ts';
-	import VariableAssignment from '$lib/transversal/entities/VariableAssignment.ts';
-	import ChildlessDecisionComponent from '../assignment/ChildlessDecisionComponent.svelte';
 	import AutomaticDebugger from './AutomaticDebuggerComponent.svelte';
 	import AutoModeComponent from './AutoModeComponent.svelte';
 	import ConflictDetectionDebugger from './ConflictDetectionDebuggerComponent.svelte';
@@ -23,9 +20,6 @@
 	let enableConflictDetection = $derived(solverMachine.detectingConflict());
 	let finished = $derived(solverMachine.completed());
 	let inAutoMode = $derived(solverMachine.isInAutoMode());
-
-
-	let test_variable: VariableAssignment = VariableAssignment.newManualAssignment(new Variable(9999, false));
 </script>
 
 <debugger>
@@ -57,9 +51,6 @@
 		<GeneralDebuggerButtons {finished} backtrackingState={enableBacktracking} />
 	{/if}
 </debugger>
-<div class="ml-2">
-	<ChildlessDecisionComponent assignment={test_variable}/>
-</div>
 
 
 <style>
