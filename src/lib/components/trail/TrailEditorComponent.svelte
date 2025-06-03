@@ -109,7 +109,7 @@
 	onscroll={handleVerticalScroll}
 	role="presentation"
 	tabindex="-1"
-	class:grabbing={grabbing}
+	class:grabbing
 >
 	<editor-leaf use:listenContentHeight>
 		<editor-indexes class="enumerate">
