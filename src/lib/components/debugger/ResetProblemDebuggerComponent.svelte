@@ -3,6 +3,7 @@
 	import DynamicRender from '../DynamicRender.svelte';
 	import { changeInstanceEventBus } from '$lib/transversal/events.ts';
 	import { Modal } from 'flowbite-svelte';
+	import { getActiveInstance } from '$lib/store/instances.store.ts';
 	const resetProps = {
 		size: 'md'
 	};
@@ -28,7 +29,7 @@
 			<button
 				class="btn mr-4"
 				onclick={() => {
-					changeInstanceEventBus.emit();
+					changeInstanceEventBus.emit(getActiveInstance()?.name as string);
 					resetModal = false;
 				}}>Yes, I'm sure</button
 			>

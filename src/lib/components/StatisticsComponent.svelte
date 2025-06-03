@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { getActiveInstance } from '$lib/store/instances.store.ts';
 	import { getProblemStore, type Problem } from '$lib/store/problem.svelte.ts';
 	import { getSolverMachine } from '$lib/store/stateMachine.svelte.ts';
 	import {
@@ -41,8 +40,8 @@
 	const finished: boolean = $derived(getSolverMachine().onFinalState());
 	const unsat: boolean = $derived(getSolverMachine().onUnsatState());
 
-	const updateActiveInstance = () => {
-		activeInstance = getActiveInstance()?.name as string;
+	const updateActiveInstance = (name: string) => {
+		activeInstance = name;
 	};
 
 	onMount(() => {
@@ -57,9 +56,9 @@
 <div class="h-full space-y-5 pt-2">
 	<div class="flex place-content-around">
 		<div class="text">
-			{problem.algorithm}
+			<span class="text-right">{problem.algorithm}</span>
 			{#if activeInstance}
-				{activeInstance}
+				<span class="text-left">{activeInstance}</span>
 			{/if}
 		</div>
 		<div class="metric">
@@ -108,6 +107,7 @@
 	}
 	.text {
 		display: flex;
+		flex-wrap: wrap;
 		flex: 1;
 		min-width: 10rem;
 		max-width: 17rem;
