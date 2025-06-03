@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { getActiveInstance } from '$lib/store/instances.store.ts';
 	import { getProblemStore, type Problem } from '$lib/store/problem.svelte.ts';
 	import { getSolverMachine } from '$lib/store/stateMachine.svelte.ts';
 	import {
@@ -10,7 +11,10 @@
 	} from '$lib/store/statistics.svelte.ts';
 	import { getLatestTrail, getTrails } from '$lib/store/trails.svelte.ts';
 	import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
+	import { changeInstanceEventBus } from '$lib/transversal/events.ts';
+	import { onMount } from 'svelte';
 
+	let activeInstance: string = $state('');
 	const problem: Problem = $derived(getProblemStore());
 	const decisions: number = $derived(getNoDecisions());
 	const conflicts: number = $derived(getNoConflicts());
@@ -36,10 +40,28 @@
 	});
 	const finished: boolean = $derived(getSolverMachine().onFinalState());
 	const unsat: boolean = $derived(getSolverMachine().onUnsatState());
+
+	const updateActiveInstance = () => {
+		activeInstance = getActiveInstance()?.name as string;
+	};
+
+	onMount(() => {
+		const unsuscribeInstanceStore = changeInstanceEventBus.subscribe(updateActiveInstance);
+
+		return () => {
+			unsuscribeInstanceStore();
+		};
+	});
 </script>
 
-<div class="h-full space-y-5 border-t border-[var(--border-color)]">
-	<div class="flex place-content-around pt-3">
+<div class="h-full space-y-5 pt-2">
+	<div class="flex place-content-around">
+		<div class="text">
+			{problem.algorithm}
+			{#if activeInstance}
+				{activeInstance}
+			{/if}
+		</div>
 		<div class="metric">
 			Decision Level:
 			<span class="statistic-value">{decisionLevelCurrentTrail}</span>
@@ -56,8 +78,6 @@
 				<span class="statistic-value">{minimumClausesLeft}</span>
 			</div>
 		{/if}
-	</div>
-	<div class="flex place-content-around">
 		<div class="metric">
 			<span>Decisions:</span>
 			<span class="statistic-value">{decisions}</span>
@@ -82,6 +102,17 @@
 		flex: 1;
 		min-width: 5rem;
 		max-width: 12rem;
+		background-color: white;
+		border-radius: 5px;
+		border: 1px solid var(--border-color);
+	}
+	.text {
+		display: flex;
+		flex: 1;
+		min-width: 10rem;
+		max-width: 17rem;
+		justify-content: space-around;
+		align-items: center;
 		background-color: white;
 		border-radius: 5px;
 		border: 1px solid var(--border-color);
