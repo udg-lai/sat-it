@@ -32,6 +32,8 @@ export interface Summary {
 	clauseCount: number;
 	claims: Claim[];
 	cnf: CNF;
+	nTautology: number;
+	nClauseSimplified: number;
 }
 
 const emptySummary = (): Summary => {
@@ -41,7 +43,9 @@ const emptySummary = (): Summary => {
 		varCount: -1,
 		clauseCount: -1,
 		claims: [],
-		cnf: []
+		cnf: [],
+		nTautology: 0,
+		nClauseSimplified: 0
 	};
 	return summary;
 };
@@ -82,12 +86,19 @@ export default function content2summary(input: Input): Summary {
 		logFatal('Problem parsing claims', unwrapEither(eitherClaims));
 	}
 
-	const eitherClauses = makeClauses(summary.claims, summary.varCount);
+	const eitherClauses: Either<ErrorMessage, MakeClausesResult> = makeClauses(
+		summary.claims,
+		summary.varCount
+	);
 	if (isRight(eitherClauses)) {
-		const { clauses } = unwrapEither(eitherClauses);
+		const { clauses, nClauseSimplified, nTautology }: MakeClausesResult =
+			unwrapEither(eitherClauses);
 		summary.cnf = clauses;
+		summary.nTautology = nTautology;
+		summary.nClauseSimplified = nClauseSimplified;
 	} else {
-		logFatal('Problem simplifying claims to clauses', unwrapEither(eitherClauses));
+		const description: ErrorMessage = unwrapEither(eitherClauses);
+		logFatal('Problem simplifying claims to clauses', description);
 	}
 
 	return summary;
@@ -194,6 +205,8 @@ function parseClaims(lines: string[], clauseCount: number): Either<ErrorMessage,
 
 interface MakeClausesResult {
 	clauses: RawClause[];
+	nTautology: number;
+	nClauseSimplified: number;
 }
 
 function makeClauses(claims: Claim[], varCount: number): Either<ErrorMessage, MakeClausesResult> {
@@ -219,13 +232,32 @@ function makeClauses(claims: Claim[], varCount: number): Either<ErrorMessage, Ma
 		// 1) drops repeated literals (removing the eos)
 		// 2) remove trivial true clauses
 		// 3) builds the clause (adds the eos)
+
+		let nTautology = 0;
+		let nClauseSimplified = 0;
+
 		const clauses = rawClauses
-			.map((rawClause) => {
-				const literals = rawClause.slice(0, -1);
-				return new Set(literals);
+			.map((clause) => clause.slice(0, -1)) // remove the eos '0'
+			.filter((clause) => {
+				const uniques: Set<number> = new Set(clause);
+				if (isTautology(uniques)) {
+					nTautology += 1;
+					return false; // drop tautologies
+				}
+				return true; // keep non-tautologies
 			})
-			.filter((clause) => !isTautology(clause))
+			.map((clause) => {
+				const uniques: Set<number> = new Set(clause);
+				if (clause.length !== uniques.size) {
+					nClauseSimplified += 1;
+				}
+				return uniques;
+			})
 			.map((clause) => [...Array.from(clause)]);
-		return makeRight({ clauses });
+		return makeRight({
+			clauses,
+			nTautology,
+			nClauseSimplified
+		});
 	}
 }

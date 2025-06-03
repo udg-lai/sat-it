@@ -2,10 +2,10 @@
 	import { closeSettingsViewEventBus } from '$lib/transversal/events.ts';
 	import { fly } from 'svelte/transition';
 	import BookmarkInstances from './BookmarkInstances.svelte';
-	import LegendComponent from './LegendComponent.svelte';
-	import OptionsComponent, { type OptionEmit } from './OptionsComponent.svelte';
-	import { getActiveView, setActiveView } from './settings.store.svelte.ts';
 	import EngineComponent from './engine/EngineComponent.svelte';
+	import LegendComponent from './LegendComponent.svelte';
+	import NavBarComponent, { type OptionEmit } from './NavBarComponent.svelte';
+	import { getActiveView, setActiveView } from './settings.store.svelte.ts';
 
 	type ActiveView = 'bookmark' | 'engine' | 'legend' | 'info';
 
@@ -35,7 +35,7 @@
 		</class>
 	</div>
 
-	<OptionsComponent event={handleOptionEvent} />
+	<NavBarComponent event={handleOptionEvent} />
 </div>
 
 <style>

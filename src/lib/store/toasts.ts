@@ -17,6 +17,13 @@ export const dismissToast = (id: number) => {
 	toasts.update((all) => all.filter((t) => t.id !== id));
 };
 
+const DEFAULT_TIMEOUT = 10000; // Default timeout for toasts
+const BREAKPOINT_TIMEOUT = 12000; // Timeout for breakpoint toasts
+const SAT_TIMEOUT = DEFAULT_TIMEOUT; // Timeout for SAT toasts
+const UNSAT_TIMEOUT = DEFAULT_TIMEOUT; // Timeout for UNSAT toasts
+const INFO_TIMEOUT = DEFAULT_TIMEOUT; // Default timeout for info toasts
+const WARNING_TIMEOUT = 3 * DEFAULT_TIMEOUT; // Timeout for warning toasts
+
 const addToast = (toast: Toast) => {
 	// Create a unique ID so we can easily find/remove it
 	// if it is dismissible/has a timeout.
@@ -29,7 +36,7 @@ const addToast = (toast: Toast) => {
 		title: '<empty>',
 		description: '<empty>',
 		dismissible: false,
-		timeout: 3000
+		timeout: DEFAULT_TIMEOUT
 	};
 
 	// Push the toast to the top of the list of toasts
@@ -47,7 +54,7 @@ export const logWarning = (title: string, description: string): void => {
 		title: formatText(title),
 		description: formatText(description),
 		dismissible: true,
-		timeout: 10000
+		timeout: WARNING_TIMEOUT
 	});
 };
 
@@ -56,7 +63,8 @@ export const logInfo = (title: string, description?: string): void => {
 		type: 'info',
 		title: formatText(title),
 		description: formatText(description),
-		dismissible: true
+		dismissible: true,
+		timeout: INFO_TIMEOUT
 	});
 };
 
@@ -66,7 +74,7 @@ export const logBreakpoint = (title: string, description?: string): void => {
 		title: formatText(title),
 		description: formatText(description),
 		dismissible: true,
-		timeout: 12000
+		timeout: BREAKPOINT_TIMEOUT
 	});
 };
 
@@ -87,7 +95,7 @@ export const logSAT = (description: string): void => {
 		title: 'SAT',
 		description: formatText(description),
 		dismissible: true,
-		timeout: 5000
+		timeout: SAT_TIMEOUT
 	});
 };
 
@@ -98,7 +106,7 @@ export const logUnSAT = (description: string): void => {
 		title: 'UNSAT',
 		description: formatText(description),
 		dismissible: true,
-		timeout: 5000
+		timeout: UNSAT_TIMEOUT
 	});
 };
 
