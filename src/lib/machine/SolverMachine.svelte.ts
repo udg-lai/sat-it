@@ -60,6 +60,10 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 		return this.stateMachine.onConflictState();
 	}
 
+	onUnsatState(): boolean {
+		return this.stateMachine.onUnsatState();
+	}
+
 	onFinalState(): boolean {
 		return this.stateMachine.onFinalState();
 	}

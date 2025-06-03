@@ -46,8 +46,8 @@
 	}
 
 	.statistics {
-		height: max(6vh, 6rem);
 		width: 100%;
+		padding-top: 0.5rem;
 	}
 
 	.enumerate-clause {

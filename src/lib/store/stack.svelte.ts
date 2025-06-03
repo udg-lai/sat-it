@@ -1,5 +1,5 @@
 import { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
-import type { Statistics } from './statistics.svelte.ts';
+import { type Statistics } from './statistics.svelte.ts';
 
 export interface Snapshot {
 	snapshot: Trail[];
@@ -12,7 +12,7 @@ let stack: Snapshot[] = $state([
 	{
 		snapshot: [],
 		activeState: 0,
-		statistics: { noDecisions: 0, noConflicts: 0, noUnitPropagations: 0 }
+		statistics: { noDecisions: 0, noConflicts: 0, noUnitPropagations: 0, clausesLeft: {} }
 	}
 ]);
 

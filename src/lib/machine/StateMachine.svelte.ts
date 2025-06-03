@@ -1,6 +1,7 @@
 import { logFatal, logSAT, logUnSAT } from '$lib/store/toasts.ts';
 import type { BKT_FUN, BKT_INPUT } from './backtracking/bkt-domain.svelte.ts';
 import type { DPLL_FUN, DPLL_INPUT } from './dpll/dpll-domain.svelte.ts';
+import { UNSAT_STATE_ID } from './reserved.ts';
 
 export type StateFun = BKT_FUN | DPLL_FUN | never;
 
@@ -74,6 +75,10 @@ export abstract class StateMachine<F extends StateFun, I extends StateInput>
 
 	onConflictState(): boolean {
 		return this.getActiveState().id === this.conflict;
+	}
+
+	onUnsatState(): boolean {
+		return this.getActiveState().id === UNSAT_STATE_ID;
 	}
 
 	getActiveState(): State<F, I> {
