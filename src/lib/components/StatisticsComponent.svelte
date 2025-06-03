@@ -67,7 +67,7 @@
 			<span class="statistic-value">{conflicts}</span>
 		</div>
 		<div class="metric">
-			<span>Unit propagations:</span>
+			<span>UPs:</span>
 			<span class="statistic-value">{unitPropagations}</span>
 		</div>
 	</div>
