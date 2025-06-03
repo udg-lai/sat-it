@@ -18,9 +18,12 @@
 	let editorElement: HTMLDivElement;
 	let trailsLeafElement: HTMLElement;
 	let userInteracting: boolean = $state(false);
+	let grabbing: boolean = $state(false);
 	let interactingTimeout: number | undefined = undefined;
 	let userScrolling: boolean = $state(false);
 	let scrollTimeout: number | undefined = undefined;
+	let lastReference: number = $state(0);
+	const recoveryTimeout: number = 3000;
 
 	let expandedTrails: boolean = $state(true);
 
@@ -28,14 +31,15 @@
 		editorElement.scrollTo({ top: editorElement.scrollHeight, behavior: 'smooth' });
 	};
 
-	function handleScroll() {
+	function handleVerticalScroll() {
 		if (scrollTimeout !== undefined) {
 			clearTimeout(scrollTimeout);
 		}
 		userScrolling = true;
 		scrollTimeout = setTimeout(() => {
 			userScrolling = false;
-		}, 2000);
+			rearrangeTrailEditor(lastReference);
+		}, recoveryTimeout);
 	}
 
 	function handleMouseDown() {
@@ -43,12 +47,22 @@
 			clearTimeout(interactingTimeout);
 		}
 		userInteracting = true;
+		grabbing = true;
+	}
+
+	function handleMouseUp() {
+		if (interactingTimeout !== undefined) {
+			clearTimeout(interactingTimeout);
+		}
 		interactingTimeout = setTimeout(() => {
 			userInteracting = false;
-		}, 3000);
+			rearrangeTrailEditor(lastReference);
+		}, recoveryTimeout);
+		grabbing = false;
 	}
 
 	function rearrangeTrailEditor(reference: number) {
+		lastReference = reference;
 		if (userInteracting || userScrolling) {
 			return;
 		}
@@ -91,9 +105,11 @@
 <trail-editor
 	bind:this={editorElement}
 	onmousedown={handleMouseDown}
-	onscroll={handleScroll}
+	onmouseup={handleMouseUp}
+	onscroll={handleVerticalScroll}
 	role="presentation"
 	tabindex="-1"
+	class:grabbing
 >
 	<editor-leaf use:listenContentHeight>
 		<editor-indexes class="enumerate">
@@ -131,6 +147,10 @@
 		overflow-y: auto;
 		overflow-x: hidden;
 		padding: 1.5rem 0.5rem;
+	}
+
+	.grabbing {
+		cursor: grabbing;
 	}
 
 	editor-leaf {
