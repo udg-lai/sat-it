@@ -40,6 +40,7 @@ export const runningOnChrome = (): boolean => {
 };
 
 export const modifyLiteralWidth = (varCount: number): void => {
-	const width = varCount >= 1000 ? 'var(--trail-literal-large-width)' : 'var(--trail-literal-standard)';
+	const width =
+		varCount >= 1000 ? 'var(--trail-literal-large-width)' : 'var(--trail-literal-standard)';
 	document.documentElement.style.setProperty('--trail-literal-min-width', width);
-}
+};

@@ -52,7 +52,6 @@
 	{/if}
 </debugger>
 
-
 <style>
 	debugger {
 		width: 100%;
