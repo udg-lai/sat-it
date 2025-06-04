@@ -1,4 +1,4 @@
-import type { SvelteSet } from "svelte/reactivity";
+import type { SvelteSet } from 'svelte/reactivity';
 
 let clausesToCheck: number[] = $state([]);
 let checkingIndex: number = $state(0);

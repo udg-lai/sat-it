@@ -1,5 +1,8 @@
 <script lang="ts">
-	import { getCheckingIndex, getClausesToCheck } from '$lib/store/conflict-detection-state.svelte.ts';
+	import {
+		getCheckingIndex,
+		getClausesToCheck
+	} from '$lib/store/conflict-detection-state.svelte.ts';
 	import { getProblemStore, type Problem } from '$lib/store/problem.svelte.ts';
 	import type Clause from '$lib/transversal/entities/Clause.ts';
 	import ClauseComponent from '../ClauseComponent.svelte';
@@ -14,7 +17,6 @@
 	});
 
 	let checkingIndex: number = $derived(getCheckingIndex());
-
 </script>
 
 {#each clauses as clause, index (index)}
