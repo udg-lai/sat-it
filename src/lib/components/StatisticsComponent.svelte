@@ -10,10 +10,8 @@
 	} from '$lib/store/statistics.svelte.ts';
 	import { getLatestTrail, getTrails } from '$lib/store/trails.svelte.ts';
 	import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
-	import { changeInstanceEventBus } from '$lib/transversal/events.ts';
-	import { onMount } from 'svelte';
 
-	let activeInstance: string = $state('');
+
 	const problem: Problem = $derived(getProblemStore());
 	const decisions: number = $derived(getNoDecisions());
 	const conflicts: number = $derived(getNoConflicts());
@@ -40,27 +38,10 @@
 	const finished: boolean = $derived(getSolverMachine().onFinalState());
 	const unsat: boolean = $derived(getSolverMachine().onUnsatState());
 
-	const updateActiveInstance = (name: string) => {
-		activeInstance = name;
-	};
-
-	onMount(() => {
-		const unsuscribeInstanceStore = changeInstanceEventBus.subscribe(updateActiveInstance);
-
-		return () => {
-			unsuscribeInstanceStore();
-		};
-	});
 </script>
 
 <div class="h-full space-y-5 pt-2">
 	<div class="flex place-content-around">
-		<div class="text">
-			<span class="text-right">{problem.algorithm}</span>
-			{#if activeInstance}
-				<span class="text-left">{activeInstance}</span>
-			{/if}
-		</div>
 		<div class="metric">
 			Decision Level:
 			<span class="statistic-value">{decisionLevelCurrentTrail}</span>
@@ -101,18 +82,6 @@
 		flex: 1;
 		min-width: 5rem;
 		max-width: 12rem;
-		background-color: white;
-		border-radius: 5px;
-		border: 1px solid var(--border-color);
-	}
-	.text {
-		display: flex;
-		flex-wrap: wrap;
-		flex: 1;
-		min-width: 10rem;
-		max-width: 17rem;
-		justify-content: space-around;
-		align-items: center;
 		background-color: white;
 		border-radius: 5px;
 		border: 1px solid var(--border-color);

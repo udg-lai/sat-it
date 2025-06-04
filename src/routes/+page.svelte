@@ -3,6 +3,7 @@
 	import AppComponent from '$lib/components/AppComponent.svelte';
 	import DebuggerComponent from '$lib/components/debugger/DebuggerComponent.svelte';
 	import SettingsComponent from '$lib/components/settings/SettingsComponent.svelte';
+	import SolvingInformation from '$lib/components/SolvingInformationComponent.svelte';
 	import StatisticsComponent from '$lib/components/StatisticsComponent.svelte';
 	import ToastComponent from '$lib/components/ToastComponent.svelte';
 	import ToolsComponent from '$lib/components/tools/ToolsComponent.svelte';
@@ -59,7 +60,10 @@
 		<ToolsComponent />
 	</tools>
 	<workspace>
-		<DebuggerComponent />
+		<user>
+			<DebuggerComponent />
+			<SolvingInformation />
+		</user>
 		<AppComponent />
 	</workspace>
 </main>
@@ -110,5 +114,11 @@
 		background-color: var(--main-bg-color);
 		border-top-width: 1px;
 		border-color: var(--border-color);
+	}
+
+	user {
+		display: flex;
+		flex-direction: row;
+		border-bottom: 1px solid var(--border-color);
 	}
 </style>

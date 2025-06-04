@@ -54,17 +54,15 @@
 
 <style>
 	debugger {
-		width: 100%;
 		height: var(--debugger-height);
+		width: 50%;
 		min-height: var(--debugger-height);
 		display: flex;
 		align-items: center;
 		justify-content: left;
-		border-bottom: 1px;
-		border-color: var(--border-color);
-		border-style: solid;
 		gap: 0.5rem;
 		padding-left: calc(var(--windows-padding) + 15px);
+		border-right: 1px solid var(--border-color);
 	}
 
 	:root {
