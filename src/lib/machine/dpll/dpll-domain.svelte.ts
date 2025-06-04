@@ -19,7 +19,7 @@ import { isUnitClause, isUnSATClause, type ClauseEval } from '$lib/transversal/e
 import type ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';
 import type VariablePool from '$lib/transversal/entities/VariablePool.svelte.ts';
 import type { DPLL_SolverMachine } from './dpll-solver-machine.svelte.ts';
-import { updateClausesToCheck } from '$lib/store/clausesToCheck.svelte.ts';
+import { updateClausesToCheck } from '$lib/store/conflict-detection-state.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import { logFatal } from '$lib/store/toasts.ts';
 
@@ -35,11 +35,11 @@ export type DPLL_TRIGGERED_CLAUSES_INPUT =
 
 export type DPLL_UNIT_CLAUSES_DETECTION_INPUT = 'triggered_clauses_state';
 
-export type DPLL_PEEK_CLAUSE_SET_INPUT = 'all_clauses_checked_state';
+export type DPLL_PICK_CLAUSE_SET_INPUT = 'all_clauses_checked_state';
 
 export type DPLL_CHECK_PENDING_CLAUSES_INPUT =
 	| 'all_variables_assigned_state'
-	| 'peek_clause_set_state';
+	| 'pick_clause_set_state';
 
 export type DPLL_QUEUE_CLAUSE_SET_INPUT = 'check_pending_clauses_state' | 'delete_clause_state';
 
@@ -72,7 +72,7 @@ export type DPLL_EMPTY_CLAUSE_SET_INPUT = 'decision_level_state';
 export type DPLL_INPUT =
 	| DPLL_EMPTY_CLAUSE_INPUT
 	| DPLL_UNIT_CLAUSES_DETECTION_INPUT
-	| DPLL_PEEK_CLAUSE_SET_INPUT
+	| DPLL_PICK_CLAUSE_SET_INPUT
 	| DPLL_ALL_VARIABLES_ASSIGNED_INPUT
 	| DPLL_TRIGGERED_CLAUSES_INPUT
 	| DPLL_QUEUE_CLAUSE_SET_INPUT
@@ -162,11 +162,11 @@ export const deleteClause: DPLL_DELETE_CLAUSE_FUN = (
 	clauses.delete(clauseId);
 };
 
-export type DPLL_PEEK_CLAUSE_SET_FUN = (
+export type DPLL_PICK_CLAUSE_SET_FUN = (
 	solverStateMachine: DPLL_SolverMachine
 ) => SvelteSet<number>;
 
-export const peekPendingClauseSet: DPLL_PEEK_CLAUSE_SET_FUN = (
+export const pickPendingClauseSet: DPLL_PICK_CLAUSE_SET_FUN = (
 	solverStateMachine: DPLL_SolverMachine
 ) => {
 	const clauseSet: SvelteSet<number> = solverStateMachine.consultPostponed();
@@ -257,7 +257,7 @@ export const emptyClauseSet: DPLL_EMPTY_CLAUSE_SET_FUN = (
 export type DPLL_FUN =
 	| DPLL_EMPTY_CLAUSE_FUN
 	| DPLL_UNIT_CLAUSES_DETECTION_FUN
-	| DPLL_PEEK_CLAUSE_SET_FUN
+	| DPLL_PICK_CLAUSE_SET_FUN
 	| DPLL_CHECK_PENDING_CLAUSES_FUN
 	| DPLL_ALL_VARIABLES_ASSIGNED_FUN
 	| DPLL_QUEUE_CLAUSE_SET_FUN

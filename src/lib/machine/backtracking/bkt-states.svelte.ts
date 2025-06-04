@@ -16,7 +16,7 @@ import {
 	emptyClauseSet,
 	nextClause,
 	nonDecisionMade,
-	peekPendingSet,
+	pickPendingSet,
 	queueClauseSet,
 	triggeredClauses,
 	unsatisfiedClause,
@@ -44,8 +44,8 @@ import {
 	type BKT_INPUT,
 	type BKT_NEXT_CLAUSE_FUN,
 	type BKT_NEXT_CLAUSE_INPUT,
-	type BKT_PEEK_PENDING_SET_FUN,
-	type BKT_PEEK_PENDING_SET_INPUT,
+	type BKT_PICK_PENDING_SET_FUN,
+	type BKT_PICK_PENDING_SET_INPUT,
 	type BKT_QUEUE_CLAUSE_SET_FUN,
 	type BKT_QUEUE_CLAUSE_SET_INPUT,
 	type BKT_TRIGGERED_CLAUSES_FUN,
@@ -62,7 +62,7 @@ export const bkt_stateName2StateId = {
 	complementary_occurrences_state: 2,
 	triggered_clauses_state: 3,
 	queue_clause_set_state: 4,
-	peek_pending_set_state: 5,
+	pick_pending_set_state: 5,
 	all_clauses_checked_state: 6,
 	next_clause_state: 7,
 	conflict_detection_state: 8,
@@ -145,16 +145,16 @@ const queue_clause_set_state: NonFinalState<BKT_QUEUE_CLAUSE_SET_FUN, BKT_QUEUE_
 		run: queueClauseSet,
 		description: 'Stack a set of clause as pending',
 		transitions: new Map<BKT_QUEUE_CLAUSE_SET_INPUT, number>().set(
-			'peek_pending_set_state',
-			bkt_stateName2StateId['peek_pending_set_state']
+			'pick_pending_set_state',
+			bkt_stateName2StateId['pick_pending_set_state']
 		)
 	};
 
-const peek_clause_set_state: NonFinalState<BKT_PEEK_PENDING_SET_FUN, BKT_PEEK_PENDING_SET_INPUT> = {
-	id: bkt_stateName2StateId['peek_pending_set_state'],
+const pick_clause_set_state: NonFinalState<BKT_PICK_PENDING_SET_FUN, BKT_PICK_PENDING_SET_INPUT> = {
+	id: bkt_stateName2StateId['pick_pending_set_state'],
 	description: 'Get next pending clause set from the queue',
-	run: peekPendingSet,
-	transitions: new Map<BKT_PEEK_PENDING_SET_INPUT, number>().set(
+	run: pickPendingSet,
+	transitions: new Map<BKT_PICK_PENDING_SET_INPUT, number>().set(
 		'all_clauses_checked_state',
 		bkt_stateName2StateId['all_clauses_checked_state']
 	)
@@ -245,7 +245,7 @@ states.set(decide_state.id, decide_state);
 states.set(complementary_occurrences_state.id, complementary_occurrences_state);
 states.set(triggered_clauses_state.id, triggered_clauses_state);
 states.set(queue_clause_set_state.id, queue_clause_set_state);
-states.set(peek_clause_set_state.id, peek_clause_set_state);
+states.set(pick_clause_set_state.id, pick_clause_set_state);
 states.set(conflict_detection_state.id, conflict_detection_state);
 states.set(all_clauses_checked_state.id, all_clauses_checked_state);
 states.set(next_clause_state.id, next_clause_state);

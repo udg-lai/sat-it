@@ -20,9 +20,9 @@ export class Queue<T> {
 		return head;
 	}
 
-	peek(): T {
+	pick(): T {
 		if (this.isEmpty()) {
-			logError('Can not peek first element of an empty queue');
+			logError('Can not pick first element of an empty queue');
 		}
 		return this.items[0];
 	}
