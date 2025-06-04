@@ -1,21 +1,21 @@
+import { updateClausesToCheck } from '$lib/store/conflict-detection-state.svelte.ts';
 import { getProblemStore, type MappingLiteral2Clauses } from '$lib/store/problem.svelte.ts';
+import { logFatal } from '$lib/store/toasts.ts';
 import {
-	emptyClauseDetection as solverEmptyClauseDetection,
 	allAssigned as solverAllAssigned,
-	decide as solverDecide,
-	complementaryOccurrences as solverComplementaryOccurrences,
-	triggeredClauses as solverTriggeredClauses,
+	backtracking as solverBacktracking,
 	clauseEvaluation as solverClauseEvaluation,
+	complementaryOccurrences as solverComplementaryOccurrences,
+	decide as solverDecide,
+	emptyClauseDetection as solverEmptyClauseDetection,
 	nonDecisionMade as solverNonDecisionMade,
-	backtracking as solverBacktracking
+	triggeredClauses as solverTriggeredClauses
 } from '$lib/transversal/algorithms/solver.svelte.ts';
+import { isUnSATClause, type ClauseEval } from '$lib/transversal/entities/Clause.ts';
 import type ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';
 import type VariablePool from '$lib/transversal/entities/VariablePool.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import type { BKT_SolverMachine } from './bkt-solver-machine.svelte.ts';
-import { logFatal } from '$lib/store/toasts.ts';
-import { isUnSATClause, type ClauseEval } from '$lib/transversal/entities/Clause.ts';
-import { updateClausesToCheck } from '$lib/store/clausesToCheck.svelte.ts';
 
 // **state inputs **
 
@@ -24,8 +24,8 @@ export type BKT_ALL_VARIABLES_ASSIGNED_INPUT = 'sat_state' | 'decide_state';
 export type BKT_DECIDE_INPUT = 'complementary_occurrences_state';
 export type BKT_COMPLEMENTARY_OCCURRENCES_INPUT = 'triggered_clauses_state';
 export type BKT_TRIGGERED_CLAUSES_INPUT = 'queue_clause_set_state' | 'all_variables_assigned_state';
-export type BKT_QUEUE_CLAUSE_SET_INPUT = 'peek_pending_set_state';
-export type BKT_PEEK_PENDING_SET_INPUT = 'all_clauses_checked_state';
+export type BKT_QUEUE_CLAUSE_SET_INPUT = 'pick_pending_set_state';
+export type BKT_PICK_PENDING_SET_INPUT = 'all_clauses_checked_state';
 export type BKT_ALL_CLAUSES_CHECKED_INPUT = 'next_clause_state' | 'all_variables_assigned_state';
 export type BKT_NEXT_CLAUSE_INPUT = 'conflict_detection_state';
 export type BKT_CONFLICT_DETECTION_INPUT = 'delete_clause_state' | 'empty_pending_set_state';
@@ -41,7 +41,7 @@ export type BKT_INPUT =
 	| BKT_COMPLEMENTARY_OCCURRENCES_INPUT
 	| BKT_TRIGGERED_CLAUSES_INPUT
 	| BKT_QUEUE_CLAUSE_SET_INPUT
-	| BKT_PEEK_PENDING_SET_INPUT
+	| BKT_PICK_PENDING_SET_INPUT
 	| BKT_ALL_CLAUSES_CHECKED_INPUT
 	| BKT_NEXT_CLAUSE_INPUT
 	| BKT_CONFLICT_DETECTION_INPUT
@@ -100,9 +100,9 @@ export const queueClauseSet: BKT_QUEUE_CLAUSE_SET_FUN = (
 	solverStateMachine.enqueue(clauses);
 };
 
-export type BKT_PEEK_PENDING_SET_FUN = (solverStateMachine: BKT_SolverMachine) => SvelteSet<number>;
+export type BKT_PICK_PENDING_SET_FUN = (solverStateMachine: BKT_SolverMachine) => SvelteSet<number>;
 
-export const peekPendingSet: BKT_PEEK_PENDING_SET_FUN = (solverStateMachine: BKT_SolverMachine) => {
+export const pickPendingSet: BKT_PICK_PENDING_SET_FUN = (solverStateMachine: BKT_SolverMachine) => {
 	const pendingSet: SvelteSet<number> = solverStateMachine.consultPending();
 	updateClausesToCheck(pendingSet);
 	return pendingSet;
@@ -175,7 +175,7 @@ export type BKT_FUN =
 	| BKT_COMPLEMENTARY_OCCURRENCES_FUN
 	| BKT_TRIGGERED_CLAUSES_FUN
 	| BKT_QUEUE_CLAUSE_SET_FUN
-	| BKT_PEEK_PENDING_SET_FUN
+	| BKT_PICK_PENDING_SET_FUN
 	| BKT_ALL_CLAUSES_CHECKED_FUN
 	| BKT_NEXT_CLAUSE_FUN
 	| BKT_CONFLICT_DETECTION_FUN

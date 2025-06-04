@@ -27,8 +27,8 @@ import type {
 	DPLL_EMPTY_CLAUSE_SET_INPUT,
 	DPLL_NEXT_CLAUSE_FUN,
 	DPLL_NEXT_CLAUSE_INPUT,
-	DPLL_PEEK_CLAUSE_SET_FUN,
-	DPLL_PEEK_CLAUSE_SET_INPUT,
+	DPLL_PICK_CLAUSE_SET_FUN,
+	DPLL_PICK_CLAUSE_SET_INPUT,
 	DPLL_QUEUE_CLAUSE_SET_FUN,
 	DPLL_QUEUE_CLAUSE_SET_INPUT,
 	DPLL_TRIGGERED_CLAUSES_FUN,
@@ -44,6 +44,7 @@ import type {
 } from './dpll-domain.svelte.ts';
 import type { DPLL_SolverMachine } from './dpll-solver-machine.svelte.ts';
 import type { DPLL_StateMachine } from './dpll-state-machine.svelte.ts';
+import { incrementCheckingIndex } from '$lib/store/conflict-detection-state.svelte.ts';
 
 export const initialTransition = (solver: DPLL_SolverMachine): void => {
 	const stateMachine: DPLL_StateMachine = solver.stateMachine;
@@ -73,7 +74,7 @@ const conflictDetectionBlock = (
 		allVariablesAssignedTransition(stateMachine);
 		return;
 	}
-	const clausesToCheck = peekClauseSetTransition(stateMachine, solver);
+	const clausesToCheck = pickClauseSetTransition(stateMachine, solver);
 	const allClausesChecked = allClausesCheckedTransition(stateMachine, clausesToCheck);
 	if (allClausesChecked) {
 		logFatal('This is not a possibility in this case');
@@ -185,23 +186,23 @@ const checkPendingClausesSetTransition = (
 		logFatal('Function call error', 'There should be a function in the Pending Clauses Set state');
 	}
 	const result: boolean = checkPendingClausesSetState.run(solver);
-	if (result) stateMachine.transition('peek_clause_set_state');
+	if (result) stateMachine.transition('pick_clause_set_state');
 	else stateMachine.transition('all_variables_assigned_state');
 	return result;
 };
 
-const peekClauseSetTransition = (
+const pickClauseSetTransition = (
 	stateMachine: DPLL_StateMachine,
 	solver: DPLL_SolverMachine
 ): SvelteSet<number> => {
-	const peekClauseSetState = stateMachine.getActiveState() as NonFinalState<
-		DPLL_PEEK_CLAUSE_SET_FUN,
-		DPLL_PEEK_CLAUSE_SET_INPUT
+	const pickClauseSetState = stateMachine.getActiveState() as NonFinalState<
+		DPLL_PICK_CLAUSE_SET_FUN,
+		DPLL_PICK_CLAUSE_SET_INPUT
 	>;
-	if (peekClauseSetState.run === undefined) {
+	if (pickClauseSetState.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Peek Clause Set state');
 	}
-	const result: SvelteSet<number> = peekClauseSetState.run(solver);
+	const result: SvelteSet<number> = pickClauseSetState.run(solver);
 	stateMachine.transition('all_clauses_checked_state');
 	return result;
 };
@@ -259,7 +260,7 @@ export const analyzeClause = (solver: DPLL_SolverMachine): void => {
 		allVariablesAssignedTransition(stateMachine);
 		return;
 	}
-	const clausesToCheck = peekClauseSetTransition(stateMachine, solver);
+	const clausesToCheck = pickClauseSetTransition(stateMachine, solver);
 	const allClausesChecked = allClausesCheckedTransition(stateMachine, clausesToCheck);
 	if (allClausesChecked) {
 		logFatal('This is not a possibility in this case');
@@ -278,6 +279,7 @@ const nextClauseTransition = (
 		logFatal('Function call error', 'There should be a function in the Next Clause state');
 	}
 	const clauseId: number = nextCluaseState.run(clauseSet);
+	incrementCheckingIndex();
 	stateMachine.transition('conflict_detection_state');
 	return clauseId;
 };

@@ -12,7 +12,7 @@ import {
 } from './dpll-solver-transitions.svelte.ts';
 import { dpll_stateName2StateId } from './dpll-states.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
-import { updateClausesToCheck } from '$lib/store/clausesToCheck.svelte.ts';
+import { updateClausesToCheck } from '$lib/store/conflict-detection-state.svelte.ts';
 import { tick } from 'svelte';
 import { getStepDelay } from '$lib/store/delay-ms.svelte.ts';
 
@@ -37,7 +37,7 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 	}
 
 	consultPostponed(): SvelteSet<number> {
-		return this.pending.peek();
+		return this.pending.pick();
 	}
 
 	thereArePostponed(): boolean {
@@ -77,7 +77,7 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 			const copiedSet = new SvelteSet<number>(pending);
 			this.pending.enqueue(copiedSet);
 		}
-		if (!this.pending.isEmpty()) updateClausesToCheck(this.pending.peek());
+		if (!this.pending.isEmpty()) updateClausesToCheck(this.pending.pick());
 	}
 
 	async transition(input: StateMachineEvent): Promise<void> {

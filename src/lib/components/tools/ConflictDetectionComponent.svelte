@@ -1,22 +1,25 @@
 <script lang="ts">
-	import { getClausesToCheck } from '$lib/store/clausesToCheck.svelte.ts';
+	import { getCheckingIndex, getClausesToCheck } from '$lib/store/conflict-detection-state.svelte.ts';
 	import { getProblemStore, type Problem } from '$lib/store/problem.svelte.ts';
 	import type Clause from '$lib/transversal/entities/Clause.ts';
-	import type { SvelteSet } from 'svelte/reactivity';
 	import ClauseComponent from '../ClauseComponent.svelte';
+	import type ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';
 
 	const problem: Problem = $derived(getProblemStore());
 
-	let clauses = $derived.by(() => {
-		const clausesToCheck: SvelteSet<number> = getClausesToCheck();
-		const allClauses: Clause[] = problem.clauses.getClauses();
-		return allClauses.filter((clause) => clausesToCheck.has(clause.getId()));
+	let clauses: Clause[] = $derived.by(() => {
+		const target: number[] = getClausesToCheck();
+		const cPool: ClausePool = problem.clauses;
+		return target.map((id) => cPool.get(id));
 	});
+
+	let checkingIndex: number = $derived(getCheckingIndex());
+
 </script>
 
-{#each clauses as clause, id (id)}
+{#each clauses as clause, index (index)}
 	<div class="enumerate-clause">
-		<div class="enumerate">
+		<div class="enumerate" class:checking={index === checkingIndex}>
 			<span>
 				{clause.getId()}.
 			</span>
@@ -43,5 +46,10 @@
 		justify-content: center;
 		font-size: 1rem;
 		opacity: 0.5;
+	}
+
+	.checking {
+		font-weight: bold;
+		color: var(--color-primary);
 	}
 </style>

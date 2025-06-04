@@ -5,7 +5,7 @@ import { makeBKTMachine } from './bkt-state-machine.svelte.ts';
 import type { StateMachineEvent } from '$lib/transversal/events.ts';
 import { logError, logFatal } from '$lib/store/toasts.ts';
 import { bkt_stateName2StateId } from './bkt-states.svelte.ts';
-import { updateClausesToCheck } from '$lib/store/clausesToCheck.svelte.ts';
+import { updateClausesToCheck } from '$lib/store/conflict-detection-state.svelte.ts';
 import {
 	analyzeClause,
 	backtracking,

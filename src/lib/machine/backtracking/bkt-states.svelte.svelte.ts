@@ -59,7 +59,7 @@ export const bkt_stateName2StateId = {
 	complementary_occurrences_state: 2,
 	triggered_clauses_state: 3,
 	queue_clause_set_state: 4,
-	peek_pending_set_state: 5,
+	pick_pending_set_state: 5,
 	all_clauses_checked_state: 6,
 	next_clause_state: 7,
 	conflict_detection_state: 8,
@@ -142,8 +142,8 @@ const queue_clause_set_state: NonFinalState<BKT_QUEUE_CLAUSE_SET_FUN, BKT_QUEUE_
 		run: queueClauseSet,
 		description: 'Stack a set of clause as pending',
 		transitions: new Map<BKT_QUEUE_CLAUSE_SET_INPUT, number>().set(
-			'peek_pending_set_state',
-			bkt_stateName2StateId['peek_pending_set_state']
+			'pick_pending_set_state',
+			bkt_stateName2StateId['pick_pending_set_state']
 		)
 	};
 
