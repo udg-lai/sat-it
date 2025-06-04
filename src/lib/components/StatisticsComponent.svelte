@@ -11,7 +11,6 @@
 	import { getLatestTrail, getTrails } from '$lib/store/trails.svelte.ts';
 	import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
 
-
 	const problem: Problem = $derived(getProblemStore());
 	const decisions: number = $derived(getNoDecisions());
 	const conflicts: number = $derived(getNoConflicts());
@@ -37,7 +36,6 @@
 	});
 	const finished: boolean = $derived(getSolverMachine().onFinalState());
 	const unsat: boolean = $derived(getSolverMachine().onUnsatState());
-
 </script>
 
 <div class="h-full space-y-5 pt-2">
