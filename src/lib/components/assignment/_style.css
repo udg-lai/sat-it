@@ -23,3 +23,8 @@
 .pad-others {
 	padding-bottom: var(--literal-padding-bottom-others);
 }
+
+.checked {
+	color: blue;
+	background-color: red;
+}

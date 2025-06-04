@@ -4,6 +4,7 @@
 	import './_style.css';
 	import { onMount } from 'svelte';
 	import { runningOnChrome } from '$lib/transversal/utils.ts';
+	import { getInspectedVariable } from '$lib/store/conflict-detection-state.svelte.ts';
 
 	interface Props {
 		assignment: VariableAssignment;
@@ -21,11 +22,14 @@
 	onMount(() => {
 		onChrome = runningOnChrome();
 	});
+
+	const inspectedVariable: number = $derived(getInspectedVariable());
 </script>
 
 <backtracking>
 	<button
 		class="literal-style backtracking {onChrome ? 'pad-chrome' : 'pad-others'}"
+		class:checked = {assignment.variableId() === inspectedVariable}
 		onclick={onClick}
 	>
 		<MathTexComponent equation={assignment.toTeX()} />

@@ -4,6 +4,7 @@
 	import './_style.css';
 	import { onMount } from 'svelte';
 	import { runningOnChrome } from '$lib/transversal/utils.ts';
+	import { getInspectedVariable } from '$lib/store/conflict-detection-state.svelte.ts';
 
 	interface Props {
 		assignment: VariableAssignment;
@@ -17,12 +18,15 @@
 	onMount(() => {
 		onChrome = runningOnChrome();
 	});
+	
+	const inspectedVariable: number = $derived(getInspectedVariable());
 </script>
 
 <decision>
 	<button
 		class="literal-style decision {onChrome ? 'pad-chrome' : 'pad-others'}"
 		class:level-expanded={expanded}
+		class:checked = {assignment.variableId() === inspectedVariable}
 	>
 		<MathTexComponent equation={assignment.toTeX()} />
 	</button>

@@ -20,23 +20,28 @@ export const makeDPLLSolver = (): DPLL_SolverMachine => {
 	return new DPLL_SolverMachine();
 };
 
+export type PendingItem = {
+  clauseSet: SvelteSet<number>;
+  variable: number;
+};
+
 export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
-	pending: Queue<SvelteSet<number>> = $state(new Queue<SvelteSet<number>>());
+	pending: Queue<PendingItem> = $state(new Queue<PendingItem>());
 
 	constructor() {
 		super(makeDPLLMachine());
-		this.pending = new Queue<SvelteSet<number>>();
+		this.pending = new Queue<PendingItem>();
 	}
 
-	postpone(clauses: SvelteSet<number>): void {
-		this.pending.enqueue(clauses);
+	postpone(pendingItem: PendingItem): void {
+		this.pending.enqueue(pendingItem);
 	}
 
-	resolvePostponed(): SvelteSet<number> | undefined {
+	resolvePostponed(): PendingItem | undefined {
 		return this.pending.dequeue();
 	}
 
-	consultPostponed(): SvelteSet<number> {
+	consultPostponed(): PendingItem {
 		return this.pending.pick();
 	}
 
@@ -48,14 +53,13 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 		return this.pending.size();
 	}
 
-	getQueue(): Queue<SvelteSet<number>> {
-		const returnQueue: Queue<SvelteSet<number>> = new Queue();
-
-		for (const originalSet of this.pending.toArray()) {
-			const copiedSet = new SvelteSet<number>(originalSet);
-			returnQueue.enqueue(copiedSet);
+	getQueue(): Queue<PendingItem> {
+		const returnQueue: Queue<PendingItem> = new Queue();
+		for (const originalItem of this.pending.toArray()) {
+			const copiedSet = new SvelteSet<number>(originalItem.clauseSet);
+			const copiedItem: PendingItem = {clauseSet: copiedSet, variable: originalItem.variable};
+			returnQueue.enqueue(copiedItem);
 		}
-
 		return returnQueue;
 	}
 
@@ -68,16 +72,20 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 	updateFromRecord(record: Record<string, unknown> | undefined): void {
 		if (record === undefined) {
 			this.pending = new Queue();
-			updateClausesToCheck(new SvelteSet<number>());
+			updateClausesToCheck(new SvelteSet<number>(), -1);
 			return;
 		}
-		const pendingClauses = record['queue'] as Queue<SvelteSet<number>>;
+		const pendingItems = record['queue'] as Queue<PendingItem>;
 		this.pending.clear();
-		for (const pending of pendingClauses.toArray()) {
-			const copiedSet = new SvelteSet<number>(pending);
-			this.pending.enqueue(copiedSet);
+		for (const pending of pendingItems.toArray()) {
+			const copiedSet = new SvelteSet<number>(pending.clauseSet);
+			const copiedItem: PendingItem = {clauseSet: copiedSet, variable: pending.variable};
+			this.pending.enqueue(copiedItem);
 		}
-		if (!this.pending.isEmpty()) updateClausesToCheck(this.pending.pick());
+		if (!this.pending.isEmpty()) {
+			const item: PendingItem = this.pending.pick();
+			updateClausesToCheck(item.clauseSet, item.variable);
+		};
 	}
 
 	async transition(input: StateMachineEvent): Promise<void> {
@@ -124,7 +132,7 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 		}
 		this.setFlagsPreAuto();
 		const times: number[] = [];
-		const postponedClauses: Set<number> = this.consultPostponed();
+		const postponedClauses: Set<number> = this.consultPostponed().clauseSet;
 		while (postponedClauses.size !== 0 && !this.forcedStop) {
 			this.step();
 			await tick();
