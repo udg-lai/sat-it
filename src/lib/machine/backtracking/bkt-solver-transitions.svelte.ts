@@ -1,5 +1,5 @@
 import { logFatal } from '$lib/store/toasts.ts';
-import type { SvelteSet } from 'svelte/reactivity';
+import { SvelteSet } from 'svelte/reactivity';
 import type { NonFinalState } from '../StateMachine.svelte.ts';
 import type {
 	BKT_ALL_CLAUSES_CHECKED_FUN,
@@ -34,7 +34,8 @@ import type {
 import type { BKT_SolverMachine } from './bkt-solver-machine.svelte.ts';
 import type { BKT_StateMachine } from './bkt-state-machine.svelte.ts';
 import { updateLastTrailEnding } from '$lib/store/trails.svelte.ts';
-import { incrementCheckingIndex } from '$lib/store/conflict-detection-state.svelte.ts';
+import { incrementCheckingIndex, updateClausesToCheck } from '$lib/store/conflict-detection-state.svelte.ts';
+import type { PendingItem } from '../SolverMachine.svelte.ts';
 
 export const initialTransition = (solver: BKT_SolverMachine): void => {
 	const stateMachine: BKT_StateMachine = solver.stateMachine;
@@ -45,7 +46,8 @@ export const initialTransition = (solver: BKT_SolverMachine): void => {
 
 export const analyzeClause = (solver: BKT_SolverMachine): void => {
 	const stateMachine: BKT_StateMachine = solver.stateMachine;
-	const pendingSet: SvelteSet<number> = solver.consultPending();
+	const pendingItem: PendingItem= solver.consultPending();
+	const pendingSet: SvelteSet<number> = pendingItem.clauseSet;
 	const clauseId: number = nextClauseTransition(stateMachine, pendingSet);
 	const conflict: boolean = conflictDetectionTransition(stateMachine, clauseId);
 	if (conflict) {
@@ -57,6 +59,7 @@ export const analyzeClause = (solver: BKT_SolverMachine): void => {
 	deleteClauseTransition(stateMachine, pendingSet, clauseId);
 	const allChecked: boolean = allClausesCheckedTransition(stateMachine, pendingSet);
 	if (!allChecked) return;
+	updateClausesToCheck(new SvelteSet<number>(), -1);
 	allVariablesAssignedTransition(stateMachine);
 };
 
@@ -67,7 +70,7 @@ export const decide = (solver: BKT_SolverMachine): void => {
 		stateMachine,
 		literalToPropagate
 	);
-	conflictDetectionBlock(solver, stateMachine, complementaryClauses);
+	conflictDetectionBlock(solver, stateMachine, Math.abs(literalToPropagate), complementaryClauses);
 };
 
 export const backtracking = (solver: BKT_SolverMachine): void => {
@@ -77,12 +80,13 @@ export const backtracking = (solver: BKT_SolverMachine): void => {
 		stateMachine,
 		literalToPropagate
 	);
-	conflictDetectionBlock(solver, stateMachine, complementaryClauses);
+	conflictDetectionBlock(solver, stateMachine, Math.abs(literalToPropagate), complementaryClauses);
 };
 
 const conflictDetectionBlock = (
 	solver: BKT_SolverMachine,
 	stateMachine: BKT_StateMachine,
+	variable: number,
 	complementaryClauses: SvelteSet<number>
 ): void => {
 	const triggeredClauses: boolean = triggeredClausesTransition(stateMachine, complementaryClauses);
@@ -90,7 +94,7 @@ const conflictDetectionBlock = (
 		allVariablesAssignedTransition(stateMachine);
 		return;
 	}
-	queueClauseSetTransition(stateMachine, solver, complementaryClauses);
+	queueClauseSetTransition(stateMachine, solver, variable, complementaryClauses);
 	const pendingSet: SvelteSet<number> = pickPendingSetTransition(stateMachine, solver);
 	const allChecked: boolean = allClausesCheckedTransition(stateMachine, pendingSet);
 	if (allChecked) {
@@ -290,6 +294,7 @@ const triggeredClausesTransition = (
 const queueClauseSetTransition = (
 	stateMachine: BKT_StateMachine,
 	solver: BKT_SolverMachine,
+	variable: number,
 	clauseSet: SvelteSet<number>
 ): void => {
 	const queueClauseSetState = stateMachine.getActiveState() as NonFinalState<
@@ -299,7 +304,7 @@ const queueClauseSetTransition = (
 	if (queueClauseSetState.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Queue Clause Set state');
 	}
-	queueClauseSetState.run(clauseSet, solver);
+	queueClauseSetState.run(variable, clauseSet, solver);
 	stateMachine.transition('pick_pending_set_state');
 };
 

@@ -1,5 +1,5 @@
 import { SvelteSet } from 'svelte/reactivity';
-import { SolverMachine } from '../SolverMachine.svelte.ts';
+import { SolverMachine, type PendingItem } from '../SolverMachine.svelte.ts';
 import type { BKT_FUN, BKT_INPUT } from './bkt-domain.svelte.ts';
 import { makeBKTMachine } from './bkt-state-machine.svelte.ts';
 import type { StateMachineEvent } from '$lib/transversal/events.ts';
@@ -20,50 +20,52 @@ export const makeBKTSolver = (): BKT_SolverMachine => {
 };
 
 export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
-	pending: SvelteSet<number> = $state(new SvelteSet<number>());
+	pending: PendingItem = $state({clauseSet:new SvelteSet<number>(), variable: -1});
 
 	constructor() {
 		super(makeBKTMachine());
-		this.pending = new SvelteSet<number>();
+		this.pending = {clauseSet:new SvelteSet<number>(), variable: -1};
 	}
 
 	// ** functions related to pending **
 	isEmpty(): boolean {
-		return this.pending.size === 0;
+		return this.pending.clauseSet.size === 0;
 	}
 
-	enqueue(clauses: SvelteSet<number>): void {
+	enqueue(item: PendingItem): void {
 		this.clear();
-		for (const clause of clauses) {
-			this.pending.add(clause);
+		for (const clause of item.clauseSet) {
+			this.pending.clauseSet.add(clause);
 		}
+		this.pending.variable = item.variable;
 	}
 
 	remove(clauseId: number): void {
-		if (!this.pending.has(clauseId)) {
+		if (!this.pending.clauseSet.has(clauseId)) {
 			logFatal('Clause not found', 'Error at removing a clause from the BKT Solver Machine');
 		} else {
-			this.pending.delete(clauseId);
+			this.pending.clauseSet.delete(clauseId);
 		}
 	}
 
 	clear(): void {
-		this.pending = new SvelteSet<number>();
+		this.pending = {clauseSet:new SvelteSet<number>(), variable: -1};
 	}
 
-	consultPending(): SvelteSet<number> {
-		if (this.pending.size === 0) {
+	consultPending(): PendingItem {
+		if (this.pending.clauseSet.size === 0) {
 			logError('Can not consult an empty set');
 		}
 		return this.pending;
 	}
 
-	getPending(): SvelteSet<number> {
-		const snapshot: SvelteSet<number> = new SvelteSet<number>();
-		for (const clause of this.pending) {
-			snapshot.add(clause);
+	getPending(): PendingItem {
+		const clausesSnapshot: SvelteSet<number> = new SvelteSet<number>();
+		for (const clause of this.pending.clauseSet) {
+			clausesSnapshot.add(clause);
 		}
-		return snapshot;
+		const pendingSnapshot: PendingItem = {clauseSet: clausesSnapshot,  variable: this.pending.variable}
+		return pendingSnapshot;
 	}
 
 	getRecord(): Record<string, unknown> {
@@ -75,14 +77,14 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 	// ** abstract functions **
 	updateFromRecord(record: Record<string, unknown> | undefined): void {
 		if (record === undefined) {
-			this.pending = new SvelteSet<number>();
-			updateClausesToCheck(new SvelteSet<number>());
+			this.pending = {clauseSet:new SvelteSet<number>(), variable: -1};
+			updateClausesToCheck(this.pending.clauseSet, this.pending.variable);
 			return;
 		}
-		const pendingClauses: SvelteSet<number> = record['pending'] as SvelteSet<number>;
-		this.pending.clear();
-		this.enqueue(pendingClauses);
-		if (!this.isEmpty()) updateClausesToCheck(this.pending);
+		const pendingRecord: PendingItem = record['pending'] as PendingItem;
+		this.pending.clauseSet.clear();
+		this.enqueue(pendingRecord);
+		if (!this.isEmpty()) updateClausesToCheck(this.pending.clauseSet, this.pending.variable);
 	}
 
 	async transition(input: StateMachineEvent): Promise<void> {
@@ -118,8 +120,7 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 		}
 		this.setFlagsPreAuto();
 		const times: number[] = [];
-		const postponedClauses: Set<number> = this.consultPending();
-		while (postponedClauses.size !== 0 && !this.forcedStop) {
+		while (this.pending.clauseSet.size !== 0 && !this.forcedStop) {
 			this.step();
 			await tick();
 			await new Promise((r) => times.push(setTimeout(r, getStepDelay())));

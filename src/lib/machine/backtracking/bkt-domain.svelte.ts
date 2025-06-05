@@ -16,6 +16,7 @@ import type ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';
 import type VariablePool from '$lib/transversal/entities/VariablePool.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import type { BKT_SolverMachine } from './bkt-solver-machine.svelte.ts';
+import type { PendingItem } from '../SolverMachine.svelte.ts';
 
 // **state inputs **
 
@@ -86,26 +87,28 @@ export const triggeredClauses: BKT_TRIGGERED_CLAUSES_FUN = (clauses: SvelteSet<n
 };
 
 export type BKT_QUEUE_CLAUSE_SET_FUN = (
+	variable: number,
 	clauses: SvelteSet<number>,
 	solverStateMachine: BKT_SolverMachine
 ) => void;
 
 export const queueClauseSet: BKT_QUEUE_CLAUSE_SET_FUN = (
+	variable: number,
 	clauses: SvelteSet<number>,
 	solverStateMachine: BKT_SolverMachine
 ) => {
 	if (clauses.size === 0) {
 		logFatal('Empty set of clauses are not thought to be queued');
 	}
-	solverStateMachine.enqueue(clauses);
+	solverStateMachine.enqueue({clauseSet: clauses, variable});
 };
 
 export type BKT_PICK_PENDING_SET_FUN = (solverStateMachine: BKT_SolverMachine) => SvelteSet<number>;
 
 export const pickPendingSet: BKT_PICK_PENDING_SET_FUN = (solverStateMachine: BKT_SolverMachine) => {
-	const pendingSet: SvelteSet<number> = solverStateMachine.consultPending();
-	updateClausesToCheck(pendingSet);
-	return pendingSet;
+	const pendingItem: PendingItem = solverStateMachine.consultPending();
+	updateClausesToCheck(pendingItem.clauseSet, pendingItem.variable );
+	return pendingItem.clauseSet;
 };
 
 export type BKT_ALL_CLAUSES_CHECKED_FUN = (pendingSet: SvelteSet<number>) => boolean;
@@ -152,7 +155,7 @@ export const emptyClauseSet: BKT_EMPTY_PENDING_SET_FUN = (
 ) => {
 	solverStateMachine.clear();
 	//I DON'T KNOW IF I REALLY NEED THIS CODELINE
-	updateClausesToCheck(new SvelteSet<number>());
+	updateClausesToCheck(new SvelteSet<number>(), -1);
 };
 
 export type BKT_DECISION_LEVEL_FUN = () => boolean;

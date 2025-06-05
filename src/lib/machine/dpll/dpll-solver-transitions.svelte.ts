@@ -1,6 +1,6 @@
 import { logFatal } from '$lib/store/toasts.ts';
 import { updateLastTrailEnding } from '$lib/store/trails.svelte.ts';
-import type { SvelteSet } from 'svelte/reactivity';
+import { SvelteSet } from 'svelte/reactivity';
 import { type NonFinalState } from '../StateMachine.svelte.ts';
 import type {
 	DPLL_ALL_CLAUSES_CHECKED_FUN,
@@ -44,7 +44,7 @@ import type {
 } from './dpll-domain.svelte.ts';
 import type { DPLL_SolverMachine } from './dpll-solver-machine.svelte.ts';
 import type { DPLL_StateMachine } from './dpll-state-machine.svelte.ts';
-import { incrementCheckingIndex } from '$lib/store/conflict-detection-state.svelte.ts';
+import { incrementCheckingIndex, updateClausesToCheck } from '$lib/store/conflict-detection-state.svelte.ts';
 import type { PendingItem } from '../SolverMachine.svelte.ts';
 
 export const initialTransition = (solver: DPLL_SolverMachine): void => {
@@ -266,6 +266,7 @@ export const analyzeClause = (solver: DPLL_SolverMachine): void => {
 	unstackClauseSetTransition(stateMachine, solver);
 	const pendingClausesSet: boolean = checkPendingClausesSetTransition(stateMachine, solver);
 	if (!pendingClausesSet) {
+		updateClausesToCheck(new SvelteSet<number>(), -1);
 		allVariablesAssignedTransition(stateMachine);
 		return;
 	}
