@@ -20,11 +20,11 @@ export const makeBKTSolver = (): BKT_SolverMachine => {
 };
 
 export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
-	pending: PendingItem = $state({clauseSet:new SvelteSet<number>(), variable: -1});
+	pending: PendingItem = $state({ clauseSet: new SvelteSet<number>(), variable: -1 });
 
 	constructor() {
 		super(makeBKTMachine());
-		this.pending = {clauseSet:new SvelteSet<number>(), variable: -1};
+		this.pending = { clauseSet: new SvelteSet<number>(), variable: -1 };
 	}
 
 	// ** functions related to pending **
@@ -49,7 +49,7 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 	}
 
 	clear(): void {
-		this.pending = {clauseSet:new SvelteSet<number>(), variable: -1};
+		this.pending = { clauseSet: new SvelteSet<number>(), variable: -1 };
 	}
 
 	consultPending(): PendingItem {
@@ -64,7 +64,10 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 		for (const clause of this.pending.clauseSet) {
 			clausesSnapshot.add(clause);
 		}
-		const pendingSnapshot: PendingItem = {clauseSet: clausesSnapshot,  variable: this.pending.variable}
+		const pendingSnapshot: PendingItem = {
+			clauseSet: clausesSnapshot,
+			variable: this.pending.variable
+		};
 		return pendingSnapshot;
 	}
 
@@ -77,7 +80,7 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 	// ** abstract functions **
 	updateFromRecord(record: Record<string, unknown> | undefined): void {
 		if (record === undefined) {
-			this.pending = {clauseSet:new SvelteSet<number>(), variable: -1};
+			this.pending = { clauseSet: new SvelteSet<number>(), variable: -1 };
 			updateClausesToCheck(this.pending.clauseSet, this.pending.variable);
 			return;
 		}

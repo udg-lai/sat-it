@@ -100,14 +100,14 @@ export const queueClauseSet: BKT_QUEUE_CLAUSE_SET_FUN = (
 	if (clauses.size === 0) {
 		logFatal('Empty set of clauses are not thought to be queued');
 	}
-	solverStateMachine.enqueue({clauseSet: clauses, variable});
+	solverStateMachine.enqueue({ clauseSet: clauses, variable });
 };
 
 export type BKT_PICK_PENDING_SET_FUN = (solverStateMachine: BKT_SolverMachine) => SvelteSet<number>;
 
 export const pickPendingSet: BKT_PICK_PENDING_SET_FUN = (solverStateMachine: BKT_SolverMachine) => {
 	const pendingItem: PendingItem = solverStateMachine.consultPending();
-	updateClausesToCheck(pendingItem.clauseSet, pendingItem.variable );
+	updateClausesToCheck(pendingItem.clauseSet, pendingItem.variable);
 	return pendingItem.clauseSet;
 };
 

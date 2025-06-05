@@ -44,7 +44,10 @@ import type {
 } from './dpll-domain.svelte.ts';
 import type { DPLL_SolverMachine } from './dpll-solver-machine.svelte.ts';
 import type { DPLL_StateMachine } from './dpll-state-machine.svelte.ts';
-import { incrementCheckingIndex, updateClausesToCheck } from '$lib/store/conflict-detection-state.svelte.ts';
+import {
+	incrementCheckingIndex,
+	updateClausesToCheck
+} from '$lib/store/conflict-detection-state.svelte.ts';
 import type { PendingItem } from '../SolverMachine.svelte.ts';
 
 export const initialTransition = (solver: DPLL_SolverMachine): void => {
