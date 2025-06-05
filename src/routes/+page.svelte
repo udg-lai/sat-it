@@ -3,6 +3,8 @@
 	import AppComponent from '$lib/components/AppComponent.svelte';
 	import DebuggerComponent from '$lib/components/debugger/DebuggerComponent.svelte';
 	import SettingsComponent from '$lib/components/settings/SettingsComponent.svelte';
+	import SolvingInformation from '$lib/components/SolvingInformationComponent.svelte';
+	import StatisticsComponent from '$lib/components/StatisticsComponent.svelte';
 	import ToastComponent from '$lib/components/ToastComponent.svelte';
 	import ToolsComponent from '$lib/components/tools/ToolsComponent.svelte';
 	import {
@@ -58,10 +60,16 @@
 		<ToolsComponent />
 	</tools>
 	<workspace>
-		<DebuggerComponent />
+		<user>
+			<DebuggerComponent />
+			<SolvingInformation />
+		</user>
 		<AppComponent />
 	</workspace>
 </main>
+<footer-component>
+	<StatisticsComponent />
+</footer-component>
 
 {#if renderSettings}
 	<settings>
@@ -76,6 +84,7 @@
 		flex-direction: row;
 		height: 100%;
 		width: 100%;
+		padding-bottom: 3rem;
 	}
 
 	workspace {
@@ -93,5 +102,23 @@
 		flex-direction: column;
 		gap: 0.5rem;
 		z-index: var(--notification-z-index);
+	}
+
+	footer-component {
+		position: fixed;
+		bottom: 0;
+		left: 0;
+		width: 100%;
+		padding-top: 0.25rem;
+		padding-bottom: 0.5rem;
+		background-color: var(--main-bg-color);
+		border-top-width: 1px;
+		border-color: var(--border-color);
+	}
+
+	user {
+		display: flex;
+		flex-direction: row;
+		border-bottom: 1px solid var(--border-color);
 	}
 </style>

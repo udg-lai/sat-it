@@ -2,7 +2,7 @@ import type { Breakpoint } from '$lib/store/breakpoints.svelte.ts';
 import { createEventBus } from './createEventBus.ts';
 
 // observable of instance changes
-export const changeInstanceEventBus = createEventBus<void>();
+export const changeInstanceEventBus = createEventBus<string>();
 
 // open settings and more event
 export const openSettingsViewEventBus = createEventBus<void>();

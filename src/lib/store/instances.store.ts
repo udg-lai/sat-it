@@ -125,5 +125,5 @@ export function deleteInstanceByName(name: string): void {
 function afterActivateInstance(instance: DimacsInstance): void {
 	modifyLiteralWidth(instance.summary.varCount);
 	updateProblemDomain(instance);
-	changeInstanceEventBus.emit();
+	changeInstanceEventBus.emit(instance.name);
 }
