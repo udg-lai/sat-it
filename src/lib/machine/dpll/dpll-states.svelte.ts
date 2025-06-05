@@ -20,8 +20,8 @@ import {
 	type DPLL_EMPTY_CLAUSE_INPUT,
 	type DPLL_FUN,
 	type DPLL_INPUT,
-	type DPLL_PEEK_CLAUSE_SET_FUN,
-	type DPLL_PEEK_CLAUSE_SET_INPUT,
+	type DPLL_PICK_CLAUSE_SET_FUN,
+	type DPLL_PICK_CLAUSE_SET_INPUT,
 	type DPLL_QUEUE_CLAUSE_SET_FUN,
 	type DPLL_QUEUE_CLAUSE_SET_INPUT,
 	type DPLL_TRIGGERED_CLAUSES_FUN,
@@ -30,7 +30,7 @@ import {
 	type DPLL_UNIT_CLAUSES_DETECTION_INPUT,
 	type DPLL_UNSTACK_CLAUSE_SET_FUN,
 	type DPLL_UNSTACK_CLAUSE_SET_INPUT,
-	peekPendingClauseSet,
+	pickPendingClauseSet,
 	type DPLL_ALL_CLAUSES_CHECKED_INPUT,
 	type DPLL_ALL_CLAUSES_CHECKED_FUN,
 	allClausesChecked,
@@ -75,7 +75,7 @@ export const dpll_stateName2StateId = {
 	triggered_clauses_state: 2,
 	queue_clause_set_state: 3,
 	check_pending_clauses_state: 4,
-	peek_clause_set_state: 5,
+	pick_clause_set_state: 5,
 	all_variables_assigned_state: 6,
 	unstack_clause_set_state: 7,
 	clause_evaluation_state: 8,
@@ -155,15 +155,15 @@ const check_pending_clauses_state: NonFinalState<
 	description: 'True if there are set of clauses postponed, false otherwise',
 	run: thereAreJobPostponed,
 	transitions: new Map<DPLL_CHECK_PENDING_CLAUSES_INPUT, number>()
-		.set('peek_clause_set_state', dpll_stateName2StateId['peek_clause_set_state'])
+		.set('pick_clause_set_state', dpll_stateName2StateId['pick_clause_set_state'])
 		.set('all_variables_assigned_state', dpll_stateName2StateId['all_variables_assigned_state'])
 };
 
-const peek_clause_set_state: NonFinalState<DPLL_PEEK_CLAUSE_SET_FUN, DPLL_PEEK_CLAUSE_SET_INPUT> = {
-	id: dpll_stateName2StateId['peek_clause_set_state'],
+const pick_clause_set_state: NonFinalState<DPLL_PICK_CLAUSE_SET_FUN, DPLL_PICK_CLAUSE_SET_INPUT> = {
+	id: dpll_stateName2StateId['pick_clause_set_state'],
 	description: 'Get next pending clause set from the queue',
-	run: peekPendingClauseSet,
-	transitions: new Map<DPLL_PEEK_CLAUSE_SET_INPUT, number>().set(
+	run: pickPendingClauseSet,
+	transitions: new Map<DPLL_PICK_CLAUSE_SET_INPUT, number>().set(
 		'all_clauses_checked_state',
 		dpll_stateName2StateId['all_clauses_checked_state']
 	)
@@ -331,7 +331,7 @@ states.set(unsat_state.id, unsat_state);
 states.set(sat_state.id, sat_state);
 states.set(check_pending_clauses_state.id, check_pending_clauses_state);
 states.set(queue_clause_set_state.id, queue_clause_set_state);
-states.set(peek_clause_set_state.id, peek_clause_set_state);
+states.set(pick_clause_set_state.id, pick_clause_set_state);
 states.set(all_variables_assigned_state.id, all_variables_assigned_state);
 states.set(decide_state.id, decide_state);
 states.set(unstack_clause_set_state.id, unstack_clause_set_state);

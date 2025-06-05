@@ -6,10 +6,10 @@
 		FileCirclePlusOutline
 	} from 'flowbite-svelte-icons';
 	import { onMount } from 'svelte';
-	import SolutionSummary from '../SolutionSummary.svelte';
 	import './_styles.css';
 	import Button from './Button.svelte';
-	import ClausesToCheckComponent from './ClausesToCheckComponent.svelte';
+	import ConflictDetectionComponent from './ConflictDetectionComponent.svelte';
+	import ProblemPreviewComponent from './ProblemPreviewComponent.svelte';
 
 	let toolsViewRef: HTMLElement;
 
@@ -176,7 +176,7 @@
 					{#if name === 'viewA'}
 						{@render snippetClausesToCheck()}
 					{:else if name === 'viewB'}
-						<SolutionSummary />
+						<ProblemPreviewComponent />
 					{:else}
 						{@render notImplementedYet()}
 					{/if}
@@ -204,7 +204,7 @@
 {/snippet}
 
 {#snippet snippetClausesToCheck()}
-	<ClausesToCheckComponent />
+	<ConflictDetectionComponent />
 {/snippet}
 
 <!--

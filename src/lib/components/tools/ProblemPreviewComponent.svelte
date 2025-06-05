@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { getProblemStore, type Problem } from '$lib/store/problem.svelte.ts';
 	import type Clause from '$lib/transversal/entities/Clause.ts';
-	import FlexVirtualList from './FlexVirtualList.svelte';
-	import ClauseComponent from './ClauseComponent.svelte';
+	import FlexVirtualList from '$lib/components/FlexVirtualList.svelte';
+	import ClauseComponent from '$lib/components/ClauseComponent.svelte';
 
 	interface Props {
 		clauseHeight?: number;
