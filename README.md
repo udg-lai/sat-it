@@ -47,16 +47,13 @@ You can preview the production build with `npm run preview`.
 
 > To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
 
-
 ## Deployment
 
 The app is configured to run on node servers.
 
-
 ```bash
 node build
 ```
-
 
 ## Automatically lint and run tests at commit
 
