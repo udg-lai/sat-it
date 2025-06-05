@@ -51,9 +51,9 @@
 <trail class="trail" use:listenContentWidth>
 	{#each initialPropagations as assignment (assignment.variableId())}
 		{#if assignment.isK()}
-			<BacktrackingComponent {assignment} />
+			<BacktrackingComponent {assignment} {isLast} />
 		{:else}
-			<UnitPropagationComponent {assignment} />
+			<UnitPropagationComponent {assignment} {isLast} />
 		{/if}
 	{/each}
 
@@ -62,6 +62,7 @@
 			decision={assignment}
 			propagations={trail.getPropagations(level)}
 			{expanded}
+			{isLast}
 		/>
 	{/each}
 </trail>

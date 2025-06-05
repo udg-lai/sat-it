@@ -127,7 +127,7 @@ export const queueClauseSet: DPLL_QUEUE_CLAUSE_SET_FUN = (
 	if (clauses.size === 0) {
 		logFatal('Empty set of clauses are not thought to be queued');
 	}
-	const item: PendingItem = {clauseSet: clauses, variable};
+	const item: PendingItem = { clauseSet: clauses, variable };
 	solverStateMachine.postpone(item);
 	return solverStateMachine.leftToPostpone();
 };

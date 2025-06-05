@@ -14,9 +14,10 @@
 
 	interface Props {
 		assignment: VariableAssignment;
+		isLast: boolean;
 	}
 
-	let { assignment }: Props = $props();
+	let { assignment, isLast }: Props = $props();
 	let buttonId: string = 'btn-' + nanoid();
 
 	const problem: Problem = $derived(getProblemStore());
@@ -56,7 +57,7 @@
 	<button
 		id={buttonId}
 		class="literal-style decision unit-propagation {onChrome ? 'pad-chrome' : 'pad-others'}"
-		class:checked = {assignment.variableId() === inspectedVariable}
+		class:checked={assignment.variableId() === inspectedVariable && isLast}
 	>
 		<MathTexComponent equation={assignment.toTeX()} />
 	</button>

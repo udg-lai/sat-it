@@ -69,7 +69,7 @@ const conflictDetectionBlock = (
 		allVariablesAssignedTransition(stateMachine);
 		return;
 	}
-	queueClauseSetTransition(stateMachine, solver, variable, complementaryClauses,);
+	queueClauseSetTransition(stateMachine, solver, variable, complementaryClauses);
 	const pendingClausesSet: boolean = checkPendingClausesSetTransition(stateMachine, solver);
 	if (!pendingClausesSet) {
 		allVariablesAssignedTransition(stateMachine);
@@ -251,7 +251,12 @@ export const analyzeClause = (solver: DPLL_SolverMachine): void => {
 			complementaryClauses
 		);
 		if (triggeredClauses) {
-			queueClauseSetTransition(stateMachine, solver, Math.abs(literalToPropagate), complementaryClauses);
+			queueClauseSetTransition(
+				stateMachine,
+				solver,
+				Math.abs(literalToPropagate),
+				complementaryClauses
+			);
 		}
 	}
 	deleteClauseTransition(stateMachine, clauseSet, clauseId);

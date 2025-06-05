@@ -21,8 +21,8 @@ export const makeDPLLSolver = (): DPLL_SolverMachine => {
 };
 
 export type PendingItem = {
-  clauseSet: SvelteSet<number>;
-  variable: number;
+	clauseSet: SvelteSet<number>;
+	variable: number;
 };
 
 export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
@@ -57,7 +57,7 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 		const returnQueue: Queue<PendingItem> = new Queue();
 		for (const originalItem of this.pending.toArray()) {
 			const copiedSet = new SvelteSet<number>(originalItem.clauseSet);
-			const copiedItem: PendingItem = {clauseSet: copiedSet, variable: originalItem.variable};
+			const copiedItem: PendingItem = { clauseSet: copiedSet, variable: originalItem.variable };
 			returnQueue.enqueue(copiedItem);
 		}
 		return returnQueue;
@@ -79,13 +79,13 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 		this.pending.clear();
 		for (const pending of pendingItems.toArray()) {
 			const copiedSet = new SvelteSet<number>(pending.clauseSet);
-			const copiedItem: PendingItem = {clauseSet: copiedSet, variable: pending.variable};
+			const copiedItem: PendingItem = { clauseSet: copiedSet, variable: pending.variable };
 			this.pending.enqueue(copiedItem);
 		}
 		if (!this.pending.isEmpty()) {
 			const item: PendingItem = this.pending.pick();
 			updateClausesToCheck(item.clauseSet, item.variable);
-		};
+		}
 	}
 
 	async transition(input: StateMachineEvent): Promise<void> {

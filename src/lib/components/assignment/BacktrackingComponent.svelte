@@ -8,10 +8,11 @@
 
 	interface Props {
 		assignment: VariableAssignment;
+		isLast: boolean;
 		eventClick?: () => void;
 	}
 
-	let { assignment, eventClick }: Props = $props();
+	let { assignment, isLast, eventClick }: Props = $props();
 
 	function onClick() {
 		eventClick?.();
@@ -29,7 +30,7 @@
 <backtracking>
 	<button
 		class="literal-style backtracking {onChrome ? 'pad-chrome' : 'pad-others'}"
-		class:checked = {assignment.variableId() === inspectedVariable}
+		class:checked={assignment.variableId() === inspectedVariable && isLast}
 		onclick={onClick}
 	>
 		<MathTexComponent equation={assignment.toTeX()} />

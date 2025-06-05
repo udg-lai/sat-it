@@ -8,23 +8,24 @@
 
 	interface Props {
 		assignment: VariableAssignment;
+		isLast: boolean;
 	}
 
-	let { assignment }: Props = $props();
+	let { assignment, isLast }: Props = $props();
 
 	let onChrome = $state(false);
 
 	onMount(() => {
 		onChrome = runningOnChrome();
 	});
-	
+
 	const inspectedVariable: number = $derived(getInspectedVariable());
 </script>
 
 <childless-decision>
 	<button
 		class="literal-style decision level-expanded childless {onChrome ? 'pad-chrome' : 'pad-others'}"
-		class:checked = {assignment.variableId() === inspectedVariable}
+		class:checked={assignment.variableId() === inspectedVariable && isLast}
 	>
 		<MathTexComponent equation={assignment.toTeX()} />
 	</button>

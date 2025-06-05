@@ -8,17 +8,18 @@
 
 	interface Props {
 		assignment: VariableAssignment;
+		isLast: boolean;
 		expanded: boolean;
 	}
 
-	let { assignment, expanded }: Props = $props();
+	let { assignment, isLast, expanded }: Props = $props();
 
 	let onChrome = $state(false);
 
 	onMount(() => {
 		onChrome = runningOnChrome();
 	});
-	
+
 	const inspectedVariable: number = $derived(getInspectedVariable());
 </script>
 
@@ -26,7 +27,7 @@
 	<button
 		class="literal-style decision {onChrome ? 'pad-chrome' : 'pad-others'}"
 		class:level-expanded={expanded}
-		class:checked = {assignment.variableId() === inspectedVariable}
+		class:checked={assignment.variableId() === inspectedVariable && isLast}
 	>
 		<MathTexComponent equation={assignment.toTeX()} />
 	</button>
