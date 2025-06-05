@@ -25,7 +25,7 @@
 <childless-decision>
 	<button
 		class="literal-style decision level-expanded childless {onChrome ? 'pad-chrome' : 'pad-others'}"
-		class:checked={assignment.variableId() === inspectedVariable && isLast}
+		class:inspecting={assignment.variableId() === inspectedVariable && isLast}
 	>
 		<MathTexComponent equation={assignment.toTeX()} />
 	</button>
@@ -37,6 +37,11 @@
 		color: black;
 		border-left: 1px solid;
 		border-right: 1px solid;
+	}
+
+	.inspecting {
+		color: var(--inspecting-color);
+		border-color: var(--inspecting-color);
 	}
 
 	.level-expanded {

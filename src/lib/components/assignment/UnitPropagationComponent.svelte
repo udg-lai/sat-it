@@ -57,7 +57,7 @@
 	<button
 		id={buttonId}
 		class="literal-style decision unit-propagation {onChrome ? 'pad-chrome' : 'pad-others'}"
-		class:checked={assignment.variableId() === inspectedVariable && isLast}
+		class:inspecting={assignment.variableId() === inspectedVariable && isLast}
 	>
 		<MathTexComponent equation={assignment.toTeX()} />
 	</button>

@@ -30,7 +30,7 @@
 <backtracking>
 	<button
 		class="literal-style backtracking {onChrome ? 'pad-chrome' : 'pad-others'}"
-		class:checked={assignment.variableId() === inspectedVariable && isLast}
+		class:inspecting={assignment.variableId() === inspectedVariable && isLast}
 		onclick={onClick}
 	>
 		<MathTexComponent equation={assignment.toTeX()} />
@@ -46,6 +46,14 @@
 		border-right: 1px transparent;
 		border-style: dashed;
 		cursor: unset;
+	}
+
+	.inspecting {
+		color: var(--inspecting-color);
+		border-color: var(--inspecting-color);
+		border-top: 1px transparent;
+		border-left: 1px transparent;
+		border-right: 1px transparent;
 	}
 
 	:global(mo) {

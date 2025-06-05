@@ -42,9 +42,10 @@ import type {
 	DPLL_UNSTACK_CLAUSE_SET_FUN,
 	DPLL_UNSTACK_CLAUSE_SET_INPUT
 } from './dpll-domain.svelte.ts';
-import type { DPLL_SolverMachine, PendingItem } from './dpll-solver-machine.svelte.ts';
+import type { DPLL_SolverMachine } from './dpll-solver-machine.svelte.ts';
 import type { DPLL_StateMachine } from './dpll-state-machine.svelte.ts';
 import { incrementCheckingIndex } from '$lib/store/conflict-detection-state.svelte.ts';
+import type { PendingItem } from '../SolverMachine.svelte.ts';
 
 export const initialTransition = (solver: DPLL_SolverMachine): void => {
 	const stateMachine: DPLL_StateMachine = solver.stateMachine;

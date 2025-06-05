@@ -1,6 +1,7 @@
 :root {
 	--literal-padding-bottom-chrome: 9px;
 	--literal-padding-bottom-others: 3px;
+	--inspecting-color: rgb(107, 154, 255);
 }
 
 .literal-style {
@@ -24,7 +25,7 @@
 	padding-bottom: var(--literal-padding-bottom-others);
 }
 
-.checked {
-	color: blue;
-	background-color: red;
+.inspecting {
+	color: var(--inspecting-color);
+	border-color: var(--inspecting-color);
 }

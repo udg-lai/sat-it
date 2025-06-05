@@ -3,6 +3,12 @@ import { tick } from 'svelte';
 import type { StateFun, StateInput, StateMachine } from './StateMachine.svelte.ts';
 import { logWarning } from '$lib/store/toasts.ts';
 import { getStepDelay } from '$lib/store/delay-ms.svelte.ts';
+import type { SvelteSet } from 'svelte/reactivity';
+
+export type PendingItem = {
+	clauseSet: SvelteSet<number>;
+	variable: number;
+};
 
 export interface SolverStateInterface<F extends StateFun, I extends StateInput> {
 	stateMachine: StateMachine<F, I>;

@@ -1,7 +1,7 @@
 import { Queue } from '$lib/transversal/entities/Queue.svelte.ts';
 import type { StateMachineEvent } from '$lib/transversal/events.ts';
 import { logFatal } from '$lib/store/toasts.ts';
-import { SolverMachine } from '../SolverMachine.svelte.ts';
+import { SolverMachine, type PendingItem } from '../SolverMachine.svelte.ts';
 import type { DPLL_FUN, DPLL_INPUT } from './dpll-domain.svelte.ts';
 import { makeDPLLMachine } from './dpll-state-machine.svelte.ts';
 import {
@@ -18,11 +18,6 @@ import { getStepDelay } from '$lib/store/delay-ms.svelte.ts';
 
 export const makeDPLLSolver = (): DPLL_SolverMachine => {
 	return new DPLL_SolverMachine();
-};
-
-export type PendingItem = {
-	clauseSet: SvelteSet<number>;
-	variable: number;
 };
 
 export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
