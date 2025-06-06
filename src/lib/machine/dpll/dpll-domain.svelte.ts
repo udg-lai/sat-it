@@ -127,8 +127,8 @@ export const queueClauseSet: DPLL_QUEUE_CLAUSE_SET_FUN = (
 	if (clauses.size === 0) {
 		logFatal('Empty set of clauses are not thought to be queued');
 	}
-	const item: ConflictAnalysis = { clauses: clauses, variableReasonId: variable };
-	solverStateMachine.postpone(item);
+	const conflict: ConflictAnalysis = { clauses: clauses, variableReasonId: variable };
+	solverStateMachine.postpone(conflict);
 	return solverStateMachine.leftToPostpone();
 };
 
@@ -167,9 +167,9 @@ export type DPLL_PICK_CLAUSE_SET_FUN = (solverStateMachine: DPLL_SolverMachine) 
 export const pickPendingClauseSet: DPLL_PICK_CLAUSE_SET_FUN = (
 	solverStateMachine: DPLL_SolverMachine
 ) => {
-	const pendingItem: ConflictAnalysis = solverStateMachine.consultPostponed();
-	updateClausesToCheck(pendingItem.clauses, pendingItem.variableReasonId);
-	return pendingItem.clauses;
+	const pendingConflict: ConflictAnalysis = solverStateMachine.consultPostponed();
+	updateClausesToCheck(pendingConflict.clauses, pendingConflict.variableReasonId);
+	return pendingConflict.clauses;
 };
 
 export type DPLL_ALL_CLAUSES_CHECKED_FUN = (clauses: Set<number>) => boolean;

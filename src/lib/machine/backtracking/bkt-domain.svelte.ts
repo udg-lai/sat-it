@@ -99,7 +99,7 @@ export const queueClauseSet: BKT_QUEUE_CLAUSE_SET_FUN = (
 	if (clauses.size === 0) {
 		logFatal('Empty set of clauses are not thought to be queued');
 	}
-	solverStateMachine.setConflict({ clauseSet: clauses, variable });
+	solverStateMachine.setConflict({ clauses, variableReasonId: variable });
 };
 
 export type BKT_PICK_PENDING_SET_FUN = (solverStateMachine: BKT_SolverMachine) => Set<number>;
@@ -149,8 +149,7 @@ export type BKT_EMPTY_PENDING_SET_FUN = (solverStateMachine: BKT_SolverMachine) 
 export const emptyClauseSet: BKT_EMPTY_PENDING_SET_FUN = (
 	solverStateMachine: BKT_SolverMachine
 ) => {
-	solverStateMachine.clear();
-	//I DON'T KNOW IF I REALLY NEED THIS CODELINE
+	solverStateMachine.resolveConflict();
 	updateClausesToCheck(new Set<number>(), -1);
 };
 
