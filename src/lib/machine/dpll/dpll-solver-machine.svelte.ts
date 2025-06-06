@@ -111,7 +111,7 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 	}
 
 	protected async solveUPStepByStep(): Promise<void> {
-		this.stepByStep(() => !this.pendingConflicts.isEmpty())
+		this.stepByStep(() => !this.pendingConflicts.isEmpty());
 	}
 
 	onConflictDetection(): boolean {

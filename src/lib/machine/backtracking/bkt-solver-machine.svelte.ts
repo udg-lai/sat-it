@@ -106,7 +106,7 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 	}
 
 	protected async solveUPStepByStep(): Promise<void> {
-		this.solveToNextVariableStepByStep
+		this.solveToNextVariableStepByStep();
 	}
 
 	onConflictDetection(): boolean {
