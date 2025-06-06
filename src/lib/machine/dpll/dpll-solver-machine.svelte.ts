@@ -1,19 +1,15 @@
+import { updateClausesToCheck } from '$lib/store/conflict-detection-state.svelte.ts';
 import { Queue } from '$lib/transversal/entities/Queue.svelte.ts';
-import type { StateMachineEvent } from '$lib/transversal/events.ts';
-import { logFatal } from '$lib/store/toasts.ts';
 import { SolverMachine, type ConflictAnalysis } from '../SolverMachine.svelte.ts';
 import type { DPLL_FUN, DPLL_INPUT } from './dpll-domain.svelte.ts';
-import { makeDPLLMachine } from './dpll-state-machine.svelte.ts';
 import {
 	analyzeClause,
 	backtracking,
 	decide,
 	initialTransition
 } from './dpll-solver-transitions.svelte.ts';
+import { makeDPLLMachine } from './dpll-state-machine.svelte.ts';
 import { dpll_stateName2StateId } from './dpll-states.svelte.ts';
-import { updateClausesToCheck } from '$lib/store/conflict-detection-state.svelte.ts';
-import { tick } from 'svelte';
-import { getStepDelay } from '$lib/store/delay-ms.svelte.ts';
 
 export const makeDPLLSolver = (): DPLL_SolverMachine => {
 	return new DPLL_SolverMachine();
@@ -88,23 +84,6 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 		}
 	}
 
-	async transition(input: StateMachineEvent): Promise<void> {
-		//If receive a step, the state machine can be waiting in 4 possible states
-		if (input === 'step') {
-			this.step();
-		} else if (input === 'nextVariable') {
-			await this.solveToNextVariableStepByStep();
-		} else if (input === 'finishUP') {
-			await this.solveUPStepByStep();
-		} else if (input === 'solve_trail') {
-			await this.solveTrailStepByStep();
-		} else if (input === 'solve_all') {
-			await this.solveAllStepByStep();
-		} else {
-			logFatal('Non expected input for DPLL Solver State Machine');
-		}
-	}
-
 	step(): void {
 		const activeId: number = this.stateMachine.getActiveId();
 
@@ -126,38 +105,16 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 		}
 	}
 
-	private async solveToNextVariableStepByStep(): Promise<void> {
-		if (!this.assertPreAuto()) {
-			return;
-		}
-		this.setFlagsPreAuto();
-		const times: number[] = [];
+	protected async solveToNextVariableStepByStep(): Promise<void> {
 		const postponedClauses: Set<number> = this.consultPostponed().clauses;
-		while (postponedClauses.size !== 0 && !this.forcedStop) {
-			this.step();
-			await tick();
-			await new Promise((r) => times.push(setTimeout(r, getStepDelay())));
-		}
-		times.forEach(clearTimeout);
-		this.setFlagsPostAuto();
+		this.stepByStep(() => postponedClauses.size !== 0);
 	}
 
-	private async solveUPStepByStep(): Promise<void> {
-		if (!this.assertPreAuto()) {
-			return;
-		}
-		this.setFlagsPreAuto();
-		const times: number[] = [];
-		while (!this.pendingConflicts.isEmpty() && !this.forcedStop) {
-			this.step();
-			await tick();
-			await new Promise((r) => times.push(setTimeout(r, getStepDelay())));
-		}
-		times.forEach(clearTimeout);
-		this.setFlagsPostAuto();
+	protected async solveUPStepByStep(): Promise<void> {
+		this.stepByStep(() => !this.pendingConflicts.isEmpty())
 	}
 
-	detectingConflict(): boolean {
+	onConflictDetection(): boolean {
 		return !this.pendingConflicts.isEmpty();
 	}
 }

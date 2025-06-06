@@ -1,7 +1,7 @@
 import type { StateMachineEvent } from '$lib/transversal/events.ts';
 import { tick } from 'svelte';
 import type { StateFun, StateInput, StateMachine } from './StateMachine.svelte.ts';
-import { logWarning } from '$lib/store/toasts.ts';
+import { logFatal, logWarning } from '$lib/store/toasts.ts';
 import { getStepDelay } from '$lib/store/delay-ms.svelte.ts';
 
 export type ConflictAnalysis = {
@@ -22,7 +22,7 @@ export interface SolverStateInterface<F extends StateFun, I extends StateInput> 
 	onConflictState: () => boolean;
 	onInitialState: () => boolean;
 	onFinalState: () => boolean;
-	detectingConflict: () => boolean;
+	onConflictDetection: () => boolean;
 }
 
 export abstract class SolverMachine<F extends StateFun, I extends StateInput>
@@ -38,8 +38,6 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 		this.runningOnAuto = false;
 		this.forcedStop = false;
 	}
-
-	abstract transition(input: StateMachineEvent): Promise<void>;
 
 	abstract getRecord(): Record<string, unknown>;
 
@@ -77,56 +75,68 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 		return this.stateMachine.onInitialState();
 	}
 
-	detectingConflict(): boolean {
-		return false;
-	}
+	abstract onConflictDetection(): boolean;
 
 	stopAutoMode(): void {
 		this.forcedStop = true;
 	}
 
+	async transition(input: StateMachineEvent): Promise<void> {
+		//If receive a step, the state machine can be waiting in 4 possible states
+		if (input === 'step') {
+			this.step();
+		} else if (input === 'nextVariable') {
+			await this.solveToNextVariableStepByStep();
+		} else if (input === 'finishUP') {
+			await this.solveUPStepByStep();
+		} else if (input === 'solve_trail') {
+			await this.solveTrailStepByStep();
+		} else if (input === 'solve_all') {
+			await this.solveAllStepByStep();
+		} else {
+			logFatal('Non expected input Solver State Machine');
+		}
+	}
+
 	protected abstract step(): void;
 
-	protected async solveAllStepByStep(): Promise<void> {
+	protected async stepByStep(continueCond: () => boolean): Promise<void> {
 		if (!this.assertPreAuto()) {
 			return;
 		}
 		this.setFlagsPreAuto();
 		const times: number[] = [];
-		while (!this.completed() && !this.forcedStop) {
+		while (continueCond() && !this.forcedStop) {
 			this.step();
 			await tick();
 			await new Promise((r) => times.push(setTimeout(r, getStepDelay())));
 		}
 		times.forEach(clearTimeout);
 		this.setFlagsPostAuto();
+	}
+
+	protected async solveAllStepByStep(): Promise<void> {
+		this.stepByStep(() => !this.completed());
 	}
 
 	protected async solveTrailStepByStep(): Promise<void> {
-		if (!this.assertPreAuto()) {
-			return;
-		}
-		this.setFlagsPreAuto();
-		const times: number[] = [];
-		while (!this.completed() && !this.onConflictState() && !this.forcedStop) {
-			this.step();
-			await tick();
-			await new Promise((r) => times.push(setTimeout(r, getStepDelay())));
-		}
-		times.forEach(clearTimeout);
-		this.setFlagsPostAuto();
+		this.stepByStep(() => !this.onConflictState() && !this.completed());
 	}
 
-	protected setFlagsPreAuto(): void {
+	protected abstract solveToNextVariableStepByStep(): Promise<void>;
+
+	protected abstract solveUPStepByStep(): Promise<void>;
+
+	private setFlagsPreAuto(): void {
 		this.forcedStop = false;
 		this.runningOnAuto = true;
 	}
 
-	protected setFlagsPostAuto(): void {
+	private setFlagsPostAuto(): void {
 		this.runningOnAuto = false;
 	}
 
-	protected assertPreAuto(): boolean {
+	private assertPreAuto(): boolean {
 		let assert = true;
 		if (this.isInAutoMode()) {
 			logWarning('Solver machine', 'Solver is already running on auto');
