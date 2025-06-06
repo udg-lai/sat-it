@@ -279,10 +279,7 @@ export const analyzeClause = (solver: DPLL_SolverMachine): void => {
 	}
 };
 
-const nextClauseTransition = (
-	stateMachine: DPLL_StateMachine,
-	clauseSet: Set<number>
-): number => {
+const nextClauseTransition = (stateMachine: DPLL_StateMachine, clauseSet: Set<number>): number => {
 	const nextCluaseState = stateMachine.getActiveState() as NonFinalState<
 		DPLL_NEXT_CLAUSE_FUN,
 		DPLL_NEXT_CLAUSE_INPUT

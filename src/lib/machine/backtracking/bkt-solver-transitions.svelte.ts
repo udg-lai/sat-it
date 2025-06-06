@@ -139,10 +139,7 @@ const allVariablesAssignedTransition = (stateMachine: BKT_StateMachine): void =>
 	else stateMachine.transition('decide_state');
 };
 
-const nextClauseTransition = (
-	stateMachine: BKT_StateMachine,
-	pendingSet: Set<number>
-): number => {
+const nextClauseTransition = (stateMachine: BKT_StateMachine, pendingSet: Set<number>): number => {
 	const nextCluaseState = stateMachine.getActiveState() as NonFinalState<
 		BKT_NEXT_CLAUSE_FUN,
 		BKT_NEXT_CLAUSE_INPUT
