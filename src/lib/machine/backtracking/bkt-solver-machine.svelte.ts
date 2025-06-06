@@ -1,18 +1,15 @@
+import { updateClausesToCheck } from '$lib/store/conflict-detection-state.svelte.ts';
+import { logFatal } from '$lib/store/toasts.ts';
 import { SolverMachine, type ConflictAnalysis } from '../SolverMachine.svelte.ts';
 import type { BKT_FUN, BKT_INPUT } from './bkt-domain.svelte.ts';
-import { makeBKTMachine } from './bkt-state-machine.svelte.ts';
-import type { StateMachineEvent } from '$lib/transversal/events.ts';
-import { logFatal } from '$lib/store/toasts.ts';
-import { bkt_stateName2StateId } from './bkt-states.svelte.ts';
-import { updateClausesToCheck } from '$lib/store/conflict-detection-state.svelte.ts';
 import {
 	analyzeClause,
 	backtracking,
 	decide,
 	initialTransition
 } from './bkt-solver-transitions.svelte.ts';
-import { tick } from 'svelte';
-import { getStepDelay } from '$lib/store/delay-ms.svelte.ts';
+import { makeBKTMachine } from './bkt-state-machine.svelte.ts';
+import { bkt_stateName2StateId } from './bkt-states.svelte.ts';
 
 export const makeBKTSolver = (): BKT_SolverMachine => {
 	return new BKT_SolverMachine();
@@ -24,16 +21,6 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 	constructor() {
 		super(makeBKTMachine());
 		this.conflictAnalysis = undefined;
-	}
-
-	// ** functions related to pending **
-	analyzingConflict(): boolean {
-		if (this.conflictAnalysis === undefined) {
-			return false;
-		} else {
-			const { clauses }: ConflictAnalysis = this.conflictAnalysis;
-			return clauses.size > 0;
-		}
 	}
 
 	resolveConflict(): void {
@@ -95,23 +82,9 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 		}
 		const conflictRecord: ConflictAnalysis = record['pending'] as ConflictAnalysis;
 		this.setConflict(conflictRecord);
-		if (this.analyzingConflict()) {
+		if (this.onConflictDetection()) {
 			const { clauses, variableReasonId }: ConflictAnalysis = conflictRecord;
 			updateClausesToCheck(clauses, variableReasonId);
-		}
-	}
-
-	async transition(input: StateMachineEvent): Promise<void> {
-		if (input === 'step') {
-			this.step();
-		} else if (input === 'nextVariable' || input === 'finishUP') {
-			await this.solveToNextVariableStepByStep();
-		} else if (input === 'solve_trail') {
-			await this.solveTrailStepByStep();
-		} else if (input === 'solve_all') {
-			await this.solveAllStepByStep();
-		} else {
-			logFatal('Non expected input for DPLL Solver State Machine');
 		}
 	}
 
@@ -128,22 +101,20 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 		}
 	}
 
-	private async solveToNextVariableStepByStep(): Promise<void> {
-		if (!this.assertPreAuto()) {
-			return;
-		}
-		this.setFlagsPreAuto();
-		const times: number[] = [];
-		while (this.analyzingConflict() && !this.forcedStop) {
-			this.step();
-			await tick();
-			await new Promise((r) => times.push(setTimeout(r, getStepDelay())));
-		}
-		times.forEach(clearTimeout);
-		this.setFlagsPostAuto();
+	protected async solveToNextVariableStepByStep(): Promise<void> {
+		this.stepByStep(() => this.onConflictDetection());
 	}
 
-	detectingConflict(): boolean {
-		return this.analyzingConflict();
+	protected async solveUPStepByStep(): Promise<void> {
+		this.solveToNextVariableStepByStep();
+	}
+
+	onConflictDetection(): boolean {
+		if (this.conflictAnalysis === undefined) {
+			return false;
+		} else {
+			const { clauses }: ConflictAnalysis = this.conflictAnalysis;
+			return clauses.size > 0;
+		}
 	}
 }
