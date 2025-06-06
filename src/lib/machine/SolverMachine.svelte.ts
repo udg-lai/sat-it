@@ -3,10 +3,9 @@ import { tick } from 'svelte';
 import type { StateFun, StateInput, StateMachine } from './StateMachine.svelte.ts';
 import { logWarning } from '$lib/store/toasts.ts';
 import { getStepDelay } from '$lib/store/delay-ms.svelte.ts';
-import type { SvelteSet } from 'svelte/reactivity';
 
-export type PendingItem = {
-	clauseSet: SvelteSet<number>;
+export type PendingConflict = {
+	clauseSet: Set<number>;
 	variable: number;
 };
 

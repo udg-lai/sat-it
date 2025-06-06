@@ -1,5 +1,4 @@
 import { logFatal } from '$lib/store/toasts.ts';
-import { SvelteSet } from 'svelte/reactivity';
 import type { NonFinalState } from '../StateMachine.svelte.ts';
 import type {
 	BKT_ALL_CLAUSES_CHECKED_FUN,
@@ -38,7 +37,7 @@ import {
 	incrementCheckingIndex,
 	updateClausesToCheck
 } from '$lib/store/conflict-detection-state.svelte.ts';
-import type { PendingItem } from '../SolverMachine.svelte.ts';
+import type { PendingConflict } from '../SolverMachine.svelte.ts';
 
 export const initialTransition = (solver: BKT_SolverMachine): void => {
 	const stateMachine: BKT_StateMachine = solver.stateMachine;
@@ -49,8 +48,8 @@ export const initialTransition = (solver: BKT_SolverMachine): void => {
 
 export const analyzeClause = (solver: BKT_SolverMachine): void => {
 	const stateMachine: BKT_StateMachine = solver.stateMachine;
-	const pendingItem: PendingItem = solver.consultPending();
-	const pendingSet: SvelteSet<number> = pendingItem.clauseSet;
+	const pendingItem: PendingConflict = solver.consultPending();
+	const pendingSet: Set<number> = pendingItem.clauseSet;
 	const clauseId: number = nextClauseTransition(stateMachine, pendingSet);
 	const conflict: boolean = conflictDetectionTransition(stateMachine, clauseId);
 	if (conflict) {
@@ -62,14 +61,14 @@ export const analyzeClause = (solver: BKT_SolverMachine): void => {
 	deleteClauseTransition(stateMachine, pendingSet, clauseId);
 	const allChecked: boolean = allClausesCheckedTransition(stateMachine, pendingSet);
 	if (!allChecked) return;
-	updateClausesToCheck(new SvelteSet<number>(), -1);
+	updateClausesToCheck(new Set<number>(), -1);
 	allVariablesAssignedTransition(stateMachine);
 };
 
 export const decide = (solver: BKT_SolverMachine): void => {
 	const stateMachine: BKT_StateMachine = solver.stateMachine;
 	const literalToPropagate: number = decideTransition(stateMachine);
-	const complementaryClauses: SvelteSet<number> = complementaryOccurrencesTransition(
+	const complementaryClauses: Set<number> = complementaryOccurrencesTransition(
 		stateMachine,
 		literalToPropagate
 	);
@@ -79,7 +78,7 @@ export const decide = (solver: BKT_SolverMachine): void => {
 export const backtracking = (solver: BKT_SolverMachine): void => {
 	const stateMachine: BKT_StateMachine = solver.stateMachine;
 	const literalToPropagate = backtrackingTransition(stateMachine);
-	const complementaryClauses: SvelteSet<number> = complementaryOccurrencesTransition(
+	const complementaryClauses: Set<number> = complementaryOccurrencesTransition(
 		stateMachine,
 		literalToPropagate
 	);
@@ -90,7 +89,7 @@ const conflictDetectionBlock = (
 	solver: BKT_SolverMachine,
 	stateMachine: BKT_StateMachine,
 	variable: number,
-	complementaryClauses: SvelteSet<number>
+	complementaryClauses: Set<number>
 ): void => {
 	const triggeredClauses: boolean = triggeredClausesTransition(stateMachine, complementaryClauses);
 	if (!triggeredClauses) {
@@ -98,7 +97,7 @@ const conflictDetectionBlock = (
 		return;
 	}
 	queueClauseSetTransition(stateMachine, solver, variable, complementaryClauses);
-	const pendingSet: SvelteSet<number> = pickPendingSetTransition(stateMachine, solver);
+	const pendingSet: Set<number> = pickPendingSetTransition(stateMachine, solver);
 	const allChecked: boolean = allClausesCheckedTransition(stateMachine, pendingSet);
 	if (allChecked) {
 		logFatal('This is not a possibility in this case');
@@ -142,7 +141,7 @@ const allVariablesAssignedTransition = (stateMachine: BKT_StateMachine): void =>
 
 const nextClauseTransition = (
 	stateMachine: BKT_StateMachine,
-	pendingSet: SvelteSet<number>
+	pendingSet: Set<number>
 ): number => {
 	const nextCluaseState = stateMachine.getActiveState() as NonFinalState<
 		BKT_NEXT_CLAUSE_FUN,
@@ -201,7 +200,7 @@ const decisionLevelTransition = (stateMachine: BKT_StateMachine): void => {
 
 const deleteClauseTransition = (
 	stateMachine: BKT_StateMachine,
-	pendingSet: SvelteSet<number>,
+	pendingSet: Set<number>,
 	clauseId: number
 ): void => {
 	const deleteClauseState = stateMachine.getActiveState() as NonFinalState<
@@ -217,7 +216,7 @@ const deleteClauseTransition = (
 
 const allClausesCheckedTransition = (
 	stateMachine: BKT_StateMachine,
-	pendingSet: SvelteSet<number>
+	pendingSet: Set<number>
 ): boolean => {
 	const allClausesCheckedState = stateMachine.getActiveState() as NonFinalState<
 		BKT_ALL_CLAUSES_CHECKED_FUN,
@@ -261,7 +260,7 @@ const backtrackingTransition = (stateMachine: BKT_StateMachine): number => {
 const complementaryOccurrencesTransition = (
 	stateMachine: BKT_StateMachine,
 	literalToPropagate: number
-): SvelteSet<number> => {
+): Set<number> => {
 	const complementaryOccurrencesState = stateMachine.getActiveState() as NonFinalState<
 		BKT_COMPLEMENTARY_OCCURRENCES_FUN,
 		BKT_COMPLEMENTARY_OCCURRENCES_INPUT
@@ -272,14 +271,14 @@ const complementaryOccurrencesTransition = (
 			'There should be a function in the Complementary Occurrences state'
 		);
 	}
-	const clauses: SvelteSet<number> = complementaryOccurrencesState.run(literalToPropagate);
+	const clauses: Set<number> = complementaryOccurrencesState.run(literalToPropagate);
 	stateMachine.transition('triggered_clauses_state');
 	return clauses;
 };
 
 const triggeredClausesTransition = (
 	stateMachine: BKT_StateMachine,
-	complementaryClauses: SvelteSet<number>
+	complementaryClauses: Set<number>
 ): boolean => {
 	const triggeredClausesState = stateMachine.getActiveState() as NonFinalState<
 		BKT_TRIGGERED_CLAUSES_FUN,
@@ -298,7 +297,7 @@ const queueClauseSetTransition = (
 	stateMachine: BKT_StateMachine,
 	solver: BKT_SolverMachine,
 	variable: number,
-	clauseSet: SvelteSet<number>
+	clauseSet: Set<number>
 ): void => {
 	const queueClauseSetState = stateMachine.getActiveState() as NonFinalState<
 		BKT_QUEUE_CLAUSE_SET_FUN,
@@ -314,7 +313,7 @@ const queueClauseSetTransition = (
 const pickPendingSetTransition = (
 	stateMachine: BKT_StateMachine,
 	solver: BKT_SolverMachine
-): SvelteSet<number> => {
+): Set<number> => {
 	const pickClauseSetState = stateMachine.getActiveState() as NonFinalState<
 		BKT_PICK_PENDING_SET_FUN,
 		BKT_PICK_PENDING_SET_INPUT
@@ -322,7 +321,7 @@ const pickPendingSetTransition = (
 	if (pickClauseSetState.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Peek Pending Set state');
 	}
-	const result: SvelteSet<number> = pickClauseSetState.run(solver);
+	const result: Set<number> = pickClauseSetState.run(solver);
 	stateMachine.transition('all_clauses_checked_state');
 	return result;
 };

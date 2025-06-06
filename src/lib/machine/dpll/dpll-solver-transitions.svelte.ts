@@ -1,6 +1,5 @@
 import { logFatal } from '$lib/store/toasts.ts';
 import { updateLastTrailEnding } from '$lib/store/trails.svelte.ts';
-import { SvelteSet } from 'svelte/reactivity';
 import { type NonFinalState } from '../StateMachine.svelte.ts';
 import type {
 	DPLL_ALL_CLAUSES_CHECKED_FUN,
@@ -48,13 +47,13 @@ import {
 	incrementCheckingIndex,
 	updateClausesToCheck
 } from '$lib/store/conflict-detection-state.svelte.ts';
-import type { PendingItem } from '../SolverMachine.svelte.ts';
+import type { PendingConflict } from '../SolverMachine.svelte.ts';
 
 export const initialTransition = (solver: DPLL_SolverMachine): void => {
 	const stateMachine: DPLL_StateMachine = solver.stateMachine;
 	ecTransition(stateMachine);
 	if (stateMachine.onFinalState()) return;
-	const complementaryClauses: SvelteSet<number> = ucdTransition(stateMachine);
+	const complementaryClauses: Set<number> = ucdTransition(stateMachine);
 	conflictDetectionBlock(solver, stateMachine, -1, complementaryClauses);
 };
 
@@ -62,7 +61,7 @@ const conflictDetectionBlock = (
 	solver: DPLL_SolverMachine,
 	stateMachine: DPLL_StateMachine,
 	variable: number,
-	complementaryClauses: SvelteSet<number>
+	complementaryClauses: Set<number>
 ): void => {
 	const triggeredClauses: boolean = triggeredClausesTransition(
 		stateMachine,
@@ -110,7 +109,7 @@ const ecTransition = (stateMachine: DPLL_StateMachine): void => {
 	}
 };
 
-const ucdTransition = (stateMachine: DPLL_StateMachine): SvelteSet<number> => {
+const ucdTransition = (stateMachine: DPLL_StateMachine): Set<number> => {
 	const ucdState = stateMachine.getActiveState() as NonFinalState<
 		DPLL_UNIT_CLAUSES_DETECTION_FUN,
 		DPLL_UNIT_CLAUSES_DETECTION_INPUT
@@ -121,7 +120,7 @@ const ucdTransition = (stateMachine: DPLL_StateMachine): SvelteSet<number> => {
 			'There should be a function in the Unit Clause Detection state'
 		);
 	}
-	const result: SvelteSet<number> = ucdState.run();
+	const result: Set<number> = ucdState.run();
 	stateMachine.transition('triggered_clauses_state');
 	return result;
 };
@@ -129,7 +128,7 @@ const ucdTransition = (stateMachine: DPLL_StateMachine): SvelteSet<number> => {
 const triggeredClausesTransition = (
 	stateMachine: DPLL_StateMachine,
 	solver: DPLL_SolverMachine,
-	complementaryClauses: SvelteSet<number>
+	complementaryClauses: Set<number>
 ): boolean => {
 	const triggeredClausesState = stateMachine.getActiveState() as NonFinalState<
 		DPLL_TRIGGERED_CLAUSES_FUN,
@@ -166,7 +165,7 @@ const queueClauseSetTransition = (
 	stateMachine: DPLL_StateMachine,
 	solver: DPLL_SolverMachine,
 	variable: number,
-	clauseSet: SvelteSet<number>
+	clauseSet: Set<number>
 ): void => {
 	const queueClauseSetState = stateMachine.getActiveState() as NonFinalState<
 		DPLL_QUEUE_CLAUSE_SET_FUN,
@@ -200,7 +199,7 @@ const checkPendingClausesSetTransition = (
 const pickClauseSetTransition = (
 	stateMachine: DPLL_StateMachine,
 	solver: DPLL_SolverMachine
-): SvelteSet<number> => {
+): Set<number> => {
 	const pickClauseSetState = stateMachine.getActiveState() as NonFinalState<
 		DPLL_PICK_CLAUSE_SET_FUN,
 		DPLL_PICK_CLAUSE_SET_INPUT
@@ -208,14 +207,14 @@ const pickClauseSetTransition = (
 	if (pickClauseSetState.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Peek Clause Set state');
 	}
-	const result: SvelteSet<number> = pickClauseSetState.run(solver);
+	const result: Set<number> = pickClauseSetState.run(solver);
 	stateMachine.transition('all_clauses_checked_state');
 	return result;
 };
 
 const allClausesCheckedTransition = (
 	stateMachine: DPLL_StateMachine,
-	clauses: SvelteSet<number>
+	clauses: Set<number>
 ): boolean => {
 	const allClausesCheckedState = stateMachine.getActiveState() as NonFinalState<
 		DPLL_ALL_CLAUSES_CHECKED_FUN,
@@ -232,8 +231,8 @@ const allClausesCheckedTransition = (
 
 export const analyzeClause = (solver: DPLL_SolverMachine): void => {
 	const stateMachine: DPLL_StateMachine = solver.stateMachine;
-	const pendingItem: PendingItem = solver.consultPostponed();
-	const clauseSet: SvelteSet<number> = pendingItem.clauseSet;
+	const pendingItem: PendingConflict = solver.consultPostponed();
+	const clauseSet: Set<number> = pendingItem.clauseSet;
 	const clauseId: number = nextClauseTransition(stateMachine, clauseSet);
 	const conflict: boolean = conflictDetectionTransition(stateMachine, clauseId);
 	if (conflict) {
@@ -245,7 +244,7 @@ export const analyzeClause = (solver: DPLL_SolverMachine): void => {
 	const unitClause: boolean = unitClauseTransition(stateMachine, clauseId);
 	if (unitClause) {
 		const literalToPropagate: number = unitPropagationTransition(stateMachine, clauseId);
-		const complementaryClauses: SvelteSet<number> = complementaryOccurrencesTransition(
+		const complementaryClauses: Set<number> = complementaryOccurrencesTransition(
 			stateMachine,
 			literalToPropagate
 		);
@@ -269,7 +268,7 @@ export const analyzeClause = (solver: DPLL_SolverMachine): void => {
 	unstackClauseSetTransition(stateMachine, solver);
 	const pendingClausesSet: boolean = checkPendingClausesSetTransition(stateMachine, solver);
 	if (!pendingClausesSet) {
-		updateClausesToCheck(new SvelteSet<number>(), -1);
+		updateClausesToCheck(new Set<number>(), -1);
 		allVariablesAssignedTransition(stateMachine);
 		return;
 	}
@@ -282,7 +281,7 @@ export const analyzeClause = (solver: DPLL_SolverMachine): void => {
 
 const nextClauseTransition = (
 	stateMachine: DPLL_StateMachine,
-	clauseSet: SvelteSet<number>
+	clauseSet: Set<number>
 ): number => {
 	const nextCluaseState = stateMachine.getActiveState() as NonFinalState<
 		DPLL_NEXT_CLAUSE_FUN,
@@ -346,7 +345,7 @@ const unitClauseTransition = (stateMachine: DPLL_StateMachine, clauseId: number)
 
 const deleteClauseTransition = (
 	stateMachine: DPLL_StateMachine,
-	clauseSet: SvelteSet<number>,
+	clauseSet: Set<number>,
 	clauseId: number
 ): void => {
 	const deleteClauseState = stateMachine.getActiveState() as NonFinalState<
@@ -391,7 +390,7 @@ const unitPropagationTransition = (stateMachine: DPLL_StateMachine, clauseId: nu
 const complementaryOccurrencesTransition = (
 	stateMachine: DPLL_StateMachine,
 	literalToPropagate: number
-): SvelteSet<number> => {
+): Set<number> => {
 	const complementaryOccurrencesState = stateMachine.getActiveState() as NonFinalState<
 		DPLL_COMPLEMENTARY_OCCURRENCES_FUN,
 		DPLL_COMPLEMENTARY_OCCURRENCES_INPUT
@@ -402,7 +401,7 @@ const complementaryOccurrencesTransition = (
 			'There should be a function in the Complementary Occurrences state'
 		);
 	}
-	const clauses: SvelteSet<number> = complementaryOccurrencesState.run(literalToPropagate);
+	const clauses: Set<number> = complementaryOccurrencesState.run(literalToPropagate);
 	stateMachine.transition('triggered_clauses_state');
 	return clauses;
 };
@@ -410,7 +409,7 @@ const complementaryOccurrencesTransition = (
 export const decide = (solver: DPLL_SolverMachine): void => {
 	const stateMachine: DPLL_StateMachine = solver.stateMachine;
 	const literalToPropagate: number = decideTransition(stateMachine);
-	const complementaryClauses: SvelteSet<number> = complementaryOccurrencesTransition(
+	const complementaryClauses: Set<number> = complementaryOccurrencesTransition(
 		stateMachine,
 		literalToPropagate
 	);
@@ -433,7 +432,7 @@ const decideTransition = (stateMachine: DPLL_StateMachine): number => {
 export const backtracking = (solver: DPLL_SolverMachine): void => {
 	const stateMachine: DPLL_StateMachine = solver.stateMachine;
 	const literalToPropagate = backtrackingTransition(stateMachine);
-	const complementaryClauses: SvelteSet<number> = complementaryOccurrencesTransition(
+	const complementaryClauses: Set<number> = complementaryOccurrencesTransition(
 		stateMachine,
 		literalToPropagate
 	);

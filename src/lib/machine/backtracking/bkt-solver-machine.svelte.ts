@@ -1,5 +1,4 @@
-import { SvelteSet } from 'svelte/reactivity';
-import { SolverMachine, type PendingItem } from '../SolverMachine.svelte.ts';
+import { SolverMachine, type PendingConflict } from '../SolverMachine.svelte.ts';
 import type { BKT_FUN, BKT_INPUT } from './bkt-domain.svelte.ts';
 import { makeBKTMachine } from './bkt-state-machine.svelte.ts';
 import type { StateMachineEvent } from '$lib/transversal/events.ts';
@@ -20,11 +19,11 @@ export const makeBKTSolver = (): BKT_SolverMachine => {
 };
 
 export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
-	pending: PendingItem = $state({ clauseSet: new SvelteSet<number>(), variable: -1 });
+	pending: PendingConflict = $state({ clauseSet: new Set<number>(), variable: -1 });
 
 	constructor() {
 		super(makeBKTMachine());
-		this.pending = { clauseSet: new SvelteSet<number>(), variable: -1 };
+		this.pending = { clauseSet: new Set<number>(), variable: -1 };
 	}
 
 	// ** functions related to pending **
@@ -32,7 +31,7 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 		return this.pending.clauseSet.size === 0;
 	}
 
-	enqueue(item: PendingItem): void {
+	enqueue(item: PendingConflict): void {
 		this.clear();
 		for (const clause of item.clauseSet) {
 			this.pending.clauseSet.add(clause);
@@ -49,22 +48,22 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 	}
 
 	clear(): void {
-		this.pending = { clauseSet: new SvelteSet<number>(), variable: -1 };
+		this.pending = { clauseSet: new Set<number>(), variable: -1 };
 	}
 
-	consultPending(): PendingItem {
+	consultPending(): PendingConflict {
 		if (this.pending.clauseSet.size === 0) {
 			logError('Can not consult an empty set');
 		}
 		return this.pending;
 	}
 
-	getPending(): PendingItem {
-		const clausesSnapshot: SvelteSet<number> = new SvelteSet<number>();
+	getPending(): PendingConflict {
+		const clausesSnapshot: Set<number> = new Set<number>();
 		for (const clause of this.pending.clauseSet) {
 			clausesSnapshot.add(clause);
 		}
-		const pendingSnapshot: PendingItem = {
+		const pendingSnapshot: PendingConflict = {
 			clauseSet: clausesSnapshot,
 			variable: this.pending.variable
 		};
@@ -80,11 +79,11 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 	// ** abstract functions **
 	updateFromRecord(record: Record<string, unknown> | undefined): void {
 		if (record === undefined) {
-			this.pending = { clauseSet: new SvelteSet<number>(), variable: -1 };
+			this.pending = { clauseSet: new Set<number>(), variable: -1 };
 			updateClausesToCheck(this.pending.clauseSet, this.pending.variable);
 			return;
 		}
-		const pendingRecord: PendingItem = record['pending'] as PendingItem;
+		const pendingRecord: PendingConflict = record['pending'] as PendingConflict;
 		this.pending.clauseSet.clear();
 		this.enqueue(pendingRecord);
 		if (!this.isEmpty()) updateClausesToCheck(this.pending.clauseSet, this.pending.variable);

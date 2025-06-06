@@ -1,7 +1,7 @@
 import { Queue } from '$lib/transversal/entities/Queue.svelte.ts';
 import type { StateMachineEvent } from '$lib/transversal/events.ts';
 import { logFatal } from '$lib/store/toasts.ts';
-import { SolverMachine, type PendingItem } from '../SolverMachine.svelte.ts';
+import { SolverMachine, type PendingConflict } from '../SolverMachine.svelte.ts';
 import type { DPLL_FUN, DPLL_INPUT } from './dpll-domain.svelte.ts';
 import { makeDPLLMachine } from './dpll-state-machine.svelte.ts';
 import {
@@ -11,7 +11,6 @@ import {
 	initialTransition
 } from './dpll-solver-transitions.svelte.ts';
 import { dpll_stateName2StateId } from './dpll-states.svelte.ts';
-import { SvelteSet } from 'svelte/reactivity';
 import { updateClausesToCheck } from '$lib/store/conflict-detection-state.svelte.ts';
 import { tick } from 'svelte';
 import { getStepDelay } from '$lib/store/delay-ms.svelte.ts';
@@ -21,22 +20,22 @@ export const makeDPLLSolver = (): DPLL_SolverMachine => {
 };
 
 export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
-	pending: Queue<PendingItem> = $state(new Queue<PendingItem>());
+	pending: Queue<PendingConflict> = $state(new Queue<PendingConflict>());
 
 	constructor() {
 		super(makeDPLLMachine());
-		this.pending = new Queue<PendingItem>();
+		this.pending = new Queue<PendingConflict>();
 	}
 
-	postpone(pendingItem: PendingItem): void {
+	postpone(pendingItem: PendingConflict): void {
 		this.pending.enqueue(pendingItem);
 	}
 
-	resolvePostponed(): PendingItem | undefined {
+	resolvePostponed(): PendingConflict | undefined {
 		return this.pending.dequeue();
 	}
 
-	consultPostponed(): PendingItem {
+	consultPostponed(): PendingConflict {
 		return this.pending.pick();
 	}
 
@@ -48,11 +47,11 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 		return this.pending.size();
 	}
 
-	getQueue(): Queue<PendingItem> {
-		const returnQueue: Queue<PendingItem> = new Queue();
+	getQueue(): Queue<PendingConflict> {
+		const returnQueue: Queue<PendingConflict> = new Queue();
 		for (const originalItem of this.pending.toArray()) {
-			const copiedSet = new SvelteSet<number>(originalItem.clauseSet);
-			const copiedItem: PendingItem = { clauseSet: copiedSet, variable: originalItem.variable };
+			const copiedSet = new Set<number>(originalItem.clauseSet);
+			const copiedItem: PendingConflict = { clauseSet: copiedSet, variable: originalItem.variable };
 			returnQueue.enqueue(copiedItem);
 		}
 		return returnQueue;
@@ -67,18 +66,18 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 	updateFromRecord(record: Record<string, unknown> | undefined): void {
 		if (record === undefined) {
 			this.pending = new Queue();
-			updateClausesToCheck(new SvelteSet<number>(), -1);
+			updateClausesToCheck(new Set<number>(), -1);
 			return;
 		}
-		const pendingItems = record['queue'] as Queue<PendingItem>;
+		const pendingItems = record['queue'] as Queue<PendingConflict>;
 		this.pending.clear();
 		for (const pending of pendingItems.toArray()) {
-			const copiedSet = new SvelteSet<number>(pending.clauseSet);
-			const copiedItem: PendingItem = { clauseSet: copiedSet, variable: pending.variable };
+			const copiedSet = new Set<number>(pending.clauseSet);
+			const copiedItem: PendingConflict = { clauseSet: copiedSet, variable: pending.variable };
 			this.pending.enqueue(copiedItem);
 		}
 		if (!this.pending.isEmpty()) {
-			const item: PendingItem = this.pending.pick();
+			const item: PendingConflict = this.pending.pick();
 			updateClausesToCheck(item.clauseSet, item.variable);
 		}
 	}
