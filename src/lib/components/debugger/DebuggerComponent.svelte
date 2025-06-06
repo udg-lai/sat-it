@@ -17,7 +17,7 @@
 	let solverMachine: SolverMachine<StateFun, StateInput> = $derived(getSolverMachine());
 	let enablePreprocess = $derived(solverMachine.onInitialState());
 	let enableBacktracking = $derived(solverMachine.onConflictState());
-	let enableConflictDetection = $derived(solverMachine.detectingConflict());
+	let enableConflictDetection = $derived(solverMachine.onConflictDetection());
 	let finished = $derived(solverMachine.completed());
 	let inAutoMode = $derived(solverMachine.isInAutoMode());
 </script>

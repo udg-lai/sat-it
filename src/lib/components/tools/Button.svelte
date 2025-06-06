@@ -15,7 +15,6 @@
 </script>
 
 <div class="flex flex-row">
-	<div class="side-bar" class:active></div>
 	<button onclick={onClick} type="button" class="button-high-contrast !p-2" class:active>
 		{#if icon}
 			<DynamicRender component={icon} props={iconProps} />
@@ -34,32 +33,18 @@
 		transition:
 			background 0.2s,
 			color 0.2s;
-		border: 1px solid transparent;
 		color: var(--secondary-font-color);
 	}
 
 	.button-high-contrast:hover {
-		border-width: 1px;
-		border-style: dashed;
-		border-color: var(--icone-strong);
-		color: var(--icone-strong);
+		color: var(--main-font-color);
 	}
 
 	.button-high-contrast:active {
-		border-style: solid;
+		color: var(--main-font-color);
 	}
 
-	.button-high-contrast.active {
-		color: var(--icone-strong);
-	}
-
-	.side-bar {
-		margin-right: -1px;
-		width: 2px;
-		background-color: var(--main-bg-color);
-	}
-
-	.side-bar.active {
-		background-color: var(--icone-strong);
+	.active {
+		color: var(--main-font-color);
 	}
 </style>
