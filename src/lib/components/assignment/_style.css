@@ -1,7 +1,6 @@
 :root {
 	--literal-padding-bottom-chrome: 9px;
 	--literal-padding-bottom-others: 3px;
-	--inspecting-color: rgb(107, 154, 255);
 }
 
 .literal-style {

@@ -37,7 +37,7 @@ import {
 	incrementCheckingIndex,
 	updateClausesToCheck
 } from '$lib/store/conflict-detection-state.svelte.ts';
-import type { PendingConflict } from '../SolverMachine.svelte.ts';
+import type { ConflictAnalysis } from '../SolverMachine.svelte.ts';
 
 export const initialTransition = (solver: BKT_SolverMachine): void => {
 	const stateMachine: BKT_StateMachine = solver.stateMachine;
@@ -48,8 +48,8 @@ export const initialTransition = (solver: BKT_SolverMachine): void => {
 
 export const analyzeClause = (solver: BKT_SolverMachine): void => {
 	const stateMachine: BKT_StateMachine = solver.stateMachine;
-	const pendingItem: PendingConflict = solver.consultPending();
-	const pendingSet: Set<number> = pendingItem.clauseSet;
+	const pendingItem: ConflictAnalysis = solver.consultConflict();
+	const pendingSet: Set<number> = pendingItem.clauses;
 	const clauseId: number = nextClauseTransition(stateMachine, pendingSet);
 	const conflict: boolean = conflictDetectionTransition(stateMachine, clauseId);
 	if (conflict) {

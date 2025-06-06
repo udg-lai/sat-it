@@ -4,9 +4,9 @@ import type { StateFun, StateInput, StateMachine } from './StateMachine.svelte.t
 import { logWarning } from '$lib/store/toasts.ts';
 import { getStepDelay } from '$lib/store/delay-ms.svelte.ts';
 
-export type PendingConflict = {
-	clauseSet: Set<number>;
-	variable: number;
+export type ConflictAnalysis = {
+	clauses: Set<number>;
+	variableReasonId: number;
 };
 
 export interface SolverStateInterface<F extends StateFun, I extends StateInput> {

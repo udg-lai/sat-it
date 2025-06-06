@@ -14,8 +14,8 @@ import {
 import { isUnSATClause, type ClauseEval } from '$lib/transversal/entities/Clause.ts';
 import type ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';
 import type VariablePool from '$lib/transversal/entities/VariablePool.svelte.ts';
+import type { ConflictAnalysis } from '../SolverMachine.svelte.ts';
 import type { BKT_SolverMachine } from './bkt-solver-machine.svelte.ts';
-import type { PendingConflict } from '../SolverMachine.svelte.ts';
 
 // **state inputs **
 
@@ -99,15 +99,15 @@ export const queueClauseSet: BKT_QUEUE_CLAUSE_SET_FUN = (
 	if (clauses.size === 0) {
 		logFatal('Empty set of clauses are not thought to be queued');
 	}
-	solverStateMachine.enqueue({ clauseSet: clauses, variable });
+	solverStateMachine.setConflict({ clauseSet: clauses, variable });
 };
 
 export type BKT_PICK_PENDING_SET_FUN = (solverStateMachine: BKT_SolverMachine) => Set<number>;
 
 export const pickPendingSet: BKT_PICK_PENDING_SET_FUN = (solverStateMachine: BKT_SolverMachine) => {
-	const pendingItem: PendingConflict = solverStateMachine.consultPending();
-	updateClausesToCheck(pendingItem.clauseSet, pendingItem.variable);
-	return pendingItem.clauseSet;
+	const { clauses, variableReasonId }: ConflictAnalysis = solverStateMachine.consultConflict();
+	updateClausesToCheck(clauses, variableReasonId);
+	return clauses;
 };
 
 export type BKT_ALL_CLAUSES_CHECKED_FUN = (pendingSet: Set<number>) => boolean;

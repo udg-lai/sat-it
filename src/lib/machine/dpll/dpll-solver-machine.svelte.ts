@@ -1,7 +1,7 @@
 import { Queue } from '$lib/transversal/entities/Queue.svelte.ts';
 import type { StateMachineEvent } from '$lib/transversal/events.ts';
 import { logFatal } from '$lib/store/toasts.ts';
-import { SolverMachine, type PendingConflict } from '../SolverMachine.svelte.ts';
+import { SolverMachine, type ConflictAnalysis } from '../SolverMachine.svelte.ts';
 import type { DPLL_FUN, DPLL_INPUT } from './dpll-domain.svelte.ts';
 import { makeDPLLMachine } from './dpll-state-machine.svelte.ts';
 import {
@@ -20,22 +20,22 @@ export const makeDPLLSolver = (): DPLL_SolverMachine => {
 };
 
 export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
-	pending: Queue<PendingConflict> = $state(new Queue<PendingConflict>());
+	pending: Queue<ConflictAnalysis> = $state(new Queue<ConflictAnalysis>());
 
 	constructor() {
 		super(makeDPLLMachine());
-		this.pending = new Queue<PendingConflict>();
+		this.pending = new Queue<ConflictAnalysis>();
 	}
 
-	postpone(pendingItem: PendingConflict): void {
+	postpone(pendingItem: ConflictAnalysis): void {
 		this.pending.enqueue(pendingItem);
 	}
 
-	resolvePostponed(): PendingConflict | undefined {
+	resolvePostponed(): ConflictAnalysis | undefined {
 		return this.pending.dequeue();
 	}
 
-	consultPostponed(): PendingConflict {
+	consultPostponed(): ConflictAnalysis {
 		return this.pending.pick();
 	}
 
@@ -47,11 +47,14 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 		return this.pending.size();
 	}
 
-	getQueue(): Queue<PendingConflict> {
-		const returnQueue: Queue<PendingConflict> = new Queue();
+	getQueue(): Queue<ConflictAnalysis> {
+		const returnQueue: Queue<ConflictAnalysis> = new Queue();
 		for (const originalItem of this.pending.toArray()) {
-			const copiedSet = new Set<number>(originalItem.clauseSet);
-			const copiedItem: PendingConflict = { clauseSet: copiedSet, variable: originalItem.variable };
+			const copiedSet = new Set<number>(originalItem.clauses);
+			const copiedItem: ConflictAnalysis = {
+				clauses: copiedSet,
+				variableReasonId: originalItem.variableReasonId
+			};
 			returnQueue.enqueue(copiedItem);
 		}
 		return returnQueue;
@@ -69,16 +72,19 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 			updateClausesToCheck(new Set<number>(), -1);
 			return;
 		}
-		const pendingItems = record['queue'] as Queue<PendingConflict>;
+		const pendingItems = record['queue'] as Queue<ConflictAnalysis>;
 		this.pending.clear();
 		for (const pending of pendingItems.toArray()) {
-			const copiedSet = new Set<number>(pending.clauseSet);
-			const copiedItem: PendingConflict = { clauseSet: copiedSet, variable: pending.variable };
+			const copiedSet = new Set<number>(pending.clauses);
+			const copiedItem: ConflictAnalysis = {
+				clauses: copiedSet,
+				variableReasonId: pending.variableReasonId
+			};
 			this.pending.enqueue(copiedItem);
 		}
 		if (!this.pending.isEmpty()) {
-			const item: PendingConflict = this.pending.pick();
-			updateClausesToCheck(item.clauseSet, item.variable);
+			const item: ConflictAnalysis = this.pending.pick();
+			updateClausesToCheck(item.clauses, item.variableReasonId);
 		}
 	}
 
@@ -126,7 +132,7 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 		}
 		this.setFlagsPreAuto();
 		const times: number[] = [];
-		const postponedClauses: Set<number> = this.consultPostponed().clauseSet;
+		const postponedClauses: Set<number> = this.consultPostponed().clauses;
 		while (postponedClauses.size !== 0 && !this.forcedStop) {
 			this.step();
 			await tick();
