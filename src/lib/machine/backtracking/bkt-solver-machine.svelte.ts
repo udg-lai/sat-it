@@ -2,7 +2,7 @@ import { SolverMachine, type ConflictAnalysis } from '../SolverMachine.svelte.ts
 import type { BKT_FUN, BKT_INPUT } from './bkt-domain.svelte.ts';
 import { makeBKTMachine } from './bkt-state-machine.svelte.ts';
 import type { StateMachineEvent } from '$lib/transversal/events.ts';
-import { logError, logFatal } from '$lib/store/toasts.ts';
+import { logFatal } from '$lib/store/toasts.ts';
 import { bkt_stateName2StateId } from './bkt-states.svelte.ts';
 import { updateClausesToCheck } from '$lib/store/conflict-detection-state.svelte.ts';
 import {
@@ -19,7 +19,7 @@ export const makeBKTSolver = (): BKT_SolverMachine => {
 };
 
 export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
-	conflictAnalysis: ConflictAnalysis | undefined = undefined;
+	conflictAnalysis: ConflictAnalysis | undefined = $state(undefined);
 
 	constructor() {
 		super(makeBKTMachine());
@@ -34,6 +34,10 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 			const { clauses }: ConflictAnalysis = this.conflictAnalysis;
 			return clauses.size > 0;
 		}
+	}
+
+	resolveConflict(): void {
+		this.conflictAnalysis = undefined;
 	}
 
 	setConflict(conflict: ConflictAnalysis): void {
@@ -130,7 +134,7 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 		}
 		this.setFlagsPreAuto();
 		const times: number[] = [];
-		while (this.conflictAnalysis.clauseSet.size !== 0 && !this.forcedStop) {
+		while (this.analyzingConflict() && !this.forcedStop) {
 			this.step();
 			await tick();
 			await new Promise((r) => times.push(setTimeout(r, getStepDelay())));
@@ -140,6 +144,6 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 	}
 
 	detectingConflict(): boolean {
-		return !this.analyzingConflict();
+		return this.analyzingConflict();
 	}
 }

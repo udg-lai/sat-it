@@ -48,9 +48,9 @@ export const initialTransition = (solver: BKT_SolverMachine): void => {
 
 export const analyzeClause = (solver: BKT_SolverMachine): void => {
 	const stateMachine: BKT_StateMachine = solver.stateMachine;
-	const pendingItem: ConflictAnalysis = solver.consultConflict();
-	const pendingSet: Set<number> = pendingItem.clauses;
-	const clauseId: number = nextClauseTransition(stateMachine, pendingSet);
+	const pendingConflict: ConflictAnalysis = solver.consultConflict();
+	const pendingClauses: Set<number> = pendingConflict.clauses;
+	const clauseId: number = nextClauseTransition(stateMachine, pendingClauses);
 	const conflict: boolean = conflictDetectionTransition(stateMachine, clauseId);
 	if (conflict) {
 		updateLastTrailEnding(clauseId);
@@ -58,8 +58,8 @@ export const analyzeClause = (solver: BKT_SolverMachine): void => {
 		decisionLevelTransition(stateMachine);
 		return;
 	}
-	deleteClauseTransition(stateMachine, pendingSet, clauseId);
-	const allChecked: boolean = allClausesCheckedTransition(stateMachine, pendingSet);
+	deleteClauseTransition(stateMachine, pendingClauses, clauseId);
+	const allChecked: boolean = allClausesCheckedTransition(stateMachine, pendingClauses);
 	if (!allChecked) return;
 	updateClausesToCheck(new Set<number>(), -1);
 	allVariablesAssignedTransition(stateMachine);

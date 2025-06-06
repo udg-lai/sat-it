@@ -20,36 +20,36 @@ export const makeDPLLSolver = (): DPLL_SolverMachine => {
 };
 
 export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
-	pending: Queue<ConflictAnalysis> = $state(new Queue<ConflictAnalysis>());
+	pendingConflicts: Queue<ConflictAnalysis> = $state(new Queue<ConflictAnalysis>());
 
 	constructor() {
 		super(makeDPLLMachine());
-		this.pending = new Queue<ConflictAnalysis>();
+		this.pendingConflicts = new Queue<ConflictAnalysis>();
 	}
 
 	postpone(pendingItem: ConflictAnalysis): void {
-		this.pending.enqueue(pendingItem);
+		this.pendingConflicts.enqueue(pendingItem);
 	}
 
 	resolvePostponed(): ConflictAnalysis | undefined {
-		return this.pending.dequeue();
+		return this.pendingConflicts.dequeue();
 	}
 
 	consultPostponed(): ConflictAnalysis {
-		return this.pending.pick();
+		return this.pendingConflicts.pick();
 	}
 
 	thereArePostponed(): boolean {
-		return !this.pending.isEmpty();
+		return !this.pendingConflicts.isEmpty();
 	}
 
 	leftToPostpone(): number {
-		return this.pending.size();
+		return this.pendingConflicts.size();
 	}
 
 	getQueue(): Queue<ConflictAnalysis> {
 		const returnQueue: Queue<ConflictAnalysis> = new Queue();
-		for (const originalItem of this.pending.toArray()) {
+		for (const originalItem of this.pendingConflicts.toArray()) {
 			const copiedSet = new Set<number>(originalItem.clauses);
 			const copiedItem: ConflictAnalysis = {
 				clauses: copiedSet,
@@ -68,23 +68,23 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 
 	updateFromRecord(record: Record<string, unknown> | undefined): void {
 		if (record === undefined) {
-			this.pending = new Queue();
+			this.pendingConflicts = new Queue();
 			updateClausesToCheck(new Set<number>(), -1);
 			return;
 		}
-		const pendingItems = record['queue'] as Queue<ConflictAnalysis>;
-		this.pending.clear();
-		for (const pending of pendingItems.toArray()) {
-			const copiedSet = new Set<number>(pending.clauses);
+		const recordedPendingConflicts = record['queue'] as Queue<ConflictAnalysis>;
+		this.pendingConflicts.clear();
+		for (const pendingConflict of recordedPendingConflicts.toArray()) {
+			const copiedSet = new Set<number>(pendingConflict.clauses);
 			const copiedItem: ConflictAnalysis = {
 				clauses: copiedSet,
-				variableReasonId: pending.variableReasonId
+				variableReasonId: pendingConflict.variableReasonId
 			};
-			this.pending.enqueue(copiedItem);
+			this.pendingConflicts.enqueue(copiedItem);
 		}
-		if (!this.pending.isEmpty()) {
-			const item: ConflictAnalysis = this.pending.pick();
-			updateClausesToCheck(item.clauses, item.variableReasonId);
+		if (!this.pendingConflicts.isEmpty()) {
+			const conflict: ConflictAnalysis = this.pendingConflicts.pick();
+			updateClausesToCheck(conflict.clauses, conflict.variableReasonId);
 		}
 	}
 
@@ -148,7 +148,7 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 		}
 		this.setFlagsPreAuto();
 		const times: number[] = [];
-		while (!this.pending.isEmpty() && !this.forcedStop) {
+		while (!this.pendingConflicts.isEmpty() && !this.forcedStop) {
 			this.step();
 			await tick();
 			await new Promise((r) => times.push(setTimeout(r, getStepDelay())));
@@ -158,6 +158,6 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 	}
 
 	detectingConflict(): boolean {
-		return !this.pending.isEmpty();
+		return !this.pendingConflicts.isEmpty();
 	}
 }

@@ -231,8 +231,8 @@ const allClausesCheckedTransition = (
 
 export const analyzeClause = (solver: DPLL_SolverMachine): void => {
 	const stateMachine: DPLL_StateMachine = solver.stateMachine;
-	const pendingItem: ConflictAnalysis = solver.consultPostponed();
-	const clauseSet: Set<number> = pendingItem.clauses;
+	const pendingConflict: ConflictAnalysis = solver.consultPostponed();
+	const clauseSet: Set<number> = pendingConflict.clauses;
 	const clauseId: number = nextClauseTransition(stateMachine, clauseSet);
 	const conflict: boolean = conflictDetectionTransition(stateMachine, clauseId);
 	if (conflict) {
