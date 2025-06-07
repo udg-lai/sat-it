@@ -51,7 +51,7 @@
 	}
 
 	.checking {
-		font-weight: bold;
-		color: var(--color-primary);
+		color: var(--inspecting-color);
+		opacity: 1;
 	}
 </style>

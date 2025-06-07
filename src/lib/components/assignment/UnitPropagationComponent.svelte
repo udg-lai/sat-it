@@ -10,12 +10,14 @@
 	import { runningOnChrome } from '$lib/transversal/utils.ts';
 	import { onMount } from 'svelte';
 	import { logFatal } from '$lib/store/toasts.ts';
+	import { getInspectedVariable } from '$lib/store/conflict-detection-state.svelte.ts';
 
 	interface Props {
 		assignment: VariableAssignment;
+		isLast: boolean;
 	}
 
-	let { assignment }: Props = $props();
+	let { assignment, isLast }: Props = $props();
 	let buttonId: string = 'btn-' + nanoid();
 
 	const problem: Problem = $derived(getProblemStore());
@@ -47,12 +49,15 @@
 	onMount(() => {
 		onChrome = runningOnChrome();
 	});
+
+	const inspectedVariable: number = $derived(getInspectedVariable());
 </script>
 
 <unit-propagation>
 	<button
 		id={buttonId}
 		class="literal-style decision unit-propagation {onChrome ? 'pad-chrome' : 'pad-others'}"
+		class:inspecting={assignment.variableId() === inspectedVariable && isLast}
 	>
 		<MathTexComponent equation={assignment.toTeX()} />
 	</button>

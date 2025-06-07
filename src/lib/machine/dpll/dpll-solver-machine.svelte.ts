@@ -1,61 +1,58 @@
+import { updateClausesToCheck } from '$lib/store/conflict-detection-state.svelte.ts';
 import { Queue } from '$lib/transversal/entities/Queue.svelte.ts';
-import type { StateMachineEvent } from '$lib/transversal/events.ts';
-import { logFatal } from '$lib/store/toasts.ts';
-import { SolverMachine } from '../SolverMachine.svelte.ts';
+import { SolverMachine, type ConflictAnalysis } from '../SolverMachine.svelte.ts';
 import type { DPLL_FUN, DPLL_INPUT } from './dpll-domain.svelte.ts';
-import { makeDPLLMachine } from './dpll-state-machine.svelte.ts';
 import {
 	analyzeClause,
 	backtracking,
 	decide,
 	initialTransition
 } from './dpll-solver-transitions.svelte.ts';
+import { makeDPLLMachine } from './dpll-state-machine.svelte.ts';
 import { dpll_stateName2StateId } from './dpll-states.svelte.ts';
-import { SvelteSet } from 'svelte/reactivity';
-import { updateClausesToCheck } from '$lib/store/conflict-detection-state.svelte.ts';
-import { tick } from 'svelte';
-import { getStepDelay } from '$lib/store/delay-ms.svelte.ts';
 
 export const makeDPLLSolver = (): DPLL_SolverMachine => {
 	return new DPLL_SolverMachine();
 };
 
 export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
-	pending: Queue<SvelteSet<number>> = $state(new Queue<SvelteSet<number>>());
+	pendingConflicts: Queue<ConflictAnalysis> = $state(new Queue<ConflictAnalysis>());
 
 	constructor() {
 		super(makeDPLLMachine());
-		this.pending = new Queue<SvelteSet<number>>();
+		this.pendingConflicts = new Queue<ConflictAnalysis>();
 	}
 
-	postpone(clauses: SvelteSet<number>): void {
-		this.pending.enqueue(clauses);
+	postpone(pendingItem: ConflictAnalysis): void {
+		this.pendingConflicts.enqueue(pendingItem);
 	}
 
-	resolvePostponed(): SvelteSet<number> | undefined {
-		return this.pending.dequeue();
+	resolvePostponed(): ConflictAnalysis | undefined {
+		return this.pendingConflicts.dequeue();
 	}
 
-	consultPostponed(): SvelteSet<number> {
-		return this.pending.pick();
+	consultPostponed(): ConflictAnalysis {
+		return this.pendingConflicts.pick();
 	}
 
 	thereArePostponed(): boolean {
-		return !this.pending.isEmpty();
+		return !this.pendingConflicts.isEmpty();
 	}
 
 	leftToPostpone(): number {
-		return this.pending.size();
+		return this.pendingConflicts.size();
 	}
 
-	getQueue(): Queue<SvelteSet<number>> {
-		const returnQueue: Queue<SvelteSet<number>> = new Queue();
-
-		for (const originalSet of this.pending.toArray()) {
-			const copiedSet = new SvelteSet<number>(originalSet);
-			returnQueue.enqueue(copiedSet);
+	getQueue(): Queue<ConflictAnalysis> {
+		const returnQueue: Queue<ConflictAnalysis> = new Queue();
+		for (const originalItem of this.pendingConflicts.toArray()) {
+			const copiedSet = new Set<number>(originalItem.clauses);
+			const copiedItem: ConflictAnalysis = {
+				clauses: copiedSet,
+				variableReasonId: originalItem.variableReasonId
+			};
+			returnQueue.enqueue(copiedItem);
 		}
-
 		return returnQueue;
 	}
 
@@ -67,33 +64,23 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 
 	updateFromRecord(record: Record<string, unknown> | undefined): void {
 		if (record === undefined) {
-			this.pending = new Queue();
-			updateClausesToCheck(new SvelteSet<number>());
+			this.pendingConflicts = new Queue();
+			updateClausesToCheck(new Set<number>(), -1);
 			return;
 		}
-		const pendingClauses = record['queue'] as Queue<SvelteSet<number>>;
-		this.pending.clear();
-		for (const pending of pendingClauses.toArray()) {
-			const copiedSet = new SvelteSet<number>(pending);
-			this.pending.enqueue(copiedSet);
+		const recordedPendingConflicts = record['queue'] as Queue<ConflictAnalysis>;
+		this.pendingConflicts.clear();
+		for (const pendingConflict of recordedPendingConflicts.toArray()) {
+			const copiedSet = new Set<number>(pendingConflict.clauses);
+			const copiedItem: ConflictAnalysis = {
+				clauses: copiedSet,
+				variableReasonId: pendingConflict.variableReasonId
+			};
+			this.pendingConflicts.enqueue(copiedItem);
 		}
-		if (!this.pending.isEmpty()) updateClausesToCheck(this.pending.pick());
-	}
-
-	async transition(input: StateMachineEvent): Promise<void> {
-		//If receive a step, the state machine can be waiting in 4 possible states
-		if (input === 'step') {
-			this.step();
-		} else if (input === 'nextVariable') {
-			await this.solveToNextVariableStepByStep();
-		} else if (input === 'finishUP') {
-			await this.solveUPStepByStep();
-		} else if (input === 'solve_trail') {
-			await this.solveTrailStepByStep();
-		} else if (input === 'solve_all') {
-			await this.solveAllStepByStep();
-		} else {
-			logFatal('Non expected input for DPLL Solver State Machine');
+		if (!this.pendingConflicts.isEmpty()) {
+			const conflict: ConflictAnalysis = this.pendingConflicts.pick();
+			updateClausesToCheck(conflict.clauses, conflict.variableReasonId);
 		}
 	}
 
@@ -118,38 +105,16 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 		}
 	}
 
-	private async solveToNextVariableStepByStep(): Promise<void> {
-		if (!this.assertPreAuto()) {
-			return;
-		}
-		this.setFlagsPreAuto();
-		const times: number[] = [];
-		const postponedClauses: Set<number> = this.consultPostponed();
-		while (postponedClauses.size !== 0 && !this.forcedStop) {
-			this.step();
-			await tick();
-			await new Promise((r) => times.push(setTimeout(r, getStepDelay())));
-		}
-		times.forEach(clearTimeout);
-		this.setFlagsPostAuto();
+	protected async solveToNextVariableStepByStep(): Promise<void> {
+		const postponedClauses: Set<number> = this.consultPostponed().clauses;
+		this.stepByStep(() => postponedClauses.size !== 0);
 	}
 
-	private async solveUPStepByStep(): Promise<void> {
-		if (!this.assertPreAuto()) {
-			return;
-		}
-		this.setFlagsPreAuto();
-		const times: number[] = [];
-		while (!this.pending.isEmpty() && !this.forcedStop) {
-			this.step();
-			await tick();
-			await new Promise((r) => times.push(setTimeout(r, getStepDelay())));
-		}
-		times.forEach(clearTimeout);
-		this.setFlagsPostAuto();
+	protected async solveUPStepByStep(): Promise<void> {
+		this.stepByStep(() => !this.pendingConflicts.isEmpty());
 	}
 
-	detectingConflict(): boolean {
-		return !this.pending.isEmpty();
+	onConflictDetection(): boolean {
+		return !this.pendingConflicts.isEmpty();
 	}
 }

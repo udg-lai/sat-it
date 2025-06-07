@@ -9,21 +9,22 @@
 		decision: VariableAssignment;
 		expanded: boolean;
 		propagations?: VariableAssignment[];
+		isLast: boolean;
 	}
 
-	let { decision, expanded, propagations = [] }: Props = $props();
+	let { decision, expanded, propagations = [], isLast }: Props = $props();
 </script>
 
 {#if propagations?.length === 0}
-	<ChildlessDecisionComponent assignment={decision} />
+	<ChildlessDecisionComponent assignment={decision} {isLast} />
 {:else}
-	<DecisionComponent {expanded} assignment={decision} />
+	<DecisionComponent {expanded} assignment={decision} {isLast} />
 	{#if expanded}
 		{#each propagations as assignment (assignment.variableId())}
 			{#if assignment.isK()}
-				<BacktrackingComponent {assignment} />
+				<BacktrackingComponent {assignment} {isLast} />
 			{:else}
-				<UnitPropagationComponent {assignment} />
+				<UnitPropagationComponent {assignment} {isLast} />
 			{/if}
 		{/each}
 	{/if}

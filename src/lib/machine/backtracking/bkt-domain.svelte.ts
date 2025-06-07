@@ -14,7 +14,7 @@ import {
 import { isUnSATClause, type ClauseEval } from '$lib/transversal/entities/Clause.ts';
 import type ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';
 import type VariablePool from '$lib/transversal/entities/VariablePool.svelte.ts';
-import { SvelteSet } from 'svelte/reactivity';
+import type { ConflictAnalysis } from '../SolverMachine.svelte.ts';
 import type { BKT_SolverMachine } from './bkt-solver-machine.svelte.ts';
 
 // **state inputs **
@@ -72,51 +72,53 @@ export const decide: BKT_DECIDE_FUN = () => {
 	return solverDecide(pool, 'backtracking');
 };
 
-export type BKT_COMPLEMENTARY_OCCURRENCES_FUN = (literal: number) => SvelteSet<number>;
+export type BKT_COMPLEMENTARY_OCCURRENCES_FUN = (literal: number) => Set<number>;
 
 export const complementaryOccurrences: BKT_COMPLEMENTARY_OCCURRENCES_FUN = (literal: number) => {
 	const mapping: MappingLiteral2Clauses = getProblemStore().mapping;
 	return solverComplementaryOccurrences(mapping, literal);
 };
 
-export type BKT_TRIGGERED_CLAUSES_FUN = (clauses: SvelteSet<number>) => boolean;
+export type BKT_TRIGGERED_CLAUSES_FUN = (clauses: Set<number>) => boolean;
 
-export const triggeredClauses: BKT_TRIGGERED_CLAUSES_FUN = (clauses: SvelteSet<number>) => {
+export const triggeredClauses: BKT_TRIGGERED_CLAUSES_FUN = (clauses: Set<number>) => {
 	return solverTriggeredClauses(clauses);
 };
 
 export type BKT_QUEUE_CLAUSE_SET_FUN = (
-	clauses: SvelteSet<number>,
+	variable: number,
+	clauses: Set<number>,
 	solverStateMachine: BKT_SolverMachine
 ) => void;
 
 export const queueClauseSet: BKT_QUEUE_CLAUSE_SET_FUN = (
-	clauses: SvelteSet<number>,
+	variable: number,
+	clauses: Set<number>,
 	solverStateMachine: BKT_SolverMachine
 ) => {
 	if (clauses.size === 0) {
 		logFatal('Empty set of clauses are not thought to be queued');
 	}
-	solverStateMachine.enqueue(clauses);
+	solverStateMachine.setConflict({ clauses, variableReasonId: variable });
 };
 
-export type BKT_PICK_PENDING_SET_FUN = (solverStateMachine: BKT_SolverMachine) => SvelteSet<number>;
+export type BKT_PICK_PENDING_SET_FUN = (solverStateMachine: BKT_SolverMachine) => Set<number>;
 
 export const pickPendingSet: BKT_PICK_PENDING_SET_FUN = (solverStateMachine: BKT_SolverMachine) => {
-	const pendingSet: SvelteSet<number> = solverStateMachine.consultPending();
-	updateClausesToCheck(pendingSet);
-	return pendingSet;
+	const { clauses, variableReasonId }: ConflictAnalysis = solverStateMachine.consultConflict();
+	updateClausesToCheck(clauses, variableReasonId);
+	return clauses;
 };
 
-export type BKT_ALL_CLAUSES_CHECKED_FUN = (pendingSet: SvelteSet<number>) => boolean;
+export type BKT_ALL_CLAUSES_CHECKED_FUN = (pendingSet: Set<number>) => boolean;
 
-export const allClausesChecked: BKT_ALL_CLAUSES_CHECKED_FUN = (pendingSet: SvelteSet<number>) => {
+export const allClausesChecked: BKT_ALL_CLAUSES_CHECKED_FUN = (pendingSet: Set<number>) => {
 	return pendingSet.size === 0;
 };
 
-export type BKT_NEXT_CLAUSE_FUN = (pendingSet: SvelteSet<number>) => number;
+export type BKT_NEXT_CLAUSE_FUN = (pendingSet: Set<number>) => number;
 
-export const nextClause: BKT_NEXT_CLAUSE_FUN = (pendingSet: SvelteSet<number>) => {
+export const nextClause: BKT_NEXT_CLAUSE_FUN = (pendingSet: Set<number>) => {
 	if (pendingSet.size === 0) {
 		logFatal('A non empty set was expected');
 	}
@@ -133,12 +135,9 @@ export const unsatisfiedClause: BKT_CONFLICT_DETECTION_FUN = (clauseId: number) 
 	return isUnSATClause(evaluation);
 };
 
-export type BKT_DELETE_CLAUSE_FUN = (pending: SvelteSet<number>, clauseId: number) => void;
+export type BKT_DELETE_CLAUSE_FUN = (pending: Set<number>, clauseId: number) => void;
 
-export const deleteClause: BKT_DELETE_CLAUSE_FUN = (
-	pending: SvelteSet<number>,
-	clauseId: number
-) => {
+export const deleteClause: BKT_DELETE_CLAUSE_FUN = (pending: Set<number>, clauseId: number) => {
 	if (!pending.has(clauseId)) {
 		logFatal('Clause not found', `Clause - ${clauseId} not found`);
 	}
@@ -150,9 +149,8 @@ export type BKT_EMPTY_PENDING_SET_FUN = (solverStateMachine: BKT_SolverMachine) 
 export const emptyClauseSet: BKT_EMPTY_PENDING_SET_FUN = (
 	solverStateMachine: BKT_SolverMachine
 ) => {
-	solverStateMachine.clear();
-	//I DON'T KNOW IF I REALLY NEED THIS CODELINE
-	updateClausesToCheck(new SvelteSet<number>());
+	solverStateMachine.resolveConflict();
+	updateClausesToCheck(new Set<number>(), -1);
 };
 
 export type BKT_DECISION_LEVEL_FUN = () => boolean;

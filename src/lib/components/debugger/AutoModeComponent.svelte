@@ -52,4 +52,12 @@
 	.range {
 		flex: 1;
 	}
+
+	:global(.range input) {
+		background-color: linear-gradient(to right, #a8a7a7, var(--inspecting-color));
+		-webkit-appearance: none;
+		appearance: none;
+		height: 3px;
+		border-radius: 2px;
+	}
 </style>
