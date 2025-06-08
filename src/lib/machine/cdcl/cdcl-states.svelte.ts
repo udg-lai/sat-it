@@ -1,9 +1,5 @@
 import type { FinalState, NonFinalState, State } from '../StateMachine.svelte.ts';
-import {
-	DECIDE_STATE_ID,
-	SAT_STATE_ID,
-	UNSAT_STATE_ID
-} from '../reserved.ts';
+import { DECIDE_STATE_ID, SAT_STATE_ID, UNSAT_STATE_ID } from '../reserved.ts';
 import {
 	allAssigned,
 	emptyClauseDetection,
