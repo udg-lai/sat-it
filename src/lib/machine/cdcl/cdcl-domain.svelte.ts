@@ -28,6 +28,7 @@ import Clause, {
 import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
 import { getLatestTrail } from '$lib/store/trails.svelte.ts';
 import type VariableAssignment from '$lib/transversal/entities/VariableAssignment.ts';
+import { isUnitPropagationReason, type Reason } from '$lib/transversal/entities/VariableAssignment.ts';
 
 const problem: Problem = $derived(getProblemStore());
 
@@ -86,6 +87,12 @@ export type CDCL_VARIABLE_IN_CC_INPUT =
 	| 'resolution_update_cc_state'
 	| 'delete_last_assignment_state';
 
+export type CDCL_RESOLUTION_UPDATE_CC_INPUT = 'delete_last_assignment_state';
+
+export type CDCL_DELETE_LAST_ASSIGNMENT_INPUT = 'asserting_clause_state';
+
+export type CDCL_LEARN_CONCLICT_CLAUSE_INPUT = 'backjumping_state';
+
 export type CDCL_INPUT =
 	| CDCL_EMPTY_CLAUSE_INPUT
 	| CDCL_UNIT_CLAUSES_DETECTION_INPUT
@@ -108,7 +115,10 @@ export type CDCL_INPUT =
 	| CDLC_BUILD_FUIP_STRUCTURE_INPUT
 	| CDCL_ASSERTING_CLAUSE_INPUT
 	| CDCL_PICK_LAST_ASSIGNMENT_INPUT
-	| CDCL_VARIABLE_IN_CC_INPUT;
+	| CDCL_VARIABLE_IN_CC_INPUT
+	| CDCL_RESOLUTION_UPDATE_CC_INPUT
+	| CDCL_DELETE_LAST_ASSIGNMENT_INPUT
+	| CDCL_LEARN_CONCLICT_CLAUSE_INPUT;
 
 // ** state functions **
 
@@ -317,18 +327,43 @@ export const assertingClause: CDCL_ASSERTING_CLAUSE_FUN = (
 	return variablesFound === 1;
 };
 
-export type CDCL_PICK_LAST_ASSIGNMENT_FUN = (trail: Trail) => number;
+export type CDCL_PICK_LAST_ASSIGNMENT_FUN = (trail: Trail) => VariableAssignment;
 
 export const pickLastAssignment = (trail: Trail) => {
-	const lastAssignment: VariableAssignment = trail.pickLastAssignment();
-	return lastAssignment.getVariable().getInt();
+	return trail.pickLastAssignment();
 };
 
-export type CDCL_VARIABLE_IN_CC_FUN = (conclictClause: Clause, variable: number) => boolean;
+export type CDCL_VARIABLE_IN_CC_FUN = (conclictClause: Clause, assignment: VariableAssignment) => boolean;
 
-export const variableInCC: CDCL_VARIABLE_IN_CC_FUN = (conclictClause: Clause, variable: number) => {
-	return conclictClause.containsVariable(variable);
+export const variableInCC: CDCL_VARIABLE_IN_CC_FUN = (conclictClause: Clause, assignment: VariableAssignment) => {
+	return conclictClause.containsVariable(assignment.getVariable().getInt());
 };
+
+export type CDCL_RESOLUTION_UPDATE_CC_FUN = (conflictClause: Clause, assignment: VariableAssignment) => void;
+
+export const resolutionUpdateCC = (conflictClause: Clause, assignment: VariableAssignment) => {
+	const reason: Reason = assignment.getReason();
+	if(!isUnitPropagationReason(reason)) {
+		logFatal('The Reason should be a UP');
+	}
+	const upClauseId: number = reason.clauseId;
+	const upClause: Clause = getProblemStore().clauses.get(upClauseId);
+
+	conflictClause = conflictClause.resolution(upClause); //This function needs to be revised as a neew Clause is being generated every time.
+	//DON'T KNOW IF I HAVE TO CALL AN UPDATE FUNCTION OR SMTG
+} 
+
+export type CDCL_DELETE_LAST_ASSIGNMENT_FUN = (trail: Trail) => void;
+
+export const deleteLastAssignment: CDCL_DELETE_LAST_ASSIGNMENT_FUN = (trail: Trail) => {
+	trail.pop();
+}
+
+export type CDCL_LEARN_CONCLICT_CLAUSE_FUN = (trail:Trail, conclictClause: Clause ) => void
+
+export const learnConclictClause: CDCL_LEARN_CONCLICT_CLAUSE_FUN = (trail:Trail, conclictClause: Clause) => {
+	trail.learn(conclictClause);
+}
 
 export type CDCL_FUN =
 	| CDCL_EMPTY_CLAUSE_FUN
@@ -349,4 +384,7 @@ export type CDCL_FUN =
 	| CDLC_BUILD_FUIP_STRUCTURE_FUN
 	| CDCL_ASSERTING_CLAUSE_FUN
 	| CDCL_PICK_LAST_ASSIGNMENT_FUN
-	| CDCL_VARIABLE_IN_CC_FUN;
+	| CDCL_VARIABLE_IN_CC_FUN
+	| CDCL_RESOLUTION_UPDATE_CC_FUN
+	| CDCL_DELETE_LAST_ASSIGNMENT_FUN
+	| CDCL_LEARN_CONCLICT_CLAUSE_FUN;

@@ -68,7 +68,12 @@ import {
 	type CDCL_PICK_LAST_ASSIGNMENT_INPUT,
 	type CDCL_VARIABLE_IN_CC_FUN,
 	type CDCL_VARIABLE_IN_CC_INPUT,
-	variableInCC
+	variableInCC,
+  type CDCL_DELETE_LAST_ASSIGNMENT_FUN,
+  type CDCL_DELETE_LAST_ASSIGNMENT_INPUT,
+  deleteLastAssignment,
+  type CDCL_LEARN_CONCLICT_CLAUSE_FUN,
+  type CDCL_LEARN_CONCLICT_CLAUSE_INPUT
 } from './cdcl-domain.svelte.ts';
 
 export const cdcl_stateName2StateId = {
@@ -99,7 +104,8 @@ export const cdcl_stateName2StateId = {
 	variable_in_cc_state: 21,
 	resolution_update_cc_state: 22,
 	delete_last_assignment_state: 23,
-	learn_cc_state: 24
+	learn_cc_state: 24,
+  backjumping_state: 25
 };
 
 // *** define state nodes ***
@@ -371,6 +377,30 @@ const variable_in_cc_state: NonFinalState<CDCL_VARIABLE_IN_CC_FUN, CDCL_VARIABLE
 		.set('delete_last_assignment_state', cdcl_stateName2StateId['delete_last_assignment_state'])
 };
 
+const resolution_update_cc_state: NonFinalState<CDCL_VARIABLE_IN_CC_FUN, CDCL_VARIABLE_IN_CC_INPUT> = {
+	id: cdcl_stateName2StateId['resolution_update_cc_state'],
+	run: variableInCC,
+	description: `Resoultion rule is applyed and Conclict clause is updated`,
+	transitions: new Map<CDCL_VARIABLE_IN_CC_INPUT, number>()
+		.set('delete_last_assignment_state', cdcl_stateName2StateId['delete_last_assignment_state'])
+};
+
+const delete_last_assignment_state: NonFinalState<CDCL_DELETE_LAST_ASSIGNMENT_FUN, CDCL_DELETE_LAST_ASSIGNMENT_INPUT> = {
+	id: cdcl_stateName2StateId['delete_last_assignment_state'],
+	run: deleteLastAssignment,
+	description: `Deletes the last assignment from the trail`,
+	transitions: new Map<CDCL_DELETE_LAST_ASSIGNMENT_INPUT, number>()
+		.set('asserting_clause_state', cdcl_stateName2StateId['asserting_clause_state'])
+};
+
+const learn_cc_state: NonFinalState<CDCL_LEARN_CONCLICT_CLAUSE_FUN, CDCL_LEARN_CONCLICT_CLAUSE_INPUT> = {
+	id: cdcl_stateName2StateId['delete_last_assignment_state'],
+	run: deleteLastAssignment,
+	description: `Deletes the last assignment from the trail`,
+	transitions: new Map<CDCL_LEARN_CONCLICT_CLAUSE_INPUT, number>()
+		.set('backjumping_state', cdcl_stateName2StateId['backjumping_state'])
+};
+
 // *** adding states to the set of states ***
 export const states: Map<number, State<CDCL_FUN, CDCL_INPUT>> = new Map();
 
@@ -398,7 +428,9 @@ states.set(build_fuip_state.id, build_fuip_state);
 states.set(asserting_clause_state.id, asserting_clause_state);
 states.set(pick_last_assignment_state.id, pick_last_assignment_state);
 states.set(variable_in_cc_state.id, variable_in_cc_state);
-
+states.set(resolution_update_cc_state.id, resolution_update_cc_state);
+states.set(delete_last_assignment_state.id, delete_last_assignment_state);
+states.set(learn_cc_state.id, learn_cc_state);
 // export initial node
 export const initial = empty_clause_state.id;
 

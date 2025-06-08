@@ -121,7 +121,7 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 			decide(this);
 		}
 		//Waiting to backtrack an assignment
-		else if (activeId === cdcl_stateName2StateId.backtracking_state) {
+		else if (activeId === cdcl_stateName2StateId.pick_last_assignment_state) {
 			backtracking(this);
 		}
 	}
