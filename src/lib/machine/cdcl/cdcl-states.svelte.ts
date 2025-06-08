@@ -69,11 +69,17 @@ import {
 	type CDCL_VARIABLE_IN_CC_FUN,
 	type CDCL_VARIABLE_IN_CC_INPUT,
 	variableInCC,
-  type CDCL_DELETE_LAST_ASSIGNMENT_FUN,
-  type CDCL_DELETE_LAST_ASSIGNMENT_INPUT,
-  deleteLastAssignment,
-  type CDCL_LEARN_CONCLICT_CLAUSE_FUN,
-  type CDCL_LEARN_CONCLICT_CLAUSE_INPUT
+	type CDCL_DELETE_LAST_ASSIGNMENT_FUN,
+	type CDCL_DELETE_LAST_ASSIGNMENT_INPUT,
+	deleteLastAssignment,
+	type CDCL_LEARN_CONCLICT_CLAUSE_FUN,
+	type CDCL_LEARN_CONCLICT_CLAUSE_INPUT,
+	type CDCL_SECOND_HIGHEST_DL_FUN,
+	type CDCL_SECOND_HIGHEST_DL_INPUT,
+	secondHighestDL,
+	type CDCL_UNDO_TRAIL_TO_SHDL_FUN,
+	type CDCL_UNDO_TRAIL_TO_SHDL_INPUT,
+	undoTrailToSHDL
 } from './cdcl-domain.svelte.ts';
 
 export const cdcl_stateName2StateId = {
@@ -105,7 +111,9 @@ export const cdcl_stateName2StateId = {
 	resolution_update_cc_state: 22,
 	delete_last_assignment_state: 23,
 	learn_cc_state: 24,
-  backjumping_state: 25
+	second_highest_dl_state: 25,
+	undo_trail_to_shdl_state: 26,
+	propagate_fuip_state: 27
 };
 
 // *** define state nodes ***
@@ -377,28 +385,69 @@ const variable_in_cc_state: NonFinalState<CDCL_VARIABLE_IN_CC_FUN, CDCL_VARIABLE
 		.set('delete_last_assignment_state', cdcl_stateName2StateId['delete_last_assignment_state'])
 };
 
-const resolution_update_cc_state: NonFinalState<CDCL_VARIABLE_IN_CC_FUN, CDCL_VARIABLE_IN_CC_INPUT> = {
+const resolution_update_cc_state: NonFinalState<
+	CDCL_VARIABLE_IN_CC_FUN,
+	CDCL_VARIABLE_IN_CC_INPUT
+> = {
 	id: cdcl_stateName2StateId['resolution_update_cc_state'],
 	run: variableInCC,
 	description: `Resoultion rule is applyed and Conclict clause is updated`,
-	transitions: new Map<CDCL_VARIABLE_IN_CC_INPUT, number>()
-		.set('delete_last_assignment_state', cdcl_stateName2StateId['delete_last_assignment_state'])
+	transitions: new Map<CDCL_VARIABLE_IN_CC_INPUT, number>().set(
+		'delete_last_assignment_state',
+		cdcl_stateName2StateId['delete_last_assignment_state']
+	)
 };
 
-const delete_last_assignment_state: NonFinalState<CDCL_DELETE_LAST_ASSIGNMENT_FUN, CDCL_DELETE_LAST_ASSIGNMENT_INPUT> = {
+const delete_last_assignment_state: NonFinalState<
+	CDCL_DELETE_LAST_ASSIGNMENT_FUN,
+	CDCL_DELETE_LAST_ASSIGNMENT_INPUT
+> = {
 	id: cdcl_stateName2StateId['delete_last_assignment_state'],
 	run: deleteLastAssignment,
 	description: `Deletes the last assignment from the trail`,
-	transitions: new Map<CDCL_DELETE_LAST_ASSIGNMENT_INPUT, number>()
-		.set('asserting_clause_state', cdcl_stateName2StateId['asserting_clause_state'])
+	transitions: new Map<CDCL_DELETE_LAST_ASSIGNMENT_INPUT, number>().set(
+		'asserting_clause_state',
+		cdcl_stateName2StateId['asserting_clause_state']
+	)
 };
 
-const learn_cc_state: NonFinalState<CDCL_LEARN_CONCLICT_CLAUSE_FUN, CDCL_LEARN_CONCLICT_CLAUSE_INPUT> = {
+const learn_cc_state: NonFinalState<
+	CDCL_LEARN_CONCLICT_CLAUSE_FUN,
+	CDCL_LEARN_CONCLICT_CLAUSE_INPUT
+> = {
 	id: cdcl_stateName2StateId['delete_last_assignment_state'],
 	run: deleteLastAssignment,
-	description: `Deletes the last assignment from the trail`,
-	transitions: new Map<CDCL_LEARN_CONCLICT_CLAUSE_INPUT, number>()
-		.set('backjumping_state', cdcl_stateName2StateId['backjumping_state'])
+	description: `Inserts the new clause inside the clause pool`,
+	transitions: new Map<CDCL_LEARN_CONCLICT_CLAUSE_INPUT, number>().set(
+		'second_highest_dl_state',
+		cdcl_stateName2StateId['second_highest_dl_state']
+	)
+};
+
+const second_highest_dl_state: NonFinalState<
+	CDCL_SECOND_HIGHEST_DL_FUN,
+	CDCL_SECOND_HIGHEST_DL_INPUT
+> = {
+	id: cdcl_stateName2StateId['second_highest_dl_state'],
+	run: secondHighestDL,
+	description: `Gets the second highst decision level`,
+	transitions: new Map<CDCL_SECOND_HIGHEST_DL_INPUT, number>().set(
+		'undo_trail_to_shdl_state',
+		cdcl_stateName2StateId['undo_trail_to_shdl_state']
+	)
+};
+
+const undo_trail_to_shdl_state: NonFinalState<
+	CDCL_UNDO_TRAIL_TO_SHDL_FUN,
+	CDCL_UNDO_TRAIL_TO_SHDL_INPUT
+> = {
+	id: cdcl_stateName2StateId['undo_trail_to_shdl_state'],
+	run: undoTrailToSHDL,
+	description: `Undo the trail until reaching the dl`,
+	transitions: new Map<CDCL_UNDO_TRAIL_TO_SHDL_INPUT, number>().set(
+		'propagate_fuip_state',
+		cdcl_stateName2StateId['propagate_fuip_state']
+	)
 };
 
 // *** adding states to the set of states ***
@@ -431,6 +480,9 @@ states.set(variable_in_cc_state.id, variable_in_cc_state);
 states.set(resolution_update_cc_state.id, resolution_update_cc_state);
 states.set(delete_last_assignment_state.id, delete_last_assignment_state);
 states.set(learn_cc_state.id, learn_cc_state);
+states.set(second_highest_dl_state.id, second_highest_dl_state);
+states.set(undo_trail_to_shdl_state.id, undo_trail_to_shdl_state);
+
 // export initial node
 export const initial = empty_clause_state.id;
 

@@ -28,7 +28,10 @@ import Clause, {
 import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
 import { getLatestTrail } from '$lib/store/trails.svelte.ts';
 import type VariableAssignment from '$lib/transversal/entities/VariableAssignment.ts';
-import { isUnitPropagationReason, type Reason } from '$lib/transversal/entities/VariableAssignment.ts';
+import {
+	isUnitPropagationReason,
+	type Reason
+} from '$lib/transversal/entities/VariableAssignment.ts';
 
 const problem: Problem = $derived(getProblemStore());
 
@@ -91,7 +94,13 @@ export type CDCL_RESOLUTION_UPDATE_CC_INPUT = 'delete_last_assignment_state';
 
 export type CDCL_DELETE_LAST_ASSIGNMENT_INPUT = 'asserting_clause_state';
 
-export type CDCL_LEARN_CONCLICT_CLAUSE_INPUT = 'backjumping_state';
+export type CDCL_LEARN_CONCLICT_CLAUSE_INPUT = 'second_highest_dl_state';
+
+export type CDCL_SECOND_HIGHEST_DL_INPUT = 'undo_trail_to_shdl_state';
+
+export type CDCL_UNDO_TRAIL_TO_SHDL_INPUT = 'propagate_fuip_state';
+
+export type CDCL_PROPAGATE_FUIP_INPUT = 'push_trail_state';
 
 export type CDCL_INPUT =
 	| CDCL_EMPTY_CLAUSE_INPUT
@@ -118,7 +127,9 @@ export type CDCL_INPUT =
 	| CDCL_VARIABLE_IN_CC_INPUT
 	| CDCL_RESOLUTION_UPDATE_CC_INPUT
 	| CDCL_DELETE_LAST_ASSIGNMENT_INPUT
-	| CDCL_LEARN_CONCLICT_CLAUSE_INPUT;
+	| CDCL_LEARN_CONCLICT_CLAUSE_INPUT
+	| CDCL_SECOND_HIGHEST_DL_INPUT
+	| CDCL_UNDO_TRAIL_TO_SHDL_INPUT;
 
 // ** state functions **
 
@@ -333,17 +344,26 @@ export const pickLastAssignment = (trail: Trail) => {
 	return trail.pickLastAssignment();
 };
 
-export type CDCL_VARIABLE_IN_CC_FUN = (conclictClause: Clause, assignment: VariableAssignment) => boolean;
+export type CDCL_VARIABLE_IN_CC_FUN = (
+	conclictClause: Clause,
+	assignment: VariableAssignment
+) => boolean;
 
-export const variableInCC: CDCL_VARIABLE_IN_CC_FUN = (conclictClause: Clause, assignment: VariableAssignment) => {
+export const variableInCC: CDCL_VARIABLE_IN_CC_FUN = (
+	conclictClause: Clause,
+	assignment: VariableAssignment
+) => {
 	return conclictClause.containsVariable(assignment.getVariable().getInt());
 };
 
-export type CDCL_RESOLUTION_UPDATE_CC_FUN = (conflictClause: Clause, assignment: VariableAssignment) => void;
+export type CDCL_RESOLUTION_UPDATE_CC_FUN = (
+	conflictClause: Clause,
+	assignment: VariableAssignment
+) => void;
 
 export const resolutionUpdateCC = (conflictClause: Clause, assignment: VariableAssignment) => {
 	const reason: Reason = assignment.getReason();
-	if(!isUnitPropagationReason(reason)) {
+	if (!isUnitPropagationReason(reason)) {
 		logFatal('The Reason should be a UP');
 	}
 	const upClauseId: number = reason.clauseId;
@@ -351,19 +371,48 @@ export const resolutionUpdateCC = (conflictClause: Clause, assignment: VariableA
 
 	conflictClause = conflictClause.resolution(upClause); //This function needs to be revised as a neew Clause is being generated every time.
 	//DON'T KNOW IF I HAVE TO CALL AN UPDATE FUNCTION OR SMTG
-} 
+};
 
 export type CDCL_DELETE_LAST_ASSIGNMENT_FUN = (trail: Trail) => void;
 
 export const deleteLastAssignment: CDCL_DELETE_LAST_ASSIGNMENT_FUN = (trail: Trail) => {
-	trail.pop();
-}
+	const assignment: VariableAssignment = trail.pop() as VariableAssignment;
+	getProblemStore().variables.dispose(assignment.getVariable().getInt());
+};
 
-export type CDCL_LEARN_CONCLICT_CLAUSE_FUN = (trail:Trail, conclictClause: Clause ) => void
+export type CDCL_LEARN_CONCLICT_CLAUSE_FUN = (trail: Trail, conclictClause: Clause) => void;
 
-export const learnConclictClause: CDCL_LEARN_CONCLICT_CLAUSE_FUN = (trail:Trail, conclictClause: Clause) => {
+export const learnConclictClause: CDCL_LEARN_CONCLICT_CLAUSE_FUN = (
+	trail: Trail,
+	conclictClause: Clause
+) => {
 	trail.learn(conclictClause);
-}
+};
+
+export type CDCL_SECOND_HIGHEST_DL_FUN = (trail: Trail, conclictClause: Clause) => number;
+
+export const secondHighestDL: CDCL_SECOND_HIGHEST_DL_FUN = (
+	trail: Trail,
+	conclictClause: Clause
+) => {
+	const clauseVariables: number[] = conclictClause.getLiterals().map((literal) => {
+		return literal.getVariable().getInt();
+	});
+	const decisionLevels = clauseVariables
+		.map((variable) => trail.getVariableDecisionLevel(variable))
+		.filter((level, index, self) => self.indexOf(level) === index)
+		.sort((a, b) => b - a);
+
+	return decisionLevels.length >= 2 ? decisionLevels[1] : decisionLevels[0] - 1;
+};
+
+export type CDCL_UNDO_TRAIL_TO_SHDL_FUN = (trail: Trail, decisionLevel: number) => void;
+
+export const undoTrailToSHDL = (trail: Trail, decisionLevel: number) => {
+	trail.undoToDL(decisionLevel);
+};
+
+export type CDCL_PROPAGATE_FUIP_FUN = (trail: Trail, conflictClause: Clause) => number;
 
 export type CDCL_FUN =
 	| CDCL_EMPTY_CLAUSE_FUN
@@ -387,4 +436,6 @@ export type CDCL_FUN =
 	| CDCL_VARIABLE_IN_CC_FUN
 	| CDCL_RESOLUTION_UPDATE_CC_FUN
 	| CDCL_DELETE_LAST_ASSIGNMENT_FUN
-	| CDCL_LEARN_CONCLICT_CLAUSE_FUN;
+	| CDCL_LEARN_CONCLICT_CLAUSE_FUN
+	| CDCL_SECOND_HIGHEST_DL_FUN
+	| CDCL_UNDO_TRAIL_TO_SHDL_FUN;

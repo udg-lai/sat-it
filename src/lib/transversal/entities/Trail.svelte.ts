@@ -1,6 +1,7 @@
 import type VariableAssignment from '$lib/transversal/entities/VariableAssignment.ts';
 import { logFatal } from '$lib/store/toasts.ts';
 import type Clause from './Clause.ts';
+import { getProblemStore } from '$lib/store/problem.svelte.ts';
 
 export class Trail {
 	private assignments: VariableAssignment[] = $state([]);
@@ -59,6 +60,20 @@ export class Trail {
 		return this.trailEnding;
 	}
 
+	getVariableDecisionLevel(variable: number): number {
+		const index = this.assignments.findIndex((a) => a.getVariable().getInt() === variable);
+		if (index === -1) {
+			logFatal(`Variable ${variable} not found in trail`);
+		}
+
+		for (let level = this.decisionLevelBookmark.length - 1; level >= 0; level--) {
+			if (index > this.decisionLevelBookmark[level]) {
+				return level;
+			}
+		}
+		logFatal(`Unable to determine decision level for variable ${variable}`);
+	}
+
 	updateTrailEnding(clauseId: number = -1): void {
 		this.trailEnding = clauseId;
 	}
@@ -96,6 +111,24 @@ export class Trail {
 
 	updateFollowUpIndex(): void {
 		this.followUPIndex = this.assignments.length - 1;
+	}
+
+	undoToDL(dl: number): void {
+		// Security check
+		if (dl < 0 || dl > this.decisionLevel) {
+			logFatal('DL error', 'The entered DL is not valid');
+		}
+
+		// We get the mark of the DL without removing the Decision.
+		const targetIndex = dl === 0 ? 0 : this.getMarkOfDecisionLevel(dl) + 1;
+		while (this.assignments.length > targetIndex) {
+			const last: VariableAssignment = this.pop() as VariableAssignment;
+			getProblemStore().variables.dispose(last.getVariable().getInt());
+		}
+
+		//Set the new dl parameters
+		this.decisionLevelBookmark = this.decisionLevelBookmark.slice(0, dl + 1); // keep bookmark[0..dl]
+		this.decisionLevel = dl;
 	}
 
 	[Symbol.iterator]() {
