@@ -23,6 +23,11 @@ class Clause implements Comparable<Clause> {
 		return Clause.idGenerator;
 	}
 
+	copy(): Clause {
+		const newClause = new Clause(this.getLiterals());
+		return newClause;
+	}
+
 	generateUniqueId() {
 		const id = Clause.idGenerator;
 		Clause.idGenerator += 1;

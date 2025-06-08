@@ -1,5 +1,9 @@
-import { getProblemStore, type MappingLiteral2Clauses, type Problem } from "$lib/store/problem.svelte.ts";
-import type ClausePool from "$lib/transversal/entities/ClausePool.svelte.ts";
+import {
+	getProblemStore,
+	type MappingLiteral2Clauses,
+	type Problem
+} from '$lib/store/problem.svelte.ts';
+import type ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';
 import {
 	clauseEvaluation,
 	allAssigned as solverAllAssigned,
@@ -9,15 +13,21 @@ import {
 	unitPropagation as solverUnitPropagation,
 	complementaryOccurrences as solverComplementaryOccurrences,
 	nonDecisionMade as solverNonDecisionMade,
-	backtracking as solverBacktracking,
 	decide as solverDecide
 } from '$lib/transversal/algorithms/solver.svelte.ts';
-import type VariablePool from "$lib/transversal/entities/VariablePool.svelte.ts";
-import type { CDCL_SolverMachine } from "./cdcl-solver-machine.svelte.ts";
-import type { ConflictAnalysis } from "../SolverMachine.svelte.ts";
-import { logFatal } from "$lib/store/toasts.ts";
-import { updateClausesToCheck } from "$lib/store/conflict-detection-state.svelte.ts";
-import { isUnitClause, isUnSATClause, type ClauseEval } from "$lib/transversal/entities/Clause.ts";
+import type VariablePool from '$lib/transversal/entities/VariablePool.svelte.ts';
+import type { CDCL_SolverMachine } from './cdcl-solver-machine.svelte.ts';
+import type { ConflictAnalysis } from '../SolverMachine.svelte.ts';
+import { logFatal } from '$lib/store/toasts.ts';
+import { updateClausesToCheck } from '$lib/store/conflict-detection-state.svelte.ts';
+import Clause, {
+	isUnitClause,
+	isUnSATClause,
+	type ClauseEval
+} from '$lib/transversal/entities/Clause.ts';
+import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
+import { getLatestTrail } from '$lib/store/trails.svelte.ts';
+import type VariableAssignment from '$lib/transversal/entities/VariableAssignment.ts';
 
 const problem: Problem = $derived(getProblemStore());
 
@@ -58,35 +68,47 @@ export type CDCL_UNIT_PROPAGATION_INPUT = 'complementary_occurrences_state';
 
 export type CDCL_COMPLEMENTARY_OCCURRENCES_INPUT = 'triggered_clauses_state';
 
-export type CDCL_CHECK_NON_DECISION_MADE_INPUT = 'backtracking_state' | 'unsat_state';
-
-export type CDCL_BACKTRACKING_INPUT = 'complementary_occurrences_state';
+export type CDCL_CHECK_NON_DECISION_MADE_INPUT = 'build_fuip_state' | 'unsat_state';
 
 export type CDCL_DECIDE_INPUT = 'complementary_occurrences_state';
 
 export type CDCL_EMPTY_CLAUSE_SET_INPUT = 'decision_level_state';
 
-export type CDCL_INPUT = 
-  | CDCL_EMPTY_CLAUSE_INPUT
-  | CDCL_UNIT_CLAUSES_DETECTION_INPUT
-  | CDCL_PICK_CLAUSE_SET_INPUT
-  | CDCL_ALL_VARIABLES_ASSIGNED_INPUT
-  | CDCL_TRIGGERED_CLAUSES_INPUT
-  | CDCL_QUEUE_CLAUSE_SET_INPUT
-  | CDCL_UNSTACK_CLAUSE_SET_INPUT
-  | CDCL_ALL_CLAUSES_CHECKED_INPUT
-  | CDCL_NEXT_CLAUSE_INPUT
-  | CDCL_CONFLICT_DETECTION_INPUT
-  | CDCL_CHECK_PENDING_CLAUSES_INPUT
-  | CDCL_DELETE_CLAUSE_INPUT
-  | CDCL_UNIT_CLAUSE_INPUT
-  | CDCL_UNIT_PROPAGATION_INPUT
-  | CDCL_COMPLEMENTARY_OCCURRENCES_INPUT
-  | CDCL_CHECK_NON_DECISION_MADE_INPUT
-  | CDCL_BACKTRACKING_INPUT
-  | CDCL_DECIDE_INPUT
-  | CDCL_EMPTY_CLAUSE_SET_INPUT;
+//New CDCL Inputs
 
+export type CDLC_BUILD_FUIP_STRUCTURE_INPUT = 'asserting_clause_state';
+
+export type CDCL_ASSERTING_CLAUSE_INPUT = 'learn_cc_state' | 'pick_last_assignment_state';
+
+export type CDCL_PICK_LAST_ASSIGNMENT_INPUT = 'variable_in_cc_state';
+
+export type CDCL_VARIABLE_IN_CC_INPUT =
+	| 'resolution_update_cc_state'
+	| 'delete_last_assignment_state';
+
+export type CDCL_INPUT =
+	| CDCL_EMPTY_CLAUSE_INPUT
+	| CDCL_UNIT_CLAUSES_DETECTION_INPUT
+	| CDCL_PICK_CLAUSE_SET_INPUT
+	| CDCL_ALL_VARIABLES_ASSIGNED_INPUT
+	| CDCL_TRIGGERED_CLAUSES_INPUT
+	| CDCL_QUEUE_CLAUSE_SET_INPUT
+	| CDCL_UNSTACK_CLAUSE_SET_INPUT
+	| CDCL_ALL_CLAUSES_CHECKED_INPUT
+	| CDCL_NEXT_CLAUSE_INPUT
+	| CDCL_CONFLICT_DETECTION_INPUT
+	| CDCL_CHECK_PENDING_CLAUSES_INPUT
+	| CDCL_DELETE_CLAUSE_INPUT
+	| CDCL_UNIT_CLAUSE_INPUT
+	| CDCL_UNIT_PROPAGATION_INPUT
+	| CDCL_COMPLEMENTARY_OCCURRENCES_INPUT
+	| CDCL_CHECK_NON_DECISION_MADE_INPUT
+	| CDCL_DECIDE_INPUT
+	| CDCL_EMPTY_CLAUSE_SET_INPUT
+	| CDLC_BUILD_FUIP_STRUCTURE_INPUT
+	| CDCL_ASSERTING_CLAUSE_INPUT
+	| CDCL_PICK_LAST_ASSIGNMENT_INPUT
+	| CDCL_VARIABLE_IN_CC_INPUT;
 
 // ** state functions **
 
@@ -232,13 +254,6 @@ export const nonDecisionMade: CDCL_CHECK_NON_DECISION_MADE_FUN = () => {
 	return solverNonDecisionMade();
 };
 
-export type CDCL_BACKTRACKING_FUN = () => number;
-
-export const backtracking: CDCL_BACKTRACKING_FUN = () => {
-	const pool: VariablePool = problem.variables;
-	return solverBacktracking(pool);
-};
-
 export type CDCL_EMPTY_CLAUSE_SET_FUN = (solverStateMachine: CDCL_SolverMachine) => void;
 
 export const emptyClauseSet: CDCL_EMPTY_CLAUSE_SET_FUN = (
@@ -250,20 +265,88 @@ export const emptyClauseSet: CDCL_EMPTY_CLAUSE_SET_FUN = (
 	updateClausesToCheck(new Set<number>(), -1);
 };
 
+// ** additional cdcl function **
+
+export type CDLC_BUILD_FUIP_STRUCTURE_FUN = (solver: CDCL_SolverMachine) => void;
+
+export const buildFUIP: CDLC_BUILD_FUIP_STRUCTURE_FUN = (solver: CDCL_SolverMachine) => {
+	// Firstly the last trail is achieved
+	const latestTrail: Trail | undefined = getLatestTrail();
+	if (latestTrail === undefined) {
+		logFatal('Not possible result', 'There is no last trail to work with');
+	}
+	// Then the variables from the last decision level are retrieved.
+	const assignmentsLastDecisionLevel: VariableAssignment[] = latestTrail.getPropagations(
+		latestTrail.getDecisionLevel()
+	);
+	const variablesLastDecisionLevel: number[] = assignmentsLastDecisionLevel.map((assignment) => {
+		return assignment.getVariable().getInt();
+	});
+
+	// Thirdly the conclict clause is retrieved
+	const conflictiveClauseId: number | undefined = latestTrail.getTrailEnding();
+	if (conflictiveClauseId === undefined) {
+		logFatal(
+			'Not possible result',
+			'It is not possible to look for the FUIP if no conflicts have been found'
+		);
+	}
+	const conflictiveClause: Clause = getProblemStore().clauses.get(conflictiveClauseId).copy();
+
+	//Lastly, generate the FUIP
+	solver.buildFUIP(latestTrail, conflictiveClause, variablesLastDecisionLevel);
+};
+
+export type CDCL_ASSERTING_CLAUSE_FUN = (conflictClause: Clause, variables: number[]) => boolean;
+
+export const assertingClause: CDCL_ASSERTING_CLAUSE_FUN = (
+	conflictClause: Clause,
+	variables: number[]
+) => {
+	const variablesFound: number = 0;
+	const i: number = 0;
+	while (i < variables.length && variablesFound < 2) {
+		conflictClause.containsVariable(variables[i]);
+	}
+	if (variablesFound === 0) {
+		logFatal(
+			'Not possible result',
+			'There must be at least one variable inside the conlict clause'
+		);
+	}
+	return variablesFound === 1;
+};
+
+export type CDCL_PICK_LAST_ASSIGNMENT_FUN = (trail: Trail) => number;
+
+export const pickLastAssignment = (trail: Trail) => {
+	const lastAssignment: VariableAssignment = trail.pickLastAssignment();
+	return lastAssignment.getVariable().getInt();
+};
+
+export type CDCL_VARIABLE_IN_CC_FUN = (conclictClause: Clause, variable: number) => boolean;
+
+export const variableInCC: CDCL_VARIABLE_IN_CC_FUN = (conclictClause: Clause, variable: number) => {
+	return conclictClause.containsVariable(variable);
+};
+
 export type CDCL_FUN =
-  | CDCL_EMPTY_CLAUSE_FUN
-  | CDCL_UNIT_CLAUSES_DETECTION_FUN
-  | CDCL_PICK_CLAUSE_SET_FUN
-  | CDCL_CHECK_PENDING_CLAUSES_FUN
-  | CDCL_ALL_VARIABLES_ASSIGNED_FUN
-  | CDCL_QUEUE_CLAUSE_SET_FUN
-  | CDCL_UNSTACK_CLAUSE_SET_FUN
-  | CDCL_DELETE_CLAUSE_FUN
-  | CDCL_CONFLICT_DETECTION_FUN
-  | CDCL_UNIT_CLAUSE_FUN
-  | CDCL_UNIT_PROPAGATION_FUN
-  | CDCL_COMPLEMENTARY_OCCURRENCES_FUN
-  | CDCL_CHECK_NON_DECISION_MADE_FUN
-  | CDCL_BACKTRACKING_FUN
-  | CDCL_DECIDE_FUN
-  | CDCL_EMPTY_CLAUSE_SET_FUN;
+	| CDCL_EMPTY_CLAUSE_FUN
+	| CDCL_UNIT_CLAUSES_DETECTION_FUN
+	| CDCL_PICK_CLAUSE_SET_FUN
+	| CDCL_CHECK_PENDING_CLAUSES_FUN
+	| CDCL_ALL_VARIABLES_ASSIGNED_FUN
+	| CDCL_QUEUE_CLAUSE_SET_FUN
+	| CDCL_UNSTACK_CLAUSE_SET_FUN
+	| CDCL_DELETE_CLAUSE_FUN
+	| CDCL_CONFLICT_DETECTION_FUN
+	| CDCL_UNIT_CLAUSE_FUN
+	| CDCL_UNIT_PROPAGATION_FUN
+	| CDCL_COMPLEMENTARY_OCCURRENCES_FUN
+	| CDCL_CHECK_NON_DECISION_MADE_FUN
+	| CDCL_DECIDE_FUN
+	| CDCL_EMPTY_CLAUSE_SET_FUN
+	| CDLC_BUILD_FUIP_STRUCTURE_FUN
+	| CDCL_ASSERTING_CLAUSE_FUN
+	| CDCL_PICK_LAST_ASSIGNMENT_FUN
+	| CDCL_VARIABLE_IN_CC_FUN;

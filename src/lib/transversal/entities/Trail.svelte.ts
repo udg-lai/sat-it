@@ -9,7 +9,7 @@ export class Trail {
 	private followUPIndex: number = -1;
 	private decisionLevel: number = 0;
 	private trailCapacity: number = 0;
-	private trailEnding: number = $state(-1);
+	private trailEnding: number | undefined = $state(undefined);
 
 	constructor(trailCapacity: number = 0) {
 		this.trailCapacity = trailCapacity;
@@ -35,6 +35,10 @@ export class Trail {
 		return [...this.assignments];
 	}
 
+	pickLastAssignment(): VariableAssignment {
+		return this.assignments[this.assignments.length - 1];
+	}
+
 	getDecisions(): VariableAssignment[] {
 		return this.getDecisionLevelMarks().map((mark) => this.assignments[mark]);
 	}
@@ -51,7 +55,7 @@ export class Trail {
 		}
 	}
 
-	getTrailEnding(): number {
+	getTrailEnding(): number | undefined {
 		return this.trailEnding;
 	}
 
