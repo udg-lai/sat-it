@@ -79,7 +79,13 @@ import {
 	secondHighestDL,
 	type CDCL_UNDO_TRAIL_TO_SHDL_FUN,
 	type CDCL_UNDO_TRAIL_TO_SHDL_INPUT,
-	undoTrailToSHDL
+	undoTrailToSHDL,
+	type CDCL_PUSH_TRAIL_FUN,
+	type CDCL_PUSH_TRAIL_INPUT,
+	pushTrail,
+	type CDCL_PROPAGATE_FUIP_FUN,
+	type CDCL_PROPAGATE_FUIP_INPUT,
+	propagateFUIP
 } from './cdcl-domain.svelte.ts';
 
 export const cdcl_stateName2StateId = {
@@ -113,7 +119,8 @@ export const cdcl_stateName2StateId = {
 	learn_cc_state: 24,
 	second_highest_dl_state: 25,
 	undo_trail_to_shdl_state: 26,
-	propagate_fuip_state: 27
+	push_trail_state: 27,
+	propagate_fuip_state: 28
 };
 
 // *** define state nodes ***
@@ -445,11 +452,30 @@ const undo_trail_to_shdl_state: NonFinalState<
 	run: undoTrailToSHDL,
 	description: `Undo the trail until reaching the dl`,
 	transitions: new Map<CDCL_UNDO_TRAIL_TO_SHDL_INPUT, number>().set(
+		'push_trail_state',
+		cdcl_stateName2StateId['push_trail_state']
+	)
+};
+
+const push_trail_state: NonFinalState<CDCL_PUSH_TRAIL_FUN, CDCL_PUSH_TRAIL_INPUT> = {
+	id: cdcl_stateName2StateId['push_trail_state'],
+	run: pushTrail,
+	description: `Pushes the trail that needs to be learned`,
+	transitions: new Map<CDCL_PUSH_TRAIL_INPUT, number>().set(
 		'propagate_fuip_state',
 		cdcl_stateName2StateId['propagate_fuip_state']
 	)
 };
 
+const propagate_fuip_state: NonFinalState<CDCL_PROPAGATE_FUIP_FUN, CDCL_PROPAGATE_FUIP_INPUT> = {
+	id: cdcl_stateName2StateId['propagate_fuip_state'],
+	run: propagateFUIP,
+	description: `Pushes the trail that needs to be learned`,
+	transitions: new Map<CDCL_PROPAGATE_FUIP_INPUT, number>().set(
+		'complementary_occurrences_state',
+		cdcl_stateName2StateId['complementary_occurrences_state']
+	)
+};
 // *** adding states to the set of states ***
 export const states: Map<number, State<CDCL_FUN, CDCL_INPUT>> = new Map();
 
@@ -482,6 +508,8 @@ states.set(delete_last_assignment_state.id, delete_last_assignment_state);
 states.set(learn_cc_state.id, learn_cc_state);
 states.set(second_highest_dl_state.id, second_highest_dl_state);
 states.set(undo_trail_to_shdl_state.id, undo_trail_to_shdl_state);
+states.set(push_trail_state.id, push_trail_state);
+states.set(propagate_fuip_state.id, propagate_fuip_state);
 
 // export initial node
 export const initial = empty_clause_state.id;

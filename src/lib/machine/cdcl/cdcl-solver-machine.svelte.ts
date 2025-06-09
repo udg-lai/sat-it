@@ -1,6 +1,6 @@
 import { updateClausesToCheck } from '$lib/store/conflict-detection-state.svelte.ts';
-import type Clause from '$lib/transversal/entities/Clause.ts';
 import { Queue } from '$lib/transversal/entities/Queue.svelte.ts';
+import type TemporalClause from '$lib/transversal/entities/TemporalClause.ts';
 import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
 import { SolverMachine, type ConflictAnalysis } from '../SolverMachine.svelte.ts';
 import type { CDCL_FUN, CDCL_INPUT } from './cdcl-domain.svelte.ts';
@@ -19,7 +19,7 @@ export const makeCDCLSolver = (): CDCL_SolverMachine => {
 
 export type FirstUIP = {
 	trail: Trail; // The trail that will be modified and will turn into the last trail.
-	conflictClause: Clause; // The clause that will be learned.
+	conflictClause: TemporalClause; // The clause that will be learned.
 	decisionLevelVariables: number[]; // The variables from the last DL.
 };
 
@@ -70,7 +70,7 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 
 	// ** functions related to firstUIP **
 
-	buildFUIP(trail: Trail, conflictClause: Clause, decisionLevelVariables: number[]): void {
+	buildFUIP(trail: Trail, conflictClause: TemporalClause, decisionLevelVariables: number[]): void {
 		this.firstUIP = { trail, conflictClause, decisionLevelVariables };
 	}
 

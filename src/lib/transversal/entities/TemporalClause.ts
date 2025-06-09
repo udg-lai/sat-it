@@ -3,7 +3,13 @@ import logicResolution from '../algorithms/resolution.ts';
 import { arraysEqual } from '../types/array.ts';
 import { logFatal } from '$lib/store/toasts.ts';
 import type { Comparable } from '../interfaces/Comparable.ts';
-import { makeSatClause, makeUnitClause, makeUnresolvedClause, makeUnSATClause, type ClauseEval } from './Clause.ts';
+import {
+	makeSatClause,
+	makeUnitClause,
+	makeUnresolvedClause,
+	makeUnSATClause,
+	type ClauseEval
+} from './Clause.ts';
 
 class TemporalClause implements Comparable<TemporalClause> {
 	private literals: Literal[] = [];

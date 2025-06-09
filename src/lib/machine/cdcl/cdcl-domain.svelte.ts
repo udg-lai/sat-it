@@ -20,14 +20,19 @@ import type { CDCL_SolverMachine } from './cdcl-solver-machine.svelte.ts';
 import type { ConflictAnalysis } from '../SolverMachine.svelte.ts';
 import { logFatal } from '$lib/store/toasts.ts';
 import { updateClausesToCheck } from '$lib/store/conflict-detection-state.svelte.ts';
-import Clause, { isUnitClause, isUnSATClause, type ClauseEval } from '$lib/transversal/entities/Clause.ts';
+import Clause, {
+	isUnitClause,
+	isUnSATClause,
+	type ClauseEval
+} from '$lib/transversal/entities/Clause.ts';
 import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
-import { getLatestTrail } from '$lib/store/trails.svelte.ts';
+import { getLatestTrail, getTrails } from '$lib/store/trails.svelte.ts';
 import type VariableAssignment from '$lib/transversal/entities/VariableAssignment.ts';
 import {
 	isUnitPropagationReason,
 	type Reason
 } from '$lib/transversal/entities/VariableAssignment.ts';
+import type TemporalClause from '$lib/transversal/entities/TemporalClause.ts';
 
 const problem: Problem = $derived(getProblemStore());
 
@@ -94,9 +99,11 @@ export type CDCL_LEARN_CONCLICT_CLAUSE_INPUT = 'second_highest_dl_state';
 
 export type CDCL_SECOND_HIGHEST_DL_INPUT = 'undo_trail_to_shdl_state';
 
-export type CDCL_UNDO_TRAIL_TO_SHDL_INPUT = 'propagate_fuip_state';
+export type CDCL_UNDO_TRAIL_TO_SHDL_INPUT = 'push_trail_state';
 
-export type CDCL_PROPAGATE_FUIP_INPUT = 'push_trail_state';
+export type CDCL_PUSH_TRAIL_INPUT = 'propagate_fuip_state';
+
+export type CDCL_PROPAGATE_FUIP_INPUT = 'complementary_occurrences_state';
 
 export type CDCL_INPUT =
 	| CDCL_EMPTY_CLAUSE_INPUT
@@ -126,6 +133,7 @@ export type CDCL_INPUT =
 	| CDCL_LEARN_CONCLICT_CLAUSE_INPUT
 	| CDCL_SECOND_HIGHEST_DL_INPUT
 	| CDCL_UNDO_TRAIL_TO_SHDL_INPUT
+	| CDCL_PUSH_TRAIL_INPUT
 	| CDCL_PROPAGATE_FUIP_INPUT;
 
 // ** state functions **
@@ -309,16 +317,21 @@ export const buildFUIP: CDLC_BUILD_FUIP_STRUCTURE_FUN = (solver: CDCL_SolverMach
 			'It is not possible to look for the FUIP if no conflicts have been found'
 		);
 	}
-	const conflictiveClause: Clause = getProblemStore().clauses.get(conflictiveClauseId).copy();
+	const conflictiveClause: TemporalClause = getProblemStore()
+		.clauses.get(conflictiveClauseId)
+		.copy();
 
 	//Lastly, generate the FUIP
 	solver.buildFUIP(latestTrail, conflictiveClause, variablesLastDecisionLevel);
 };
 
-export type CDCL_ASSERTING_CLAUSE_FUN = (conflictClause: Clause, variables: number[]) => boolean;
+export type CDCL_ASSERTING_CLAUSE_FUN = (
+	conflictClause: TemporalClause,
+	variables: number[]
+) => boolean;
 
 export const assertingClause: CDCL_ASSERTING_CLAUSE_FUN = (
-	conflictClause: Clause,
+	conflictClause: TemporalClause,
 	variables: number[]
 ) => {
 	const variablesFound: number = 0;
@@ -342,23 +355,26 @@ export const pickLastAssignment = (trail: Trail) => {
 };
 
 export type CDCL_VARIABLE_IN_CC_FUN = (
-	conclictClause: Clause,
+	conclictClause: TemporalClause,
 	assignment: VariableAssignment
 ) => boolean;
 
 export const variableInCC: CDCL_VARIABLE_IN_CC_FUN = (
-	conclictClause: Clause,
+	conclictClause: TemporalClause,
 	assignment: VariableAssignment
 ) => {
 	return conclictClause.containsVariable(assignment.getVariable().getInt());
 };
 
 export type CDCL_RESOLUTION_UPDATE_CC_FUN = (
-	conflictClause: Clause,
+	conflictClause: TemporalClause,
 	assignment: VariableAssignment
 ) => void;
 
-export const resolutionUpdateCC = (conflictClause: Clause, assignment: VariableAssignment) => {
+export const resolutionUpdateCC = (
+	conflictClause: TemporalClause,
+	assignment: VariableAssignment
+) => {
 	const reason: Reason = assignment.getReason();
 	if (!isUnitPropagationReason(reason)) {
 		logFatal('The Reason should be a UP');
@@ -366,7 +382,7 @@ export const resolutionUpdateCC = (conflictClause: Clause, assignment: VariableA
 	const upClauseId: number = reason.clauseId;
 	const upClause: Clause = getProblemStore().clauses.get(upClauseId);
 
-	conflictClause.resolution(upClause);
+	conflictClause = conflictClause.resolution(upClause);
 	//DON'T KNOW IF I HAVE TO CALL AN UPDATE FUNCTION OR SMTG
 };
 
@@ -377,20 +393,21 @@ export const deleteLastAssignment: CDCL_DELETE_LAST_ASSIGNMENT_FUN = (trail: Tra
 	getProblemStore().variables.dispose(assignment.getVariable().getInt());
 };
 
-export type CDCL_LEARN_CONCLICT_CLAUSE_FUN = (trail: Trail, conclictClause: Clause) => void;
+export type CDCL_LEARN_CONCLICT_CLAUSE_FUN = (trail: Trail, conclictClause: TemporalClause) => void;
 
 export const learnConclictClause: CDCL_LEARN_CONCLICT_CLAUSE_FUN = (
 	trail: Trail,
-	conclictClause: Clause
+	conclictClause: TemporalClause
 ) => {
-	trail.learn(conclictClause);
+	const toLearnClause: Clause = new Clause(conclictClause.getLiterals());
+	trail.learn(toLearnClause);
 };
 
-export type CDCL_SECOND_HIGHEST_DL_FUN = (trail: Trail, conclictClause: Clause) => number;
+export type CDCL_SECOND_HIGHEST_DL_FUN = (trail: Trail, conclictClause: TemporalClause) => number;
 
 export const secondHighestDL: CDCL_SECOND_HIGHEST_DL_FUN = (
 	trail: Trail,
-	conclictClause: Clause
+	conclictClause: TemporalClause
 ) => {
 	const clauseVariables: number[] = conclictClause.getLiterals().map((literal) => {
 		return literal.getVariable().getInt();
@@ -409,7 +426,11 @@ export const undoTrailToSHDL = (trail: Trail, decisionLevel: number) => {
 	trail.undoToDL(decisionLevel);
 };
 
-//HERE I NEED TO PUSH THE TRAIL BEFORE DOING THIS.
+export type CDCL_PUSH_TRAIL_FUN = (trail: Trail) => void;
+
+export const pushTrail: CDCL_PUSH_TRAIL_FUN = (trail: Trail) => {
+	getTrails().push(trail);
+};
 
 export type CDCL_PROPAGATE_FUIP_FUN = (trail: Trail, conflictClause: Clause) => number;
 
@@ -452,4 +473,5 @@ export type CDCL_FUN =
 	| CDCL_LEARN_CONCLICT_CLAUSE_FUN
 	| CDCL_SECOND_HIGHEST_DL_FUN
 	| CDCL_UNDO_TRAIL_TO_SHDL_FUN
+	| CDCL_PUSH_TRAIL_FUN
 	| CDCL_PROPAGATE_FUIP_FUN;
