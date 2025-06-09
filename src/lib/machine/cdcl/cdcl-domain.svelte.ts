@@ -20,7 +20,7 @@ import type { CDCL_SolverMachine } from './cdcl-solver-machine.svelte.ts';
 import type { ConflictAnalysis } from '../SolverMachine.svelte.ts';
 import { logFatal } from '$lib/store/toasts.ts';
 import { updateClausesToCheck } from '$lib/store/conflict-detection-state.svelte.ts';
-import Clause from '$lib/transversal/entities/Clause.ts';
+import Clause, { isUnitClause, isUnSATClause, type ClauseEval } from '$lib/transversal/entities/Clause.ts';
 import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
 import { getLatestTrail } from '$lib/store/trails.svelte.ts';
 import type VariableAssignment from '$lib/transversal/entities/VariableAssignment.ts';
@@ -28,7 +28,6 @@ import {
 	isUnitPropagationReason,
 	type Reason
 } from '$lib/transversal/entities/VariableAssignment.ts';
-import { isUnitClause, isUnSATClause, type ClauseEval } from '$lib/transversal/entities/TemporalClause.ts';
 
 const problem: Problem = $derived(getProblemStore());
 
@@ -415,14 +414,18 @@ export const undoTrailToSHDL = (trail: Trail, decisionLevel: number) => {
 export type CDCL_PROPAGATE_FUIP_FUN = (trail: Trail, conflictClause: Clause) => number;
 
 export const propagateFUIP: CDCL_PROPAGATE_FUIP_FUN = (trail: Trail, conclictClause: Clause) => {
-	if(!conclictClause.optimalCheckUnit()) {
-		logFatal("Not possible case");
+	if (!conclictClause.optimalCheckUnit()) {
+		logFatal('Not possible case');
 	}
-	const {variables, clauses} = getProblemStore()
-	const literalToPropagate: number = solverUnitPropagation(variables, clauses, conclictClause.getId());
+	const { variables, clauses } = getProblemStore();
+	const literalToPropagate: number = solverUnitPropagation(
+		variables,
+		clauses,
+		conclictClause.getId()
+	);
 
 	return literalToPropagate;
-}
+};
 
 export type CDCL_FUN =
 	| CDCL_EMPTY_CLAUSE_FUN

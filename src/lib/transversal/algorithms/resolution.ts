@@ -1,16 +1,13 @@
 import type Literal from '$lib/transversal/entities/Literal.svelte.ts';
 import TemporalClause from '../entities/TemporalClause.ts';
 
-export default function logicResolution(
-	c1: TemporalClause, 
-	c2: TemporalClause,
-): TemporalClause {
+export default function logicResolution(c1: TemporalClause, c2: TemporalClause): TemporalClause {
 	const resolvedLiterals: Map<number, Literal> = new Map();
 
 	//We need to do this as it follows as the ids of each literal are unique
-	for(const lit of c1) {
-		resolvedLiterals.set(lit.toInt(), lit.copy())
-	};
+	for (const lit of c1) {
+		resolvedLiterals.set(lit.toInt(), lit.copy());
+	}
 
 	let foundComplementary = false;
 	for (const lit of c2) {
