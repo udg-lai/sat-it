@@ -127,7 +127,7 @@ export class Trail {
 		}
 
 		//Set the new dl parameters
-		this.decisionLevelBookmark = this.decisionLevelBookmark.slice(0, dl + 1); // keep bookmark[0..dl]
+		this.decisionLevelBookmark = this.decisionLevelBookmark.slice(0, dl + 1);
 		this.decisionLevel = dl;
 	}
 

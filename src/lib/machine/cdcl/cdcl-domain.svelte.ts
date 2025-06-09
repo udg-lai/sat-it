@@ -20,11 +20,7 @@ import type { CDCL_SolverMachine } from './cdcl-solver-machine.svelte.ts';
 import type { ConflictAnalysis } from '../SolverMachine.svelte.ts';
 import { logFatal } from '$lib/store/toasts.ts';
 import { updateClausesToCheck } from '$lib/store/conflict-detection-state.svelte.ts';
-import Clause, {
-	isUnitClause,
-	isUnSATClause,
-	type ClauseEval
-} from '$lib/transversal/entities/Clause.ts';
+import Clause from '$lib/transversal/entities/Clause.ts';
 import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
 import { getLatestTrail } from '$lib/store/trails.svelte.ts';
 import type VariableAssignment from '$lib/transversal/entities/VariableAssignment.ts';
@@ -32,6 +28,7 @@ import {
 	isUnitPropagationReason,
 	type Reason
 } from '$lib/transversal/entities/VariableAssignment.ts';
+import { isUnitClause, isUnSATClause, type ClauseEval } from '$lib/transversal/entities/TemporalClause.ts';
 
 const problem: Problem = $derived(getProblemStore());
 
@@ -129,7 +126,8 @@ export type CDCL_INPUT =
 	| CDCL_DELETE_LAST_ASSIGNMENT_INPUT
 	| CDCL_LEARN_CONCLICT_CLAUSE_INPUT
 	| CDCL_SECOND_HIGHEST_DL_INPUT
-	| CDCL_UNDO_TRAIL_TO_SHDL_INPUT;
+	| CDCL_UNDO_TRAIL_TO_SHDL_INPUT
+	| CDCL_PROPAGATE_FUIP_INPUT;
 
 // ** state functions **
 
@@ -369,7 +367,7 @@ export const resolutionUpdateCC = (conflictClause: Clause, assignment: VariableA
 	const upClauseId: number = reason.clauseId;
 	const upClause: Clause = getProblemStore().clauses.get(upClauseId);
 
-	conflictClause = conflictClause.resolution(upClause); //This function needs to be revised as a neew Clause is being generated every time.
+	conflictClause.resolution(upClause);
 	//DON'T KNOW IF I HAVE TO CALL AN UPDATE FUNCTION OR SMTG
 };
 
@@ -412,7 +410,19 @@ export const undoTrailToSHDL = (trail: Trail, decisionLevel: number) => {
 	trail.undoToDL(decisionLevel);
 };
 
+//HERE I NEED TO PUSH THE TRAIL BEFORE DOING THIS.
+
 export type CDCL_PROPAGATE_FUIP_FUN = (trail: Trail, conflictClause: Clause) => number;
+
+export const propagateFUIP: CDCL_PROPAGATE_FUIP_FUN = (trail: Trail, conclictClause: Clause) => {
+	if(!conclictClause.optimalCheckUnit()) {
+		logFatal("Not possible case");
+	}
+	const {variables, clauses} = getProblemStore()
+	const literalToPropagate: number = solverUnitPropagation(variables, clauses, conclictClause.getId());
+
+	return literalToPropagate;
+}
 
 export type CDCL_FUN =
 	| CDCL_EMPTY_CLAUSE_FUN
@@ -438,4 +448,5 @@ export type CDCL_FUN =
 	| CDCL_DELETE_LAST_ASSIGNMENT_FUN
 	| CDCL_LEARN_CONCLICT_CLAUSE_FUN
 	| CDCL_SECOND_HIGHEST_DL_FUN
-	| CDCL_UNDO_TRAIL_TO_SHDL_FUN;
+	| CDCL_UNDO_TRAIL_TO_SHDL_FUN
+	| CDCL_PROPAGATE_FUIP_FUN;
