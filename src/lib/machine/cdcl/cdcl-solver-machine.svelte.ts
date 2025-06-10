@@ -3,7 +3,11 @@ import { logFatal } from '$lib/store/toasts.ts';
 import { Queue } from '$lib/transversal/entities/Queue.svelte.ts';
 import type TemporalClause from '$lib/transversal/entities/TemporalClause.ts';
 import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
-import { SolverMachine, type ConflictAnalysis, type ConflictDetection } from '../SolverMachine.svelte.ts';
+import {
+	SolverMachine,
+	type ConflictAnalysis,
+	type ConflictDetection
+} from '../SolverMachine.svelte.ts';
 import type { CDCL_FUN, CDCL_INPUT } from './cdcl-domain.svelte.ts';
 import {
 	analyzeClause,
@@ -65,13 +69,20 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 
 	// ** functions related to firstUIP **
 
-	setConflictAnalysis(trail: Trail, conflictClause: TemporalClause, decisionLevelVariables: number[]): void {
+	setConflictAnalysis(
+		trail: Trail,
+		conflictClause: TemporalClause,
+		decisionLevelVariables: number[]
+	): void {
 		this.conflictAnalysis = { trail, conflictClause, decisionLevelVariables };
 	}
 
 	updateConflictClause(conflictClause: TemporalClause): void {
-		if(!this.conflictAnalysis) {
-			logFatal('Not possible to update the Conflict Clause', 'There is no Conflict Clause to update as there is no Conflict Analysis structure built')
+		if (!this.conflictAnalysis) {
+			logFatal(
+				'Not possible to update the Conflict Clause',
+				'There is no Conflict Clause to update as there is no Conflict Analysis structure built'
+			);
 		}
 		this.conflictAnalysis.conflictClause = conflictClause;
 	}

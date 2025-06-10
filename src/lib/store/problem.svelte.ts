@@ -54,19 +54,19 @@ export function updateAlgorithm(algorithm: Algorithm) {
 
 export function updateProblemFromTrail(trail: Trail) {
 	const { variables, ...currentProblem } = problemStore;
-	
+
 	//Reset the variables
 	variables.reset();
 	trail.forEach((value) => {
 		const variable = value.getVariable();
 		variables.persist(variable.getInt(), variable.getAssignment());
 	});
-	
+
 	//Reset the caluses
 	const defaultClauses: Clause[] = getDefaultClauses();
 	const learnedClauses: Clause[] = trail.learnedClauses();
 	const clauses: ClausePool = new ClausePool([...defaultClauses, ...learnedClauses]);
-	
+
 	//Reset the mapping
 	const mapping: MappingLiteral2Clauses = literalToClauses(clauses);
 
@@ -80,7 +80,7 @@ export function resetProblem() {
 }
 
 export function addClauseToClausePool(clause: Clause) {
-	const {clauses, ...currentProblem} = problemStore;
+	const { clauses, ...currentProblem } = problemStore;
 	clauses.addClause(clause);
 
 	//Reset the mapping

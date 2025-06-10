@@ -120,7 +120,7 @@ export class Trail {
 		}
 
 		// We get the mark of the DL+1 as we don't want to remove the propagations.
-		const targetIndex = dl === 0 ? 0 : this.getMarkOfDecisionLevel(dl+1);
+		const targetIndex = dl === 0 ? 0 : this.getMarkOfDecisionLevel(dl + 1);
 		while (this.assignments.length > targetIndex) {
 			const last: VariableAssignment = this.pop() as VariableAssignment;
 			getProblemStore().variables.dispose(last.getVariable().getInt());

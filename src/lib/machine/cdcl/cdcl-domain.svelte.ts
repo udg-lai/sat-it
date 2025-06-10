@@ -295,7 +295,9 @@ export const emptyClauseSet: CDCL_EMPTY_CLAUSE_SET_FUN = (
 
 export type CDLC_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN = (solver: CDCL_SolverMachine) => void;
 
-export const buildConflictAnalysis: CDLC_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN = (solver: CDCL_SolverMachine) => {
+export const buildConflictAnalysis: CDLC_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN = (
+	solver: CDCL_SolverMachine
+) => {
 	// Firstly the last trail is achieved
 	const latestTrail: Trail | undefined = getLatestTrail();
 	if (latestTrail === undefined) {
@@ -393,7 +395,10 @@ export const deleteLastAssignment: CDCL_DELETE_LAST_ASSIGNMENT_FUN = (trail: Tra
 	getProblemStore().variables.dispose(assignment.getVariable().getInt());
 };
 
-export type CDCL_LEARN_CONCLICT_CLAUSE_FUN = (trail: Trail, conclictClause: TemporalClause) => number;
+export type CDCL_LEARN_CONCLICT_CLAUSE_FUN = (
+	trail: Trail,
+	conclictClause: TemporalClause
+) => number;
 
 export const learnConflictClause: CDCL_LEARN_CONCLICT_CLAUSE_FUN = (
 	trail: Trail,

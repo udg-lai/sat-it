@@ -441,10 +441,7 @@ const second_highest_dl_state: NonFinalState<
 	)
 };
 
-const undo_trail_to_shdl_state: NonFinalState<
-	CDCL_BACKJUMPING_FUN,
-	CDCL_BACKJUMPING_INPUT
-> = {
+const undo_trail_to_shdl_state: NonFinalState<CDCL_BACKJUMPING_FUN, CDCL_BACKJUMPING_INPUT> = {
 	id: cdcl_stateName2StateId['undo_trail_to_shdl_state'],
 	run: backjumping,
 	description: `Undo the trail until reaching the dl`,
