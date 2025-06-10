@@ -1,6 +1,6 @@
 import { updateClausesToCheck } from '$lib/store/conflict-detection-state.svelte.ts';
 import { logFatal } from '$lib/store/toasts.ts';
-import { SolverMachine, type ConflictAnalysis } from '../SolverMachine.svelte.ts';
+import { SolverMachine, type ConflictDetection } from '../SolverMachine.svelte.ts';
 import type { BKT_FUN, BKT_INPUT } from './bkt-domain.svelte.ts';
 import {
 	analyzeClause,
@@ -16,7 +16,7 @@ export const makeBKTSolver = (): BKT_SolverMachine => {
 };
 
 export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
-	conflictAnalysis: ConflictAnalysis | undefined = $state(undefined);
+	conflictAnalysis: ConflictDetection | undefined = $state(undefined);
 
 	constructor() {
 		super(makeBKTMachine());
@@ -27,7 +27,7 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 		this.conflictAnalysis = undefined;
 	}
 
-	setConflict(conflict: ConflictAnalysis): void {
+	setConflict(conflict: ConflictDetection): void {
 		this.conflictAnalysis = conflict;
 	}
 
@@ -39,7 +39,7 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 			);
 		}
 
-		const { clauses }: ConflictAnalysis = this.conflictAnalysis;
+		const { clauses }: ConflictDetection = this.conflictAnalysis;
 
 		if (!clauses.has(clauseId)) {
 			logFatal('Clause not found', 'Error at removing a clause from the BKT Solver Machine');
@@ -48,7 +48,7 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 		}
 	}
 
-	consultConflict(): ConflictAnalysis {
+	consultConflict(): ConflictDetection {
 		if (this.conflictAnalysis === undefined) {
 			logFatal(
 				'Conflict analysis not initialized',
@@ -64,7 +64,7 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 		};
 	}
 
-	private makeConflictAnalysisCopy(): ConflictAnalysis | undefined {
+	private makeConflictAnalysisCopy(): ConflictDetection | undefined {
 		if (this.conflictAnalysis !== undefined) {
 			const clauses: Set<number> = new Set<number>([...this.conflictAnalysis.clauses.values()]);
 			const variableReasonId: number = this.conflictAnalysis.variableReasonId;
@@ -80,10 +80,10 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 			updateClausesToCheck(new Set<number>(), -1);
 			return;
 		}
-		const conflictRecord: ConflictAnalysis = record['pending'] as ConflictAnalysis;
+		const conflictRecord: ConflictDetection = record['pending'] as ConflictDetection;
 		this.setConflict(conflictRecord);
 		if (this.onConflictDetection()) {
-			const { clauses, variableReasonId }: ConflictAnalysis = conflictRecord;
+			const { clauses, variableReasonId }: ConflictDetection = conflictRecord;
 			updateClausesToCheck(clauses, variableReasonId);
 		}
 	}
@@ -113,7 +113,7 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 		if (this.conflictAnalysis === undefined) {
 			return false;
 		} else {
-			const { clauses }: ConflictAnalysis = this.conflictAnalysis;
+			const { clauses }: ConflictDetection = this.conflictAnalysis;
 			return clauses.size > 0;
 		}
 	}

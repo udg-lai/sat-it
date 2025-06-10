@@ -6,8 +6,10 @@ import type {
 	CDCL_ALL_CLAUSES_CHECKED_INPUT,
 	CDCL_ALL_VARIABLES_ASSIGNED_FUN,
 	CDCL_ALL_VARIABLES_ASSIGNED_INPUT,
-	CDCL_BACKTRACKING_FUN,
-	CDCL_BACKTRACKING_INPUT,
+	CDCL_ASSERTING_CLAUSE_FUN,
+	CDCL_ASSERTING_CLAUSE_INPUT,
+	CDCL_BACKJUMPING_FUN,
+	CDCL_BACKJUMPING_INPUT,
 	CDCL_CHECK_NON_DECISION_MADE_FUN,
 	CDCL_CHECK_NON_DECISION_MADE_INPUT,
 	CDCL_CHECK_PENDING_CLAUSES_FUN,
@@ -20,16 +22,28 @@ import type {
 	CDCL_DECIDE_INPUT,
 	CDCL_DELETE_CLAUSE_FUN,
 	CDCL_DELETE_CLAUSE_INPUT,
+	CDCL_DELETE_LAST_ASSIGNMENT_FUN,
+	CDCL_DELETE_LAST_ASSIGNMENT_INPUT,
 	CDCL_EMPTY_CLAUSE_FUN,
 	CDCL_EMPTY_CLAUSE_INPUT,
 	CDCL_EMPTY_CLAUSE_SET_FUN,
 	CDCL_EMPTY_CLAUSE_SET_INPUT,
+	CDCL_LEARN_CONCLICT_CLAUSE_FUN,
+	CDCL_LEARN_CONCLICT_CLAUSE_INPUT,
 	CDCL_NEXT_CLAUSE_FUN,
 	CDCL_NEXT_CLAUSE_INPUT,
 	CDCL_PICK_CLAUSE_SET_FUN,
 	CDCL_PICK_CLAUSE_SET_INPUT,
+	CDCL_PICK_LAST_ASSIGNMENT_FUN,
+	CDCL_PICK_LAST_ASSIGNMENT_INPUT,
+	CDCL_PUSH_TRAIL_FUN,
+	CDCL_PUSH_TRAIL_INPUT,
 	CDCL_QUEUE_CLAUSE_SET_FUN,
 	CDCL_QUEUE_CLAUSE_SET_INPUT,
+	CDCL_RESOLUTION_UPDATE_CC_FUN,
+	CDCL_RESOLUTION_UPDATE_CC_INPUT,
+	CDCL_SECOND_HIGHEST_DL_FUN,
+	CDCL_SECOND_HIGHEST_DL_INPUT,
 	CDCL_TRIGGERED_CLAUSES_FUN,
 	CDCL_TRIGGERED_CLAUSES_INPUT,
 	CDCL_UNIT_CLAUSE_FUN,
@@ -39,7 +53,11 @@ import type {
 	CDCL_UNIT_PROPAGATION_FUN,
 	CDCL_UNIT_PROPAGATION_INPUT,
 	CDCL_UNSTACK_CLAUSE_SET_FUN,
-	CDCL_UNSTACK_CLAUSE_SET_INPUT
+	CDCL_UNSTACK_CLAUSE_SET_INPUT,
+	CDCL_VARIABLE_IN_CC_FUN,
+	CDCL_VARIABLE_IN_CC_INPUT,
+	CDLC_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN,
+	CDLC_BUILD_CONFLICT_ANALYSIS_STRUCTURE_INPUT
 } from './cdcl-domain.svelte.ts';
 import type { CDCL_SolverMachine } from './cdcl-solver-machine.svelte.ts';
 import type { CDCL_StateMachine } from './cdcl-state-machine.svelte.ts';
@@ -47,7 +65,8 @@ import {
 	incrementCheckingIndex,
 	updateClausesToCheck
 } from '$lib/store/conflict-detection-state.svelte.ts';
-import type { ConflictAnalysis } from '../SolverMachine.svelte.ts';
+import type { ConflictAnalysis, ConflictDetection } from '../SolverMachine.svelte.ts';
+import VariableAssignment from '$lib/transversal/entities/VariableAssignment.ts';
 
 export const initialTransition = (solver: CDCL_SolverMachine): void => {
 	const stateMachine: CDCL_StateMachine = solver.stateMachine;
@@ -231,7 +250,7 @@ const allClausesCheckedTransition = (
 
 export const analyzeClause = (solver: CDCL_SolverMachine): void => {
 	const stateMachine: CDCL_StateMachine = solver.stateMachine;
-	const pendingConflict: ConflictAnalysis = solver.consultPostponed();
+	const pendingConflict: ConflictDetection = solver.consultPostponed();
 	const clauseSet: Set<number> = pendingConflict.clauses;
 	const clauseId: number = nextClauseTransition(stateMachine, clauseSet);
 	const conflict: boolean = conflictDetectionTransition(stateMachine, clauseId);
@@ -239,6 +258,15 @@ export const analyzeClause = (solver: CDCL_SolverMachine): void => {
 		updateLastTrailEnding(clauseId);
 		emptyClauseSetTransition(stateMachine, solver);
 		decisionLevelTransition(stateMachine);
+		buildConflictAnalysisTransition(stateMachine, solver);
+		const conflictAnalysis: ConflictAnalysis | undefined = solver.consultConflictAnalysis();
+		if(conflictAnalysis === undefined) {
+			logFatal("Error", "The conflict analysis has not been saved correctly");
+		}
+		const isAsserting:boolean = assertingClauseTransition(stateMachine, conflictAnalysis);
+		if(isAsserting) {
+			logFatal("Error", "It is not possible for the CC to be asserting");
+		}
 		return;
 	}
 	const unitClause: boolean = unitClauseTransition(stateMachine, clauseId);
@@ -320,7 +348,7 @@ const decisionLevelTransition = (stateMachine: CDCL_StateMachine): void => {
 	}
 	const result: boolean = decisionLevelState.run();
 	if (result) stateMachine.transition('unsat_state');
-	else stateMachine.transition('backtracking_state');
+	else stateMachine.transition('build_conflict_analysis_state');
 };
 
 const unitClauseTransition = (stateMachine: CDCL_StateMachine, clauseId: number): boolean => {
@@ -426,29 +454,6 @@ const decideTransition = (stateMachine: CDCL_StateMachine): number => {
 	return literalToPropagate;
 };
 
-export const backtracking = (solver: CDCL_SolverMachine): void => {
-	const stateMachine: CDCL_StateMachine = solver.stateMachine;
-	const literalToPropagate = backtrackingTransition(stateMachine);
-	const complementaryClauses: Set<number> = complementaryOccurrencesTransition(
-		stateMachine,
-		literalToPropagate
-	);
-	conflictDetectionBlock(solver, stateMachine, Math.abs(literalToPropagate), complementaryClauses);
-};
-
-const backtrackingTransition = (stateMachine: CDCL_StateMachine): number => {
-	const backtrackingState = stateMachine.getActiveState() as NonFinalState<
-		CDCL_BACKTRACKING_FUN,
-		CDCL_BACKTRACKING_INPUT
-	>;
-	if (backtrackingState.run === undefined) {
-		logFatal('Function call error', 'There should be a function in the Decide state');
-	}
-	const literalToPropagate: number = backtrackingState.run();
-	stateMachine.transition('complementary_occurrences_state');
-	return literalToPropagate;
-};
-
 const emptyClauseSetTransition = (
 	stateMachine: CDCL_StateMachine,
 	solver: CDCL_SolverMachine
@@ -463,3 +468,157 @@ const emptyClauseSetTransition = (
 	emptyClauseSetState.run(solver);
 	stateMachine.transition('decision_level_state');
 };
+
+// ** cdcl transition **
+
+export const conflictAnalysis = (solver: CDCL_SolverMachine): void => {
+	const stateMachine: CDCL_StateMachine = solver.stateMachine;
+	const conflictAnalysis: ConflictAnalysis = solver.consultConflictAnalysis() as ConflictAnalysis;
+	const lastAssignment: VariableAssignment = pickLastAssignmentTransition(stateMachine, conflictAnalysis);
+	const variableAppear: boolean = variableInCCTransition(stateMachine, conflictAnalysis, lastAssignment);
+	if(variableAppear) {
+		resolutionUpdateCCTransition(stateMachine, solver, conflictAnalysis, lastAssignment)
+	}
+	deleteLastAssignmentTransition(stateMachine, solver, conflictAnalysis);
+	const isAsserting:boolean = assertingClauseTransition(stateMachine,conflictAnalysis);
+	if(!isAsserting) {
+		return;
+	}
+	const clauseId: number = learnConflictClauseTransition(stateMachine, conflictAnalysis);
+	const secondHighestDL: number = getSecondHighestDLTransition(stateMachine, conflictAnalysis);
+	backjumpingTransition(stateMachine, conflictAnalysis, secondHighestDL);
+	pushTrailTransition(stateMachine, conflictAnalysis);
+	const literalToPropagate = unitPropagationTransition(stateMachine, clauseId);
+	const complementaryClauses: Set<number> = complementaryOccurrencesTransition(
+		stateMachine,
+		literalToPropagate
+	);
+	conflictDetectionBlock(solver, stateMachine, Math.abs(literalToPropagate), complementaryClauses);
+};
+
+const buildConflictAnalysisTransition = (stateMachine: CDCL_StateMachine, solver: CDCL_SolverMachine) => {
+	const buildConflictAnalysisState = stateMachine.getActiveState() as NonFinalState<
+		CDLC_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN,
+		CDLC_BUILD_CONFLICT_ANALYSIS_STRUCTURE_INPUT
+	>;
+	if (buildConflictAnalysisState.run === undefined) {
+		logFatal('Function call error', 'There should be a function in the Build Conflict Analysis state');
+	}
+	buildConflictAnalysisState.run(solver);
+	stateMachine.transition('asserting_clause_state');
+}
+
+const assertingClauseTransition = (stateMachine: CDCL_StateMachine, conflictAnalysis: ConflictAnalysis): boolean => {
+	const assertingClauseState = stateMachine.getActiveState() as NonFinalState<
+		CDCL_ASSERTING_CLAUSE_FUN,
+		CDCL_ASSERTING_CLAUSE_INPUT
+	>;
+	if (assertingClauseState.run === undefined) {
+		logFatal('Function call error', 'There should be a function in the Asserting Clause state');
+	}
+	const isAsserting: boolean = assertingClauseState.run(conflictAnalysis.conflictClause, conflictAnalysis.decisionLevelVariables);
+	if(isAsserting) stateMachine.transition('learn_cc_state');
+	else stateMachine.transition('pick_last_assignment_state');
+	return isAsserting;
+}
+
+const pickLastAssignmentTransition = (stateMachine: CDCL_StateMachine, conflictAnalysis: ConflictAnalysis) => {
+	const pickLastAssignmentState = stateMachine.getActiveState() as NonFinalState<
+		CDCL_PICK_LAST_ASSIGNMENT_FUN,
+		CDCL_PICK_LAST_ASSIGNMENT_INPUT
+	>;
+	if (pickLastAssignmentState.run === undefined) {
+		logFatal('Function call error', 'There should be a function in the Pick Last Assignment state');
+	}
+	const assignment: VariableAssignment = pickLastAssignmentState.run(conflictAnalysis.trail);
+	stateMachine.transition('variable_in_cc_state');
+	return assignment;
+}
+
+const variableInCCTransition = (stateMachine: CDCL_StateMachine, conflictAnalysis: ConflictAnalysis, lastAssignment: VariableAssignment) => {
+	const variableInCCState = stateMachine.getActiveState() as NonFinalState<
+		CDCL_VARIABLE_IN_CC_FUN,
+		CDCL_VARIABLE_IN_CC_INPUT
+	>;
+	if (variableInCCState.run === undefined) {
+		logFatal('Function call error', 'There should be a function in the Variable In CC state');
+	}
+	const variableAppears: boolean = variableInCCState.run(conflictAnalysis.conflictClause, lastAssignment);
+	if(variableAppears) stateMachine.transition('resolution_update_cc_state');
+	else stateMachine.transition('delete_last_assignment_state');
+	return variableAppears;
+}
+
+const resolutionUpdateCCTransition = (stateMachine: CDCL_StateMachine, solver: CDCL_SolverMachine, conflictAnalysis: ConflictAnalysis, lastAssignment: VariableAssignment) => {
+	const resolutionUpdateCCState = stateMachine.getActiveState() as NonFinalState<
+		CDCL_RESOLUTION_UPDATE_CC_FUN,
+		CDCL_RESOLUTION_UPDATE_CC_INPUT
+	>;
+	if (resolutionUpdateCCState.run === undefined) {
+		logFatal('Function call error', 'There should be a function in the Variable In CC state');
+	}
+	resolutionUpdateCCState.run(solver, conflictAnalysis.conflictClause, lastAssignment);
+	stateMachine.transition('resolution_update_cc_state');
+}
+
+const deleteLastAssignmentTransition = (stateMachine: CDCL_StateMachine, solver: CDCL_SolverMachine, conflictAnalysis: ConflictAnalysis) => {
+	const deleteLastAssignmentState = stateMachine.getActiveState() as NonFinalState<
+		CDCL_DELETE_LAST_ASSIGNMENT_FUN,
+		CDCL_DELETE_LAST_ASSIGNMENT_INPUT
+	>;
+	if (deleteLastAssignmentState.run === undefined) {
+		logFatal('Function call error', 'There should be a function in the Variable In CC state');
+	}
+	deleteLastAssignmentState.run(conflictAnalysis.trail);
+	stateMachine.transition('asserting_clause_state');
+}
+
+const learnConflictClauseTransition = (stateMachine: CDCL_StateMachine, conflictAnalysis: ConflictAnalysis): number => {
+	const learnConflictClauseState = stateMachine.getActiveState() as NonFinalState<
+		CDCL_LEARN_CONCLICT_CLAUSE_FUN,
+		CDCL_LEARN_CONCLICT_CLAUSE_INPUT
+	>;
+	if (learnConflictClauseState.run === undefined) {
+		logFatal('Function call error', 'There should be a function in the Variable In CC state');
+	}
+	const clauseId: number = learnConflictClauseState.run(conflictAnalysis.trail, conflictAnalysis.conflictClause);
+	stateMachine.transition('second_highest_dl_state');
+	return clauseId;
+}
+
+const getSecondHighestDLTransition = (stateMachine: CDCL_StateMachine, conflictAnalysis: ConflictAnalysis) => {
+	const getSecondHighestDLState = stateMachine.getActiveState() as NonFinalState<
+		CDCL_SECOND_HIGHEST_DL_FUN,
+		CDCL_SECOND_HIGHEST_DL_INPUT
+	>;
+	if (getSecondHighestDLState.run === undefined) {
+		logFatal('Function call error', 'There should be a function in the Variable In CC state');
+	}
+	const secondHighestDL: number = getSecondHighestDLState.run(conflictAnalysis.trail, conflictAnalysis.conflictClause);
+	stateMachine.transition('undo_backjumping_state');
+	return secondHighestDL;
+}
+
+const backjumpingTransition = (stateMachine: CDCL_StateMachine, conflictAnalysis: ConflictAnalysis, secondHighestDL: number) => {
+	const backjumpingState = stateMachine.getActiveState() as NonFinalState<
+		CDCL_BACKJUMPING_FUN,
+		CDCL_BACKJUMPING_INPUT
+	>;
+	if (backjumpingState.run === undefined) {
+		logFatal('Function call error', 'There should be a function in the Variable In CC state');
+	}
+	backjumpingState.run(conflictAnalysis.trail, secondHighestDL);
+	stateMachine.transition('push_trail_state');
+}
+
+const pushTrailTransition = (stateMachine: CDCL_StateMachine, conflictAnalysis: ConflictAnalysis) => {
+	const pushTrailState = stateMachine.getActiveState() as NonFinalState<
+		CDCL_PUSH_TRAIL_FUN,
+		CDCL_PUSH_TRAIL_INPUT
+	>;
+	if (pushTrailState.run === undefined) {
+		logFatal('Function call error', 'There should be a function in the Variable In CC state');
+	}
+	pushTrailState.run(conflictAnalysis.trail);
+	stateMachine.transition('unit_propagation_state');
+}

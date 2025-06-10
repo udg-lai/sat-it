@@ -1,12 +1,13 @@
 import { updateClausesToCheck } from '$lib/store/conflict-detection-state.svelte.ts';
+import { logFatal } from '$lib/store/toasts.ts';
 import { Queue } from '$lib/transversal/entities/Queue.svelte.ts';
 import type TemporalClause from '$lib/transversal/entities/TemporalClause.ts';
 import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
-import { SolverMachine, type ConflictAnalysis } from '../SolverMachine.svelte.ts';
+import { SolverMachine, type ConflictAnalysis, type ConflictDetection } from '../SolverMachine.svelte.ts';
 import type { CDCL_FUN, CDCL_INPUT } from './cdcl-domain.svelte.ts';
 import {
 	analyzeClause,
-	backtracking,
+	conflictAnalysis,
 	decide,
 	initialTransition
 } from './cdcl-solver-transitions.svelte.ts';
@@ -17,33 +18,27 @@ export const makeCDCLSolver = (): CDCL_SolverMachine => {
 	return new CDCL_SolverMachine();
 };
 
-export type FirstUIP = {
-	trail: Trail; // The trail that will be modified and will turn into the last trail.
-	conflictClause: TemporalClause; // The clause that will be learned.
-	decisionLevelVariables: number[]; // The variables from the last DL.
-};
-
 export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 	// Queue that will contain all those Set of clauses that need to be checked.
-	pendingConflicts: Queue<ConflictAnalysis> = $state(new Queue<ConflictAnalysis>());
+	pendingConflicts: Queue<ConflictDetection> = $state(new Queue<ConflictDetection>());
 	// This variable contains all the information for the machine to find the firstUIP.
-	firstUIP: FirstUIP | undefined = $state(undefined);
+	conflictAnalysis: ConflictAnalysis | undefined = $state(undefined);
 
 	constructor() {
 		super(makeCDCLMachine());
-		this.pendingConflicts = new Queue<ConflictAnalysis>();
+		this.pendingConflicts = new Queue<ConflictDetection>();
 	}
 
 	// ** functions related to pendingConflicts **
-	postpone(pendingConflict: ConflictAnalysis): void {
+	postpone(pendingConflict: ConflictDetection): void {
 		this.pendingConflicts.enqueue(pendingConflict);
 	}
 
-	resolvePostponed(): ConflictAnalysis | undefined {
+	resolvePostponed(): ConflictDetection | undefined {
 		return this.pendingConflicts.dequeue();
 	}
 
-	consultPostponed(): ConflictAnalysis {
+	consultPostponed(): ConflictDetection {
 		return this.pendingConflicts.pick();
 	}
 
@@ -55,11 +50,11 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 		return this.pendingConflicts.size();
 	}
 
-	getQueue(): Queue<ConflictAnalysis> {
-		const returnQueue: Queue<ConflictAnalysis> = new Queue();
+	getQueue(): Queue<ConflictDetection> {
+		const returnQueue: Queue<ConflictDetection> = new Queue();
 		for (const originalItem of this.pendingConflicts.toArray()) {
 			const copiedSet = new Set<number>(originalItem.clauses);
-			const copiedItem: ConflictAnalysis = {
+			const copiedItem: ConflictDetection = {
 				clauses: copiedSet,
 				variableReasonId: originalItem.variableReasonId
 			};
@@ -70,8 +65,19 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 
 	// ** functions related to firstUIP **
 
-	buildFUIP(trail: Trail, conflictClause: TemporalClause, decisionLevelVariables: number[]): void {
-		this.firstUIP = { trail, conflictClause, decisionLevelVariables };
+	setConflictAnalysis(trail: Trail, conflictClause: TemporalClause, decisionLevelVariables: number[]): void {
+		this.conflictAnalysis = { trail, conflictClause, decisionLevelVariables };
+	}
+
+	updateConflictClause(conflictClause: TemporalClause): void {
+		if(!this.conflictAnalysis) {
+			logFatal('Not possible to update the Conflict Clause', 'There is no Conflict Clause to update as there is no Conflict Analysis structure built')
+		}
+		this.conflictAnalysis.conflictClause = conflictClause;
+	}
+
+	consultConflictAnalysis(): ConflictAnalysis | undefined {
+		return this.conflictAnalysis;
 	}
 
 	// ** general functions **
@@ -79,7 +85,7 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 	getRecord(): Record<string, unknown> {
 		return {
 			queue: this.getQueue(),
-			firstUIP: this.firstUIP
+			conflictAnalysis: this.conflictAnalysis
 		};
 	}
 
@@ -89,18 +95,18 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 			updateClausesToCheck(new Set<number>(), -1);
 			return;
 		}
-		const recordedPendingConflicts = record['queue'] as Queue<ConflictAnalysis>;
+		const recordedPendingConflicts = record['queue'] as Queue<ConflictDetection>;
 		this.pendingConflicts.clear();
 		for (const pendingConflict of recordedPendingConflicts.toArray()) {
 			const copiedSet = new Set<number>(pendingConflict.clauses);
-			const copiedItem: ConflictAnalysis = {
+			const copiedItem: ConflictDetection = {
 				clauses: copiedSet,
 				variableReasonId: pendingConflict.variableReasonId
 			};
 			this.pendingConflicts.enqueue(copiedItem);
 		}
 		if (!this.pendingConflicts.isEmpty()) {
-			const conflict: ConflictAnalysis = this.pendingConflicts.pick();
+			const conflict: ConflictDetection = this.pendingConflicts.pick();
 			updateClausesToCheck(conflict.clauses, conflict.variableReasonId);
 		}
 	}
@@ -122,7 +128,7 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 		}
 		//Waiting to backtrack an assignment
 		else if (activeId === cdcl_stateName2StateId.pick_last_assignment_state) {
-			backtracking(this);
+			conflictAnalysis(this);
 		}
 	}
 

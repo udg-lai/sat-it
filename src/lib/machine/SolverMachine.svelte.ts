@@ -3,10 +3,18 @@ import { tick } from 'svelte';
 import type { StateFun, StateInput, StateMachine } from './StateMachine.svelte.ts';
 import { logFatal, logWarning } from '$lib/store/toasts.ts';
 import { getStepDelay } from '$lib/store/delay-ms.svelte.ts';
+import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
+import type TemporalClause from '$lib/transversal/entities/TemporalClause.ts';
 
-export type ConflictAnalysis = {
+export type ConflictDetection = {
 	clauses: Set<number>;
 	variableReasonId: number;
+};
+
+export type ConflictAnalysis = {
+	trail: Trail; // This is the trail that will be modified and turned into the latest trail.
+	conflictClause: TemporalClause; // The clause that will be learned.
+	decisionLevelVariables: number[]; // The variables from the last DL.
 };
 
 export interface SolverStateInterface<F extends StateFun, I extends StateInput> {

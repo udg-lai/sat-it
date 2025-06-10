@@ -57,9 +57,9 @@ import {
 	type CDCL_EMPTY_CLAUSE_SET_FUN,
 	type CDCL_EMPTY_CLAUSE_SET_INPUT,
 	emptyClauseSet,
-	type CDLC_BUILD_FUIP_STRUCTURE_INPUT,
-	type CDLC_BUILD_FUIP_STRUCTURE_FUN,
-	buildFUIP,
+	type CDLC_BUILD_CONFLICT_ANALYSIS_STRUCTURE_INPUT,
+	type CDLC_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN,
+	buildConflictAnalysis,
 	type CDCL_ASSERTING_CLAUSE_FUN,
 	type CDCL_ASSERTING_CLAUSE_INPUT,
 	assertingClause,
@@ -77,15 +77,13 @@ import {
 	type CDCL_SECOND_HIGHEST_DL_FUN,
 	type CDCL_SECOND_HIGHEST_DL_INPUT,
 	secondHighestDL,
-	type CDCL_UNDO_TRAIL_TO_SHDL_FUN,
-	type CDCL_UNDO_TRAIL_TO_SHDL_INPUT,
-	undoTrailToSHDL,
+	type CDCL_BACKJUMPING_FUN,
+	type CDCL_BACKJUMPING_INPUT,
+	backjumping,
 	type CDCL_PUSH_TRAIL_FUN,
 	type CDCL_PUSH_TRAIL_INPUT,
 	pushTrail,
-	type CDCL_PROPAGATE_FUIP_FUN,
-	type CDCL_PROPAGATE_FUIP_INPUT,
-	propagateFUIP
+	learnConflictClause
 } from './cdcl-domain.svelte.ts';
 
 export const cdcl_stateName2StateId = {
@@ -110,7 +108,7 @@ export const cdcl_stateName2StateId = {
 	complementary_occurrences_state: 15,
 	decision_level_state: 16,
 	empty_clause_set_state: 17,
-	build_fuip_state: 18,
+	build_conflict_analysis_state: 18,
 	asserting_clause_state: 19,
 	pick_last_assignment_state: 20,
 	variable_in_cc_state: 21,
@@ -119,8 +117,7 @@ export const cdcl_stateName2StateId = {
 	learn_cc_state: 24,
 	second_highest_dl_state: 25,
 	undo_trail_to_shdl_state: 26,
-	push_trail_state: 27,
-	propagate_fuip_state: 28
+	push_trail_state: 27
 };
 
 // *** define state nodes ***
@@ -326,7 +323,7 @@ const decision_level_state: NonFinalState<
 	run: nonDecisionMade,
 	description: `Check if decision level of the latest trail is === 0`,
 	transitions: new Map<CDCL_CHECK_NON_DECISION_MADE_INPUT, number>()
-		.set('build_fuip_state', cdcl_stateName2StateId['build_fuip_state'])
+		.set('build_conflict_analysis_state', cdcl_stateName2StateId['build_conflict_analysis_state'])
 		.set('unsat_state', cdcl_stateName2StateId['unsat_state'])
 };
 
@@ -345,14 +342,14 @@ const empty_clause_set_state: NonFinalState<
 
 // ** additional states from cdcl **
 
-const build_fuip_state: NonFinalState<
-	CDLC_BUILD_FUIP_STRUCTURE_FUN,
-	CDLC_BUILD_FUIP_STRUCTURE_INPUT
+const build_conflict_analysis_state: NonFinalState<
+	CDLC_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN,
+	CDLC_BUILD_CONFLICT_ANALYSIS_STRUCTURE_INPUT
 > = {
-	id: cdcl_stateName2StateId['build_fuip_state'],
-	run: buildFUIP,
-	description: `Buidls the First Unique Implication Point Structure`,
-	transitions: new Map<CDLC_BUILD_FUIP_STRUCTURE_INPUT, number>().set(
+	id: cdcl_stateName2StateId['build_conflict_analysis_state'],
+	run: buildConflictAnalysis,
+	description: `Buidls the Conflict Analysis Structure`,
+	transitions: new Map<CDLC_BUILD_CONFLICT_ANALYSIS_STRUCTURE_INPUT, number>().set(
 		'asserting_clause_state',
 		cdcl_stateName2StateId['asserting_clause_state']
 	)
@@ -422,8 +419,8 @@ const learn_cc_state: NonFinalState<
 	CDCL_LEARN_CONCLICT_CLAUSE_FUN,
 	CDCL_LEARN_CONCLICT_CLAUSE_INPUT
 > = {
-	id: cdcl_stateName2StateId['delete_last_assignment_state'],
-	run: deleteLastAssignment,
+	id: cdcl_stateName2StateId['learn_cc_state'],
+	run: learnConflictClause,
 	description: `Inserts the new clause inside the clause pool`,
 	transitions: new Map<CDCL_LEARN_CONCLICT_CLAUSE_INPUT, number>().set(
 		'second_highest_dl_state',
@@ -439,19 +436,19 @@ const second_highest_dl_state: NonFinalState<
 	run: secondHighestDL,
 	description: `Gets the second highst decision level`,
 	transitions: new Map<CDCL_SECOND_HIGHEST_DL_INPUT, number>().set(
-		'undo_trail_to_shdl_state',
+		'undo_backjumping_state',
 		cdcl_stateName2StateId['undo_trail_to_shdl_state']
 	)
 };
 
 const undo_trail_to_shdl_state: NonFinalState<
-	CDCL_UNDO_TRAIL_TO_SHDL_FUN,
-	CDCL_UNDO_TRAIL_TO_SHDL_INPUT
+	CDCL_BACKJUMPING_FUN,
+	CDCL_BACKJUMPING_INPUT
 > = {
 	id: cdcl_stateName2StateId['undo_trail_to_shdl_state'],
-	run: undoTrailToSHDL,
+	run: backjumping,
 	description: `Undo the trail until reaching the dl`,
-	transitions: new Map<CDCL_UNDO_TRAIL_TO_SHDL_INPUT, number>().set(
+	transitions: new Map<CDCL_BACKJUMPING_INPUT, number>().set(
 		'push_trail_state',
 		cdcl_stateName2StateId['push_trail_state']
 	)
@@ -462,20 +459,11 @@ const push_trail_state: NonFinalState<CDCL_PUSH_TRAIL_FUN, CDCL_PUSH_TRAIL_INPUT
 	run: pushTrail,
 	description: `Pushes the trail that needs to be learned`,
 	transitions: new Map<CDCL_PUSH_TRAIL_INPUT, number>().set(
-		'propagate_fuip_state',
-		cdcl_stateName2StateId['propagate_fuip_state']
+		'unit_propagation_state',
+		cdcl_stateName2StateId['unit_propagation_state']
 	)
 };
 
-const propagate_fuip_state: NonFinalState<CDCL_PROPAGATE_FUIP_FUN, CDCL_PROPAGATE_FUIP_INPUT> = {
-	id: cdcl_stateName2StateId['propagate_fuip_state'],
-	run: propagateFUIP,
-	description: `Pushes the trail that needs to be learned`,
-	transitions: new Map<CDCL_PROPAGATE_FUIP_INPUT, number>().set(
-		'complementary_occurrences_state',
-		cdcl_stateName2StateId['complementary_occurrences_state']
-	)
-};
 // *** adding states to the set of states ***
 export const states: Map<number, State<CDCL_FUN, CDCL_INPUT>> = new Map();
 
@@ -499,7 +487,7 @@ states.set(unit_propagation_state.id, unit_propagation_state);
 states.set(complementary_occurrences_state.id, complementary_occurrences_state);
 states.set(decision_level_state.id, decision_level_state);
 states.set(empty_clause_set_state.id, empty_clause_set_state);
-states.set(build_fuip_state.id, build_fuip_state);
+states.set(build_conflict_analysis_state.id, build_conflict_analysis_state);
 states.set(asserting_clause_state.id, asserting_clause_state);
 states.set(pick_last_assignment_state.id, pick_last_assignment_state);
 states.set(variable_in_cc_state.id, variable_in_cc_state);
@@ -509,7 +497,6 @@ states.set(learn_cc_state.id, learn_cc_state);
 states.set(second_highest_dl_state.id, second_highest_dl_state);
 states.set(undo_trail_to_shdl_state.id, undo_trail_to_shdl_state);
 states.set(push_trail_state.id, push_trail_state);
-states.set(propagate_fuip_state.id, propagate_fuip_state);
 
 // export initial node
 export const initial = empty_clause_state.id;

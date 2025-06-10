@@ -113,14 +113,14 @@ export class Trail {
 		this.followUPIndex = this.assignments.length - 1;
 	}
 
-	undoToDL(dl: number): void {
+	backjump(dl: number): void {
 		// Security check
 		if (dl < 0 || dl > this.decisionLevel) {
 			logFatal('DL error', 'The entered DL is not valid');
 		}
 
-		// We get the mark of the DL without removing the Decision.
-		const targetIndex = dl === 0 ? 0 : this.getMarkOfDecisionLevel(dl) + 1;
+		// We get the mark of the DL+1 as we don't want to remove the propagations.
+		const targetIndex = dl === 0 ? 0 : this.getMarkOfDecisionLevel(dl+1);
 		while (this.assignments.length > targetIndex) {
 			const last: VariableAssignment = this.pop() as VariableAssignment;
 			getProblemStore().variables.dispose(last.getVariable().getInt());

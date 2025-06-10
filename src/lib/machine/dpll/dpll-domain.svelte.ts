@@ -20,7 +20,7 @@ import type VariablePool from '$lib/transversal/entities/VariablePool.svelte.ts'
 import type { DPLL_SolverMachine } from './dpll-solver-machine.svelte.ts';
 import { updateClausesToCheck } from '$lib/store/conflict-detection-state.svelte.ts';
 import { logFatal } from '$lib/store/toasts.ts';
-import type { ConflictAnalysis } from '../SolverMachine.svelte.ts';
+import type { ConflictDetection } from '../SolverMachine.svelte.ts';
 import { isUnitClause, isUnSATClause, type ClauseEval } from '$lib/transversal/entities/Clause.ts';
 
 const problem: Problem = $derived(getProblemStore());
@@ -127,7 +127,7 @@ export const queueClauseSet: DPLL_QUEUE_CLAUSE_SET_FUN = (
 	if (clauses.size === 0) {
 		logFatal('Empty set of clauses are not thought to be queued');
 	}
-	const conflict: ConflictAnalysis = { clauses: clauses, variableReasonId: variable };
+	const conflict: ConflictDetection = { clauses: clauses, variableReasonId: variable };
 	solverStateMachine.postpone(conflict);
 	return solverStateMachine.leftToPostpone();
 };
@@ -167,7 +167,7 @@ export type DPLL_PICK_CLAUSE_SET_FUN = (solverStateMachine: DPLL_SolverMachine) 
 export const pickPendingClauseSet: DPLL_PICK_CLAUSE_SET_FUN = (
 	solverStateMachine: DPLL_SolverMachine
 ) => {
-	const pendingConflict: ConflictAnalysis = solverStateMachine.consultPostponed();
+	const pendingConflict: ConflictDetection = solverStateMachine.consultPostponed();
 	updateClausesToCheck(pendingConflict.clauses, pendingConflict.variableReasonId);
 	return pendingConflict.clauses;
 };

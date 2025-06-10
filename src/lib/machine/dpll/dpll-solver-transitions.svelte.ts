@@ -47,7 +47,7 @@ import {
 	incrementCheckingIndex,
 	updateClausesToCheck
 } from '$lib/store/conflict-detection-state.svelte.ts';
-import type { ConflictAnalysis } from '../SolverMachine.svelte.ts';
+import type { ConflictDetection } from '../SolverMachine.svelte.ts';
 
 export const initialTransition = (solver: DPLL_SolverMachine): void => {
 	const stateMachine: DPLL_StateMachine = solver.stateMachine;
@@ -231,7 +231,7 @@ const allClausesCheckedTransition = (
 
 export const analyzeClause = (solver: DPLL_SolverMachine): void => {
 	const stateMachine: DPLL_StateMachine = solver.stateMachine;
-	const pendingConflict: ConflictAnalysis = solver.consultPostponed();
+	const pendingConflict: ConflictDetection = solver.consultPostponed();
 	const clauseSet: Set<number> = pendingConflict.clauses;
 	const clauseId: number = nextClauseTransition(stateMachine, clauseSet);
 	const conflict: boolean = conflictDetectionTransition(stateMachine, clauseId);

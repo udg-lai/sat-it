@@ -1,4 +1,5 @@
 import {
+	addClauseToClausePool,
 	getProblemStore,
 	type MappingLiteral2Clauses,
 	type Problem
@@ -17,7 +18,7 @@ import {
 } from '$lib/transversal/algorithms/solver.svelte.ts';
 import type VariablePool from '$lib/transversal/entities/VariablePool.svelte.ts';
 import type { CDCL_SolverMachine } from './cdcl-solver-machine.svelte.ts';
-import type { ConflictAnalysis } from '../SolverMachine.svelte.ts';
+import type { ConflictDetection } from '../SolverMachine.svelte.ts';
 import { logFatal } from '$lib/store/toasts.ts';
 import { updateClausesToCheck } from '$lib/store/conflict-detection-state.svelte.ts';
 import Clause, {
@@ -73,7 +74,7 @@ export type CDCL_UNIT_PROPAGATION_INPUT = 'complementary_occurrences_state';
 
 export type CDCL_COMPLEMENTARY_OCCURRENCES_INPUT = 'triggered_clauses_state';
 
-export type CDCL_CHECK_NON_DECISION_MADE_INPUT = 'build_fuip_state' | 'unsat_state';
+export type CDCL_CHECK_NON_DECISION_MADE_INPUT = 'build_conflict_analysis_state' | 'unsat_state';
 
 export type CDCL_DECIDE_INPUT = 'complementary_occurrences_state';
 
@@ -81,7 +82,7 @@ export type CDCL_EMPTY_CLAUSE_SET_INPUT = 'decision_level_state';
 
 //New CDCL Inputs
 
-export type CDLC_BUILD_FUIP_STRUCTURE_INPUT = 'asserting_clause_state';
+export type CDLC_BUILD_CONFLICT_ANALYSIS_STRUCTURE_INPUT = 'asserting_clause_state';
 
 export type CDCL_ASSERTING_CLAUSE_INPUT = 'learn_cc_state' | 'pick_last_assignment_state';
 
@@ -97,13 +98,11 @@ export type CDCL_DELETE_LAST_ASSIGNMENT_INPUT = 'asserting_clause_state';
 
 export type CDCL_LEARN_CONCLICT_CLAUSE_INPUT = 'second_highest_dl_state';
 
-export type CDCL_SECOND_HIGHEST_DL_INPUT = 'undo_trail_to_shdl_state';
+export type CDCL_SECOND_HIGHEST_DL_INPUT = 'undo_backjumping_state';
 
-export type CDCL_UNDO_TRAIL_TO_SHDL_INPUT = 'push_trail_state';
+export type CDCL_BACKJUMPING_INPUT = 'push_trail_state';
 
-export type CDCL_PUSH_TRAIL_INPUT = 'propagate_fuip_state';
-
-export type CDCL_PROPAGATE_FUIP_INPUT = 'complementary_occurrences_state';
+export type CDCL_PUSH_TRAIL_INPUT = 'unit_propagation_state';
 
 export type CDCL_INPUT =
 	| CDCL_EMPTY_CLAUSE_INPUT
@@ -124,7 +123,7 @@ export type CDCL_INPUT =
 	| CDCL_CHECK_NON_DECISION_MADE_INPUT
 	| CDCL_DECIDE_INPUT
 	| CDCL_EMPTY_CLAUSE_SET_INPUT
-	| CDLC_BUILD_FUIP_STRUCTURE_INPUT
+	| CDLC_BUILD_CONFLICT_ANALYSIS_STRUCTURE_INPUT
 	| CDCL_ASSERTING_CLAUSE_INPUT
 	| CDCL_PICK_LAST_ASSIGNMENT_INPUT
 	| CDCL_VARIABLE_IN_CC_INPUT
@@ -132,9 +131,8 @@ export type CDCL_INPUT =
 	| CDCL_DELETE_LAST_ASSIGNMENT_INPUT
 	| CDCL_LEARN_CONCLICT_CLAUSE_INPUT
 	| CDCL_SECOND_HIGHEST_DL_INPUT
-	| CDCL_UNDO_TRAIL_TO_SHDL_INPUT
-	| CDCL_PUSH_TRAIL_INPUT
-	| CDCL_PROPAGATE_FUIP_INPUT;
+	| CDCL_BACKJUMPING_INPUT
+	| CDCL_PUSH_TRAIL_INPUT;
 
 // ** state functions **
 
@@ -165,6 +163,8 @@ export type CDCL_QUEUE_CLAUSE_SET_FUN = (
 	solverStateMachine: CDCL_SolverMachine
 ) => number;
 
+//HERE I NEED TO CHECK IF I REALLY USE THE REUTRN VALUE FOR SOMETHING
+
 export const queueClauseSet: CDCL_QUEUE_CLAUSE_SET_FUN = (
 	variable: number,
 	clauses: Set<number>,
@@ -173,7 +173,7 @@ export const queueClauseSet: CDCL_QUEUE_CLAUSE_SET_FUN = (
 	if (clauses.size === 0) {
 		logFatal('Empty set of clauses are not thought to be queued');
 	}
-	const conflict: ConflictAnalysis = { clauses: clauses, variableReasonId: variable };
+	const conflict: ConflictDetection = { clauses: clauses, variableReasonId: variable };
 	solverStateMachine.postpone(conflict);
 	return solverStateMachine.leftToPostpone();
 };
@@ -213,7 +213,7 @@ export type CDCL_PICK_CLAUSE_SET_FUN = (solverStateMachine: CDCL_SolverMachine) 
 export const pickPendingClauseSet: CDCL_PICK_CLAUSE_SET_FUN = (
 	solverStateMachine: CDCL_SolverMachine
 ) => {
-	const pendingConflict: ConflictAnalysis = solverStateMachine.consultPostponed();
+	const pendingConflict: ConflictDetection = solverStateMachine.consultPostponed();
 	updateClausesToCheck(pendingConflict.clauses, pendingConflict.variableReasonId);
 	return pendingConflict.clauses;
 };
@@ -293,9 +293,9 @@ export const emptyClauseSet: CDCL_EMPTY_CLAUSE_SET_FUN = (
 
 // ** additional cdcl function **
 
-export type CDLC_BUILD_FUIP_STRUCTURE_FUN = (solver: CDCL_SolverMachine) => void;
+export type CDLC_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN = (solver: CDCL_SolverMachine) => void;
 
-export const buildFUIP: CDLC_BUILD_FUIP_STRUCTURE_FUN = (solver: CDCL_SolverMachine) => {
+export const buildConflictAnalysis: CDLC_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN = (solver: CDCL_SolverMachine) => {
 	// Firstly the last trail is achieved
 	const latestTrail: Trail | undefined = getLatestTrail();
 	if (latestTrail === undefined) {
@@ -314,15 +314,14 @@ export const buildFUIP: CDLC_BUILD_FUIP_STRUCTURE_FUN = (solver: CDCL_SolverMach
 	if (conflictiveClauseId === undefined) {
 		logFatal(
 			'Not possible result',
-			'It is not possible to look for the FUIP if no conflicts have been found'
+			'It is not possible to do the CA if no conflicts have been found'
 		);
 	}
 	const conflictiveClause: TemporalClause = getProblemStore()
 		.clauses.get(conflictiveClauseId)
 		.copy();
-
-	//Lastly, generate the FUIP
-	solver.buildFUIP(latestTrail, conflictiveClause, variablesLastDecisionLevel);
+	//Lastly, generate the conflict analysis structure
+	solver.setConflictAnalysis(latestTrail, conflictiveClause, variablesLastDecisionLevel);
 };
 
 export type CDCL_ASSERTING_CLAUSE_FUN = (
@@ -367,11 +366,13 @@ export const variableInCC: CDCL_VARIABLE_IN_CC_FUN = (
 };
 
 export type CDCL_RESOLUTION_UPDATE_CC_FUN = (
+	solver: CDCL_SolverMachine,
 	conflictClause: TemporalClause,
 	assignment: VariableAssignment
 ) => void;
 
-export const resolutionUpdateCC = (
+export const resolutionUpdateCC: CDCL_RESOLUTION_UPDATE_CC_FUN = (
+	solver: CDCL_SolverMachine,
 	conflictClause: TemporalClause,
 	assignment: VariableAssignment
 ) => {
@@ -381,9 +382,8 @@ export const resolutionUpdateCC = (
 	}
 	const upClauseId: number = reason.clauseId;
 	const upClause: Clause = getProblemStore().clauses.get(upClauseId);
-
-	conflictClause = conflictClause.resolution(upClause);
-	//DON'T KNOW IF I HAVE TO CALL AN UPDATE FUNCTION OR SMTG
+	const newCC: TemporalClause = conflictClause.resolution(upClause);
+	solver.updateConflictClause(newCC);
 };
 
 export type CDCL_DELETE_LAST_ASSIGNMENT_FUN = (trail: Trail) => void;
@@ -393,14 +393,16 @@ export const deleteLastAssignment: CDCL_DELETE_LAST_ASSIGNMENT_FUN = (trail: Tra
 	getProblemStore().variables.dispose(assignment.getVariable().getInt());
 };
 
-export type CDCL_LEARN_CONCLICT_CLAUSE_FUN = (trail: Trail, conclictClause: TemporalClause) => void;
+export type CDCL_LEARN_CONCLICT_CLAUSE_FUN = (trail: Trail, conclictClause: TemporalClause) => number;
 
-export const learnConclictClause: CDCL_LEARN_CONCLICT_CLAUSE_FUN = (
+export const learnConflictClause: CDCL_LEARN_CONCLICT_CLAUSE_FUN = (
 	trail: Trail,
 	conclictClause: TemporalClause
 ) => {
 	const toLearnClause: Clause = new Clause(conclictClause.getLiterals());
 	trail.learn(toLearnClause);
+	addClauseToClausePool(toLearnClause);
+	return toLearnClause.getId();
 };
 
 export type CDCL_SECOND_HIGHEST_DL_FUN = (trail: Trail, conclictClause: TemporalClause) => number;
@@ -417,35 +419,20 @@ export const secondHighestDL: CDCL_SECOND_HIGHEST_DL_FUN = (
 		.filter((level, index, self) => self.indexOf(level) === index)
 		.sort((a, b) => b - a);
 
+	console.log(decisionLevels);
 	return decisionLevels.length >= 2 ? decisionLevels[1] : decisionLevels[0] - 1;
 };
 
-export type CDCL_UNDO_TRAIL_TO_SHDL_FUN = (trail: Trail, decisionLevel: number) => void;
+export type CDCL_BACKJUMPING_FUN = (trail: Trail, decisionLevel: number) => void;
 
-export const undoTrailToSHDL = (trail: Trail, decisionLevel: number) => {
-	trail.undoToDL(decisionLevel);
+export const backjumping = (trail: Trail, decisionLevel: number) => {
+	trail.backjump(decisionLevel);
 };
 
 export type CDCL_PUSH_TRAIL_FUN = (trail: Trail) => void;
 
 export const pushTrail: CDCL_PUSH_TRAIL_FUN = (trail: Trail) => {
 	getTrails().push(trail);
-};
-
-export type CDCL_PROPAGATE_FUIP_FUN = (trail: Trail, conflictClause: Clause) => number;
-
-export const propagateFUIP: CDCL_PROPAGATE_FUIP_FUN = (trail: Trail, conclictClause: Clause) => {
-	if (!conclictClause.optimalCheckUnit()) {
-		logFatal('Not possible case');
-	}
-	const { variables, clauses } = getProblemStore();
-	const literalToPropagate: number = solverUnitPropagation(
-		variables,
-		clauses,
-		conclictClause.getId()
-	);
-
-	return literalToPropagate;
 };
 
 export type CDCL_FUN =
@@ -464,7 +451,7 @@ export type CDCL_FUN =
 	| CDCL_CHECK_NON_DECISION_MADE_FUN
 	| CDCL_DECIDE_FUN
 	| CDCL_EMPTY_CLAUSE_SET_FUN
-	| CDLC_BUILD_FUIP_STRUCTURE_FUN
+	| CDLC_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN
 	| CDCL_ASSERTING_CLAUSE_FUN
 	| CDCL_PICK_LAST_ASSIGNMENT_FUN
 	| CDCL_VARIABLE_IN_CC_FUN
@@ -472,6 +459,5 @@ export type CDCL_FUN =
 	| CDCL_DELETE_LAST_ASSIGNMENT_FUN
 	| CDCL_LEARN_CONCLICT_CLAUSE_FUN
 	| CDCL_SECOND_HIGHEST_DL_FUN
-	| CDCL_UNDO_TRAIL_TO_SHDL_FUN
-	| CDCL_PUSH_TRAIL_FUN
-	| CDCL_PROPAGATE_FUIP_FUN;
+	| CDCL_BACKJUMPING_FUN
+	| CDCL_PUSH_TRAIL_FUN;
