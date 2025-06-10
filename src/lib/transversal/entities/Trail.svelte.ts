@@ -56,6 +56,14 @@ export class Trail {
 		}
 	}
 
+	getLevelAssignments(level: number): VariableAssignment[] {
+		if (level === 0) {
+			return this.getLevelZeroPropagations();
+		} else {
+			return this.getLvlAssignments(level);
+		}
+	}
+
 	getTrailEnding(): number | undefined {
 		return this.trailEnding;
 	}
@@ -67,7 +75,7 @@ export class Trail {
 		}
 
 		for (let level = this.decisionLevelBookmark.length - 1; level >= 0; level--) {
-			if (index > this.decisionLevelBookmark[level]) {
+			if (index >= this.decisionLevelBookmark[level]) {
 				return level;
 			}
 		}
@@ -120,7 +128,8 @@ export class Trail {
 		}
 
 		// We get the mark of the DL+1 as we don't want to remove the propagations.
-		const targetIndex = dl === 0 ? 0 : this.getMarkOfDecisionLevel(dl + 1);
+		const targetIndex =
+			dl === 0 ? this.getMarkOfDecisionLevel(1) : this.getMarkOfDecisionLevel(dl + 1);
 		while (this.assignments.length > targetIndex) {
 			const last: VariableAssignment = this.pop() as VariableAssignment;
 			getProblemStore().variables.dispose(last.getVariable().getInt());
@@ -160,6 +169,17 @@ export class Trail {
 			endMark = this.assignments.length;
 		}
 		return this.assignments.slice(startMark + 1, endMark);
+	}
+
+	private getLvlAssignments(level: number): VariableAssignment[] {
+		const startMark = this.getMarkOfDecisionLevel(level);
+		let endMark;
+		if (this.decisionLevelExists(level + 1)) {
+			endMark = this.getMarkOfDecisionLevel(level + 1);
+		} else {
+			endMark = this.assignments.length;
+		}
+		return this.assignments.slice(startMark, endMark);
 	}
 
 	private registerNewDecisionLevel(): void {

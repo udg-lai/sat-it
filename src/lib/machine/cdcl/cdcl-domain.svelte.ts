@@ -33,7 +33,7 @@ import {
 	isUnitPropagationReason,
 	type Reason
 } from '$lib/transversal/entities/VariableAssignment.ts';
-import type TemporalClause from '$lib/transversal/entities/TemporalClause.ts';
+import TemporalClause from '$lib/transversal/entities/TemporalClause.ts';
 
 const problem: Problem = $derived(getProblemStore());
 
@@ -303,8 +303,9 @@ export const buildConflictAnalysis: CDLC_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN =
 	if (latestTrail === undefined) {
 		logFatal('Not possible result', 'There is no last trail to work with');
 	}
+
 	// Then the variables from the last decision level are retrieved.
-	const assignmentsLastDecisionLevel: VariableAssignment[] = latestTrail.getPropagations(
+	const assignmentsLastDecisionLevel: VariableAssignment[] = latestTrail.getLevelAssignments(
 		latestTrail.getDecisionLevel()
 	);
 	const variablesLastDecisionLevel: number[] = assignmentsLastDecisionLevel.map((assignment) => {
@@ -319,11 +320,10 @@ export const buildConflictAnalysis: CDLC_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN =
 			'It is not possible to do the CA if no conflicts have been found'
 		);
 	}
-	const conflictiveClause: TemporalClause = getProblemStore()
-		.clauses.get(conflictiveClauseId)
-		.copy();
+	const conflictiveClause: Clause = getProblemStore().clauses.get(conflictiveClauseId);
+	const conflictiveClauseCopy: TemporalClause = new TemporalClause(conflictiveClause.getLiterals());
 	//Lastly, generate the conflict analysis structure
-	solver.setConflictAnalysis(latestTrail, conflictiveClause, variablesLastDecisionLevel);
+	solver.setConflictAnalysis(latestTrail.copy(), conflictiveClauseCopy, variablesLastDecisionLevel);
 };
 
 export type CDCL_ASSERTING_CLAUSE_FUN = (
@@ -335,10 +335,13 @@ export const assertingClause: CDCL_ASSERTING_CLAUSE_FUN = (
 	conflictClause: TemporalClause,
 	variables: number[]
 ) => {
-	const variablesFound: number = 0;
-	const i: number = 0;
+	let variablesFound: number = 0;
+	let i: number = 0;
 	while (i < variables.length && variablesFound < 2) {
-		conflictClause.containsVariable(variables[i]);
+		if (conflictClause.containsVariable(variables[i])) {
+			variablesFound += 1;
+		}
+		i += 1;
 	}
 	if (variablesFound === 0) {
 		logFatal(

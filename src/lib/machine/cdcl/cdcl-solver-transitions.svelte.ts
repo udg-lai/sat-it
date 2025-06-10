@@ -259,7 +259,9 @@ export const analyzeClause = (solver: CDCL_SolverMachine): void => {
 		emptyClauseSetTransition(stateMachine, solver);
 		decisionLevelTransition(stateMachine);
 		buildConflictAnalysisTransition(stateMachine, solver);
+
 		const conflictAnalysis: ConflictAnalysis | undefined = solver.consultConflictAnalysis();
+
 		if (conflictAnalysis === undefined) {
 			logFatal('Error', 'The conflict analysis has not been saved correctly');
 		}
@@ -486,11 +488,13 @@ export const conflictAnalysis = (solver: CDCL_SolverMachine): void => {
 	if (variableAppear) {
 		resolutionUpdateCCTransition(stateMachine, solver, conflictAnalysis, lastAssignment);
 	}
-	deleteLastAssignmentTransition(stateMachine, solver, conflictAnalysis);
+	deleteLastAssignmentTransition(stateMachine, conflictAnalysis);
 	const isAsserting: boolean = assertingClauseTransition(stateMachine, conflictAnalysis);
+	console.log(conflictAnalysis.conflictClause);
 	if (!isAsserting) {
 		return;
 	}
+	console.log(isAsserting);
 	const clauseId: number = learnConflictClauseTransition(stateMachine, conflictAnalysis);
 	const secondHighestDL: number = getSecondHighestDLTransition(stateMachine, conflictAnalysis);
 	backjumpingTransition(stateMachine, conflictAnalysis, secondHighestDL);
@@ -592,12 +596,11 @@ const resolutionUpdateCCTransition = (
 		logFatal('Function call error', 'There should be a function in the Variable In CC state');
 	}
 	resolutionUpdateCCState.run(solver, conflictAnalysis.conflictClause, lastAssignment);
-	stateMachine.transition('resolution_update_cc_state');
+	stateMachine.transition('delete_last_assignment_state');
 };
 
 const deleteLastAssignmentTransition = (
 	stateMachine: CDCL_StateMachine,
-	solver: CDCL_SolverMachine,
 	conflictAnalysis: ConflictAnalysis
 ) => {
 	const deleteLastAssignmentState = stateMachine.getActiveState() as NonFinalState<
@@ -646,6 +649,7 @@ const getSecondHighestDLTransition = (
 		conflictAnalysis.conflictClause
 	);
 	stateMachine.transition('undo_backjumping_state');
+	console.log(secondHighestDL);
 	return secondHighestDL;
 };
 

@@ -83,7 +83,10 @@ import {
 	type CDCL_PUSH_TRAIL_FUN,
 	type CDCL_PUSH_TRAIL_INPUT,
 	pushTrail,
-	learnConflictClause
+	learnConflictClause,
+	resolutionUpdateCC,
+	type CDCL_RESOLUTION_UPDATE_CC_FUN,
+	type CDCL_RESOLUTION_UPDATE_CC_INPUT
 } from './cdcl-domain.svelte.ts';
 
 export const cdcl_stateName2StateId = {
@@ -390,13 +393,13 @@ const variable_in_cc_state: NonFinalState<CDCL_VARIABLE_IN_CC_FUN, CDCL_VARIABLE
 };
 
 const resolution_update_cc_state: NonFinalState<
-	CDCL_VARIABLE_IN_CC_FUN,
-	CDCL_VARIABLE_IN_CC_INPUT
+	CDCL_RESOLUTION_UPDATE_CC_FUN,
+	CDCL_RESOLUTION_UPDATE_CC_INPUT
 > = {
 	id: cdcl_stateName2StateId['resolution_update_cc_state'],
-	run: variableInCC,
+	run: resolutionUpdateCC,
 	description: `Resoultion rule is applyed and Conclict clause is updated`,
-	transitions: new Map<CDCL_VARIABLE_IN_CC_INPUT, number>().set(
+	transitions: new Map<CDCL_RESOLUTION_UPDATE_CC_INPUT, number>().set(
 		'delete_last_assignment_state',
 		cdcl_stateName2StateId['delete_last_assignment_state']
 	)

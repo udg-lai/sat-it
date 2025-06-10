@@ -76,7 +76,14 @@ export function updateProblemFromTrail(trail: Trail) {
 export function resetProblem() {
 	const problem: Problem = problemStore;
 	problem.variables.reset();
-	problemStore = { ...problem };
+
+	//Reset the caluses
+	const defaultClauses: Clause[] = getDefaultClauses();
+	const clauses: ClausePool = new ClausePool(defaultClauses);
+	//Reset the mapping
+	const mapping: MappingLiteral2Clauses = literalToClauses(clauses);
+
+	problemStore = { variables: problem.variables, clauses, mapping, algorithm: problem.algorithm };
 }
 
 export function addClauseToClausePool(clause: Clause) {
