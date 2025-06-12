@@ -49,11 +49,27 @@ You can preview the production build with `npm run preview`.
 
 ## Deployment
 
-The app is configured to run on node servers.
+The app deployment depends on the `adapter`.
+If you are using the 'node' adapter you might run the app by:
 
 ```bash
 node build
 ```
+
+If you use the `static` adapter, you need a software to serve static files.
+
+```bash
+npx serve build
+```
+
+We have a mechanism to upload the aplication using GitHub pages,
+so we chosed to use the `static` adapter.
+
+To do so, the following workflow is triggered when a new Git tag is added:
+
+- project is build
+- tested
+- if tests passed, the app is published
 
 ## Automatically lint and run tests at commit
 
