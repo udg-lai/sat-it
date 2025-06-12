@@ -6,6 +6,7 @@
 	import AutomaticDebugger from './AutomaticDebuggerComponent.svelte';
 	import AutoModeComponent from './AutoModeComponent.svelte';
 	import ConflictDetectionDebugger from './ConflictDetectionDebuggerComponent.svelte';
+	import ConflictAnalysisDebugger from './ConflictAnalysisDebuggerComponent.svelte';
 	import GeneralDebuggerButtons from './GeneralDebuggerComponent.svelte';
 	import InitialStepDebugger from './InitialStepDebuggerComponent.svelte';
 	import ManualDebugger from './ManualDebuggerComponent.svelte';
@@ -16,8 +17,8 @@
 
 	let solverMachine: SolverMachine<StateFun, StateInput> = $derived(getSolverMachine());
 	let enablePreprocess = $derived(solverMachine.onInitialState());
-	let enableBacktracking = $derived(solverMachine.onConflictState());
 	let enableConflictDetection = $derived(solverMachine.onConflictDetection());
+	let enableConflictAnalysis = $derived(solverMachine.onConflictState());
 	let finished = $derived(solverMachine.completed());
 	let inAutoMode = $derived(solverMachine.isInAutoMode());
 </script>
@@ -30,25 +31,27 @@
 	{:else}
 		{#if enableConflictDetection}
 			<ConflictDetectionDebugger cdMode={enableConflictDetection} />
+		{:else if enableConflictAnalysis && problem.algorithm === 'cdcl'}
+			<ConflictAnalysisDebugger />
 		{:else if !finished}
 			<AutomaticDebugger
-				backtrackingState={enableBacktracking}
+				backtrackingState={enableConflictAnalysis}
 				{finished}
 				cdMode={enableConflictDetection}
-				nextVariable={defaultNextVariable && !enableBacktracking ? defaultNextVariable : undefined}
+				nextVariable={defaultNextVariable && !enableConflictAnalysis ? defaultNextVariable : undefined}
 			/>
 
 			<ManualDebugger
 				{defaultNextVariable}
 				{finished}
 				cdMode={enableConflictDetection}
-				backtrackingState={enableBacktracking}
+				backtrackingState={enableConflictAnalysis}
 			/>
 		{:else}
 			<ResetProblemDebugger />
 		{/if}
 
-		<GeneralDebuggerButtons {finished} backtrackingState={enableBacktracking} />
+		<GeneralDebuggerButtons {finished} backtrackingState={enableConflictAnalysis} />
 	{/if}
 </debugger>
 

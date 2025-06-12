@@ -116,23 +116,23 @@ function literalToClauses(clauses: ClausePool): MappingLiteral2Clauses {
 const obtainProblemClauses = (): Clause[] => {
 	//Get all the clauses from the problem
 	const defaultClauses: UnindexedClause[] = getDefaultClauses();
-	const learnedClauses: UnindexedClause[] = []; 
-	for(const trail of getTrails()) {
-		const learnedClause: UnindexedClause | undefined = trail.getLearnedClause()
-		if(learnedClause !== undefined) learnedClauses.push(learnedClause);
+	const learnedClauses: UnindexedClause[] = [];
+	for (const trail of getTrails()) {
+		const learnedClause: UnindexedClause | undefined = trail.getLearnedClause();
+		if (learnedClause !== undefined) learnedClauses.push(learnedClause);
 		console.log(trail);
 	}
-	const problemUnindexedClauses: UnindexedClause[] = [...defaultClauses, ...learnedClauses] 
+	const problemUnindexedClauses: UnindexedClause[] = [...defaultClauses, ...learnedClauses];
 
 	//Reset the clause id Counter and generate the clause list to reset the clause pool
 	Clause.resetUniqueIdGenerator();
 
 	//Generate the clause pool clauses
-	const problemClauses: Clause[] = []
-	for(const uClause of problemUnindexedClauses) {
+	const problemClauses: Clause[] = [];
+	for (const uClause of problemUnindexedClauses) {
 		problemClauses.push(new Clause(uClause.getLiterals()));
 	}
 	return problemClauses;
-}
+};
 
 export const getProblemStore = () => problemStore;

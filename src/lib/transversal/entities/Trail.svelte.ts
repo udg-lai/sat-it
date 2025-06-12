@@ -28,7 +28,7 @@ export class Trail {
 		return newTrail;
 	}
 
-	//This partial copy is needed to avoid having the same trailEnding and 
+	//This partial copy is needed to avoid having the same trailEnding and
 	partialCopy(): Trail {
 		const newTrail = new Trail(this.trailCapacity);
 		newTrail.assignments = this.assignments.map((assignment) => assignment.copy());

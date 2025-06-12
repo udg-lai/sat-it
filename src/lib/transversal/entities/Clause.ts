@@ -37,7 +37,7 @@ class Clause implements Comparable<Clause> {
 		this.id = newId;
 	}
 
-		addLiteral(lit: Literal) {
+	addLiteral(lit: Literal) {
 		this.literals.push(lit);
 	}
 

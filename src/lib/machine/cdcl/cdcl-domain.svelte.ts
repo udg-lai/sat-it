@@ -321,35 +321,25 @@ export const buildConflictAnalysis: CDLC_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN =
 		);
 	}
 	const conflictiveClause: Clause = getProblemStore().clauses.get(conflictiveClauseId);
-	const conflictiveClauseCopy: UnindexedClause = new UnindexedClause(conflictiveClause.getLiterals());
+	const conflictiveClauseCopy: UnindexedClause = new UnindexedClause(
+		conflictiveClause.getLiterals()
+	);
 	//Lastly, generate the conflict analysis structure
-	solver.setConflictAnalysis(latestTrail.partialCopy(), conflictiveClauseCopy, variablesLastDecisionLevel);
+	solver.setConflictAnalysis(
+		latestTrail.partialCopy(),
+		conflictiveClauseCopy,
+		variablesLastDecisionLevel
+	);
 };
 
 export type CDCL_ASSERTING_CLAUSE_FUN = (
-	conflictClause: UnindexedClause,
-	variables: number[]
+	solver: CDCL_SolverMachine
 ) => boolean;
 
 export const assertingClause: CDCL_ASSERTING_CLAUSE_FUN = (
-	conflictClause: UnindexedClause,
-	variables: number[]
+	solver: CDCL_SolverMachine
 ) => {
-	let variablesFound: number = 0;
-	let i: number = 0;
-	while (i < variables.length && variablesFound < 2) {
-		if (conflictClause.containsVariable(variables[i])) {
-			variablesFound += 1;
-		}
-		i += 1;
-	}
-	if (variablesFound === 0) {
-		logFatal(
-			'Not possible result',
-			'There must be at least one variable inside the conlict clause'
-		);
-	}
-	return variablesFound === 1;
+	return solver.isAsseritve()
 };
 
 export type CDCL_PICK_LAST_ASSIGNMENT_FUN = (trail: Trail) => VariableAssignment;
@@ -412,7 +402,7 @@ export const learnConflictClause: CDCL_LEARN_CONCLICT_CLAUSE_FUN = (
 
 	//Generate the "Clause" that will be added to the pool.
 	const toLearnClause: Clause = new Clause(conclictClause.getLiterals());
-	
+
 	//The clause is stored inside the pool
 	addClauseToClausePool(toLearnClause);
 	return toLearnClause.getId();

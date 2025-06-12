@@ -264,7 +264,7 @@ export const analyzeClause = (solver: CDCL_SolverMachine): void => {
 		if (conflictAnalysis === undefined) {
 			logFatal('Error', 'The conflict analysis has not been saved correctly');
 		}
-		const isAsserting: boolean = assertingClauseTransition(stateMachine, conflictAnalysis);
+		const isAsserting: boolean = assertingClauseTransition(stateMachine, solver);
 		if (isAsserting) {
 			logFatal('Error', 'It is not possible for the CC to be asserting');
 		}
@@ -488,7 +488,7 @@ export const conflictAnalysis = (solver: CDCL_SolverMachine): void => {
 		resolutionUpdateCCTransition(stateMachine, solver, conflictAnalysis, lastAssignment);
 	}
 	deleteLastAssignmentTransition(stateMachine, conflictAnalysis);
-	const isAsserting: boolean = assertingClauseTransition(stateMachine, conflictAnalysis);
+	const isAsserting: boolean = assertingClauseTransition(stateMachine, solver);
 	if (!isAsserting) {
 		return;
 	}
@@ -524,7 +524,7 @@ const buildConflictAnalysisTransition = (
 
 const assertingClauseTransition = (
 	stateMachine: CDCL_StateMachine,
-	conflictAnalysis: ConflictAnalysis
+	solver: CDCL_SolverMachine
 ): boolean => {
 	const assertingClauseState = stateMachine.getActiveState() as NonFinalState<
 		CDCL_ASSERTING_CLAUSE_FUN,
@@ -533,10 +533,7 @@ const assertingClauseTransition = (
 	if (assertingClauseState.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Asserting Clause state');
 	}
-	const isAsserting: boolean = assertingClauseState.run(
-		conflictAnalysis.conflictClause,
-		conflictAnalysis.decisionLevelVariables
-	);
+	const isAsserting: boolean = assertingClauseState.run(solver);
 	if (isAsserting) stateMachine.transition('learn_cc_state');
 	else stateMachine.transition('pick_last_assignment_state');
 	return isAsserting;

@@ -5,7 +5,7 @@ let defaultcClauses: UnindexedClause[] = $state([]);
 
 export const setDefaultClauses = (clauses: Clause[]) => {
 	defaultcClauses = [];
-	for(const clause of clauses) {
+	for (const clause of clauses) {
 		defaultcClauses.push(new UnindexedClause(clause.getLiterals()));
 	}
 };

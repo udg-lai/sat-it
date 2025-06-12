@@ -68,7 +68,7 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 		return returnQueue;
 	}
 
-	// ** functions related to firstUIP **
+	// ** functions related to conflict analysis **
 
 	setConflictAnalysis(
 		trail: Trail,
@@ -92,6 +92,29 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 
 	consultConflictAnalysis(): ConflictAnalysis | undefined {
 		return this.conflictAnalysis;
+	}
+
+	isAsseritve() {
+		if (this.conflictAnalysis === undefined) return false;
+
+		const variables: number[] = this.conflictAnalysis.decisionLevelVariables;
+		const conflictClause: UnindexedClause = this.conflictAnalysis.conflictClause;
+		
+		let variablesFound: number = 0;
+		let i: number = 0;
+		while (i < variables.length && variablesFound < 2) {
+			if (conflictClause.containsVariable(variables[i])) {
+				variablesFound += 1;
+			}
+			i += 1;
+		}
+		if (variablesFound === 0) {
+			logFatal(
+				'Not possible result',
+				'There must be at least one variable inside the conlict clause'
+			);
+		}
+		return variablesFound === 1;
 	}
 
 	// ** general functions **
@@ -153,6 +176,10 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 
 	protected async solveUPStepByStep(): Promise<void> {
 		this.stepByStep(() => !this.pendingConflicts.isEmpty());
+	}
+
+	protected async solveCAStepByStep(): Promise<void> {
+		this.stepByStep(() => !this.isAsseritve());
 	}
 
 	onConflictDetection(): boolean {

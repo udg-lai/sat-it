@@ -109,6 +109,10 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 		this.solveToNextVariableStepByStep();
 	}
 
+	protected async solveCAStepByStep(): Promise<void> {
+		logFatal('Non expected input Solver State Machine');
+	}
+
 	onConflictDetection(): boolean {
 		if (this.conflictAnalysis === undefined) {
 			return false;

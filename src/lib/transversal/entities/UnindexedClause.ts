@@ -14,7 +14,7 @@ class UnindexedClause {
 	}
 
 	resolution(other: Clause): UnindexedClause {
-		const unindexedClause: UnindexedClause = new UnindexedClause(other.getLiterals())
+		const unindexedClause: UnindexedClause = new UnindexedClause(other.getLiterals());
 		return logicResolution(this, unindexedClause);
 	}
 
@@ -36,8 +36,5 @@ class UnindexedClause {
 	): T[] {
 		return this.literals.map(callback, thisArg);
 	}
-	
-
-
 }
 export default UnindexedClause;
