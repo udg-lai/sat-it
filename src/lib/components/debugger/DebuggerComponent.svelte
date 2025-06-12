@@ -55,7 +55,7 @@
 <style>
 	debugger {
 		height: var(--debugger-height);
-		width: 50%;
+		width: 100%;
 		min-height: var(--debugger-height);
 		display: flex;
 		align-items: center;

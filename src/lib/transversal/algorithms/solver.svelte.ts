@@ -152,8 +152,7 @@ const afterAssignment = (assignment: Assignment): void => {
 };
 
 export const backtracking = (pool: VariablePool): number => {
-	const trail: Trail = (getLatestTrail() as Trail).copy();
-	trail.updateTrailEnding();
+	const trail: Trail = (getLatestTrail() as Trail).partialCopy();
 	const lastVariableAssignment: VariableAssignment = disposeUntilDecision(trail, pool);
 
 	const lastVariable: Variable = lastVariableAssignment.getVariable();

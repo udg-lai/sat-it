@@ -22,7 +22,7 @@
 		class: 'h-7 w-7 cursor-pointer'
 	};
 
-	const clauseId: number | undefined = $derived(trail.getTrailEnding());
+	const clauseId: number | undefined = $derived(trail.getTrailConflict());
 	const clause: string | undefined = $derived.by(() => {
 		if (clauseId === undefined) return undefined;
 		const clause: Clause = problem.clauses.get(clauseId);

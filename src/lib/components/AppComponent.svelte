@@ -51,6 +51,9 @@
 	}
 
 	function reloadFromSnapshot({ snapshot, activeState, statistics, record }: Snapshot): void {
+		updateTrails([...snapshot]);
+		updateStatistics(statistics);
+		updateSolverMachine(activeState, record);
 		const len = snapshot.length;
 		if (len > 0) {
 			const latest = snapshot[len - 1];
@@ -58,9 +61,6 @@
 		} else {
 			resetProblem();
 		}
-		updateTrails([...snapshot]);
-		updateStatistics(statistics);
-		updateSolverMachine(activeState, record);
 	}
 
 	function togglePropagations(e: EditorViewEvent) {

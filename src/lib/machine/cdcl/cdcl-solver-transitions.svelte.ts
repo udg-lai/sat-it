@@ -105,7 +105,6 @@ const conflictDetectionBlock = (
 };
 
 const ecTransition = (stateMachine: CDCL_StateMachine): void => {
-	console.log('ecTransition');
 	if (stateMachine.getActiveId() !== 0) {
 		logFatal(
 			'Fail Initial',
@@ -490,11 +489,9 @@ export const conflictAnalysis = (solver: CDCL_SolverMachine): void => {
 	}
 	deleteLastAssignmentTransition(stateMachine, conflictAnalysis);
 	const isAsserting: boolean = assertingClauseTransition(stateMachine, conflictAnalysis);
-	console.log(conflictAnalysis.conflictClause);
 	if (!isAsserting) {
 		return;
 	}
-	console.log(isAsserting);
 	const clauseId: number = learnConflictClauseTransition(stateMachine, conflictAnalysis);
 	const secondHighestDL: number = getSecondHighestDLTransition(stateMachine, conflictAnalysis);
 	backjumpingTransition(stateMachine, conflictAnalysis, secondHighestDL);
@@ -649,7 +646,6 @@ const getSecondHighestDLTransition = (
 		conflictAnalysis.conflictClause
 	);
 	stateMachine.transition('undo_backjumping_state');
-	console.log(secondHighestDL);
 	return secondHighestDL;
 };
 

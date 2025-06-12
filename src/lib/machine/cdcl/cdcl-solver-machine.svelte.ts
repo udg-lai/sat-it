@@ -2,7 +2,7 @@ import { setConflictClause } from '$lib/store/clause-pool.svelte.ts';
 import { updateClausesToCheck } from '$lib/store/conflict-detection-state.svelte.ts';
 import { logFatal } from '$lib/store/toasts.ts';
 import { Queue } from '$lib/transversal/entities/Queue.svelte.ts';
-import type TemporalClause from '$lib/transversal/entities/TemporalClause.ts';
+import type UnindexedClause from '$lib/transversal/entities/UnindexedClause.ts';
 import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
 import {
 	SolverMachine,
@@ -72,14 +72,14 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 
 	setConflictAnalysis(
 		trail: Trail,
-		conflictClause: TemporalClause,
+		conflictClause: UnindexedClause,
 		decisionLevelVariables: number[]
 	): void {
 		this.conflictAnalysis = { trail, conflictClause, decisionLevelVariables };
 		setConflictClause(this.conflictAnalysis.conflictClause);
 	}
 
-	updateConflictClause(conflictClause: TemporalClause): void {
+	updateConflictClause(conflictClause: UnindexedClause): void {
 		if (!this.conflictAnalysis) {
 			logFatal(
 				'Not possible to update the Conflict Clause',

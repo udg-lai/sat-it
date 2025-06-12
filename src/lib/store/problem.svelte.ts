@@ -2,8 +2,10 @@ import ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';
 import VariablePool from '../transversal/entities/VariablePool.svelte.ts';
 import type { DimacsInstance } from '$lib/dimacs/dimacs-instance.interface.ts';
 import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
-import type Clause from '$lib/transversal/entities/Clause.ts';
+import Clause from '$lib/transversal/entities/Clause.ts';
 import { getDefaultClauses, setDefaultClauses } from './clause-pool.svelte.ts';
+import { getTrails } from './trails.svelte.ts';
+import type UnindexedClause from '$lib/transversal/entities/UnindexedClause.ts';
 
 export type MappingLiteral2Clauses = Map<number, Set<number>>;
 
@@ -63,9 +65,7 @@ export function updateProblemFromTrail(trail: Trail) {
 	});
 
 	//Reset the caluses
-	const defaultClauses: Clause[] = getDefaultClauses();
-	const learnedClauses: Clause[] = trail.learnedClauses();
-	const clauses: ClausePool = new ClausePool([...defaultClauses, ...learnedClauses]);
+	const clauses: ClausePool = new ClausePool(obtainProblemClauses());
 
 	//Reset the mapping
 	const mapping: MappingLiteral2Clauses = literalToClauses(clauses);
@@ -78,8 +78,7 @@ export function resetProblem() {
 	problem.variables.reset();
 
 	//Reset the caluses
-	const defaultClauses: Clause[] = getDefaultClauses();
-	const clauses: ClausePool = new ClausePool(defaultClauses);
+	const clauses: ClausePool = new ClausePool(obtainProblemClauses());
 	//Reset the mapping
 	const mapping: MappingLiteral2Clauses = literalToClauses(clauses);
 
@@ -112,6 +111,28 @@ function literalToClauses(clauses: ClausePool): MappingLiteral2Clauses {
 		});
 	});
 	return mapping;
+}
+
+const obtainProblemClauses = (): Clause[] => {
+	//Get all the clauses from the problem
+	const defaultClauses: UnindexedClause[] = getDefaultClauses();
+	const learnedClauses: UnindexedClause[] = []; 
+	for(const trail of getTrails()) {
+		const learnedClause: UnindexedClause | undefined = trail.getLearnedClause()
+		if(learnedClause !== undefined) learnedClauses.push(learnedClause);
+		console.log(trail);
+	}
+	const problemUnindexedClauses: UnindexedClause[] = [...defaultClauses, ...learnedClauses] 
+
+	//Reset the clause id Counter and generate the clause list to reset the clause pool
+	Clause.resetUniqueIdGenerator();
+
+	//Generate the clause pool clauses
+	const problemClauses: Clause[] = []
+	for(const uClause of problemUnindexedClauses) {
+		problemClauses.push(new Clause(uClause.getLiterals()));
+	}
+	return problemClauses;
 }
 
 export const getProblemStore = () => problemStore;

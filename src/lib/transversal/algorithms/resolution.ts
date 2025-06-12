@@ -1,7 +1,7 @@
 import type Literal from '$lib/transversal/entities/Literal.svelte.ts';
-import TemporalClause from '../entities/TemporalClause.ts';
+import UnindexedClause from '../entities/UnindexedClause.ts';
 
-export default function logicResolution(c1: TemporalClause, c2: TemporalClause): TemporalClause {
+export default function logicResolution(c1: UnindexedClause, c2: UnindexedClause): UnindexedClause {
 	const resolvedLiterals: Map<number, Literal> = new Map();
 
 	//We need to do this as it follows as the ids of each literal are unique
@@ -22,5 +22,5 @@ export default function logicResolution(c1: TemporalClause, c2: TemporalClause):
 			resolvedLiterals.set(litId, lit.copy());
 		}
 	}
-	return new TemporalClause(Array.from(resolvedLiterals.values()));
+	return new UnindexedClause(Array.from(resolvedLiterals.values()));
 }

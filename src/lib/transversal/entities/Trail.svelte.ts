@@ -1,16 +1,16 @@
 import type VariableAssignment from '$lib/transversal/entities/VariableAssignment.ts';
 import { logFatal } from '$lib/store/toasts.ts';
-import type Clause from './Clause.ts';
 import { getProblemStore } from '$lib/store/problem.svelte.ts';
+import UnindexedClause from './UnindexedClause.ts';
 
 export class Trail {
 	private assignments: VariableAssignment[] = $state([]);
 	private decisionLevelBookmark: number[] = $state([-1]);
-	private learned: Clause[] = [];
+	private learned: UnindexedClause | undefined = undefined;
 	private followUPIndex: number = -1;
 	private decisionLevel: number = 0;
 	private trailCapacity: number = 0;
-	private trailEnding: number | undefined = $state(undefined);
+	private trailConflict: number | undefined = $state(undefined);
 
 	constructor(trailCapacity: number = 0) {
 		this.trailCapacity = trailCapacity;
@@ -20,11 +20,22 @@ export class Trail {
 		const newTrail = new Trail(this.trailCapacity);
 		newTrail.assignments = this.assignments.map((assignment) => assignment.copy());
 		newTrail.decisionLevelBookmark = [...this.decisionLevelBookmark];
-		newTrail.learned = this.learned.map((clause) => clause);
+		newTrail.learned = this.learned;
 		newTrail.followUPIndex = this.followUPIndex;
 		newTrail.decisionLevel = this.decisionLevel;
 		newTrail.trailCapacity = this.trailCapacity;
-		newTrail.trailEnding = this.trailEnding;
+		newTrail.trailConflict = this.trailConflict;
+		return newTrail;
+	}
+
+	//This partial copy is needed to avoid having the same trailEnding and 
+	partialCopy(): Trail {
+		const newTrail = new Trail(this.trailCapacity);
+		newTrail.assignments = this.assignments.map((assignment) => assignment.copy());
+		newTrail.decisionLevelBookmark = [...this.decisionLevelBookmark];
+		newTrail.followUPIndex = this.followUPIndex;
+		newTrail.decisionLevel = this.decisionLevel;
+		newTrail.trailCapacity = this.trailCapacity;
 		return newTrail;
 	}
 
@@ -64,8 +75,8 @@ export class Trail {
 		}
 	}
 
-	getTrailEnding(): number | undefined {
-		return this.trailEnding;
+	getTrailConflict(): number | undefined {
+		return this.trailConflict;
 	}
 
 	getVariableDecisionLevel(variable: number): number {
@@ -82,8 +93,8 @@ export class Trail {
 		logFatal(`Unable to determine decision level for variable ${variable}`);
 	}
 
-	updateTrailEnding(clauseId: number = -1): void {
-		this.trailEnding = clauseId;
+	updateTrailConflict(clauseId: number): void {
+		this.trailConflict = clauseId;
 	}
 
 	hasPropagations(level: number): boolean {
@@ -109,12 +120,12 @@ export class Trail {
 		return returnValue;
 	}
 
-	learnedClauses(): Clause[] {
+	getLearnedClause(): UnindexedClause | undefined {
 		return this.learned;
 	}
 
-	learn(clause: Clause): void {
-		this.learned.push(clause);
+	learn(clause: UnindexedClause): void {
+		this.learned = clause;
 	}
 
 	updateFollowUpIndex(): void {
