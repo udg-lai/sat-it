@@ -1,18 +1,28 @@
-name: Notify on New Tag
-
+name: Deploy Edu Sat It App to GitHub Pages
 on:
   push:
     tags:
       - '*'
-
 jobs:
-  notify-server:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - name: Add SSH key
-        uses: webfactory/ssh-agent@v0.7.0
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-      - name: Trigger pull/deploy script remotely
-        run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SERVER_HOST }} "cd /apps/edusatit && git pull && ./deploy.sh ${{ github.ref_name }}"
+      - name: Set up Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build the app
+        run: npm run build
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build
