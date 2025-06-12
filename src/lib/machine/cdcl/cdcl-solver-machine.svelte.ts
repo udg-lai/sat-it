@@ -99,7 +99,7 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 
 		const variables: number[] = this.conflictAnalysis.decisionLevelVariables;
 		const conflictClause: UnindexedClause = this.conflictAnalysis.conflictClause;
-		
+
 		let variablesFound: number = 0;
 		let i: number = 0;
 		while (i < variables.length && variablesFound < 2) {

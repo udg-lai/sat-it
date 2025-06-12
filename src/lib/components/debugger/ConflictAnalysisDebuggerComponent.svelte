@@ -1,6 +1,6 @@
 <script lang="ts">
-    import './_style.css';
-	import { ForwardOutline,CodeMergeOutline } from 'flowbite-svelte-icons';
+	import './_style.css';
+	import { ForwardOutline, CodeMergeOutline } from 'flowbite-svelte-icons';
 	import DynamicRender from '../DynamicRender.svelte';
 	import { stateMachineEventBus, toggleTrailExpandEventBus } from '$lib/transversal/events.ts';
 
@@ -10,15 +10,15 @@
 </script>
 
 <conflict-analysis-debugger>
-    <button
-        class="btn general-btn ca-btn"
-        title="Step"
+	<button
+		class="btn general-btn ca-btn"
+		title="Step"
 		onclick={() => {
 			stateMachineEventBus.emit('step');
 		}}
-    >
-        <DynamicRender component={CodeMergeOutline} props={assignmentProps} />
-    </button>
+	>
+		<DynamicRender component={CodeMergeOutline} props={assignmentProps} />
+	</button>
 
 	<button
 		class="btn general-btn ca-btn"
@@ -38,10 +38,10 @@
 		flex-direction: row;
 		gap: 0.5rem;
 	}
-    .ca-btn {
-        color: var(--backtracking-color);
-        border-color: var(--backtracking-color);
-        transition: border-color 0.3s ease;
-        border-style: dashed;
-    }
+	.ca-btn {
+		color: var(--backtracking-color);
+		border-color: var(--backtracking-color);
+		transition: border-color 0.3s ease;
+		border-style: dashed;
+	}
 </style>

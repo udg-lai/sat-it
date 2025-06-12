@@ -332,14 +332,10 @@ export const buildConflictAnalysis: CDLC_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN =
 	);
 };
 
-export type CDCL_ASSERTING_CLAUSE_FUN = (
-	solver: CDCL_SolverMachine
-) => boolean;
+export type CDCL_ASSERTING_CLAUSE_FUN = (solver: CDCL_SolverMachine) => boolean;
 
-export const assertingClause: CDCL_ASSERTING_CLAUSE_FUN = (
-	solver: CDCL_SolverMachine
-) => {
-	return solver.isAsseritve()
+export const assertingClause: CDCL_ASSERTING_CLAUSE_FUN = (solver: CDCL_SolverMachine) => {
+	return solver.isAsseritve();
 };
 
 export type CDCL_PICK_LAST_ASSIGNMENT_FUN = (trail: Trail) => VariableAssignment;

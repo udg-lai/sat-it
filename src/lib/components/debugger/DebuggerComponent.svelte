@@ -38,7 +38,9 @@
 				backtrackingState={enableConflictAnalysis}
 				{finished}
 				cdMode={enableConflictDetection}
-				nextVariable={defaultNextVariable && !enableConflictAnalysis ? defaultNextVariable : undefined}
+				nextVariable={defaultNextVariable && !enableConflictAnalysis
+					? defaultNextVariable
+					: undefined}
 			/>
 
 			<ManualDebugger
