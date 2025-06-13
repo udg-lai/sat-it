@@ -71,7 +71,7 @@
 </Popover>
 
 <style>
-    .backjumping {
+	.backjumping {
 		border-color: var(--conflict-color);
 		color: var(--conflict-color);
 		border-top: 1px transparent;
@@ -81,7 +81,7 @@
 		cursor: pointer;
 	}
 
-    .inspecting {
+	.inspecting {
 		color: var(--inspecting-color);
 		border-color: var(--inspecting-color);
 		border-top: 1px transparent;

@@ -20,7 +20,7 @@ type UnitPropagation = {
 type Backjumping = {
 	type: 'backjumping';
 	clauseId: number;
-}
+};
 
 type Backtracking = {
 	type: 'backtracking';
@@ -46,7 +46,7 @@ export const isUnitPropagationReason = (r: Reason): r is UnitPropagation => {
 
 export const isBackjumpingReason = (r: Reason): r is Backjumping => {
 	return r.type === 'backjumping';
-}
+};
 
 export const isBacktrackingReason = (r: Reason): r is Backtracking => {
 	return r.type === 'backtracking';
@@ -77,7 +77,7 @@ export const makeBackjumpingResason = (clauseId: number): Backjumping => {
 		type: 'backjumping',
 		clauseId
 	};
-}
+};
 
 export const makeBacktrackingReason = (): Backtracking => {
 	return {
@@ -131,7 +131,7 @@ export default class VariableAssignment {
 	}
 
 	isBJ(): boolean {
-		return isBackjumpingReason(this.reason)
+		return isBackjumpingReason(this.reason);
 	}
 
 	isK(): boolean {

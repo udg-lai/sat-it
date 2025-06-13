@@ -94,13 +94,12 @@ export const unitPropagation = (
 	doAssignment(variableId, polarity);
 
 	const variable: Variable = variables.getCopy(variableId);
-	if(assignmentReason === 'up') {
+	if (assignmentReason === 'up') {
 		trail.push(VariableAssignment.newUnitPropagationAssignment(variable, clauseId));
-	}
-	else {
+	} else {
 		trail.push(VariableAssignment.newBackjumpingAssignment(variable, clauseId));
 	}
-	
+
 	increaseNoUnitPropagations();
 	stackTrail(trail);
 	return literalToPropagate;

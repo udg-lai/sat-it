@@ -685,10 +685,12 @@ const propagateCCTransition = (stateMachine: CDCL_StateMachine, clauseId: number
 		CDCL_PROPAGATE_CC_INPUT
 	>;
 	if (propagateCCState.run === undefined) {
-		logFatal('Function call error', 'There should be a function in the Propagate Conflict Clause state');
+		logFatal(
+			'Function call error',
+			'There should be a function in the Propagate Conflict Clause state'
+		);
 	}
 	const literalToPropagate: number = propagateCCState.run(clauseId);
 	stateMachine.transition('complementary_occurrences_state');
 	return literalToPropagate;
 };
-
