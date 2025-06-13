@@ -81,7 +81,8 @@ export const triggeredClauses = (clauses: Set<number>): boolean => {
 export const unitPropagation = (
 	variables: VariablePool,
 	clauses: ClausePool,
-	clauseId: number
+	clauseId: number,
+	assignmentReason: 'up' | 'backjumping'
 ): number => {
 	const trail: Trail = obtainTrail(variables);
 	const clause: Clause = clauses.get(clauseId);
@@ -93,8 +94,13 @@ export const unitPropagation = (
 	doAssignment(variableId, polarity);
 
 	const variable: Variable = variables.getCopy(variableId);
-	trail.push(VariableAssignment.newUnitPropagationAssignment(variable, clauseId));
-
+	if(assignmentReason === 'up') {
+		trail.push(VariableAssignment.newUnitPropagationAssignment(variable, clauseId));
+	}
+	else {
+		trail.push(VariableAssignment.newBackjumpingAssignment(variable, clauseId));
+	}
+	
 	increaseNoUnitPropagations();
 	stackTrail(trail);
 	return literalToPropagate;

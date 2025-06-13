@@ -86,7 +86,10 @@ import {
 	learnConflictClause,
 	resolutionUpdateCC,
 	type CDCL_RESOLUTION_UPDATE_CC_FUN,
-	type CDCL_RESOLUTION_UPDATE_CC_INPUT
+	type CDCL_RESOLUTION_UPDATE_CC_INPUT,
+	type CDCL_PROPAGATE_CC_FUN,
+	type CDCL_PROPAGATE_CC_INPUT,
+	propagateCC
 } from './cdcl-domain.svelte.ts';
 
 export const cdcl_stateName2StateId = {
@@ -120,7 +123,8 @@ export const cdcl_stateName2StateId = {
 	learn_cc_state: 24,
 	second_highest_dl_state: 25,
 	undo_trail_to_shdl_state: 26,
-	push_trail_state: 27
+	push_trail_state: 27,
+	propagate_cc_state: 28
 };
 
 // *** define state nodes ***
@@ -459,8 +463,18 @@ const push_trail_state: NonFinalState<CDCL_PUSH_TRAIL_FUN, CDCL_PUSH_TRAIL_INPUT
 	run: pushTrail,
 	description: `Pushes the trail that needs to be learned`,
 	transitions: new Map<CDCL_PUSH_TRAIL_INPUT, number>().set(
-		'unit_propagation_state',
-		cdcl_stateName2StateId['unit_propagation_state']
+		'propagate_cc_state',
+		cdcl_stateName2StateId['propagate_cc_state']
+	)
+};
+
+const propagate_cc_state: NonFinalState<CDCL_PROPAGATE_CC_FUN, CDCL_PROPAGATE_CC_INPUT> = {
+	id: cdcl_stateName2StateId['propagate_cc_state'],
+	run: propagateCC,
+	description: `Pushes the trail that needs to be learned`,
+	transitions: new Map<CDCL_PROPAGATE_CC_INPUT, number>().set(
+		'complementary_occurrences_state',
+		cdcl_stateName2StateId['complementary_occurrences_state']
 	)
 };
 
@@ -497,6 +511,7 @@ states.set(learn_cc_state.id, learn_cc_state);
 states.set(second_highest_dl_state.id, second_highest_dl_state);
 states.set(undo_trail_to_shdl_state.id, undo_trail_to_shdl_state);
 states.set(push_trail_state.id, push_trail_state);
+states.set(propagate_cc_state.id, propagate_cc_state);
 
 // export initial node
 export const initial = empty_clause_state.id;
