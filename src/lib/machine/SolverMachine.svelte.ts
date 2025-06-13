@@ -136,6 +136,8 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 		this.stepByStep(() => !this.onConflictState() && !this.completed());
 	}
 
+	abstract hasConflictAnalysis(): boolean;
+
 	protected abstract solveToNextVariableStepByStep(): Promise<void>;
 
 	protected abstract solveUPStepByStep(): Promise<void>;

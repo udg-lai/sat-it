@@ -169,6 +169,10 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 		}
 	}
 
+	hasConflictAnalysis() {
+		return true;
+	}
+
 	protected async solveToNextVariableStepByStep(): Promise<void> {
 		const postponedClauses: Set<number> = this.consultPostponed().clauses;
 		this.stepByStep(() => postponedClauses.size !== 0);

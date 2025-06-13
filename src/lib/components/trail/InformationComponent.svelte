@@ -72,7 +72,7 @@
 	}
 
 	.notification.conflict {
-		color: var(--backtracking-color);
+		color: var(--conflict-color);
 		cursor: pointer;
 		pointer-events: auto;
 	}

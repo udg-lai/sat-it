@@ -17,10 +17,11 @@
 
 	let solverMachine: SolverMachine<StateFun, StateInput> = $derived(getSolverMachine());
 	let enablePreprocess = $derived(solverMachine.onInitialState());
-	let enableConflictDetection = $derived(solverMachine.onConflictDetection());
-	let enableConflictAnalysis = $derived(solverMachine.onConflictState());
+	let onConflictDetection = $derived(solverMachine.onConflictDetection());
+	let onConflict = $derived(solverMachine.onConflictState());
 	let finished = $derived(solverMachine.completed());
 	let inAutoMode = $derived(solverMachine.isInAutoMode());
+	let hasConflictAnalysis = $derived(solverMachine.hasConflictAnalysis())
 </script>
 
 <debugger>
@@ -29,16 +30,16 @@
 	{:else if enablePreprocess}
 		<InitialStepDebugger />
 	{:else}
-		{#if enableConflictDetection}
-			<ConflictDetectionDebugger cdMode={enableConflictDetection} />
-		{:else if enableConflictAnalysis && problem.algorithm === 'cdcl'}
+		{#if onConflictDetection}
+			<ConflictDetectionDebugger />
+		{:else if onConflict && hasConflictAnalysis}
 			<ConflictAnalysisDebugger />
 		{:else if !finished}
 			<AutomaticDebugger
-				backtrackingState={enableConflictAnalysis}
+				onConflict={onConflict}
 				{finished}
-				cdMode={enableConflictDetection}
-				nextVariable={defaultNextVariable && !enableConflictAnalysis
+				{onConflictDetection}
+				nextVariable={defaultNextVariable !== undefined && !onConflict
 					? defaultNextVariable
 					: undefined}
 			/>
@@ -46,14 +47,14 @@
 			<ManualDebugger
 				{defaultNextVariable}
 				{finished}
-				cdMode={enableConflictDetection}
-				backtrackingState={enableConflictAnalysis}
+				{onConflictDetection}
+				{onConflict}
 			/>
 		{:else}
 			<ResetProblemDebugger />
 		{/if}
 
-		<GeneralDebuggerButtons {finished} backtrackingState={enableConflictAnalysis} />
+		<GeneralDebuggerButtons {finished} backtrackingState={onConflict} />
 	{/if}
 </debugger>
 

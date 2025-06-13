@@ -15,11 +15,11 @@
 	interface Props {
 		defaultNextVariable: number | undefined;
 		finished: boolean;
-		cdMode: boolean;
-		backtrackingState: boolean;
+		onConflictDetection: boolean;
+		onConflict: boolean;
 	}
 
-	let { defaultNextVariable, finished, cdMode, backtrackingState }: Props = $props();
+	let { defaultNextVariable, finished, onConflictDetection, onConflict }: Props = $props();
 
 	const generalProps = {
 		size: 'md'
@@ -64,11 +64,11 @@
 		class="btn general-btn"
 		class:invalidOption={defaultNextVariable === undefined ||
 			finished ||
-			cdMode ||
-			backtrackingState}
+			onConflictDetection ||
+			onConflict}
 		title="Manual Decision"
 		onclick={() => (manualDecisionModal = true)}
-		disabled={defaultNextVariable === undefined || finished || cdMode || backtrackingState}
+		disabled={defaultNextVariable === undefined || finished || onConflictDetection || onConflict}
 	>
 		<DynamicRender component={PenOutline} props={generalProps} />
 	</button>

@@ -106,6 +106,10 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 		}
 	}
 
+	hasConflictAnalysis() {
+		return false;
+	}
+
 	protected async solveToNextVariableStepByStep(): Promise<void> {
 		const postponedClauses: Set<number> = this.consultPostponed().clauses;
 		this.stepByStep(() => postponedClauses.size !== 0);

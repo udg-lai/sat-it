@@ -161,7 +161,7 @@
 		background-color: var(--main-bg-color);
 	}
 	:global(.bottomNavCenter:hover) {
-		background-color: var(--backtracking-color);
+		background-color: var(--conflict-color);
 	}
 	:global(.tooltip) {
 		background-color: var(--main-bg-color);

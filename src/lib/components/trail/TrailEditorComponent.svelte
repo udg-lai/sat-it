@@ -4,9 +4,7 @@
 	import TrailComponent from './TrailComponent.svelte';
 	import { toggleTrailExpandEventBus, trailTrackingEventBus } from '$lib/transversal/events.ts';
 	import InformationComponent from './InformationComponent.svelte';
-	import { getConflictClause } from '$lib/store/clause-pool.svelte.ts';
-	import MathTexComponent from '../MathTexComponent.svelte';
-
+	
 	interface Props {
 		trails: Trail[];
 	}
@@ -102,16 +100,6 @@
 			unsubscribeExpandedTrails();
 		};
 	});
-
-	const conflictClauseString: string = $derived.by(() => {
-		const concflictClause = getConflictClause();
-		if (concflictClause === undefined) return '';
-		return concflictClause
-			.map((literal) => {
-				return literal.toTeX();
-			})
-			.join('\\: \\:');
-	});
 </script>
 
 <trail-editor
@@ -151,8 +139,6 @@
 		</editor-info>
 	</editor-leaf>
 </trail-editor>
-
-<MathTexComponent equation={conflictClauseString} fontSize="var(--extreme-size)" />
 
 <style>
 	trail-editor {

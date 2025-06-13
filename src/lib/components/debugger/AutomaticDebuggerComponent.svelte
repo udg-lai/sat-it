@@ -6,13 +6,13 @@
 	import { updateAssignment } from '$lib/store/assignment.svelte.ts';
 
 	interface Props {
-		backtrackingState: boolean;
+		onConflict: boolean;
 		finished: boolean;
-		cdMode: boolean;
-		nextVariable?: number;
+		onConflictDetection: boolean;
+		nextVariable: number | undefined;
 	}
 
-	let { backtrackingState, finished, cdMode: upMode, nextVariable }: Props = $props();
+	let { onConflict, finished, onConflictDetection, nextVariable }: Props = $props();
 
 	const assignmentProps = {
 		size: 'md'
@@ -21,41 +21,41 @@
 
 <automatic-debugger>
 	<div class="join-variable">
-		{#if nextVariable}
+		{#if nextVariable !== undefined}
 			<div class="next-variable">
 				<span>
 					{nextVariable}
 				</span>
 			</div>
 		{:else}
-			<div class="next-variable" class:conflict={backtrackingState}>
+			<div class="next-variable" class:conflict={onConflict}>
 				<span>X</span>
 			</div>
 		{/if}
 
-		{#if !backtrackingState}
+		{#if !onConflict}
 			<button
 				class="btn general-btn next-button"
-				class:invalidOption={finished || upMode}
+				class:invalidOption={finished || onConflictDetection}
 				onclick={() => {
 					updateAssignment('automated');
 					stateMachineEventBus.emit('step');
 					userActionEventBus.emit('record');
 				}}
 				title="Decide"
-				disabled={finished || upMode}
+				disabled={finished || onConflictDetection}
 			>
 				<DynamicRender component={CaretRightOutline} props={assignmentProps} />
 			</button>
 		{:else}
 			<button
 				class="btn general-btn bkt-btn next-button"
-				class:invalidOption={finished || upMode}
+				class:invalidOption={finished || onConflictDetection}
 				onclick={() => {
 					stateMachineEventBus.emit('step');
 				}}
 				title="Backtrack"
-				disabled={finished || upMode}
+				disabled={finished || onConflictDetection}
 			>
 				<DynamicRender component={CodeMergeOutline} props={assignmentProps} />
 			</button>
@@ -95,8 +95,8 @@
 	}
 
 	.conflict {
-		color: var(--backtracking-color);
-		border: 1px dashed var(--backtracking-color);
+		color: var(--conflict-color);
+		border: 1px dashed var(--conflict-color);
 		border-radius: 6px 0px 0px 6px;
 		border-right: none;
 	}

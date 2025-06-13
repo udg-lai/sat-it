@@ -39,8 +39,8 @@
 		gap: 0.5rem;
 	}
 	.ca-btn {
-		color: var(--backtracking-color);
-		border-color: var(--backtracking-color);
+		color: var(--conflict-color);
+		border-color: var(--conflict-color);
 		transition: border-color 0.3s ease;
 		border-style: dashed;
 	}
