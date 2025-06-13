@@ -102,7 +102,7 @@ function literalToClauses(clauses: ClausePool): MappingLiteral2Clauses {
 	clauses.getClauses().forEach((clause, clauseId) => {
 		addClauseToMapping(clause, clauseId, mapping);
 	});
-	
+
 	return mapping;
 }
 
@@ -117,7 +117,7 @@ const addClauseToMapping = (clause: Clause, clauseId: number, mapping: MappingLi
 			mapping.set(literalId, s);
 		}
 	});
-}	
+};
 
 const obtainProblemClauses = (): Clause[] => {
 	//Get all the clauses from the problem
