@@ -15,11 +15,10 @@
 	interface Props {
 		defaultNextVariable: number | undefined;
 		finished: boolean;
-		onConflictDetection: boolean;
 		onConflict: boolean;
 	}
 
-	let { defaultNextVariable, finished, onConflictDetection, onConflict }: Props = $props();
+	let { defaultNextVariable, finished, onConflict }: Props = $props();
 
 	const generalProps = {
 		size: 'md'
@@ -62,13 +61,10 @@
 <manual-debugger>
 	<button
 		class="btn general-btn"
-		class:invalidOption={defaultNextVariable === undefined ||
-			finished ||
-			onConflictDetection ||
-			onConflict}
+		class:invalidOption={defaultNextVariable === undefined || finished || onConflict}
 		title="Manual Decision"
 		onclick={() => (manualDecisionModal = true)}
-		disabled={defaultNextVariable === undefined || finished || onConflictDetection || onConflict}
+		disabled={defaultNextVariable === undefined || finished || onConflict}
 	>
 		<DynamicRender component={PenOutline} props={generalProps} />
 	</button>

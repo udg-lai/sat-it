@@ -12,11 +12,8 @@ export type ConflictDetection = {
 };
 
 export type ConflictAnalysis = {
-	/** This is the trail that will be modified and turned into the latest trail */
 	trail: Trail;
-	/**  The clause that will be learned */
 	conflictClause: UnindexedClause;
-	/** The variables from the last DL */
 	decisionLevelVariables: number[];
 };
 
@@ -98,10 +95,8 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 			this.step();
 		} else if (input === 'nextVariable') {
 			await this.solveToNextVariableStepByStep();
-		} else if (input === 'finishUP') {
-			await this.solveUPStepByStep();
-		} else if (input === 'finishCA') {
-			await this.solveCAStepByStep();
+		} else if (input === 'finishCD') {
+			await this.solveCDStepByStep();
 		} else if (input === 'solve_trail') {
 			await this.solveTrailStepByStep();
 		} else if (input === 'solve_all') {
@@ -136,13 +131,9 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 		this.stepByStep(() => !this.onConflictState() && !this.completed());
 	}
 
-	abstract hasConflictAnalysis(): boolean;
-
 	protected abstract solveToNextVariableStepByStep(): Promise<void>;
 
-	protected abstract solveUPStepByStep(): Promise<void>;
-
-	protected abstract solveCAStepByStep(): Promise<void>;
+	protected abstract solveCDStepByStep(): Promise<void>;
 
 	private setFlagsPreAuto(): void {
 		this.forcedStop = false;

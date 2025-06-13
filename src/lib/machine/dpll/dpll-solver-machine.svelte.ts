@@ -1,5 +1,4 @@
 import { updateClausesToCheck } from '$lib/store/conflict-detection-state.svelte.ts';
-import { logFatal } from '$lib/store/toasts.ts';
 import { Queue } from '$lib/transversal/entities/Queue.svelte.ts';
 import { SolverMachine, type ConflictDetection } from '../SolverMachine.svelte.ts';
 import type { DPLL_FUN, DPLL_INPUT } from './dpll-domain.svelte.ts';
@@ -106,21 +105,13 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 		}
 	}
 
-	hasConflictAnalysis() {
-		return false;
-	}
-
 	protected async solveToNextVariableStepByStep(): Promise<void> {
 		const postponedClauses: Set<number> = this.consultPostponed().clauses;
 		this.stepByStep(() => postponedClauses.size !== 0);
 	}
 
-	protected async solveUPStepByStep(): Promise<void> {
+	protected async solveCDStepByStep(): Promise<void> {
 		this.stepByStep(() => !this.pendingConflicts.isEmpty());
-	}
-
-	protected async solveCAStepByStep(): Promise<void> {
-		logFatal('Non expected input Solver State Machine');
 	}
 
 	onConflictDetection(): boolean {

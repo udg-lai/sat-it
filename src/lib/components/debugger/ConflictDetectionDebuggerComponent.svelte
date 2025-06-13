@@ -6,7 +6,7 @@
 	} from 'flowbite-svelte-icons';
 	import DynamicRender from '../DynamicRender.svelte';
 	import { stateMachineEventBus, toggleTrailExpandEventBus } from '$lib/transversal/events.ts';
-	
+
 	const assignmentProps = {
 		size: 'md'
 	};
@@ -39,7 +39,7 @@
 		title="Finish UPs"
 		onclick={() => {
 			toggleTrailExpandEventBus.emit(true);
-			stateMachineEventBus.emit('finishUP');
+			stateMachineEventBus.emit('finishCD');
 		}}
 	>
 		<DynamicRender component={ChevronDoubleRightOutline} props={assignmentProps} />

@@ -22,7 +22,7 @@ export type StateMachineEvent =
 	| 'solve_trail'
 	| 'solve_all'
 	| 'nextVariable'
-	| 'finishUP'
+	| 'finishCD'
 	| 'finishCA';
 
 export const stateMachineEventBus = createEventBus<StateMachineEvent>();

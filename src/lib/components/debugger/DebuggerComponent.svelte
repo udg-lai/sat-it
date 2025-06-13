@@ -21,7 +21,6 @@
 	let onConflict = $derived(solverMachine.onConflictState());
 	let finished = $derived(solverMachine.completed());
 	let inAutoMode = $derived(solverMachine.isInAutoMode());
-	let hasConflictAnalysis = $derived(solverMachine.hasConflictAnalysis())
 </script>
 
 <debugger>
@@ -32,11 +31,11 @@
 	{:else}
 		{#if onConflictDetection}
 			<ConflictDetectionDebugger />
-		{:else if onConflict && hasConflictAnalysis}
+		{:else if onConflict && problem.algorithm === 'cdcl'}
 			<ConflictAnalysisDebugger />
 		{:else if !finished}
 			<AutomaticDebugger
-				onConflict={onConflict}
+				{onConflict}
 				{finished}
 				{onConflictDetection}
 				nextVariable={defaultNextVariable !== undefined && !onConflict
@@ -44,12 +43,7 @@
 					: undefined}
 			/>
 
-			<ManualDebugger
-				{defaultNextVariable}
-				{finished}
-				{onConflictDetection}
-				{onConflict}
-			/>
+			<ManualDebugger {defaultNextVariable} {finished} {onConflict} />
 		{:else}
 			<ResetProblemDebugger />
 		{/if}

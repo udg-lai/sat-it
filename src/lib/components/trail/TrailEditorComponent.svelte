@@ -4,7 +4,7 @@
 	import TrailComponent from './TrailComponent.svelte';
 	import { toggleTrailExpandEventBus, trailTrackingEventBus } from '$lib/transversal/events.ts';
 	import InformationComponent from './InformationComponent.svelte';
-	
+
 	interface Props {
 		trails: Trail[];
 	}

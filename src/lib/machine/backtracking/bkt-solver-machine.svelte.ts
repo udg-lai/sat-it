@@ -16,30 +16,30 @@ export const makeBKTSolver = (): BKT_SolverMachine => {
 };
 
 export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
-	conflictAnalysis: ConflictDetection | undefined = $state(undefined);
+	conflictDetection: ConflictDetection | undefined = $state(undefined);
 
 	constructor() {
 		super(makeBKTMachine());
-		this.conflictAnalysis = undefined;
+		this.conflictDetection = undefined;
 	}
 
 	resolveConflict(): void {
-		this.conflictAnalysis = undefined;
+		this.conflictDetection = undefined;
 	}
 
 	setConflict(conflict: ConflictDetection): void {
-		this.conflictAnalysis = conflict;
+		this.conflictDetection = conflict;
 	}
 
 	visitClause(clauseId: number): void {
-		if (this.conflictAnalysis === undefined) {
+		if (this.conflictDetection === undefined) {
 			logFatal(
 				'Conflict analysis not initialized',
 				'Error at visiting a clause in the BKT Solver Machine'
 			);
 		}
 
-		const { clauses }: ConflictDetection = this.conflictAnalysis;
+		const { clauses }: ConflictDetection = this.conflictDetection;
 
 		if (!clauses.has(clauseId)) {
 			logFatal('Clause not found', 'Error at removing a clause from the BKT Solver Machine');
@@ -49,25 +49,25 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 	}
 
 	consultConflict(): ConflictDetection {
-		if (this.conflictAnalysis === undefined) {
+		if (this.conflictDetection === undefined) {
 			logFatal(
 				'Conflict analysis not initialized',
 				'Error at consulting a conflict in the BKT Solver Machine'
 			);
 		}
-		return this.conflictAnalysis;
+		return this.conflictDetection;
 	}
 
 	getRecord(): Record<string, unknown> {
 		return {
-			pending: this.makeConflictAnalysisCopy()
+			pending: this.makeConflictDetectionCopy()
 		};
 	}
 
-	private makeConflictAnalysisCopy(): ConflictDetection | undefined {
-		if (this.conflictAnalysis !== undefined) {
-			const clauses: Set<number> = new Set<number>([...this.conflictAnalysis.clauses.values()]);
-			const variableReasonId: number = this.conflictAnalysis.variableReasonId;
+	private makeConflictDetectionCopy(): ConflictDetection | undefined {
+		if (this.conflictDetection !== undefined) {
+			const clauses: Set<number> = new Set<number>([...this.conflictDetection.clauses.values()]);
+			const variableReasonId: number = this.conflictDetection.variableReasonId;
 			return { clauses, variableReasonId };
 		}
 		return undefined;
@@ -76,7 +76,7 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 	// ** abstract functions **
 	updateFromRecord(record: Record<string, unknown> | undefined): void {
 		if (record === undefined) {
-			this.conflictAnalysis = undefined;
+			this.conflictDetection = undefined;
 			updateClausesToCheck(new Set<number>(), -1);
 			return;
 		}
@@ -101,27 +101,19 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 		}
 	}
 
-	hasConflictAnalysis() {
-		return false;
-	}
-
 	protected async solveToNextVariableStepByStep(): Promise<void> {
 		this.stepByStep(() => this.onConflictDetection());
 	}
 
-	protected async solveUPStepByStep(): Promise<void> {
+	protected async solveCDStepByStep(): Promise<void> {
 		this.solveToNextVariableStepByStep();
 	}
 
-	protected async solveCAStepByStep(): Promise<void> {
-		logFatal('Non expected input Solver State Machine');
-	}
-
 	onConflictDetection(): boolean {
-		if (this.conflictAnalysis === undefined) {
+		if (this.conflictDetection === undefined) {
 			return false;
 		} else {
-			const { clauses }: ConflictDetection = this.conflictAnalysis;
+			const { clauses }: ConflictDetection = this.conflictDetection;
 			return clauses.size > 0;
 		}
 	}

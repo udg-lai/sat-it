@@ -18,6 +18,7 @@ import {
 } from './cdcl-solver-transitions.svelte.ts';
 import { makeCDCLMachine } from './cdcl-state-machine.svelte.ts';
 import { cdcl_stateName2StateId } from './cdcl-states.svelte.ts';
+import type { StateMachineEvent } from '$lib/transversal/events.ts';
 
 export const makeCDCLSolver = (): CDCL_SolverMachine => {
 	return new CDCL_SolverMachine();
@@ -148,6 +149,12 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 		}
 	}
 
+	async transition(input: StateMachineEvent): Promise<void> {
+		if (input === 'finishCA') {
+			await this.solveCAStepByStep();
+		} else super.transition(input);
+	}
+
 	step(): void {
 		const activeId: number = this.stateMachine.getActiveId();
 
@@ -169,16 +176,12 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 		}
 	}
 
-	hasConflictAnalysis() {
-		return true;
-	}
-
 	protected async solveToNextVariableStepByStep(): Promise<void> {
 		const postponedClauses: Set<number> = this.consultPostponed().clauses;
 		this.stepByStep(() => postponedClauses.size !== 0);
 	}
 
-	protected async solveUPStepByStep(): Promise<void> {
+	protected async solveCDStepByStep(): Promise<void> {
 		this.stepByStep(() => !this.pendingConflicts.isEmpty());
 	}
 
