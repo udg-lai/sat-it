@@ -89,8 +89,9 @@ export function addClauseToClausePool(clause: Clause) {
 	const { clauses, ...currentProblem } = problemStore;
 	clauses.addClause(clause);
 
-	//Reset the mapping
-	const mapping: MappingLiteral2Clauses = literalToClauses(clauses);
+	//Add clause to mapping
+	const mapping: MappingLiteral2Clauses = problemStore.mapping;
+	addClauseToMapping(clause, clause.getId(), mapping);
 
 	problemStore = { ...currentProblem, clauses, mapping };
 }
@@ -99,19 +100,24 @@ function literalToClauses(clauses: ClausePool): MappingLiteral2Clauses {
 	const mapping: Map<number, Set<number>> = new Map();
 
 	clauses.getClauses().forEach((clause, clauseId) => {
-		clause.getLiterals().forEach((literal) => {
-			const literalId = literal.toInt();
-			if (mapping.has(literalId)) {
-				const s = mapping.get(literalId);
-				s?.add(clauseId);
-			} else {
-				const s = new Set([clauseId]);
-				mapping.set(literalId, s);
-			}
-		});
+		addClauseToMapping(clause, clauseId, mapping);
 	});
+	
 	return mapping;
 }
+
+const addClauseToMapping = (clause: Clause, clauseId: number, mapping: MappingLiteral2Clauses) => {
+	clause.getLiterals().forEach((literal) => {
+		const literalId = literal.toInt();
+		if (mapping.has(literalId)) {
+			const s = mapping.get(literalId);
+			s?.add(clauseId);
+		} else {
+			const s = new Set([clauseId]);
+			mapping.set(literalId, s);
+		}
+	});
+}	
 
 const obtainProblemClauses = (): Clause[] => {
 	//Get all the clauses from the problem
