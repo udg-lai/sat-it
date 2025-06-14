@@ -53,7 +53,7 @@ export function updateAlgorithm(algorithm: Algorithm) {
 export function updateProblemFromTrail(trail: Trail) {
 	const { variables, ...currentProblem } = problemStore;
 	variables.reset();
-	trail.forEach(assignment => {
+	trail.forEach((assignment) => {
 		const variable: Variable = assignment.getVariable();
 		variables.assign(variable.getInt(), variable.getAssignment());
 	});

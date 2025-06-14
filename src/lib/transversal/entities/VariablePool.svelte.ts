@@ -8,9 +8,9 @@ export interface IVariablePool {
 	unassign(variableId: number): void;
 	getVariable(variable: number): void;
 	getVariableCopy(variable: number): Variable;
-	nextVariable(): number | undefined
-	reset(): void
-	allAssigned(): boolean
+	nextVariable(): number | undefined;
+	reset(): void;
+	allAssigned(): boolean;
 }
 
 export class VariablePool implements IVariablePool {
@@ -25,7 +25,7 @@ export class VariablePool implements IVariablePool {
 	}
 
 	reset(): void {
-		this.variables.forEach(variable => variable.assign(undefined))
+		this.variables.forEach((variable) => variable.assign(undefined));
 		this.nvPointer = 0;
 	}
 
