@@ -1,8 +1,8 @@
 import VariableAssignment from '../entities/VariableAssignment.ts';
 import { Trail } from '../entities/Trail.svelte.ts';
-import type VariablePool from '../entities/VariablePool.svelte.ts';
 import { logFatal } from '$lib/store/toasts.ts';
 import { fromJust, isJust } from '../types/maybe.ts';
+import type { VariablePool } from '../entities/VariablePool.svelte.ts';
 
 export interface DummySearchParams {
 	trails: Trail[];
@@ -30,8 +30,8 @@ export const dummyAssignmentAlgorithm: StepAlgorithm = (params: DummySearchParam
 		const nextVariable = variables.nextVariableToAssign();
 		if (isJust(nextVariable)) {
 			const variableId = fromJust(nextVariable);
-			variables.persist(variableId, true);
-			const variable = variables.getCopy(variableId);
+			variables.assign(variableId, true);
+			const variable = variables.getVariableCopy(variableId);
 			workingTrail.push(VariableAssignment.newAutomatedAssignment(variable, algorithmName));
 		} else {
 			logFatal('Dummy Search Algorithm', 'No variable to decide');
@@ -42,11 +42,10 @@ export const dummyAssignmentAlgorithm: StepAlgorithm = (params: DummySearchParam
 		let lastDecision: VariableAssignment | undefined = copyWorkingTrail.pop();
 		while (!backtrack && lastDecision !== undefined) {
 			const lastVariable = lastDecision.getVariable();
-			variables.dispose(lastVariable.getInt());
 			if (lastDecision.isD()) {
 				backtrack = true;
-				variables.persist(lastVariable.getInt(), !lastVariable.getAssignment());
-				const variable = variables.getCopy(lastVariable.getInt());
+				variables.assign(lastVariable.getInt(), !lastVariable.getAssignment());
+				const variable = variables.getVariableCopy(lastVariable.getInt());
 				copyWorkingTrail.push(VariableAssignment.newBacktrackingAssignment(variable));
 				copyWorkingTrail.updateFollowUpIndex();
 			} else {

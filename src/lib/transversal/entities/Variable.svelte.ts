@@ -1,11 +1,13 @@
 import type { Comparable } from '../interfaces/Comparable.ts';
 import { logFatal } from '$lib/store/toasts.ts';
 
+export type Assignment = boolean | undefined;
+
 export default class Variable implements Comparable<Variable> {
 	private id: number;
-	private assignment: boolean | undefined = $state();
+	private assignment: Assignment = $state(undefined);
 
-	constructor(id: number, assignment: boolean | undefined = undefined) {
+	constructor(id: number, assignment: Assignment = undefined) {
 		if (id < 0) throw 'ERROR: variable ID should be >= 0';
 		this.id = id;
 		this.assignment = assignment;
@@ -23,24 +25,21 @@ export default class Variable implements Comparable<Variable> {
 		return !this.isAssigned();
 	}
 
-	getAssignment(): boolean {
-		if (this.assignment === undefined) {
-			logFatal('Evaluation of an undefined variable');
-		}
+	getAssignment(): Assignment {
 		return this.assignment;
 	}
 
-	assign(assignment: boolean): void {
-		this.assignment = assignment;
+	unassign(): void {
+		this.assign(undefined);
 	}
 
-	unassign(): void {
-		this.assignment = undefined;
+	assign(assignment: Assignment): void {
+		this.assignment = assignment;
 	}
 
 	negate(): void {
 		if (this.isNotAssigned()) {
-			logFatal('You can not negate the assigment of a non assigned variable');
+			logFatal('You can not negate the assignment of a non assigned variable');
 		} else {
 			this.assign(!this.assignment);
 		}
