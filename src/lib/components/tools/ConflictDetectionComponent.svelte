@@ -7,6 +7,7 @@
 	import type Clause from '$lib/transversal/entities/Clause.ts';
 	import ClauseComponent from '../ClauseComponent.svelte';
 	import type ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';
+	import { isSatClause, isUnSATClause } from '$lib/transversal/entities/Clause.ts';
 
 	const problem: Problem = $derived(getProblemStore());
 
@@ -26,7 +27,9 @@
 				{clause.getId()}.
 			</span>
 		</div>
-		<ClauseComponent {clause} />
+		<div class:inspecting={checkingIndex === index} class:inspectedTrue={checkingIndex > index && isSatClause(clause.eval())} class:inspectedFalse={checkingIndex > index && isUnSATClause(clause.eval())}>
+			<ClauseComponent {clause} />
+		</div>
 	</div>
 {/each}
 
@@ -53,5 +56,17 @@
 	.checking {
 		color: var(--inspecting-color);
 		opacity: 1;
+	}
+
+		.inspecting {
+		background-color: rgba(136, 213, 255, 0.2);
+	}
+
+	.inspectedTrue {
+		background-color: rgba(79, 211, 79, 0.200);
+	}
+
+	.inspectedFalse {
+		background-color: rgba(255, 152, 152, 0.200);
 	}
 </style>

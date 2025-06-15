@@ -15,8 +15,9 @@
 	--more-options-z-index: 100;
 	--TeX-font-size: 1.2rem;
 	--backtracking-color: #8a3ffc;
-	--unsatisfied-color: #d12771;
-	--satisfied-color: #24a148;
+	--unassigned-color: #000000;
+	--unsatisfied-color: #d31266;
+	--satisfied-color: #11ae3e;
 	--clause-id-color: #00000099;
 	--inspecting-color: #e17191;
 	--trail-height: 5rem;
