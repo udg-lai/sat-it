@@ -1,6 +1,6 @@
 import Clause from './entities/Clause.ts';
 import Literal from './entities/Literal.svelte.ts';
-import VariablePool from './entities/VariablePool.svelte.ts';
+import { VariablePool } from '$lib/transversal/entities/VariablePool.svelte.ts';
 import { logWarning } from '$lib/store/toasts.ts';
 import type { CNF } from './mapping/contentToSummary.ts';
 
@@ -22,7 +22,7 @@ function literalSetToClause(literals: number[], variables: VariablePool): Clause
 		const literalInstances = literals.map((lit) => {
 			const variable = Math.abs(lit);
 			const polarity = lit < 0 ? 'Negative' : 'Positive';
-			const literal = new Literal(variables.get(variable), polarity);
+			const literal = new Literal(variables.getVariable(variable), polarity);
 			return literal;
 		});
 		clause = new Clause(literalInstances);

@@ -3,7 +3,7 @@ import type { AssignmentEval, IClausePool } from '../interfaces/IClausePool.ts';
 import type { CNF } from '../mapping/contentToSummary.ts';
 import { cnfToClauseSet } from '../utils.ts';
 import Clause, { type ClauseEval, isSatClause, isUnSATClause } from './Clause.ts';
-import type VariablePool from './VariablePool.svelte.ts';
+import { VariablePool } from '$lib/transversal/entities/VariablePool.svelte.ts';
 
 class ClausePool implements IClausePool {
 	private clauses: Clause[];

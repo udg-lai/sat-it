@@ -13,7 +13,7 @@ import {
 } from '$lib/transversal/algorithms/solver.svelte.ts';
 import { isUnSATClause, type ClauseEval } from '$lib/transversal/entities/Clause.ts';
 import type ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';
-import type VariablePool from '$lib/transversal/entities/VariablePool.svelte.ts';
+import { VariablePool } from '$lib/transversal/entities/VariablePool.svelte.ts';
 import type { ConflictAnalysis } from '../SolverMachine.svelte.ts';
 import type { BKT_SolverMachine } from './bkt-solver-machine.svelte.ts';
 

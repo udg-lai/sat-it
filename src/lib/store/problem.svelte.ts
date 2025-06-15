@@ -1,7 +1,8 @@
 import ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';
-import VariablePool from '../transversal/entities/VariablePool.svelte.ts';
 import type { DimacsInstance } from '$lib/dimacs/dimacs-instance.interface.ts';
 import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
+import { VariablePool } from '$lib/transversal/entities/VariablePool.svelte.ts';
+import type Variable from '$lib/transversal/entities/Variable.svelte.ts';
 
 export type MappingLiteral2Clauses = Map<number, Set<number>>;
 
@@ -52,9 +53,9 @@ export function updateAlgorithm(algorithm: Algorithm) {
 export function updateProblemFromTrail(trail: Trail) {
 	const { variables, ...currentProblem } = problemStore;
 	variables.reset();
-	trail.forEach((value) => {
-		const variable = value.getVariable();
-		variables.persist(variable.getInt(), variable.getAssignment());
+	trail.forEach((assignment) => {
+		const variable: Variable = assignment.getVariable();
+		variables.assign(variable.getInt(), variable.getAssignment());
 	});
 	problemStore = { ...currentProblem, variables };
 }
