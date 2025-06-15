@@ -67,12 +67,13 @@ import {
 } from '$lib/store/conflict-detection-state.svelte.ts';
 import type { ConflictAnalysis, ConflictDetection } from '../SolverMachine.svelte.ts';
 import VariableAssignment from '$lib/transversal/entities/VariableAssignment.ts';
+import { SvelteSet } from 'svelte/reactivity';
 
 export const initialTransition = (solver: CDCL_SolverMachine): void => {
 	const stateMachine: CDCL_StateMachine = solver.stateMachine;
 	ecTransition(stateMachine);
 	if (stateMachine.onFinalState()) return;
-	const complementaryClauses: Set<number> = ucdTransition(stateMachine);
+	const complementaryClauses: SvelteSet<number> = ucdTransition(stateMachine);
 	conflictDetectionBlock(solver, stateMachine, -1, complementaryClauses);
 };
 
@@ -80,7 +81,7 @@ const conflictDetectionBlock = (
 	solver: CDCL_SolverMachine,
 	stateMachine: CDCL_StateMachine,
 	variable: number,
-	complementaryClauses: Set<number>
+	complementaryClauses: SvelteSet<number>
 ): void => {
 	const triggeredClauses: boolean = triggeredClausesTransition(
 		stateMachine,
@@ -127,7 +128,7 @@ const ecTransition = (stateMachine: CDCL_StateMachine): void => {
 	}
 };
 
-const ucdTransition = (stateMachine: CDCL_StateMachine): Set<number> => {
+const ucdTransition = (stateMachine: CDCL_StateMachine): SvelteSet<number> => {
 	const ucdState = stateMachine.getActiveState() as NonFinalState<
 		CDCL_UNIT_CLAUSES_DETECTION_FUN,
 		CDCL_UNIT_CLAUSES_DETECTION_INPUT
@@ -138,7 +139,7 @@ const ucdTransition = (stateMachine: CDCL_StateMachine): Set<number> => {
 			'There should be a function in the Unit Clause Detection state'
 		);
 	}
-	const result: Set<number> = ucdState.run();
+	const result: SvelteSet<number> = ucdState.run();
 	stateMachine.transition('triggered_clauses_state');
 	return result;
 };
@@ -146,7 +147,7 @@ const ucdTransition = (stateMachine: CDCL_StateMachine): Set<number> => {
 const triggeredClausesTransition = (
 	stateMachine: CDCL_StateMachine,
 	solver: CDCL_SolverMachine,
-	complementaryClauses: Set<number>
+	complementaryClauses: SvelteSet<number>
 ): boolean => {
 	const triggeredClausesState = stateMachine.getActiveState() as NonFinalState<
 		CDCL_TRIGGERED_CLAUSES_FUN,
@@ -183,7 +184,7 @@ const queueClauseSetTransition = (
 	stateMachine: CDCL_StateMachine,
 	solver: CDCL_SolverMachine,
 	variable: number,
-	clauseSet: Set<number>
+	clauseSet: SvelteSet<number>
 ): void => {
 	const queueClauseSetState = stateMachine.getActiveState() as NonFinalState<
 		CDCL_QUEUE_CLAUSE_SET_FUN,
@@ -217,7 +218,7 @@ const checkPendingClausesSetTransition = (
 const pickClauseSetTransition = (
 	stateMachine: CDCL_StateMachine,
 	solver: CDCL_SolverMachine
-): Set<number> => {
+): SvelteSet<number> => {
 	const pickClauseSetState = stateMachine.getActiveState() as NonFinalState<
 		CDCL_PICK_CLAUSE_SET_FUN,
 		CDCL_PICK_CLAUSE_SET_INPUT
@@ -225,14 +226,14 @@ const pickClauseSetTransition = (
 	if (pickClauseSetState.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Peek Clause Set state');
 	}
-	const result: Set<number> = pickClauseSetState.run(solver);
+	const result: SvelteSet<number> = pickClauseSetState.run(solver);
 	stateMachine.transition('all_clauses_checked_state');
 	return result;
 };
 
 const allClausesCheckedTransition = (
 	stateMachine: CDCL_StateMachine,
-	clauses: Set<number>
+	clauses: SvelteSet<number>
 ): boolean => {
 	const allClausesCheckedState = stateMachine.getActiveState() as NonFinalState<
 		CDCL_ALL_CLAUSES_CHECKED_FUN,
@@ -250,7 +251,7 @@ const allClausesCheckedTransition = (
 export const analyzeClause = (solver: CDCL_SolverMachine): void => {
 	const stateMachine: CDCL_StateMachine = solver.stateMachine;
 	const pendingConflict: ConflictDetection = solver.consultPostponed();
-	const clauseSet: Set<number> = pendingConflict.clauses;
+	const clauseSet: SvelteSet<number> = pendingConflict.clauses;
 	const clauseId: number = nextClauseTransition(stateMachine, clauseSet);
 	const conflict: boolean = conflictDetectionTransition(stateMachine, clauseId);
 	if (conflict) {
@@ -273,7 +274,7 @@ export const analyzeClause = (solver: CDCL_SolverMachine): void => {
 	const unitClause: boolean = unitClauseTransition(stateMachine, clauseId);
 	if (unitClause) {
 		const literalToPropagate: number = unitPropagationTransition(stateMachine, clauseId);
-		const complementaryClauses: Set<number> = complementaryOccurrencesTransition(
+		const complementaryClauses: SvelteSet<number> = complementaryOccurrencesTransition(
 			stateMachine,
 			literalToPropagate
 		);
@@ -297,7 +298,7 @@ export const analyzeClause = (solver: CDCL_SolverMachine): void => {
 	unstackClauseSetTransition(stateMachine, solver);
 	const pendingClausesSet: boolean = checkPendingClausesSetTransition(stateMachine, solver);
 	if (!pendingClausesSet) {
-		updateClausesToCheck(new Set<number>(), -1);
+		updateClausesToCheck(new SvelteSet<number>(), -1);
 		allVariablesAssignedTransition(stateMachine);
 		return;
 	}
@@ -308,7 +309,7 @@ export const analyzeClause = (solver: CDCL_SolverMachine): void => {
 	}
 };
 
-const nextClauseTransition = (stateMachine: CDCL_StateMachine, clauseSet: Set<number>): number => {
+const nextClauseTransition = (stateMachine: CDCL_StateMachine, clauseSet: SvelteSet<number>): number => {
 	const nextCluaseState = stateMachine.getActiveState() as NonFinalState<
 		CDCL_NEXT_CLAUSE_FUN,
 		CDCL_NEXT_CLAUSE_INPUT
@@ -371,7 +372,7 @@ const unitClauseTransition = (stateMachine: CDCL_StateMachine, clauseId: number)
 
 const deleteClauseTransition = (
 	stateMachine: CDCL_StateMachine,
-	clauseSet: Set<number>,
+	clauseSet: SvelteSet<number>,
 	clauseId: number
 ): void => {
 	const deleteClauseState = stateMachine.getActiveState() as NonFinalState<
@@ -416,7 +417,7 @@ const unitPropagationTransition = (stateMachine: CDCL_StateMachine, clauseId: nu
 const complementaryOccurrencesTransition = (
 	stateMachine: CDCL_StateMachine,
 	literalToPropagate: number
-): Set<number> => {
+): SvelteSet<number> => {
 	const complementaryOccurrencesState = stateMachine.getActiveState() as NonFinalState<
 		CDCL_COMPLEMENTARY_OCCURRENCES_FUN,
 		CDCL_COMPLEMENTARY_OCCURRENCES_INPUT
@@ -427,7 +428,7 @@ const complementaryOccurrencesTransition = (
 			'There should be a function in the Complementary Occurrences state'
 		);
 	}
-	const clauses: Set<number> = complementaryOccurrencesState.run(literalToPropagate);
+	const clauses: SvelteSet<number> = complementaryOccurrencesState.run(literalToPropagate);
 	stateMachine.transition('triggered_clauses_state');
 	return clauses;
 };
@@ -435,7 +436,7 @@ const complementaryOccurrencesTransition = (
 export const decide = (solver: CDCL_SolverMachine): void => {
 	const stateMachine: CDCL_StateMachine = solver.stateMachine;
 	const literalToPropagate: number = decideTransition(stateMachine);
-	const complementaryClauses: Set<number> = complementaryOccurrencesTransition(
+	const complementaryClauses: SvelteSet<number> = complementaryOccurrencesTransition(
 		stateMachine,
 		literalToPropagate
 	);
@@ -497,7 +498,7 @@ export const conflictAnalysis = (solver: CDCL_SolverMachine): void => {
 	backjumpingTransition(stateMachine, conflictAnalysis, secondHighestDL);
 	pushTrailTransition(stateMachine, conflictAnalysis);
 	const literalToPropagate = unitPropagationTransition(stateMachine, clauseId);
-	const complementaryClauses: Set<number> = complementaryOccurrencesTransition(
+	const complementaryClauses: SvelteSet<number> = complementaryOccurrencesTransition(
 		stateMachine,
 		literalToPropagate
 	);

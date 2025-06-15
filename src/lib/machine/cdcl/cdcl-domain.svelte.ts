@@ -34,6 +34,7 @@ import {
 	type Reason
 } from '$lib/transversal/entities/VariableAssignment.ts';
 import UnindexedClause from '$lib/transversal/entities/UnindexedClause.ts';
+import { SvelteSet } from 'svelte/reactivity';
 
 const problem: Problem = $derived(getProblemStore());
 
@@ -159,7 +160,7 @@ export const emptyClauseDetection: CDCL_EMPTY_CLAUSE_FUN = () => {
 
 export type CDCL_QUEUE_CLAUSE_SET_FUN = (
 	variable: number,
-	clauses: Set<number>,
+	clauses: SvelteSet<number>,
 	solverStateMachine: CDCL_SolverMachine
 ) => number;
 
@@ -167,7 +168,7 @@ export type CDCL_QUEUE_CLAUSE_SET_FUN = (
 
 export const queueClauseSet: CDCL_QUEUE_CLAUSE_SET_FUN = (
 	variable: number,
-	clauses: Set<number>,
+	clauses: SvelteSet<number>,
 	solverStateMachine: CDCL_SolverMachine
 ) => {
 	if (clauses.size === 0) {
@@ -186,29 +187,29 @@ export const unstackClauseSet: CDCL_UNSTACK_CLAUSE_SET_FUN = (
 	return solverStateMachine.resolvePostponed();
 };
 
-export type CDCL_UNIT_CLAUSES_DETECTION_FUN = () => Set<number>;
+export type CDCL_UNIT_CLAUSES_DETECTION_FUN = () => SvelteSet<number>;
 
 export const unitClauseDetection: CDCL_UNIT_CLAUSES_DETECTION_FUN = () => {
 	const pool: ClausePool = problem.clauses;
 	return solverUnitClauseDetection(pool);
 };
 
-export type CDCL_TRIGGERED_CLAUSES_FUN = (clauses: Set<number>) => boolean;
+export type CDCL_TRIGGERED_CLAUSES_FUN = (clauses: SvelteSet<number>) => boolean;
 
-export const triggeredClauses: CDCL_TRIGGERED_CLAUSES_FUN = (clauses: Set<number>) => {
+export const triggeredClauses: CDCL_TRIGGERED_CLAUSES_FUN = (clauses: SvelteSet<number>) => {
 	return solverTriggeredClauses(clauses);
 };
 
-export type CDCL_DELETE_CLAUSE_FUN = (clauses: Set<number>, clauseId: number) => void;
+export type CDCL_DELETE_CLAUSE_FUN = (clauses: SvelteSet<number>, clauseId: number) => void;
 
-export const deleteClause: CDCL_DELETE_CLAUSE_FUN = (clauses: Set<number>, clauseId: number) => {
+export const deleteClause: CDCL_DELETE_CLAUSE_FUN = (clauses: SvelteSet<number>, clauseId: number) => {
 	if (!clauses.has(clauseId)) {
 		logFatal('Clause not found', `Clause - ${clauseId} not found`);
 	}
 	clauses.delete(clauseId);
 };
 
-export type CDCL_PICK_CLAUSE_SET_FUN = (solverStateMachine: CDCL_SolverMachine) => Set<number>;
+export type CDCL_PICK_CLAUSE_SET_FUN = (solverStateMachine: CDCL_SolverMachine) => SvelteSet<number>;
 
 export const pickPendingClauseSet: CDCL_PICK_CLAUSE_SET_FUN = (
 	solverStateMachine: CDCL_SolverMachine
@@ -218,15 +219,15 @@ export const pickPendingClauseSet: CDCL_PICK_CLAUSE_SET_FUN = (
 	return pendingConflict.clauses;
 };
 
-export type CDCL_ALL_CLAUSES_CHECKED_FUN = (clauses: Set<number>) => boolean;
+export type CDCL_ALL_CLAUSES_CHECKED_FUN = (clauses: SvelteSet<number>) => boolean;
 
-export const allClausesChecked: CDCL_ALL_CLAUSES_CHECKED_FUN = (clauses: Set<number>) => {
+export const allClausesChecked: CDCL_ALL_CLAUSES_CHECKED_FUN = (clauses: SvelteSet<number>) => {
 	return clauses.size === 0;
 };
 
-export type CDCL_NEXT_CLAUSE_FUN = (clauses: Set<number>) => number;
+export type CDCL_NEXT_CLAUSE_FUN = (clauses: SvelteSet<number>) => number;
 
-export const nextClause: CDCL_NEXT_CLAUSE_FUN = (clauses: Set<number>) => {
+export const nextClause: CDCL_NEXT_CLAUSE_FUN = (clauses: SvelteSet<number>) => {
 	if (clauses.size === 0) {
 		logFatal('A non empty set was expected');
 	}
@@ -267,7 +268,7 @@ export const unitPropagation: CDCL_UNIT_PROPAGATION_FUN = (clauseId: number) => 
 	return solverUnitPropagation(variables, clauses, clauseId);
 };
 
-export type CDCL_COMPLEMENTARY_OCCURRENCES_FUN = (literal: number) => Set<number>;
+export type CDCL_COMPLEMENTARY_OCCURRENCES_FUN = (literal: number) => SvelteSet<number>;
 
 export const complementaryOccurrences: CDCL_COMPLEMENTARY_OCCURRENCES_FUN = (literal: number) => {
 	const mapping: MappingLiteral2Clauses = problem.mapping;
@@ -288,7 +289,7 @@ export const emptyClauseSet: CDCL_EMPTY_CLAUSE_SET_FUN = (
 	while (solverStateMachine.leftToPostpone() > 0) {
 		solverStateMachine.resolvePostponed();
 	}
-	updateClausesToCheck(new Set<number>(), -1);
+	updateClausesToCheck(new SvelteSet<number>(), -1);
 };
 
 // ** additional cdcl function **

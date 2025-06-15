@@ -1,5 +1,6 @@
 import { updateClausesToCheck } from '$lib/store/conflict-detection-state.svelte.ts';
 import { Queue } from '$lib/transversal/entities/Queue.svelte.ts';
+import { SvelteSet } from 'svelte/reactivity';
 import { SolverMachine, type ConflictDetection } from '../SolverMachine.svelte.ts';
 import type { DPLL_FUN, DPLL_INPUT } from './dpll-domain.svelte.ts';
 import {
@@ -46,7 +47,7 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 	getQueue(): Queue<ConflictDetection> {
 		const returnQueue: Queue<ConflictDetection> = new Queue();
 		for (const originalItem of this.pendingConflicts.toArray()) {
-			const copiedSet = new Set<number>(originalItem.clauses);
+			const copiedSet = new SvelteSet<number>(originalItem.clauses);
 			const copiedItem: ConflictDetection = {
 				clauses: copiedSet,
 				variableReasonId: originalItem.variableReasonId
@@ -65,13 +66,13 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 	updateFromRecord(record: Record<string, unknown> | undefined): void {
 		if (record === undefined) {
 			this.pendingConflicts = new Queue();
-			updateClausesToCheck(new Set<number>(), -1);
+			updateClausesToCheck(new SvelteSet<number>(), -1);
 			return;
 		}
 		const recordedPendingConflicts = record['queue'] as Queue<ConflictDetection>;
 		this.pendingConflicts.clear();
 		for (const pendingConflict of recordedPendingConflicts.toArray()) {
-			const copiedSet = new Set<number>(pendingConflict.clauses);
+			const copiedSet = new SvelteSet<number>(pendingConflict.clauses);
 			const copiedItem: ConflictDetection = {
 				clauses: copiedSet,
 				variableReasonId: pendingConflict.variableReasonId

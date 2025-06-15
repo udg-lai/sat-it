@@ -1,8 +1,10 @@
+import type { SvelteSet } from "svelte/reactivity";
+
 let inspectedVariable: number = $state(-1);
 let clausesToCheck: number[] = $state([]);
 let checkingIndex: number = $state(0);
 
-export function updateClausesToCheck(toCheck: Set<number>, variable: number) {
+export function updateClausesToCheck(toCheck: SvelteSet<number>, variable: number) {
 	inspectedVariable = variable;
 	checkingIndex = 0;
 	clausesToCheck = [...toCheck];
