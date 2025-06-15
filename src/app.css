@@ -14,7 +14,7 @@
 	--notification-z-index: 1000;
 	--more-options-z-index: 100;
 	--TeX-font-size: 1.2rem;
-	--backtracking-color: #8a3ffc;
+	--conflict-color: #8a3ffc;
 	--unsatisfied-color: #d12771;
 	--satisfied-color: #24a148;
 	--clause-id-color: #00000099;
@@ -27,7 +27,6 @@
 	--trail-literal-large-width: 45px;
 	--popover-font-size: 0.9rem;
 	--button-size: 40px;
-
 	--icon-unselected: #828282;
 	--icon-base: #8a3ffc;
 	--icon-light: #e5d9ff;
@@ -37,7 +36,6 @@
 	--button-active-color: #cacaca90;
 	--button-border-color: #afafaf;
 	--opacity-50: 0.5;
-	--tail-component-width: ;
 }
 
 html,

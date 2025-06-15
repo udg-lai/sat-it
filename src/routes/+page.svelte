@@ -120,7 +120,7 @@
 
 	user {
 		display: flex;
-		flex-direction: row;
+		flex-direction: column;
 		border-bottom: 1px solid var(--border-color);
 	}
 </style>

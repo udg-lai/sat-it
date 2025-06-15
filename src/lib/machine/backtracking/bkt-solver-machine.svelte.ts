@@ -1,6 +1,6 @@
 import { updateClausesToCheck } from '$lib/store/conflict-detection-state.svelte.ts';
 import { logFatal } from '$lib/store/toasts.ts';
-import { SolverMachine, type ConflictAnalysis } from '../SolverMachine.svelte.ts';
+import { SolverMachine, type ConflictDetection } from '../SolverMachine.svelte.ts';
 import type { BKT_FUN, BKT_INPUT } from './bkt-domain.svelte.ts';
 import {
 	analyzeClause,
@@ -16,30 +16,30 @@ export const makeBKTSolver = (): BKT_SolverMachine => {
 };
 
 export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
-	conflictAnalysis: ConflictAnalysis | undefined = $state(undefined);
+	conflictDetection: ConflictDetection | undefined = $state(undefined);
 
 	constructor() {
 		super(makeBKTMachine());
-		this.conflictAnalysis = undefined;
+		this.conflictDetection = undefined;
 	}
 
 	resolveConflict(): void {
-		this.conflictAnalysis = undefined;
+		this.conflictDetection = undefined;
 	}
 
-	setConflict(conflict: ConflictAnalysis): void {
-		this.conflictAnalysis = conflict;
+	setConflict(conflict: ConflictDetection): void {
+		this.conflictDetection = conflict;
 	}
 
 	visitClause(clauseId: number): void {
-		if (this.conflictAnalysis === undefined) {
+		if (this.conflictDetection === undefined) {
 			logFatal(
 				'Conflict analysis not initialized',
 				'Error at visiting a clause in the BKT Solver Machine'
 			);
 		}
 
-		const { clauses }: ConflictAnalysis = this.conflictAnalysis;
+		const { clauses }: ConflictDetection = this.conflictDetection;
 
 		if (!clauses.has(clauseId)) {
 			logFatal('Clause not found', 'Error at removing a clause from the BKT Solver Machine');
@@ -48,26 +48,26 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 		}
 	}
 
-	consultConflict(): ConflictAnalysis {
-		if (this.conflictAnalysis === undefined) {
+	consultConflict(): ConflictDetection {
+		if (this.conflictDetection === undefined) {
 			logFatal(
 				'Conflict analysis not initialized',
 				'Error at consulting a conflict in the BKT Solver Machine'
 			);
 		}
-		return this.conflictAnalysis;
+		return this.conflictDetection;
 	}
 
 	getRecord(): Record<string, unknown> {
 		return {
-			pending: this.makeConflictAnalysisCopy()
+			pending: this.makeConflictDetectionCopy()
 		};
 	}
 
-	private makeConflictAnalysisCopy(): ConflictAnalysis | undefined {
-		if (this.conflictAnalysis !== undefined) {
-			const clauses: Set<number> = new Set<number>([...this.conflictAnalysis.clauses.values()]);
-			const variableReasonId: number = this.conflictAnalysis.variableReasonId;
+	private makeConflictDetectionCopy(): ConflictDetection | undefined {
+		if (this.conflictDetection !== undefined) {
+			const clauses: Set<number> = new Set<number>([...this.conflictDetection.clauses.values()]);
+			const variableReasonId: number = this.conflictDetection.variableReasonId;
 			return { clauses, variableReasonId };
 		}
 		return undefined;
@@ -76,14 +76,14 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 	// ** abstract functions **
 	updateFromRecord(record: Record<string, unknown> | undefined): void {
 		if (record === undefined) {
-			this.conflictAnalysis = undefined;
+			this.conflictDetection = undefined;
 			updateClausesToCheck(new Set<number>(), -1);
 			return;
 		}
-		const conflictRecord: ConflictAnalysis = record['pending'] as ConflictAnalysis;
+		const conflictRecord: ConflictDetection = record['pending'] as ConflictDetection;
 		this.setConflict(conflictRecord);
 		if (this.onConflictDetection()) {
-			const { clauses, variableReasonId }: ConflictAnalysis = conflictRecord;
+			const { clauses, variableReasonId }: ConflictDetection = conflictRecord;
 			updateClausesToCheck(clauses, variableReasonId);
 		}
 	}
@@ -105,15 +105,15 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 		this.stepByStep(() => this.onConflictDetection());
 	}
 
-	protected async solveUPStepByStep(): Promise<void> {
+	protected async solveCDStepByStep(): Promise<void> {
 		this.solveToNextVariableStepByStep();
 	}
 
 	onConflictDetection(): boolean {
-		if (this.conflictAnalysis === undefined) {
+		if (this.conflictDetection === undefined) {
 			return false;
 		} else {
-			const { clauses }: ConflictAnalysis = this.conflictAnalysis;
+			const { clauses }: ConflictDetection = this.conflictDetection;
 			return clauses.size > 0;
 		}
 	}

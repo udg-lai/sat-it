@@ -6,6 +6,7 @@
 	import AutomaticDebugger from './AutomaticDebuggerComponent.svelte';
 	import AutoModeComponent from './AutoModeComponent.svelte';
 	import ConflictDetectionDebugger from './ConflictDetectionDebuggerComponent.svelte';
+	import ConflictAnalysisDebugger from './ConflictAnalysisDebuggerComponent.svelte';
 	import GeneralDebuggerButtons from './GeneralDebuggerComponent.svelte';
 	import InitialStepDebugger from './InitialStepDebuggerComponent.svelte';
 	import ManualDebugger from './ManualDebuggerComponent.svelte';
@@ -16,8 +17,8 @@
 
 	let solverMachine: SolverMachine<StateFun, StateInput> = $derived(getSolverMachine());
 	let enablePreprocess = $derived(solverMachine.onInitialState());
-	let enableBacktracking = $derived(solverMachine.onConflictState());
-	let enableConflictDetection = $derived(solverMachine.onConflictDetection());
+	let onConflictDetection = $derived(solverMachine.onConflictDetection());
+	let onConflict = $derived(solverMachine.onConflictState());
 	let finished = $derived(solverMachine.completed());
 	let inAutoMode = $derived(solverMachine.isInAutoMode());
 </script>
@@ -28,34 +29,33 @@
 	{:else if enablePreprocess}
 		<InitialStepDebugger />
 	{:else}
-		{#if enableConflictDetection}
-			<ConflictDetectionDebugger cdMode={enableConflictDetection} />
+		{#if onConflictDetection}
+			<ConflictDetectionDebugger />
+		{:else if onConflict && problem.algorithm === 'cdcl'}
+			<ConflictAnalysisDebugger />
 		{:else if !finished}
 			<AutomaticDebugger
-				backtrackingState={enableBacktracking}
+				{onConflict}
 				{finished}
-				cdMode={enableConflictDetection}
-				nextVariable={defaultNextVariable && !enableBacktracking ? defaultNextVariable : undefined}
+				{onConflictDetection}
+				nextVariable={defaultNextVariable !== undefined && !onConflict
+					? defaultNextVariable
+					: undefined}
 			/>
 
-			<ManualDebugger
-				{defaultNextVariable}
-				{finished}
-				cdMode={enableConflictDetection}
-				backtrackingState={enableBacktracking}
-			/>
+			<ManualDebugger {defaultNextVariable} {finished} {onConflict} />
 		{:else}
 			<ResetProblemDebugger />
 		{/if}
 
-		<GeneralDebuggerButtons {finished} backtrackingState={enableBacktracking} />
+		<GeneralDebuggerButtons {finished} backtrackingState={onConflict} />
 	{/if}
 </debugger>
 
 <style>
 	debugger {
 		height: var(--debugger-height);
-		width: 50%;
+		width: 100%;
 		min-height: var(--debugger-height);
 		display: flex;
 		align-items: center;

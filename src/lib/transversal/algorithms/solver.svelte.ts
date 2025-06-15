@@ -11,8 +11,8 @@ import {
 } from '$lib/store/statistics.svelte.ts';
 import { logBreakpoint, logFatal } from '$lib/store/toasts.ts';
 import { getLatestTrail, getTrails, stackTrail, unstackTrail } from '$lib/store/trails.svelte.ts';
+import type { ClauseEval } from '../entities/Clause.ts';
 import type Clause from '../entities/Clause.ts';
-import { type ClauseEval } from '../entities/Clause.ts';
 import type ClausePool from '../entities/ClausePool.svelte.ts';
 import { Trail } from '../entities/Trail.svelte.ts';
 import type Variable from '../entities/Variable.svelte.ts';
@@ -152,8 +152,7 @@ const afterAssignment = (assignment: Assignment): void => {
 };
 
 export const backtracking = (pool: VariablePool): number => {
-	const trail: Trail = (getLatestTrail() as Trail).copy();
-	trail.updateTrailEnding();
+	const trail: Trail = (getLatestTrail() as Trail).partialCopy();
 	const lastVariableAssignment: VariableAssignment = disposeUntilDecision(trail, pool);
 
 	const lastVariable: Variable = lastVariableAssignment.getVariable();

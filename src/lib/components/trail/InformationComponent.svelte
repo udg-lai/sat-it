@@ -22,9 +22,9 @@
 		class: 'h-7 w-7 cursor-pointer'
 	};
 
-	const clauseId: number = $derived(trail.getTrailEnding());
+	const clauseId: number | undefined = $derived(trail.getTrailConflict());
 	const clause: string | undefined = $derived.by(() => {
-		if (clauseId === -1) return undefined;
+		if (clauseId === undefined) return undefined;
 		const clause: Clause = problem.clauses.get(clauseId);
 		return clause
 			.map((literal) => {
@@ -72,7 +72,7 @@
 	}
 
 	.notification.conflict {
-		color: var(--backtracking-color);
+		color: var(--conflict-color);
 		cursor: pointer;
 		pointer-events: auto;
 	}

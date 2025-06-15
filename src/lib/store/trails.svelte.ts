@@ -20,5 +20,5 @@ export const updateTrails = (snapshot: Trail[]): void => {
 };
 
 export const updateLastTrailEnding = (clauseId: number): void => {
-	trails[trails.length - 1].updateTrailEnding(clauseId);
+	trails[trails.length - 1].updateTrailConflict(clauseId);
 };

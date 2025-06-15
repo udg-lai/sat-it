@@ -1,11 +1,12 @@
 import { logFatal, logSAT, logUnSAT } from '$lib/store/toasts.ts';
 import type { BKT_FUN, BKT_INPUT } from './backtracking/bkt-domain.svelte.ts';
+import type { CDCL_FUN, CDCL_INPUT } from './cdcl/cdcl-domain.svelte.ts';
 import type { DPLL_FUN, DPLL_INPUT } from './dpll/dpll-domain.svelte.ts';
 import { UNSAT_STATE_ID } from './reserved.ts';
 
-export type StateFun = BKT_FUN | DPLL_FUN | never;
+export type StateFun = BKT_FUN | DPLL_FUN | CDCL_FUN | never;
 
-export type StateInput = BKT_INPUT | DPLL_INPUT;
+export type StateInput = BKT_INPUT | DPLL_INPUT | CDCL_INPUT;
 
 export interface FinalState<F extends StateFun> {
 	id: number;

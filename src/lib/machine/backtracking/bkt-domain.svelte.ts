@@ -13,8 +13,8 @@ import {
 } from '$lib/transversal/algorithms/solver.svelte.ts';
 import { isUnSATClause, type ClauseEval } from '$lib/transversal/entities/Clause.ts';
 import type ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';
+import type { ConflictDetection } from '../SolverMachine.svelte.ts';
 import { VariablePool } from '$lib/transversal/entities/VariablePool.svelte.ts';
-import type { ConflictAnalysis } from '../SolverMachine.svelte.ts';
 import type { BKT_SolverMachine } from './bkt-solver-machine.svelte.ts';
 
 // **state inputs **
@@ -105,7 +105,7 @@ export const queueClauseSet: BKT_QUEUE_CLAUSE_SET_FUN = (
 export type BKT_PICK_PENDING_SET_FUN = (solverStateMachine: BKT_SolverMachine) => Set<number>;
 
 export const pickPendingSet: BKT_PICK_PENDING_SET_FUN = (solverStateMachine: BKT_SolverMachine) => {
-	const { clauses, variableReasonId }: ConflictAnalysis = solverStateMachine.consultConflict();
+	const { clauses, variableReasonId }: ConflictDetection = solverStateMachine.consultConflict();
 	updateClausesToCheck(clauses, variableReasonId);
 	return clauses;
 };

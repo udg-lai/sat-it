@@ -39,8 +39,8 @@
 
 <style>
 	.backtracking {
-		border-color: var(--backtracking-color);
-		color: var(--backtracking-color);
+		border-color: var(--conflict-color);
+		color: var(--conflict-color);
 		border-top: 1px transparent;
 		border-left: 1px transparent;
 		border-right: 1px transparent;
