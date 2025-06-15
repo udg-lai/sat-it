@@ -28,7 +28,7 @@ export class Trail {
 		return newTrail;
 	}
 
-	//This partial copy is needed to avoid having the same trailEnding and
+	//This partial copy is needed as we don't want to have the same "trailConflict" and "learnedClause" as this function is meant for creating the new "latestTrail"
 	partialCopy(): Trail {
 		const newTrail = new Trail(this.trailCapacity);
 		newTrail.assignments = this.assignments.map((assignment) => assignment.copy());
@@ -143,7 +143,7 @@ export class Trail {
 			dl === 0 ? this.getMarkOfDecisionLevel(1) : this.getMarkOfDecisionLevel(dl + 1);
 		while (this.assignments.length > targetIndex) {
 			const last: VariableAssignment = this.pop() as VariableAssignment;
-			getProblemStore().variables.dispose(last.getVariable().getInt());
+			getProblemStore().variables.unassign(last.getVariable().getInt());
 		}
 
 		//Set the new dl parameters

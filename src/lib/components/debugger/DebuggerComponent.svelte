@@ -13,7 +13,7 @@
 	import ResetProblemDebugger from './ResetProblemDebuggerComponent.svelte';
 
 	const problem: Problem = $derived(getProblemStore());
-	let defaultNextVariable: number | undefined = $derived(problem.variables.nextVariable);
+	let defaultNextVariable: number | undefined = $derived(problem.variables.nextVariable());
 
 	let solverMachine: SolverMachine<StateFun, StateInput> = $derived(getSolverMachine());
 	let enablePreprocess = $derived(solverMachine.onInitialState());
