@@ -67,9 +67,9 @@
 			<AppComponent />
 		</workspace>
 	</main>
-	<footer-component>
+	<footer>
 		<StatisticsComponent />
-	</footer-component>
+	</footer>
 </website-wrapper>
 
 {#if renderSettings}
@@ -110,8 +110,7 @@
 		z-index: var(--notification-z-index);
 	}
 
-	footer-component {
-		padding-bottom: 0.5rem;
+	footer {
 		width: 100%;
 		background-color: var(--main-bg-color);
 		border-top-width: 1px;
