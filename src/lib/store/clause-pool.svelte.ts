@@ -1,21 +1,21 @@
 import type Clause from '$lib/transversal/entities/Clause.ts';
-import UnindexedClause from '$lib/transversal/entities/UnindexedClause.ts';
+import TemporalClause from '$lib/transversal/entities/TemporalClause.ts';
 
-let defaultcClauses: UnindexedClause[] = $state([]);
+let defaultClauses: TemporalClause[] = $state([]);
 
 export const setDefaultClauses = (clauses: Clause[]) => {
-	defaultcClauses = [];
+	defaultClauses = [];
 	for (const clause of clauses) {
-		defaultcClauses.push(new UnindexedClause(clause.getLiterals()));
+		defaultClauses.push(clause.toTemporalClause());
 	}
 };
 
-export const getDefaultClauses = () => defaultcClauses;
+export const getDefaultClauses = () => defaultClauses;
 
-let conclictClause: UnindexedClause | undefined = $state(undefined);
+let conflictClause: TemporalClause | undefined = $state(undefined);
 
-export const setConflictClause = (cc: UnindexedClause) => {
-	conclictClause = cc;
+export const setConflictClause = (cc: TemporalClause) => {
+	conflictClause = cc;
 };
 
-export const getConflictClause = () => conclictClause;
+export const getConflictClause = () => conflictClause;

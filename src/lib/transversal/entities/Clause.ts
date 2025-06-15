@@ -1,9 +1,8 @@
 import { logFatal } from '$lib/store/toasts.ts';
-import logicResolution from '../algorithms/resolution.ts';
 import type { Comparable } from '../interfaces/Comparable.ts';
 import { arraysEqual } from '../types/array.ts';
 import type Literal from './Literal.svelte.ts';
-import UnindexedClause from './UnindexedClause.ts';
+import TemporalClause from './TemporalClause.ts';
 
 class Clause implements Comparable<Clause> {
 	private literals: Literal[] = [];
@@ -113,10 +112,15 @@ class Clause implements Comparable<Clause> {
 		return unit;
 	}
 
-	resolution(other: UnindexedClause): Clause {
-		const temporalClause: UnindexedClause = new UnindexedClause(this.getLiterals());
-		const result: UnindexedClause = logicResolution(temporalClause, other);
+	resolution(other: Clause): Clause {
+		const thisTemp: TemporalClause = new TemporalClause(this.getLiterals());
+		const otherTemp: TemporalClause = new TemporalClause(other.getLiterals());
+		const result: TemporalClause = thisTemp.resolution(otherTemp);
 		return new Clause(result.getLiterals());
+	}
+
+	toTemporalClause(): TemporalClause {
+		return new TemporalClause(this.getLiterals());
 	}
 
 	equals(other: Clause): boolean {

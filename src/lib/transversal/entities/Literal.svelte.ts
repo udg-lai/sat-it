@@ -58,8 +58,8 @@ export default class Literal implements Comparable<Literal> {
 				'The evaluation is given by its variable which is not yet assigned'
 			);
 		}
-		let evaluation = this.variable.getAssignment();
-		if (this.polarity === 'Negative') evaluation = !evaluation;
-		return evaluation;
+		let truthValue: boolean = this.variable.getAssignment() as boolean;
+		if (this.polarity === 'Negative') truthValue = !truthValue;
+		return truthValue;
 	}
 }

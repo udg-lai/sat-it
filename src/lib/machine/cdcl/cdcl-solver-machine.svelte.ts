@@ -2,7 +2,7 @@ import { setConflictClause } from '$lib/store/clause-pool.svelte.ts';
 import { updateClausesToCheck } from '$lib/store/conflict-detection-state.svelte.ts';
 import { logFatal } from '$lib/store/toasts.ts';
 import { Queue } from '$lib/transversal/entities/Queue.svelte.ts';
-import type UnindexedClause from '$lib/transversal/entities/UnindexedClause.ts';
+import type TemporalClause from '$lib/transversal/entities/TemporalClause.ts';
 import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
 import {
 	SolverMachine,
@@ -74,14 +74,14 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 
 	setConflictAnalysis(
 		trail: Trail,
-		conflictClause: UnindexedClause,
+		conflictClause: TemporalClause,
 		decisionLevelVariables: number[]
 	): void {
 		this.conflictAnalysis = { trail, conflictClause, decisionLevelVariables };
 		setConflictClause(this.conflictAnalysis.conflictClause);
 	}
 
-	updateConflictClause(conflictClause: UnindexedClause): void {
+	updateConflictClause(conflictClause: TemporalClause): void {
 		if (!this.conflictAnalysis) {
 			logFatal(
 				'Not possible to update the Conflict Clause',
@@ -96,11 +96,11 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 		return this.conflictAnalysis;
 	}
 
-	isAsseritve() {
+	isAssertive() {
 		if (this.conflictAnalysis === undefined) return false;
 
 		const variables: number[] = this.conflictAnalysis.decisionLevelVariables;
-		const conflictClause: UnindexedClause = this.conflictAnalysis.conflictClause;
+		const conflictClause: TemporalClause = this.conflictAnalysis.conflictClause;
 
 		let variablesFound: number = 0;
 		let i: number = 0;
@@ -113,7 +113,7 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 		if (variablesFound === 0) {
 			logFatal(
 				'Not possible result',
-				'There must be at least one variable inside the conlict clause'
+				'There must be at least one variable inside the conflict clause'
 			);
 		}
 		return variablesFound === 1;
@@ -187,7 +187,7 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 	}
 
 	protected async solveCAStepByStep(): Promise<void> {
-		this.stepByStep(() => !this.isAsseritve());
+		this.stepByStep(() => !this.isAssertive());
 	}
 
 	onConflictDetection(): boolean {

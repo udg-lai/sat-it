@@ -4,8 +4,8 @@ import type { StateFun, StateInput, StateMachine } from './StateMachine.svelte.t
 import { logFatal, logWarning } from '$lib/store/toasts.ts';
 import { getStepDelay } from '$lib/store/delay-ms.svelte.ts';
 import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
-import type UnindexedClause from '$lib/transversal/entities/UnindexedClause.ts';
 import type { SvelteSet } from 'svelte/reactivity';
+import type TemporalClause from '$lib/transversal/entities/TemporalClause.ts';
 
 export type ConflictDetection = {
 	clauses: SvelteSet<number>;
@@ -14,7 +14,7 @@ export type ConflictDetection = {
 
 export type ConflictAnalysis = {
 	trail: Trail;
-	conflictClause: UnindexedClause;
+	conflictClause: TemporalClause;
 	decisionLevelVariables: number[];
 };
 
