@@ -34,7 +34,6 @@ export const isPropagationReason = (r: Reason): r is Propagation => {
 	return r.type === 'propagated' || r.type === 'backjumping';
 };
 
-
 export const isDecisionReason = (r: Reason): r is Decision => {
 	return r.type === 'manual' || r.type === 'automated';
 };

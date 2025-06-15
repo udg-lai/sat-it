@@ -29,10 +29,7 @@ import Clause, {
 import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
 import { getLatestTrail, getTrails } from '$lib/store/trails.svelte.ts';
 import type VariableAssignment from '$lib/transversal/entities/VariableAssignment.ts';
-import {
-	isPropagationReason,
-	type Reason
-} from '$lib/transversal/entities/VariableAssignment.ts';
+import { isPropagationReason, type Reason } from '$lib/transversal/entities/VariableAssignment.ts';
 import TemporalClause from '$lib/transversal/entities/TemporalClause.ts';
 
 const problem: Problem = $derived(getProblemStore());
