@@ -5,7 +5,7 @@ import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
 import Clause from '$lib/transversal/entities/Clause.ts';
 import { getDefaultClauses, setDefaultClauses } from './clause-pool.svelte.ts';
 import { getTrails } from './trails.svelte.ts';
-import type UnindexedClause from '$lib/transversal/entities/UnindexedClause.ts';
+import type TemporalClause from '$lib/transversal/entities/TemporalClause.ts';
 
 export type MappingLiteral2Clauses = Map<number, Set<number>>;
 
@@ -121,14 +121,14 @@ const addClauseToMapping = (clause: Clause, clauseId: number, mapping: MappingLi
 
 const obtainProblemClauses = (): Clause[] => {
 	//Get all the clauses from the problem
-	const defaultClauses: UnindexedClause[] = getDefaultClauses();
-	const learnedClauses: UnindexedClause[] = [];
+	const defaultClauses: TemporalClause[] = getDefaultClauses();
+	const learnedClauses: TemporalClause[] = [];
 	for (const trail of getTrails()) {
-		const learnedClause: UnindexedClause | undefined = trail.getLearnedClause();
+		const learnedClause: TemporalClause | undefined = trail.getLearnedClause();
 		if (learnedClause !== undefined) learnedClauses.push(learnedClause);
 		console.log(trail);
 	}
-	const problemUnindexedClauses: UnindexedClause[] = [...defaultClauses, ...learnedClauses];
+	const problemUnindexedClauses: TemporalClause[] = [...defaultClauses, ...learnedClauses];
 
 	//Reset the clause id Counter and generate the clause list to reset the clause pool
 	Clause.resetUniqueIdGenerator();
