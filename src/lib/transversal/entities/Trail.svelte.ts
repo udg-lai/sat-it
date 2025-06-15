@@ -1,12 +1,12 @@
 import type VariableAssignment from '$lib/transversal/entities/VariableAssignment.ts';
 import { logFatal } from '$lib/store/toasts.ts';
 import { getProblemStore } from '$lib/store/problem.svelte.ts';
-import UnindexedClause from './UnindexedClause.ts';
+import TemporalClause from './TemporalClause.ts';
 
 export class Trail {
 	private assignments: VariableAssignment[] = $state([]);
 	private decisionLevelBookmark: number[] = $state([-1]);
-	private learned: UnindexedClause | undefined = undefined;
+	private learned: TemporalClause | undefined = undefined;
 	private followUPIndex: number = -1;
 	private decisionLevel: number = 0;
 	private trailCapacity: number = 0;
@@ -120,11 +120,11 @@ export class Trail {
 		return returnValue;
 	}
 
-	getLearnedClause(): UnindexedClause | undefined {
+	getLearnedClause(): TemporalClause | undefined {
 		return this.learned;
 	}
 
-	learn(clause: UnindexedClause): void {
+	learn(clause: TemporalClause): void {
 		this.learned = clause;
 	}
 

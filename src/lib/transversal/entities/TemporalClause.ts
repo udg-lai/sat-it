@@ -1,8 +1,7 @@
 import logicResolution from '../algorithms/resolution.ts';
-import type Clause from './Clause.ts';
 import type Literal from './Literal.svelte.ts';
 
-class UnindexedClause {
+class TemporalClause {
 	private literals: Literal[] = [];
 
 	constructor(literals: Literal[] = []) {
@@ -13,9 +12,8 @@ class UnindexedClause {
 		return [...this.literals];
 	}
 
-	resolution(other: Clause): UnindexedClause {
-		const unindexedClause: UnindexedClause = new UnindexedClause(other.getLiterals());
-		return logicResolution(this, unindexedClause);
+	resolution(other: TemporalClause): TemporalClause {
+		return logicResolution(this, other);
 	}
 
 	containsVariable(variableId: number): boolean {
@@ -37,4 +35,4 @@ class UnindexedClause {
 		return this.literals.map(callback, thisArg);
 	}
 }
-export default UnindexedClause;
+export default TemporalClause;
