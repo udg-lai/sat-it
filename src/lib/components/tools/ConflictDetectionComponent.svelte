@@ -27,7 +27,11 @@
 				{clause.getId()}.
 			</span>
 		</div>
-		<div class:inspecting={checkingIndex === index} class:inspectedTrue={checkingIndex > index && isSatClause(clause.eval())} class:inspectedFalse={checkingIndex > index && isUnSATClause(clause.eval())}>
+		<div
+			class:inspecting={checkingIndex === index}
+			class:inspectedTrue={checkingIndex > index && isSatClause(clause.eval())}
+			class:inspectedFalse={checkingIndex > index && isUnSATClause(clause.eval())}
+		>
 			<ClauseComponent {clause} />
 		</div>
 	</div>
@@ -58,15 +62,15 @@
 		opacity: 1;
 	}
 
-		.inspecting {
+	.inspecting {
 		background-color: rgba(136, 213, 255, 0.2);
 	}
 
 	.inspectedTrue {
-		background-color: rgba(79, 211, 79, 0.200);
+		background-color: rgba(79, 211, 79, 0.2);
 	}
 
 	.inspectedFalse {
-		background-color: rgba(255, 152, 152, 0.200);
+		background-color: rgba(255, 152, 152, 0.2);
 	}
 </style>
