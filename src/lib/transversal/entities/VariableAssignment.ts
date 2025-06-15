@@ -22,11 +22,18 @@ type Backjumping = {
 	clauseId: number;
 };
 
+type Propagation = UnitPropagation | Backjumping;
+
 type Backtracking = {
 	type: 'backtracking';
 };
 
-export type Reason = Decision | UnitPropagation | Backtracking | Backjumping;
+export type Reason = Decision | Propagation | Backtracking;
+
+export const isPropagationReason = (r: Reason): r is Propagation => {
+	return r.type === 'propagated' || r.type === 'backjumping';
+};
+
 
 export const isDecisionReason = (r: Reason): r is Decision => {
 	return r.type === 'manual' || r.type === 'automated';

@@ -30,7 +30,7 @@ import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
 import { getLatestTrail, getTrails } from '$lib/store/trails.svelte.ts';
 import type VariableAssignment from '$lib/transversal/entities/VariableAssignment.ts';
 import {
-	isUnitPropagationReason,
+	isPropagationReason,
 	type Reason
 } from '$lib/transversal/entities/VariableAssignment.ts';
 import TemporalClause from '$lib/transversal/entities/TemporalClause.ts';
@@ -369,7 +369,7 @@ export const resolutionUpdateCC: CDCL_RESOLUTION_UPDATE_CC_FUN = (
 	assignment: VariableAssignment
 ) => {
 	const reason: Reason = assignment.getReason();
-	if (!isUnitPropagationReason(reason)) {
+	if (!isPropagationReason(reason)) {
 		logFatal('The Reason should be a UP');
 	}
 	const upClauseId: number = reason.clauseId;

@@ -27,10 +27,10 @@
 			if (isUnitPropagationReason(reason)) {
 				return problem.clauses.get(reason.clauseId);
 			} else {
-				logFatal('Reason error', 'The reason is not a backtracking');
+				logFatal('Reason error', 'The reason is not a UP');
 			}
 		} else {
-			logFatal('Reason error', 'The variable assignment is not a backtracking');
+			logFatal('Reason error', 'The variable assignment is not a UP');
 		}
 	});
 
