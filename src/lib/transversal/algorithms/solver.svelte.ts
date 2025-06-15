@@ -17,7 +17,7 @@ import type ClausePool from '../entities/ClausePool.svelte.ts';
 import { Trail } from '../entities/Trail.svelte.ts';
 import type Variable from '../entities/Variable.svelte.ts';
 import VariableAssignment from '../entities/VariableAssignment.ts';
-import type VariablePool from '../entities/VariablePool.svelte.ts';
+import type { VariablePool } from '../entities/VariablePool.svelte.ts';
 import { isUnSAT } from '../interfaces/IClausePool.ts';
 import { fromJust, isJust } from '../types/maybe.ts';
 
@@ -54,7 +54,7 @@ export const decide = (pool: VariablePool, algorithm: string): number => {
 
 	doAssignment(variableId, assignmentEvent.polarity);
 
-	const variable = pool.getCopy(variableId);
+	const variable = pool.getVariableCopy(variableId);
 	if (manualAssignment) {
 		trail.push(VariableAssignment.newManualAssignment(variable));
 	} else {
@@ -93,7 +93,7 @@ export const unitPropagation = (
 
 	doAssignment(variableId, polarity);
 
-	const variable: Variable = variables.getCopy(variableId);
+	const variable: Variable = variables.getVariableCopy(variableId);
 	if (assignmentReason === 'up') {
 		trail.push(VariableAssignment.newUnitPropagationAssignment(variable, clauseId));
 	} else {
@@ -133,7 +133,7 @@ export const nonDecisionMade = (): boolean => {
 const doAssignment = (variableId: number, polarity: boolean): void => {
 	const { variables } = getProblemStore();
 
-	variables.persist(variableId, polarity);
+	variables.assign(variableId, polarity);
 
 	const assignment: Assignment = {
 		type: 'variable',
@@ -162,11 +162,10 @@ export const backtracking = (pool: VariablePool): number => {
 
 	const lastVariable: Variable = lastVariableAssignment.getVariable();
 	const polarity: boolean = !lastVariable.getAssignment();
-	pool.dispose(lastVariable.getInt());
 
 	doAssignment(lastVariable.getInt(), polarity);
 
-	const variable = pool.getCopy(lastVariable.getInt());
+	const variable = pool.getVariableCopy(lastVariable.getInt());
 	trail.push(VariableAssignment.newBacktrackingAssignment(variable));
 	trail.updateFollowUpIndex();
 
@@ -178,7 +177,7 @@ export const backtracking = (pool: VariablePool): number => {
 const disposeUntilDecision = (trail: Trail, variables: VariablePool): VariableAssignment => {
 	let last = trail.pop();
 	while (last && !last.isD()) {
-		variables.dispose(last.getVariable().getInt());
+		variables.unassign(last.getVariable().getInt());
 		last = trail.pop();
 	}
 	if (!last) {

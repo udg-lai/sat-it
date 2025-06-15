@@ -7,7 +7,7 @@ import VariableAssignment, {
 	isAutomatedReason,
 	isManualReason
 } from '$lib/transversal/entities/VariableAssignment.ts';
-import VariablePool from '$lib/transversal/entities/VariablePool.svelte.ts';
+import { VariablePool } from '$lib/transversal/entities/VariablePool.svelte.ts';
 import { describe, expect, it } from 'vitest';
 
 const params: DummySearchParams = {
@@ -34,11 +34,10 @@ describe('variable assignment', () => {
 	});
 	it('Manual Decision', () => {
 		const { trails, variables } = params;
-		variables.dispose(3);
-		variables.persist(3, false);
+		variables.assign(3, false);
 
 		trails[trails.length - 1].push(
-			VariableAssignment.newManualAssignment(params.variables.getCopy(3))
+			VariableAssignment.newManualAssignment(params.variables.getVariableCopy(3))
 		);
 		const lastAssignment = trails[trails.length - 1].pop();
 		expect(lastAssignment).not.toBe(undefined);

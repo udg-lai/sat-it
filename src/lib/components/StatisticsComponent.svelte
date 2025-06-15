@@ -38,7 +38,7 @@
 	const unsat: boolean = $derived(getSolverMachine().onUnsatState());
 </script>
 
-<div class="h-full space-y-5 pt-2">
+<div class="statistics">
 	<div class="flex place-content-around">
 		<div class="metric">
 			Decision Level:
@@ -86,5 +86,9 @@
 	}
 	.statistic-value {
 		text-align: right;
+	}
+
+	.statistics {
+		padding: 0.5rem 0rem;
 	}
 </style>

@@ -16,7 +16,7 @@ import {
 	nonDecisionMade as solverNonDecisionMade,
 	decide as solverDecide
 } from '$lib/transversal/algorithms/solver.svelte.ts';
-import type VariablePool from '$lib/transversal/entities/VariablePool.svelte.ts';
+import { VariablePool } from '$lib/transversal/entities/VariablePool.svelte.ts';
 import type { CDCL_SolverMachine } from './cdcl-solver-machine.svelte.ts';
 import type { ConflictDetection } from '../SolverMachine.svelte.ts';
 import { logFatal } from '$lib/store/toasts.ts';
@@ -33,7 +33,7 @@ import {
 	isUnitPropagationReason,
 	type Reason
 } from '$lib/transversal/entities/VariableAssignment.ts';
-import UnindexedClause from '$lib/transversal/entities/UnindexedClause.ts';
+import TemporalClause from '$lib/transversal/entities/TemporalClause.ts';
 
 const problem: Problem = $derived(getProblemStore());
 
@@ -324,9 +324,7 @@ export const buildConflictAnalysis: CDLC_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN =
 		);
 	}
 	const conflictiveClause: Clause = getProblemStore().clauses.get(conflictiveClauseId);
-	const conflictiveClauseCopy: UnindexedClause = new UnindexedClause(
-		conflictiveClause.getLiterals()
-	);
+	const conflictiveClauseCopy: TemporalClause = new TemporalClause(conflictiveClause.getLiterals());
 	//Lastly, generate the conflict analysis structure
 	solver.setConflictAnalysis(
 		latestTrail.partialCopy(),
@@ -338,7 +336,7 @@ export const buildConflictAnalysis: CDLC_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN =
 export type CDCL_ASSERTING_CLAUSE_FUN = (solver: CDCL_SolverMachine) => boolean;
 
 export const assertingClause: CDCL_ASSERTING_CLAUSE_FUN = (solver: CDCL_SolverMachine) => {
-	return solver.isAsseritve();
+	return solver.isAssertive();
 };
 
 export type CDCL_PICK_LAST_ASSIGNMENT_FUN = (trail: Trail) => VariableAssignment;
@@ -348,12 +346,12 @@ export const pickLastAssignment = (trail: Trail) => {
 };
 
 export type CDCL_VARIABLE_IN_CC_FUN = (
-	conclictClause: UnindexedClause,
+	conclictClause: TemporalClause,
 	assignment: VariableAssignment
 ) => boolean;
 
 export const variableInCC: CDCL_VARIABLE_IN_CC_FUN = (
-	conclictClause: UnindexedClause,
+	conclictClause: TemporalClause,
 	assignment: VariableAssignment
 ) => {
 	return conclictClause.containsVariable(assignment.getVariable().getInt());
@@ -361,13 +359,13 @@ export const variableInCC: CDCL_VARIABLE_IN_CC_FUN = (
 
 export type CDCL_RESOLUTION_UPDATE_CC_FUN = (
 	solver: CDCL_SolverMachine,
-	conflictClause: UnindexedClause,
+	conflictClause: TemporalClause,
 	assignment: VariableAssignment
 ) => void;
 
 export const resolutionUpdateCC: CDCL_RESOLUTION_UPDATE_CC_FUN = (
 	solver: CDCL_SolverMachine,
-	conflictClause: UnindexedClause,
+	conflictClause: TemporalClause,
 	assignment: VariableAssignment
 ) => {
 	const reason: Reason = assignment.getReason();
@@ -376,7 +374,7 @@ export const resolutionUpdateCC: CDCL_RESOLUTION_UPDATE_CC_FUN = (
 	}
 	const upClauseId: number = reason.clauseId;
 	const upClause: Clause = getProblemStore().clauses.get(upClauseId);
-	const newCC: UnindexedClause = conflictClause.resolution(upClause);
+	const newCC: TemporalClause = conflictClause.resolution(upClause.toTemporalClause());
 	solver.updateConflictClause(newCC);
 };
 
@@ -384,17 +382,17 @@ export type CDCL_DELETE_LAST_ASSIGNMENT_FUN = (trail: Trail) => void;
 
 export const deleteLastAssignment: CDCL_DELETE_LAST_ASSIGNMENT_FUN = (trail: Trail) => {
 	const assignment: VariableAssignment = trail.pop() as VariableAssignment;
-	getProblemStore().variables.dispose(assignment.getVariable().getInt());
+	getProblemStore().variables.unassign(assignment.getVariable().getInt());
 };
 
 export type CDCL_LEARN_CONCLICT_CLAUSE_FUN = (
 	trail: Trail,
-	conclictClause: UnindexedClause
+	conclictClause: TemporalClause
 ) => number;
 
 export const learnConflictClause: CDCL_LEARN_CONCLICT_CLAUSE_FUN = (
 	trail: Trail,
-	conclictClause: UnindexedClause
+	conclictClause: TemporalClause
 ) => {
 	//Add the UnindexedClause to the trail
 	trail.learn(conclictClause);
@@ -407,11 +405,11 @@ export const learnConflictClause: CDCL_LEARN_CONCLICT_CLAUSE_FUN = (
 	return toLearnClause.getId();
 };
 
-export type CDCL_SECOND_HIGHEST_DL_FUN = (trail: Trail, conclictClause: UnindexedClause) => number;
+export type CDCL_SECOND_HIGHEST_DL_FUN = (trail: Trail, conclictClause: TemporalClause) => number;
 
 export const secondHighestDL: CDCL_SECOND_HIGHEST_DL_FUN = (
 	trail: Trail,
-	conclictClause: UnindexedClause
+	conclictClause: TemporalClause
 ) => {
 	const clauseVariables: number[] = conclictClause.getLiterals().map((literal) => {
 		return literal.getVariable().getInt();

@@ -16,7 +16,7 @@ import {
 	decide as solverDecide
 } from '$lib/transversal/algorithms/solver.svelte.ts';
 import type ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';
-import type VariablePool from '$lib/transversal/entities/VariablePool.svelte.ts';
+import { VariablePool } from '$lib/transversal/entities/VariablePool.svelte.ts';
 import type { DPLL_SolverMachine } from './dpll-solver-machine.svelte.ts';
 import { updateClausesToCheck } from '$lib/store/conflict-detection-state.svelte.ts';
 import { logFatal } from '$lib/store/toasts.ts';

@@ -166,13 +166,13 @@ export default class VariableAssignment {
 				'The evaluation is given by its variable which is not yet assigned'
 			);
 		}
-		const assignment = this.variable.getAssignment();
-		const variable = this.variable.getInt();
+		const truthValue: boolean = this.variable.getAssignment() as boolean;
+		const variableId = this.variable.getInt();
 		let text: string;
-		if (assignment) {
-			text = variable.toString();
+		if (truthValue) {
+			text = variableId.toString();
 		} else {
-			text = `\\overline{${variable}}`;
+			text = `\\overline{${variableId}}`;
 		}
 		return text;
 	}
