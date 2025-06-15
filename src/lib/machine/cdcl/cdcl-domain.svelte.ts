@@ -16,7 +16,7 @@ import {
 	nonDecisionMade as solverNonDecisionMade,
 	decide as solverDecide
 } from '$lib/transversal/algorithms/solver.svelte.ts';
-import type VariablePool from '$lib/transversal/entities/VariablePool.svelte.ts';
+import { VariablePool } from '$lib/transversal/entities/VariablePool.svelte.ts';
 import type { CDCL_SolverMachine } from './cdcl-solver-machine.svelte.ts';
 import type { ConflictDetection } from '../SolverMachine.svelte.ts';
 import { logFatal } from '$lib/store/toasts.ts';
@@ -379,7 +379,7 @@ export type CDCL_DELETE_LAST_ASSIGNMENT_FUN = (trail: Trail) => void;
 
 export const deleteLastAssignment: CDCL_DELETE_LAST_ASSIGNMENT_FUN = (trail: Trail) => {
 	const assignment: VariableAssignment = trail.pop() as VariableAssignment;
-	getProblemStore().variables.dispose(assignment.getVariable().getInt());
+	getProblemStore().variables.unassign(assignment.getVariable().getInt());
 };
 
 export type CDCL_LEARN_CONCLICT_CLAUSE_FUN = (
