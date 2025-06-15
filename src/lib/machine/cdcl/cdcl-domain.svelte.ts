@@ -321,9 +321,7 @@ export const buildConflictAnalysis: CDLC_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN =
 		);
 	}
 	const conflictiveClause: Clause = getProblemStore().clauses.get(conflictiveClauseId);
-	const conflictiveClauseCopy: TemporalClause = new TemporalClause(
-		conflictiveClause.getLiterals()
-	);
+	const conflictiveClauseCopy: TemporalClause = new TemporalClause(conflictiveClause.getLiterals());
 	//Lastly, generate the conflict analysis structure
 	solver.setConflictAnalysis(
 		latestTrail.partialCopy(),
