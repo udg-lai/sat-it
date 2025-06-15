@@ -111,7 +111,7 @@
 	}
 
 	footer-component {
-		height: 40px;
+		padding-bottom: 0.5rem;
 		width: 100%;
 		background-color: var(--main-bg-color);
 		border-top-width: 1px;
