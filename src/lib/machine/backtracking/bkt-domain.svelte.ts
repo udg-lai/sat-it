@@ -138,7 +138,10 @@ export const unsatisfiedClause: BKT_CONFLICT_DETECTION_FUN = (clauseId: number) 
 
 export type BKT_DELETE_CLAUSE_FUN = (pending: SvelteSet<number>, clauseId: number) => void;
 
-export const deleteClause: BKT_DELETE_CLAUSE_FUN = (pending: SvelteSet<number>, clauseId: number) => {
+export const deleteClause: BKT_DELETE_CLAUSE_FUN = (
+	pending: SvelteSet<number>,
+	clauseId: number
+) => {
 	if (!pending.has(clauseId)) {
 		logFatal('Clause not found', `Clause - ${clauseId} not found`);
 	}

@@ -156,14 +156,19 @@ export const triggeredClauses: DPLL_TRIGGERED_CLAUSES_FUN = (clauses: SvelteSet<
 
 export type DPLL_DELETE_CLAUSE_FUN = (clauses: SvelteSet<number>, clauseId: number) => void;
 
-export const deleteClause: DPLL_DELETE_CLAUSE_FUN = (clauses: SvelteSet<number>, clauseId: number) => {
+export const deleteClause: DPLL_DELETE_CLAUSE_FUN = (
+	clauses: SvelteSet<number>,
+	clauseId: number
+) => {
 	if (!clauses.has(clauseId)) {
 		logFatal('Clause not found', `Clause - ${clauseId} not found`);
 	}
 	clauses.delete(clauseId);
 };
 
-export type DPLL_PICK_CLAUSE_SET_FUN = (solverStateMachine: DPLL_SolverMachine) => SvelteSet<number>;
+export type DPLL_PICK_CLAUSE_SET_FUN = (
+	solverStateMachine: DPLL_SolverMachine
+) => SvelteSet<number>;
 
 export const pickPendingClauseSet: DPLL_PICK_CLAUSE_SET_FUN = (
 	solverStateMachine: DPLL_SolverMachine

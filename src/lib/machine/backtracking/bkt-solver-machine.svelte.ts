@@ -67,7 +67,9 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 
 	private makeConflictDetectionCopy(): ConflictDetection | undefined {
 		if (this.conflictDetection !== undefined) {
-			const clauses: SvelteSet<number> = new SvelteSet<number>([...this.conflictDetection.clauses.values()]);
+			const clauses: SvelteSet<number> = new SvelteSet<number>([
+				...this.conflictDetection.clauses.values()
+			]);
 			const variableReasonId: number = this.conflictDetection.variableReasonId;
 			return { clauses, variableReasonId };
 		}

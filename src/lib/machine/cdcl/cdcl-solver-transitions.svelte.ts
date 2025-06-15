@@ -309,7 +309,10 @@ export const analyzeClause = (solver: CDCL_SolverMachine): void => {
 	}
 };
 
-const nextClauseTransition = (stateMachine: CDCL_StateMachine, clauseSet: SvelteSet<number>): number => {
+const nextClauseTransition = (
+	stateMachine: CDCL_StateMachine,
+	clauseSet: SvelteSet<number>
+): number => {
 	const nextCluaseState = stateMachine.getActiveState() as NonFinalState<
 		CDCL_NEXT_CLAUSE_FUN,
 		CDCL_NEXT_CLAUSE_INPUT

@@ -202,14 +202,19 @@ export const triggeredClauses: CDCL_TRIGGERED_CLAUSES_FUN = (clauses: SvelteSet<
 
 export type CDCL_DELETE_CLAUSE_FUN = (clauses: SvelteSet<number>, clauseId: number) => void;
 
-export const deleteClause: CDCL_DELETE_CLAUSE_FUN = (clauses: SvelteSet<number>, clauseId: number) => {
+export const deleteClause: CDCL_DELETE_CLAUSE_FUN = (
+	clauses: SvelteSet<number>,
+	clauseId: number
+) => {
 	if (!clauses.has(clauseId)) {
 		logFatal('Clause not found', `Clause - ${clauseId} not found`);
 	}
 	clauses.delete(clauseId);
 };
 
-export type CDCL_PICK_CLAUSE_SET_FUN = (solverStateMachine: CDCL_SolverMachine) => SvelteSet<number>;
+export type CDCL_PICK_CLAUSE_SET_FUN = (
+	solverStateMachine: CDCL_SolverMachine
+) => SvelteSet<number>;
 
 export const pickPendingClauseSet: CDCL_PICK_CLAUSE_SET_FUN = (
 	solverStateMachine: CDCL_SolverMachine
