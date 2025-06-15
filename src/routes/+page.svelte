@@ -46,30 +46,31 @@
 </script>
 
 <svelte:body oncontextmenu={disableContextMenu} />
+<website-wrapper>
+	<main class="chakra-petch-medium">
+		{#if $toasts}
+			<div class="toasts">
+				{#each $toasts as toast (toast.id)}
+					<ToastComponent {toast} />
+				{/each}
+			</div>
+		{/if}
 
-<main class="chakra-petch-medium">
-	{#if $toasts}
-		<div class="toasts">
-			{#each $toasts as toast (toast.id)}
-				<ToastComponent {toast} />
-			{/each}
-		</div>
-	{/if}
-
-	<tools>
-		<ToolsComponent />
-	</tools>
-	<workspace>
-		<user>
-			<DebuggerComponent />
-			<SolvingInformation />
-		</user>
-		<AppComponent />
-	</workspace>
-</main>
-<footer-component>
-	<StatisticsComponent />
-</footer-component>
+		<tools>
+			<ToolsComponent />
+		</tools>
+		<workspace>
+			<user>
+				<DebuggerComponent />
+				<SolvingInformation />
+			</user>
+			<AppComponent />
+		</workspace>
+	</main>
+	<footer-component>
+		<StatisticsComponent />
+	</footer-component>
+</website-wrapper>
 
 {#if renderSettings}
 	<settings>
@@ -78,13 +79,18 @@
 {/if}
 
 <style>
+	website-wrapper {
+		display: flex;
+		flex-direction: column;
+		height: 100%;
+	}
+
 	main {
 		position: relative;
 		display: flex;
 		flex-direction: row;
-		height: 100%;
+		flex: 1;
 		width: 100%;
-		padding-bottom: 3rem;
 	}
 
 	workspace {
@@ -105,15 +111,12 @@
 	}
 
 	footer-component {
-		position: fixed;
-		bottom: 0;
-		left: 0;
+		height: 40px;
 		width: 100%;
-		padding-top: 0.25rem;
-		padding-bottom: 0.5rem;
 		background-color: var(--main-bg-color);
 		border-top-width: 1px;
 		border-color: var(--border-color);
+		flex-shrink: 0;
 	}
 
 	user {
