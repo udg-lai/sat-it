@@ -6,16 +6,17 @@
 		onClick?: () => void;
 		icon?: Component;
 		active?: boolean;
+		title?: string;
 	}
 
-	let { onClick, icon, active }: Props = $props();
+	let { onClick, icon, active, title }: Props = $props();
 	const iconProps = {
 		class: 'h-8 w-8 cursor-pointer'
 	};
 </script>
 
 <div class="flex flex-row">
-	<button onclick={onClick} type="button" class="button-high-contrast !p-2" class:active>
+	<button onclick={onClick} type="button" class="button-high-contrast !p-2" class:active {title}>
 		{#if icon}
 			<DynamicRender component={icon} props={iconProps} />
 		{/if}
