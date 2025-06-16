@@ -1,10 +1,6 @@
 <script lang="ts">
 	import { openSettingsViewEventBus } from '$lib/transversal/events.ts';
-	import {
-		ArrowUpFromBracketOutline,
-		BookOutline,
-		ClipboardOutline
-	} from 'flowbite-svelte-icons';
+	import { ArrowUpFromBracketOutline, BookOutline, ClipboardOutline } from 'flowbite-svelte-icons';
 	import { onMount } from 'svelte';
 	import './_styles.css';
 	import Button from './Button.svelte';
