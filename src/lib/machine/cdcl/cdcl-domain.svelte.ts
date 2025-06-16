@@ -19,7 +19,7 @@ import {
 import { VariablePool } from '$lib/transversal/entities/VariablePool.svelte.ts';
 import type { CDCL_SolverMachine } from './cdcl-solver-machine.svelte.ts';
 import type { ConflictDetection } from '../SolverMachine.svelte.ts';
-import { logFatal } from '$lib/store/toasts.ts';
+import { logFatal, logInfo } from '$lib/store/toasts.ts';
 import { updateClausesToCheck } from '$lib/store/conflict-detection-state.svelte.ts';
 import Clause, {
 	isUnitClause,
@@ -389,16 +389,18 @@ export type CDCL_LEARN_CONCLICT_CLAUSE_FUN = (
 
 export const learnConflictClause: CDCL_LEARN_CONCLICT_CLAUSE_FUN = (
 	trail: Trail,
-	conclictClause: TemporalClause
+	conflictClause: TemporalClause
 ) => {
-	//Add the UnindexedClause to the trail
-	trail.learn(conclictClause);
+	// Saves learned clause in the trail
+	trail.learn(conflictClause);
 
 	//Generate the "Clause" that will be added to the pool.
-	const toLearnClause: Clause = new Clause(conclictClause.getLiterals());
+	const toLearnClause: Clause = new Clause(conflictClause.getLiterals());
 
 	//The clause is stored inside the pool
 	addClauseToClausePool(toLearnClause);
+
+	logInfo('New clause learn', `Clause ${toLearnClause.getId()} learned`);
 	return toLearnClause.getId();
 };
 
