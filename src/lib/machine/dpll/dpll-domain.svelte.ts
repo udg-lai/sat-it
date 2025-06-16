@@ -184,14 +184,15 @@ export const allClausesChecked: DPLL_ALL_CLAUSES_CHECKED_FUN = (clauses: SvelteS
 	return clauses.size === 0;
 };
 
-export type DPLL_NEXT_CLAUSE_FUN = (clauses: SvelteSet<number>) => number;
+export type DPLL_NEXT_CLAUSE_FUN = (clauses: SvelteSet<number>, solver: DPLL_SolverMachine) => number;
 
-export const nextClause: DPLL_NEXT_CLAUSE_FUN = (clauses: SvelteSet<number>) => {
+export const nextClause: DPLL_NEXT_CLAUSE_FUN = (clauses: SvelteSet<number>, solver: DPLL_SolverMachine) => {
 	if (clauses.size === 0) {
 		logFatal('A non empty set was expected');
 	}
 	const clausesIterator = clauses.values().next();
 	const clauseId = clausesIterator.value;
+	solver.setInspectedClause(clauseId);
 	return clauseId as number;
 };
 
@@ -265,9 +266,9 @@ export type DPLL_FUN =
 	| DPLL_CHECK_PENDING_CLAUSES_FUN
 	| DPLL_ALL_VARIABLES_ASSIGNED_FUN
 	| DPLL_QUEUE_CLAUSE_SET_FUN
-	| DPLL_NEXT_CLAUSE_FUN
 	| DPLL_UNSTACK_CLAUSE_SET_FUN
 	| DPLL_DELETE_CLAUSE_FUN
+	| DPLL_NEXT_CLAUSE_FUN
 	| DPLL_CONFLICT_DETECTION_FUN
 	| DPLL_UNIT_CLAUSE_FUN
 	| DPLL_UNIT_PROPAGATION_FUN

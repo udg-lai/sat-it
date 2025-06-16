@@ -5,7 +5,7 @@ import { SolverMachine, type ConflictDetection } from '../SolverMachine.svelte.t
 import type { DPLL_FUN, DPLL_INPUT } from './dpll-domain.svelte.ts';
 import {
 	analyzeClause,
-	backtracking,
+	conflictiveState,
 	decide,
 	initialTransition
 } from './dpll-solver-transitions.svelte.ts';
@@ -18,6 +18,9 @@ export const makeDPLLSolver = (): DPLL_SolverMachine => {
 
 export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 	pendingConflicts: Queue<ConflictDetection> = $state(new Queue<ConflictDetection>());
+
+	//We will need the clause that we've inspected
+	inspectedClause: number | undefined = $state(undefined);
 
 	constructor() {
 		super(makeDPLLMachine());
@@ -57,9 +60,18 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 		return returnQueue;
 	}
 
+	getInspectedClause() {
+		return this.inspectedClause;
+	}
+
+	setInspectedClause(clauseId: number | undefined) {
+		this.inspectedClause = clauseId;
+	}
+
 	getRecord(): Record<string, unknown> {
 		return {
-			queue: this.getQueue()
+			queue: this.getQueue(),
+			inspectedClause: this.inspectedClause
 		};
 	}
 
@@ -83,6 +95,9 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 			const conflict: ConflictDetection = this.pendingConflicts.pick();
 			updateClausesToCheck(conflict.clauses, conflict.variableReasonId);
 		}
+		//Also we need the inspected clause
+		const recordedClause = record['inspectedClause'] as number | undefined;
+		this.inspectedClause = recordedClause;
 	}
 
 	step(): void {
@@ -92,8 +107,8 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 		if (activeId === dpll_stateName2StateId.empty_clause_state) {
 			initialTransition(this);
 		}
-		//Waiting to analyze the next clause of the clauses to revise
-		else if (activeId === dpll_stateName2StateId.next_clause_state) {
+		//Waiting to analyze the next clause or changing the clause set
+		else if (activeId === dpll_stateName2StateId.delete_clause_state) {
 			analyzeClause(this);
 		}
 		//Waiting to decide a variables
@@ -101,8 +116,8 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 			decide(this);
 		}
 		//Waiting to backtrack an assignment
-		else if (activeId === dpll_stateName2StateId.backtracking_state) {
-			backtracking(this);
+		else if (activeId === dpll_stateName2StateId.empty_clause_set_state) {
+			conflictiveState(this);
 		}
 	}
 
