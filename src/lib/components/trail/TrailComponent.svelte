@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
 	import type VariableAssignment from '$lib/transversal/entities/VariableAssignment.ts';
+	import BackjumpingComponent from '../assignment/BackjumpingComponent.svelte';
 	import BacktrackingComponent from '../assignment/BacktrackingComponent.svelte';
 	import UnitPropagationComponent from '../assignment/UnitPropagationComponent.svelte';
 	import DecisionLevelComponent from './DecisionLevelComponent.svelte';
@@ -52,6 +53,8 @@
 	{#each initialPropagations as assignment (assignment.variableId())}
 		{#if assignment.isK()}
 			<BacktrackingComponent {assignment} {isLast} />
+		{:else if assignment.isBJ()}
+			<BackjumpingComponent {assignment} {isLast} />
 		{:else}
 			<UnitPropagationComponent {assignment} {isLast} />
 		{/if}

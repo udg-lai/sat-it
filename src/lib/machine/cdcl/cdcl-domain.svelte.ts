@@ -29,10 +29,7 @@ import Clause, {
 import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
 import { getLatestTrail, getTrails } from '$lib/store/trails.svelte.ts';
 import type VariableAssignment from '$lib/transversal/entities/VariableAssignment.ts';
-import {
-	isUnitPropagationReason,
-	type Reason
-} from '$lib/transversal/entities/VariableAssignment.ts';
+import { isPropagatioReason, type Reason } from '$lib/transversal/entities/VariableAssignment.ts';
 import TemporalClause from '$lib/transversal/entities/TemporalClause.ts';
 
 const problem: Problem = $derived(getProblemStore());
@@ -102,7 +99,9 @@ export type CDCL_SECOND_HIGHEST_DL_INPUT = 'undo_backjumping_state';
 
 export type CDCL_BACKJUMPING_INPUT = 'push_trail_state';
 
-export type CDCL_PUSH_TRAIL_INPUT = 'unit_propagation_state';
+export type CDCL_PUSH_TRAIL_INPUT = 'propagate_cc_state';
+
+export type CDCL_PROPAGATE_CC_INPUT = 'complementary_occurrences_state';
 
 export type CDCL_INPUT =
 	| CDCL_EMPTY_CLAUSE_INPUT
@@ -132,7 +131,8 @@ export type CDCL_INPUT =
 	| CDCL_LEARN_CONCLICT_CLAUSE_INPUT
 	| CDCL_SECOND_HIGHEST_DL_INPUT
 	| CDCL_BACKJUMPING_INPUT
-	| CDCL_PUSH_TRAIL_INPUT;
+	| CDCL_PUSH_TRAIL_INPUT
+	| CDCL_PROPAGATE_CC_INPUT;
 
 // ** state functions **
 
@@ -264,7 +264,7 @@ export type CDCL_UNIT_PROPAGATION_FUN = (clauseId: number) => number;
 export const unitPropagation: CDCL_UNIT_PROPAGATION_FUN = (clauseId: number) => {
 	const variables: VariablePool = problem.variables;
 	const clauses: ClausePool = problem.clauses;
-	return solverUnitPropagation(variables, clauses, clauseId);
+	return solverUnitPropagation(variables, clauses, clauseId, 'up');
 };
 
 export type CDCL_COMPLEMENTARY_OCCURRENCES_FUN = (literal: number) => Set<number>;
@@ -366,7 +366,7 @@ export const resolutionUpdateCC: CDCL_RESOLUTION_UPDATE_CC_FUN = (
 	assignment: VariableAssignment
 ) => {
 	const reason: Reason = assignment.getReason();
-	if (!isUnitPropagationReason(reason)) {
+	if (!isPropagatioReason(reason)) {
 		logFatal('The Reason should be a UP');
 	}
 	const upClauseId: number = reason.clauseId;
@@ -429,6 +429,14 @@ export type CDCL_PUSH_TRAIL_FUN = (trail: Trail) => void;
 
 export const pushTrail: CDCL_PUSH_TRAIL_FUN = (trail: Trail) => {
 	getTrails().push(trail);
+};
+
+export type CDCL_PROPAGATE_CC_FUN = (clauseId: number) => number;
+
+export const propagateCC: CDCL_PROPAGATE_CC_FUN = (clauseId: number) => {
+	const variables: VariablePool = problem.variables;
+	const clauses: ClausePool = problem.clauses;
+	return solverUnitPropagation(variables, clauses, clauseId, 'backjumping');
 };
 
 export type CDCL_FUN =

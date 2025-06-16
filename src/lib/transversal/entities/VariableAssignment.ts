@@ -17,11 +17,18 @@ type UnitPropagation = {
 	clauseId: number;
 };
 
+type Backjumping = {
+	type: 'backjumping';
+	clauseId: number;
+};
+
+type Propagation = UnitPropagation | Backjumping;
+
 type Backtracking = {
 	type: 'backtracking';
 };
 
-export type Reason = Decision | UnitPropagation | Backtracking;
+export type Reason = Decision | Propagation | Backtracking;
 
 export const isDecisionReason = (r: Reason): r is Decision => {
 	return r.type === 'manual' || r.type === 'automated';
@@ -37,6 +44,14 @@ export const isManualReason = (r: Reason): r is Manual => {
 
 export const isUnitPropagationReason = (r: Reason): r is UnitPropagation => {
 	return r.type === 'propagated';
+};
+
+export const isBackjumpingReason = (r: Reason): r is Backjumping => {
+	return r.type === 'backjumping';
+};
+
+export const isPropagatioReason = (r: Reason): r is Propagation => {
+	return r.type === 'propagated' || r.type === 'backjumping';
 };
 
 export const isBacktrackingReason = (r: Reason): r is Backtracking => {
@@ -59,6 +74,13 @@ export const makeManualReason = (): Manual => {
 export const makeUnitPropagationReason = (clauseId: number): UnitPropagation => {
 	return {
 		type: 'propagated',
+		clauseId
+	};
+};
+
+export const makeBackjumpingResason = (clauseId: number): Backjumping => {
+	return {
+		type: 'backjumping',
 		clauseId
 	};
 };
@@ -90,6 +112,10 @@ export default class VariableAssignment {
 		return new VariableAssignment(variable, makeUnitPropagationReason(clauseId));
 	}
 
+	static newBackjumpingAssignment(variable: Variable, clauseId: number) {
+		return new VariableAssignment(variable, makeBackjumpingResason(clauseId));
+	}
+
 	static newBacktrackingAssignment(variable: Variable) {
 		return new VariableAssignment(variable, makeBacktrackingReason());
 	}
@@ -108,6 +134,10 @@ export default class VariableAssignment {
 
 	isUP(): boolean {
 		return isUnitPropagationReason(this.reason);
+	}
+
+	isBJ(): boolean {
+		return isBackjumpingReason(this.reason);
 	}
 
 	isK(): boolean {

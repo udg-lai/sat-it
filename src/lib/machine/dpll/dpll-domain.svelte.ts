@@ -218,7 +218,7 @@ export type DPLL_UNIT_PROPAGATION_FUN = (clauseId: number) => number;
 export const unitPropagation: DPLL_UNIT_PROPAGATION_FUN = (clauseId: number) => {
 	const variables: VariablePool = problem.variables;
 	const clauses: ClausePool = problem.clauses;
-	return solverUnitPropagation(variables, clauses, clauseId);
+	return solverUnitPropagation(variables, clauses, clauseId, 'up');
 };
 
 export type DPLL_COMPLEMENTARY_OCCURRENCES_FUN = (literal: number) => Set<number>;
