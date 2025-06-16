@@ -4,11 +4,12 @@ import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
 import Clause from '$lib/transversal/entities/Clause.ts';
 import { getDefaultClauses, setDefaultClauses } from './clause-pool.svelte.ts';
 import { getTrails } from './trails.svelte.ts';
+import { SvelteSet } from 'svelte/reactivity';
 import type TemporalClause from '$lib/transversal/entities/TemporalClause.ts';
 import { VariablePool } from '$lib/transversal/entities/VariablePool.svelte.ts';
 import type Variable from '$lib/transversal/entities/Variable.svelte.ts';
 
-export type MappingLiteral2Clauses = Map<number, Set<number>>;
+export type MappingLiteral2Clauses = Map<number, SvelteSet<number>>;
 
 export type Algorithm = 'backtracking' | 'dpll' | 'cdcl';
 
@@ -22,7 +23,7 @@ export interface Problem {
 let problemStore: Problem = $state({
 	variables: new VariablePool(0),
 	clauses: new ClausePool(),
-	mapping: new Map<number, Set<number>>(),
+	mapping: new Map<number, SvelteSet<number>>(),
 	algorithm: 'backtracking'
 });
 
@@ -98,7 +99,7 @@ export function addClauseToClausePool(clause: Clause) {
 }
 
 function literalToClauses(clauses: ClausePool): MappingLiteral2Clauses {
-	const mapping: Map<number, Set<number>> = new Map();
+	const mapping: Map<number, SvelteSet<number>> = new Map();
 
 	clauses.getClauses().forEach((clause, clauseId) => {
 		addClauseToMapping(clause, clauseId, mapping);
@@ -114,7 +115,7 @@ const addClauseToMapping = (clause: Clause, clauseId: number, mapping: MappingLi
 			const s = mapping.get(literalId);
 			s?.add(clauseId);
 		} else {
-			const s = new Set([clauseId]);
+			const s = new SvelteSet([clauseId]);
 			mapping.set(literalId, s);
 		}
 	});

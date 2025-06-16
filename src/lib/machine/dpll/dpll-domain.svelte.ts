@@ -22,6 +22,7 @@ import { updateClausesToCheck } from '$lib/store/conflict-detection-state.svelte
 import { logFatal } from '$lib/store/toasts.ts';
 import type { ConflictDetection } from '../SolverMachine.svelte.ts';
 import { isUnitClause, isUnSATClause, type ClauseEval } from '$lib/transversal/entities/Clause.ts';
+import { SvelteSet } from 'svelte/reactivity';
 
 const problem: Problem = $derived(getProblemStore());
 // ** state inputs **
@@ -115,13 +116,13 @@ export const emptyClauseDetection: DPLL_EMPTY_CLAUSE_FUN = () => {
 
 export type DPLL_QUEUE_CLAUSE_SET_FUN = (
 	variable: number,
-	clauses: Set<number>,
+	clauses: SvelteSet<number>,
 	solverStateMachine: DPLL_SolverMachine
 ) => number;
 
 export const queueClauseSet: DPLL_QUEUE_CLAUSE_SET_FUN = (
 	variable: number,
-	clauses: Set<number>,
+	clauses: SvelteSet<number>,
 	solverStateMachine: DPLL_SolverMachine
 ) => {
 	if (clauses.size === 0) {
@@ -140,29 +141,34 @@ export const unstackClauseSet: DPLL_UNSTACK_CLAUSE_SET_FUN = (
 	return solverStateMachine.resolvePostponed();
 };
 
-export type DPLL_UNIT_CLAUSES_DETECTION_FUN = () => Set<number>;
+export type DPLL_UNIT_CLAUSES_DETECTION_FUN = () => SvelteSet<number>;
 
 export const unitClauseDetection: DPLL_UNIT_CLAUSES_DETECTION_FUN = () => {
 	const pool: ClausePool = problem.clauses;
 	return solverUnitClauseDetection(pool);
 };
 
-export type DPLL_TRIGGERED_CLAUSES_FUN = (clauses: Set<number>) => boolean;
+export type DPLL_TRIGGERED_CLAUSES_FUN = (clauses: SvelteSet<number>) => boolean;
 
-export const triggeredClauses: DPLL_TRIGGERED_CLAUSES_FUN = (clauses: Set<number>) => {
+export const triggeredClauses: DPLL_TRIGGERED_CLAUSES_FUN = (clauses: SvelteSet<number>) => {
 	return solverTriggeredClauses(clauses);
 };
 
-export type DPLL_DELETE_CLAUSE_FUN = (clauses: Set<number>, clauseId: number) => void;
+export type DPLL_DELETE_CLAUSE_FUN = (clauses: SvelteSet<number>, clauseId: number) => void;
 
-export const deleteClause: DPLL_DELETE_CLAUSE_FUN = (clauses: Set<number>, clauseId: number) => {
+export const deleteClause: DPLL_DELETE_CLAUSE_FUN = (
+	clauses: SvelteSet<number>,
+	clauseId: number
+) => {
 	if (!clauses.has(clauseId)) {
 		logFatal('Clause not found', `Clause - ${clauseId} not found`);
 	}
 	clauses.delete(clauseId);
 };
 
-export type DPLL_PICK_CLAUSE_SET_FUN = (solverStateMachine: DPLL_SolverMachine) => Set<number>;
+export type DPLL_PICK_CLAUSE_SET_FUN = (
+	solverStateMachine: DPLL_SolverMachine
+) => SvelteSet<number>;
 
 export const pickPendingClauseSet: DPLL_PICK_CLAUSE_SET_FUN = (
 	solverStateMachine: DPLL_SolverMachine
@@ -172,15 +178,15 @@ export const pickPendingClauseSet: DPLL_PICK_CLAUSE_SET_FUN = (
 	return pendingConflict.clauses;
 };
 
-export type DPLL_ALL_CLAUSES_CHECKED_FUN = (clauses: Set<number>) => boolean;
+export type DPLL_ALL_CLAUSES_CHECKED_FUN = (clauses: SvelteSet<number>) => boolean;
 
-export const allClausesChecked: DPLL_ALL_CLAUSES_CHECKED_FUN = (clauses: Set<number>) => {
+export const allClausesChecked: DPLL_ALL_CLAUSES_CHECKED_FUN = (clauses: SvelteSet<number>) => {
 	return clauses.size === 0;
 };
 
-export type DPLL_NEXT_CLAUSE_FUN = (clauses: Set<number>) => number;
+export type DPLL_NEXT_CLAUSE_FUN = (clauses: SvelteSet<number>) => number;
 
-export const nextClause: DPLL_NEXT_CLAUSE_FUN = (clauses: Set<number>) => {
+export const nextClause: DPLL_NEXT_CLAUSE_FUN = (clauses: SvelteSet<number>) => {
 	if (clauses.size === 0) {
 		logFatal('A non empty set was expected');
 	}
@@ -221,7 +227,7 @@ export const unitPropagation: DPLL_UNIT_PROPAGATION_FUN = (clauseId: number) => 
 	return solverUnitPropagation(variables, clauses, clauseId, 'up');
 };
 
-export type DPLL_COMPLEMENTARY_OCCURRENCES_FUN = (literal: number) => Set<number>;
+export type DPLL_COMPLEMENTARY_OCCURRENCES_FUN = (literal: number) => SvelteSet<number>;
 
 export const complementaryOccurrences: DPLL_COMPLEMENTARY_OCCURRENCES_FUN = (literal: number) => {
 	const mapping: MappingLiteral2Clauses = problem.mapping;
@@ -249,7 +255,7 @@ export const emptyClauseSet: DPLL_EMPTY_CLAUSE_SET_FUN = (
 	while (solverStateMachine.leftToPostpone() > 0) {
 		solverStateMachine.resolvePostponed();
 	}
-	updateClausesToCheck(new Set<number>(), -1);
+	updateClausesToCheck(new SvelteSet<number>(), -1);
 };
 
 export type DPLL_FUN =

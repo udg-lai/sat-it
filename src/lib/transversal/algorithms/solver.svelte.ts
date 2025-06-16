@@ -11,6 +11,7 @@ import {
 } from '$lib/store/statistics.svelte.ts';
 import { logBreakpoint, logFatal } from '$lib/store/toasts.ts';
 import { getLatestTrail, getTrails, stackTrail, unstackTrail } from '$lib/store/trails.svelte.ts';
+import { SvelteSet } from 'svelte/reactivity';
 import type { ClauseEval } from '../entities/Clause.ts';
 import type Clause from '../entities/Clause.ts';
 import type ClausePool from '../entities/ClausePool.svelte.ts';
@@ -26,8 +27,8 @@ export const emptyClauseDetection = (pool: ClausePool): boolean => {
 	return isUnSAT(evaluation);
 };
 
-export const unitClauseDetection = (pool: ClausePool): Set<number> => {
-	const unitClauses: Set<number> = pool.getUnitClauses();
+export const unitClauseDetection = (pool: ClausePool): SvelteSet<number> => {
+	const unitClauses: SvelteSet<number> = pool.getUnitClauses();
 	return unitClauses;
 };
 
@@ -114,9 +115,9 @@ const obtainTrail = (variables: VariablePool): Trail => {
 export const complementaryOccurrences = (
 	mapping: MappingLiteral2Clauses,
 	literal: number
-): Set<number> => {
-	const mappingReturn: Set<number> | undefined = mapping.get(-literal);
-	const complementaryOccurrences: Set<number> = new Set<number>();
+): SvelteSet<number> => {
+	const mappingReturn: SvelteSet<number> | undefined = mapping.get(-literal);
+	const complementaryOccurrences: SvelteSet<number> = new SvelteSet<number>();
 	if (mappingReturn !== undefined) {
 		for (const clause of mappingReturn) {
 			complementaryOccurrences.add(clause);

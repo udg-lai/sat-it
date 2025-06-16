@@ -1,5 +1,6 @@
 import { updateClausesToCheck } from '$lib/store/conflict-detection-state.svelte.ts';
 import { logFatal } from '$lib/store/toasts.ts';
+import { SvelteSet } from 'svelte/reactivity';
 import { SolverMachine, type ConflictDetection } from '../SolverMachine.svelte.ts';
 import type { BKT_FUN, BKT_INPUT } from './bkt-domain.svelte.ts';
 import {
@@ -66,7 +67,9 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 
 	private makeConflictDetectionCopy(): ConflictDetection | undefined {
 		if (this.conflictDetection !== undefined) {
-			const clauses: Set<number> = new Set<number>([...this.conflictDetection.clauses.values()]);
+			const clauses: SvelteSet<number> = new SvelteSet<number>([
+				...this.conflictDetection.clauses.values()
+			]);
 			const variableReasonId: number = this.conflictDetection.variableReasonId;
 			return { clauses, variableReasonId };
 		}
@@ -77,7 +80,7 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 	updateFromRecord(record: Record<string, unknown> | undefined): void {
 		if (record === undefined) {
 			this.conflictDetection = undefined;
-			updateClausesToCheck(new Set<number>(), -1);
+			updateClausesToCheck(new SvelteSet<number>(), -1);
 			return;
 		}
 		const conflictRecord: ConflictDetection = record['pending'] as ConflictDetection;
