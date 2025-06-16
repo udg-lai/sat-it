@@ -18,7 +18,6 @@ export const makeDPLLSolver = (): DPLL_SolverMachine => {
 
 export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 	pendingConflicts: Queue<ConflictDetection> = $state(new Queue<ConflictDetection>());
-
 	//We will need the clause that we've inspected
 	inspectedClause: number | undefined = $state(undefined);
 

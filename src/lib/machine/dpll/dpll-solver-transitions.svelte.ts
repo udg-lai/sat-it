@@ -65,8 +65,8 @@ export const analyzeClause = (solver: DPLL_SolverMachine): void => {
 	const pendingConflict: ConflictDetection = solver.consultPostponed();
 	const clauseSet: SvelteSet<number> = pendingConflict.clauses;
 	const clauseId: number | undefined = solver.getInspectedClause();
-	if(clauseId === undefined) {
-		logFatal("Unexected undefined in inspectedClause")
+	if (clauseId === undefined) {
+		logFatal('Unexected undefined in inspectedClause');
 	}
 	deleteClauseTransition(stateMachine, clauseSet, clauseId);
 	propagationBlock(solver, stateMachine, clauseSet);
@@ -85,8 +85,8 @@ export const decide = (solver: DPLL_SolverMachine): void => {
 export const conflictiveState = (solver: DPLL_SolverMachine): void => {
 	const stateMachine: DPLL_StateMachine = solver.stateMachine;
 	emptyClauseSetTransition(stateMachine, solver);
-	const firstLevel:boolean = decisionLevelTransition(stateMachine);
-	if(firstLevel) return;
+	const firstLevel: boolean = decisionLevelTransition(stateMachine);
+	if (firstLevel) return;
 	const literalToPropagate = backtrackingTransition(stateMachine);
 	const complementaryClauses: SvelteSet<number> = complementaryOccurrencesTransition(
 		stateMachine,
@@ -166,9 +166,10 @@ const propagationBlock = (
 			complementaryClauses
 		);
 	}
-}
+};
 
 /* Specific Transitions */
+
 const ecTransition = (stateMachine: DPLL_StateMachine): void => {
 	console.log('ecTransition');
 	if (stateMachine.getActiveId() !== 0) {

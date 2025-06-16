@@ -230,14 +230,15 @@ export const allClausesChecked: CDCL_ALL_CLAUSES_CHECKED_FUN = (clauses: SvelteS
 	return clauses.size === 0;
 };
 
-export type CDCL_NEXT_CLAUSE_FUN = (clauses: SvelteSet<number>) => number;
+export type CDCL_NEXT_CLAUSE_FUN = (clauses: SvelteSet<number>, solver: CDCL_SolverMachine) => number;
 
-export const nextClause: CDCL_NEXT_CLAUSE_FUN = (clauses: SvelteSet<number>) => {
+export const nextClause: CDCL_NEXT_CLAUSE_FUN = (clauses: SvelteSet<number>, solver: CDCL_SolverMachine) => {
 	if (clauses.size === 0) {
 		logFatal('A non empty set was expected');
 	}
 	const clausesIterator = clauses.values().next();
 	const clauseId = clausesIterator.value;
+	solver.setInspectedClause(clauseId);
 	return clauseId as number;
 };
 
@@ -461,6 +462,7 @@ export type CDCL_FUN =
 	| CDCL_UNIT_PROPAGATION_FUN
 	| CDCL_COMPLEMENTARY_OCCURRENCES_FUN
 	| CDCL_CHECK_NON_DECISION_MADE_FUN
+	| CDCL_NEXT_CLAUSE_FUN
 	| CDCL_DECIDE_FUN
 	| CDCL_EMPTY_CLAUSE_SET_FUN
 	| CDLC_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN

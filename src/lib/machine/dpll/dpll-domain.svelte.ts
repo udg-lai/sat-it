@@ -184,9 +184,15 @@ export const allClausesChecked: DPLL_ALL_CLAUSES_CHECKED_FUN = (clauses: SvelteS
 	return clauses.size === 0;
 };
 
-export type DPLL_NEXT_CLAUSE_FUN = (clauses: SvelteSet<number>, solver: DPLL_SolverMachine) => number;
+export type DPLL_NEXT_CLAUSE_FUN = (
+	clauses: SvelteSet<number>,
+	solver: DPLL_SolverMachine
+) => number;
 
-export const nextClause: DPLL_NEXT_CLAUSE_FUN = (clauses: SvelteSet<number>, solver: DPLL_SolverMachine) => {
+export const nextClause: DPLL_NEXT_CLAUSE_FUN = (
+	clauses: SvelteSet<number>,
+	solver: DPLL_SolverMachine
+) => {
 	if (clauses.size === 0) {
 		logFatal('A non empty set was expected');
 	}
