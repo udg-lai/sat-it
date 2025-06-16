@@ -147,6 +147,7 @@
 		overflow-y: auto;
 		overflow-x: hidden;
 		padding: 1.5rem 0.5rem;
+		height: calc(100% - var(--debugger-height) - var(--solving-info-height));
 	}
 
 	.grabbing {

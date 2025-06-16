@@ -62,10 +62,6 @@
 		justify-content: left;
 		gap: 0.5rem;
 		padding-left: calc(var(--windows-padding) + 15px);
-		border-right: 1px solid var(--border-color);
-	}
-
-	:root {
-		--debugger-height: 90px;
+		border-bottom: 1px solid var(--border-color);
 	}
 </style>
