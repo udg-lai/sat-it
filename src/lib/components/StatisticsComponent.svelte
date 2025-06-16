@@ -34,47 +34,42 @@
 		}
 		return minimum;
 	});
-	const finished: boolean = $derived(getSolverMachine().onFinalState());
 	const unsat: boolean = $derived(getSolverMachine().onUnsatState());
 </script>
 
 <div class="statistics">
-	<div class="flex place-content-around">
-		<div class="metric">
-			Decision Level:
-			<span class="statistic-value">{decisionLevelCurrentTrail}</span>
-		</div>
-		{#if !finished}
-			<div class="metric">
-				Clauses left:
-				<span class="statistic-value">{clausesLeft}</span>
-			</div>
-		{/if}
-		{#if unsat}
-			<div class="metric">
-				Minimum Clauses:
-				<span class="statistic-value">{minimumClausesLeft}</span>
-			</div>
-		{/if}
-		<div class="metric">
-			<span>Decisions:</span>
-			<span class="statistic-value">{decisions}</span>
-		</div>
-		<div class="metric">
-			<span>Conflicts:</span>
-			<span class="statistic-value">{conflicts}</span>
-		</div>
-		<div class="metric">
-			<span>UPs:</span>
-			<span class="statistic-value">{unitPropagations}</span>
-		</div>
+	<div class="metric">
+		Decision Level:
+		<span class="statistic-value">{decisionLevelCurrentTrail}</span>
 	</div>
+	<div class="metric">
+		<span>Decisions:</span>
+		<span class="statistic-value">{decisions}</span>
+	</div>
+	<div class="metric">
+		<span>Conflicts:</span>
+		<span class="statistic-value">{conflicts}</span>
+	</div>
+	<div class="metric">
+		<span>UPs:</span>
+		<span class="statistic-value">{unitPropagations}</span>
+	</div>
+	<div class="metric">
+		Clauses left:
+		<span class="statistic-value">{clausesLeft}</span>
+	</div>
+	{#if unsat}
+		<div class="metric">
+			Minimum Clauses:
+			<span class="statistic-value">{minimumClausesLeft}</span>
+		</div>
+	{/if}
 </div>
 
 <style>
 	.metric {
 		display: flex;
-		justify-content: space-between;
+		justify-content: space-around;
 		align-items: center;
 		padding: 1px 5px;
 		flex: 1;
@@ -84,11 +79,14 @@
 		border-radius: 5px;
 		border: 1px solid var(--border-color);
 	}
+
 	.statistic-value {
 		text-align: right;
 	}
 
 	.statistics {
-		padding: 0.5rem 0rem;
+		display: flex;
+		gap: 0.5rem;
+		justify-content: center;
 	}
 </style>

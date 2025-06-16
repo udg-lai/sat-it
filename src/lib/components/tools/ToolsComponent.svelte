@@ -142,50 +142,52 @@
 	}
 </script>
 
-<div class="tools-container">
-	<div class="options-tools">
-		{#each tools as { name }, id}
-			<div class="toggle-button">
-				{#if name === 'viewA'}
-					{@render toolA(id)}
-				{:else if name === 'viewB'}
-					{@render toolB(id)}
-				{:else}
-					{@render notImplementedYet()}
-				{/if}
-			</div>
-		{/each}
-		<div class="toggle-button settings-btn">
-			{@render settings()}
-		</div>
-		<div class="vertical-separator"></div>
-	</div>
-
-	<div
-		bind:this={toolsViewRef}
-		class="tool-content scrollable-content"
-		class:hide-tools-view={closed}
-	>
-		{#each tools as { name, active } (name)}
-			{#if active}
-				<div class="view">
+<tools>
+	<div class="tools-container">
+		<div class="options-tools">
+			{#each tools as { name }, id}
+				<div class="toggle-button">
 					{#if name === 'viewA'}
-						<ProblemPreviewComponent />
+						{@render toolA(id)}
 					{:else if name === 'viewB'}
-						{@render snippetClausesToCheck()}
+						{@render toolB(id)}
 					{:else}
 						{@render notImplementedYet()}
 					{/if}
 				</div>
-			{/if}
-		{/each}
+			{/each}
+			<div class="toggle-button settings-btn">
+				{@render settings()}
+			</div>
+			<div class="vertical-separator"></div>
+		</div>
+
+		<div
+			bind:this={toolsViewRef}
+			class="tool-content scrollable-content"
+			class:hide-tools-view={closed}
+		>
+			{#each tools as { name, active } (name)}
+				{#if active}
+					<div class="view">
+						{#if name === 'viewA'}
+							<ProblemPreviewComponent />
+						{:else if name === 'viewB'}
+							{@render snippetClausesToCheck()}
+						{:else}
+							{@render notImplementedYet()}
+						{/if}
+					</div>
+				{/if}
+			{/each}
+		</div>
+		<div
+			use:resizeHandle
+			class="draggable-bar vertical-separator cursor-col-resize"
+			class:resizing={isResizing}
+		></div>
 	</div>
-	<div
-		use:resizeHandle
-		class="draggable-bar vertical-separator cursor-col-resize"
-		class:resizing={isResizing}
-	></div>
-</div>
+</tools>
 
 {#snippet toolA(id: number)}
 	<Button
