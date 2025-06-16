@@ -22,12 +22,13 @@
 
 {#each clauses as clause, index (index)}
 	<div class="enumerate-clause">
-		<div class="enumerate" class:checking={index === checkingIndex}>
+		<div class="enumerate">
 			<span>
 				{clause.getId()}.
 			</span>
 		</div>
 		<div
+			class="clause-highlighter"
 			class:inspecting={checkingIndex === index}
 			class:inspectedTrue={checkingIndex > index && isSatClause(clause.eval())}
 			class:inspectedFalse={checkingIndex > index && isUnSATClause(clause.eval())}
@@ -57,20 +58,22 @@
 		opacity: 0.5;
 	}
 
-	.checking {
-		color: var(--inspecting-color);
-		opacity: 1;
+	.clause-highlighter {
+		border: solid;
+		border-width: 0px;
+		border-bottom-width: 1px;
+		border-color: var(--main-bg-color);
 	}
 
 	.inspecting {
-		background-color: rgba(136, 213, 255, 0.2);
+		border-color: var(--inspecting-color);
 	}
 
 	.inspectedTrue {
-		background-color: rgba(79, 211, 79, 0.2);
+		background-color: rgb(79, 211, 79, 0.2);
 	}
 
 	.inspectedFalse {
-		background-color: rgba(255, 152, 152, 0.2);
+		background-color: rgb(255, 152, 152, 0.2);
 	}
 </style>
