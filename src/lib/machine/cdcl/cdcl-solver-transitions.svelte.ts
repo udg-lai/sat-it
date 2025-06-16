@@ -70,6 +70,7 @@ import {
 import type { ConflictAnalysis, ConflictDetection } from '../SolverMachine.svelte.ts';
 import VariableAssignment from '$lib/transversal/entities/VariableAssignment.ts';
 import { SvelteSet } from 'svelte/reactivity';
+import { increaseNoConflicts } from '$lib/store/statistics.svelte.ts';
 
 /* exported transitions */
 
@@ -680,6 +681,7 @@ const backjumpingTransition = (
 		logFatal('Function call error', 'There should be a function in the Variable In CC state');
 	}
 	backjumpingState.run(conflictAnalysis.trail, secondHighestDL);
+	increaseNoConflicts();
 	stateMachine.transition('push_trail_state');
 };
 

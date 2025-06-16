@@ -1,10 +1,7 @@
 <script lang="ts">
 	import { beforeNavigate } from '$app/navigation';
 	import AppComponent from '$lib/components/AppComponent.svelte';
-	import DebuggerComponent from '$lib/components/debugger/DebuggerComponent.svelte';
 	import SettingsComponent from '$lib/components/settings/SettingsComponent.svelte';
-	import SolvingInformation from '$lib/components/SolvingInformationComponent.svelte';
-	import StatisticsComponent from '$lib/components/StatisticsComponent.svelte';
 	import ToastComponent from '$lib/components/ToastComponent.svelte';
 	import ToolsComponent from '$lib/components/tools/ToolsComponent.svelte';
 	import {
@@ -46,32 +43,17 @@
 </script>
 
 <svelte:body oncontextmenu={disableContextMenu} />
-<website-wrapper>
-	<main class="chakra-petch-medium">
-		{#if $toasts}
-			<div class="toasts">
-				{#each $toasts as toast (toast.id)}
-					<ToastComponent {toast} />
-				{/each}
-			</div>
-		{/if}
-
-		<tools>
-			<ToolsComponent />
-		</tools>
-		<workspace>
-			<user>
-				<DebuggerComponent />
-				<SolvingInformation />
-			</user>
-			<AppComponent />
-		</workspace>
-	</main>
-	<footer>
-		<StatisticsComponent />
-	</footer>
-</website-wrapper>
-
+<main class="chakra-petch-medium">
+	{#if $toasts}
+		<div class="toasts">
+			{#each $toasts as toast (toast.id)}
+				<ToastComponent {toast} />
+			{/each}
+		</div>
+	{/if}
+	<ToolsComponent />
+	<AppComponent />
+</main>
 {#if renderSettings}
 	<settings>
 		<SettingsComponent />
@@ -79,25 +61,13 @@
 {/if}
 
 <style>
-	website-wrapper {
-		display: flex;
-		flex-direction: column;
-		height: 100%;
-	}
-
 	main {
 		position: relative;
 		display: flex;
 		flex-direction: row;
 		flex: 1;
 		width: 100%;
-	}
-
-	workspace {
-		display: flex;
-		flex-direction: column;
-		max-height: 100%;
-		width: 100%;
+		height: 100%;
 	}
 
 	.toasts {
@@ -108,19 +78,5 @@
 		flex-direction: column;
 		gap: 0.5rem;
 		z-index: var(--notification-z-index);
-	}
-
-	footer {
-		width: 100%;
-		background-color: var(--main-bg-color);
-		border-top-width: 1px;
-		border-color: var(--border-color);
-		flex-shrink: 0;
-	}
-
-	user {
-		display: flex;
-		flex-direction: column;
-		border-bottom: 1px solid var(--border-color);
 	}
 </style>

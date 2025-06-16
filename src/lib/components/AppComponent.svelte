@@ -26,7 +26,9 @@
 		type StateMachineEvent
 	} from '$lib/transversal/events.ts';
 	import { onMount } from 'svelte';
+	import DebuggerComponent from './debugger/DebuggerComponent.svelte';
 	import { editorViewEventStore, type EditorViewEvent } from './debugger/events.svelte.ts';
+	import SolvingInformationComponent from './SolvingInformationComponent.svelte';
 
 	let expandPropagations: boolean = $state(true);
 
@@ -98,4 +100,16 @@
 	});
 </script>
 
-<TrailEditor {trails} />
+<app>
+	<DebuggerComponent />
+	<TrailEditor {trails} />
+	<SolvingInformationComponent />
+</app>
+
+<style>
+	app {
+		display: flex;
+		flex-direction: column;
+		width: 100%;
+	}
+</style>

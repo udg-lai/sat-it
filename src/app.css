@@ -38,6 +38,8 @@
 	--button-active-color: #cacaca90;
 	--button-border-color: #afafaf;
 	--opacity-50: 0.5;
+	--debugger-height: 90px;
+	--solving-info-height: calc(var(--debugger-height) * 1);
 }
 
 html,
