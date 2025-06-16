@@ -20,7 +20,7 @@
 
 <style>
 	.undefined {
-		color: #c7c7c7;
+		color: var(--unassigned-color);
 	}
 
 	.false {

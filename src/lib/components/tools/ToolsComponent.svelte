@@ -1,10 +1,6 @@
 <script lang="ts">
 	import { openSettingsViewEventBus } from '$lib/transversal/events.ts';
-	import {
-		ArrowUpFromBracketOutline,
-		BugOutline,
-		FileCirclePlusOutline
-	} from 'flowbite-svelte-icons';
+	import { ArrowUpFromBracketOutline, BookOutline, ClipboardOutline } from 'flowbite-svelte-icons';
 	import { onMount } from 'svelte';
 	import './_styles.css';
 	import Button from './Button.svelte';
@@ -174,9 +170,9 @@
 			{#if active}
 				<div class="view">
 					{#if name === 'viewA'}
-						{@render snippetClausesToCheck()}
-					{:else if name === 'viewB'}
 						<ProblemPreviewComponent />
+					{:else if name === 'viewB'}
+						{@render snippetClausesToCheck()}
 					{:else}
 						{@render notImplementedYet()}
 					{/if}
@@ -192,15 +188,25 @@
 </div>
 
 {#snippet toolA(id: number)}
-	<Button onClick={() => activateTool(id)} icon={FileCirclePlusOutline} active={tools[id].active} />
+	<Button
+		onClick={() => activateTool(id)}
+		icon={BookOutline}
+		active={tools[id].active}
+		title="Problem Clauses"
+	/>
 {/snippet}
 
 {#snippet toolB(id: number)}
-	<Button onClick={() => activateTool(id)} icon={BugOutline} active={tools[id].active} />
+	<Button
+		onClick={() => activateTool(id)}
+		icon={ClipboardOutline}
+		active={tools[id].active}
+		title="Conflict Detection"
+	/>
 {/snippet}
 
 {#snippet settings()}
-	<Button onClick={onOpenViewMoreEvent} icon={ArrowUpFromBracketOutline} />
+	<Button onClick={onOpenViewMoreEvent} icon={ArrowUpFromBracketOutline} title="Settings" />
 {/snippet}
 
 {#snippet snippetClausesToCheck()}

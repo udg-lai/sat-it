@@ -21,6 +21,7 @@
 
 <style>
 	.clause-style {
+		color: black;
 		display: flex;
 		flex-direction: row;
 		gap: 0.5rem;

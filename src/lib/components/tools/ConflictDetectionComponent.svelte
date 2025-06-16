@@ -7,6 +7,7 @@
 	import type Clause from '$lib/transversal/entities/Clause.ts';
 	import ClauseComponent from '../ClauseComponent.svelte';
 	import type ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';
+	import { isSatClause, isUnSATClause } from '$lib/transversal/entities/Clause.ts';
 
 	const problem: Problem = $derived(getProblemStore());
 
@@ -21,12 +22,19 @@
 
 {#each clauses as clause, index (index)}
 	<div class="enumerate-clause">
-		<div class="enumerate" class:checking={index === checkingIndex}>
+		<div class="enumerate">
 			<span>
 				{clause.getId()}.
 			</span>
 		</div>
-		<ClauseComponent {clause} />
+		<div
+			class="clause-highlighter"
+			class:inspecting={checkingIndex === index}
+			class:inspectedTrue={checkingIndex > index && isSatClause(clause.eval())}
+			class:inspectedFalse={checkingIndex > index && isUnSATClause(clause.eval())}
+		>
+			<ClauseComponent {clause} />
+		</div>
 	</div>
 {/each}
 
@@ -50,8 +58,22 @@
 		opacity: 0.5;
 	}
 
-	.checking {
-		color: var(--inspecting-color);
-		opacity: 1;
+	.clause-highlighter {
+		border: solid;
+		border-width: 0px;
+		border-bottom-width: 1px;
+		border-color: var(--main-bg-color);
+	}
+
+	.inspecting {
+		border-color: var(--inspecting-color);
+	}
+
+	.inspectedTrue {
+		background-color: var(--shaded-satisfied-color);
+	}
+
+	.inspectedFalse {
+		background-color: var(--shaded-unsatisfied-color);
 	}
 </style>

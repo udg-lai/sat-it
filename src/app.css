@@ -15,11 +15,13 @@
 	--more-options-z-index: 100;
 	--TeX-font-size: 1.2rem;
 	--conflict-color: #8a3ffc;
+	--unassigned-color: #000000;
 	--unsatisfied-color: #d12771;
+	--shaded-unsatisfied-color: #d127711c;
 	--satisfied-color: #24a148;
-	--clause-id-color: #00000099;
-	--inspecting-color: #e17191;
-	--trail-height: 5rem;
+	--shaded-satisfied-color: #24a1481c;
+	--inspecting-color: #f59b00;
+	--trail-height: 5.5rem;
 	--trail-content-height: 4rem;
 	--trail-gap: 1rem;
 	--trail-literal-min-width: var(--trail-literal-large-width);
