@@ -107,14 +107,14 @@ export const preConflictAnalysis = (solver: CDCL_SolverMachine) => {
 	const stateMachine: CDCL_StateMachine = solver.stateMachine;
 	emptyClauseSetTransition(stateMachine, solver);
 	const firstLevel: boolean = decisionLevelTransition(stateMachine);
-	if(firstLevel) return;
+	if (firstLevel) return;
 	buildConflictAnalysisTransition(stateMachine, solver);
 	const asserting: boolean = assertingClauseTransition(stateMachine, solver);
-	if(asserting) {
+	if (asserting) {
 		logFatal('It is impossible that the conflictive clause is asserting');
 	}
 	conflictAnalysis(solver);
-}
+};
 
 export const conflictAnalysis = (solver: CDCL_SolverMachine): void => {
 	const stateMachine: CDCL_StateMachine = solver.stateMachine;
