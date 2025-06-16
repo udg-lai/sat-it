@@ -36,6 +36,8 @@ import type {
 	CDCL_PICK_CLAUSE_SET_INPUT,
 	CDCL_PICK_LAST_ASSIGNMENT_FUN,
 	CDCL_PICK_LAST_ASSIGNMENT_INPUT,
+	CDCL_PROPAGATE_CC_FUN,
+	CDCL_PROPAGATE_CC_INPUT,
 	CDCL_PUSH_TRAIL_FUN,
 	CDCL_PUSH_TRAIL_INPUT,
 	CDCL_QUEUE_CLAUSE_SET_FUN,
@@ -500,7 +502,7 @@ export const conflictAnalysis = (solver: CDCL_SolverMachine): void => {
 	const secondHighestDL: number = getSecondHighestDLTransition(stateMachine, conflictAnalysis);
 	backjumpingTransition(stateMachine, conflictAnalysis, secondHighestDL);
 	pushTrailTransition(stateMachine, conflictAnalysis);
-	const literalToPropagate = unitPropagationTransition(stateMachine, clauseId);
+	const literalToPropagate = propagateCCTransition(stateMachine, clauseId);
 	const complementaryClauses: SvelteSet<number> = complementaryOccurrencesTransition(
 		stateMachine,
 		literalToPropagate
@@ -678,5 +680,21 @@ const pushTrailTransition = (
 		logFatal('Function call error', 'There should be a function in the Variable In CC state');
 	}
 	pushTrailState.run(conflictAnalysis.trail);
-	stateMachine.transition('unit_propagation_state');
+	stateMachine.transition('propagate_cc_state');
+};
+
+const propagateCCTransition = (stateMachine: CDCL_StateMachine, clauseId: number): number => {
+	const propagateCCState = stateMachine.getActiveState() as NonFinalState<
+		CDCL_PROPAGATE_CC_FUN,
+		CDCL_PROPAGATE_CC_INPUT
+	>;
+	if (propagateCCState.run === undefined) {
+		logFatal(
+			'Function call error',
+			'There should be a function in the Propagate Conflict Clause state'
+		);
+	}
+	const literalToPropagate: number = propagateCCState.run(clauseId);
+	stateMachine.transition('complementary_occurrences_state');
+	return literalToPropagate;
 };

@@ -19,7 +19,7 @@ import {
 import { VariablePool } from '$lib/transversal/entities/VariablePool.svelte.ts';
 import type { CDCL_SolverMachine } from './cdcl-solver-machine.svelte.ts';
 import type { ConflictDetection } from '../SolverMachine.svelte.ts';
-import { logFatal } from '$lib/store/toasts.ts';
+import { logFatal, logInfo } from '$lib/store/toasts.ts';
 import { updateClausesToCheck } from '$lib/store/conflict-detection-state.svelte.ts';
 import Clause, {
 	isUnitClause,
@@ -29,11 +29,8 @@ import Clause, {
 import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
 import { getLatestTrail, getTrails } from '$lib/store/trails.svelte.ts';
 import type VariableAssignment from '$lib/transversal/entities/VariableAssignment.ts';
-import {
-	isUnitPropagationReason,
-	type Reason
-} from '$lib/transversal/entities/VariableAssignment.ts';
 import { SvelteSet } from 'svelte/reactivity';
+import { isPropagatioReason, type Reason } from '$lib/transversal/entities/VariableAssignment.ts';
 import TemporalClause from '$lib/transversal/entities/TemporalClause.ts';
 
 const problem: Problem = $derived(getProblemStore());
@@ -103,7 +100,9 @@ export type CDCL_SECOND_HIGHEST_DL_INPUT = 'undo_backjumping_state';
 
 export type CDCL_BACKJUMPING_INPUT = 'push_trail_state';
 
-export type CDCL_PUSH_TRAIL_INPUT = 'unit_propagation_state';
+export type CDCL_PUSH_TRAIL_INPUT = 'propagate_cc_state';
+
+export type CDCL_PROPAGATE_CC_INPUT = 'complementary_occurrences_state';
 
 export type CDCL_INPUT =
 	| CDCL_EMPTY_CLAUSE_INPUT
@@ -133,7 +132,8 @@ export type CDCL_INPUT =
 	| CDCL_LEARN_CONCLICT_CLAUSE_INPUT
 	| CDCL_SECOND_HIGHEST_DL_INPUT
 	| CDCL_BACKJUMPING_INPUT
-	| CDCL_PUSH_TRAIL_INPUT;
+	| CDCL_PUSH_TRAIL_INPUT
+	| CDCL_PROPAGATE_CC_INPUT;
 
 // ** state functions **
 
@@ -270,7 +270,7 @@ export type CDCL_UNIT_PROPAGATION_FUN = (clauseId: number) => number;
 export const unitPropagation: CDCL_UNIT_PROPAGATION_FUN = (clauseId: number) => {
 	const variables: VariablePool = problem.variables;
 	const clauses: ClausePool = problem.clauses;
-	return solverUnitPropagation(variables, clauses, clauseId);
+	return solverUnitPropagation(variables, clauses, clauseId, 'up');
 };
 
 export type CDCL_COMPLEMENTARY_OCCURRENCES_FUN = (literal: number) => SvelteSet<number>;
@@ -372,7 +372,7 @@ export const resolutionUpdateCC: CDCL_RESOLUTION_UPDATE_CC_FUN = (
 	assignment: VariableAssignment
 ) => {
 	const reason: Reason = assignment.getReason();
-	if (!isUnitPropagationReason(reason)) {
+	if (!isPropagatioReason(reason)) {
 		logFatal('The Reason should be a UP');
 	}
 	const upClauseId: number = reason.clauseId;
@@ -395,16 +395,18 @@ export type CDCL_LEARN_CONCLICT_CLAUSE_FUN = (
 
 export const learnConflictClause: CDCL_LEARN_CONCLICT_CLAUSE_FUN = (
 	trail: Trail,
-	conclictClause: TemporalClause
+	conflictClause: TemporalClause
 ) => {
-	//Add the UnindexedClause to the trail
-	trail.learn(conclictClause);
+	// Saves learned clause in the trail
+	trail.learn(conflictClause);
 
 	//Generate the "Clause" that will be added to the pool.
-	const toLearnClause: Clause = new Clause(conclictClause.getLiterals());
+	const toLearnClause: Clause = new Clause(conflictClause.getLiterals());
 
 	//The clause is stored inside the pool
 	addClauseToClausePool(toLearnClause);
+
+	logInfo('New clause learn', `Clause ${toLearnClause.getId()} learned`);
 	return toLearnClause.getId();
 };
 
@@ -435,6 +437,14 @@ export type CDCL_PUSH_TRAIL_FUN = (trail: Trail) => void;
 
 export const pushTrail: CDCL_PUSH_TRAIL_FUN = (trail: Trail) => {
 	getTrails().push(trail);
+};
+
+export type CDCL_PROPAGATE_CC_FUN = (clauseId: number) => number;
+
+export const propagateCC: CDCL_PROPAGATE_CC_FUN = (clauseId: number) => {
+	const variables: VariablePool = problem.variables;
+	const clauses: ClausePool = problem.clauses;
+	return solverUnitPropagation(variables, clauses, clauseId, 'backjumping');
 };
 
 export type CDCL_FUN =

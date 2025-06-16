@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type VariableAssignment from '$lib/transversal/entities/VariableAssignment.ts';
+	import BackjumpingComponent from '../assignment/BackjumpingComponent.svelte';
 	import BacktrackingComponent from '../assignment/BacktrackingComponent.svelte';
 	import ChildlessDecisionComponent from '../assignment/ChildlessDecisionComponent.svelte';
 	import DecisionComponent from '../assignment/DecisionComponent.svelte';
@@ -23,6 +24,8 @@
 		{#each propagations as assignment (assignment.variableId())}
 			{#if assignment.isK()}
 				<BacktrackingComponent {assignment} {isLast} />
+			{:else if assignment.isBJ()}
+				<BackjumpingComponent {assignment} {isLast} />
 			{:else}
 				<UnitPropagationComponent {assignment} {isLast} />
 			{/if}
