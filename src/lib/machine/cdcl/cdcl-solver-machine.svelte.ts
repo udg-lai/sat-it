@@ -18,7 +18,7 @@ import {
 } from './cdcl-solver-transitions.svelte.ts';
 import { makeCDCLMachine } from './cdcl-state-machine.svelte.ts';
 import { cdcl_stateName2StateId } from './cdcl-states.svelte.ts';
-import type { StateMachineEvent } from '$lib/transversal/events.ts';
+import { conflictDetectionEventBus, type StateMachineEvent } from '$lib/transversal/events.ts';
 import { SvelteSet } from 'svelte/reactivity';
 
 export const makeCDCLSolver = (): CDCL_SolverMachine => {
@@ -165,6 +165,7 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 		}
 		//Waiting to analyze the next clause of the clauses to revise
 		else if (activeId === cdcl_stateName2StateId.next_clause_state) {
+			conflictDetectionEventBus.emit();
 			analyzeClause(this);
 		}
 		//Waiting to decide a variables

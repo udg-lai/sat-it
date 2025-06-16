@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { openSettingsViewEventBus } from '$lib/transversal/events.ts';
+	import { conflictDetectionEventBus, openSettingsViewEventBus } from '$lib/transversal/events.ts';
 	import { ArrowUpFromBracketOutline, BookOutline, ClipboardOutline } from 'flowbite-svelte-icons';
 	import { onMount } from 'svelte';
 	import './_styles.css';
@@ -49,6 +49,15 @@
 			tools[what].active = true;
 			toolsViewRef.style.width = 'var(--max-width-tools)';
 		}
+		tools = [...tools];
+	}
+
+	export function activateConflictDetectionView(): void {
+		const alreadyActive = tools[1].active;
+		if (alreadyActive) return;
+		tools = tools.map((v) => ({ ...v, active: false }));
+		tools[1].active = true;
+		toolsViewRef.style.width = 'var(--max-width-tools)';
 		tools = [...tools];
 	}
 
@@ -140,6 +149,23 @@
 	function onOpenViewMoreEvent(): void {
 		openSettingsViewEventBus.emit();
 	}
+
+	function openConflictDetectionView() {
+		const alreadyActive = tools[1].active;
+		if (alreadyActive) return;
+		tools = tools.map((v) => ({ ...v, active: false }));
+		tools[1].active = true;
+		toolsViewRef.style.width = 'var(--max-width-tools)';
+		tools = [...tools];
+	}
+
+	onMount(() => {
+		const unsubscribeConflictDetection =
+			conflictDetectionEventBus.subscribe(openConflictDetectionView);
+		return () => {
+			unsubscribeConflictDetection();
+		};
+	});
 </script>
 
 <tools>
