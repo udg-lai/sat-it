@@ -32,6 +32,6 @@
 		justify-content: space-around;
 		align-items: center;
 		border-top: 1px solid var(--border-color);
-		width: 50%;
+		width: 100%;
 	}
 </style>

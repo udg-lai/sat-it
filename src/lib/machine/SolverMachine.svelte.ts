@@ -3,10 +3,19 @@ import { tick } from 'svelte';
 import type { StateFun, StateInput, StateMachine } from './StateMachine.svelte.ts';
 import { logFatal, logWarning } from '$lib/store/toasts.ts';
 import { getStepDelay } from '$lib/store/delay-ms.svelte.ts';
+import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
+import type { SvelteSet } from 'svelte/reactivity';
+import type TemporalClause from '$lib/transversal/entities/TemporalClause.ts';
+
+export type ConflictDetection = {
+	clauses: SvelteSet<number>;
+	variableReasonId: number;
+};
 
 export type ConflictAnalysis = {
-	clauses: Set<number>;
-	variableReasonId: number;
+	trail: Trail;
+	conflictClause: TemporalClause;
+	decisionLevelVariables: number[];
 };
 
 export interface SolverStateInterface<F extends StateFun, I extends StateInput> {
@@ -87,8 +96,8 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 			this.step();
 		} else if (input === 'nextVariable') {
 			await this.solveToNextVariableStepByStep();
-		} else if (input === 'finishUP') {
-			await this.solveUPStepByStep();
+		} else if (input === 'finishCD') {
+			await this.solveCDStepByStep();
 		} else if (input === 'solve_trail') {
 			await this.solveTrailStepByStep();
 		} else if (input === 'solve_all') {
@@ -125,7 +134,7 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 
 	protected abstract solveToNextVariableStepByStep(): Promise<void>;
 
-	protected abstract solveUPStepByStep(): Promise<void>;
+	protected abstract solveCDStepByStep(): Promise<void>;
 
 	private setFlagsPreAuto(): void {
 		this.forcedStop = false;

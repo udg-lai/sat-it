@@ -2,6 +2,7 @@ import {
 	BKT_SolverMachine,
 	makeBKTSolver
 } from '$lib/machine/backtracking/bkt-solver-machine.svelte.ts';
+import { makeCDCLSolver } from '$lib/machine/cdcl/cdcl-solver-machine.svelte.ts';
 import { makeDPLLSolver } from '$lib/machine/dpll/dpll-solver-machine.svelte.ts';
 import { SolverMachine } from '$lib/machine/SolverMachine.svelte.ts';
 import type { StateFun, StateInput } from '$lib/machine/StateMachine.svelte.ts';
@@ -20,7 +21,7 @@ export const setSolverStateMachine = () => {
 	} else if (algorithm === 'dpll') {
 		solverMachine = makeDPLLSolver();
 	} else if (algorithm === 'cdcl') {
-		solverMachine = makeDPLLSolver();
+		solverMachine = makeCDCLSolver();
 	} else {
 		logFatal('No SolverStateMachine was created');
 	}

@@ -1,18 +1,17 @@
-import type Literal from './Literal.svelte.ts';
-import logicResolution from '../algorithms/resolution.ts';
-import { arraysEqual } from '../types/array.ts';
-import type { Comparable } from '$lib/transversal/interfaces/Comparable.ts';
 import { logFatal } from '$lib/store/toasts.ts';
+import type { Comparable } from '../interfaces/Comparable.ts';
+import { arraysEqual } from '../types/array.ts';
+import type Literal from './Literal.svelte.ts';
+import TemporalClause from './TemporalClause.ts';
 
 class Clause implements Comparable<Clause> {
-	private static idGenerator: number = 0;
-
 	private literals: Literal[] = [];
+	private static idGenerator: number = 0;
 	private id: number;
 
 	constructor(literals: Literal[] = []) {
-		this.id = this.generateUniqueId();
 		this.literals = literals;
+		this.id = this.generateUniqueId();
 	}
 
 	static resetUniqueIdGenerator() {
@@ -114,7 +113,14 @@ class Clause implements Comparable<Clause> {
 	}
 
 	resolution(other: Clause): Clause {
-		return logicResolution(this, other);
+		const thisTemp: TemporalClause = new TemporalClause(this.getLiterals());
+		const otherTemp: TemporalClause = new TemporalClause(other.getLiterals());
+		const result: TemporalClause = thisTemp.resolution(otherTemp);
+		return new Clause(result.getLiterals());
+	}
+
+	toTemporalClause(): TemporalClause {
+		return new TemporalClause(this.getLiterals());
 	}
 
 	equals(other: Clause): boolean {

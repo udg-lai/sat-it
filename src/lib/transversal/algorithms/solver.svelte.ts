@@ -11,8 +11,9 @@ import {
 } from '$lib/store/statistics.svelte.ts';
 import { logBreakpoint, logFatal } from '$lib/store/toasts.ts';
 import { getLatestTrail, getTrails, stackTrail, unstackTrail } from '$lib/store/trails.svelte.ts';
+import { SvelteSet } from 'svelte/reactivity';
+import type { ClauseEval } from '../entities/Clause.ts';
 import type Clause from '../entities/Clause.ts';
-import { type ClauseEval } from '../entities/Clause.ts';
 import type ClausePool from '../entities/ClausePool.svelte.ts';
 import { Trail } from '../entities/Trail.svelte.ts';
 import type Variable from '../entities/Variable.svelte.ts';
@@ -26,8 +27,8 @@ export const emptyClauseDetection = (pool: ClausePool): boolean => {
 	return isUnSAT(evaluation);
 };
 
-export const unitClauseDetection = (pool: ClausePool): Set<number> => {
-	const unitClauses: Set<number> = pool.getUnitClauses();
+export const unitClauseDetection = (pool: ClausePool): SvelteSet<number> => {
+	const unitClauses: SvelteSet<number> = pool.getUnitClauses();
 	return unitClauses;
 };
 
@@ -81,7 +82,8 @@ export const triggeredClauses = (clauses: Set<number>): boolean => {
 export const unitPropagation = (
 	variables: VariablePool,
 	clauses: ClausePool,
-	clauseId: number
+	clauseId: number,
+	assignmentReason: 'up' | 'backjumping'
 ): number => {
 	const trail: Trail = obtainTrail(variables);
 	const clause: Clause = clauses.get(clauseId);
@@ -93,7 +95,11 @@ export const unitPropagation = (
 	doAssignment(variableId, polarity);
 
 	const variable: Variable = variables.getVariableCopy(variableId);
-	trail.push(VariableAssignment.newUnitPropagationAssignment(variable, clauseId));
+	if (assignmentReason === 'up') {
+		trail.push(VariableAssignment.newUnitPropagationAssignment(variable, clauseId));
+	} else {
+		trail.push(VariableAssignment.newBackjumpingAssignment(variable, clauseId));
+	}
 
 	increaseNoUnitPropagations();
 	stackTrail(trail);
@@ -109,9 +115,9 @@ const obtainTrail = (variables: VariablePool): Trail => {
 export const complementaryOccurrences = (
 	mapping: MappingLiteral2Clauses,
 	literal: number
-): Set<number> => {
-	const mappingReturn: Set<number> | undefined = mapping.get(-literal);
-	const complementaryOccurrences: Set<number> = new Set<number>();
+): SvelteSet<number> => {
+	const mappingReturn: SvelteSet<number> | undefined = mapping.get(-literal);
+	const complementaryOccurrences: SvelteSet<number> = new SvelteSet<number>();
 	if (mappingReturn !== undefined) {
 		for (const clause of mappingReturn) {
 			complementaryOccurrences.add(clause);
@@ -152,8 +158,7 @@ const afterAssignment = (assignment: Assignment): void => {
 };
 
 export const backtracking = (pool: VariablePool): number => {
-	const trail: Trail = (getLatestTrail() as Trail).copy();
-	trail.updateTrailEnding();
+	const trail: Trail = (getLatestTrail() as Trail).partialCopy();
 	const lastVariableAssignment: VariableAssignment = disposeUntilDecision(trail, pool);
 
 	const lastVariable: Variable = lastVariableAssignment.getVariable();

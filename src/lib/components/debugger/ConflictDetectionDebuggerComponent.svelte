@@ -6,11 +6,6 @@
 	} from 'flowbite-svelte-icons';
 	import DynamicRender from '../DynamicRender.svelte';
 	import { stateMachineEventBus, toggleTrailExpandEventBus } from '$lib/transversal/events.ts';
-	interface Props {
-		cdMode: boolean;
-	}
-
-	let { cdMode: upMode }: Props = $props();
 
 	const assignmentProps = {
 		size: 'md'
@@ -20,12 +15,10 @@
 <conflict-detection-debugger>
 	<button
 		class="btn general-btn"
-		class:invalidOption={!upMode}
 		title="Step"
 		onclick={() => {
 			stateMachineEventBus.emit('step');
 		}}
-		disabled={!upMode}
 	>
 		<DynamicRender component={CaretRightOutline} props={assignmentProps} />
 	</button>
@@ -33,12 +26,10 @@
 	<button
 		class="btn general-btn"
 		title="Next variable"
-		class:invalidOption={!upMode}
 		onclick={() => {
 			toggleTrailExpandEventBus.emit(true);
 			stateMachineEventBus.emit('nextVariable');
 		}}
-		disabled={!upMode}
 	>
 		<DynamicRender component={ForwardOutline} props={assignmentProps} />
 	</button>
@@ -46,12 +37,10 @@
 	<button
 		class="btn general-btn"
 		title="Finish UPs"
-		class:invalidOption={!upMode}
 		onclick={() => {
 			toggleTrailExpandEventBus.emit(true);
-			stateMachineEventBus.emit('finishUP');
+			stateMachineEventBus.emit('finishCD');
 		}}
-		disabled={!upMode}
 	>
 		<DynamicRender component={ChevronDoubleRightOutline} props={assignmentProps} />
 	</button>
