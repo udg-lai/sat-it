@@ -17,10 +17,11 @@
 	--conflict-color: #8a3ffc;
 	--unassigned-color: #000000;
 	--unsatisfied-color: #d12771;
+	--shaded-unsatisfied-color: #d127711C;
 	--satisfied-color: #24a148;
-	--clause-id-color: #00000099;
+	--shaded-satisfied-color: #24a1481C;
 	--inspecting-color: #f59b00;
-	--trail-height: 5rem;
+	--trail-height: 5.5rem;
 	--trail-content-height: 4rem;
 	--trail-gap: 1rem;
 	--trail-literal-min-width: var(--trail-literal-large-width);

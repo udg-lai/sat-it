@@ -70,10 +70,10 @@
 	}
 
 	.inspectedTrue {
-		background-color: rgb(79, 211, 79, 0.2);
+		background-color: var(--shaded-satisfied-color);
 	}
 
 	.inspectedFalse {
-		background-color: rgb(255, 152, 152, 0.2);
+		background-color: var(--shaded-unsatisfied-color);
 	}
 </style>

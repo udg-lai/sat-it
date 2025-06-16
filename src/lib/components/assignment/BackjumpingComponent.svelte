@@ -106,7 +106,7 @@
 	}
 
 	:global(.app-popover .clause-id) {
-		color: var(--clause-id-color);
+		opacity: 0.5;
 	}
 
 	:global(.app-popover > .py-2) {
