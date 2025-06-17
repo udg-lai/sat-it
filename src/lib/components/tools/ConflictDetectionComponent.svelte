@@ -30,8 +30,8 @@
 		<div
 			class="clause-highlighter"
 			class:inspecting={checkingIndex === index}
-			class:inspectedTrue={checkingIndex > index && isSatClause(clause.eval())}
-			class:inspectedFalse={checkingIndex > index && isUnSATClause(clause.eval())}
+			class:inspectedTrue={checkingIndex >= index && isSatClause(clause.eval())}
+			class:inspectedFalse={checkingIndex >= index && isUnSATClause(clause.eval())}
 		>
 			<ClauseComponent {clause} />
 		</div>

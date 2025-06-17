@@ -5,7 +5,7 @@ import { SolverMachine, type ConflictDetection } from '../SolverMachine.svelte.t
 import type { DPLL_FUN, DPLL_INPUT } from './dpll-domain.svelte.ts';
 import {
 	analyzeClause,
-	backtracking,
+	conflictiveState,
 	decide,
 	initialTransition
 } from './dpll-solver-transitions.svelte.ts';
@@ -92,8 +92,8 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 		if (activeId === dpll_stateName2StateId.empty_clause_state) {
 			initialTransition(this);
 		}
-		//Waiting to analyze the next clause of the clauses to revise
-		else if (activeId === dpll_stateName2StateId.next_clause_state) {
+		//Waiting to analyze the next clause or changing the clause set
+		else if (activeId === dpll_stateName2StateId.delete_clause_state) {
 			analyzeClause(this);
 		}
 		//Waiting to decide a variables
@@ -101,8 +101,8 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 			decide(this);
 		}
 		//Waiting to backtrack an assignment
-		else if (activeId === dpll_stateName2StateId.backtracking_state) {
-			backtracking(this);
+		else if (activeId === dpll_stateName2StateId.empty_clause_set_state) {
+			conflictiveState(this);
 		}
 	}
 
@@ -116,6 +116,6 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 	}
 
 	onConflictDetection(): boolean {
-		return !this.pendingConflicts.isEmpty();
+		return !this.pendingConflicts.isEmpty() && !this.stateMachine.onConflictState();
 	}
 }

@@ -44,3 +44,6 @@ export const solverStartedAutoMode = createEventBus<void>();
 
 // every time solver finished running on automatic it emits an event
 export const solverFinishedAutoMode = createEventBus<void>();
+
+// event bus for opening the conflict detection view
+export const conflictDetectionEventBus = createEventBus<void>();

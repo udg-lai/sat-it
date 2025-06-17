@@ -64,6 +64,7 @@ import type {
 import type { CDCL_SolverMachine } from './cdcl-solver-machine.svelte.ts';
 import type { CDCL_StateMachine } from './cdcl-state-machine.svelte.ts';
 import {
+	getCheckedClause,
 	incrementCheckingIndex,
 	updateClausesToCheck
 } from '$lib/store/conflict-detection-state.svelte.ts';
@@ -71,6 +72,9 @@ import type { ConflictAnalysis, ConflictDetection } from '../SolverMachine.svelt
 import VariableAssignment from '$lib/transversal/entities/VariableAssignment.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import { increaseNoConflicts } from '$lib/store/statistics.svelte.ts';
+import { conflictDetectionEventBus } from '$lib/transversal/events.ts';
+
+/* exported transitions */
 
 export const initialTransition = (solver: CDCL_SolverMachine): void => {
 	const stateMachine: CDCL_StateMachine = solver.stateMachine;
@@ -79,6 +83,75 @@ export const initialTransition = (solver: CDCL_SolverMachine): void => {
 	const complementaryClauses: SvelteSet<number> = ucdTransition(stateMachine);
 	conflictDetectionBlock(solver, stateMachine, -1, complementaryClauses);
 };
+
+export const analyzeClause = (solver: CDCL_SolverMachine): void => {
+	const stateMachine: CDCL_StateMachine = solver.stateMachine;
+	const pendingConflict: ConflictDetection = solver.consultPostponed();
+	const clauseSet: SvelteSet<number> = pendingConflict.clauses;
+	const clauseId: number | undefined = getCheckedClause();
+	if (clauseId === undefined) {
+		logFatal('Unexected undefined in inspectedClause');
+	}
+	deleteClauseTransition(stateMachine, clauseSet, clauseId);
+	propagationBlock(solver, stateMachine, clauseSet);
+};
+
+export const decide = (solver: CDCL_SolverMachine): void => {
+	const stateMachine: CDCL_StateMachine = solver.stateMachine;
+	const literalToPropagate: number = decideTransition(stateMachine);
+	const complementaryClauses: SvelteSet<number> = complementaryOccurrencesTransition(
+		stateMachine,
+		literalToPropagate
+	);
+	conflictDetectionBlock(solver, stateMachine, Math.abs(literalToPropagate), complementaryClauses);
+};
+
+export const preConflictAnalysis = (solver: CDCL_SolverMachine) => {
+	const stateMachine: CDCL_StateMachine = solver.stateMachine;
+	emptyClauseSetTransition(stateMachine, solver);
+	const firstLevel: boolean = decisionLevelTransition(stateMachine);
+	if (firstLevel) return;
+	buildConflictAnalysisTransition(stateMachine, solver);
+	const asserting: boolean = assertingClauseTransition(stateMachine, solver);
+	if (asserting) {
+		logFatal('It is impossible that the conflictive clause is asserting');
+	}
+	conflictAnalysis(solver);
+};
+
+export const conflictAnalysis = (solver: CDCL_SolverMachine): void => {
+	const stateMachine: CDCL_StateMachine = solver.stateMachine;
+	const conflictAnalysis: ConflictAnalysis = solver.consultConflictAnalysis() as ConflictAnalysis;
+	const lastAssignment: VariableAssignment = pickLastAssignmentTransition(
+		stateMachine,
+		conflictAnalysis
+	);
+	const variableAppear: boolean = variableInCCTransition(
+		stateMachine,
+		conflictAnalysis,
+		lastAssignment
+	);
+	if (variableAppear) {
+		resolutionUpdateCCTransition(stateMachine, solver, conflictAnalysis, lastAssignment);
+	}
+	deleteLastAssignmentTransition(stateMachine, conflictAnalysis);
+	const isAsserting: boolean = assertingClauseTransition(stateMachine, solver);
+	if (!isAsserting) {
+		return;
+	}
+	const clauseId: number = learnConflictClauseTransition(stateMachine, conflictAnalysis);
+	const secondHighestDL: number = getSecondHighestDLTransition(stateMachine, conflictAnalysis);
+	backjumpingTransition(stateMachine, conflictAnalysis, secondHighestDL);
+	pushTrailTransition(stateMachine, conflictAnalysis);
+	const literalToPropagate = propagateCCTransition(stateMachine, clauseId);
+	const complementaryClauses: SvelteSet<number> = complementaryOccurrencesTransition(
+		stateMachine,
+		literalToPropagate
+	);
+	conflictDetectionBlock(solver, stateMachine, Math.abs(literalToPropagate), complementaryClauses);
+};
+
+/* General non-exported transitions */
 
 const conflictDetectionBlock = (
 	solver: CDCL_SolverMachine,
@@ -96,17 +169,63 @@ const conflictDetectionBlock = (
 		return;
 	}
 	queueClauseSetTransition(stateMachine, solver, variable, complementaryClauses);
+	conflictDetectionEventBus.emit();
 	const pendingClausesSet: boolean = checkPendingClausesSetTransition(stateMachine, solver);
 	if (!pendingClausesSet) {
 		allVariablesAssignedTransition(stateMachine);
 		return;
 	}
 	const clausesToCheck = pickClauseSetTransition(stateMachine, solver);
-	const allClausesChecked = allClausesCheckedTransition(stateMachine, clausesToCheck);
+	propagationBlock(solver, stateMachine, clausesToCheck);
+};
+
+const propagationBlock = (
+	solver: CDCL_SolverMachine,
+	stateMachine: CDCL_StateMachine,
+	clauseSet: SvelteSet<number>
+): void => {
+	const allClausesChecked = allClausesCheckedTransition(stateMachine, clauseSet);
 	if (allClausesChecked) {
-		logFatal('This is not a possibility in this case');
+		unstackClauseSetTransition(stateMachine, solver);
+		const pendingClausesSet: boolean = checkPendingClausesSetTransition(stateMachine, solver);
+		if (!pendingClausesSet) {
+			updateClausesToCheck(new SvelteSet<number>(), -1);
+			allVariablesAssignedTransition(stateMachine);
+			return;
+		}
+		const clausesToCheck = pickClauseSetTransition(stateMachine, solver);
+		propagationBlock(solver, stateMachine, clausesToCheck);
+		return;
+	}
+	const clauseId: number = nextClauseTransition(stateMachine, clauseSet);
+	const conflict: boolean = conflictDetectionTransition(stateMachine, clauseId);
+	if (conflict) {
+		updateLastTrailEnding(clauseId);
+		return;
+	}
+	const unitClause: boolean = unitClauseTransition(stateMachine, clauseId);
+	if (!unitClause) return;
+	const literalToPropagate: number = unitPropagationTransition(stateMachine, clauseId);
+	const complementaryClauses: SvelteSet<number> = complementaryOccurrencesTransition(
+		stateMachine,
+		literalToPropagate
+	);
+	const triggeredClauses: boolean = triggeredClausesTransition(
+		stateMachine,
+		solver,
+		complementaryClauses
+	);
+	if (triggeredClauses) {
+		queueClauseSetTransition(
+			stateMachine,
+			solver,
+			Math.abs(literalToPropagate),
+			complementaryClauses
+		);
 	}
 };
+
+/* Specific Transitions */
 
 const ecTransition = (stateMachine: CDCL_StateMachine): void => {
 	if (stateMachine.getActiveId() !== 0) {
@@ -251,67 +370,6 @@ const allClausesCheckedTransition = (
 	return result;
 };
 
-export const analyzeClause = (solver: CDCL_SolverMachine): void => {
-	const stateMachine: CDCL_StateMachine = solver.stateMachine;
-	const pendingConflict: ConflictDetection = solver.consultPostponed();
-	const clauseSet: SvelteSet<number> = pendingConflict.clauses;
-	const clauseId: number = nextClauseTransition(stateMachine, clauseSet);
-	const conflict: boolean = conflictDetectionTransition(stateMachine, clauseId);
-	if (conflict) {
-		updateLastTrailEnding(clauseId);
-		emptyClauseSetTransition(stateMachine, solver);
-		decisionLevelTransition(stateMachine);
-		buildConflictAnalysisTransition(stateMachine, solver);
-
-		const conflictAnalysis: ConflictAnalysis | undefined = solver.consultConflictAnalysis();
-
-		if (conflictAnalysis === undefined) {
-			logFatal('Error', 'The conflict analysis has not been saved correctly');
-		}
-		const isAsserting: boolean = assertingClauseTransition(stateMachine, solver);
-		if (isAsserting) {
-			logFatal('Error', 'It is not possible for the CC to be asserting');
-		}
-		return;
-	}
-	const unitClause: boolean = unitClauseTransition(stateMachine, clauseId);
-	if (unitClause) {
-		const literalToPropagate: number = unitPropagationTransition(stateMachine, clauseId);
-		const complementaryClauses: SvelteSet<number> = complementaryOccurrencesTransition(
-			stateMachine,
-			literalToPropagate
-		);
-		const triggeredClauses: boolean = triggeredClausesTransition(
-			stateMachine,
-			solver,
-			complementaryClauses
-		);
-		if (triggeredClauses) {
-			queueClauseSetTransition(
-				stateMachine,
-				solver,
-				Math.abs(literalToPropagate),
-				complementaryClauses
-			);
-		}
-	}
-	deleteClauseTransition(stateMachine, clauseSet, clauseId);
-	const allChecked: boolean = allClausesCheckedTransition(stateMachine, clauseSet);
-	if (!allChecked) return;
-	unstackClauseSetTransition(stateMachine, solver);
-	const pendingClausesSet: boolean = checkPendingClausesSetTransition(stateMachine, solver);
-	if (!pendingClausesSet) {
-		updateClausesToCheck(new SvelteSet<number>(), -1);
-		allVariablesAssignedTransition(stateMachine);
-		return;
-	}
-	const clausesToCheck = pickClauseSetTransition(stateMachine, solver);
-	const allClausesChecked = allClausesCheckedTransition(stateMachine, clausesToCheck);
-	if (allClausesChecked) {
-		logFatal('This is not a possibility in this case');
-	}
-};
-
 const nextClauseTransition = (
 	stateMachine: CDCL_StateMachine,
 	clauseSet: SvelteSet<number>
@@ -324,7 +382,6 @@ const nextClauseTransition = (
 		logFatal('Function call error', 'There should be a function in the Next Clause state');
 	}
 	const clauseId: number = nextCluaseState.run(clauseSet);
-	incrementCheckingIndex();
 	stateMachine.transition('conflict_detection_state');
 	return clauseId;
 };
@@ -346,7 +403,7 @@ const conflictDetectionTransition = (
 	return result;
 };
 
-const decisionLevelTransition = (stateMachine: CDCL_StateMachine): void => {
+const decisionLevelTransition = (stateMachine: CDCL_StateMachine): boolean => {
 	const decisionLevelState = stateMachine.getActiveState() as NonFinalState<
 		CDCL_CHECK_NON_DECISION_MADE_FUN,
 		CDCL_CHECK_NON_DECISION_MADE_INPUT
@@ -357,6 +414,7 @@ const decisionLevelTransition = (stateMachine: CDCL_StateMachine): void => {
 	const result: boolean = decisionLevelState.run();
 	if (result) stateMachine.transition('unsat_state');
 	else stateMachine.transition('build_conflict_analysis_state');
+	return result;
 };
 
 const unitClauseTransition = (stateMachine: CDCL_StateMachine, clauseId: number): boolean => {
@@ -390,6 +448,7 @@ const deleteClauseTransition = (
 	}
 	deleteClauseState.run(clauseSet, clauseId);
 	stateMachine.transition('all_clauses_checked_state');
+	incrementCheckingIndex();
 };
 
 const unstackClauseSetTransition = (
@@ -439,16 +498,6 @@ const complementaryOccurrencesTransition = (
 	return clauses;
 };
 
-export const decide = (solver: CDCL_SolverMachine): void => {
-	const stateMachine: CDCL_StateMachine = solver.stateMachine;
-	const literalToPropagate: number = decideTransition(stateMachine);
-	const complementaryClauses: SvelteSet<number> = complementaryOccurrencesTransition(
-		stateMachine,
-		literalToPropagate
-	);
-	conflictDetectionBlock(solver, stateMachine, Math.abs(literalToPropagate), complementaryClauses);
-};
-
 const decideTransition = (stateMachine: CDCL_StateMachine): number => {
 	const decideState = stateMachine.getActiveState() as NonFinalState<
 		CDCL_DECIDE_FUN,
@@ -478,38 +527,6 @@ const emptyClauseSetTransition = (
 };
 
 // ** cdcl transition **
-
-export const conflictAnalysis = (solver: CDCL_SolverMachine): void => {
-	const stateMachine: CDCL_StateMachine = solver.stateMachine;
-	const conflictAnalysis: ConflictAnalysis = solver.consultConflictAnalysis() as ConflictAnalysis;
-	const lastAssignment: VariableAssignment = pickLastAssignmentTransition(
-		stateMachine,
-		conflictAnalysis
-	);
-	const variableAppear: boolean = variableInCCTransition(
-		stateMachine,
-		conflictAnalysis,
-		lastAssignment
-	);
-	if (variableAppear) {
-		resolutionUpdateCCTransition(stateMachine, solver, conflictAnalysis, lastAssignment);
-	}
-	deleteLastAssignmentTransition(stateMachine, conflictAnalysis);
-	const isAsserting: boolean = assertingClauseTransition(stateMachine, solver);
-	if (!isAsserting) {
-		return;
-	}
-	const clauseId: number = learnConflictClauseTransition(stateMachine, conflictAnalysis);
-	const secondHighestDL: number = getSecondHighestDLTransition(stateMachine, conflictAnalysis);
-	backjumpingTransition(stateMachine, conflictAnalysis, secondHighestDL);
-	pushTrailTransition(stateMachine, conflictAnalysis);
-	const literalToPropagate = propagateCCTransition(stateMachine, clauseId);
-	const complementaryClauses: SvelteSet<number> = complementaryOccurrencesTransition(
-		stateMachine,
-		literalToPropagate
-	);
-	conflictDetectionBlock(solver, stateMachine, Math.abs(literalToPropagate), complementaryClauses);
-};
 
 const buildConflictAnalysisTransition = (
 	stateMachine: CDCL_StateMachine,

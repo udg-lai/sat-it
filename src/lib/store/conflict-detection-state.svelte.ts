@@ -21,3 +21,5 @@ export const incrementCheckingIndex = () => {
 		checkingIndex++;
 	}
 };
+
+export const getCheckedClause = () => clausesToCheck[checkingIndex];

@@ -17,6 +17,7 @@
 		class="btn general-btn"
 		title="Step"
 		onclick={() => {
+			toggleTrailExpandEventBus.emit(true);
 			stateMachineEventBus.emit('step');
 		}}
 	>
