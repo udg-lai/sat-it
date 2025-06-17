@@ -116,9 +116,6 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 	}
 
 	onConflictDetection(): boolean {
-		return (
-			!this.pendingConflicts.isEmpty() &&
-			!this.stateMachine.onConflictState()
-		);
+		return !this.pendingConflicts.isEmpty() && !this.stateMachine.onConflictState();
 	}
 }

@@ -56,7 +56,7 @@ export const analyzeClause = (solver: BKT_SolverMachine): void => {
 	const pendingClauses: SvelteSet<number> = pendingConflict.clauses;
 	const clauseId: number = getCheckedClause();
 	deleteClauseTransition(stateMachine, pendingClauses, clauseId);
-	conflictDetectionBlock(stateMachine, pendingClauses)
+	conflictDetectionBlock(stateMachine, pendingClauses);
 };
 
 export const decide = (solver: BKT_SolverMachine): void => {
@@ -66,7 +66,12 @@ export const decide = (solver: BKT_SolverMachine): void => {
 		stateMachine,
 		literalToPropagate
 	);
-	preConflictDetectionBlock(solver, stateMachine, Math.abs(literalToPropagate), complementaryClauses);
+	preConflictDetectionBlock(
+		solver,
+		stateMachine,
+		Math.abs(literalToPropagate),
+		complementaryClauses
+	);
 };
 
 export const backtracking = (solver: BKT_SolverMachine): void => {
@@ -78,7 +83,12 @@ export const backtracking = (solver: BKT_SolverMachine): void => {
 		stateMachine,
 		literalToPropagate
 	);
-	preConflictDetectionBlock(solver, stateMachine, Math.abs(literalToPropagate), complementaryClauses);
+	preConflictDetectionBlock(
+		solver,
+		stateMachine,
+		Math.abs(literalToPropagate),
+		complementaryClauses
+	);
 };
 
 const preConflictDetectionBlock = (
@@ -94,7 +104,7 @@ const preConflictDetectionBlock = (
 	}
 	queueClauseSetTransition(stateMachine, solver, variable, complementaryClauses);
 	const pendingSet: SvelteSet<number> = pickPendingSetTransition(stateMachine, solver);
-	conflictDetectionBlock(stateMachine, pendingSet)
+	conflictDetectionBlock(stateMachine, pendingSet);
 };
 
 const conflictDetectionBlock = (
@@ -106,14 +116,14 @@ const conflictDetectionBlock = (
 		updateClausesToCheck(new SvelteSet<number>(), -1);
 		allVariablesAssignedTransition(stateMachine);
 		return;
-	};
+	}
 	const clauseId: number = nextClauseTransition(stateMachine, pendingClauses);
 	const conflict: boolean = conflictDetectionTransition(stateMachine, clauseId);
 	if (conflict) {
 		updateLastTrailEnding(clauseId);
 		return;
 	}
-}
+};
 
 const ecTransition = (stateMachine: BKT_StateMachine): void => {
 	if (stateMachine.getActiveId() !== 0) {

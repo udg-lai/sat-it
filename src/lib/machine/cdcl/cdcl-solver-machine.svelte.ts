@@ -196,9 +196,6 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 	}
 
 	onConflictDetection(): boolean {
-		return (
-			!this.pendingConflicts.isEmpty() &&
-			!this.stateMachine.onConflictState()
-		);
+		return !this.pendingConflicts.isEmpty() && !this.stateMachine.onConflictState();
 	}
 }
