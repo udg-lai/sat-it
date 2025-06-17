@@ -101,7 +101,12 @@ export const decide = (solver: CDCL_SolverMachine): void => {
 		stateMachine,
 		literalToPropagate
 	);
-	preConflictDetectionBlock(solver, stateMachine, Math.abs(literalToPropagate), complementaryClauses);
+	preConflictDetectionBlock(
+		solver,
+		stateMachine,
+		Math.abs(literalToPropagate),
+		complementaryClauses
+	);
 };
 
 export const preConflictAnalysis = (solver: CDCL_SolverMachine) => {
@@ -146,7 +151,12 @@ export const conflictAnalysis = (solver: CDCL_SolverMachine): void => {
 		stateMachine,
 		literalToPropagate
 	);
-	preConflictDetectionBlock(solver, stateMachine, Math.abs(literalToPropagate), complementaryClauses);
+	preConflictDetectionBlock(
+		solver,
+		stateMachine,
+		Math.abs(literalToPropagate),
+		complementaryClauses
+	);
 };
 
 /* General non-exported transitions */

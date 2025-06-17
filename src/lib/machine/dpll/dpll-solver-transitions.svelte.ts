@@ -79,7 +79,12 @@ export const decide = (solver: DPLL_SolverMachine): void => {
 		stateMachine,
 		literalToPropagate
 	);
-	preConflictDetectionBlock(solver, stateMachine, Math.abs(literalToPropagate), complementaryClauses);
+	preConflictDetectionBlock(
+		solver,
+		stateMachine,
+		Math.abs(literalToPropagate),
+		complementaryClauses
+	);
 };
 
 export const conflictiveState = (solver: DPLL_SolverMachine): void => {
@@ -92,7 +97,12 @@ export const conflictiveState = (solver: DPLL_SolverMachine): void => {
 		stateMachine,
 		literalToPropagate
 	);
-	preConflictDetectionBlock(solver, stateMachine, Math.abs(literalToPropagate), complementaryClauses);
+	preConflictDetectionBlock(
+		solver,
+		stateMachine,
+		Math.abs(literalToPropagate),
+		complementaryClauses
+	);
 };
 
 /* General non-exported transitions */
