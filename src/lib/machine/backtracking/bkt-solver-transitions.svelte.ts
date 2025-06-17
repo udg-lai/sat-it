@@ -34,11 +34,14 @@ import type { BKT_SolverMachine } from './bkt-solver-machine.svelte.ts';
 import type { BKT_StateMachine } from './bkt-state-machine.svelte.ts';
 import { updateLastTrailEnding } from '$lib/store/trails.svelte.ts';
 import {
+	getCheckedClause,
 	incrementCheckingIndex,
 	updateClausesToCheck
 } from '$lib/store/conflict-detection-state.svelte.ts';
 import type { ConflictDetection } from '../SolverMachine.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
+
+/* exported transitions */
 
 export const initialTransition = (solver: BKT_SolverMachine): void => {
 	const stateMachine: BKT_StateMachine = solver.stateMachine;
@@ -51,19 +54,9 @@ export const analyzeClause = (solver: BKT_SolverMachine): void => {
 	const stateMachine: BKT_StateMachine = solver.stateMachine;
 	const pendingConflict: ConflictDetection = solver.consultConflict();
 	const pendingClauses: SvelteSet<number> = pendingConflict.clauses;
-	const clauseId: number = nextClauseTransition(stateMachine, pendingClauses);
-	const conflict: boolean = conflictDetectionTransition(stateMachine, clauseId);
-	if (conflict) {
-		updateLastTrailEnding(clauseId);
-		emptyPendingSetTransition(stateMachine, solver);
-		decisionLevelTransition(stateMachine);
-		return;
-	}
+	const clauseId: number = getCheckedClause();
 	deleteClauseTransition(stateMachine, pendingClauses, clauseId);
-	const allChecked: boolean = allClausesCheckedTransition(stateMachine, pendingClauses);
-	if (!allChecked) return;
-	updateClausesToCheck(new SvelteSet<number>(), -1);
-	allVariablesAssignedTransition(stateMachine);
+	conflictDetectionBlock(stateMachine, pendingClauses)
 };
 
 export const decide = (solver: BKT_SolverMachine): void => {
@@ -73,20 +66,22 @@ export const decide = (solver: BKT_SolverMachine): void => {
 		stateMachine,
 		literalToPropagate
 	);
-	conflictDetectionBlock(solver, stateMachine, Math.abs(literalToPropagate), complementaryClauses);
+	preConflictDetectionBlock(solver, stateMachine, Math.abs(literalToPropagate), complementaryClauses);
 };
 
 export const backtracking = (solver: BKT_SolverMachine): void => {
 	const stateMachine: BKT_StateMachine = solver.stateMachine;
+	emptyPendingSetTransition(stateMachine, solver);
+	decisionLevelTransition(stateMachine);
 	const literalToPropagate = backtrackingTransition(stateMachine);
 	const complementaryClauses: SvelteSet<number> = complementaryOccurrencesTransition(
 		stateMachine,
 		literalToPropagate
 	);
-	conflictDetectionBlock(solver, stateMachine, Math.abs(literalToPropagate), complementaryClauses);
+	preConflictDetectionBlock(solver, stateMachine, Math.abs(literalToPropagate), complementaryClauses);
 };
 
-const conflictDetectionBlock = (
+const preConflictDetectionBlock = (
 	solver: BKT_SolverMachine,
 	stateMachine: BKT_StateMachine,
 	variable: number,
@@ -99,11 +94,26 @@ const conflictDetectionBlock = (
 	}
 	queueClauseSetTransition(stateMachine, solver, variable, complementaryClauses);
 	const pendingSet: SvelteSet<number> = pickPendingSetTransition(stateMachine, solver);
-	const allChecked: boolean = allClausesCheckedTransition(stateMachine, pendingSet);
-	if (allChecked) {
-		logFatal('This is not a possibility in this case');
-	}
+	conflictDetectionBlock(stateMachine, pendingSet)
 };
+
+const conflictDetectionBlock = (
+	stateMachine: BKT_StateMachine,
+	pendingClauses: SvelteSet<number>
+) => {
+	const allChecked: boolean = allClausesCheckedTransition(stateMachine, pendingClauses);
+	if (allChecked) {
+		updateClausesToCheck(new SvelteSet<number>(), -1);
+		allVariablesAssignedTransition(stateMachine);
+		return;
+	};
+	const clauseId: number = nextClauseTransition(stateMachine, pendingClauses);
+	const conflict: boolean = conflictDetectionTransition(stateMachine, clauseId);
+	if (conflict) {
+		updateLastTrailEnding(clauseId);
+		return;
+	}
+}
 
 const ecTransition = (stateMachine: BKT_StateMachine): void => {
 	if (stateMachine.getActiveId() !== 0) {
@@ -152,7 +162,6 @@ const nextClauseTransition = (
 		logFatal('Function call error', 'There should be a function in the Next Clause state');
 	}
 	const clauseId: number = nextCluaseState.run(pendingSet);
-	incrementCheckingIndex();
 	stateMachine.transition('conflict_detection_state');
 	return clauseId;
 };
@@ -213,6 +222,7 @@ const deleteClauseTransition = (
 	}
 	deleteClauseState.run(pendingSet, clauseId);
 	stateMachine.transition('all_clauses_checked_state');
+	incrementCheckingIndex();
 };
 
 const allClausesCheckedTransition = (
