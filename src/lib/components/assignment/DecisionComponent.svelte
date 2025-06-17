@@ -10,9 +10,12 @@
 		assignment: VariableAssignment;
 		isLast: boolean;
 		expanded: boolean;
+		emitToggle: () => void
 	}
 
-	let { assignment, isLast, expanded }: Props = $props();
+	let { assignment, isLast, expanded, emitToggle }: Props = $props();
+
+	let openLevel: boolean = $state(false);
 
 	let onChrome = $state(false);
 
@@ -20,14 +23,24 @@
 		onChrome = runningOnChrome();
 	});
 
+	$effect(() => {
+		openLevel = expanded;
+	})
+
 	const inspectedVariable: number = $derived(getInspectedVariable());
+
+	function emitLevelOpen(): void {
+		openLevel = !openLevel;
+		emitToggle();
+	}
 </script>
 
 <decision>
 	<button
 		class="literal-style decision {onChrome ? 'pad-chrome' : 'pad-others'}"
-		class:level-expanded={expanded}
+		class:level-closed={!expanded || !openLevel}
 		class:inspecting={assignment.variableId() === inspectedVariable && isLast}
+		onclick={emitLevelOpen}
 	>
 		<MathTexComponent equation={assignment.toTeX()} />
 	</button>
@@ -38,15 +51,16 @@
 		border-color: black;
 		color: black;
 		border-left: 1px solid;
-		border-right: 1px solid;
+		border-right: 1px solid transparent;
 	}
 
 	.inspecting {
 		color: var(--inspecting-color);
 		border-color: var(--inspecting-color);
+		border-right: 1px solid transparent;
 	}
 
-	.level-expanded {
-		border-right: 1px solid transparent;
+	.level-closed {
+		border-right: 1px solid black;
 	}
 </style>

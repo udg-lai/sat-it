@@ -19,7 +19,7 @@
 {#if propagations?.length === 0}
 	<ChildlessDecisionComponent assignment={decision} {isLast} />
 {:else}
-	<DecisionComponent {expanded} assignment={decision} {isLast} />
+	<DecisionComponent {expanded} assignment={decision} {isLast} emitToggle={() => (expanded = !expanded)} />
 	{#if expanded}
 		{#each propagations as assignment (assignment.variableId())}
 			{#if assignment.isK()}
