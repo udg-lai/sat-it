@@ -10,7 +10,7 @@
 		assignment: VariableAssignment;
 		isLast: boolean;
 		expanded: boolean;
-		emitToggle: () => void
+		emitToggle: () => void;
 	}
 
 	let { assignment, isLast, expanded, emitToggle }: Props = $props();
@@ -25,7 +25,7 @@
 
 	$effect(() => {
 		openLevel = expanded;
-	})
+	});
 
 	const inspectedVariable: number = $derived(getInspectedVariable());
 

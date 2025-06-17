@@ -2,7 +2,11 @@
 	import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
 	import { onMount } from 'svelte';
 	import TrailComponent from './TrailComponent.svelte';
-	import { solverStartedAutoMode, toggleTrailExpandEventBus, trailTrackingEventBus } from '$lib/transversal/events.ts';
+	import {
+		solverStartedAutoMode,
+		toggleTrailExpandEventBus,
+		trailTrackingEventBus
+	} from '$lib/transversal/events.ts';
 	import InformationComponent from './InformationComponent.svelte';
 	import type { SolverMachine } from '$lib/machine/SolverMachine.svelte.ts';
 	import { getSolverMachine } from '$lib/store/solver-machine.svelte.ts';
@@ -37,7 +41,7 @@
 	};
 
 	function isSolverRunningSolo(): boolean {
-		const autoMode: boolean =  solverMachine.isInAutoMode();
+		const autoMode: boolean = solverMachine.isInAutoMode();
 		return autoMode;
 	}
 
@@ -107,7 +111,9 @@
 		const unsubscribeExpandedTrails = toggleTrailExpandEventBus.subscribe(
 			(expanded) => (expandedTrails = expanded)
 		);
-		const unsubscribeRunningOnAuto = solverStartedAutoMode.subscribe(() => rearrangeTrailEditor(lastReference));
+		const unsubscribeRunningOnAuto = solverStartedAutoMode.subscribe(() =>
+			rearrangeTrailEditor(lastReference)
+		);
 		return () => {
 			unsubscribeTrailTracking();
 			unsubscribeExpandedTrails();
