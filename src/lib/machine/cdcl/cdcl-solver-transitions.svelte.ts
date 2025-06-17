@@ -71,6 +71,7 @@ import type { ConflictAnalysis, ConflictDetection } from '../SolverMachine.svelt
 import VariableAssignment from '$lib/transversal/entities/VariableAssignment.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import { increaseNoConflicts } from '$lib/store/statistics.svelte.ts';
+import { conflictDetectionEventBus } from '$lib/transversal/events.ts';
 
 export const initialTransition = (solver: CDCL_SolverMachine): void => {
 	const stateMachine: CDCL_StateMachine = solver.stateMachine;
@@ -96,6 +97,7 @@ const conflictDetectionBlock = (
 		return;
 	}
 	queueClauseSetTransition(stateMachine, solver, variable, complementaryClauses);
+	conflictDetectionEventBus.emit();
 	const pendingClausesSet: boolean = checkPendingClausesSetTransition(stateMachine, solver);
 	if (!pendingClausesSet) {
 		allVariablesAssignedTransition(stateMachine);

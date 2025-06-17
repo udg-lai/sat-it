@@ -39,6 +39,7 @@ import {
 } from '$lib/store/conflict-detection-state.svelte.ts';
 import type { ConflictDetection } from '../SolverMachine.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
+import { conflictDetectionEventBus } from '$lib/transversal/events.ts';
 
 export const initialTransition = (solver: BKT_SolverMachine): void => {
 	const stateMachine: BKT_StateMachine = solver.stateMachine;
@@ -98,6 +99,7 @@ const conflictDetectionBlock = (
 		return;
 	}
 	queueClauseSetTransition(stateMachine, solver, variable, complementaryClauses);
+	conflictDetectionEventBus.emit();
 	const pendingSet: SvelteSet<number> = pickPendingSetTransition(stateMachine, solver);
 	const allChecked: boolean = allClausesCheckedTransition(stateMachine, pendingSet);
 	if (allChecked) {

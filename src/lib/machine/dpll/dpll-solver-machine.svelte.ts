@@ -11,7 +11,6 @@ import {
 } from './dpll-solver-transitions.svelte.ts';
 import { makeDPLLMachine } from './dpll-state-machine.svelte.ts';
 import { dpll_stateName2StateId } from './dpll-states.svelte.ts';
-import { conflictDetectionEventBus } from '$lib/transversal/events.ts';
 
 export const makeDPLLSolver = (): DPLL_SolverMachine => {
 	return new DPLL_SolverMachine();
@@ -95,7 +94,6 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 		}
 		//Waiting to analyze the next clause of the clauses to revise
 		else if (activeId === dpll_stateName2StateId.next_clause_state) {
-			conflictDetectionEventBus.emit();
 			analyzeClause(this);
 		}
 		//Waiting to decide a variables
