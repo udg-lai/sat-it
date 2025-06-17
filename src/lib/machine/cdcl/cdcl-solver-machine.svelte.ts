@@ -14,7 +14,8 @@ import {
 	analyzeClause,
 	conflictAnalysis,
 	decide,
-	initialTransition
+	initialTransition,
+	preConflictAnalysis
 } from './cdcl-solver-transitions.svelte.ts';
 import { makeCDCLMachine } from './cdcl-state-machine.svelte.ts';
 import { cdcl_stateName2StateId } from './cdcl-states.svelte.ts';
@@ -164,12 +165,16 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 			initialTransition(this);
 		}
 		//Waiting to analyze the next clause of the clauses to revise
-		else if (activeId === cdcl_stateName2StateId.next_clause_state) {
+		else if (activeId === cdcl_stateName2StateId.delete_clause_state) {
 			analyzeClause(this);
 		}
 		//Waiting to decide a variables
 		else if (activeId === cdcl_stateName2StateId.decide_state) {
 			decide(this);
+		}
+		//Waiting after founding a conflict
+		else if (activeId === cdcl_stateName2StateId.empty_clause_set_state) {
+			preConflictAnalysis(this);
 		}
 		//Waiting to backtrack an assignment
 		else if (activeId === cdcl_stateName2StateId.pick_last_assignment_state) {
@@ -191,6 +196,6 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 	}
 
 	onConflictDetection(): boolean {
-		return !this.pendingConflicts.isEmpty();
+		return !this.pendingConflicts.isEmpty() && !this.stateMachine.onConflictState();
 	}
 }

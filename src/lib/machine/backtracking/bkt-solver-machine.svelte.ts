@@ -95,11 +95,11 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 		const activeId: number = this.stateMachine.getActiveId();
 		if (activeId === bkt_stateName2StateId.empty_clause_state) {
 			initialTransition(this);
-		} else if (activeId === bkt_stateName2StateId.next_clause_state) {
+		} else if (activeId === bkt_stateName2StateId.delete_clause_state) {
 			analyzeClause(this);
 		} else if (activeId === bkt_stateName2StateId.decide_state) {
 			decide(this);
-		} else if (activeId === bkt_stateName2StateId.backtracking_state) {
+		} else if (activeId === bkt_stateName2StateId.empty_pending_set_state) {
 			backtracking(this);
 		}
 	}
@@ -117,7 +117,7 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 			return false;
 		} else {
 			const { clauses }: ConflictDetection = this.conflictDetection;
-			return clauses.size > 0;
+			return clauses.size > 0 && !this.stateMachine.onConflictState();
 		}
 	}
 }

@@ -258,7 +258,7 @@ states.set(backtracking_state.id, backtracking_state);
 
 export const initial = empty_clause_state.id;
 
-export const conflict = backtracking_state.id;
+export const conflict = empty_pending_set_state.id;
 
 export const sat = sat_state.id;
 
