@@ -18,7 +18,6 @@ import {
 	nonDecisionMade,
 	pickPendingSet,
 	queueClauseSet,
-	triggeredClauses,
 	unsatisfiedClause,
 	type BKT_ALL_CLAUSES_CHECKED_FUN,
 	type BKT_ALL_CLAUSES_CHECKED_INPUT,
@@ -47,9 +46,7 @@ import {
 	type BKT_PICK_PENDING_SET_FUN,
 	type BKT_PICK_PENDING_SET_INPUT,
 	type BKT_QUEUE_CLAUSE_SET_FUN,
-	type BKT_QUEUE_CLAUSE_SET_INPUT,
-	type BKT_TRIGGERED_CLAUSES_FUN,
-	type BKT_TRIGGERED_CLAUSES_INPUT
+	type BKT_QUEUE_CLAUSE_SET_INPUT
 } from './bkt-domain.svelte.ts';
 
 export const bkt_stateName2StateId = {
@@ -60,15 +57,14 @@ export const bkt_stateName2StateId = {
 	empty_clause_state: 0,
 	all_variables_assigned_state: 1,
 	complementary_occurrences_state: 2,
-	triggered_clauses_state: 3,
-	queue_clause_set_state: 4,
-	pick_pending_set_state: 5,
-	all_clauses_checked_state: 6,
-	next_clause_state: 7,
-	conflict_detection_state: 8,
-	delete_clause_state: 9,
-	empty_pending_set_state: 10,
-	decision_level_state: 11
+	queue_clause_set_state: 3,
+	pick_pending_set_state: 4,
+	all_clauses_checked_state: 5,
+	next_clause_state: 6,
+	conflict_detection_state: 7,
+	delete_clause_state: 8,
+	empty_pending_set_state: 9,
+	decision_level_state: 10
 };
 
 // ** define state nodes **
@@ -122,21 +118,9 @@ const complementary_occurrences_state: NonFinalState<
 	run: complementaryOccurrences,
 	description: 'Get the clauses where the complementary of the last assigned literal appear',
 	transitions: new Map<BKT_COMPLEMENTARY_OCCURRENCES_INPUT, number>().set(
-		'triggered_clauses_state',
-		bkt_stateName2StateId['triggered_clauses_state']
+		'queue_clause_set_state',
+		bkt_stateName2StateId['queue_clause_set_state']
 	)
-};
-
-const triggered_clauses_state: NonFinalState<
-	BKT_TRIGGERED_CLAUSES_FUN,
-	BKT_TRIGGERED_CLAUSES_INPUT
-> = {
-	id: bkt_stateName2StateId['triggered_clauses_state'],
-	run: triggeredClauses,
-	description: 'Checks if last assignment added clauses to revise',
-	transitions: new Map<BKT_TRIGGERED_CLAUSES_INPUT, number>()
-		.set('queue_clause_set_state', bkt_stateName2StateId['queue_clause_set_state'])
-		.set('all_variables_assigned_state', bkt_stateName2StateId['all_variables_assigned_state'])
 };
 
 const queue_clause_set_state: NonFinalState<BKT_QUEUE_CLAUSE_SET_FUN, BKT_QUEUE_CLAUSE_SET_INPUT> =
@@ -243,7 +227,6 @@ states.set(empty_clause_state.id, empty_clause_state);
 states.set(all_variables_assigned_state.id, all_variables_assigned_state);
 states.set(decide_state.id, decide_state);
 states.set(complementary_occurrences_state.id, complementary_occurrences_state);
-states.set(triggered_clauses_state.id, triggered_clauses_state);
 states.set(queue_clause_set_state.id, queue_clause_set_state);
 states.set(pick_clause_set_state.id, pick_clause_set_state);
 states.set(conflict_detection_state.id, conflict_detection_state);

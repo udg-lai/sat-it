@@ -26,9 +26,7 @@ import type {
 	BKT_PICK_PENDING_SET_FUN,
 	BKT_PICK_PENDING_SET_INPUT,
 	BKT_QUEUE_CLAUSE_SET_FUN,
-	BKT_QUEUE_CLAUSE_SET_INPUT,
-	BKT_TRIGGERED_CLAUSES_FUN,
-	BKT_TRIGGERED_CLAUSES_INPUT
+	BKT_QUEUE_CLAUSE_SET_INPUT
 } from './bkt-domain.svelte.ts';
 import type { BKT_SolverMachine } from './bkt-solver-machine.svelte.ts';
 import type { BKT_StateMachine } from './bkt-state-machine.svelte.ts';
@@ -98,13 +96,8 @@ const preConflictDetectionBlock = (
 	variable: number,
 	complementaryClauses: SvelteSet<number>
 ): void => {
-	const triggeredClauses: boolean = triggeredClausesTransition(stateMachine, complementaryClauses);
-	if (!triggeredClauses) {
-		allVariablesAssignedTransition(stateMachine);
-		return;
-	}
 	queueClauseSetTransition(stateMachine, solver, variable, complementaryClauses);
-	conflictDetectionEventBus.emit();
+	if (complementaryClauses.size !== 0) conflictDetectionEventBus.emit();
 	const pendingSet: SvelteSet<number> = pickPendingSetTransition(stateMachine, solver);
 	conflictDetectionBlock(stateMachine, pendingSet);
 };
@@ -295,25 +288,8 @@ const complementaryOccurrencesTransition = (
 		);
 	}
 	const clauses: SvelteSet<number> = complementaryOccurrencesState.run(literalToPropagate);
-	stateMachine.transition('triggered_clauses_state');
+	stateMachine.transition('queue_clause_set_state');
 	return clauses;
-};
-
-const triggeredClausesTransition = (
-	stateMachine: BKT_StateMachine,
-	complementaryClauses: SvelteSet<number>
-): boolean => {
-	const triggeredClausesState = stateMachine.getActiveState() as NonFinalState<
-		BKT_TRIGGERED_CLAUSES_FUN,
-		BKT_TRIGGERED_CLAUSES_INPUT
-	>;
-	if (triggeredClausesState.run === undefined) {
-		logFatal('Function call error', 'There should be a function in the Triggered Clauses state');
-	}
-	const result: boolean = triggeredClausesState.run(complementaryClauses);
-	if (result) stateMachine.transition('queue_clause_set_state');
-	else stateMachine.transition('all_variables_assigned_state');
-	return result;
 };
 
 const queueClauseSetTransition = (
