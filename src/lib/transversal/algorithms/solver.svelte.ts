@@ -2,7 +2,7 @@ import type { AssignmentEvent } from '$lib/components/debugger/events.svelte.ts'
 import { getAssignment } from '$lib/store/assignment.svelte.ts';
 import { markedAsBreakpoint, type Assignment } from '$lib/store/breakpoints.svelte.ts';
 import { getProblemStore, type MappingLiteral2Clauses } from '$lib/store/problem.svelte.ts';
-import { getSolverMachine } from '$lib/store/stateMachine.svelte.ts';
+import { getSolverMachine } from '$lib/store/solver-machine.svelte.ts';
 import {
 	increaseNoConflicts,
 	increaseNoDecisions,

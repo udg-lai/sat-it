@@ -134,7 +134,6 @@ export abstract class StateMachine<F extends StateFun, I extends StateInput>
 	}
 
 	private notifyFinalState(): void {
-		console.log('notifiying final state');
 		const stateId = this.getActiveState().id;
 		if (stateId === this.sat) {
 			logSAT('The problem has been satisfied');

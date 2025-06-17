@@ -2,7 +2,7 @@
 	import type { SolverMachine } from '$lib/machine/SolverMachine.svelte.ts';
 	import type { StateFun, StateInput } from '$lib/machine/StateMachine.svelte.ts';
 	import { getProblemStore, type Problem } from '$lib/store/problem.svelte.ts';
-	import { getSolverMachine } from '$lib/store/stateMachine.svelte.ts';
+	import { getSolverMachine } from '$lib/store/solver-machine.svelte.ts';
 	import AutomaticDebugger from './AutomaticDebuggerComponent.svelte';
 	import AutoModeComponent from './AutoModeComponent.svelte';
 	import ConflictDetectionDebugger from './ConflictDetectionDebuggerComponent.svelte';

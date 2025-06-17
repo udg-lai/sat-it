@@ -1,4 +1,8 @@
-import type { StateMachineEvent } from '$lib/transversal/events.ts';
+import {
+	solverFinishedAutoMode,
+	solverStartedAutoMode,
+	type StateMachineEvent
+} from '$lib/transversal/events.ts';
 import { tick } from 'svelte';
 import type { StateFun, StateInput, StateMachine } from './StateMachine.svelte.ts';
 import { logFatal, logWarning } from '$lib/store/toasts.ts';
@@ -114,6 +118,7 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 			return;
 		}
 		this.setFlagsPreAuto();
+		this.notifyRunningOnAuto();
 		const times: number[] = [];
 		while (continueCond() && !this.forcedStop) {
 			this.step();
@@ -122,6 +127,15 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 		}
 		times.forEach(clearTimeout);
 		this.setFlagsPostAuto();
+		this.notifyFinishRunningOnAuto();
+	}
+
+	private notifyRunningOnAuto(): void {
+		solverStartedAutoMode.emit();
+	}
+
+	private notifyFinishRunningOnAuto(): void {
+		solverFinishedAutoMode.emit();
 	}
 
 	protected async solveAllStepByStep(): Promise<void> {

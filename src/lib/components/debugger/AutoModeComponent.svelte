@@ -5,7 +5,7 @@
 	import './_style.css';
 	import type { SolverMachine } from '$lib/machine/SolverMachine.svelte.ts';
 	import type { StateFun, StateInput } from '$lib/machine/StateMachine.svelte.ts';
-	import { getSolverMachine } from '$lib/store/stateMachine.svelte.ts';
+	import { getSolverMachine } from '$lib/store/solver-machine.svelte.ts';
 	import { MAX_DELAY_MS, MIN_DELAY_MS, setStepDelay } from '$lib/store/delay-ms.svelte.ts';
 	import {
 		getBaselineDelay,

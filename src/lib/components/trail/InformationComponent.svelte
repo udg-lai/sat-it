@@ -2,7 +2,7 @@
 	import { SAT_STATE_ID, UNSAT_STATE_ID } from '$lib/machine/reserved.ts';
 	import { nanoid } from 'nanoid';
 	import { getProblemStore, type Problem } from '$lib/store/problem.svelte.ts';
-	import { getSolverMachine } from '$lib/store/stateMachine.svelte.ts';
+	import { getSolverMachine } from '$lib/store/solver-machine.svelte.ts';
 	import type Clause from '$lib/transversal/entities/Clause.ts';
 	import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
 	import { Popover } from 'flowbite-svelte';

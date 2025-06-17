@@ -2,8 +2,15 @@
 	import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
 	import { onMount } from 'svelte';
 	import TrailComponent from './TrailComponent.svelte';
-	import { toggleTrailExpandEventBus, trailTrackingEventBus } from '$lib/transversal/events.ts';
+	import {
+		solverStartedAutoMode,
+		toggleTrailExpandEventBus,
+		trailTrackingEventBus
+	} from '$lib/transversal/events.ts';
 	import InformationComponent from './InformationComponent.svelte';
+	import type { SolverMachine } from '$lib/machine/SolverMachine.svelte.ts';
+	import { getSolverMachine } from '$lib/store/solver-machine.svelte.ts';
+	import type { StateFun, StateInput } from '$lib/machine/StateMachine.svelte.ts';
 
 	interface Props {
 		trails: Trail[];
@@ -23,13 +30,20 @@
 	let userScrolling: boolean = $state(false);
 	let scrollTimeout: number | undefined = undefined;
 	let lastReference: number = $state(0);
-	const recoveryTimeout: number = 3000;
+	const recoveryTimeout: number = 2.5 * 1000;
 
 	let expandedTrails: boolean = $state(true);
+
+	let solverMachine: SolverMachine<StateFun, StateInput> = $derived(getSolverMachine());
 
 	const scrollToBottom = (editorElement: HTMLElement) => {
 		editorElement.scrollTo({ top: editorElement.scrollHeight, behavior: 'smooth' });
 	};
+
+	function isSolverRunningSolo(): boolean {
+		const autoMode: boolean = solverMachine.isInAutoMode();
+		return autoMode;
+	}
 
 	function handleVerticalScroll() {
 		if (scrollTimeout !== undefined) {
@@ -46,6 +60,7 @@
 		if (interactingTimeout !== undefined) {
 			clearTimeout(interactingTimeout);
 		}
+		if (!isSolverRunningSolo()) return;
 		userInteracting = true;
 		grabbing = true;
 	}
@@ -54,6 +69,7 @@
 		if (interactingTimeout !== undefined) {
 			clearTimeout(interactingTimeout);
 		}
+		if (!isSolverRunningSolo()) return;
 		interactingTimeout = setTimeout(() => {
 			userInteracting = false;
 			rearrangeTrailEditor(lastReference);
@@ -95,9 +111,13 @@
 		const unsubscribeExpandedTrails = toggleTrailExpandEventBus.subscribe(
 			(expanded) => (expandedTrails = expanded)
 		);
+		const unsubscribeRunningOnAuto = solverStartedAutoMode.subscribe(() =>
+			rearrangeTrailEditor(lastReference)
+		);
 		return () => {
 			unsubscribeTrailTracking();
 			unsubscribeExpandedTrails();
+			unsubscribeRunningOnAuto();
 		};
 	});
 </script>

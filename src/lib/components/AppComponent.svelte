@@ -9,7 +9,7 @@
 		getSolverMachine,
 		setSolverStateMachine,
 		updateSolverMachine
-	} from '$lib/store/stateMachine.svelte.ts';
+	} from '$lib/store/solver-machine.svelte.ts';
 	import {
 		getStatistics,
 		resetStatistics,
