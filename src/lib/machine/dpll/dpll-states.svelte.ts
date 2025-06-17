@@ -10,7 +10,6 @@ import {
 	emptyClauseDetection,
 	nextClause,
 	queueClauseSet,
-	triggeredClauses,
 	unitClauseDetection,
 	unstackClauseSet,
 	type DPLL_ALL_VARIABLES_ASSIGNED_FUN,
@@ -24,8 +23,6 @@ import {
 	type DPLL_PICK_CLAUSE_SET_INPUT,
 	type DPLL_QUEUE_CLAUSE_SET_FUN,
 	type DPLL_QUEUE_CLAUSE_SET_INPUT,
-	type DPLL_TRIGGERED_CLAUSES_FUN,
-	type DPLL_TRIGGERED_CLAUSES_INPUT,
 	type DPLL_UNIT_CLAUSES_DETECTION_FUN,
 	type DPLL_UNIT_CLAUSES_DETECTION_INPUT,
 	type DPLL_UNSTACK_CLAUSE_SET_FUN,
@@ -72,24 +69,23 @@ export const dpll_stateName2StateId = {
 	unsat_state: UNSAT_STATE_ID,
 	empty_clause_state: 0,
 	unit_clauses_detection_state: 1,
-	triggered_clauses_state: 2,
-	queue_clause_set_state: 3,
-	check_pending_clauses_state: 4,
-	pick_clause_set_state: 5,
-	all_variables_assigned_state: 6,
-	unstack_clause_set_state: 7,
-	clause_evaluation_state: 8,
-	all_clauses_checked_state: 9,
-	next_clause_state: 10,
-	conflict_detection_state: 11,
-	unit_clause_state: 12,
-	delete_clause_state: 13,
-	unit_propagation_state: 14,
-	complementary_occurrences_state: 15,
-	decision_level_state: 16,
+	queue_clause_set_state: 2,
+	check_pending_clauses_state: 3,
+	pick_clause_set_state: 4,
+	all_variables_assigned_state: 5,
+	unstack_clause_set_state: 6,
+	clause_evaluation_state: 7,
+	all_clauses_checked_state: 8,
+	next_clause_state: 9,
+	conflict_detection_state: 10,
+	unit_clause_state: 11,
+	delete_clause_state: 12,
+	unit_propagation_state: 13,
+	complementary_occurrences_state: 14,
+	decision_level_state: 15,
 	backtracking_state: BACKTRACKING_STATE_ID,
 	decide_state: DECIDE_STATE_ID,
-	empty_clause_set_state: 19
+	empty_clause_set_state: 16
 };
 
 // *** define state nodes ***
@@ -111,8 +107,8 @@ const unit_clauses_detection_state: NonFinalState<
 	run: unitClauseDetection,
 	description: 'Seeks for the problem s unit clauses',
 	transitions: new Map<DPLL_UNIT_CLAUSES_DETECTION_INPUT, number>().set(
-		'triggered_clauses_state',
-		dpll_stateName2StateId['triggered_clauses_state']
+		'queue_clause_set_state',
+		dpll_stateName2StateId['queue_clause_set_state']
 	)
 };
 
@@ -234,8 +230,8 @@ const complementary_occurrences_state: NonFinalState<
 	run: complementaryOccurrences,
 	description: 'Get the clauses where the complementary of the last assigned literal appear',
 	transitions: new Map<DPLL_COMPLEMENTARY_OCCURRENCES_INPUT, number>().set(
-		'triggered_clauses_state',
-		dpll_stateName2StateId['triggered_clauses_state']
+		'queue_clause_set_state',
+		dpll_stateName2StateId['queue_clause_set_state']
 	)
 };
 
@@ -248,19 +244,6 @@ const queue_clause_set_state: NonFinalState<
 	description: 'Stack a set of clause as pending',
 	transitions: new Map<DPLL_QUEUE_CLAUSE_SET_INPUT, number>()
 		.set('check_pending_clauses_state', dpll_stateName2StateId['check_pending_clauses_state'])
-		.set('delete_clause_state', dpll_stateName2StateId['delete_clause_state'])
-};
-
-const triggered_clauses_state: NonFinalState<
-	DPLL_TRIGGERED_CLAUSES_FUN,
-	DPLL_TRIGGERED_CLAUSES_INPUT
-> = {
-	id: dpll_stateName2StateId['triggered_clauses_state'],
-	run: triggeredClauses,
-	description: 'Checks if last assignment added clauses to revise',
-	transitions: new Map<DPLL_TRIGGERED_CLAUSES_INPUT, number>()
-		.set('queue_clause_set_state', dpll_stateName2StateId['queue_clause_set_state'])
-		.set('all_variables_assigned_state', dpll_stateName2StateId['all_variables_assigned_state'])
 		.set('delete_clause_state', dpll_stateName2StateId['delete_clause_state'])
 };
 
@@ -335,7 +318,6 @@ states.set(pick_clause_set_state.id, pick_clause_set_state);
 states.set(all_variables_assigned_state.id, all_variables_assigned_state);
 states.set(decide_state.id, decide_state);
 states.set(unstack_clause_set_state.id, unstack_clause_set_state);
-states.set(triggered_clauses_state.id, triggered_clauses_state);
 states.set(next_clause_state.id, next_clause_state);
 states.set(all_clauses_checked_state.id, all_clauses_checked_state);
 states.set(conflict_detection_state.id, conflict_detection_state);

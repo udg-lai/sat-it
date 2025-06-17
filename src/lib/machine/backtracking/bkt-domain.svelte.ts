@@ -8,7 +8,7 @@ import {
 	complementaryOccurrences as solverComplementaryOccurrences,
 	decide as solverDecide,
 	emptyClauseDetection as solverEmptyClauseDetection,
-	nonDecisionMade as solverNonDecisionMade,
+	nonDecisionMade as solverNonDecisionMade
 } from '$lib/transversal/algorithms/solver.svelte.ts';
 import { isUnSATClause, type ClauseEval } from '$lib/transversal/entities/Clause.ts';
 import type ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';

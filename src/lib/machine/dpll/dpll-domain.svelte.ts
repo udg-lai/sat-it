@@ -7,7 +7,6 @@ import {
 	clauseEvaluation,
 	allAssigned as solverAllAssigned,
 	emptyClauseDetection as solverEmptyClauseDetection,
-	triggeredClauses as solverTriggeredClauses,
 	unitClauseDetection as solverUnitClauseDetection,
 	unitPropagation as solverUnitPropagation,
 	complementaryOccurrences as solverComplementaryOccurrences,
@@ -29,12 +28,7 @@ const problem: Problem = $derived(getProblemStore());
 
 export type DPLL_EMPTY_CLAUSE_INPUT = 'unit_clauses_detection_state' | 'unsat_state';
 
-export type DPLL_TRIGGERED_CLAUSES_INPUT =
-	| 'queue_clause_set_state'
-	| 'all_variables_assigned_state'
-	| 'delete_clause_state';
-
-export type DPLL_UNIT_CLAUSES_DETECTION_INPUT = 'triggered_clauses_state';
+export type DPLL_UNIT_CLAUSES_DETECTION_INPUT = 'queue_clause_set_state'; //CHANGED
 
 export type DPLL_PICK_CLAUSE_SET_INPUT = 'all_clauses_checked_state';
 
@@ -60,7 +54,7 @@ export type DPLL_ALL_VARIABLES_ASSIGNED_INPUT = 'sat_state' | 'decide_state';
 
 export type DPLL_UNIT_PROPAGATION_INPUT = 'complementary_occurrences_state';
 
-export type DPLL_COMPLEMENTARY_OCCURRENCES_INPUT = 'triggered_clauses_state';
+export type DPLL_COMPLEMENTARY_OCCURRENCES_INPUT = 'queue_clause_set_state'; //CHANGED
 
 export type DPLL_CHECK_NON_DECISION_MADE_INPUT = 'backtracking_state' | 'unsat_state';
 
@@ -75,7 +69,6 @@ export type DPLL_INPUT =
 	| DPLL_UNIT_CLAUSES_DETECTION_INPUT
 	| DPLL_PICK_CLAUSE_SET_INPUT
 	| DPLL_ALL_VARIABLES_ASSIGNED_INPUT
-	| DPLL_TRIGGERED_CLAUSES_INPUT
 	| DPLL_QUEUE_CLAUSE_SET_INPUT
 	| DPLL_UNSTACK_CLAUSE_SET_INPUT
 	| DPLL_ALL_CLAUSES_CHECKED_INPUT
@@ -125,9 +118,6 @@ export const queueClauseSet: DPLL_QUEUE_CLAUSE_SET_FUN = (
 	clauses: SvelteSet<number>,
 	solverStateMachine: DPLL_SolverMachine
 ) => {
-	if (clauses.size === 0) {
-		logFatal('Empty set of clauses are not thought to be queued');
-	}
 	const conflict: ConflictDetection = { clauses: clauses, variableReasonId: variable };
 	solverStateMachine.postpone(conflict);
 	return solverStateMachine.leftToPostpone();
@@ -146,12 +136,6 @@ export type DPLL_UNIT_CLAUSES_DETECTION_FUN = () => SvelteSet<number>;
 export const unitClauseDetection: DPLL_UNIT_CLAUSES_DETECTION_FUN = () => {
 	const pool: ClausePool = problem.clauses;
 	return solverUnitClauseDetection(pool);
-};
-
-export type DPLL_TRIGGERED_CLAUSES_FUN = (clauses: SvelteSet<number>) => boolean;
-
-export const triggeredClauses: DPLL_TRIGGERED_CLAUSES_FUN = (clauses: SvelteSet<number>) => {
-	return solverTriggeredClauses(clauses);
 };
 
 export type DPLL_DELETE_CLAUSE_FUN = (clauses: SvelteSet<number>, clauseId: number) => void;
