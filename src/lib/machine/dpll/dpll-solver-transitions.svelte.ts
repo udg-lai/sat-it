@@ -174,7 +174,6 @@ const propagationBlock = (
 /* Specific Transitions */
 
 const ecTransition = (stateMachine: DPLL_StateMachine): void => {
-	console.log('ecTransition');
 	if (stateMachine.getActiveId() !== 0) {
 		logFatal(
 			'Fail Initial',

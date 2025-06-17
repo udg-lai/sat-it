@@ -39,5 +39,11 @@ export const trailTrackingEventBus = createEventBus<number>();
 // event bus for collapse/expand of the trails
 export const toggleTrailExpandEventBus = createEventBus<boolean>();
 
+// every time solver started running on automatic it emits an event
+export const solverStartedAutoMode = createEventBus<void>();
+
+// every time solver finished running on automatic it emits an event
+export const solverFinishedAutoMode = createEventBus<void>();
+
 // event bus for opening the conflict detection view
 export const conflictDetectionEventBus = createEventBus<void>();
