@@ -10,7 +10,6 @@
 	import GeneralDebuggerButtons from './GeneralDebuggerComponent.svelte';
 	import InitialStepDebugger from './InitialStepDebuggerComponent.svelte';
 	import ManualDebugger from './ManualDebuggerComponent.svelte';
-	import ResetProblemDebugger from './ResetProblemDebuggerComponent.svelte';
 
 	const problem: Problem = $derived(getProblemStore());
 	let defaultNextVariable: number | undefined = $derived(problem.variables.nextVariable());
@@ -44,8 +43,6 @@
 			/>
 
 			<ManualDebugger {defaultNextVariable} {finished} {onConflict} />
-		{:else}
-			<ResetProblemDebugger />
 		{/if}
 
 		<GeneralDebuggerButtons {finished} backtrackingState={onConflict} />

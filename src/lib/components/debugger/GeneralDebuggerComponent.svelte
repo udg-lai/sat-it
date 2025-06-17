@@ -18,6 +18,7 @@
 	} from '$lib/transversal/events.ts';
 	import { updateAssignment } from '$lib/store/assignment.svelte.ts';
 	import { getTrailsExpanded, setTrailsExpanded } from './_state.svelte.ts';
+	import ResetProblem from './ResetProblemDebuggerComponent.svelte';
 
 	interface Props {
 		finished: boolean;
@@ -108,6 +109,8 @@
 	>
 		<DynamicRender component={BarsOutline} props={generalProps} />
 	</button>
+
+	<ResetProblem />
 
 	<button
 		class="btn general-btn"
