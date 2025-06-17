@@ -49,6 +49,7 @@ import {
 } from '$lib/store/conflict-detection-state.svelte.ts';
 import type { ConflictDetection } from '../SolverMachine.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
+import { conflictDetectionEventBus } from '$lib/transversal/events.ts';
 
 export const initialTransition = (solver: DPLL_SolverMachine): void => {
 	const stateMachine: DPLL_StateMachine = solver.stateMachine;
@@ -74,6 +75,7 @@ const conflictDetectionBlock = (
 		return;
 	}
 	queueClauseSetTransition(stateMachine, solver, variable, complementaryClauses);
+	conflictDetectionEventBus.emit();
 	const pendingClausesSet: boolean = checkPendingClausesSetTransition(stateMachine, solver);
 	if (!pendingClausesSet) {
 		allVariablesAssignedTransition(stateMachine);

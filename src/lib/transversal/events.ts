@@ -38,3 +38,6 @@ export const trailTrackingEventBus = createEventBus<number>();
 
 // event bus for collapse/expand of the trails
 export const toggleTrailExpandEventBus = createEventBus<boolean>();
+
+// event bus for opening the conflict detection view
+export const conflictDetectionEventBus = createEventBus<void>();

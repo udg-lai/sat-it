@@ -18,7 +18,7 @@ import {
 } from './cdcl-solver-transitions.svelte.ts';
 import { makeCDCLMachine } from './cdcl-state-machine.svelte.ts';
 import { cdcl_stateName2StateId } from './cdcl-states.svelte.ts';
-import type { StateMachineEvent } from '$lib/transversal/events.ts';
+import { type StateMachineEvent } from '$lib/transversal/events.ts';
 import { SvelteSet } from 'svelte/reactivity';
 
 export const makeCDCLSolver = (): CDCL_SolverMachine => {
