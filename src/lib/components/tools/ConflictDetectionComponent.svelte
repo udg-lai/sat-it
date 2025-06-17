@@ -55,7 +55,7 @@
 		align-items: end;
 		justify-content: center;
 		font-size: 1rem;
-		opacity: 0.5;
+		opacity: var(--opacity-50);
 	}
 
 	.clause-highlighter {

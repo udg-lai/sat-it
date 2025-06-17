@@ -16,6 +16,8 @@
 	--TeX-font-size: 1.2rem;
 	--conflict-color: #8a3ffc;
 	--unassigned-color: #000000;
+	--decision-color: var(--unassigned-color);
+	--clause-color: var(--unassigned-color);
 	--unsatisfied-color: #d12771;
 	--shaded-unsatisfied-color: #d127711c;
 	--satisfied-color: #24a148;

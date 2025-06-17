@@ -21,7 +21,7 @@
 
 <style>
 	.clause-style {
-		color: black;
+		color: var(--clause-color);
 		display: flex;
 		flex-direction: row;
 		gap: 0.5rem;
