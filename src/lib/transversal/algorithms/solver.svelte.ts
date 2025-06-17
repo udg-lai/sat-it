@@ -75,10 +75,6 @@ export const clauseEvaluation = (pool: ClausePool, clauseId: number): ClauseEval
 	return evaluation;
 };
 
-export const triggeredClauses = (clauses: Set<number>): boolean => {
-	return clauses.size !== 0;
-};
-
 export const unitPropagation = (
 	variables: VariablePool,
 	clauses: ClausePool,
