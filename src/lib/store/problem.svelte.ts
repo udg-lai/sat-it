@@ -128,7 +128,6 @@ const obtainProblemClauses = (): Clause[] => {
 	for (const trail of getTrails()) {
 		const learnedClause: TemporalClause | undefined = trail.getLearnedClause();
 		if (learnedClause !== undefined) learnedClauses.push(learnedClause);
-		console.log(trail);
 	}
 	const problemUnindexedClauses: TemporalClause[] = [...defaultClauses, ...learnedClauses];
 

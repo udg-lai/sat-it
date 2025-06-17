@@ -1,4 +1,4 @@
-import type { StateMachineEvent } from '$lib/transversal/events.ts';
+import { solverFinishedAutoMode, solverStartedAutoMode, type StateMachineEvent } from '$lib/transversal/events.ts';
 import { tick } from 'svelte';
 import type { StateFun, StateInput, StateMachine } from './StateMachine.svelte.ts';
 import { logFatal, logWarning } from '$lib/store/toasts.ts';

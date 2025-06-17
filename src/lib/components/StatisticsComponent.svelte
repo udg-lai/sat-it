@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { getProblemStore, type Problem } from '$lib/store/problem.svelte.ts';
-	import { getSolverMachine } from '$lib/store/stateMachine.svelte.ts';
+	import { getSolverMachine } from '$lib/store/solver-machine.svelte.ts';
 	import {
 		getClausesLeft,
 		getNoConflicts,

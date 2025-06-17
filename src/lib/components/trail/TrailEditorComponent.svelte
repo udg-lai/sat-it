@@ -4,6 +4,9 @@
 	import TrailComponent from './TrailComponent.svelte';
 	import { toggleTrailExpandEventBus, trailTrackingEventBus } from '$lib/transversal/events.ts';
 	import InformationComponent from './InformationComponent.svelte';
+	import type { SolverMachine } from '$lib/machine/SolverMachine.svelte.ts';
+	import { getSolverMachine } from '$lib/store/solver-machine.svelte.ts';
+	import type { StateFun, StateInput } from '$lib/machine/StateMachine.svelte.ts';
 
 	interface Props {
 		trails: Trail[];
