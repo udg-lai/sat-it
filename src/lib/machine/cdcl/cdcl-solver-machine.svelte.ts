@@ -31,8 +31,6 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 	pendingConflicts: Queue<ConflictDetection> = $state(new Queue<ConflictDetection>());
 	// This variable contains all the information for the machine to find the firstUIP.
 	conflictAnalysis: ConflictAnalysis | undefined = $state(undefined);
-	//We will need the clause that we've inspected
-	inspectedClause: number | undefined = $state(undefined);
 
 	constructor() {
 		super(makeCDCLMachine());
@@ -71,16 +69,6 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 			returnQueue.enqueue(copiedItem);
 		}
 		return returnQueue;
-	}
-
-	// ** functions related to inspected clause **
-
-	getInspectedClause() {
-		return this.inspectedClause;
-	}
-
-	setInspectedClause(clauseId: number | undefined) {
-		this.inspectedClause = clauseId;
 	}
 
 	// ** functions related to conflict analysis **
@@ -137,8 +125,7 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 	getRecord(): Record<string, unknown> {
 		return {
 			queue: this.getQueue(),
-			conflictAnalysis: this.conflictAnalysis,
-			inspectedClause: this.inspectedClause
+			conflictAnalysis: this.conflictAnalysis
 		};
 	}
 
@@ -162,8 +149,6 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 			const conflict: ConflictDetection = this.pendingConflicts.pick();
 			updateClausesToCheck(conflict.clauses, conflict.variableReasonId);
 		}
-		const recordedClause = record['inspectedClause'] as number | undefined;
-		this.inspectedClause = recordedClause;
 	}
 
 	async transition(input: StateMachineEvent): Promise<void> {

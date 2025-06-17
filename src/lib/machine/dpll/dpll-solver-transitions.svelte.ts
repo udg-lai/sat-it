@@ -44,6 +44,7 @@ import type {
 import type { DPLL_SolverMachine } from './dpll-solver-machine.svelte.ts';
 import type { DPLL_StateMachine } from './dpll-state-machine.svelte.ts';
 import {
+	getCheckedClause,
 	incrementCheckingIndex,
 	updateClausesToCheck
 } from '$lib/store/conflict-detection-state.svelte.ts';
@@ -64,7 +65,7 @@ export const analyzeClause = (solver: DPLL_SolverMachine): void => {
 	const stateMachine: DPLL_StateMachine = solver.stateMachine;
 	const pendingConflict: ConflictDetection = solver.consultPostponed();
 	const clauseSet: SvelteSet<number> = pendingConflict.clauses;
-	const clauseId: number | undefined = solver.getInspectedClause();
+	const clauseId: number | undefined = getCheckedClause();
 	if (clauseId === undefined) {
 		logFatal('Unexected undefined in inspectedClause');
 	}
@@ -140,7 +141,7 @@ const propagationBlock = (
 		propagationBlock(solver, stateMachine, clausesToCheck);
 		return;
 	}
-	const clauseId: number = nextClauseTransition(stateMachine, clauseSet, solver);
+	const clauseId: number = nextClauseTransition(stateMachine, clauseSet);
 	const conflict: boolean = conflictDetectionTransition(stateMachine, clauseId);
 	if (conflict) {
 		updateLastTrailEnding(clauseId);
@@ -316,8 +317,7 @@ const allClausesCheckedTransition = (
 
 const nextClauseTransition = (
 	stateMachine: DPLL_StateMachine,
-	clauseSet: SvelteSet<number>,
-	solver: DPLL_SolverMachine
+	clauseSet: SvelteSet<number>
 ): number => {
 	const nextCluaseState = stateMachine.getActiveState() as NonFinalState<
 		DPLL_NEXT_CLAUSE_FUN,
@@ -326,7 +326,7 @@ const nextClauseTransition = (
 	if (nextCluaseState.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Next Clause state');
 	}
-	const clauseId: number = nextCluaseState.run(clauseSet, solver);
+	const clauseId: number = nextCluaseState.run(clauseSet);
 	stateMachine.transition('conflict_detection_state');
 	return clauseId;
 };

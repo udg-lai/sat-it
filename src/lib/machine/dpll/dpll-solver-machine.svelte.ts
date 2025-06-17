@@ -18,8 +18,6 @@ export const makeDPLLSolver = (): DPLL_SolverMachine => {
 
 export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 	pendingConflicts: Queue<ConflictDetection> = $state(new Queue<ConflictDetection>());
-	//We will need the clause that we've inspected
-	inspectedClause: number | undefined = $state(undefined);
 
 	constructor() {
 		super(makeDPLLMachine());
@@ -59,18 +57,9 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 		return returnQueue;
 	}
 
-	getInspectedClause() {
-		return this.inspectedClause;
-	}
-
-	setInspectedClause(clauseId: number | undefined) {
-		this.inspectedClause = clauseId;
-	}
-
 	getRecord(): Record<string, unknown> {
 		return {
-			queue: this.getQueue(),
-			inspectedClause: this.inspectedClause
+			queue: this.getQueue()
 		};
 	}
 
@@ -94,9 +83,6 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 			const conflict: ConflictDetection = this.pendingConflicts.pick();
 			updateClausesToCheck(conflict.clauses, conflict.variableReasonId);
 		}
-		//Also we need the inspected clause
-		const recordedClause = record['inspectedClause'] as number | undefined;
-		this.inspectedClause = recordedClause;
 	}
 
 	step(): void {
