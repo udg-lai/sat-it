@@ -93,7 +93,7 @@
 		background-color: var(--main-bg-color);
 		border-color: var(--border-color);
 		z-index: 5;
-		color: black;
+		color: var(--clause-color);
 		padding: 0.4rem 0.5rem;
 	}
 
@@ -106,7 +106,7 @@
 	}
 
 	:global(.app-popover .clause-id) {
-		opacity: 0.5;
+		opacity: var(--opacity-50);
 	}
 
 	:global(.app-popover > .py-2) {
