@@ -25,7 +25,7 @@ export default class Literal implements Comparable<Literal> {
 		return this.variable.isAssigned();
 	}
 
-	/*Both functions isTrue and isFlase, will execute the function "evaluate" only if the function "isAssigned" is true*/
+	/*Both functions isTrue and isFalse, will execute the function "evaluate" only if the function "isAssigned" is true*/
 	isTrue(): boolean {
 		return this.isAssigned() && this.evaluate();
 	}

@@ -1,26 +1,27 @@
 import type { AssignmentEvent } from '$lib/components/debugger/events.svelte.ts';
 import { getAssignment } from '$lib/store/assignment.svelte.ts';
-import { markedAsBreakpoint, type Assignment } from '$lib/store/breakpoints.svelte.ts';
 import { getProblemStore, type MappingLiteral2Clauses } from '$lib/store/problem.svelte.ts';
 import { getSolverMachine } from '$lib/store/solver-machine.svelte.ts';
 import {
 	increaseNoConflicts,
 	increaseNoDecisions,
-	increaseNoUnitPropagations as increaseNoUnitPropagations,
+	increaseNoUnitPropagations,
 	updateClausesLeft
 } from '$lib/store/statistics.svelte.ts';
 import { logBreakpoint, logFatal } from '$lib/store/toasts.ts';
 import { getLatestTrail, getTrails, stackTrail, unstackTrail } from '$lib/store/trails.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
-import type { ClauseEval } from '../entities/Clause.ts';
 import type Clause from '../entities/Clause.ts';
+import type { ClauseEval } from '../entities/Clause.ts';
 import type ClausePool from '../entities/ClausePool.svelte.ts';
 import { Trail } from '../entities/Trail.svelte.ts';
 import type Variable from '../entities/Variable.svelte.ts';
 import VariableAssignment from '../entities/VariableAssignment.ts';
 import type { VariablePool } from '../entities/VariablePool.svelte.ts';
 import { isUnSAT } from '../interfaces/IClausePool.ts';
+import type { TruthAssignment } from '../interfaces/TruthAssignment.ts';
 import { fromJust, isJust } from '../types/maybe.ts';
+import { isBreakpoint } from '$lib/store/breakpoints.svelte.ts';
 
 export const emptyClauseDetection = (pool: ClausePool): boolean => {
 	const evaluation = pool.eval();
@@ -53,7 +54,12 @@ export const decide = (pool: VariablePool, algorithm: string): number => {
 		variableId = assignmentEvent.variable;
 	}
 
-	doAssignment(variableId, assignmentEvent.polarity);
+	const truthAssignment: TruthAssignment = {
+		variable: variableId,
+		polarity: assignmentEvent.polarity
+	};
+
+	doAssignment(truthAssignment);
 
 	const variable = pool.getVariableCopy(variableId);
 	if (manualAssignment) {
@@ -92,7 +98,12 @@ export const unitPropagation = (
 	const polarity: boolean = literalToPropagate > 0;
 	const variableId: number = Math.abs(literalToPropagate);
 
-	doAssignment(variableId, polarity);
+	const truthAssignment: TruthAssignment = {
+		variable: variableId,
+		polarity
+	};
+
+	doAssignment(truthAssignment);
 
 	const variable: Variable = variables.getVariableCopy(variableId);
 	if (assignmentReason === 'up') {
@@ -131,30 +142,28 @@ export const nonDecisionMade = (): boolean => {
 	return trail.getDecisionLevel() === 0;
 };
 
-const doAssignment = (variableId: number, polarity: boolean): void => {
+const doAssignment = (truthAssignment: TruthAssignment): void => {
 	const { variables } = getProblemStore();
-
-	variables.assign(variableId, polarity);
-
-	const assignment: Assignment = {
-		type: 'variable',
-		id: variableId
-	};
-
-	afterAssignment(assignment);
+	variables.assign(truthAssignment.variable, truthAssignment.polarity);
+	handleBreakpoints(truthAssignment);
+	updateClausesLeft(getTrails().length);
 };
 
-const afterAssignment = (assignment: Assignment): void => {
+const handleBreakpoints = (truthAssignment: TruthAssignment): void => {
 	const solverMachine = getSolverMachine();
 	const runningInAutoMode: boolean = solverMachine.isInAutoMode();
-	const isBreakpoint: boolean = markedAsBreakpoint(assignment);
-	if (isBreakpoint) {
-		logBreakpoint('Variable breakpoint', `Variable ${assignment.id} assigned`);
+
+	const { variable, polarity } = truthAssignment;
+
+	const literal: number = polarity ? variable : variable * -1;
+
+	const isBP: boolean = isBreakpoint(literal);
+	if (isBP) {
+		logBreakpoint('Breakpoint', `Variable ${variable} assigned to ${polarity}`);
 	}
-	if (runningInAutoMode && isBreakpoint) {
+	if (runningInAutoMode && isBP) {
 		solverMachine.stopAutoMode();
 	}
-	updateClausesLeft(getTrails().length);
 };
 
 export const backtracking = (pool: VariablePool): number => {
@@ -164,7 +173,12 @@ export const backtracking = (pool: VariablePool): number => {
 	const lastVariable: Variable = lastVariableAssignment.getVariable();
 	const polarity: boolean = !lastVariable.getAssignment();
 
-	doAssignment(lastVariable.getInt(), polarity);
+	const assignment = {
+		variable: lastVariable.getInt(),
+		polarity
+	};
+
+	doAssignment(assignment);
 
 	const variable = pool.getVariableCopy(lastVariable.getInt());
 	trail.push(VariableAssignment.newBacktrackingAssignment(variable));

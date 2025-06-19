@@ -1,3 +1,4 @@
+import { logFatal } from '$lib/store/toasts.ts';
 import { makeJust, makeNothing, type Maybe } from '../types/maybe.ts';
 import Variable, { type Assignment } from './Variable.svelte.ts';
 
@@ -5,12 +6,15 @@ export interface IVariablePool {
 	allAssigned(): boolean;
 	nextVariableToAssign(): Maybe<number>;
 	assign(variableId: number, assignment: Assignment): void;
+	assignByLiteral(literal: number): void;
 	unassign(variableId: number): void;
 	getVariable(variable: number): void;
 	getVariableCopy(variable: number): Variable;
 	nextVariable(): number | undefined;
 	reset(): void;
 	allAssigned(): boolean;
+	size(): number;
+	includes(varId: number): boolean;
 }
 
 export class VariablePool implements IVariablePool {
@@ -40,6 +44,13 @@ export class VariablePool implements IVariablePool {
 
 	unassign(variableId: number): void {
 		this.assign(variableId, undefined);
+	}
+
+	assignByLiteral(literal: number): void {
+		const variable = Math.abs(literal);
+		this.checkIndex(variable);
+		const polarity = literal > 0;
+		this.assign(variable, polarity);
 	}
 
 	assign(variableId: number, assignment: Assignment): void {
@@ -78,8 +89,12 @@ export class VariablePool implements IVariablePool {
 		return this.variables.filter((v) => !v.isAssigned()).map((v) => v.getInt());
 	}
 
-	getVariablesIDs(): number[] {
-		return this.variables.map((variable) => variable.getInt());
+	includes(varId: number): boolean {
+		return varId >= 1 && varId <= this.size();
+	}
+
+	size(): number {
+		return this.capacity;
 	}
 
 	private updateNextVarPointer(varIndex: number, assignment: Assignment) {
@@ -110,7 +125,7 @@ export class VariablePool implements IVariablePool {
 	private checkIndex(variableId: number): number {
 		const idx = this.variableToIndex(variableId);
 		if (idx < 0 || idx >= this.variables.length)
-			throw '[ERROR]: Trying to obtain an out-of-range variable from the table';
+			logFatal('Assignment error', 'Trying to obtain an out-of-range variable from the table');
 		return idx;
 	}
 
