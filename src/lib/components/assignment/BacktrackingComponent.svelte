@@ -5,6 +5,7 @@
 	import { onMount } from 'svelte';
 	import { runningOnChrome } from '$lib/transversal/utils.ts';
 	import { getInspectedVariable } from '$lib/store/conflict-detection-state.svelte.ts';
+	import HeadTailComponent from '../HeadTailComponent.svelte';
 
 	interface Props {
 		assignment: VariableAssignment;
@@ -13,6 +14,9 @@
 	}
 
 	let { assignment, isLast, eventClick }: Props = $props();
+
+	const inspectedVariable: number = $derived(getInspectedVariable());
+	let inspecting: boolean = $derived(assignment.variableId() === inspectedVariable && isLast);
 
 	function onClick() {
 		eventClick?.();
@@ -23,19 +27,18 @@
 	onMount(() => {
 		onChrome = runningOnChrome();
 	});
-
-	const inspectedVariable: number = $derived(getInspectedVariable());
 </script>
 
-<backtracking>
-	<button
-		class="literal-style backtracking {onChrome ? 'pad-chrome' : 'pad-others'}"
-		class:inspecting={assignment.variableId() === inspectedVariable && isLast}
-		onclick={onClick}
-	>
-		<MathTexComponent equation={assignment.toTeX()} />
-	</button>
-</backtracking>
+<HeadTailComponent inspecting={inspecting}>
+	<backtracking>
+		<button
+			class="literal-style backtracking {onChrome ? 'pad-chrome' : 'pad-others'}"
+			onclick={onClick}
+		>
+			<MathTexComponent equation={assignment.toTeX()} />
+		</button>
+	</backtracking>
+</HeadTailComponent>
 
 <style>
 	.backtracking {
@@ -46,14 +49,6 @@
 		border-right: 1px transparent;
 		border-style: dashed;
 		cursor: unset;
-	}
-
-	.inspecting {
-		color: var(--inspecting-color);
-		border-color: var(--inspecting-color);
-		border-top: 1px transparent;
-		border-left: 1px transparent;
-		border-right: 1px transparent;
 	}
 
 	:global(mo) {
