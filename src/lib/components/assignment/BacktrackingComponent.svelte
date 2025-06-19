@@ -29,7 +29,7 @@
 	});
 </script>
 
-<HeadTailComponent inspecting={inspecting}>
+<HeadTailComponent {inspecting}>
 	<backtracking>
 		<button
 			class="literal-style backtracking {onChrome ? 'pad-chrome' : 'pad-others'}"
