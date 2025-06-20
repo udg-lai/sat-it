@@ -6,7 +6,6 @@ export interface IVariablePool {
 	allAssigned(): boolean;
 	nextVariableToAssign(): Maybe<number>;
 	assign(variableId: number, assignment: Assignment): void;
-	assignByLiteral(literal: number): void;
 	unassign(variableId: number): void;
 	getVariable(variable: number): void;
 	getVariableCopy(variable: number): Variable;
@@ -44,13 +43,6 @@ export class VariablePool implements IVariablePool {
 
 	unassign(variableId: number): void {
 		this.assign(variableId, undefined);
-	}
-
-	assignByLiteral(literal: number): void {
-		const variable = Math.abs(literal);
-		this.checkIndex(variable);
-		const polarity = literal > 0;
-		this.assign(variable, polarity);
 	}
 
 	assign(variableId: number, assignment: Assignment): void {
