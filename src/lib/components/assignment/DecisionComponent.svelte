@@ -5,6 +5,7 @@
 	import { onMount } from 'svelte';
 	import { runningOnChrome } from '$lib/transversal/utils.ts';
 	import { getInspectedVariable } from '$lib/store/conflict-detection-state.svelte.ts';
+	import HeadTailComponent from '../HeadTailComponent.svelte';
 
 	interface Props {
 		assignment: VariableAssignment;
@@ -16,10 +17,10 @@
 	let { assignment, isLast, expanded, emitToggle }: Props = $props();
 
 	let openLevel: boolean = $state(false);
+
 	const inspectedVariable: number = $derived(getInspectedVariable());
 	let inspecting: boolean = $derived(assignment.variableId() === inspectedVariable && isLast);
 
-	let color: string = $derived(inspecting ? 'var(--inspecting-color)' : 'black');
 	let onChrome = $state(false);
 
 	onMount(() => {
@@ -36,27 +37,20 @@
 	}
 </script>
 
-<decision>
-	<button
-		class="literal-style decision {onChrome ? 'pad-chrome' : 'pad-others'}"
-		class:level-closed={!expanded || !openLevel}
-		style="--color: {color};"
-		class:inspecting
-		onclick={emitLevelOpen}
-	>
-		<MathTexComponent equation={assignment.toTeX()} />
-	</button>
-</decision>
+<HeadTailComponent {inspecting}>
+	<decision>
+		<button
+			class="literal-style decision {onChrome ? 'pad-chrome' : 'pad-others'}"
+			onclick={emitLevelOpen}
+		>
+			<MathTexComponent equation={assignment.toTeX()} />
+		</button>
+	</decision>
+</HeadTailComponent>
 
 <style>
 	.decision {
-		border-color: var(--color);
-		color: var(--color);
 		border-left: 1px solid;
 		border-right: 1px solid transparent;
-	}
-
-	.level-closed {
-		border-right: 1px solid var(--color);
 	}
 </style>

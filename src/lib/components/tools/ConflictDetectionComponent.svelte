@@ -7,7 +7,13 @@
 	import type Clause from '$lib/transversal/entities/Clause.ts';
 	import ClauseComponent from '../ClauseComponent.svelte';
 	import type ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';
-	import { isSatClause, isUnSATClause } from '$lib/transversal/entities/Clause.ts';
+	import {
+		isSatClause,
+		isUnitClause,
+		isUnresolvedClause,
+		isUnSATClause
+	} from '$lib/transversal/entities/Clause.ts';
+	import HeadTailComponent from '../HeadTailComponent.svelte';
 
 	const problem: Problem = $derived(getProblemStore());
 
@@ -18,35 +24,53 @@
 	});
 
 	let checkingIndex: number = $derived(getCheckingIndex());
+
+	function isSat(clause: Clause): boolean {
+		return isSatClause(clause.eval());
+	}
+
+	function isUnSat(clause: Clause): boolean {
+		return isUnSATClause(clause.eval());
+	}
+
+	function isPartial(clause: Clause): boolean {
+		const evaluation = clause.eval();
+		return isUnresolvedClause(evaluation) || isUnitClause(evaluation);
+	}
 </script>
 
-{#each clauses as clause, index (index)}
-	<div class="enumerate-clause">
-		<div class="enumerate">
-			<span>
-				{clause.getId()}.
-			</span>
+<conflict-detection-component>
+	{#each clauses as clause, index (index)}
+		<div class="enumerate-clause">
+			<div class="enumerate">
+				<span>
+					{clause.getId()}.
+				</span>
+			</div>
+			<HeadTailComponent inspecting={checkingIndex === index}>
+				<div
+					class="clause-highlighter"
+					class:inspectedTrue={isSat(clause)}
+					class:inspectedFalse={isUnSat(clause)}
+					class:visited-clause={checkingIndex >= index && isPartial(clause)}
+				>
+					<ClauseComponent {clause} />
+				</div>
+			</HeadTailComponent>
 		</div>
-		<div
-			class="clause-highlighter"
-			class:inspecting={checkingIndex === index}
-			class:inspectedTrue={checkingIndex >= index && isSatClause(clause.eval())}
-			class:inspectedFalse={checkingIndex >= index && isUnSATClause(clause.eval())}
-		>
-			<ClauseComponent {clause} />
-		</div>
-	</div>
-{/each}
+	{/each}
+</conflict-detection-component>
 
 <style>
 	.enumerate-clause {
 		display: flex;
-		width: 100%;
 		height: 100%;
 		flex-direction: row;
 		gap: 0.5rem;
 		align-items: end;
 		height: 50px;
+		align-items: center;
+		width: fit-content;
 	}
 
 	.enumerate {
@@ -58,22 +82,15 @@
 		opacity: var(--opacity-50);
 	}
 
-	.clause-highlighter {
-		border: solid;
-		border-width: 0px;
-		border-bottom-width: 1px;
-		border-color: var(--main-bg-color);
-	}
-
-	.inspecting {
-		border-color: var(--inspecting-color);
-	}
-
 	.inspectedTrue {
 		background-color: var(--shaded-satisfied-color);
 	}
 
 	.inspectedFalse {
 		background-color: var(--shaded-unsatisfied-color);
+	}
+
+	.visited-clause {
+		background-color: var(--visited-clause-color);
 	}
 </style>

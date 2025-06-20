@@ -11,6 +11,7 @@
 	import { onMount } from 'svelte';
 	import { logFatal } from '$lib/store/toasts.ts';
 	import { getInspectedVariable } from '$lib/store/conflict-detection-state.svelte.ts';
+	import HeadTailComponent from '../HeadTailComponent.svelte';
 
 	interface Props {
 		assignment: VariableAssignment;
@@ -19,6 +20,9 @@
 
 	let { assignment, isLast }: Props = $props();
 	let buttonId: string = 'btn-' + nanoid();
+
+	const inspectedVariable: number = $derived(getInspectedVariable());
+	let inspecting: boolean = $derived(assignment.variableId() === inspectedVariable && isLast);
 
 	const problem: Problem = $derived(getProblemStore());
 	const propagatedClause: Clause = $derived.by(() => {
@@ -49,19 +53,18 @@
 	onMount(() => {
 		onChrome = runningOnChrome();
 	});
-
-	const inspectedVariable: number = $derived(getInspectedVariable());
 </script>
 
-<backtracking>
-	<button
-		id={buttonId}
-		class="literal-style decision backjumping {onChrome ? 'pad-chrome' : 'pad-others'}"
-		class:inspecting={assignment.variableId() === inspectedVariable && isLast}
-	>
-		<MathTexComponent equation={assignment.toTeX()} />
-	</button>
-</backtracking>
+<HeadTailComponent {inspecting}>
+	<backtracking>
+		<button
+			id={buttonId}
+			class="literal-style decision backjumping {onChrome ? 'pad-chrome' : 'pad-others'}"
+		>
+			<MathTexComponent equation={assignment.toTeX()} />
+		</button>
+	</backtracking>
+</HeadTailComponent>
 
 <Popover triggeredBy={'#' + buttonId} class="app-popover" trigger="click" placement="bottom">
 	<div class="popover-content">
@@ -79,14 +82,6 @@
 		border-right: 1px transparent;
 		border-style: dashed;
 		cursor: pointer;
-	}
-
-	.inspecting {
-		color: var(--inspecting-color);
-		border-color: var(--inspecting-color);
-		border-top: 1px transparent;
-		border-left: 1px transparent;
-		border-right: 1px transparent;
 	}
 
 	:global(.app-popover) {

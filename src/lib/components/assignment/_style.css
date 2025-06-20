@@ -23,8 +23,3 @@
 .pad-others {
 	padding-bottom: var(--literal-padding-bottom-others);
 }
-
-.inspecting {
-	color: var(--inspecting-color);
-	border-color: var(--inspecting-color);
-}
