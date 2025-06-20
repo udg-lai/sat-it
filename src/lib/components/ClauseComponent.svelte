@@ -26,5 +26,6 @@
 		flex-direction: row;
 		gap: 0.5rem;
 		align-items: end;
+		padding: 0.5rem;
 	}
 </style>

@@ -22,7 +22,8 @@
 	--shaded-unsatisfied-color: #d127711c;
 	--satisfied-color: #24a148;
 	--shaded-satisfied-color: #24a1481c;
-	--inspecting-color: #f59b00;
+	--visited-clause-color: #bdbdbd2b;
+	--inspecting-color: #bdbdbd;
 	--trail-height: 5.5rem;
 	--trail-content-height: 4rem;
 	--trail-gap: 1rem;
