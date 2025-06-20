@@ -10,6 +10,7 @@ import {
 import { type ErrorMessage } from '$lib/transversal/types/types.ts';
 
 export interface Claim {
+	id: number;
 	comments: string[];
 	literals: number[];
 }
@@ -210,7 +211,7 @@ function parseClaims(
 				if (wrongLiteral) {
 					throw Error(`Wrong literal ${wrongLiteral}`);
 				}
-				claims.push({ comments, literals });
+				claims.push({ id: count, comments, literals });
 				count += 1;
 			}
 		} catch (e: unknown) {
@@ -247,6 +248,8 @@ function simplifyClaims(claims: Claim[]): SimplifiedResult {
 	let nClauseSimplified = 0;
 	let commentBuffer: string[] = [];
 
+	let count = 0;
+
 	for (const claim of claims) {
 		const { comments, literals } = claim;
 		const uniques: Set<number> = new Set(literals);
@@ -259,10 +262,12 @@ function simplifyClaims(claims: Claim[]): SimplifiedResult {
 				nClauseSimplified += 1;
 			}
 			simplified.push({
+				id: count,
 				comments: commentBuffer,
 				literals: Array.from(uniques)
 			});
 			commentBuffer = [];
+			count += 1;
 		}
 	}
 

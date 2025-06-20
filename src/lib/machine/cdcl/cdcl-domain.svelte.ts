@@ -406,8 +406,8 @@ export const learnConflictClause: CDCL_LEARN_CONCLICT_CLAUSE_FUN = (
 	//The clause is stored inside the pool
 	addClauseToClausePool(toLearnClause);
 
-	logInfo('New clause learn', `Clause ${toLearnClause.getId()} learned`);
-	return toLearnClause.getId();
+	logInfo('New clause learn', `Clause ${toLearnClause.getTag()} learned`);
+	return toLearnClause.getTag();
 };
 
 export type CDCL_SECOND_HIGHEST_DL_FUN = (trail: Trail, conclictClause: TemporalClause) => number;

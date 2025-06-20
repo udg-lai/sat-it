@@ -24,7 +24,7 @@
 
 			<div class="enumerate display">
 				<span>
-					{(item as Clause).getId()}.
+					{(item as Clause).getTag()}.
 				</span>
 			</div>
 			<div class="clause display">

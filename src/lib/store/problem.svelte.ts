@@ -93,7 +93,7 @@ export function addClauseToClausePool(clause: Clause) {
 
 	//Add clause to mapping
 	const mapping: MappingLiteral2Clauses = problemStore.mapping;
-	addClauseToMapping(clause, clause.getId(), mapping);
+	addClauseToMapping(clause, clause.getTag(), mapping);
 
 	problemStore = { ...currentProblem, clauses, mapping };
 }

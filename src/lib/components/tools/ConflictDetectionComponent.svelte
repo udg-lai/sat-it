@@ -44,7 +44,7 @@
 		<div class="enumerate-clause">
 			<div class="enumerate">
 				<span>
-					{clause.getId()}.
+					{clause.getTag()}.
 				</span>
 			</div>
 			<HeadTailComponent inspecting={checkingIndex === index}>

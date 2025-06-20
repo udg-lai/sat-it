@@ -38,7 +38,7 @@
 		}
 	});
 
-	const conflictClauseId: number = $derived(propagatedClause.getId());
+	const conflictClauseId: number = $derived(propagatedClause.getTag());
 
 	const conflictClauseString: string = $derived(
 		propagatedClause
