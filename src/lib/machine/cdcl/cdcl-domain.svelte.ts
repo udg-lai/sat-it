@@ -25,7 +25,7 @@ import Clause, {
 	isUnitClause,
 	isUnSATClause,
 	type ClauseEval
-} from '$lib/transversal/entities/Clause.ts';
+} from '$lib/transversal/entities/Clause.svelte.ts';
 import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
 import { getLatestTrail, getTrails } from '$lib/store/trails.svelte.ts';
 import type VariableAssignment from '$lib/transversal/entities/VariableAssignment.ts';
@@ -401,13 +401,13 @@ export const learnConflictClause: CDCL_LEARN_CONCLICT_CLAUSE_FUN = (
 	trail.learn(conflictClause);
 
 	//Generate the "Clause" that will be added to the pool.
-	const toLearnClause: Clause = new Clause(conflictClause.getLiterals());
+	const lemma: Clause = new Clause(conflictClause.getLiterals(), { learnt: true });
 
 	//The clause is stored inside the pool
-	addClauseToClausePool(toLearnClause);
+	addClauseToClausePool(lemma);
 
-	logInfo('New clause learn', `Clause ${toLearnClause.getId()} learned`);
-	return toLearnClause.getId();
+	logInfo('New clause learn', `Clause ${lemma.getTag()} learned`);
+	return lemma.getTag();
 };
 
 export type CDCL_SECOND_HIGHEST_DL_FUN = (trail: Trail, conclictClause: TemporalClause) => number;

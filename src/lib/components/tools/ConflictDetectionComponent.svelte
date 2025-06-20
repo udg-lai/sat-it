@@ -4,7 +4,7 @@
 		getClausesToCheck
 	} from '$lib/store/conflict-detection-state.svelte.ts';
 	import { getProblemStore, type Problem } from '$lib/store/problem.svelte.ts';
-	import type Clause from '$lib/transversal/entities/Clause.ts';
+	import type Clause from '$lib/transversal/entities/Clause.svelte.ts';
 	import ClauseComponent from '../ClauseComponent.svelte';
 	import type ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';
 	import {
@@ -12,7 +12,7 @@
 		isUnitClause,
 		isUnresolvedClause,
 		isUnSATClause
-	} from '$lib/transversal/entities/Clause.ts';
+	} from '$lib/transversal/entities/Clause.svelte.ts';
 	import HeadTailComponent from '../HeadTailComponent.svelte';
 
 	const problem: Problem = $derived(getProblemStore());
@@ -39,12 +39,12 @@
 	}
 </script>
 
-<conflict-detection-component>
+<conflict-detection>
 	{#each clauses as clause, index (index)}
 		<div class="enumerate-clause">
 			<div class="enumerate">
 				<span>
-					{clause.getId()}.
+					{clause.getTag()}.
 				</span>
 			</div>
 			<HeadTailComponent inspecting={checkingIndex === index}>
@@ -59,7 +59,7 @@
 			</HeadTailComponent>
 		</div>
 	{/each}
-</conflict-detection-component>
+</conflict-detection>
 
 <style>
 	.enumerate-clause {

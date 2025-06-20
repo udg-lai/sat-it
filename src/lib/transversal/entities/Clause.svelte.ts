@@ -6,48 +6,53 @@ import Literal from './Literal.svelte.ts';
 import TemporalClause from './TemporalClause.ts';
 import type { VariablePool } from './VariablePool.svelte.ts';
 
+type ClauseOptions = {
+	comments?: string[];
+	tag?: number;
+	learnt?: boolean;
+};
+
 class Clause implements Comparable<Clause> {
 	private literals: Literal[] = [];
-	private static idGenerator: number = 0;
-	private id: number;
-	private comments: string[] = [];
+	private comments: string[] = $state([]);
+	private tag: number;
+	private learnt: boolean = false;
 
-	constructor(literals: Literal[] = [], comments: string[] = []) {
+	constructor(
+		literals: Literal[],
+		{ comments = [], tag = -1, learnt = false }: ClauseOptions = {}
+	) {
 		this.literals = literals;
 		this.comments = comments;
-		this.id = this.generateUniqueId();
+		this.tag = tag;
+		this.learnt = learnt;
 	}
 
 	static buildFrom(claim: Claim, variables: VariablePool): Clause {
 		const literals: Literal[] = claim.literals.map((lit) => Literal.buildFrom(lit, variables));
 		const comments = claim.comments;
-		return new Clause(literals, comments);
-	}
-
-	static resetUniqueIdGenerator() {
-		Clause.idGenerator = 0;
-	}
-
-	static nextUniqueId() {
-		return Clause.idGenerator;
-	}
-
-	generateUniqueId() {
-		const id = Clause.idGenerator;
-		Clause.idGenerator += 1;
-		return id;
-	}
-
-	getId(): number {
-		return this.id;
-	}
-
-	setId(newId: number): void {
-		this.id = newId;
+		const tag = claim.id;
+		return new Clause(literals, {
+			comments,
+			tag,
+			learnt: false
+		});
 	}
 
 	addLiteral(lit: Literal) {
 		this.literals.push(lit);
+	}
+
+	getTag(): number {
+		return this.tag;
+	}
+
+	setTag(tag: number): void {
+		this.tag = tag;
+	}
+
+	wasLearnt(): boolean {
+		return this.learnt;
 	}
 
 	findUnassignedLiteral(): number {

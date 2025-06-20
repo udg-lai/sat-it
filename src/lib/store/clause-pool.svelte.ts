@@ -1,4 +1,4 @@
-import type Clause from '$lib/transversal/entities/Clause.ts';
+import type Clause from '$lib/transversal/entities/Clause.svelte.ts';
 import TemporalClause from '$lib/transversal/entities/TemporalClause.ts';
 
 let defaultClauses: TemporalClause[] = $state([]);
@@ -12,10 +12,10 @@ export const setDefaultClauses = (clauses: Clause[]) => {
 
 export const getDefaultClauses = () => defaultClauses;
 
-let conflictClause: TemporalClause | undefined = $state(undefined);
+let conflictAnalysisClause: TemporalClause | undefined = $state(undefined);
 
-export const setConflictClause = (cc: TemporalClause) => {
-	conflictClause = cc;
+export const setConflictAnalysisClause = (cc: TemporalClause) => {
+	conflictAnalysisClause = cc;
 };
 
-export const getConflictClause = () => conflictClause;
+export const getConflictAnalysisClause = () => conflictAnalysisClause;

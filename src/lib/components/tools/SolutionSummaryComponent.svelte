@@ -2,7 +2,7 @@
 	import ClauseComponent from '$lib/components/ClauseComponent.svelte';
 	import FlexVirtualList from '$lib/components/FlexVirtualList.svelte';
 	import { getClausePool } from '$lib/store/problem.svelte.ts';
-	import type Clause from '$lib/transversal/entities/Clause.ts';
+	import type Clause from '$lib/transversal/entities/Clause.svelte.ts';
 
 	interface Props {
 		clauseHeight?: number;
@@ -15,13 +15,17 @@
 
 <solution-summary>
 	<FlexVirtualList items={clauses} itemSize={clauseHeight}>
-		<div slot="item" let:item class="clause">
-			<div class="enumerate-clause">
-				<div class="enumerate">
-					<span>
-						{(item as Clause).getId()}.
-					</span>
-				</div>
+		<div slot="item" let:item class="clause-item">
+			{#each (item as Clause).getComments() as comment}
+				{comment}
+			{/each}
+
+			<div class="enumerate display">
+				<span>
+					{(item as Clause).getTag()}.
+				</span>
+			</div>
+			<div class="clause display">
 				<ClauseComponent clause={item as Clause} />
 			</div>
 		</div>
@@ -35,11 +39,7 @@
 		flex-direction: column;
 	}
 
-	.clause {
-		height: 100%;
-	}
-
-	.enumerate-clause {
+	.clause-item {
 		display: flex;
 		width: 100%;
 		height: 100%;
@@ -49,11 +49,20 @@
 	}
 
 	.enumerate {
+		opacity: 0.5;
 		width: 3.5rem;
+		padding-bottom: 0.25rem;
+		justify-content: center;
+	}
+
+	.display {
+		height: 100%;
 		display: flex;
 		align-items: end;
-		justify-content: center;
 		font-size: 1rem;
-		opacity: 0.5;
+	}
+
+	.display.clause {
+		flex: 1;
 	}
 </style>

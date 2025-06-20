@@ -1,7 +1,7 @@
 import ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';
 import type { DimacsInstance } from '$lib/dimacs/dimacs-instance.interface.ts';
 import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
-import Clause from '$lib/transversal/entities/Clause.ts';
+import Clause from '$lib/transversal/entities/Clause.svelte.ts';
 import { getDefaultClauses, setDefaultClauses } from './clause-pool.svelte.ts';
 import { getTrails } from './trails.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
@@ -76,24 +76,23 @@ export function updateProblemFromTrail(trail: Trail) {
 }
 
 export function resetProblem() {
-	const problem: Problem = problemStore;
-	problem.variables.reset();
+	const { variables, clauses, algorithm }: Problem = problemStore;
 
-	//Reset the caluses
-	const clauses: ClausePool = new ClausePool(obtainProblemClauses());
-	//Reset the mapping
+	variables.reset();
+	clauses.clearLearnt();
+
 	const mapping: MappingLiteral2Clauses = literalToClauses(clauses);
 
-	problemStore = { variables: problem.variables, clauses, mapping, algorithm: problem.algorithm };
+	problemStore = { variables, clauses, mapping, algorithm };
 }
 
-export function addClauseToClausePool(clause: Clause) {
+export function addClauseToClausePool(lemma: Clause) {
 	const { clauses, ...currentProblem } = problemStore;
-	clauses.addClause(clause);
+	clauses.addClause(lemma);
 
 	//Add clause to mapping
 	const mapping: MappingLiteral2Clauses = problemStore.mapping;
-	addClauseToMapping(clause, clause.getId(), mapping);
+	addClauseToMapping(lemma, lemma.getTag(), mapping);
 
 	problemStore = { ...currentProblem, clauses, mapping };
 }
@@ -130,9 +129,6 @@ const obtainProblemClauses = (): Clause[] => {
 		if (learnedClause !== undefined) learnedClauses.push(learnedClause);
 	}
 	const problemUnindexedClauses: TemporalClause[] = [...defaultClauses, ...learnedClauses];
-
-	//Reset the clause id Counter and generate the clause list to reset the clause pool
-	Clause.resetUniqueIdGenerator();
 
 	//Generate the clause pool clauses
 	const problemClauses: Clause[] = [];
