@@ -19,6 +19,7 @@ class Clause implements Comparable<Clause> {
 	private learnt: boolean = false;
 
 	constructor(literals: Literal[], { comments = [], tag = -1, learnt = false }: ClauseOptions = {}) {
+		console.log(comments)
 		this.literals = literals;
 		this.comments = comments;
 		this.tag = tag;
@@ -46,7 +47,7 @@ class Clause implements Comparable<Clause> {
 		this.tag = tag;
 	}
 
-	isLearnt(): boolean {
+	wasLearnt(): boolean {
 		return this.learnt;
 	}
 

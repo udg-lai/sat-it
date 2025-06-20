@@ -7,12 +7,13 @@ import { logFatal } from '$lib/store/toasts.ts';
 
 class ClausePool implements IClausePool {
 	private clauses: SvelteMap<number, Clause> = new SvelteMap();
+	private learnt: SvelteSet<number> = new SvelteSet();
 
 	constructor(clauses: Clause[] = []) {
+		this.clauses = new SvelteMap()
+		this.learnt = new SvelteSet()
 		for (const clause of clauses) {
-			let id = this.clauses.size
-			clause.setTag(id);
-			this.clauses.set(id, clause)
+			this._addClause(clause);
 		}
 	}
 
@@ -86,10 +87,24 @@ class ClausePool implements IClausePool {
 		return this.clauses.size;
 	}
 
+	getLearnt(): Clause[] {
+		return [...this.learnt.values()].map(tag => this.clauses.get(tag) as Clause)
+	}
+
+	clearLearnt(): void {
+		for (const tag of this.learnt) {
+			this.clauses.delete(tag)
+		}
+		this.learnt.clear();
+	}
+
 	private _addClause(clause: Clause): void {
 		let id = this.clauses.size;
 		clause.setTag(id);
 		this.clauses.set(id, clause)
+		if (clause.wasLearnt()) {
+			this.learnt.add(id);
+		}
 	}
 
 	private _get(tag: number): Clause {

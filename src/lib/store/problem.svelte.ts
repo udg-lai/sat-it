@@ -76,15 +76,14 @@ export function updateProblemFromTrail(trail: Trail) {
 }
 
 export function resetProblem() {
-	const problem: Problem = problemStore;
-	problem.variables.reset();
+	const { variables, clauses, algorithm }: Problem = problemStore;
 
-	//Reset the caluses
-	const clauses: ClausePool = new ClausePool(obtainProblemClauses());
-	//Reset the mapping
+	variables.reset();
+	clauses.clearLearnt();
+
 	const mapping: MappingLiteral2Clauses = literalToClauses(clauses);
 
-	problemStore = { variables: problem.variables, clauses, mapping, algorithm: problem.algorithm };
+	problemStore = { variables, clauses, mapping, algorithm };
 }
 
 export function addClauseToClausePool(clause: Clause) {
