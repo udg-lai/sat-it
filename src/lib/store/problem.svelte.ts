@@ -86,13 +86,13 @@ export function resetProblem() {
 	problemStore = { variables, clauses, mapping, algorithm };
 }
 
-export function addClauseToClausePool(clause: Clause) {
+export function addClauseToClausePool(lemma: Clause) {
 	const { clauses, ...currentProblem } = problemStore;
-	clauses.addClause(clause);
+	clauses.addClause(lemma);
 
 	//Add clause to mapping
 	const mapping: MappingLiteral2Clauses = problemStore.mapping;
-	addClauseToMapping(clause, clause.getTag(), mapping);
+	addClauseToMapping(lemma, lemma.getTag(), mapping);
 
 	problemStore = { ...currentProblem, clauses, mapping };
 }
