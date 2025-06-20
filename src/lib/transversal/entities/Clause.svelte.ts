@@ -8,42 +8,17 @@ import type { VariablePool } from './VariablePool.svelte.ts';
 
 class Clause implements Comparable<Clause> {
 	private literals: Literal[] = [];
-	private static idGenerator: number = 0;
-	private id: number;
-	private comments: string[] = [];
+	private comments: string[] = $state([]);
 
-	constructor(literals: Literal[] = [], comments: string[] = []) {
+	constructor(literals: Literal[], comments: string[] = []) {
 		this.literals = literals;
 		this.comments = comments;
-		this.id = this.generateUniqueId();
 	}
 
 	static buildFrom(claim: Claim, variables: VariablePool): Clause {
 		const literals: Literal[] = claim.literals.map((lit) => Literal.buildFrom(lit, variables));
 		const comments = claim.comments;
 		return new Clause(literals, comments);
-	}
-
-	static resetUniqueIdGenerator() {
-		Clause.idGenerator = 0;
-	}
-
-	static nextUniqueId() {
-		return Clause.idGenerator;
-	}
-
-	generateUniqueId() {
-		const id = Clause.idGenerator;
-		Clause.idGenerator += 1;
-		return id;
-	}
-
-	getId(): number {
-		return this.id;
-	}
-
-	setId(newId: number): void {
-		this.id = newId;
 	}
 
 	addLiteral(lit: Literal) {
@@ -144,6 +119,7 @@ class Clause implements Comparable<Clause> {
 	}
 
 	getComments(): string[] {
+		console.log($state.snapshot(this.comments))
 		return this.comments;
 	}
 

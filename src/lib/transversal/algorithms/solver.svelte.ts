@@ -12,8 +12,8 @@ import {
 import { logBreakpoint, logFatal } from '$lib/store/toasts.ts';
 import { getLatestTrail, getTrails, stackTrail, unstackTrail } from '$lib/store/trails.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
-import type { ClauseEval } from '../entities/Clause.ts';
-import type Clause from '../entities/Clause.ts';
+import type { ClauseEval } from '../entities/Clause.svelte.ts';
+import type Clause from '../entities/Clause.svelte.ts';
 import type ClausePool from '../entities/ClausePool.svelte.ts';
 import { Trail } from '../entities/Trail.svelte.ts';
 import type Variable from '../entities/Variable.svelte.ts';

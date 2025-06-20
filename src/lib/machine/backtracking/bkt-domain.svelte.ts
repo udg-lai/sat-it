@@ -11,7 +11,7 @@ import {
 	nonDecisionMade as solverNonDecisionMade,
 	triggeredClauses as solverTriggeredClauses
 } from '$lib/transversal/algorithms/solver.svelte.ts';
-import { isUnSATClause, type ClauseEval } from '$lib/transversal/entities/Clause.ts';
+import { isUnSATClause, type ClauseEval } from '$lib/transversal/entities/Clause.svelte.ts';
 import type ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import type { ConflictDetection } from '../SolverMachine.svelte.ts';

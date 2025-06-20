@@ -25,7 +25,7 @@ import Clause, {
 	isUnitClause,
 	isUnSATClause,
 	type ClauseEval
-} from '$lib/transversal/entities/Clause.ts';
+} from '$lib/transversal/entities/Clause.svelte.ts';
 import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
 import { getLatestTrail, getTrails } from '$lib/store/trails.svelte.ts';
 import type VariableAssignment from '$lib/transversal/entities/VariableAssignment.ts';

@@ -21,7 +21,7 @@ import type { DPLL_SolverMachine } from './dpll-solver-machine.svelte.ts';
 import { updateClausesToCheck } from '$lib/store/conflict-detection-state.svelte.ts';
 import { logFatal } from '$lib/store/toasts.ts';
 import type { ConflictDetection } from '../SolverMachine.svelte.ts';
-import { isUnitClause, isUnSATClause, type ClauseEval } from '$lib/transversal/entities/Clause.ts';
+import { isUnitClause, isUnSATClause, type ClauseEval } from '$lib/transversal/entities/Clause.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
 
 const problem: Problem = $derived(getProblemStore());

@@ -4,7 +4,7 @@
 	import MathTexComponent from '$lib/components/MathTexComponent.svelte';
 	import { nanoid } from 'nanoid';
 	import './_style.css';
-	import type Clause from '$lib/transversal/entities/Clause.ts';
+	import type Clause from '$lib/transversal/entities/Clause.svelte.ts';
 	import { isUnitPropagationReason } from '$lib/transversal/entities/VariableAssignment.ts';
 	import { getProblemStore, type Problem } from '$lib/store/problem.svelte.ts';
 	import { Popover } from 'flowbite-svelte';

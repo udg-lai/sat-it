@@ -1,4 +1,4 @@
-import Clause from '$lib/transversal/entities/Clause.ts';
+import Clause from '$lib/transversal/entities/Clause.svelte.ts';
 import ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';
 import { VariablePool } from '$lib/transversal/entities/VariablePool.svelte.ts';
 import { isSAT, isUnresolved, isUnSAT } from '$lib/transversal/interfaces/IClausePool.ts';

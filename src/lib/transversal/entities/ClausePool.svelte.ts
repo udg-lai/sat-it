@@ -1,6 +1,6 @@
 import { SvelteSet } from 'svelte/reactivity';
 import type { AssignmentEval, IClausePool } from '../interfaces/IClausePool.ts';
-import Clause, { type ClauseEval, isSatClause, isUnSATClause } from './Clause.ts';
+import Clause, { type ClauseEval, isSatClause, isUnSATClause } from './Clause.svelte.ts';
 import { VariablePool } from '$lib/transversal/entities/VariablePool.svelte.ts';
 import type { Claim } from '../parsers/dimacs.ts';
 
@@ -69,7 +69,7 @@ class ClausePool implements IClausePool {
 	}
 
 	getClauses(): Clause[] {
-		return this.clauses;
+		return [...this.clauses];
 	}
 
 	leftToSatisfy(): number {

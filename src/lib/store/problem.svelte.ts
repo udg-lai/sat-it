@@ -1,7 +1,7 @@
 import ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';
 import type { DimacsInstance } from '$lib/dimacs/dimacs-instance.interface.ts';
 import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
-import Clause from '$lib/transversal/entities/Clause.ts';
+import Clause from '$lib/transversal/entities/Clause.svelte.ts';
 import { getDefaultClauses, setDefaultClauses } from './clause-pool.svelte.ts';
 import { getTrails } from './trails.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
@@ -130,9 +130,6 @@ const obtainProblemClauses = (): Clause[] => {
 		if (learnedClause !== undefined) learnedClauses.push(learnedClause);
 	}
 	const problemUnindexedClauses: TemporalClause[] = [...defaultClauses, ...learnedClauses];
-
-	//Reset the clause id Counter and generate the clause list to reset the clause pool
-	Clause.resetUniqueIdGenerator();
 
 	//Generate the clause pool clauses
 	const problemClauses: Clause[] = [];

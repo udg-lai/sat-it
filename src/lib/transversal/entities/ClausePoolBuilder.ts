@@ -1,5 +1,5 @@
 import type { IClausePool } from '../interfaces/IClausePool.ts';
-import type Clause from './Clause.ts';
+import type Clause from './Clause.svelte.ts';
 import ClausePool from './ClausePool.svelte.ts';
 
 export type PoolType = 'ClausePool'; //In case some other Pool types are recommended
