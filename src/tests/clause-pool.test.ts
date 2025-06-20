@@ -1,4 +1,3 @@
-import Clause from '$lib/transversal/entities/Clause.svelte.ts';
 import ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';
 import { VariablePool } from '$lib/transversal/entities/VariablePool.svelte.ts';
 import { isSAT, isUnresolved, isUnSAT } from '$lib/transversal/interfaces/IClausePool.ts';
@@ -35,7 +34,6 @@ const summary02: Summary = parseDimacs(example02);
 
 describe('clause pool', () => {
 	it('unresolved', () => {
-		Clause.resetUniqueIdGenerator();
 		const variables: VariablePool = new VariablePool(3);
 		const clausePool: ClausePool = ClausePool.buildFrom(summary01.claims, variables);
 		variables.assign(1, true);
@@ -43,7 +41,6 @@ describe('clause pool', () => {
 		expect(isUnresolved(evaluation)).toBe(true);
 	});
 	it('unsat', () => {
-		Clause.resetUniqueIdGenerator();
 		const variables: VariablePool = new VariablePool(3);
 		const clausePool: ClausePool = ClausePool.buildFrom(summary01.claims, variables);
 		variables.assign(1, true);
@@ -54,7 +51,6 @@ describe('clause pool', () => {
 		expect(isUnSAT(evaluation)).toBe(true);
 	});
 	it('sat', () => {
-		Clause.resetUniqueIdGenerator();
 		const variables: VariablePool = new VariablePool(3);
 		const clausePool: ClausePool = ClausePool.buildFrom(summary01.claims, variables);
 		variables.assign(1, true);
@@ -64,7 +60,6 @@ describe('clause pool', () => {
 		expect(isSAT(evaluation)).toBe(true);
 	});
 	it('addition-sat', () => {
-		Clause.resetUniqueIdGenerator();
 		const variables: VariablePool = new VariablePool(3);
 		const clausePool: ClausePool = ClausePool.buildFrom(summary02.claims, variables);
 		variables.assign(1, true);
@@ -74,10 +69,8 @@ describe('clause pool', () => {
 		expect(isSAT(evaluation)).toBe(true);
 	});
 	it('addition-sat', () => {
-		Clause.resetUniqueIdGenerator();
 		const variables: VariablePool = new VariablePool(3);
 		const clausePool: ClausePool = ClausePool.buildFrom(summary02.claims, variables);
 		expect(clausePool.size()).toBe(3);
-		expect(Clause.nextUniqueId()).toBe(3);
 	});
 });

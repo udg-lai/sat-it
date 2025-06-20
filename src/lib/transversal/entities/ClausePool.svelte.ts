@@ -1,17 +1,17 @@
+import { logFatal } from '$lib/store/toasts.ts';
+import { VariablePool } from '$lib/transversal/entities/VariablePool.svelte.ts';
 import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 import type { AssignmentEval, IClausePool } from '../interfaces/IClausePool.ts';
-import Clause, { type ClauseEval, isSatClause, isUnSATClause } from './Clause.svelte.ts';
-import { VariablePool } from '$lib/transversal/entities/VariablePool.svelte.ts';
 import type { Claim } from '../parsers/dimacs.ts';
-import { logFatal } from '$lib/store/toasts.ts';
+import Clause, { type ClauseEval, isSatClause, isUnSATClause } from './Clause.svelte.ts';
 
 class ClausePool implements IClausePool {
 	private clauses: SvelteMap<number, Clause> = new SvelteMap();
 	private learnt: SvelteSet<number> = new SvelteSet();
 
 	constructor(clauses: Clause[] = []) {
-		this.clauses = new SvelteMap()
-		this.learnt = new SvelteSet()
+		this.clauses = new SvelteMap();
+		this.learnt = new SvelteSet();
 		for (const clause of clauses) {
 			this._addClause(clause);
 		}
@@ -27,7 +27,7 @@ class ClausePool implements IClausePool {
 		let nSatisfied = 0;
 		let i = 0;
 		let conflict: Clause | undefined = undefined;
-		const clauses: Clause[] = [...this.clauses.values()]
+		const clauses: Clause[] = [...this.clauses.values()];
 		while (i < clauses.length && !unsat) {
 			const clause: Clause = clauses[i];
 			const evaluation: ClauseEval = clause.eval();
@@ -88,20 +88,20 @@ class ClausePool implements IClausePool {
 	}
 
 	getLearnt(): Clause[] {
-		return [...this.learnt.values()].map(tag => this.clauses.get(tag) as Clause)
+		return [...this.learnt.values()].map((tag) => this.clauses.get(tag) as Clause);
 	}
 
 	clearLearnt(): void {
 		for (const tag of this.learnt) {
-			this.clauses.delete(tag)
+			this.clauses.delete(tag);
 		}
 		this.learnt.clear();
 	}
 
 	private _addClause(clause: Clause): void {
-		let id = this.clauses.size;
+		const id = this.clauses.size;
 		clause.setTag(id);
-		this.clauses.set(id, clause)
+		this.clauses.set(id, clause);
 		if (clause.wasLearnt()) {
 			this.learnt.add(id);
 		}
@@ -109,7 +109,7 @@ class ClausePool implements IClausePool {
 
 	private _get(tag: number): Clause {
 		if (!this.clauses.has(tag)) {
-			logFatal('ClausePool', `Accessing to an unknown clause by tag ${tag}`)
+			logFatal('ClausePool', `Accessing to an unknown clause by tag ${tag}`);
 		} else {
 			return this.clauses.get(tag) as Clause;
 		}

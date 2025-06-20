@@ -16,11 +16,9 @@
 <solution-summary>
 	<FlexVirtualList items={clauses} itemSize={clauseHeight}>
 		<div slot="item" let:item class="clause-item">
-
 			{#each (item as Clause).getComments() as comment}
 				{comment}
 			{/each}
-
 
 			<div class="enumerate display">
 				<span>

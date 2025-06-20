@@ -9,8 +9,8 @@ import type { VariablePool } from './VariablePool.svelte.ts';
 type ClauseOptions = {
 	comments?: string[];
 	tag?: number;
-	learnt?: boolean
-}
+	learnt?: boolean;
+};
 
 class Clause implements Comparable<Clause> {
 	private literals: Literal[] = [];
@@ -18,8 +18,10 @@ class Clause implements Comparable<Clause> {
 	private tag: number;
 	private learnt: boolean = false;
 
-	constructor(literals: Literal[], { comments = [], tag = -1, learnt = false }: ClauseOptions = {}) {
-		console.log(comments)
+	constructor(
+		literals: Literal[],
+		{ comments = [], tag = -1, learnt = false }: ClauseOptions = {}
+	) {
 		this.literals = literals;
 		this.comments = comments;
 		this.tag = tag;
@@ -31,7 +33,9 @@ class Clause implements Comparable<Clause> {
 		const comments = claim.comments;
 		const tag = claim.id;
 		return new Clause(literals, {
-			comments, tag, learnt: false
+			comments,
+			tag,
+			learnt: false
 		});
 	}
 
@@ -145,7 +149,6 @@ class Clause implements Comparable<Clause> {
 	}
 
 	getComments(): string[] {
-		console.log($state.snapshot(this.comments))
 		return this.comments;
 	}
 
