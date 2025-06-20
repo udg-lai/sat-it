@@ -1,7 +1,7 @@
 import { logError } from '$lib/store/toasts.ts';
 import { SvelteSet } from 'svelte/reactivity';
 
-const variableBreakpoint: SvelteSet<number> = $state(new SvelteSet<number>());
+const breakpoints: SvelteSet<number> = $state(new SvelteSet<number>());
 
 export type LiteralBreakpoint = {
 	type: 'literal';
@@ -10,22 +10,22 @@ export type LiteralBreakpoint = {
 
 export const addBreakpoint = (breakpoint: LiteralBreakpoint): void => {
 	if (breakpoint.type === 'literal') {
-		variableBreakpoint.add(breakpoint.literal);
+		breakpoints.add(breakpoint.literal);
 	} else {
 		logError('Unsupported breakpoint type:', breakpoint.type);
 	}
 };
 
 export const isBreakpoint = (literal: number): boolean => {
-	return variableBreakpoint.has(literal);
+	return breakpoints.has(literal);
 };
 
 export const removeBreakpoint = (literal: number): void => {
-	variableBreakpoint.delete(literal);
+	breakpoints.delete(literal);
 };
 
-export const getBreakpoints = () => variableBreakpoint;
+export const getBreakpoints = () => breakpoints;
 
 export const clearBreakpoints = (): void => {
-	variableBreakpoint.clear();
+	breakpoints.clear();
 };
