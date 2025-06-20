@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { getProblemStore, type Problem } from '$lib/store/problem.svelte.ts';
-	import type Clause from '$lib/transversal/entities/Clause.ts';
-	import FlexVirtualList from '$lib/components/FlexVirtualList.svelte';
 	import ClauseComponent from '$lib/components/ClauseComponent.svelte';
+	import FlexVirtualList from '$lib/components/FlexVirtualList.svelte';
+	import { getClausePool } from '$lib/store/problem.svelte.ts';
+	import type Clause from '$lib/transversal/entities/Clause.ts';
 
 	interface Props {
 		clauseHeight?: number;
@@ -10,9 +10,7 @@
 
 	let { clauseHeight = 50 }: Props = $props();
 
-	const problem: Problem = $derived(getProblemStore());
-
-	let clauses: Clause[] = $derived(problem.clauses.getClauses());
+	let clauses: Clause[] = $derived(getClausePool().getClauses());
 </script>
 
 <solution-summary>

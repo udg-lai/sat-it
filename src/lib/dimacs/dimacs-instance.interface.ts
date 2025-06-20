@@ -1,8 +1,6 @@
-import type { Summary } from '$lib/transversal/mapping/contentToSummary.ts';
+import type { Summary } from '$lib/transversal/parsers/dimacs.ts';
 
 export interface DimacsInstance {
 	name: string;
-	content: string;
 	summary: Summary;
-	html?: string[];
 }

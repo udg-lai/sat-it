@@ -1,9 +1,8 @@
 import { SvelteSet } from 'svelte/reactivity';
 import type { AssignmentEval, IClausePool } from '../interfaces/IClausePool.ts';
-import type { CNF } from '../mapping/contentToSummary.ts';
-import { cnfToClauseSet } from '../utils.ts';
 import Clause, { type ClauseEval, isSatClause, isUnSATClause } from './Clause.ts';
 import { VariablePool } from '$lib/transversal/entities/VariablePool.svelte.ts';
+import type { Claim } from '../parsers/dimacs.ts';
 
 class ClausePool implements IClausePool {
 	private clauses: Clause[];
@@ -12,9 +11,9 @@ class ClausePool implements IClausePool {
 		this.clauses = clauses;
 	}
 
-	static buildFrom(cnf: CNF, variables: VariablePool): ClausePool {
+	static buildFrom(claims: Claim[], variables: VariablePool): ClausePool {
 		Clause.resetUniqueIdGenerator();
-		const clauses: Clause[] = cnfToClauseSet(cnf, variables);
+		const clauses: Clause[] = claims.map((c) => Clause.buildFrom(c, variables));
 		return new ClausePool(clauses);
 	}
 
@@ -22,7 +21,7 @@ class ClausePool implements IClausePool {
 		let unsat = false;
 		let nSatisfied = 0;
 		let i = 0;
-		let conflicClause: Clause | undefined = undefined;
+		let conflictClause: Clause | undefined = undefined;
 		while (i < this.clauses.length && !unsat) {
 			const clause: Clause = this.clauses[i];
 			const clauseEval: ClauseEval = clause.eval();
@@ -32,14 +31,14 @@ class ClausePool implements IClausePool {
 				if (sat) nSatisfied++;
 				i++;
 			} else {
-				conflicClause = clause;
+				conflictClause = clause;
 			}
 		}
 		let state: AssignmentEval;
 		if (unsat) {
 			state = {
 				type: 'UnSAT',
-				conflictClause: conflicClause?.getId() as number
+				conflictClause: conflictClause?.getId() as number
 			};
 		} else if (nSatisfied === i) {
 			state = { type: 'SAT' };

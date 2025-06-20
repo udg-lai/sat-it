@@ -28,10 +28,10 @@ let problemStore: Problem = $state({
 });
 
 export function updateProblemDomain(instance: DimacsInstance) {
-	const { varCount, cnf: clauses } = instance.summary;
+	const { varCount, claims } = instance.summary;
 
 	const variablePool: VariablePool = new VariablePool(varCount);
-	const clausePool: ClausePool = ClausePool.buildFrom(clauses, variablePool);
+	const clausePool: ClausePool = ClausePool.buildFrom(claims, variablePool);
 	setDefaultClauses(clausePool.getClauses());
 	const mapping: MappingLiteral2Clauses = literalToClauses(clausePool);
 
@@ -143,3 +143,5 @@ const obtainProblemClauses = (): Clause[] => {
 };
 
 export const getProblemStore = () => problemStore;
+
+export const getClausePool = () => problemStore.clauses;
