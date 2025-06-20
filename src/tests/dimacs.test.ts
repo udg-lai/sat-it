@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import content2summary, { type Summary } from '$lib/transversal/mapping/contentToSummary.ts';
+import parseDimacs, { type Summary } from '$lib/transversal/parsers/dimacs.ts';
 
 const example01 = `
 c
@@ -54,13 +54,13 @@ c start with comments
 c bu
 `;
 
-// trivial true clause
+// unsupported literal
 const example05 = `
 c hola
 c
 p cnf 4 5
 1 -2 4 0
--1 2 3 4 0
+-1 2 3 44 0
 -1 -2 2 4 0
 -3 -4 0
 c
@@ -72,43 +72,35 @@ c bu
 
 describe('dimacs parser', () => {
 	it('example01', () => {
-		const summary: Summary = content2summary({ name: 'example01', content: example01 });
-		expect(summary.description).toBe(`c\nc\nc start with comments\nc\nc adios`);
+		const summary: Summary = parseDimacs(example01);
+		expect(summary.comments).toStrictEqual(['c', 'c', 'c start with comments', 'c', 'c adios']);
 		expect(summary.varCount).toBe(5);
 		expect(summary.clauseCount).toBe(3);
-		expect(summary.claims.map((claim) => claim.clause)).toStrictEqual([
-			[1, -5, 4, 0],
-			[-1, 5, 3, 4, 0],
-			[-3, -4, 0]
+		expect(summary.claims.map((claim) => claim.literals)).toStrictEqual([
+			[1, -5, 4],
+			[-1, 5, 3, 4],
+			[-3, -4]
 		]);
 	});
 	it('example02', () => {
-		const summary: Summary = content2summary({ name: 'example02', content: example02 });
-		expect(summary.description).toBe('');
+		const summary: Summary = parseDimacs(example02);
+		expect(summary.comments).toStrictEqual([]);
 		expect(summary.varCount).toBe(4);
 		expect(summary.clauseCount).toBe(5);
-		expect(summary.claims.map((claim) => claim.clause)).toStrictEqual([
-			[1, -2, 4, 0],
-			[-1, 2, 3, 4, 0],
-			[-3, -4, 0],
-			[-1, -2, 0],
-			[-1, -2, 3, 0]
+		expect(summary.claims.map((claim) => claim.literals)).toStrictEqual([
+			[1, -2, 4],
+			[-1, 2, 3, 4],
+			[-3, -4],
+			[-1, -2],
+			[-1, -2, 3]
 		]);
 	});
 	it('example03', () => {
-		const summary: Summary = content2summary({ name: 'example03', content: example03 });
-		expect(summary.description).toBe('c hola\nc');
+		const summary: Summary = parseDimacs(example03);
+		expect(summary.comments).toStrictEqual(['c hola', 'c']);
 		expect(summary.varCount).toBe(4);
 		expect(summary.clauseCount).toBe(6);
-		expect(summary.claims.map((claim) => claim.clause)).toStrictEqual([
-			[1, -2, 4, 0],
-			[-1, 2, 3, 4, 0],
-			[-1, -2, 2, 4, 0],
-			[-3, -4, 0],
-			[-1, -2, 0],
-			[-1, -2, 3, 0]
-		]);
-		expect(summary.cnf).toStrictEqual([
+		expect(summary.claims.map((claim) => claim.literals)).toStrictEqual([
 			[1, -2, 4],
 			[-1, 2, 3, 4],
 			[-3, -4],
@@ -117,19 +109,11 @@ describe('dimacs parser', () => {
 		]);
 	});
 	it('example04', () => {
-		const summary: Summary = content2summary({ name: 'example04', content: example04 });
-		expect(summary.description).toBe(`c hola\nc`);
+		const summary: Summary = parseDimacs(example04);
+		expect(summary.comments).toStrictEqual(['c hola', 'c']);
 		expect(summary.varCount).toBe(4);
 		expect(summary.clauseCount).toBe(6);
-		expect(summary.claims.map((claim) => claim.clause)).toStrictEqual([
-			[1, -2, -2, 4, 0],
-			[-1, 2, 3, 4, 0],
-			[-1, -2, 2, 4, 0],
-			[-3, -4, 0],
-			[-1, -2, 0],
-			[-1, -2, 3, 3, 0]
-		]);
-		expect(summary.cnf).toStrictEqual([
+		expect(summary.claims.map((claim) => claim.literals)).toStrictEqual([
 			[1, -2, 4],
 			[-1, 2, 3, 4],
 			[-3, -4],
@@ -138,6 +122,6 @@ describe('dimacs parser', () => {
 		]);
 	});
 	it('example05', () => {
-		expect(() => content2summary({ name: 'example05', content: example05 })).toThrowError();
+		expect(() => parseDimacs(example05)).toThrowError();
 	});
 });

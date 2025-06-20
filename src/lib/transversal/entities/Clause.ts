@@ -1,17 +1,27 @@
 import { logFatal } from '$lib/store/toasts.ts';
 import type { Comparable } from '../interfaces/Comparable.ts';
+import type { Claim } from '../parsers/dimacs.ts';
 import { arraysEqual } from '../types/array.ts';
-import type Literal from './Literal.svelte.ts';
+import Literal from './Literal.svelte.ts';
 import TemporalClause from './TemporalClause.ts';
+import type { VariablePool } from './VariablePool.svelte.ts';
 
 class Clause implements Comparable<Clause> {
 	private literals: Literal[] = [];
 	private static idGenerator: number = 0;
 	private id: number;
+	private comments: string[] = [];
 
-	constructor(literals: Literal[] = []) {
+	constructor(literals: Literal[] = [], comments: string[] = []) {
 		this.literals = literals;
+		this.comments = comments;
 		this.id = this.generateUniqueId();
+	}
+
+	static buildFrom(claim: Claim, variables: VariablePool): Clause {
+		const literals: Literal[] = claim.literals.map((lit) => Literal.buildFrom(lit, variables));
+		const comments = claim.comments;
+		return new Clause(literals, comments);
 	}
 
 	static resetUniqueIdGenerator() {
@@ -131,6 +141,10 @@ class Clause implements Comparable<Clause> {
 
 	nLiterals(): number {
 		return this.literals.length;
+	}
+
+	getComments(): string[] {
+		return this.comments;
 	}
 
 	[Symbol.iterator]() {

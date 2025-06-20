@@ -2,8 +2,7 @@
 	import type { DimacsInstance } from '$lib/dimacs/dimacs-instance.interface.ts';
 	import { addInstance } from '$lib/store/instances.store.ts';
 	import { logError, logInfo } from '$lib/store/toasts.ts';
-	import claims2html from '$lib/transversal/mapping/claimsToHtml.ts';
-	import parser, { type Summary } from '$lib/transversal/mapping/contentToSummary.ts';
+	import parser, { type Summary } from '$lib/transversal/parsers/dimacs.ts';
 	import { BottomNav, BottomNavItem, Tooltip } from 'flowbite-svelte';
 	import {
 		AdjustmentsVerticalOutline,
@@ -12,7 +11,7 @@
 		ExclamationCircleOutline,
 		PlusOutline
 	} from 'flowbite-svelte-icons';
-	import { getActiveView, type ActiveView } from './settings.store.svelte.ts';
+	import { getActiveView, type ActiveView } from './_store.svelte.ts';
 
 	export type OptionEmit = 'bookmark' | 'engine' | 'info' | 'close';
 
@@ -58,14 +57,12 @@
 		}
 	}
 
-	function saveInstance(name: string, content: string): void {
+	function saveInstance(name: string, dimacs: string): void {
 		try {
-			const summary: Summary = parser({ name: name, content });
+			const summary: Summary = parser(dimacs);
 			const instance: DimacsInstance = {
 				name: name.toLowerCase(),
-				content,
-				summary,
-				html: claims2html(summary.claims)
+				summary
 			};
 			notifySimplifiedCNF(summary);
 			addInstance(instance);

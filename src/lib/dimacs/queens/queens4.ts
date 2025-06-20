@@ -1,5 +1,4 @@
-import claims2html from '$lib/transversal/mapping/claimsToHtml.ts';
-import content2summary from '$lib/transversal/mapping/contentToSummary.ts';
+import parseDimacs from '$lib/transversal/parsers/dimacs.ts';
 import type { DimacsInstance } from '../dimacs-instance.interface.ts';
 
 const fileName = 'NQueens4.dimacs';
@@ -139,13 +138,11 @@ c i guess it works
 1 0
 -2 0`;
 
-const summary = content2summary({ content, name: fileName.toLowerCase() });
+const summary = parseDimacs(content);
 
 const instance: DimacsInstance = {
 	name: fileName.toLowerCase(),
-	content,
-	summary,
-	html: claims2html(summary.claims)
+	summary
 };
 
 export default instance;

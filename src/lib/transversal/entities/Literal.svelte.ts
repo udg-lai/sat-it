@@ -1,6 +1,7 @@
 import Variable from '$lib/transversal/entities/Variable.svelte.ts';
 import { logFatal } from '$lib/store/toasts.ts';
 import type { Comparable } from '../interfaces/Comparable.ts';
+import type { VariablePool } from './VariablePool.svelte.ts';
 
 export type Polarity = 'Positive' | 'Negative';
 
@@ -11,6 +12,12 @@ export default class Literal implements Comparable<Literal> {
 	constructor(variable: Variable, polarity: Polarity) {
 		this.variable = variable;
 		this.polarity = polarity;
+	}
+
+	static buildFrom(literal: number, variables: VariablePool) {
+		const variable = Math.abs(literal);
+		const polarity = literal < 0 ? 'Negative' : 'Positive';
+		return new Literal(variables.getVariable(variable), polarity);
 	}
 
 	getVariable() {
@@ -25,7 +32,7 @@ export default class Literal implements Comparable<Literal> {
 		return this.variable.isAssigned();
 	}
 
-	/*Both functions isTrue and isFlase, will execute the function "evaluate" only if the function "isAssigned" is true*/
+	/*Both functions isTrue and isFalse, will execute the function "evaluate" only if the function "isAssigned" is true*/
 	isTrue(): boolean {
 		return this.isAssigned() && this.evaluate();
 	}

@@ -1,18 +1,14 @@
 <script lang="ts">
 	import type { DimacsInstance } from '$lib/dimacs/dimacs-instance.interface.ts';
-	import claimsToHtml from '$lib/transversal/mapping/claimsToHtml.ts';
 	import VirtualList from 'svelte-tiny-virtual-list';
 
 	interface Props {
 		dimacsInstance: DimacsInstance;
 	}
 
-	type Html = string;
-
 	let { dimacsInstance }: Props = $props();
 
-	let items: Html[] = $derived(dimacsInstance?.html ?? claimsToHtml(dimacsInstance.summary.claims));
-
+	let items: unknown[] = [];
 	let previewObserver: ResizeObserver;
 	let virtualHeight: number = $state(0);
 	let itemSize: number = $state(40);
@@ -35,7 +31,7 @@
 	}
 </script>
 
-<div class="dimacs-viewer-component">
+<problem-summary>
 	<p class="title">{dimacsInstance.name}</p>
 	<div class="dimacs-list border-b" use:updateHeight>
 		<VirtualList
@@ -57,10 +53,10 @@
 			<p>Clauses: <span class="ocurrences">{dimacsInstance.summary.clauseCount}</span></p>
 		</div>
 	</div>
-</div>
+</problem-summary>
 
 <style>
-	.dimacs-viewer-component {
+	problem-summary {
 		flex: 1;
 		width: 100%;
 		position: relative;

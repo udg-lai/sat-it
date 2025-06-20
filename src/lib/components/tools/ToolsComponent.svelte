@@ -5,7 +5,7 @@
 	import './_styles.css';
 	import Button from './Button.svelte';
 	import ConflictDetectionComponent from './ConflictDetectionComponent.svelte';
-	import ProblemPreviewComponent from './ProblemPreviewComponent.svelte';
+	import SolutionSummaryComponent from './SolutionSummaryComponent.svelte';
 
 	let toolsViewRef: HTMLElement;
 
@@ -197,7 +197,7 @@
 				{#if active}
 					<div class="view">
 						{#if name === 'viewA'}
-							<ProblemPreviewComponent />
+							<SolutionSummaryComponent />
 						{:else if name === 'viewB'}
 							{@render snippetClausesToCheck()}
 						{:else}
