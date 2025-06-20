@@ -112,16 +112,6 @@
 		text-align: right;
 	}
 
-	:global(.comment) {
-		padding-left: 5px;
-		padding-right: 5px;
-		color: rgb(107 114 128 / var(--tw-text-opacity, 1));
-		background-color: #f6f8fa;
-		font-family: monospace;
-		font-style: italic;
-		display: block;
-	}
-
 	:global(.clause) {
 		display: flex;
 		gap: 1rem;

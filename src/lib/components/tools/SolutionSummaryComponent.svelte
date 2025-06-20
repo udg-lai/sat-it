@@ -1,35 +1,32 @@
 <script lang="ts">
 	import ClauseComponent from '$lib/components/ClauseComponent.svelte';
-	import FlexVirtualList from '$lib/components/FlexVirtualList.svelte';
 	import { getClausePool } from '$lib/store/problem.svelte.ts';
 	import type Clause from '$lib/transversal/entities/Clause.svelte.ts';
-
-	interface Props {
-		clauseHeight?: number;
-	}
-
-	let { clauseHeight = 50 }: Props = $props();
 
 	let clauses: Clause[] = $derived(getClausePool().getClauses());
 </script>
 
 <solution-summary>
-	<FlexVirtualList items={clauses} itemSize={clauseHeight}>
-		<div slot="item" let:item class="clause-item">
-			{#each (item as Clause).getComments() as comment}
-				{comment}
+	{#each clauses as clause (clause.getTag())}
+		<div class="claim">
+			{#each clause.getComments() as comment}
+				<span class="comment">
+					{comment}
+				</span>
 			{/each}
 
-			<div class="enumerate display">
-				<span>
-					{(item as Clause).getTag()}.
-				</span>
-			</div>
-			<div class="clause display">
-				<ClauseComponent clause={item as Clause} />
+			<div class="tagged-clause">
+				<div class="tag-container">
+					<span class="enumerate display">
+						{clause.getTag()}.
+					</span>
+				</div>
+				<div class="clause display">
+					<ClauseComponent {clause} />
+				</div>
 			</div>
 		</div>
-	</FlexVirtualList>
+	{/each}
 </solution-summary>
 
 <style>
@@ -37,22 +34,46 @@
 		display: flex;
 		flex: 1;
 		flex-direction: column;
+		padding: 0.5rem 1rem;
+		gap: 0.25rem;
 	}
 
-	.clause-item {
+	.tag-container {
 		display: flex;
-		width: 100%;
-		height: 100%;
+		align-items: start;
+		width: 3.5rem;
+	}
+
+	.claim {
+		display: flex;
+		width: fit-content;
+		height: fit-content;
+		flex-direction: column;
+		gap: 0.25rem;
+		align-items: start;
+		padding: 0.25rem 0rem;
+	}
+
+	.tagged-clause {
+		display: flex;
+		flex: 1;
 		flex-direction: row;
-		gap: 0.5rem;
-		align-items: end;
 	}
 
 	.enumerate {
 		opacity: 0.5;
-		width: 3.5rem;
 		padding-bottom: 0.25rem;
 		justify-content: center;
+	}
+
+	.comment {
+		padding-bottom: 0.5rem;
+		color: rgb(107 114 128 / var(--tw-text-opacity, 1));
+		background-color: #f6f8fa;
+		font-family: monospace;
+		font-style: italic;
+		display: block;
+		margin-bottom: 0.25rem;
 	}
 
 	.display {

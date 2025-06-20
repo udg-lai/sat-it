@@ -33,7 +33,7 @@
 		itemCount={items.length}
 		{itemSize}
 	>
-		<div slot="item" class="item-list" let:index let:style {style}>
+		<div slot="item" let:index let:style {style}>
 			<!-- Slot for custom item rendering -->
 			<slot name="item" item={items[index]} {index} />
 		</div></VirtualList
