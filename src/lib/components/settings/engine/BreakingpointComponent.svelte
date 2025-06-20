@@ -23,12 +23,12 @@
 		Array.from(getBreakpoints().values())
 			.map((lit) => [Math.abs(lit), lit])
 			.sort((a, b) => {
-				const [la, va] = a;
-				const [lb, vb] = b;
-				if (la === lb) {
-					return va - vb;
-				} else {
+				const [va, la] = a;
+				const [vb, lb] = b;
+				if (va === vb) {
 					return la - lb;
+				} else {
+					return va - vb;
 				}
 			})
 	);
@@ -76,7 +76,7 @@
 
 		if (value < min || value > max || value === 0) {
 			literalBreakpoint = undefined;
-			input.setCustomValidity(`Valid breakpoints in [${min} - ${max}] except zero`);
+			input.setCustomValidity(`Valid breakpoints in [${min} : ${max}] except zero`);
 			input.reportValidity();
 			return;
 		} else {
