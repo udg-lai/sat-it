@@ -56,7 +56,7 @@ body {
 	overflow: hidden;
 }
 
-body>div {
+body > div {
 	height: 100%;
 	width: 100%;
 }
@@ -70,10 +70,8 @@ body>div {
 	border-color: var(--border-color);
 }
 
-
 :global(.comment) {
 }
-
 
 .chakra-petch-medium {
 	font-family: 'Chakra Petch', sans-serif;

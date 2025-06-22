@@ -1,9 +1,9 @@
-type Left<T> = {
+export type Left<T> = {
 	left: T;
 	right?: never;
 };
 
-type Right<U> = {
+export type Right<U> = {
 	left?: never;
 	right: U;
 };

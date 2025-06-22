@@ -36,8 +36,8 @@
 		<div slot="item" let:index let:style {style}>
 			<!-- Slot for custom item rendering -->
 			<slot name="item" item={items[index]} {index} />
-		</div></VirtualList
-	>
+		</div>
+	</VirtualList>
 </div>
 
 <style>
