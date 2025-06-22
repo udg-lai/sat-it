@@ -38,7 +38,9 @@
 				{finished}
 				{onConflictDetection}
 				nextLiteral={defaultNextVariable !== undefined && !onConflict
-					? getBaselinePolarity() === true ? defaultNextVariable : -defaultNextVariable
+					? getBaselinePolarity() === true
+						? defaultNextVariable
+						: -defaultNextVariable
 					: undefined}
 			/>
 		{/if}

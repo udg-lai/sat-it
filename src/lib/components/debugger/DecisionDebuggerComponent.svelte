@@ -22,10 +22,10 @@
 
 	let userLiteral: number | undefined = $state(undefined);
 
-	const problem: Problem = $derived(getProblemStore());
+	// -----Code related to checking manual decisions-----
+	const { variables }: Problem = $derived(getProblemStore());
 
-
-	let max: number = $derived(problem.variables.size());
+	let max: number = $derived(variables.size());
 	let min: number = $derived(max * -1);
 
 	let isVariableValid: boolean = $derived.by(() => {
@@ -33,7 +33,7 @@
 		else {
 			if (userLiteral < min || userLiteral > max || userLiteral === 0) return false;
 			else {
-				const assignedVariables = problem.variables.assignedVariables();
+				const assignedVariables = variables.assignedVariables();
 				return !assignedVariables.includes(Math.abs(userLiteral));
 			}
 		}
@@ -47,7 +47,7 @@
 		}
 
 		if (input.value === '') {
-			userLiteral = undefined
+			userLiteral = undefined;
 			return;
 		}
 
@@ -71,26 +71,22 @@
 		userLiteral = value;
 	};
 
+	//It can happen that a user enters a '-' without anything else and we'll have to clean the input if necessary.
 	const checkMinus = () => {
-		if(userLiteral !== undefined && userLiteral.toString() === '-') {
+		if (userLiteral !== undefined && userLiteral.toString() === '-') {
 			userLiteral = undefined;
 		}
-	}
+	};
 
 	const emitAssignment = (): void => {
 		if (userLiteral === undefined) {
 			updateAssignment('automated');
 			stateMachineEventBus.emit('step');
 			userActionEventBus.emit('record');
-		}
-		else {
+		} else {
 			if (!isVariableValid) {
-				logInfo(
-					'Manual assignment error',
-					`Variable ${Math.abs(userLiteral)} already assigned`
-				);
-			}
-			else {
+				logInfo('Manual assignment error', `Variable ${Math.abs(userLiteral)} already assigned`);
+			} else {
 				console.log(userLiteral);
 				const polarity: boolean = userLiteral > 0;
 				const userNextVariable: number = Math.abs(userLiteral);
@@ -100,7 +96,7 @@
 			}
 			userLiteral = undefined;
 		}
-	}
+	};
 </script>
 
 <decision-debugger>
@@ -118,9 +114,7 @@
 				/>
 			</div>
 		{:else}
-			<div class="next-variable" class:conflict={onConflict}>
-				
-			</div>
+			<div class="next-variable" class:conflict={onConflict}></div>
 		{/if}
 
 		{#if !onConflict}
