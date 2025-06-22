@@ -3,13 +3,13 @@
 	import type { StateFun, StateInput } from '$lib/machine/StateMachine.svelte.ts';
 	import { getProblemStore, type Problem } from '$lib/store/problem.svelte.ts';
 	import { getSolverMachine } from '$lib/store/solver-machine.svelte.ts';
-	import AutomaticDebugger from './AutomaticDebuggerComponent.svelte';
+	import AutomaticDebugger from './DecisionDebuggerComponent.svelte';
 	import AutoModeComponent from './AutoModeComponent.svelte';
 	import ConflictDetectionDebugger from './ConflictDetectionDebuggerComponent.svelte';
 	import ConflictAnalysisDebugger from './ConflictAnalysisDebuggerComponent.svelte';
 	import GeneralDebuggerButtons from './GeneralDebuggerComponent.svelte';
 	import InitialStepDebugger from './InitialStepDebuggerComponent.svelte';
-	import ManualDebugger from './ManualDebuggerComponent.svelte';
+	import { getBaselinePolarity } from '$lib/store/parameters.svelte.ts';
 
 	const problem: Problem = $derived(getProblemStore());
 	let defaultNextVariable: number | undefined = $derived(problem.variables.nextVariable());
@@ -37,12 +37,10 @@
 				{onConflict}
 				{finished}
 				{onConflictDetection}
-				nextVariable={defaultNextVariable !== undefined && !onConflict
-					? defaultNextVariable
+				nextLiteral={defaultNextVariable !== undefined && !onConflict
+					? getBaselinePolarity() === true ? defaultNextVariable : -defaultNextVariable
 					: undefined}
 			/>
-
-			<ManualDebugger {defaultNextVariable} {finished} {onConflict} />
 		{/if}
 
 		<GeneralDebuggerButtons {finished} backtrackingState={onConflict} />
