@@ -1,7 +1,7 @@
 import { updateClausesToCheck } from '$lib/store/conflict-detection-state.svelte.ts';
 import { Queue } from '$lib/transversal/entities/Queue.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
-import { SolverMachine, type ConflictDetection } from '../SolverMachine.svelte.ts';
+import { SolverMachine } from '../SolverMachine.svelte.ts';
 import type { DPLL_FUN, DPLL_INPUT } from './dpll-domain.svelte.ts';
 import {
 	analyzeClause,
@@ -11,6 +11,7 @@ import {
 } from './dpll-solver-transitions.svelte.ts';
 import { DPLL_StateMachine, makeDPLLMachine } from './dpll-state-machine.svelte.ts';
 import { dpll_stateName2StateId } from './dpll-states.svelte.ts';
+import type { ConflictDetection } from '../types.ts';
 
 export const makeDPLLSolver = (): DPLL_SolverMachine => {
 	return new DPLL_SolverMachine();
@@ -117,6 +118,6 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 	}
 
 	onConflictDetection(): boolean {
-		return !this.pendingConflicts.isEmpty() && !this.stateMachine.onConflictState();
+		return !this.pendingConflicts.isEmpty() && !this.onConflictState();
 	}
 }

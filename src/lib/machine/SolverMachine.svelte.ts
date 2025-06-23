@@ -1,3 +1,5 @@
+import { getStepDelay } from '$lib/store/delay-ms.svelte.ts';
+import { logFatal, logWarning } from '$lib/store/toasts.ts';
 import {
 	solverFinishedAutoMode,
 	solverStartedAutoMode,
@@ -5,26 +7,10 @@ import {
 } from '$lib/transversal/events.ts';
 import { tick } from 'svelte';
 import type { StateFun, StateInput, StateMachine } from './StateMachine.svelte.ts';
-import { logFatal, logWarning } from '$lib/store/toasts.ts';
-import { getStepDelay } from '$lib/store/delay-ms.svelte.ts';
-import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
-import type { SvelteSet } from 'svelte/reactivity';
-import type TemporalClause from '$lib/transversal/entities/TemporalClause.ts';
-
-export type ConflictDetection = {
-	clauses: SvelteSet<number>;
-	variableReasonId: number;
-};
-
-export type ConflictAnalysis = {
-	trail: Trail;
-	conflictClause: TemporalClause;
-	decisionLevelVariables: number[];
-};
 
 export type KnownSolver = 'bkt' | 'dpll' | 'cdcl';
 
-export interface SolverStateInterface {
+export interface SolverStateInterface<F extends StateFun, I extends StateInput> {
 	transition: (input: StateMachineEvent) => Promise<void>;
 	getActiveStateId: () => number;
 	updateActiveStateId: (id: number) => void;
@@ -37,11 +23,11 @@ export interface SolverStateInterface {
 	onFinalState: () => boolean;
 	onConflictDetection: () => boolean;
 	identify: () => KnownSolver;
+	getStateMachine: () => StateMachine<F, I>;
 }
 
 export abstract class SolverMachine<F extends StateFun, I extends StateInput>
-	implements SolverStateInterface
-{
+	implements SolverStateInterface<F, I> {
 	protected stateMachine!: StateMachine<F, I>;
 	private runningOnAuto: boolean = $state(false);
 	private forcedStop: boolean = $state(false);
@@ -60,6 +46,10 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 
 	isInAutoMode(): boolean {
 		return this.runningOnAuto;
+	}
+
+	getStateMachine(): StateMachine<F, I> {
+		return this.stateMachine;
 	}
 
 	getActiveStateId(): number {

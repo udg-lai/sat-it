@@ -36,21 +36,21 @@ import {
 	incrementCheckingIndex,
 	updateClausesToCheck
 } from '$lib/store/conflict-detection-state.svelte.ts';
-import type { ConflictDetection } from '../SolverMachine.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import { conflictDetectionEventBus } from '$lib/transversal/events.ts';
+import type { ConflictDetection } from '../types.ts';
 
 /* exported transitions */
 
 export const initialTransition = (solver: BKT_SolverMachine): void => {
-	const stateMachine: BKT_StateMachine = solver.stateMachine;
+	const stateMachine: BKT_StateMachine = solver.getStateMachine();
 	ecTransition(stateMachine);
 	if (stateMachine.onFinalState()) return;
 	allVariablesAssignedTransition(stateMachine);
 };
 
 export const analyzeClause = (solver: BKT_SolverMachine): void => {
-	const stateMachine: BKT_StateMachine = solver.stateMachine;
+	const stateMachine: BKT_StateMachine = solver.getStateMachine();
 	const pendingConflict: ConflictDetection = solver.consultConflict();
 	const pendingClauses: SvelteSet<number> = pendingConflict.clauses;
 	const clauseId: number = getCheckedClause();
@@ -59,7 +59,7 @@ export const analyzeClause = (solver: BKT_SolverMachine): void => {
 };
 
 export const decide = (solver: BKT_SolverMachine): void => {
-	const stateMachine: BKT_StateMachine = solver.stateMachine;
+	const stateMachine: BKT_StateMachine = solver.getStateMachine();
 	const literalToPropagate: number = decideTransition(stateMachine);
 	const complementaryClauses: SvelteSet<number> = complementaryOccurrencesTransition(
 		stateMachine,
@@ -74,7 +74,7 @@ export const decide = (solver: BKT_SolverMachine): void => {
 };
 
 export const backtracking = (solver: BKT_SolverMachine): void => {
-	const stateMachine: BKT_StateMachine = solver.stateMachine;
+	const stateMachine: BKT_StateMachine = solver.getStateMachine();
 	emptyPendingSetTransition(stateMachine, solver);
 	const firstLevel: boolean = decisionLevelTransition(stateMachine);
 	if (firstLevel) return;

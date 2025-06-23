@@ -1,5 +1,14 @@
+import {
+	getCheckedClause,
+	incrementCheckingIndex,
+	updateClausesToCheck
+} from '$lib/store/conflict-detection-state.svelte.ts';
+import { increaseNoConflicts } from '$lib/store/statistics.svelte.ts';
 import { logFatal } from '$lib/store/toasts.ts';
 import { updateLastTrailEnding } from '$lib/store/trails.svelte.ts';
+import VariableAssignment from '$lib/transversal/entities/VariableAssignment.ts';
+import { conflictDetectionEventBus } from '$lib/transversal/events.ts';
+import { SvelteSet } from 'svelte/reactivity';
 import { type NonFinalState } from '../StateMachine.svelte.ts';
 import type {
 	CDCL_ALL_CLAUSES_CHECKED_FUN,
@@ -61,41 +70,31 @@ import type {
 } from './cdcl-domain.svelte.ts';
 import type { CDCL_SolverMachine } from './cdcl-solver-machine.svelte.ts';
 import type { CDCL_StateMachine } from './cdcl-state-machine.svelte.ts';
-import {
-	getCheckedClause,
-	incrementCheckingIndex,
-	updateClausesToCheck
-} from '$lib/store/conflict-detection-state.svelte.ts';
-import type { ConflictAnalysis, ConflictDetection } from '../SolverMachine.svelte.ts';
-import VariableAssignment from '$lib/transversal/entities/VariableAssignment.ts';
-import { SvelteSet } from 'svelte/reactivity';
-import { increaseNoConflicts } from '$lib/store/statistics.svelte.ts';
-import { conflictDetectionEventBus } from '$lib/transversal/events.ts';
+import type { ConflictAnalysis, ConflictDetection } from '../types.ts';
 
 /* exported transitions */
 
 export const initialTransition = (solver: CDCL_SolverMachine): void => {
-	const stateMachine: CDCL_StateMachine = solver.stateMachine;
-	ecTransition(stateMachine);
-	if (stateMachine.onFinalState()) return;
-	const complementaryClauses: SvelteSet<number> = ucdTransition(stateMachine);
-	preConflictDetectionBlock(solver, stateMachine, -1, complementaryClauses);
+	ecTransition(solver.getStateMachine());
+	if (solver.onFinalState()) return;
+	const complementaryClauses: SvelteSet<number> = ucdTransition(solver.getStateMachine());
+	preConflictDetectionBlock(solver, solver.getStateMachine(), -1, complementaryClauses);
 };
 
 export const analyzeClause = (solver: CDCL_SolverMachine): void => {
-	const stateMachine: CDCL_StateMachine = solver.stateMachine;
+	const stateMachine: CDCL_StateMachine = solver.getStateMachine();
 	const pendingConflict: ConflictDetection = solver.consultPostponed();
 	const clauseSet: SvelteSet<number> = pendingConflict.clauses;
 	const clauseId: number | undefined = getCheckedClause();
 	if (clauseId === undefined) {
-		logFatal('Unexected undefined in inspectedClause');
+		logFatal('Unexpected undefined in inspectedClause');
 	}
 	deleteClauseTransition(stateMachine, clauseSet, clauseId);
 	conflictDetectionBlock(solver, stateMachine, clauseSet);
 };
 
 export const decide = (solver: CDCL_SolverMachine): void => {
-	const stateMachine: CDCL_StateMachine = solver.stateMachine;
+	const stateMachine: CDCL_StateMachine = solver.getStateMachine();
 	const literalToPropagate: number = decideTransition(stateMachine);
 	const complementaryClauses: SvelteSet<number> = complementaryOccurrencesTransition(
 		stateMachine,
@@ -110,7 +109,7 @@ export const decide = (solver: CDCL_SolverMachine): void => {
 };
 
 export const preConflictAnalysis = (solver: CDCL_SolverMachine) => {
-	const stateMachine: CDCL_StateMachine = solver.stateMachine;
+	const stateMachine: CDCL_StateMachine = solver.getStateMachine();
 	emptyClauseSetTransition(stateMachine, solver);
 	const firstLevel: boolean = decisionLevelTransition(stateMachine);
 	if (firstLevel) return;
@@ -123,8 +122,13 @@ export const preConflictAnalysis = (solver: CDCL_SolverMachine) => {
 };
 
 export const conflictAnalysis = (solver: CDCL_SolverMachine): void => {
-	const stateMachine: CDCL_StateMachine = solver.stateMachine;
-	const conflictAnalysis: ConflictAnalysis = solver.consultConflictAnalysis() as ConflictAnalysis;
+	const stateMachine: CDCL_StateMachine = solver.getStateMachine();
+	const conflictAnalysis: ConflictAnalysis | undefined = solver.consultConflictAnalysis();
+
+	if (!conflictAnalysis) {
+		logFatal('CDCL solver', 'Conflict data can not be undefined');
+	}
+
 	const lastAssignment: VariableAssignment = pickLastAssignmentTransition(
 		stateMachine,
 		conflictAnalysis

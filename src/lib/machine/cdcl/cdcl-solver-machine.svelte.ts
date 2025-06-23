@@ -6,8 +6,6 @@ import type TemporalClause from '$lib/transversal/entities/TemporalClause.ts';
 import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
 import {
 	SolverMachine,
-	type ConflictAnalysis,
-	type ConflictDetection
 } from '../SolverMachine.svelte.ts';
 import type { CDCL_FUN, CDCL_INPUT } from './cdcl-domain.svelte.ts';
 import {
@@ -21,6 +19,7 @@ import { CDCL_StateMachine, makeCDCLStateMachine } from './cdcl-state-machine.sv
 import { cdcl_stateName2StateId } from './cdcl-states.svelte.ts';
 import { type StateMachineEvent } from '$lib/transversal/events.ts';
 import { SvelteSet } from 'svelte/reactivity';
+import type { ConflictAnalysis, ConflictDetection } from '../types.ts';
 
 export const makeCDCLSolver = (): CDCL_SolverMachine => {
 	return new CDCL_SolverMachine();

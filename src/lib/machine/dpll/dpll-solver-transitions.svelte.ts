@@ -46,14 +46,14 @@ import {
 	incrementCheckingIndex,
 	updateClausesToCheck
 } from '$lib/store/conflict-detection-state.svelte.ts';
-import type { ConflictDetection } from '../SolverMachine.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import { conflictDetectionEventBus } from '$lib/transversal/events.ts';
+import type { ConflictDetection } from '../types.ts';
 
 /* exported transitions */
 
 export const initialTransition = (solver: DPLL_SolverMachine): void => {
-	const stateMachine: DPLL_StateMachine = solver.stateMachine;
+	const stateMachine: DPLL_StateMachine = solver.getStateMachine();
 	ecTransition(stateMachine);
 	if (stateMachine.onFinalState()) return;
 	const complementaryClauses: SvelteSet<number> = ucdTransition(stateMachine);
@@ -61,19 +61,19 @@ export const initialTransition = (solver: DPLL_SolverMachine): void => {
 };
 
 export const analyzeClause = (solver: DPLL_SolverMachine): void => {
-	const stateMachine: DPLL_StateMachine = solver.stateMachine;
+	const stateMachine: DPLL_StateMachine = solver.getStateMachine();
 	const pendingConflict: ConflictDetection = solver.consultPostponed();
 	const clauseSet: SvelteSet<number> = pendingConflict.clauses;
 	const clauseId: number | undefined = getCheckedClause();
 	if (clauseId === undefined) {
-		logFatal('Unexected undefined in inspectedClause');
+		logFatal('Unexpected undefined in inspectedClause');
 	}
 	deleteClauseTransition(stateMachine, clauseSet, clauseId);
 	conflictDetectionBlock(solver, stateMachine, clauseSet);
 };
 
 export const decide = (solver: DPLL_SolverMachine): void => {
-	const stateMachine: DPLL_StateMachine = solver.stateMachine;
+	const stateMachine: DPLL_StateMachine = solver.getStateMachine();
 	const literalToPropagate: number = decideTransition(stateMachine);
 	const complementaryClauses: SvelteSet<number> = complementaryOccurrencesTransition(
 		stateMachine,
@@ -88,7 +88,7 @@ export const decide = (solver: DPLL_SolverMachine): void => {
 };
 
 export const conflictiveState = (solver: DPLL_SolverMachine): void => {
-	const stateMachine: DPLL_StateMachine = solver.stateMachine;
+	const stateMachine: DPLL_StateMachine = solver.getStateMachine();
 	emptyClauseSetTransition(stateMachine, solver);
 	const firstLevel: boolean = decisionLevelTransition(stateMachine);
 	if (firstLevel) return;
