@@ -210,7 +210,7 @@
 		color: black;
 	}
 
-	:global(.btn) {
+	.btn {
 		border: solid;
 		border-width: 1px;
 		border-radius: 0.5rem;

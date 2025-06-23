@@ -71,51 +71,6 @@
 	color: #4b4b4b;
 }
 
-/*Polarity buttons*/
-.polarity {
-	display: flex;
-	flex: 1;
-	width: 100%;
-	justify-content: center;
-	align-items: center;
-	border-style: solid;
-	border-color: #afafaf;
-	border-width: 1px;
-	background-color: #cacaca30;
-	cursor: pointer;
-	transition:
-		background-color 0.3s ease,
-		color 0.3s ease;
-}
-
-.polarity:hover {
-	background-color: #cacaca70;
-}
-
-.polarity.active {
-	background-color: #cacaca;
-}
-
-/*Others*/
-.manual-decision {
-	background-color: var(--main-bg-color);
-	color: black;
-
-	button:hover {
-		background-color: #cacaca70;
-	}
-}
-
-.variable-selector {
-	background-color: var(--main-bg-color);
-	border: none;
-	cursor: pointer;
-}
-
-.variable-selector.invalidOption {
-	color: red;
-}
-
 /*These lines are to delete the arrows to increase and decrease the variable from the inputs*/
 input[type='number']::-webkit-outer-spin-button,
 input[type='number']::-webkit-inner-spin-button {

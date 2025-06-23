@@ -174,9 +174,10 @@
 	}
 
 	.variable-input {
+		border-radius: 6px 0px 0px 6px;
 		width: var(--variable-input-width);
 		height: var(--button-size);
-		background-color: var(--button-color);
+		background-color: transparent;
 		border: none;
 	}
 
