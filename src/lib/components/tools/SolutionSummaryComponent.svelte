@@ -1,68 +1,120 @@
 <script lang="ts">
 	import ClauseComponent from '$lib/components/ClauseComponent.svelte';
-	import FlexVirtualList from '$lib/components/FlexVirtualList.svelte';
 	import { getClausePool } from '$lib/store/problem.svelte.ts';
 	import type Clause from '$lib/transversal/entities/Clause.svelte.ts';
+	import {
+		isRight,
+		makeLeft,
+		makeRight,
+		unwrapEither,
+		type Either,
+		type Left,
+		type Right
+	} from '$lib/transversal/types/either.ts';
+	import VirtualList from 'svelte-tiny-virtual-list';
 
 	interface Props {
-		clauseHeight?: number;
+		itemHeight?: number;
 	}
 
-	let { clauseHeight = 50 }: Props = $props();
+	let { itemHeight = 50 }: Props = $props();
+
+	let virtualHeight: number = $state(0);
+
+	function updateHeight(element: HTMLElement) {
+		const previewObserver = new ResizeObserver((entries) => {
+			for (const entry of entries) {
+				const h = entry.contentRect.height - itemHeight / 2;
+				virtualHeight = Math.max(h, 0);
+			}
+		});
+		previewObserver.observe(element);
+		return {
+			destroy() {
+				previewObserver.disconnect();
+			}
+		};
+	}
 
 	let clauses: Clause[] = $derived(getClausePool().getClauses());
+
+	let summary: Either<Clause, string>[] = $derived.by(() => {
+		return clauses.flatMap((c) => {
+			const comments: Right<string>[] = c.getComments().map(makeRight);
+			const clause: Left<Clause> = makeLeft(c);
+			return [...comments, clause];
+		});
+	});
 </script>
 
-<solution-summary>
-	<FlexVirtualList items={clauses} itemSize={clauseHeight}>
-		<div slot="item" let:item class="clause-item">
-			{#each (item as Clause).getComments() as comment}
-				{comment}
-			{/each}
-
-			<div class="enumerate display">
-				<span>
-					{(item as Clause).getTag()}.
-				</span>
-			</div>
-			<div class="clause display">
-				<ClauseComponent clause={item as Clause} />
-			</div>
+<solution-summary use:updateHeight>
+	<VirtualList
+		width="100%"
+		height={virtualHeight}
+		scrollDirection="vertical"
+		itemCount={summary.length}
+		itemSize={itemHeight}
+	>
+		<div slot="item" class="item-list" let:index let:style {style}>
+			{#if isRight(summary[index])}
+				{@render renderComment(unwrapEither(summary[index]))}
+			{:else}
+				{@render renderClause(unwrapEither(summary[index]))}
+			{/if}
 		</div>
-	</FlexVirtualList>
+	</VirtualList>
 </solution-summary>
+
+{#snippet renderClause(clause: Clause)}
+	<div class="tagged-clause">
+		<span class="enumerate">{clause.getTag()}.</span>
+		<ClauseComponent {clause} />
+	</div>
+{/snippet}
+
+{#snippet renderComment(comment: string)}
+	<div class="item-wrapper">
+		<span class="comment">{comment}</span>
+	</div>
+{/snippet}
 
 <style>
 	solution-summary {
 		display: flex;
 		flex: 1;
 		flex-direction: column;
+		padding: 0.5rem 1rem;
+		gap: 0.25rem;
 	}
 
-	.clause-item {
+	.item-wrapper {
 		display: flex;
-		width: 100%;
+		flex: 1;
+		align-items: center;
 		height: 100%;
+	}
+
+	.tagged-clause {
+		display: flex;
+		flex: 1;
 		flex-direction: row;
+		height: 100%;
+		align-items: center;
 		gap: 0.5rem;
-		align-items: end;
 	}
 
 	.enumerate {
 		opacity: 0.5;
-		width: 3.5rem;
-		padding-bottom: 0.25rem;
 		justify-content: center;
+		width: 2.5rem;
 	}
 
-	.display {
-		height: 100%;
-		display: flex;
-		align-items: end;
-		font-size: 1rem;
-	}
-
-	.display.clause {
-		flex: 1;
+	.comment {
+		color: rgb(107 114 128 / var(--tw-text-opacity, 1));
+		background-color: #f6f8fa;
+		font-family: monospace;
+		font-style: italic;
+		display: block;
+		width: fit-content;
 	}
 </style>

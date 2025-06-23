@@ -53,7 +53,7 @@
 <div class="bookmark">
 	<div class="bookmark-preview">
 		{#if previewingInstance}
-			<ProblemSummaryComponent dimacsInstance={previewingInstance} />
+			<ProblemSummaryComponent instance={previewingInstance} />
 		{/if}
 	</div>
 	<div class="bookmark-list">
