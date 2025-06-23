@@ -15,7 +15,7 @@
 		TrashBinOutline
 	} from 'flowbite-svelte-icons';
 	import { onMount } from 'svelte';
-	import ViewerComponent from './ViewerComponent.svelte';
+	import ProblemSummaryComponent from './ProblemSummaryComponent.svelte';
 
 	let previewingInstance: InteractiveInstance | undefined = $state(undefined);
 	let openModal: boolean = $state(false);
@@ -53,7 +53,7 @@
 <div class="bookmark">
 	<div class="bookmark-preview">
 		{#if previewingInstance}
-			<ViewerComponent dimacsInstance={previewingInstance} />
+			<ProblemSummaryComponent instance={previewingInstance} />
 		{/if}
 	</div>
 	<div class="bookmark-list">

@@ -1,4 +1,4 @@
-import type Clause from '$lib/transversal/entities/Clause.ts';
+import type Clause from '$lib/transversal/entities/Clause.svelte.ts';
 import type { SvelteSet } from 'svelte/reactivity';
 
 export interface IClausePool {

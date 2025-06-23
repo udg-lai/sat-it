@@ -1,15 +1,15 @@
 <script lang="ts">
-	import './_style.css';
 	import DynamicRender from '$lib/components/DynamicRender.svelte';
 	import {
 		addBreakpoint,
 		getBreakpoints,
+		isBreakpoint,
 		removeBreakpoint
 	} from '$lib/store/breakpoints.svelte.ts';
 	import { getProblemStore, type Problem } from '$lib/store/problem.svelte.ts';
+	import { logInfo } from '$lib/store/toasts.ts';
 	import { BugOutline } from 'flowbite-svelte-icons';
-	import { SvelteSet } from 'svelte/reactivity';
-	import { logError } from '$lib/store/toasts.ts';
+	import './_style.css';
 
 	interface Props {
 		iconClass: { size: string };
@@ -19,48 +19,71 @@
 	const elementClass: string =
 		'rounded-lg bg-[var(--main-bg-color)] border border-[var(--border-color)] p-2';
 
-	let breakpointVariables: SvelteSet<number> = $derived(getBreakpoints());
-	const showVariables: number[] = $derived(
-		Array.from(breakpointVariables.values()).sort((a, b) => a - b)
+	const breakpoints: number[][] = $derived(
+		Array.from(getBreakpoints().values())
+			.map((lit) => [Math.abs(lit), lit])
+			.sort((a, b) => {
+				const [va, la] = a;
+				const [vb, lb] = b;
+				if (va === vb) {
+					return la - lb;
+				} else {
+					return va - vb;
+				}
+			})
 	);
 
-	let variableToAdd: number | undefined = $state();
+	let literalBreakpoint: number | undefined = $state();
 
 	const problem: Problem = $derived(getProblemStore());
 
-	const addVariable = (): void => {
-		if (variableToAdd === undefined) return;
-		if (!isNaN(variableToAdd) && problem.variables.getVariablesIDs().includes(variableToAdd)) {
-			addBreakpoint({ type: 'variable', variableId: variableToAdd });
-		} else {
-			logError('Breakpoint Variables', 'The variable you wanted to include is not in the problem');
+	let max: number = $derived(problem.variables.size());
+	let min: number = $derived(max * -1);
+
+	const addLiteralBreakpoint = (): void => {
+		if (literalBreakpoint === undefined) return;
+
+		if (isBreakpoint(literalBreakpoint)) {
+			logInfo(
+				'Breakpoint',
+				`Variable ${Math.abs(literalBreakpoint)} for ${literalBreakpoint > 0} assignment already added`
+			);
 		}
-		variableToAdd = undefined;
+		if (!isNaN(literalBreakpoint) && problem.variables.includes(Math.abs(literalBreakpoint))) {
+			addBreakpoint({ type: 'literal', literal: literalBreakpoint });
+		}
+		literalBreakpoint = undefined;
 	};
 
 	const validateInput = (event: Event): void => {
 		const input: HTMLInputElement = event.target as HTMLInputElement;
+
+		if (input.value === '-') {
+			return;
+		}
+
+		if (input.value === '') {
+			return;
+		}
+
 		const value: number = Number(input.value);
 
 		if (isNaN(value)) {
-			variableToAdd = undefined;
+			literalBreakpoint = undefined;
 			input.value = '';
 			return;
 		}
 
-		const min: number = 1;
-		const max: number = problem.variables.capacity;
-
-		if (value < min || value > max) {
-			variableToAdd = undefined;
-			input.setCustomValidity(`Variables range between ${min} and ${max}`);
+		if (value < min || value > max || value === 0) {
+			literalBreakpoint = undefined;
+			input.setCustomValidity(`Valid breakpoints in [${min} : ${max}] except zero`);
 			input.reportValidity();
 			return;
 		} else {
 			input.setCustomValidity('');
 		}
 
-		variableToAdd = value;
+		literalBreakpoint = value;
 	};
 </script>
 
@@ -73,27 +96,27 @@
 		<label for="baselineDelay" class="whitespace-nowrap text-gray-900">Variable:</label>
 		<input
 			id="baselineDelay"
-			type="number"
+			type="text"
 			class="w-32 rounded-lg border border-[var(--border-color)] text-right focus:outline-none focus:ring-0"
-			bind:value={variableToAdd}
-			onchange={addVariable}
+			bind:value={literalBreakpoint}
+			onchange={addLiteralBreakpoint}
 			oninput={validateInput}
-			min={1}
-			max={problem.variables.capacity}
+			placeholder=""
+			{max}
 		/>
 	</variables>
 	<variables-display class="breakpoint-display">
 		<div class="{elementClass} scroll-container">
 			<ul class="items scrollable">
-				{#each showVariables as variable}
+				{#each breakpoints as [, literal]}
 					<li>
 						<button
 							onclick={() => {
-								removeBreakpoint({ type: 'variable', variableId: variable });
+								removeBreakpoint(literal);
 							}}
 							class="variable-text"
 						>
-							{variable}
+							{literal}
 						</button>
 					</li>
 				{/each}

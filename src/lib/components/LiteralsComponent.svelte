@@ -1,19 +1,23 @@
 <script lang="ts">
-	import Clause from '$lib/transversal/entities/Clause.svelte.ts';
-	import LiteralComponent from './LiteralComponent.svelte';
 	import MathTexComponent from './MathTexComponent.svelte';
 
 	interface Props {
-		clause: Clause;
+		literals: number[];
 	}
 
-	let { clause }: Props = $props();
+	let { literals }: Props = $props();
+
+	function toTeX(literal: number): string {
+		const variable = Math.abs(literal);
+		const negative = literal < 0;
+		return negative ? `\\overline{${variable}}` : `${variable}`;
+	}
 </script>
 
 <clause>
-	{#each clause as lit, i (i)}
-		<LiteralComponent literal={lit} />
-		{#if i < clause.nLiterals() - 1}
+	{#each literals as lit, i (i)}
+		<MathTexComponent equation={toTeX(lit)} />
+		{#if i < literals.length - 1}
 			<MathTexComponent equation={'\\lor'} fontSize={'1rem'} />
 		{/if}
 	{/each}

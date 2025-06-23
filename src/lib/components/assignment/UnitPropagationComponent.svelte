@@ -1,9 +1,10 @@
 <script lang="ts">
+	import HeadTailComponent from './../HeadTailComponent.svelte';
 	import type VariableAssignment from '$lib/transversal/entities/VariableAssignment.ts';
 	import MathTexComponent from '$lib/components/MathTexComponent.svelte';
 	import { nanoid } from 'nanoid';
 	import './_style.css';
-	import type Clause from '$lib/transversal/entities/Clause.ts';
+	import type Clause from '$lib/transversal/entities/Clause.svelte.ts';
 	import { isUnitPropagationReason } from '$lib/transversal/entities/VariableAssignment.ts';
 	import { getProblemStore, type Problem } from '$lib/store/problem.svelte.ts';
 	import { Popover } from 'flowbite-svelte';
@@ -20,6 +21,9 @@
 	let { assignment, isLast }: Props = $props();
 	let buttonId: string = 'btn-' + nanoid();
 
+	let inspectedVariable: number = $derived(getInspectedVariable());
+	let inspecting: boolean = $derived(assignment.variableId() === inspectedVariable && isLast);
+
 	const problem: Problem = $derived(getProblemStore());
 	const propagatedClause: Clause = $derived.by(() => {
 		if (assignment.isUP()) {
@@ -34,7 +38,7 @@
 		}
 	});
 
-	const conflictClauseId: number = $derived(propagatedClause.getId());
+	const conflictClauseId: number = $derived(propagatedClause.getTag());
 
 	const conflictClauseString: string = $derived(
 		propagatedClause
@@ -49,19 +53,18 @@
 	onMount(() => {
 		onChrome = runningOnChrome();
 	});
-
-	const inspectedVariable: number = $derived(getInspectedVariable());
 </script>
 
-<unit-propagation>
-	<button
-		id={buttonId}
-		class="literal-style decision unit-propagation {onChrome ? 'pad-chrome' : 'pad-others'}"
-		class:inspecting={assignment.variableId() === inspectedVariable && isLast}
-	>
-		<MathTexComponent equation={assignment.toTeX()} />
-	</button>
-</unit-propagation>
+<HeadTailComponent {inspecting}>
+	<unit-propagation>
+		<button
+			id={buttonId}
+			class="literal-style decision unit-propagation {onChrome ? 'pad-chrome' : 'pad-others'}"
+		>
+			<MathTexComponent equation={assignment.toTeX()} />
+		</button>
+	</unit-propagation>
+</HeadTailComponent>
 
 <Popover triggeredBy={'#' + buttonId} class="app-popover" trigger="click" placement="bottom">
 	<div class="popover-content">

@@ -3,7 +3,7 @@
 	import { nanoid } from 'nanoid';
 	import { getProblemStore, type Problem } from '$lib/store/problem.svelte.ts';
 	import { getSolverMachine } from '$lib/store/solver-machine.svelte.ts';
-	import type Clause from '$lib/transversal/entities/Clause.ts';
+	import type Clause from '$lib/transversal/entities/Clause.svelte.ts';
 	import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
 	import { Popover } from 'flowbite-svelte';
 	import MathTexComponent from '../MathTexComponent.svelte';

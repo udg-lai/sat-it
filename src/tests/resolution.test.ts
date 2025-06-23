@@ -1,7 +1,7 @@
 import Variable from '$lib/transversal/entities/Variable.svelte.ts';
 import { describe, it, expect } from 'vitest';
 import Literal from '$lib/transversal/entities/Literal.svelte.ts';
-import Clause from '$lib/transversal/entities/Clause.ts';
+import Clause from '$lib/transversal/entities/Clause.svelte.ts';
 
 describe('resolution algorithm', () => {
 	const variables = {
