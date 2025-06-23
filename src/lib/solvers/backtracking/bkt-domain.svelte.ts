@@ -9,7 +9,7 @@ import {
 	decide as solverDecide,
 	emptyClauseDetection as solverEmptyClauseDetection,
 	nonDecisionMade as solverNonDecisionMade
-} from '$lib/algorithms/solver.svelte.ts';
+} from '$lib/solvers/shared.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import type { BKT_SolverMachine } from './bkt-solver-machine.svelte.ts';
 import type ClausePool from '$lib/entities/ClausePool.svelte.ts';

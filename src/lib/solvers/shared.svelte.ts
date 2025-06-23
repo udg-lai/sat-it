@@ -1,4 +1,3 @@
-import type { AssignmentEvent } from '$lib/stores/debugger.svelte.ts';
 import type Clause from '$lib/entities/Clause.svelte.ts';
 import type { ClauseEval } from '$lib/entities/Clause.svelte.ts';
 import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
@@ -6,7 +5,7 @@ import { Trail } from '$lib/entities/Trail.svelte.ts';
 import type Variable from '$lib/entities/Variable.svelte.ts';
 import VariableAssignment from '$lib/entities/VariableAssignment.ts';
 import type { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
-import { getAssignment } from '$lib/states/assignment.svelte.ts';
+import { getAssignment, type AssignmentEvent } from '$lib/states/assignment.svelte.ts';
 import { isBreakpoint } from '$lib/states/breakpoints.svelte.ts';
 import { getProblemStore, type MappingLiteral2Clauses } from '$lib/states/problem.svelte.ts';
 import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';

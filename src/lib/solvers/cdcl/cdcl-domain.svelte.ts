@@ -7,7 +7,7 @@ import {
 	nonDecisionMade as solverNonDecisionMade,
 	unitClauseDetection as solverUnitClauseDetection,
 	unitPropagation as solverUnitPropagation
-} from '$lib/algorithms/solver.svelte.ts';
+} from '$lib/solvers/shared.svelte.ts';
 import Clause, {
 	isUnitClause,
 	isUnSATClause,

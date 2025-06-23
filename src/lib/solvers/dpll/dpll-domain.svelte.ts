@@ -13,7 +13,7 @@ import {
 	nonDecisionMade as solverNonDecisionMade,
 	backtracking as solverBacktracking,
 	decide as solverDecide
-} from '$lib/algorithms/solver.svelte.ts';
+} from '$lib/solvers/shared.svelte.ts';
 import type { DPLL_SolverMachine } from './dpll-solver-machine.svelte.ts';
 import { updateClausesToCheck } from '$lib/states/conflict-detection-state.svelte.ts';
 import { logFatal } from '$lib/stores/toasts.ts';

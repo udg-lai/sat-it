@@ -7,6 +7,10 @@
 		userActionEventBus
 	} from '$lib/events/events.ts';
 	import { updateAssignment } from '$lib/states/assignment.svelte.ts';
+	import {
+		getTrailsExpanded,
+		setTrailsExpanded
+	} from '$lib/states/decision-levels-expanded.svelte.ts';
 	import { getStackLength, getStackPointer } from '$lib/states/stack.svelte.ts';
 	import {
 		ArrowRightOutline,
@@ -17,7 +21,6 @@
 	} from 'flowbite-svelte-icons';
 	import { onDestroy, onMount } from 'svelte';
 	import ResetProblem from './ResetProblemDebuggerComponent.svelte';
-	import { getTrailsExpanded, setTrailsExpanded } from './state.svelte.ts';
 	import './style.css';
 
 	interface Props {
