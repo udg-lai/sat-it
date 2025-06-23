@@ -2,7 +2,7 @@ import { type State, StateMachine } from '../StateMachine.svelte.ts';
 import type { CDCL_FUN, CDCL_INPUT } from './cdcl-domain.svelte.ts';
 import { conflict, initial, sat, states, unsat } from './cdcl-states.svelte.ts';
 
-export const makeCDCLMachine = (): CDCL_StateMachine => {
+export const makeCDCLStateMachine = (): CDCL_StateMachine => {
 	return new CDCL_StateMachine(states, initial, conflict, sat, unsat);
 };
 

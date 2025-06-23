@@ -17,7 +17,7 @@ import {
 	initialTransition,
 	preConflictAnalysis
 } from './cdcl-solver-transitions.svelte.ts';
-import { makeCDCLMachine } from './cdcl-state-machine.svelte.ts';
+import { CDCL_StateMachine, makeCDCLStateMachine } from './cdcl-state-machine.svelte.ts';
 import { cdcl_stateName2StateId } from './cdcl-states.svelte.ts';
 import { type StateMachineEvent } from '$lib/transversal/events.ts';
 import { SvelteSet } from 'svelte/reactivity';
@@ -33,7 +33,8 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 	conflictAnalysis: ConflictAnalysis | undefined = $state(undefined);
 
 	constructor() {
-		super(makeCDCLMachine());
+		const stateMachine: CDCL_StateMachine = makeCDCLStateMachine();
+		super(stateMachine, 'cdcl');
 		this.pendingConflicts = new Queue<ConflictDetection>();
 	}
 

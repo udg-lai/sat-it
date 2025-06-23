@@ -9,7 +9,7 @@ import {
 	decide,
 	initialTransition
 } from './dpll-solver-transitions.svelte.ts';
-import { makeDPLLMachine } from './dpll-state-machine.svelte.ts';
+import { DPLL_StateMachine, makeDPLLMachine } from './dpll-state-machine.svelte.ts';
 import { dpll_stateName2StateId } from './dpll-states.svelte.ts';
 
 export const makeDPLLSolver = (): DPLL_SolverMachine => {
@@ -20,7 +20,8 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 	pendingConflicts: Queue<ConflictDetection> = $state(new Queue<ConflictDetection>());
 
 	constructor() {
-		super(makeDPLLMachine());
+		const stateMachine: DPLL_StateMachine = makeDPLLMachine();
+		super(stateMachine, 'dpll');
 		this.pendingConflicts = new Queue<ConflictDetection>();
 	}
 

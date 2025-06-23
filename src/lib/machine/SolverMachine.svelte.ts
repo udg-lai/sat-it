@@ -22,9 +22,9 @@ export type ConflictAnalysis = {
 	decisionLevelVariables: number[];
 };
 
-export interface SolverStateInterface<F extends StateFun, I extends StateInput> {
-	stateMachine: StateMachine<F, I>;
-	runningOnAuto: boolean;
+export type KnownSolver = 'bkt' | 'dpll' | 'cdcl';
+
+export interface SolverStateInterface {
 	transition: (input: StateMachineEvent) => Promise<void>;
 	getActiveStateId: () => number;
 	updateActiveStateId: (id: number) => void;
@@ -36,20 +36,22 @@ export interface SolverStateInterface<F extends StateFun, I extends StateInput> 
 	onInitialState: () => boolean;
 	onFinalState: () => boolean;
 	onConflictDetection: () => boolean;
+	identify: () => KnownSolver;
 }
 
 export abstract class SolverMachine<F extends StateFun, I extends StateInput>
-	implements SolverStateInterface<F, I>
+	implements SolverStateInterface
 {
-	//With the exclamation mark, we assure that the stateMachine attribute will be assigned before its use
-	stateMachine!: StateMachine<F, I>;
-	runningOnAuto: boolean = $state(false);
-	forcedStop: boolean = $state(false);
+	protected stateMachine!: StateMachine<F, I>;
+	private runningOnAuto: boolean = $state(false);
+	private forcedStop: boolean = $state(false);
+	private solverId!: KnownSolver;
 
-	constructor(stateMachine: StateMachine<F, I>) {
+	constructor(stateMachine: StateMachine<F, I>, solverId: KnownSolver) {
 		this.stateMachine = stateMachine;
 		this.runningOnAuto = false;
 		this.forcedStop = false;
+		this.solverId = solverId;
 	}
 
 	abstract getRecord(): Record<string, unknown>;
@@ -92,6 +94,10 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 
 	stopAutoMode(): void {
 		this.forcedStop = true;
+	}
+
+	identify(): KnownSolver {
+		return this.solverId;
 	}
 
 	async transition(input: StateMachineEvent): Promise<void> {

@@ -9,7 +9,7 @@ import {
 	decide,
 	initialTransition
 } from './bkt-solver-transitions.svelte.ts';
-import { makeBKTMachine } from './bkt-state-machine.svelte.ts';
+import { BKT_StateMachine, makeBKTStateMachine } from './bkt-state-machine.svelte.ts';
 import { bkt_stateName2StateId } from './bkt-states.svelte.ts';
 
 export const makeBKTSolver = (): BKT_SolverMachine => {
@@ -20,7 +20,8 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 	conflictDetection: ConflictDetection | undefined = $state(undefined);
 
 	constructor() {
-		super(makeBKTMachine());
+		const stateMachine: BKT_StateMachine = makeBKTStateMachine();
+		super(stateMachine, 'bkt');
 		this.conflictDetection = undefined;
 	}
 

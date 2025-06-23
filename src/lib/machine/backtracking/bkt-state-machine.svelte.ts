@@ -2,7 +2,7 @@ import { conflict, initial, sat, states, unsat } from './bkt-states.svelte.ts';
 import { type State, StateMachine } from '../StateMachine.svelte.ts';
 import type { BKT_FUN, BKT_INPUT } from './bkt-domain.svelte.ts';
 
-export const makeBKTMachine = (): BKT_StateMachine => {
+export const makeBKTStateMachine = (): BKT_StateMachine => {
 	return new BKT_StateMachine(states, initial);
 };
 
