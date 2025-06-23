@@ -5,7 +5,7 @@
 	import { stateMachineEventBus, userActionEventBus } from '$lib/transversal/events.ts';
 	import { updateAssignment } from '$lib/store/assignment.svelte.ts';
 	import { getProblemStore, type Problem } from '$lib/store/problem.svelte.ts';
-	import { logInfo } from '$lib/store/toasts.ts';
+	import { logInfo, logWarning } from '$lib/store/toasts.ts';
 
 	const assignmentProps = {
 		size: 'md'
@@ -20,7 +20,7 @@
 
 	let { onConflict, finished, onConflictDetection, nextLiteral }: Props = $props();
 
-	let userLiteral: number | undefined = $state(undefined);
+	let inputLiteral: number | undefined = $state(undefined);
 
 	// -----Code related to checking manual decisions-----
 	const { variables }: Problem = $derived(getProblemStore());
@@ -28,16 +28,12 @@
 	let max: number = $derived(variables.size());
 	let min: number = $derived(max * -1);
 
-	let isLiteralValid: boolean = $derived.by(() => {
-		if (userLiteral === undefined) return false;
-		else {
-			if (userLiteral < min || userLiteral > max || userLiteral === 0) return false;
-			else {
-				const assignedVariables = variables.assignedVariables();
-				return !assignedVariables.includes(Math.abs(userLiteral));
-			}
+	const handleKeyDown = (event: KeyboardEvent): void => {
+		if (event.key === 'Enter') {
+			validateInput(event);
+			emitAssignment(inputLiteral);
 		}
-	});
+	};
 
 	const validateInput = (event: Event): void => {
 		const input: HTMLInputElement = event.target as HTMLInputElement;
@@ -48,82 +44,76 @@
 
 		if (input.value === '') {
 			//This line is necessary because if not userLiteral will be an empty string
-			userLiteral = undefined;
+			inputLiteral = undefined;
 			return;
 		}
 
-		const value: number = Number(input.value);
+		const literal: number = Number(input.value);
 
-		if (isNaN(value)) {
-			userLiteral = undefined;
+		if (isNaN(literal)) {
+			inputLiteral = undefined;
 			input.value = '';
 			return;
 		}
 
-		if (value < min || value > max || value === 0) {
-			userLiteral = undefined;
-			input.setCustomValidity(`Valid literal in [${min} : ${max}] except zero`);
-			input.reportValidity();
+		if (literal < min || literal > max || literal === 0) {
+			inputLiteral = undefined;
+			const variable: number = Math.abs(literal);
+			logInfo(
+				'Manual assignment',
+				`The variable '${variable}' is not defined in the problem context.`
+			);
 			return;
-		} else {
-			input.setCustomValidity('');
 		}
 
-		userLiteral = value;
+		// Only "possible" variable assignment
+		inputLiteral = literal;
 	};
 
 	//It can happen that a user enters just a '-' which is an invalid "final input".
 	const checkForMinus = () => {
-		if (userLiteral !== undefined && userLiteral.toString() === '-') {
-			userLiteral = undefined;
+		if (inputLiteral !== undefined && inputLiteral.toString() === '-') {
+			inputLiteral = undefined;
 		}
 	};
 
-	const emitAssignment = (): void => {
-		if (userLiteral === undefined) {
+	const alreadyAssignedTruthValue = (literal: number): boolean => {
+		const variable = Math.abs(literal);
+		return variables.assignedTruthValue(variable);
+	};
+
+	const emitAssignment = (literal: number | undefined): void => {
+		if (literal === undefined) {
 			updateAssignment('automated');
 			stateMachineEventBus.emit('step');
 			userActionEventBus.emit('record');
 		} else {
-			if (!isLiteralValid) {
-				logInfo('Manual assignment error', `Variable ${Math.abs(userLiteral)} already assigned`);
+			if (alreadyAssignedTruthValue(literal)) {
+				const variable: number = Math.abs(literal);
+				logWarning(
+					'Manual assignment',
+					`Variable '${variable}' has been already assigned with a truth value.`
+				);
 			} else {
-				console.log(userLiteral);
-				const polarity: boolean = userLiteral > 0;
-				const userNextVariable: number = Math.abs(userLiteral);
-				updateAssignment('manual', polarity, userNextVariable as number);
+				const truthValue: boolean = literal > 0;
+				const variable: number = Math.abs(literal);
+				updateAssignment('manual', truthValue, variable);
 				stateMachineEventBus.emit('step');
 				userActionEventBus.emit('record');
 			}
-			userLiteral = undefined;
+			inputLiteral = undefined;
 		}
 	};
 </script>
 
 <decision-debugger>
 	<div class="join-variable">
-		{#if nextLiteral !== undefined}
-			<div class="next-variable">
-				<input
-					type="text"
-					class="variable-input"
-					bind:value={userLiteral}
-					oninput={validateInput}
-					onchange={checkForMinus}
-					placeholder={nextLiteral.toString()}
-					{max}
-				/>
-			</div>
-		{:else}
-			<div class="next-variable" class:conflict={onConflict}></div>
-		{/if}
-
 		{#if !onConflict}
 			<button
-				class="btn general-btn next-button"
+				class="btn general-btn join-right"
 				class:invalidOption={finished || onConflictDetection}
 				onclick={() => {
-					emitAssignment();
+					emitAssignment(inputLiteral);
 				}}
 				title="Decide"
 				disabled={finished || onConflictDetection}
@@ -132,7 +122,7 @@
 			</button>
 		{:else}
 			<button
-				class="btn general-btn conflict-btn next-button"
+				class="btn general-btn conflict-btn join"
 				class:invalidOption={finished || onConflictDetection}
 				onclick={() => {
 					stateMachineEventBus.emit('step');
@@ -142,6 +132,20 @@
 			>
 				<DynamicRender component={CodeMergeOutline} props={assignmentProps} />
 			</button>
+		{/if}
+		{#if nextLiteral !== undefined}
+			<div class="next-variable join-left">
+				<input
+					type="text"
+					class="variable-input"
+					bind:value={inputLiteral}
+					oninput={validateInput}
+					onkeydown={handleKeyDown}
+					onchange={checkForMinus}
+					placeholder={nextLiteral.toString()}
+					{max}
+				/>
+			</div>
 		{/if}
 	</div>
 </decision-debugger>
@@ -166,18 +170,16 @@
 		align-items: center;
 		justify-content: center;
 		border: 1px solid var(--border-color);
-		border-radius: 6px 0px 0px 6px;
-		border-right: none;
 		background-color: var(--button-color);
 		border-color: var(--button-border-color);
 	}
 
 	.variable-input {
-		border-radius: 6px 0px 0px 6px;
 		width: var(--variable-input-width);
 		height: var(--button-size);
 		background-color: transparent;
 		border: none;
+		text-align: end;
 	}
 
 	.variable-input:focus {
@@ -185,15 +187,17 @@
 		box-shadow: none;
 	}
 
-	.next-button {
+	.join-right {
+		border-radius: 6px 0px 0px 6px;
+		border-right: none;
+	}
+
+	.join-left {
 		border-radius: 0 6px 6px 0;
 		border-left: none;
 	}
 
-	.conflict {
-		color: var(--conflict-color);
-		border: 1px dashed var(--conflict-color);
-		border-radius: 6px 0px 0px 6px;
-		border-right: none;
+	.join {
+		border-radius: 6px;
 	}
 </style>

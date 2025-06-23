@@ -1,5 +1,4 @@
 import type { Comparable } from '../interfaces/Comparable.ts';
-import { logFatal } from '$lib/store/toasts.ts';
 
 export type Assignment = boolean | undefined;
 
@@ -17,12 +16,8 @@ export default class Variable implements Comparable<Variable> {
 		return this.id;
 	}
 
-	isAssigned(): boolean {
+	hasTruthValue(): boolean {
 		return this.assignment !== undefined;
-	}
-
-	isNotAssigned(): boolean {
-		return !this.isAssigned();
 	}
 
 	getAssignment(): Assignment {
@@ -38,10 +33,10 @@ export default class Variable implements Comparable<Variable> {
 	}
 
 	negate(): void {
-		if (this.isNotAssigned()) {
-			logFatal('You can not negate the assignment of a non assigned variable');
+		if (this.hasTruthValue()) {
+			this.assignment = !this.assignment;
 		} else {
-			this.assign(!this.assignment);
+			this.assignment = undefined;
 		}
 	}
 
