@@ -153,7 +153,7 @@
 		<editor-info>
 			{#each trails as trail, index (index)}
 				<div class="item">
-					<InformationComponent {trail} />
+					<InformationComponent {trail} isLast={trails.length === index + 1} />
 				</div>
 			{/each}
 		</editor-info>

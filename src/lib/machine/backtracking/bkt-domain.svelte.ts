@@ -8,8 +8,7 @@ import {
 	complementaryOccurrences as solverComplementaryOccurrences,
 	decide as solverDecide,
 	emptyClauseDetection as solverEmptyClauseDetection,
-	nonDecisionMade as solverNonDecisionMade,
-	triggeredClauses as solverTriggeredClauses
+	nonDecisionMade as solverNonDecisionMade
 } from '$lib/transversal/algorithms/solver.svelte.ts';
 import { isUnSATClause, type ClauseEval } from '$lib/transversal/entities/Clause.svelte.ts';
 import type ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';
@@ -23,8 +22,7 @@ import type { BKT_SolverMachine } from './bkt-solver-machine.svelte.ts';
 export type BKT_EMPTY_CLAUSE_INPUT = 'all_variables_assigned_state' | 'unsat_state';
 export type BKT_ALL_VARIABLES_ASSIGNED_INPUT = 'sat_state' | 'decide_state';
 export type BKT_DECIDE_INPUT = 'complementary_occurrences_state';
-export type BKT_COMPLEMENTARY_OCCURRENCES_INPUT = 'triggered_clauses_state';
-export type BKT_TRIGGERED_CLAUSES_INPUT = 'queue_clause_set_state' | 'all_variables_assigned_state';
+export type BKT_COMPLEMENTARY_OCCURRENCES_INPUT = 'queue_clause_set_state';
 export type BKT_QUEUE_CLAUSE_SET_INPUT = 'pick_pending_set_state';
 export type BKT_PICK_PENDING_SET_INPUT = 'all_clauses_checked_state';
 export type BKT_ALL_CLAUSES_CHECKED_INPUT = 'next_clause_state' | 'all_variables_assigned_state';
@@ -40,7 +38,6 @@ export type BKT_INPUT =
 	| BKT_ALL_VARIABLES_ASSIGNED_INPUT
 	| BKT_DECIDE_INPUT
 	| BKT_COMPLEMENTARY_OCCURRENCES_INPUT
-	| BKT_TRIGGERED_CLAUSES_INPUT
 	| BKT_QUEUE_CLAUSE_SET_INPUT
 	| BKT_PICK_PENDING_SET_INPUT
 	| BKT_ALL_CLAUSES_CHECKED_INPUT
@@ -80,12 +77,6 @@ export const complementaryOccurrences: BKT_COMPLEMENTARY_OCCURRENCES_FUN = (lite
 	return solverComplementaryOccurrences(mapping, literal);
 };
 
-export type BKT_TRIGGERED_CLAUSES_FUN = (clauses: SvelteSet<number>) => boolean;
-
-export const triggeredClauses: BKT_TRIGGERED_CLAUSES_FUN = (clauses: SvelteSet<number>) => {
-	return solverTriggeredClauses(clauses);
-};
-
 export type BKT_QUEUE_CLAUSE_SET_FUN = (
 	variable: number,
 	clauses: SvelteSet<number>,
@@ -97,9 +88,6 @@ export const queueClauseSet: BKT_QUEUE_CLAUSE_SET_FUN = (
 	clauses: SvelteSet<number>,
 	solverStateMachine: BKT_SolverMachine
 ) => {
-	if (clauses.size === 0) {
-		logFatal('Empty set of clauses are not thought to be queued');
-	}
 	solverStateMachine.setConflict({ clauses, variableReasonId: variable });
 };
 
@@ -175,7 +163,6 @@ export type BKT_FUN =
 	| BKT_ALL_VARIABLES_ASSIGNED_FUN
 	| BKT_DECIDE_FUN
 	| BKT_COMPLEMENTARY_OCCURRENCES_FUN
-	| BKT_TRIGGERED_CLAUSES_FUN
 	| BKT_QUEUE_CLAUSE_SET_FUN
 	| BKT_PICK_PENDING_SET_FUN
 	| BKT_ALL_CLAUSES_CHECKED_FUN

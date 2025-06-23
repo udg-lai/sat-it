@@ -9,7 +9,6 @@ import {
 	clauseEvaluation,
 	allAssigned as solverAllAssigned,
 	emptyClauseDetection as solverEmptyClauseDetection,
-	triggeredClauses as solverTriggeredClauses,
 	unitClauseDetection as solverUnitClauseDetection,
 	unitPropagation as solverUnitPropagation,
 	complementaryOccurrences as solverComplementaryOccurrences,
@@ -39,12 +38,7 @@ const problem: Problem = $derived(getProblemStore());
 
 export type CDCL_EMPTY_CLAUSE_INPUT = 'unit_clauses_detection_state' | 'unsat_state';
 
-export type CDCL_TRIGGERED_CLAUSES_INPUT =
-	| 'queue_clause_set_state'
-	| 'all_variables_assigned_state'
-	| 'delete_clause_state';
-
-export type CDCL_UNIT_CLAUSES_DETECTION_INPUT = 'triggered_clauses_state';
+export type CDCL_UNIT_CLAUSES_DETECTION_INPUT = 'queue_clause_set_state';
 
 export type CDCL_PICK_CLAUSE_SET_INPUT = 'all_clauses_checked_state';
 
@@ -70,7 +64,7 @@ export type CDCL_ALL_VARIABLES_ASSIGNED_INPUT = 'sat_state' | 'decide_state';
 
 export type CDCL_UNIT_PROPAGATION_INPUT = 'complementary_occurrences_state';
 
-export type CDCL_COMPLEMENTARY_OCCURRENCES_INPUT = 'triggered_clauses_state';
+export type CDCL_COMPLEMENTARY_OCCURRENCES_INPUT = 'queue_clause_set_state';
 
 export type CDCL_CHECK_NON_DECISION_MADE_INPUT = 'build_conflict_analysis_state' | 'unsat_state';
 
@@ -109,7 +103,6 @@ export type CDCL_INPUT =
 	| CDCL_UNIT_CLAUSES_DETECTION_INPUT
 	| CDCL_PICK_CLAUSE_SET_INPUT
 	| CDCL_ALL_VARIABLES_ASSIGNED_INPUT
-	| CDCL_TRIGGERED_CLAUSES_INPUT
 	| CDCL_QUEUE_CLAUSE_SET_INPUT
 	| CDCL_UNSTACK_CLAUSE_SET_INPUT
 	| CDCL_ALL_CLAUSES_CHECKED_INPUT
@@ -171,9 +164,6 @@ export const queueClauseSet: CDCL_QUEUE_CLAUSE_SET_FUN = (
 	clauses: SvelteSet<number>,
 	solverStateMachine: CDCL_SolverMachine
 ) => {
-	if (clauses.size === 0) {
-		logFatal('Empty set of clauses are not thought to be queued');
-	}
 	const conflict: ConflictDetection = { clauses: clauses, variableReasonId: variable };
 	solverStateMachine.postpone(conflict);
 	return solverStateMachine.leftToPostpone();
@@ -192,12 +182,6 @@ export type CDCL_UNIT_CLAUSES_DETECTION_FUN = () => SvelteSet<number>;
 export const unitClauseDetection: CDCL_UNIT_CLAUSES_DETECTION_FUN = () => {
 	const pool: ClausePool = problem.clauses;
 	return solverUnitClauseDetection(pool);
-};
-
-export type CDCL_TRIGGERED_CLAUSES_FUN = (clauses: SvelteSet<number>) => boolean;
-
-export const triggeredClauses: CDCL_TRIGGERED_CLAUSES_FUN = (clauses: SvelteSet<number>) => {
-	return solverTriggeredClauses(clauses);
 };
 
 export type CDCL_DELETE_CLAUSE_FUN = (clauses: SvelteSet<number>, clauseId: number) => void;

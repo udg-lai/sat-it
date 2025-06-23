@@ -26,9 +26,7 @@ import type {
 	BKT_PICK_PENDING_SET_FUN,
 	BKT_PICK_PENDING_SET_INPUT,
 	BKT_QUEUE_CLAUSE_SET_FUN,
-	BKT_QUEUE_CLAUSE_SET_INPUT,
-	BKT_TRIGGERED_CLAUSES_FUN,
-	BKT_TRIGGERED_CLAUSES_INPUT
+	BKT_QUEUE_CLAUSE_SET_INPUT
 } from './bkt-domain.svelte.ts';
 import type { BKT_SolverMachine } from './bkt-solver-machine.svelte.ts';
 import type { BKT_StateMachine } from './bkt-state-machine.svelte.ts';
@@ -78,7 +76,8 @@ export const decide = (solver: BKT_SolverMachine): void => {
 export const backtracking = (solver: BKT_SolverMachine): void => {
 	const stateMachine: BKT_StateMachine = solver.stateMachine;
 	emptyPendingSetTransition(stateMachine, solver);
-	decisionLevelTransition(stateMachine);
+	const firstLevel: boolean = decisionLevelTransition(stateMachine);
+	if (firstLevel) return;
 	const literalToPropagate = backtrackingTransition(stateMachine);
 	const complementaryClauses: SvelteSet<number> = complementaryOccurrencesTransition(
 		stateMachine,
@@ -98,13 +97,8 @@ const preConflictDetectionBlock = (
 	variable: number,
 	complementaryClauses: SvelteSet<number>
 ): void => {
-	const triggeredClauses: boolean = triggeredClausesTransition(stateMachine, complementaryClauses);
-	if (!triggeredClauses) {
-		allVariablesAssignedTransition(stateMachine);
-		return;
-	}
 	queueClauseSetTransition(stateMachine, solver, variable, complementaryClauses);
-	conflictDetectionEventBus.emit();
+	if (complementaryClauses.size !== 0) conflictDetectionEventBus.emit();
 	const pendingSet: SvelteSet<number> = pickPendingSetTransition(stateMachine, solver);
 	conflictDetectionBlock(stateMachine, pendingSet);
 };
@@ -207,7 +201,7 @@ const emptyPendingSetTransition = (
 	stateMachine.transition('decision_level_state');
 };
 
-const decisionLevelTransition = (stateMachine: BKT_StateMachine): void => {
+const decisionLevelTransition = (stateMachine: BKT_StateMachine): boolean => {
 	const decisionLevelState = stateMachine.getActiveState() as NonFinalState<
 		BKT_DECISION_LEVEL_FUN,
 		BKT_DECISION_LEVEL_INPUT
@@ -218,6 +212,7 @@ const decisionLevelTransition = (stateMachine: BKT_StateMachine): void => {
 	const result: boolean = decisionLevelState.run();
 	if (result) stateMachine.transition('unsat_state');
 	else stateMachine.transition('backtracking_state');
+	return result;
 };
 
 const deleteClauseTransition = (
@@ -273,7 +268,7 @@ const backtrackingTransition = (stateMachine: BKT_StateMachine): number => {
 		BKT_BACKTRACKING_INPUT
 	>;
 	if (backtrackingState.run === undefined) {
-		logFatal('Function call error', 'There should be a function in the Decide state');
+		logFatal('Function call error', 'There should be a function in the Backtracking state');
 	}
 	const literalToPropagate: number = backtrackingState.run();
 	stateMachine.transition('complementary_occurrences_state');
@@ -295,25 +290,8 @@ const complementaryOccurrencesTransition = (
 		);
 	}
 	const clauses: SvelteSet<number> = complementaryOccurrencesState.run(literalToPropagate);
-	stateMachine.transition('triggered_clauses_state');
+	stateMachine.transition('queue_clause_set_state');
 	return clauses;
-};
-
-const triggeredClausesTransition = (
-	stateMachine: BKT_StateMachine,
-	complementaryClauses: SvelteSet<number>
-): boolean => {
-	const triggeredClausesState = stateMachine.getActiveState() as NonFinalState<
-		BKT_TRIGGERED_CLAUSES_FUN,
-		BKT_TRIGGERED_CLAUSES_INPUT
-	>;
-	if (triggeredClausesState.run === undefined) {
-		logFatal('Function call error', 'There should be a function in the Triggered Clauses state');
-	}
-	const result: boolean = triggeredClausesState.run(complementaryClauses);
-	if (result) stateMachine.transition('queue_clause_set_state');
-	else stateMachine.transition('all_variables_assigned_state');
-	return result;
 };
 
 const queueClauseSetTransition = (

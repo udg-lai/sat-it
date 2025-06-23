@@ -30,8 +30,6 @@ import type {
 	DPLL_PICK_CLAUSE_SET_INPUT,
 	DPLL_QUEUE_CLAUSE_SET_FUN,
 	DPLL_QUEUE_CLAUSE_SET_INPUT,
-	DPLL_TRIGGERED_CLAUSES_FUN,
-	DPLL_TRIGGERED_CLAUSES_INPUT,
 	DPLL_UNIT_CLAUSE_FUN,
 	DPLL_UNIT_CLAUSE_INPUT,
 	DPLL_UNIT_CLAUSES_DETECTION_FUN,
@@ -59,7 +57,7 @@ export const initialTransition = (solver: DPLL_SolverMachine): void => {
 	ecTransition(stateMachine);
 	if (stateMachine.onFinalState()) return;
 	const complementaryClauses: SvelteSet<number> = ucdTransition(stateMachine);
-	conflictDetectionBlock(solver, stateMachine, -1, complementaryClauses);
+	preConflictDetectionBlock(solver, stateMachine, -1, complementaryClauses);
 };
 
 export const analyzeClause = (solver: DPLL_SolverMachine): void => {
@@ -71,7 +69,7 @@ export const analyzeClause = (solver: DPLL_SolverMachine): void => {
 		logFatal('Unexected undefined in inspectedClause');
 	}
 	deleteClauseTransition(stateMachine, clauseSet, clauseId);
-	propagationBlock(solver, stateMachine, clauseSet);
+	conflictDetectionBlock(solver, stateMachine, clauseSet);
 };
 
 export const decide = (solver: DPLL_SolverMachine): void => {
@@ -81,7 +79,12 @@ export const decide = (solver: DPLL_SolverMachine): void => {
 		stateMachine,
 		literalToPropagate
 	);
-	conflictDetectionBlock(solver, stateMachine, Math.abs(literalToPropagate), complementaryClauses);
+	preConflictDetectionBlock(
+		solver,
+		stateMachine,
+		Math.abs(literalToPropagate),
+		complementaryClauses
+	);
 };
 
 export const conflictiveState = (solver: DPLL_SolverMachine): void => {
@@ -94,38 +97,34 @@ export const conflictiveState = (solver: DPLL_SolverMachine): void => {
 		stateMachine,
 		literalToPropagate
 	);
-	conflictDetectionBlock(solver, stateMachine, Math.abs(literalToPropagate), complementaryClauses);
+	preConflictDetectionBlock(
+		solver,
+		stateMachine,
+		Math.abs(literalToPropagate),
+		complementaryClauses
+	);
 };
 
 /* General non-exported transitions */
 
-const conflictDetectionBlock = (
+const preConflictDetectionBlock = (
 	solver: DPLL_SolverMachine,
 	stateMachine: DPLL_StateMachine,
 	variable: number,
 	complementaryClauses: SvelteSet<number>
 ): void => {
-	const triggeredClauses: boolean = triggeredClausesTransition(
-		stateMachine,
-		solver,
-		complementaryClauses
-	);
-	if (!triggeredClauses) {
-		allVariablesAssignedTransition(stateMachine);
-		return;
-	}
 	queueClauseSetTransition(stateMachine, solver, variable, complementaryClauses);
-	conflictDetectionEventBus.emit();
+	if (complementaryClauses.size !== 0) conflictDetectionEventBus.emit();
 	const pendingClausesSet: boolean = checkPendingClausesSetTransition(stateMachine, solver);
 	if (!pendingClausesSet) {
 		allVariablesAssignedTransition(stateMachine);
 		return;
 	}
 	const clausesToCheck = pickClauseSetTransition(stateMachine, solver);
-	propagationBlock(solver, stateMachine, clausesToCheck);
+	conflictDetectionBlock(solver, stateMachine, clausesToCheck);
 };
 
-const propagationBlock = (
+const conflictDetectionBlock = (
 	solver: DPLL_SolverMachine,
 	stateMachine: DPLL_StateMachine,
 	clauseSet: SvelteSet<number>
@@ -140,7 +139,7 @@ const propagationBlock = (
 			return;
 		}
 		const clausesToCheck = pickClauseSetTransition(stateMachine, solver);
-		propagationBlock(solver, stateMachine, clausesToCheck);
+		conflictDetectionBlock(solver, stateMachine, clausesToCheck);
 		return;
 	}
 	const clauseId: number = nextClauseTransition(stateMachine, clauseSet);
@@ -156,19 +155,12 @@ const propagationBlock = (
 		stateMachine,
 		literalToPropagate
 	);
-	const triggeredClauses: boolean = triggeredClausesTransition(
+	queueClauseSetTransition(
 		stateMachine,
 		solver,
+		Math.abs(literalToPropagate),
 		complementaryClauses
 	);
-	if (triggeredClauses) {
-		queueClauseSetTransition(
-			stateMachine,
-			solver,
-			Math.abs(literalToPropagate),
-			complementaryClauses
-		);
-	}
 };
 
 /* Specific Transitions */
@@ -208,27 +200,7 @@ const ucdTransition = (stateMachine: DPLL_StateMachine): SvelteSet<number> => {
 		);
 	}
 	const result: SvelteSet<number> = ucdState.run();
-	stateMachine.transition('triggered_clauses_state');
-	return result;
-};
-
-const triggeredClausesTransition = (
-	stateMachine: DPLL_StateMachine,
-	solver: DPLL_SolverMachine,
-	complementaryClauses: SvelteSet<number>
-): boolean => {
-	const triggeredClausesState = stateMachine.getActiveState() as NonFinalState<
-		DPLL_TRIGGERED_CLAUSES_FUN,
-		DPLL_TRIGGERED_CLAUSES_INPUT
-	>;
-	if (triggeredClausesState.run === undefined) {
-		logFatal('Function call error', 'There should be a function in the Triggered Clauses state');
-	}
-	const result: boolean = triggeredClausesState.run(complementaryClauses);
-	if (result) {
-		stateMachine.transition('queue_clause_set_state');
-	} else if (!result && solver.thereArePostponed()) stateMachine.transition('delete_clause_state');
-	else stateMachine.transition('all_variables_assigned_state');
+	stateMachine.transition('queue_clause_set_state');
 	return result;
 };
 
@@ -440,7 +412,7 @@ const complementaryOccurrencesTransition = (
 		);
 	}
 	const clauses: SvelteSet<number> = complementaryOccurrencesState.run(literalToPropagate);
-	stateMachine.transition('triggered_clauses_state');
+	stateMachine.transition('queue_clause_set_state');
 	return clauses;
 };
 

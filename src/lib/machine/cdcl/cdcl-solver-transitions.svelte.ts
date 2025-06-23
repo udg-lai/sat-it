@@ -46,8 +46,6 @@ import type {
 	CDCL_RESOLUTION_UPDATE_CC_INPUT,
 	CDCL_SECOND_HIGHEST_DL_FUN,
 	CDCL_SECOND_HIGHEST_DL_INPUT,
-	CDCL_TRIGGERED_CLAUSES_FUN,
-	CDCL_TRIGGERED_CLAUSES_INPUT,
 	CDCL_UNIT_CLAUSE_FUN,
 	CDCL_UNIT_CLAUSE_INPUT,
 	CDCL_UNIT_CLAUSES_DETECTION_FUN,
@@ -81,7 +79,7 @@ export const initialTransition = (solver: CDCL_SolverMachine): void => {
 	ecTransition(stateMachine);
 	if (stateMachine.onFinalState()) return;
 	const complementaryClauses: SvelteSet<number> = ucdTransition(stateMachine);
-	conflictDetectionBlock(solver, stateMachine, -1, complementaryClauses);
+	preConflictDetectionBlock(solver, stateMachine, -1, complementaryClauses);
 };
 
 export const analyzeClause = (solver: CDCL_SolverMachine): void => {
@@ -93,7 +91,7 @@ export const analyzeClause = (solver: CDCL_SolverMachine): void => {
 		logFatal('Unexected undefined in inspectedClause');
 	}
 	deleteClauseTransition(stateMachine, clauseSet, clauseId);
-	propagationBlock(solver, stateMachine, clauseSet);
+	conflictDetectionBlock(solver, stateMachine, clauseSet);
 };
 
 export const decide = (solver: CDCL_SolverMachine): void => {
@@ -103,7 +101,12 @@ export const decide = (solver: CDCL_SolverMachine): void => {
 		stateMachine,
 		literalToPropagate
 	);
-	conflictDetectionBlock(solver, stateMachine, Math.abs(literalToPropagate), complementaryClauses);
+	preConflictDetectionBlock(
+		solver,
+		stateMachine,
+		Math.abs(literalToPropagate),
+		complementaryClauses
+	);
 };
 
 export const preConflictAnalysis = (solver: CDCL_SolverMachine) => {
@@ -148,38 +151,34 @@ export const conflictAnalysis = (solver: CDCL_SolverMachine): void => {
 		stateMachine,
 		literalToPropagate
 	);
-	conflictDetectionBlock(solver, stateMachine, Math.abs(literalToPropagate), complementaryClauses);
+	preConflictDetectionBlock(
+		solver,
+		stateMachine,
+		Math.abs(literalToPropagate),
+		complementaryClauses
+	);
 };
 
 /* General non-exported transitions */
 
-const conflictDetectionBlock = (
+const preConflictDetectionBlock = (
 	solver: CDCL_SolverMachine,
 	stateMachine: CDCL_StateMachine,
 	variable: number,
 	complementaryClauses: SvelteSet<number>
 ): void => {
-	const triggeredClauses: boolean = triggeredClausesTransition(
-		stateMachine,
-		solver,
-		complementaryClauses
-	);
-	if (!triggeredClauses) {
-		allVariablesAssignedTransition(stateMachine);
-		return;
-	}
 	queueClauseSetTransition(stateMachine, solver, variable, complementaryClauses);
-	conflictDetectionEventBus.emit();
+	if (complementaryClauses.size !== 0) conflictDetectionEventBus.emit();
 	const pendingClausesSet: boolean = checkPendingClausesSetTransition(stateMachine, solver);
 	if (!pendingClausesSet) {
 		allVariablesAssignedTransition(stateMachine);
 		return;
 	}
 	const clausesToCheck = pickClauseSetTransition(stateMachine, solver);
-	propagationBlock(solver, stateMachine, clausesToCheck);
+	conflictDetectionBlock(solver, stateMachine, clausesToCheck);
 };
 
-const propagationBlock = (
+const conflictDetectionBlock = (
 	solver: CDCL_SolverMachine,
 	stateMachine: CDCL_StateMachine,
 	clauseSet: SvelteSet<number>
@@ -194,7 +193,7 @@ const propagationBlock = (
 			return;
 		}
 		const clausesToCheck = pickClauseSetTransition(stateMachine, solver);
-		propagationBlock(solver, stateMachine, clausesToCheck);
+		conflictDetectionBlock(solver, stateMachine, clausesToCheck);
 		return;
 	}
 	const clauseId: number = nextClauseTransition(stateMachine, clauseSet);
@@ -210,19 +209,12 @@ const propagationBlock = (
 		stateMachine,
 		literalToPropagate
 	);
-	const triggeredClauses: boolean = triggeredClausesTransition(
+	queueClauseSetTransition(
 		stateMachine,
 		solver,
+		Math.abs(literalToPropagate),
 		complementaryClauses
 	);
-	if (triggeredClauses) {
-		queueClauseSetTransition(
-			stateMachine,
-			solver,
-			Math.abs(literalToPropagate),
-			complementaryClauses
-		);
-	}
 };
 
 /* Specific Transitions */
@@ -262,27 +254,7 @@ const ucdTransition = (stateMachine: CDCL_StateMachine): SvelteSet<number> => {
 		);
 	}
 	const result: SvelteSet<number> = ucdState.run();
-	stateMachine.transition('triggered_clauses_state');
-	return result;
-};
-
-const triggeredClausesTransition = (
-	stateMachine: CDCL_StateMachine,
-	solver: CDCL_SolverMachine,
-	complementaryClauses: SvelteSet<number>
-): boolean => {
-	const triggeredClausesState = stateMachine.getActiveState() as NonFinalState<
-		CDCL_TRIGGERED_CLAUSES_FUN,
-		CDCL_TRIGGERED_CLAUSES_INPUT
-	>;
-	if (triggeredClausesState.run === undefined) {
-		logFatal('Function call error', 'There should be a function in the Triggered Clauses state');
-	}
-	const result: boolean = triggeredClausesState.run(complementaryClauses);
-	if (result) {
-		stateMachine.transition('queue_clause_set_state');
-	} else if (!result && solver.thereArePostponed()) stateMachine.transition('delete_clause_state');
-	else stateMachine.transition('all_variables_assigned_state');
+	stateMachine.transition('queue_clause_set_state');
 	return result;
 };
 
@@ -494,7 +466,7 @@ const complementaryOccurrencesTransition = (
 		);
 	}
 	const clauses: SvelteSet<number> = complementaryOccurrencesState.run(literalToPropagate);
-	stateMachine.transition('triggered_clauses_state');
+	stateMachine.transition('queue_clause_set_state');
 	return clauses;
 };
 
