@@ -9,11 +9,11 @@
 
 	interface Props {
 		assignment: VariableAssignment;
-		isLast: boolean;
+		isLast?: boolean;
 		eventClick?: () => void;
 	}
 
-	let { assignment, isLast, eventClick }: Props = $props();
+	let { assignment, isLast = false, eventClick }: Props = $props();
 
 	const inspectedVariable: number = $derived(getInspectedVariable());
 	let inspecting: boolean = $derived(assignment.variableId() === inspectedVariable && isLast);

@@ -9,10 +9,10 @@
 
 	interface Props {
 		assignment: VariableAssignment;
-		isLast: boolean;
+		isLast?: boolean;
 	}
 
-	let { assignment, isLast }: Props = $props();
+	let { assignment, isLast = false}: Props = $props();
 
 	const inspectedVariable: number = $derived(getInspectedVariable());
 	let inspecting: boolean = $derived(assignment.variableId() === inspectedVariable && isLast);

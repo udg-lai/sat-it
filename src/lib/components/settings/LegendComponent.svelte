@@ -22,7 +22,7 @@
 			<ChildlessDecisionComponent assignment={decisionExample} />
 		</div>
 		<div class="flex flex-1 flex-col items-center">
-			<p class="mb-2"><strong>Decision colapsed</strong></p>
+			<p class="mb-2"><strong>Decision collapsed</strong></p>
 			<DecisionComponent assignment={decisionExample} expanded={false} />
 		</div>
 	</div>
