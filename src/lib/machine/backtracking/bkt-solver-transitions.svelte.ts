@@ -76,7 +76,8 @@ export const decide = (solver: BKT_SolverMachine): void => {
 export const backtracking = (solver: BKT_SolverMachine): void => {
 	const stateMachine: BKT_StateMachine = solver.stateMachine;
 	emptyPendingSetTransition(stateMachine, solver);
-	decisionLevelTransition(stateMachine);
+	const firstLevel: boolean = decisionLevelTransition(stateMachine);
+	if(firstLevel) return;
 	const literalToPropagate = backtrackingTransition(stateMachine);
 	const complementaryClauses: SvelteSet<number> = complementaryOccurrencesTransition(
 		stateMachine,
@@ -200,7 +201,7 @@ const emptyPendingSetTransition = (
 	stateMachine.transition('decision_level_state');
 };
 
-const decisionLevelTransition = (stateMachine: BKT_StateMachine): void => {
+const decisionLevelTransition = (stateMachine: BKT_StateMachine): boolean => {
 	const decisionLevelState = stateMachine.getActiveState() as NonFinalState<
 		BKT_DECISION_LEVEL_FUN,
 		BKT_DECISION_LEVEL_INPUT
@@ -211,6 +212,7 @@ const decisionLevelTransition = (stateMachine: BKT_StateMachine): void => {
 	const result: boolean = decisionLevelState.run();
 	if (result) stateMachine.transition('unsat_state');
 	else stateMachine.transition('backtracking_state');
+	return result;
 };
 
 const deleteClauseTransition = (
@@ -266,7 +268,7 @@ const backtrackingTransition = (stateMachine: BKT_StateMachine): number => {
 		BKT_BACKTRACKING_INPUT
 	>;
 	if (backtrackingState.run === undefined) {
-		logFatal('Function call error', 'There should be a function in the Decide state');
+		logFatal('Function call error', 'There should be a function in the Backtracking state');
 	}
 	const literalToPropagate: number = backtrackingState.run();
 	stateMachine.transition('complementary_occurrences_state');
