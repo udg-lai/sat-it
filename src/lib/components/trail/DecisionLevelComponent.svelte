@@ -13,7 +13,7 @@
 		isLast?: boolean;
 	}
 
-	let { decision, expanded, propagations = [], isLast = false}: Props = $props();
+	let { decision, expanded, propagations = [], isLast = false }: Props = $props();
 </script>
 
 {#if propagations?.length === 0}
