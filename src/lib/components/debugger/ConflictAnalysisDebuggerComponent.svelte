@@ -11,7 +11,7 @@
 
 <conflict-analysis-debugger>
 	<button
-		class="btn general-btn ca-btn"
+		class="btn general-btn conflict-btn"
 		title="Step"
 		onclick={() => {
 			stateMachineEventBus.emit('step');
@@ -21,7 +21,7 @@
 	</button>
 
 	<button
-		class="btn general-btn ca-btn"
+		class="btn general-btn conflict-btn"
 		title="Finish Conflict Analysis"
 		onclick={() => {
 			toggleTrailExpandEventBus.emit(true);
@@ -37,11 +37,5 @@
 		display: flex;
 		flex-direction: row;
 		gap: 0.5rem;
-	}
-	.ca-btn {
-		color: var(--conflict-color);
-		border-color: var(--conflict-color);
-		transition: border-color 0.3s ease;
-		border-style: dashed;
 	}
 </style>

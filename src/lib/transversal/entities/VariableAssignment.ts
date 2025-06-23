@@ -166,7 +166,7 @@ export default class VariableAssignment {
 	}
 
 	toTeX(): string {
-		if (this.variable.isNotAssigned()) {
+		if (!this.variable.hasTruthValue()) {
 			logFatal(
 				'Evaluating a variable assignment with not assigned value',
 				'The evaluation is given by its variable which is not yet assigned'
