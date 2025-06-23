@@ -23,7 +23,9 @@
 
 	// Chromium does not control the part of the range that is "filled" so we need to create a gradient and add it to the background
 	let percentage: number = $derived(((delay - min) / (max - min)) * 100);
-	let chromiumBackground: string = $derived(`linear-gradient(to right, var(--conflict-color) 0%, var(--conflict-color) ${percentage}%, var(--inspecting-color) ${percentage}%, var(--inspecting-color) 100%)`);
+	let chromiumBackground: string = $derived(
+		`linear-gradient(to right, var(--conflict-color) 0%, var(--conflict-color) ${percentage}%, var(--inspecting-color) ${percentage}%, var(--inspecting-color) 100%)`
+	);
 
 	let mappedDelay = $derived(
 		MIN_DELAY_MS * (MAX_DELAY_MS / MIN_DELAY_MS) ** ((max - delay) / (max - min))
@@ -39,7 +41,15 @@
 		<DynamicRender component={StopOutline} props={{ size: 'md' }} />
 	</button>
 	<div class="range">
-		<Range id="range-steps" {min} {max} bind:value={delay} {step} size="sm" style="background: {chromiumBackground};"/>
+		<Range
+			id="range-steps"
+			{min}
+			{max}
+			bind:value={delay}
+			{step}
+			size="sm"
+			style="background: {chromiumBackground};"
+		/>
 	</div>
 </auto-mode>
 
@@ -59,7 +69,7 @@
 		align-items: center;
 	}
 
-	:global(.range input[type="range"]) {
+	:global(.range input[type='range']) {
 		-webkit-appearance: none;
 		appearance: none;
 		/* modify the background color in chromium and macOS web browser */
@@ -67,7 +77,7 @@
 			height: 3px;
 		}
 		/* modify the highlighted part of the track in firefox web browser */
-		&::-moz-range-progress  {
+		&::-moz-range-progress {
 			background-color: var(--conflict-color);
 		}
 		/* modify the thumb in chromium and macOS web browser */
