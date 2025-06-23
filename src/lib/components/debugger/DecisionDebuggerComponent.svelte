@@ -72,7 +72,7 @@
 		userLiteral = value;
 	};
 
-	//It can happen that a user enters just a '-' which is an invalid "final input". 
+	//It can happen that a user enters just a '-' which is an invalid "final input".
 	const checkForMinus = () => {
 		if (userLiteral !== undefined && userLiteral.toString() === '-') {
 			userLiteral = undefined;
