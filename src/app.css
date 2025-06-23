@@ -70,9 +70,6 @@ body > div {
 	border-color: var(--border-color);
 }
 
-:global(.comment) {
-}
-
 .chakra-petch-medium {
 	font-family: 'Chakra Petch', sans-serif;
 	font-weight: 500;
