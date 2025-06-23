@@ -90,7 +90,10 @@
 		} else {
 			if (alreadyAssignedTruthValue(literal)) {
 				const variable: number = Math.abs(literal);
-				logWarning('Manual assignment', `Variable '${variable}' has been already assigned with a truth value.`);
+				logWarning(
+					'Manual assignment',
+					`Variable '${variable}' has been already assigned with a truth value.`
+				);
 			} else {
 				const truthValue: boolean = literal > 0;
 				const variable: number = Math.abs(literal);
