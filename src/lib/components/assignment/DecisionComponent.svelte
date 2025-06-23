@@ -2,10 +2,9 @@
 	import type VariableAssignment from '$lib/transversal/entities/VariableAssignment.ts';
 	import MathTexComponent from '$lib/components/MathTexComponent.svelte';
 	import './_style.css';
-	import { onMount } from 'svelte';
-	import { runningOnChrome } from '$lib/transversal/utils.ts';
 	import { getInspectedVariable } from '$lib/store/conflict-detection-state.svelte.ts';
 	import HeadTailComponent from '../HeadTailComponent.svelte';
+	import { onChrome } from '$lib/app.svelte.ts';
 
 	interface Props {
 		assignment: VariableAssignment;
@@ -21,11 +20,7 @@
 	const inspectedVariable: number = $derived(getInspectedVariable());
 	let inspecting: boolean = $derived(assignment.variableId() === inspectedVariable && isLast);
 
-	let onChrome = $state(false);
-
-	onMount(() => {
-		onChrome = runningOnChrome();
-	});
+	let chrome: boolean = $derived(onChrome());
 
 	$effect(() => {
 		openLevel = expanded;
@@ -40,7 +35,7 @@
 <HeadTailComponent {inspecting}>
 	<decision>
 		<button
-			class="literal-style decision {onChrome ? 'pad-chrome' : 'pad-others'}"
+			class="literal-style decision {chrome ? 'pad-chrome' : 'pad-others'}"
 			onclick={emitLevelOpen}
 		>
 			<MathTexComponent equation={assignment.toTeX()} />

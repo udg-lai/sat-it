@@ -1,17 +1,16 @@
 <script lang="ts">
-	import HeadTailComponent from './../HeadTailComponent.svelte';
-	import type VariableAssignment from '$lib/transversal/entities/VariableAssignment.ts';
+	import { onChrome } from '$lib/app.svelte.ts';
 	import MathTexComponent from '$lib/components/MathTexComponent.svelte';
-	import { nanoid } from 'nanoid';
-	import './_style.css';
-	import type Clause from '$lib/transversal/entities/Clause.svelte.ts';
-	import { isUnitPropagationReason } from '$lib/transversal/entities/VariableAssignment.ts';
-	import { getProblemStore, type Problem } from '$lib/store/problem.svelte.ts';
-	import { Popover } from 'flowbite-svelte';
-	import { runningOnChrome } from '$lib/transversal/utils.ts';
-	import { onMount } from 'svelte';
-	import { logFatal } from '$lib/store/toasts.ts';
 	import { getInspectedVariable } from '$lib/store/conflict-detection-state.svelte.ts';
+	import { getProblemStore, type Problem } from '$lib/store/problem.svelte.ts';
+	import { logFatal } from '$lib/store/toasts.ts';
+	import type Clause from '$lib/transversal/entities/Clause.svelte.ts';
+	import type VariableAssignment from '$lib/transversal/entities/VariableAssignment.ts';
+	import { isUnitPropagationReason } from '$lib/transversal/entities/VariableAssignment.ts';
+	import { Popover } from 'flowbite-svelte';
+	import { nanoid } from 'nanoid';
+	import HeadTailComponent from './../HeadTailComponent.svelte';
+	import './_style.css';
 
 	interface Props {
 		assignment: VariableAssignment;
@@ -48,18 +47,14 @@
 			.join('\\: \\:')
 	);
 
-	let onChrome = $state(false);
-
-	onMount(() => {
-		onChrome = runningOnChrome();
-	});
+	let chrome: boolean = $derived(onChrome());
 </script>
 
 <HeadTailComponent {inspecting}>
 	<unit-propagation>
 		<button
 			id={buttonId}
-			class="literal-style decision unit-propagation {onChrome ? 'pad-chrome' : 'pad-others'}"
+			class="literal-style decision unit-propagation {chrome ? 'pad-chrome' : 'pad-others'}"
 		>
 			<MathTexComponent equation={assignment.toTeX()} />
 		</button>
