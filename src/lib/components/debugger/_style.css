@@ -33,7 +33,7 @@
 	justify-content: center;
 }
 
-.bkt-btn {
+.conflict-btn {
 	color: var(--conflict-color);
 	border-color: var(--conflict-color);
 	transition: border-color 0.3s ease;

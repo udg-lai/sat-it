@@ -28,7 +28,7 @@
 	let max: number = $derived(variables.size());
 	let min: number = $derived(max * -1);
 
-	let isVariableValid: boolean = $derived.by(() => {
+	let isLiteralValid: boolean = $derived.by(() => {
 		if (userLiteral === undefined) return false;
 		else {
 			if (userLiteral < min || userLiteral > max || userLiteral === 0) return false;
@@ -47,6 +47,7 @@
 		}
 
 		if (input.value === '') {
+			//This line is necessary because if not userLiteral will be an empty string
 			userLiteral = undefined;
 			return;
 		}
@@ -61,7 +62,7 @@
 
 		if (value < min || value > max || value === 0) {
 			userLiteral = undefined;
-			input.setCustomValidity(`Valid variable in [${min} : ${max}] except zero`);
+			input.setCustomValidity(`Valid literal in [${min} : ${max}] except zero`);
 			input.reportValidity();
 			return;
 		} else {
@@ -71,8 +72,8 @@
 		userLiteral = value;
 	};
 
-	//It can happen that a user enters a '-' without anything else and we'll have to clean the input if necessary.
-	const checkMinus = () => {
+	//It can happen that a user enters just a '-' which is an invalid "final input". 
+	const checkForMinus = () => {
 		if (userLiteral !== undefined && userLiteral.toString() === '-') {
 			userLiteral = undefined;
 		}
@@ -84,7 +85,7 @@
 			stateMachineEventBus.emit('step');
 			userActionEventBus.emit('record');
 		} else {
-			if (!isVariableValid) {
+			if (!isLiteralValid) {
 				logInfo('Manual assignment error', `Variable ${Math.abs(userLiteral)} already assigned`);
 			} else {
 				console.log(userLiteral);
@@ -108,7 +109,7 @@
 					class="variable-input"
 					bind:value={userLiteral}
 					oninput={validateInput}
-					onchange={checkMinus}
+					onchange={checkForMinus}
 					placeholder={nextLiteral.toString()}
 					{max}
 				/>
@@ -131,7 +132,7 @@
 			</button>
 		{:else}
 			<button
-				class="btn general-btn bkt-btn next-button"
+				class="btn general-btn conflict-btn next-button"
 				class:invalidOption={finished || onConflictDetection}
 				onclick={() => {
 					stateMachineEventBus.emit('step');
@@ -152,6 +153,12 @@
 		gap: 0.5rem;
 	}
 
+	.join-variable {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
 	.next-variable {
 		display: flex;
 		width: var(--variable-input-width);
@@ -165,14 +172,6 @@
 		border-color: var(--button-border-color);
 	}
 
-	input {
-		outline: none;
-	}
-
-	input:focus {
-		outline: none;
-	}
-
 	.variable-input {
 		border-radius: 6px 0px 0px 6px;
 		width: var(--variable-input-width);
@@ -181,15 +180,9 @@
 		border: none;
 	}
 
-	:global(.variable-input:focus) {
+	.variable-input:focus {
 		outline: none;
 		box-shadow: none;
-	}
-
-	.join-variable {
-		display: flex;
-		align-items: center;
-		justify-content: center;
 	}
 
 	.next-button {
