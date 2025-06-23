@@ -29,7 +29,7 @@ export default class Literal implements Comparable<Literal> {
 	}
 
 	isAssigned(): boolean {
-		return this.variable.isAssigned();
+		return this.variable.hasTruthValue();
 	}
 
 	/*Both functions isTrue and isFalse, will execute the function "evaluate" only if the function "isAssigned" is true*/
@@ -59,7 +59,7 @@ export default class Literal implements Comparable<Literal> {
 	}
 
 	private evaluate(): boolean {
-		if (this.variable.isNotAssigned()) {
+		if (!this.variable.hasTruthValue()) {
 			logFatal(
 				'Evaluating a literal with not assigned value',
 				'The evaluation is given by its variable which is not yet assigned'

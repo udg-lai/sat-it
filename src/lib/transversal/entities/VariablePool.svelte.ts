@@ -13,7 +13,8 @@ export interface IVariablePool {
 	reset(): void;
 	allAssigned(): boolean;
 	size(): number;
-	includes(varId: number): boolean;
+	includes(variableId: number): boolean;
+	assignedTruthValue(variableId: number): boolean;
 }
 
 export class VariablePool implements IVariablePool {
@@ -42,18 +43,11 @@ export class VariablePool implements IVariablePool {
 	}
 
 	unassign(variableId: number): void {
-		this.assign(variableId, undefined);
+		this._assign(variableId, undefined);
 	}
 
 	assign(variableId: number, assignment: Assignment): void {
-		const varIndex: number = this.checkIndex(variableId);
-		const variable: Variable = this.variables[varIndex];
-		const pAssignment: Assignment = variable.getAssignment();
-		if (pAssignment !== undefined) {
-			this.updateNextVarPointer(varIndex, undefined);
-		}
-		variable.assign(assignment);
-		this.updateNextVarPointer(varIndex, assignment);
+		this._assign(variableId, assignment);
 	}
 
 	nextVariable(): number | undefined {
@@ -73,14 +67,6 @@ export class VariablePool implements IVariablePool {
 		return this.capacity;
 	}
 
-	assignedVariables(): number[] {
-		return this.variables.filter((v) => v.isAssigned()).map((v) => v.getInt());
-	}
-
-	nonAssignedVariables(): number[] {
-		return this.variables.filter((v) => !v.isAssigned()).map((v) => v.getInt());
-	}
-
 	includes(varId: number): boolean {
 		return varId >= 1 && varId <= this.size();
 	}
@@ -89,12 +75,34 @@ export class VariablePool implements IVariablePool {
 		return this.capacity;
 	}
 
+	assignedTruthValue(variableId: number): boolean {
+		return this._assignedTruthValue().has(variableId);
+	}
+
+	private _assignedTruthValue(): Set<number> {
+		const assigned: number[] = this.variables
+			.filter((v) => v.hasTruthValue())
+			.map((v) => v.getInt());
+		return new Set([...assigned]);
+	}
+
+	private _assign(variableId: number, assignment: Assignment): void {
+		const varIndex: number = this.checkIndex(variableId);
+		const variable: Variable = this.variables[varIndex];
+		const pAssignment: Assignment = variable.getAssignment();
+		if (pAssignment !== undefined) {
+			this.updateNextVarPointer(varIndex, undefined);
+		}
+		variable.assign(assignment);
+		this.updateNextVarPointer(varIndex, assignment);
+	}
+
 	private updateNextVarPointer(varIndex: number, assignment: Assignment) {
 		if (assignment === undefined) {
 			this.nvPointer = Math.min(varIndex, this.nvPointer);
 		} else {
 			if (this.nvPointer === varIndex) {
-				while (this.nvPointer < this.capacity && this.variables[this.nvPointer].isAssigned()) {
+				while (this.nvPointer < this.capacity && this.variables[this.nvPointer].hasTruthValue()) {
 					this.nvPointer++;
 				}
 			}
@@ -104,7 +112,7 @@ export class VariablePool implements IVariablePool {
 	private getNextId(): Maybe<number> {
 		let nextFound = false;
 		while (this.nvPointer < this.capacity && !nextFound) {
-			const assigned = this.variables[this.nvPointer].isAssigned();
+			const assigned = this.variables[this.nvPointer].hasTruthValue();
 			if (!assigned) {
 				nextFound = true;
 			} else {
