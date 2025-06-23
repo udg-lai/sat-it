@@ -1,59 +1,90 @@
 <script lang="ts">
 	import type { DimacsInstance } from '$lib/dimacs/dimacs-instance.interface.ts';
+	import type { Claim } from '$lib/transversal/parsers/dimacs.ts';
+	import {
+		isRight,
+		makeLeft,
+		makeRight,
+		unwrapEither,
+		type Either
+	} from '$lib/transversal/types/either.ts';
+	import { makeTuple, type Tuple } from '$lib/transversal/types/tuple.ts';
 	import VirtualList from 'svelte-tiny-virtual-list';
+	import LiteralsComponent from '../LiteralsComponent.svelte';
 
 	interface Props {
-		dimacsInstance: DimacsInstance;
+		instance: DimacsInstance;
+		itemHeight?: number;
 	}
 
-	let { dimacsInstance }: Props = $props();
+	let { instance, itemHeight = 50 }: Props = $props();
 
-	let items: unknown[] = [];
-	let previewObserver: ResizeObserver;
 	let virtualHeight: number = $state(0);
-	let itemSize: number = $state(40);
 
-	function updateHeight(htmlElement: HTMLElement) {
-		if (previewObserver) previewObserver.disconnect();
+	let claims: Claim[] = $derived(instance.summary.claims);
+	let varCount: number = $derived(instance.summary.varCount);
+	let clauseCount: number = $derived(instance.summary.clauseCount);
 
-		previewObserver = new ResizeObserver((entries) => {
+	function updateHeight(element: HTMLElement) {
+		const previewObserver = new ResizeObserver((entries) => {
 			for (const entry of entries) {
-				const h = entry.contentRect.height - itemSize / 2;
+				const h = entry.contentRect.height - itemHeight / 2;
 				virtualHeight = Math.max(h, 0);
 			}
 		});
-		previewObserver.observe(htmlElement);
+		previewObserver.observe(element);
 		return {
 			destroy() {
 				previewObserver.disconnect();
 			}
 		};
 	}
+
+	let summary: Either<Tuple<number, number[]>, string>[] = $derived.by(() => {
+		return claims.flatMap(({ comments, literals, id }) => {
+			return [...comments.map(makeRight), makeLeft(makeTuple(id, literals))];
+		});
+	});
 </script>
 
 <problem-summary>
-	<p class="title">{dimacsInstance.name}</p>
+	<p class="title">{instance.name}</p>
 	<div class="dimacs-list border-b" use:updateHeight>
 		<VirtualList
 			width="100%"
 			height={virtualHeight}
 			scrollDirection="vertical"
-			itemCount={items.length}
-			{itemSize}
+			itemCount={summary.length}
+			itemSize={itemHeight}
 		>
 			<div slot="item" class="item-list" let:index let:style {style}>
-				{@html items[index]}
+				{#if isRight(summary[index])}
+					{@render renderComment(unwrapEither(summary[index]))}
+				{:else}
+					{@render renderLiterals(unwrapEither(summary[index]))}
+				{/if}
 			</div>
 		</VirtualList>
 	</div>
 
 	<div class="dimacs-footer">
 		<div class="footer-statistics">
-			<p>Variables: <span class="ocurrences"> {dimacsInstance.summary.varCount}</span></p>
-			<p>Clauses: <span class="ocurrences">{dimacsInstance.summary.clauseCount}</span></p>
+			<p>Variables: <span class="ocurrences">{varCount}</span></p>
+			<p>Clauses: <span class="ocurrences">{clauseCount}</span></p>
 		</div>
 	</div>
 </problem-summary>
+
+{#snippet renderLiterals(literals: Tuple<number, number[]>)}
+	<div class="item-wrapper">
+		<span class="enumerate">{literals.fst}.</span>
+		<LiteralsComponent literals={literals.snd} />
+	</div>
+{/snippet}
+
+{#snippet renderComment(comment: string)}
+	<span class="comment">{comment}</span>
+{/snippet}
 
 <style>
 	problem-summary {
@@ -97,34 +128,26 @@
 		border-bottom-width: 1px;
 	}
 
-	:global(.literal) {
-		color: blue;
-		font-weight: bold;
+	.item-wrapper {
+		display: flex;
+		flex: 1;
+		align-items: center;
+		height: 100%;
 	}
 
-	:global(.delimiter) {
-		color: red;
-		display: none;
+	.enumerate {
+		opacity: 0.5;
+		justify-content: center;
+		width: 2.5rem;
 	}
 
-	:global(.literal, .delimiter) {
-		width: 3rem;
-		text-align: right;
-	}
-
-	:global(.comment) {
-		padding-left: 5px;
-		padding-right: 5px;
+	.comment {
 		color: rgb(107 114 128 / var(--tw-text-opacity, 1));
 		background-color: #f6f8fa;
 		font-family: monospace;
 		font-style: italic;
 		display: block;
-	}
-
-	:global(.clause) {
-		display: flex;
-		gap: 1rem;
+		width: fit-content;
 	}
 
 	:global(.virtual-list-wrapper) {
