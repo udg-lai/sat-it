@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { SAT_STATE_ID, UNSAT_STATE_ID } from '$lib/machine/reserved.ts';
+	import { SAT_STATE_ID, UNSAT_STATE_ID } from '$lib/solvers/reserved.ts';
 	import { nanoid } from 'nanoid';
-	import { getProblemStore, type Problem } from '$lib/store/problem.svelte.ts';
-	import { getSolverMachine } from '$lib/store/solver-machine.svelte.ts';
-	import type Clause from '$lib/transversal/entities/Clause.svelte.ts';
-	import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
+	import { getProblemStore, type Problem } from '$lib/states/problem.svelte.ts';
+	import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
+	import type Clause from '$lib/entities/Clause.svelte.ts';
+	import type { Trail } from '$lib/entities/Trail.svelte.ts';
 	import { Popover } from 'flowbite-svelte';
 	import MathTexComponent from '../MathTexComponent.svelte';
 	import DynamicRender from '../DynamicRender.svelte';

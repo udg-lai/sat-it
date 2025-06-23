@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { dismissToast, type Toast as NotificationToast } from '$lib/store/toasts.ts';
+	import { dismissToast, type Toast as NotificationToast } from '$lib/stores/toasts.ts';
 	import {
 		CheckOutline,
 		CloseCircleOutline,

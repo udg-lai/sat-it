@@ -1,11 +1,11 @@
 <script lang="ts">
-	import './_style.css';
-	import { CaretRightOutline, CodeMergeOutline } from 'flowbite-svelte-icons';
 	import DynamicRender from '$lib/components/DynamicRender.svelte';
-	import { stateMachineEventBus, userActionEventBus } from '$lib/transversal/events.ts';
-	import { updateAssignment } from '$lib/store/assignment.svelte.ts';
-	import { getProblemStore, type Problem } from '$lib/store/problem.svelte.ts';
-	import { logInfo, logWarning } from '$lib/store/toasts.ts';
+	import { stateMachineEventBus, userActionEventBus } from '$lib/events/events.ts';
+	import { updateAssignment } from '$lib/states/assignment.svelte.ts';
+	import { getProblemStore, type Problem } from '$lib/states/problem.svelte.ts';
+	import { logInfo, logWarning } from '$lib/stores/toasts.ts';
+	import { CaretRightOutline, CodeMergeOutline } from 'flowbite-svelte-icons';
+	import './style.css';
 
 	const assignmentProps = {
 		size: 'md'

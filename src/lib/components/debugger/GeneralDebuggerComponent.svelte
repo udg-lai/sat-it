@@ -1,7 +1,13 @@
 <script lang="ts">
-	import './_style.css';
-	import { onDestroy, onMount } from 'svelte';
+	import { browser } from '$app/environment';
 	import DynamicRender from '$lib/components/DynamicRender.svelte';
+	import {
+		stateMachineEventBus,
+		toggleTrailExpandEventBus,
+		userActionEventBus
+	} from '$lib/events/events.ts';
+	import { updateAssignment } from '$lib/states/assignment.svelte.ts';
+	import { getStackLength, getStackPointer } from '$lib/states/stack.svelte.ts';
 	import {
 		ArrowRightOutline,
 		BarsOutline,
@@ -9,16 +15,10 @@
 		ChevronRightOutline,
 		ReplyOutline
 	} from 'flowbite-svelte-icons';
-	import { getStackLength, getStackPointer } from '$lib/store/stack.svelte.ts';
-	import { browser } from '$app/environment';
-	import {
-		stateMachineEventBus,
-		toggleTrailExpandEventBus,
-		userActionEventBus
-	} from '$lib/transversal/events.ts';
-	import { updateAssignment } from '$lib/store/assignment.svelte.ts';
-	import { getTrailsExpanded, setTrailsExpanded } from './_state.svelte.ts';
+	import { onDestroy, onMount } from 'svelte';
 	import ResetProblem from './ResetProblemDebuggerComponent.svelte';
+	import { getTrailsExpanded, setTrailsExpanded } from './state.svelte.ts';
+	import './style.css';
 
 	interface Props {
 		finished: boolean;

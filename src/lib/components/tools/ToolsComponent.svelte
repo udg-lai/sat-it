@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { conflictDetectionEventBus, openSettingsViewEventBus } from '$lib/transversal/events.ts';
+	import { conflictDetectionEventBus, openSettingsViewEventBus } from '$lib/events/events.ts';
 	import { ArrowUpFromBracketOutline, BookOutline, ClipboardOutline } from 'flowbite-svelte-icons';
 	import { onMount } from 'svelte';
-	import './_styles.css';
 	import Button from './Button.svelte';
 	import ConflictDetectionComponent from './ConflictDetectionComponent.svelte';
 	import SolutionSummaryComponent from './SolutionSummaryComponent.svelte';
+	import './style.css';
 
 	let toolsViewRef: HTMLElement;
 

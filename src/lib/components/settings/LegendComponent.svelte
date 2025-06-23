@@ -1,6 +1,6 @@
 <script lang="ts">
-	import Variable from '$lib/transversal/entities/Variable.svelte.ts';
-	import VariableAssignment from '$lib/transversal/entities/VariableAssignment.ts';
+	import Variable from '$lib/entities/Variable.svelte.ts';
+	import VariableAssignment from '$lib/entities/VariableAssignment.ts';
 	import BacktrackingComponent from '../assignment/BacktrackingComponent.svelte';
 	import ChildlessDecisionComponent from '../assignment/ChildlessDecisionComponent.svelte';
 	import DecisionComponent from '../assignment/DecisionComponent.svelte';

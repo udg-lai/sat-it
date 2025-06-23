@@ -2,12 +2,12 @@ import {
 	algorithmName as dummyAlgorithmName,
 	dummyAssignmentAlgorithm,
 	type DummySearchParams
-} from '$lib/transversal/algorithms/dummy.ts';
+} from '$lib/algorithms/dummy.ts';
 import VariableAssignment, {
 	isAutomatedReason,
 	isManualReason
-} from '$lib/transversal/entities/VariableAssignment.ts';
-import { VariablePool } from '$lib/transversal/entities/VariablePool.svelte.ts';
+} from '$lib/entities/VariableAssignment.ts';
+import { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
 import { describe, expect, it } from 'vitest';
 
 const params: DummySearchParams = {

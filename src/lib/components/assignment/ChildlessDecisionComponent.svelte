@@ -1,11 +1,11 @@
 <script lang="ts">
-	import HeadTailComponent from './../HeadTailComponent.svelte';
-	import type VariableAssignment from '$lib/transversal/entities/VariableAssignment.ts';
 	import MathTexComponent from '$lib/components/MathTexComponent.svelte';
-	import './_style.css';
+	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
+	import { getInspectedVariable } from '$lib/states/conflict-detection-state.svelte.ts';
+	import { runningOnChrome } from '$lib/utils.ts';
 	import { onMount } from 'svelte';
-	import { runningOnChrome } from '$lib/transversal/utils.ts';
-	import { getInspectedVariable } from '$lib/store/conflict-detection-state.svelte.ts';
+	import HeadTailComponent from './../HeadTailComponent.svelte';
+	import './style.css';
 
 	interface Props {
 		assignment: VariableAssignment;
