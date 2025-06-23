@@ -77,7 +77,7 @@ export const backtracking = (solver: BKT_SolverMachine): void => {
 	const stateMachine: BKT_StateMachine = solver.stateMachine;
 	emptyPendingSetTransition(stateMachine, solver);
 	const firstLevel: boolean = decisionLevelTransition(stateMachine);
-	if(firstLevel) return;
+	if (firstLevel) return;
 	const literalToPropagate = backtrackingTransition(stateMachine);
 	const complementaryClauses: SvelteSet<number> = complementaryOccurrencesTransition(
 		stateMachine,

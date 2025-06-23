@@ -12,8 +12,9 @@
 
 	interface Props {
 		trail: Trail;
+		isLast: boolean;
 	}
-	let { trail }: Props = $props();
+	let { trail, isLast }: Props = $props();
 
 	let buttonId: string = 'btn-' + nanoid();
 
@@ -42,10 +43,10 @@
 	id={buttonId}
 	class="notification"
 	class:conflict={clause !== undefined}
-	class:unsat={unsatState}
+	class:unsat={unsatState && isLast}
 	class:sat={satState && clause === undefined}
 >
-	{#if unsatState}
+	{#if unsatState && isLast}
 		<DynamicRender component={CloseOutline} props={iconProps} />
 	{:else if clause !== undefined}
 		<DynamicRender component={HammerOutline} props={iconProps} />
