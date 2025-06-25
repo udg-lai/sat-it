@@ -31,6 +31,7 @@ import { logFatal, logInfo } from '$lib/stores/toasts.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import type { ConflictDetection } from '../types.ts';
 import type { CDCL_SolverMachine } from './cdcl-solver-machine.svelte.ts';
+import { unwrapEither, type Either } from '$lib/types/either.ts';
 
 const problem: Problem = $derived(getProblemStore());
 
@@ -302,7 +303,7 @@ export const buildConflictAnalysis: CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN =
 		return assignment.getVariable().getInt();
 	});
 
-	// Thirdly the conclict clause is retrieved
+	// Thirdly the conflict clause is retrieved
 	const conflictiveClauseId: number | undefined = latestTrail.getTrailConflict();
 	if (conflictiveClauseId === undefined) {
 		logFatal(
@@ -310,12 +311,19 @@ export const buildConflictAnalysis: CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN =
 			'It is not possible to do the CA if no conflicts have been found'
 		);
 	}
-	const conflictiveClause: Clause = getProblemStore().clauses.get(conflictiveClauseId);
-	const conflictiveClauseCopy: TemporalClause = new TemporalClause(conflictiveClause.getLiterals());
+
+	const trail: Trail| undefined = getLatestTrail()
+	if (trail === undefined) logFatal("CDCL domain", "Undefined latest trail");
+
+	const conflictAnalysisCtx: Either<TemporalClause, undefined>[] = trail.getConflictAnalysisCtx();
+	const conflictiveClause: Either<TemporalClause, undefined> = conflictAnalysisCtx[0];
+	if (conflictiveClause === undefined) logFatal("CDCL domain", "Conflictive clause can not be undefined");
+	const temporalClause: TemporalClause = unwrapEither(conflictiveClause);
+
 	//Lastly, generate the conflict analysis structure
 	solver.setConflictAnalysis(
 		latestTrail.partialCopy(),
-		conflictiveClauseCopy,
+		temporalClause,
 		variablesLastDecisionLevel
 	);
 };
@@ -348,7 +356,7 @@ export type CDCL_RESOLUTION_UPDATE_CC_FUN = (
 	solver: CDCL_SolverMachine,
 	conflictClause: TemporalClause,
 	assignment: VariableAssignment
-) => void;
+) => TemporalClause;
 
 export const resolutionUpdateCC: CDCL_RESOLUTION_UPDATE_CC_FUN = (
 	solver: CDCL_SolverMachine,
@@ -363,6 +371,7 @@ export const resolutionUpdateCC: CDCL_RESOLUTION_UPDATE_CC_FUN = (
 	const upClause: Clause = getProblemStore().clauses.get(upClauseId);
 	const newCC: TemporalClause = conflictClause.resolution(upClause.toTemporalClause());
 	solver.updateConflictClause(newCC);
+	return newCC;
 };
 
 export type CDCL_DELETE_LAST_ASSIGNMENT_FUN = (trail: Trail) => void;

@@ -1,30 +1,30 @@
 import { logFatal } from '$lib/stores/toasts.ts';
 import type Variable from './Variable.svelte.ts';
 
-type Automated = {
+export type Automated = {
 	type: 'automated';
 	algorithm: string;
 };
 
-type Manual = {
+export type Manual = {
 	type: 'manual';
 };
 
-type Decision = Automated | Manual;
+export type Decision = Automated | Manual;
 
-type UnitPropagation = {
+export type UnitPropagation = {
 	type: 'propagated';
 	clauseId: number;
 };
 
-type Backjumping = {
+export type Backjumping = {
 	type: 'backjumping';
 	clauseId: number;
 };
 
-type Propagation = UnitPropagation | Backjumping;
+export type Propagation = UnitPropagation | Backjumping;
 
-type Backtracking = {
+export type Backtracking = {
 	type: 'backtracking';
 };
 

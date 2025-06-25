@@ -1,6 +1,10 @@
+import { getClausePool, getProblemStore } from '$lib/states/problem.svelte.ts';
 import { logFatal } from '$lib/stores/toasts.ts';
-import { getProblemStore } from '$lib/states/problem.svelte.ts';
-import TemporalClause from './TemporalClause.ts';
+import { makeLeft, makeRight, type Either } from '../types/either.ts';
+import type Clause from './Clause.svelte.ts';
+import type ClausePool from './ClausePool.svelte.ts';
+import type TemporalClause from './TemporalClause.ts';
+import { isUnitPropagationReason, type Reason } from './VariableAssignment.ts';
 import type VariableAssignment from './VariableAssignment.ts';
 
 export class Trail {
@@ -10,7 +14,10 @@ export class Trail {
 	private followUPIndex: number = -1;
 	private decisionLevel: number = 0;
 	private trailCapacity: number = 0;
-	private trailConflict: number | undefined = $state(undefined);
+	private conflictiveClause: number | undefined = $state(undefined);
+	private learntClause: number | undefined = $state(undefined); // this is for doing undo algorithmic
+	private conflictAnalysisCtx: Either<TemporalClause, undefined>[] = $state([]); // this is just for representing the conflict analysis view
+	private latestLevelUPCtx: number[] = $derived.by(() => this._computeLatestLevelUPContext());
 
 	constructor(trailCapacity: number = 0) {
 		this.trailCapacity = trailCapacity;
@@ -24,11 +31,11 @@ export class Trail {
 		newTrail.followUPIndex = this.followUPIndex;
 		newTrail.decisionLevel = this.decisionLevel;
 		newTrail.trailCapacity = this.trailCapacity;
-		newTrail.trailConflict = this.trailConflict;
+		newTrail.conflictiveClause = this.conflictiveClause;
 		return newTrail;
 	}
 
-	//This partial copy is needed as we don't want to have the same "trailConflict" and "learnedClause" as this function is meant for creating the new "latestTrail"
+	//This partial copy is needed as we don't want to have the same "conflictiveClause" and "learnedClause" as this function is meant for creating the new "latestTrail"
 	partialCopy(): Trail {
 		const newTrail = new Trail(this.trailCapacity);
 		newTrail.assignments = this.assignments.map((assignment) => assignment.copy());
@@ -76,7 +83,7 @@ export class Trail {
 	}
 
 	getTrailConflict(): number | undefined {
-		return this.trailConflict;
+		return this.conflictiveClause;
 	}
 
 	getVariableDecisionLevel(variable: number): number {
@@ -93,9 +100,30 @@ export class Trail {
 		logFatal(`Unable to determine decision level for variable ${variable}`);
 	}
 
-	updateTrailConflict(clauseId: number): void {
-		this.trailConflict = clauseId;
+	setConflict(clauseId: number): void {
+		this.conflictiveClause = clauseId;
+		this._initConflictAnalysisCtx(clauseId);
 	}
+
+	getConflictAnalysisCtx(): Either<TemporalClause, undefined>[] {
+		return this.conflictAnalysisCtx;
+	}
+
+	updateConflictAnalysisCtx(clause: TemporalClause | undefined = undefined): void {
+		this.conflictAnalysisCtx.push(clause === undefined ? makeRight(clause) : makeLeft(clause));
+	}
+
+	getLatestLevelUPCtx(): Clause[] {
+		const clauses = getClausePool();
+		return this.latestLevelUPCtx.map(clauses.get);
+	}
+
+	private _initConflictAnalysisCtx(clauseId: number): void {
+		const clauses: ClausePool = getClausePool();
+		const clause: TemporalClause = clauses.get(clauseId).toTemporalClause();
+		this.conflictAnalysisCtx.push(makeLeft(clause));
+	}
+
 
 	hasPropagations(level: number): boolean {
 		return this.getPropagations(level).length > 0;
@@ -149,6 +177,8 @@ export class Trail {
 		//Set the new dl parameters
 		this.decisionLevelBookmark = this.decisionLevelBookmark.slice(0, dl + 1);
 		this.decisionLevel = dl;
+
+		this.updateFollowUpIndex();
 	}
 
 	[Symbol.iterator]() {
@@ -231,5 +261,19 @@ export class Trail {
 	private hasDecisions(): boolean {
 		const levels = this.getDecisionLevelMarks();
 		return levels.length > 0;
+	}
+
+	private _computeLatestLevelUPContext(): number[] {
+		const latestLevelIndex = this.decisionLevelBookmark.at(-1);
+		if (latestLevelIndex === undefined || latestLevelIndex === -1) return [];
+		else {
+			const propagations: VariableAssignment[] = this.assignments.slice(latestLevelIndex + 1);
+			const reasons: number[] = propagations.map(p => {
+				const reason: Reason = p.getReason();
+				if (!isUnitPropagationReason(reason)) logFatal("Trail", `Unexpected UP reason but ${reason} was given`);
+				return reason.clauseId;
+			});
+			return reasons;
+		}
 	}
 }

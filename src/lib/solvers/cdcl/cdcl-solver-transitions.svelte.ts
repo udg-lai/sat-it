@@ -5,7 +5,7 @@ import {
 } from '$lib/states/conflict-detection-state.svelte.ts';
 import { increaseNoConflicts } from '$lib/states/statistics.svelte.ts';
 import { logFatal } from '$lib/stores/toasts.ts';
-import { updateLastTrailEnding } from '$lib/states/trails.svelte.ts';
+import { getLatestTrail, updateLastTrailEnding } from '$lib/states/trails.svelte.ts';
 import { conflictDetectionEventBus } from '$lib/events/events.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import { type NonFinalState } from '../StateMachine.svelte.ts';
@@ -69,8 +69,12 @@ import type {
 } from './cdcl-domain.svelte.ts';
 import type { CDCL_SolverMachine } from './cdcl-solver-machine.svelte.ts';
 import type { CDCL_StateMachine } from './cdcl-state-machine.svelte.ts';
-import type { ConflictAnalysis, ConflictDetection } from '../types.ts';
+import type { ConflictAnalysis } from '../types.ts';
+import type { ConflictDetection } from '../types.ts';
 import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
+import type TemporalClause from '$lib/entities/TemporalClause.ts';
+import { getLastTrailSize } from '$lib/states/trail-size.svelte.ts';
+import type { Trail } from '$lib/entities/Trail.svelte.ts';
 
 /* exported transitions */
 
@@ -138,9 +142,16 @@ export const conflictAnalysis = (solver: CDCL_SolverMachine): void => {
 		conflictAnalysis,
 		lastAssignment
 	);
+	const latestTrail: Trail | undefined = getLatestTrail();
+	if (latestTrail === undefined) logFatal("CDCL solver", "Latest trail should not be undefined");
+
 	if (variableAppear) {
-		resolutionUpdateCCTransition(stateMachine, solver, conflictAnalysis, lastAssignment);
+		const temporalClause: TemporalClause = resolutionUpdateCCTransition(stateMachine, solver, conflictAnalysis, lastAssignment);
+		latestTrail.updateConflictAnalysisCtx(temporalClause);
+	} else {
+		latestTrail.updateConflictAnalysisCtx();
 	}
+
 	deleteLastAssignmentTransition(stateMachine, conflictAnalysis);
 	const isAsserting: boolean = assertingClauseTransition(stateMachine, solver);
 	if (!isAsserting) {
@@ -581,7 +592,7 @@ const resolutionUpdateCCTransition = (
 	solver: CDCL_SolverMachine,
 	conflictAnalysis: ConflictAnalysis,
 	lastAssignment: VariableAssignment
-) => {
+): TemporalClause => {
 	const resolutionUpdateCCState = stateMachine.getActiveState() as NonFinalState<
 		CDCL_RESOLUTION_UPDATE_CC_FUN,
 		CDCL_RESOLUTION_UPDATE_CC_INPUT
@@ -589,8 +600,9 @@ const resolutionUpdateCCTransition = (
 	if (resolutionUpdateCCState.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Variable In CC state');
 	}
-	resolutionUpdateCCState.run(solver, conflictAnalysis.conflictClause, lastAssignment);
+	const temporalClause: TemporalClause = resolutionUpdateCCState.run(solver, conflictAnalysis.conflictClause, lastAssignment);
 	stateMachine.transition('delete_last_assignment_state');
+	return temporalClause;
 };
 
 const deleteLastAssignmentTransition = (
