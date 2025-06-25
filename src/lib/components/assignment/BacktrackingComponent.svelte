@@ -1,9 +1,8 @@
 <script lang="ts">
 	import MathTexComponent from '$lib/components/MathTexComponent.svelte';
+	import { onChrome } from '$lib/app.svelte.ts';
 	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
 	import { getInspectedVariable } from '$lib/states/conflict-detection-state.svelte.ts';
-	import { runningOnChrome } from '$lib/utils.ts';
-	import { onMount } from 'svelte';
 	import HeadTailComponent from '../HeadTailComponent.svelte';
 	import './style.css';
 
@@ -22,17 +21,13 @@
 		eventClick?.();
 	}
 
-	let onChrome = $state(false);
-
-	onMount(() => {
-		onChrome = runningOnChrome();
-	});
+	let chrome: boolean = $derived(onChrome());
 </script>
 
 <HeadTailComponent {inspecting}>
 	<backtracking>
 		<button
-			class="literal-style backtracking {onChrome ? 'pad-chrome' : 'pad-others'}"
+			class="literal-style backtracking {chrome ? 'pad-chrome' : 'pad-others'}"
 			onclick={onClick}
 		>
 			<MathTexComponent equation={assignment.toTeX()} />
@@ -51,7 +46,7 @@
 		cursor: unset;
 	}
 
-	:global(mo) {
+	:global(mover mo) {
 		margin-bottom: 3px;
 	}
 </style>

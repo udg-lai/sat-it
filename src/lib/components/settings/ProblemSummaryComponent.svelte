@@ -71,13 +71,15 @@
 
 {#snippet renderLiterals(literals: Tuple<number, number[]>)}
 	<div class="item-wrapper">
-		<span class="enumerate">{literals.fst}.</span>
+		<p class="enumerate">{literals.fst}.</p>
 		<LiteralsComponent literals={literals.snd} />
 	</div>
 {/snippet}
 
 {#snippet renderComment(comment: string)}
-	<span class="comment">{comment}</span>
+	<div class="item-wrapper">
+		<p class="comment">{comment}</p>
+	</div>
 {/snippet}
 
 <style>
@@ -125,14 +127,18 @@
 	.item-wrapper {
 		display: flex;
 		flex: 1;
-		align-items: center;
+		align-items: end;
 		height: 100%;
+	}
+
+	.item-wrapper p {
+		display: inline-block;
+		margin: 0;
 	}
 
 	.enumerate {
 		opacity: 0.5;
-		justify-content: center;
-		width: 2.5rem;
+		width: 3rem;
 	}
 
 	.comment {

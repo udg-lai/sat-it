@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onChrome } from '$lib/app.svelte.ts';
 	import MathTexComponent from '$lib/components/MathTexComponent.svelte';
 	import type Clause from '$lib/entities/Clause.svelte.ts';
 	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
@@ -6,10 +7,8 @@
 	import { getInspectedVariable } from '$lib/states/conflict-detection-state.svelte.ts';
 	import { getProblemStore, type Problem } from '$lib/states/problem.svelte.ts';
 	import { logFatal } from '$lib/stores/toasts.ts';
-	import { runningOnChrome } from '$lib/utils.ts';
 	import { Popover } from 'flowbite-svelte';
 	import { nanoid } from 'nanoid';
-	import { onMount } from 'svelte';
 	import HeadTailComponent from './../HeadTailComponent.svelte';
 	import './style.css';
 
@@ -48,18 +47,14 @@
 			.join('\\: \\:')
 	);
 
-	let onChrome = $state(false);
-
-	onMount(() => {
-		onChrome = runningOnChrome();
-	});
+	let chrome: boolean = $derived(onChrome());
 </script>
 
 <HeadTailComponent {inspecting}>
 	<unit-propagation>
 		<button
 			id={buttonId}
-			class="literal-style decision unit-propagation {onChrome ? 'pad-chrome' : 'pad-others'}"
+			class="literal-style decision unit-propagation {chrome ? 'pad-chrome' : 'pad-others'}"
 		>
 			<MathTexComponent equation={assignment.toTeX()} />
 		</button>

@@ -44,6 +44,8 @@
 	--opacity-50: 0.5;
 	--debugger-height: 90px;
 	--solving-info-height: calc(var(--debugger-height) * 1);
+	--TeX-padding-bottom-chrome: 9px;
+	--TeX-padding-bottom-others: 3px;
 }
 
 html,
@@ -75,4 +77,12 @@ body > div {
 	font-family: 'Chakra Petch', sans-serif;
 	font-weight: 500;
 	font-style: normal;
+}
+
+.pad-chrome {
+	padding-bottom: var(--TeX-padding-bottom-chrome);
+}
+
+.pad-others {
+	padding-bottom: var(--TeX-padding-bottom-others);
 }
