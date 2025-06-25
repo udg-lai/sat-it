@@ -12,10 +12,14 @@
 		getClausesToCheck
 	} from '$lib/states/conflict-detection-state.svelte.ts';
 	import { getProblemStore, type Problem } from '$lib/states/problem.svelte.ts';
+	import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 	import ClauseComponent from '../ClauseComponent.svelte';
 	import HeadTailComponent from '../HeadTailComponent.svelte';
 
 	const problem: Problem = $derived(getProblemStore());
+	
+	const solverMachine = $derived(getSolverMachine());
+	const onPreConflictState: boolean = $derived(solverMachine.onPreConflictState());
 
 	let clauses: Clause[] = $derived.by(() => {
 		const target: number[] = getClausesToCheck();
@@ -38,7 +42,9 @@
 		return isUnresolvedClause(evaluation) || isUnitClause(evaluation);
 	}
 </script>
-
+	<HeadTailComponent inspecting={onPreConflictState}>
+			<div class="static"></div>
+	</HeadTailComponent>
 <conflict-detection>
 	{#each clauses as clause, index (index)}
 		<div class="enumerate-clause">
@@ -47,7 +53,7 @@
 					{clause.getTag()}.
 				</span>
 			</div>
-			<HeadTailComponent inspecting={checkingIndex === index}>
+			<HeadTailComponent inspecting={checkingIndex === index && !onPreConflictState}>
 				<div
 					class="clause-highlighter"
 					class:inspectedTrue={isSat(clause)}
@@ -62,6 +68,10 @@
 </conflict-detection>
 
 <style>
+	.static {
+		height: 1px;
+		width: 100%;
+	}
 	.enumerate-clause {
 		display: flex;
 		height: 100%;

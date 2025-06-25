@@ -93,10 +93,7 @@ const afterAssignmentBlock = (
 	);
 	queueOccurrenceListTransition(stateMachine, solver, variable, complementaryClauses);
 	conflictDetectionEventBus.emit();
-	pickPendingOccurrenceListTransition(
-		stateMachine,
-		solver
-	);
+	pickPendingOccurrenceListTransition(stateMachine, solver);
 };
 
 const conflictDetectionBlock = (
