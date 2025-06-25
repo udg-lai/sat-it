@@ -15,10 +15,10 @@
 
 	interface Props {
 		assignment: VariableAssignment;
-		isLast: boolean;
+		isLast?: boolean;
 	}
 
-	let { assignment, isLast }: Props = $props();
+	let { assignment, isLast = false }: Props = $props();
 	let buttonId: string = 'btn-' + nanoid();
 
 	let inspectedVariable: number = $derived(getInspectedVariable());

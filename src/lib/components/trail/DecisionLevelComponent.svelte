@@ -10,10 +10,10 @@
 		decision: VariableAssignment;
 		expanded: boolean;
 		propagations?: VariableAssignment[];
-		isLast: boolean;
+		isLast?: boolean;
 	}
 
-	let { decision, expanded, propagations = [], isLast }: Props = $props();
+	let { decision, expanded, propagations = [], isLast = false }: Props = $props();
 </script>
 
 {#if propagations?.length === 0}
