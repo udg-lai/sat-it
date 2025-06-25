@@ -99,7 +99,10 @@ const preConflictDetectionBlock = (
 ): void => {
 	queueOccurrenceListTransition(stateMachine, solver, variable, complementaryClauses);
 	if (complementaryClauses.size !== 0) conflictDetectionEventBus.emit();
-	const occurrenceList: SvelteSet<number> = pickPendingOccurrenceListTransition(stateMachine, solver);
+	const occurrenceList: SvelteSet<number> = pickPendingOccurrenceListTransition(
+		stateMachine,
+		solver
+	);
 	conflictDetectionBlock(stateMachine, occurrenceList);
 };
 

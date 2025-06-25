@@ -10,8 +10,8 @@ import type {
 	DPLL_BACKTRACKING_INPUT,
 	DPLL_CHECK_NON_DECISION_MADE_FUN,
 	DPLL_CHECK_NON_DECISION_MADE_INPUT,
-	DPLL_CHECK_PENDING_CLAUSES_FUN,
-	DPLL_CHECK_PENDING_CLAUSES_INPUT,
+	DPLL_CHECK_PENDING_OCCURRENCE_LISTS_FUN,
+	DPLL_CHECK_PENDING_OCCURRENCE_LISTS_INPUT,
 	DPLL_COMPLEMENTARY_OCCURRENCES_FUN,
 	DPLL_COMPLEMENTARY_OCCURRENCES_INPUT,
 	DPLL_CONFLICT_DETECTION_FUN,
@@ -22,21 +22,21 @@ import type {
 	DPLL_DELETE_CLAUSE_INPUT,
 	DPLL_EMPTY_CLAUSE_FUN,
 	DPLL_EMPTY_CLAUSE_INPUT,
-	DPLL_EMPTY_CLAUSE_SET_FUN,
-	DPLL_EMPTY_CLAUSE_SET_INPUT,
+	DPLL_EMPTY_OCCURRENCE_LISTS_FUN,
+	DPLL_EMPTY_OCCURRENCE_LISTS_INPUT,
 	DPLL_NEXT_CLAUSE_FUN,
 	DPLL_NEXT_CLAUSE_INPUT,
 	DPLL_PICK_CLAUSE_SET_FUN,
 	DPLL_PICK_CLAUSE_SET_INPUT,
-	DPLL_QUEUE_CLAUSE_SET_FUN,
-	DPLL_QUEUE_CLAUSE_SET_INPUT,
+	DPLL_QUEUE_OCCURRENCE_LIST_FUN,
+	DPLL_QUEUE_OCCURRENCE_LIST_INPUT,
 	DPLL_UNIT_CLAUSE_FUN,
 	DPLL_UNIT_CLAUSE_INPUT,
 	DPLL_UNIT_CLAUSES_DETECTION_FUN,
 	DPLL_UNIT_CLAUSES_DETECTION_INPUT,
 	DPLL_UNIT_PROPAGATION_FUN,
 	DPLL_UNIT_PROPAGATION_INPUT,
-	DPLL_UNSTACK_CLAUSE_SET_FUN,
+	DPLL_UNSTACK_OCCURRENCE_LIST_FUN,
 	DPLL_UNSTACK_CLAUSE_SET_INPUT
 } from './dpll-domain.svelte.ts';
 import type { DPLL_SolverMachine } from './dpll-solver-machine.svelte.ts';
@@ -113,9 +113,9 @@ const preConflictDetectionBlock = (
 	variable: number,
 	complementaryClauses: SvelteSet<number>
 ): void => {
-	queueClauseSetTransition(stateMachine, solver, variable, complementaryClauses);
+	queueOccurrenceListTransition(stateMachine, solver, variable, complementaryClauses);
 	if (complementaryClauses.size !== 0) conflictDetectionEventBus.emit();
-	const pendingClausesSet: boolean = checkPendingClausesSetTransition(stateMachine, solver);
+	const pendingClausesSet: boolean = checkPendingOccurrenceListsTransition(stateMachine, solver);
 	if (!pendingClausesSet) {
 		allVariablesAssignedTransition(stateMachine);
 		return;
@@ -131,9 +131,9 @@ const conflictDetectionBlock = (
 ): void => {
 	const allClausesChecked = allClausesCheckedTransition(stateMachine, clauseSet);
 	if (allClausesChecked) {
-		unstackClauseSetTransition(stateMachine, solver);
-		const pendingClausesSet: boolean = checkPendingClausesSetTransition(stateMachine, solver);
-		if (!pendingClausesSet) {
+		unstackOccurrenceListTransition(stateMachine, solver);
+		const pendingOccurrenceLists: boolean = checkPendingOccurrenceListsTransition(stateMachine, solver);
+		if (!pendingOccurrenceLists) {
 			updateClausesToCheck(new SvelteSet<number>(), -1);
 			allVariablesAssignedTransition(stateMachine);
 			return;
@@ -155,7 +155,7 @@ const conflictDetectionBlock = (
 		stateMachine,
 		literalToPropagate
 	);
-	queueClauseSetTransition(
+	queueOccurrenceListTransition(
 		stateMachine,
 		solver,
 		Math.abs(literalToPropagate),
@@ -200,7 +200,7 @@ const ucdTransition = (stateMachine: DPLL_StateMachine): SvelteSet<number> => {
 		);
 	}
 	const result: SvelteSet<number> = ucdState.run();
-	stateMachine.transition('queue_clause_set_state');
+	stateMachine.transition('queue_occurrence_list_state');
 	return result;
 };
 
@@ -220,36 +220,36 @@ const allVariablesAssignedTransition = (stateMachine: DPLL_StateMachine): void =
 	else stateMachine.transition('decide_state');
 };
 
-const queueClauseSetTransition = (
+const queueOccurrenceListTransition = (
 	stateMachine: DPLL_StateMachine,
 	solver: DPLL_SolverMachine,
 	variable: number,
 	clauseSet: SvelteSet<number>
 ): void => {
-	const queueClauseSetState = stateMachine.getActiveState() as NonFinalState<
-		DPLL_QUEUE_CLAUSE_SET_FUN,
-		DPLL_QUEUE_CLAUSE_SET_INPUT
+	const queueOccurrenceListState = stateMachine.getActiveState() as NonFinalState<
+		DPLL_QUEUE_OCCURRENCE_LIST_FUN,
+		DPLL_QUEUE_OCCURRENCE_LIST_INPUT
 	>;
-	if (queueClauseSetState.run === undefined) {
-		logFatal('Function call error', 'There should be a function in the Queue Clause Set state');
+	if (queueOccurrenceListState.run === undefined) {
+		logFatal('Function call error', 'There should be a function in the Queue Occurrence List state');
 	}
-	const size: number = queueClauseSetState.run(variable, clauseSet, solver);
+	const size: number = queueOccurrenceListState.run(variable, clauseSet, solver);
 	if (size > 1) stateMachine.transition('delete_clause_state');
-	else stateMachine.transition('check_pending_clauses_state');
+	else stateMachine.transition('check_pending_occurrence_lists_state');
 };
 
-const checkPendingClausesSetTransition = (
+const checkPendingOccurrenceListsTransition = (
 	stateMachine: DPLL_StateMachine,
 	solver: DPLL_SolverMachine
 ): boolean => {
-	const checkPendingClausesSetState = stateMachine.getActiveState() as NonFinalState<
-		DPLL_CHECK_PENDING_CLAUSES_FUN,
-		DPLL_CHECK_PENDING_CLAUSES_INPUT
+	const checkPendingOccurrenceListsState = stateMachine.getActiveState() as NonFinalState<
+		DPLL_CHECK_PENDING_OCCURRENCE_LISTS_FUN,
+		DPLL_CHECK_PENDING_OCCURRENCE_LISTS_INPUT
 	>;
-	if (checkPendingClausesSetState.run === undefined) {
-		logFatal('Function call error', 'There should be a function in the Pending Clauses Set state');
+	if (checkPendingOccurrenceListsState.run === undefined) {
+		logFatal('Function call error', 'There should be a function in the Pending Occurrence Lists state');
 	}
-	const result: boolean = checkPendingClausesSetState.run(solver);
+	const result: boolean = checkPendingOccurrenceListsState.run(solver);
 	if (result) stateMachine.transition('pick_clause_set_state');
 	else stateMachine.transition('all_variables_assigned_state');
 	return result;
@@ -292,14 +292,14 @@ const nextClauseTransition = (
 	stateMachine: DPLL_StateMachine,
 	clauseSet: SvelteSet<number>
 ): number => {
-	const nextCluaseState = stateMachine.getActiveState() as NonFinalState<
+	const nextClauseState = stateMachine.getActiveState() as NonFinalState<
 		DPLL_NEXT_CLAUSE_FUN,
 		DPLL_NEXT_CLAUSE_INPUT
 	>;
-	if (nextCluaseState.run === undefined) {
+	if (nextClauseState.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Next Clause state');
 	}
-	const clauseId: number = nextCluaseState.run(clauseSet);
+	const clauseId: number = nextClauseState.run(clauseSet);
 	stateMachine.transition('conflict_detection_state');
 	return clauseId;
 };
@@ -316,7 +316,7 @@ const conflictDetectionTransition = (
 		logFatal('Function call error', 'There should be a function in the Conflict Detection state');
 	}
 	const result: boolean = conflictDetectionState.run(clauseId);
-	if (result) stateMachine.transition('empty_clause_set_state');
+	if (result) stateMachine.transition('empty_occurrence_lists_state');
 	else stateMachine.transition('unit_clause_state');
 	return result;
 };
@@ -369,19 +369,19 @@ const deleteClauseTransition = (
 	incrementCheckingIndex();
 };
 
-const unstackClauseSetTransition = (
+const unstackOccurrenceListTransition = (
 	stateMachine: DPLL_StateMachine,
 	solver: DPLL_SolverMachine
 ): void => {
-	const dequeueClauseSetState = stateMachine.getActiveState() as NonFinalState<
-		DPLL_UNSTACK_CLAUSE_SET_FUN,
+	const unstackOccurrenceListSetState = stateMachine.getActiveState() as NonFinalState<
+		DPLL_UNSTACK_OCCURRENCE_LIST_FUN,
 		DPLL_UNSTACK_CLAUSE_SET_INPUT
 	>;
-	if (dequeueClauseSetState.run === undefined) {
-		logFatal('Function call error', 'There should be a function in the Dequeue Clause Set state');
+	if (unstackOccurrenceListSetState.run === undefined) {
+		logFatal('Function call error', 'There should be a function in the Unstack Occurrence List state');
 	}
-	dequeueClauseSetState.run(solver);
-	stateMachine.transition('check_pending_clauses_state');
+	unstackOccurrenceListSetState.run(solver);
+	stateMachine.transition('check_pending_occurrence_lists_state');
 };
 
 const unitPropagationTransition = (stateMachine: DPLL_StateMachine, clauseId: number): number => {
@@ -412,7 +412,7 @@ const complementaryOccurrencesTransition = (
 		);
 	}
 	const clauses: SvelteSet<number> = complementaryOccurrencesState.run(literalToPropagate);
-	stateMachine.transition('queue_clause_set_state');
+	stateMachine.transition('queue_occurrence_list_state');
 	return clauses;
 };
 
@@ -447,8 +447,8 @@ const emptyClauseSetTransition = (
 	solver: DPLL_SolverMachine
 ): void => {
 	const emptyClauseSetState = stateMachine.getActiveState() as NonFinalState<
-		DPLL_EMPTY_CLAUSE_SET_FUN,
-		DPLL_EMPTY_CLAUSE_SET_INPUT
+		DPLL_EMPTY_OCCURRENCE_LISTS_FUN,
+		DPLL_EMPTY_OCCURRENCE_LISTS_INPUT
 	>;
 	if (emptyClauseSetState.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Empty Clause Set state');

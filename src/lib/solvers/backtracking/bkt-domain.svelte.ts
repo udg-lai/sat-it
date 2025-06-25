@@ -91,9 +91,13 @@ export const queueOccurrenceList: BKT_QUEUE_OCCURRENCE_LIST_FUN = (
 	solverStateMachine.setOccurrenceList({ clauses, variableReasonId: variable });
 };
 
-export type BKT_PICK_PENDING_OCCURRENCE_LIST_FUN = (solverStateMachine: BKT_SolverMachine) => SvelteSet<number>;
+export type BKT_PICK_PENDING_OCCURRENCE_LIST_FUN = (
+	solverStateMachine: BKT_SolverMachine
+) => SvelteSet<number>;
 
-export const pickPendingOccurrenceList: BKT_PICK_PENDING_OCCURRENCE_LIST_FUN = (solverStateMachine: BKT_SolverMachine) => {
+export const pickPendingOccurrenceList: BKT_PICK_PENDING_OCCURRENCE_LIST_FUN = (
+	solverStateMachine: BKT_SolverMachine
+) => {
 	const { clauses, variableReasonId }: OccurrenceList = solverStateMachine.consultOccurrenceList();
 	updateClausesToCheck(clauses, variableReasonId);
 	return clauses;

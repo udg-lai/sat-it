@@ -123,18 +123,23 @@ const complementary_occurrences_state: NonFinalState<
 	)
 };
 
-const queue_occurrence_list_state: NonFinalState<BKT_QUEUE_OCCURRENCE_LIST_FUN, BKT_QUEUE_OCCURRENCE_LIST_INPUT> =
-	{
-		id: bkt_stateName2StateId['queue_occurrence_list_state'],
-		run: queueOccurrenceList,
-		description: 'Stack an occurrence list as pending',
-		transitions: new Map<BKT_QUEUE_OCCURRENCE_LIST_INPUT, number>().set(
-			'pick_pending_occurrence_list_state',
-			bkt_stateName2StateId['pick_pending_occurrence_list_state']
-		)
-	};
+const queue_occurrence_list_state: NonFinalState<
+	BKT_QUEUE_OCCURRENCE_LIST_FUN,
+	BKT_QUEUE_OCCURRENCE_LIST_INPUT
+> = {
+	id: bkt_stateName2StateId['queue_occurrence_list_state'],
+	run: queueOccurrenceList,
+	description: 'Stack an occurrence list as pending',
+	transitions: new Map<BKT_QUEUE_OCCURRENCE_LIST_INPUT, number>().set(
+		'pick_pending_occurrence_list_state',
+		bkt_stateName2StateId['pick_pending_occurrence_list_state']
+	)
+};
 
-const pick_pending_occurrence_list_state: NonFinalState<BKT_PICK_PENDING_OCCURRENCE_LIST_FUN, BKT_PENDING_OCCURRENCE_LIST_INPUT> = {
+const pick_pending_occurrence_list_state: NonFinalState<
+	BKT_PICK_PENDING_OCCURRENCE_LIST_FUN,
+	BKT_PENDING_OCCURRENCE_LIST_INPUT
+> = {
 	id: bkt_stateName2StateId['pick_pending_occurrence_list_state'],
 	description: 'Get next pending occurrence list from the queue',
 	run: pickPendingOccurrenceList,

@@ -32,13 +32,13 @@ export type DPLL_UNIT_CLAUSES_DETECTION_INPUT = 'queue_occurrence_list_state';
 
 export type DPLL_PICK_CLAUSE_SET_INPUT = 'all_clauses_checked_state';
 
-export type DPLL_CHECK_PENDING_CLAUSES_INPUT =
+export type DPLL_CHECK_PENDING_OCCURRENCE_LISTS_INPUT =
 	| 'all_variables_assigned_state'
 	| 'pick_clause_set_state';
 
-export type DPLL_QUEUE_CLAUSE_SET_INPUT = 'check_pending_clauses_state' | 'delete_clause_state';
+export type DPLL_QUEUE_OCCURRENCE_LIST_INPUT = 'check_pending_occurrence_lists_state' | 'delete_clause_state';
 
-export type DPLL_UNSTACK_CLAUSE_SET_INPUT = 'check_pending_clauses_state';
+export type DPLL_UNSTACK_CLAUSE_SET_INPUT = 'check_pending_occurrence_lists_state';
 
 export type DPLL_DELETE_CLAUSE_INPUT = 'all_clauses_checked_state';
 
@@ -46,7 +46,7 @@ export type DPLL_ALL_CLAUSES_CHECKED_INPUT = 'next_clause_state' | 'unstack_clau
 
 export type DPLL_NEXT_CLAUSE_INPUT = 'conflict_detection_state';
 
-export type DPLL_CONFLICT_DETECTION_INPUT = 'unit_clause_state' | 'empty_clause_set_state';
+export type DPLL_CONFLICT_DETECTION_INPUT = 'unit_clause_state' | 'empty_occurrence_lists_state';
 
 export type DPLL_UNIT_CLAUSE_INPUT = 'delete_clause_state' | 'unit_propagation_state';
 
@@ -62,19 +62,19 @@ export type DPLL_BACKTRACKING_INPUT = 'complementary_occurrences_state';
 
 export type DPLL_DECIDE_INPUT = 'complementary_occurrences_state';
 
-export type DPLL_EMPTY_CLAUSE_SET_INPUT = 'decision_level_state';
+export type DPLL_EMPTY_OCCURRENCE_LISTS_INPUT = 'decision_level_state';
 
 export type DPLL_INPUT =
 	| DPLL_EMPTY_CLAUSE_INPUT
 	| DPLL_UNIT_CLAUSES_DETECTION_INPUT
 	| DPLL_PICK_CLAUSE_SET_INPUT
 	| DPLL_ALL_VARIABLES_ASSIGNED_INPUT
-	| DPLL_QUEUE_CLAUSE_SET_INPUT
+	| DPLL_QUEUE_OCCURRENCE_LIST_INPUT
 	| DPLL_UNSTACK_CLAUSE_SET_INPUT
 	| DPLL_ALL_CLAUSES_CHECKED_INPUT
 	| DPLL_NEXT_CLAUSE_INPUT
 	| DPLL_CONFLICT_DETECTION_INPUT
-	| DPLL_CHECK_PENDING_CLAUSES_INPUT
+	| DPLL_CHECK_PENDING_OCCURRENCE_LISTS_INPUT
 	| DPLL_DELETE_CLAUSE_INPUT
 	| DPLL_UNIT_CLAUSE_INPUT
 	| DPLL_UNIT_PROPAGATION_INPUT
@@ -82,7 +82,7 @@ export type DPLL_INPUT =
 	| DPLL_CHECK_NON_DECISION_MADE_INPUT
 	| DPLL_BACKTRACKING_INPUT
 	| DPLL_DECIDE_INPUT
-	| DPLL_EMPTY_CLAUSE_SET_INPUT;
+	| DPLL_EMPTY_OCCURRENCE_LISTS_INPUT;
 
 // ** state functions **
 
@@ -107,25 +107,25 @@ export const emptyClauseDetection: DPLL_EMPTY_CLAUSE_FUN = () => {
 	return solverEmptyClauseDetection(pool);
 };
 
-export type DPLL_QUEUE_CLAUSE_SET_FUN = (
+export type DPLL_QUEUE_OCCURRENCE_LIST_FUN = (
 	variable: number,
 	clauses: SvelteSet<number>,
 	solverStateMachine: DPLL_SolverMachine
 ) => number;
 
-export const queueClauseSet: DPLL_QUEUE_CLAUSE_SET_FUN = (
+export const queueOccurrenceList: DPLL_QUEUE_OCCURRENCE_LIST_FUN = (
 	variable: number,
 	clauses: SvelteSet<number>,
 	solverStateMachine: DPLL_SolverMachine
 ) => {
-	const conflict: OccurrenceList = { clauses: clauses, variableReasonId: variable };
-	solverStateMachine.postpone(conflict);
+	const occurrenceList: OccurrenceList = { clauses: clauses, variableReasonId: variable };
+	solverStateMachine.postpone(occurrenceList);
 	return solverStateMachine.leftToPostpone();
 };
 
-export type DPLL_UNSTACK_CLAUSE_SET_FUN = (solverStateMachine: DPLL_SolverMachine) => void;
+export type DPLL_UNSTACK_OCCURRENCE_LIST_FUN = (solverStateMachine: DPLL_SolverMachine) => void;
 
-export const unstackClauseSet: DPLL_UNSTACK_CLAUSE_SET_FUN = (
+export const unstackOccurrenceList: DPLL_UNSTACK_OCCURRENCE_LIST_FUN = (
 	solverStateMachine: DPLL_SolverMachine
 ) => {
 	return solverStateMachine.resolvePostponed();
@@ -154,12 +154,12 @@ export type DPLL_PICK_CLAUSE_SET_FUN = (
 	solverStateMachine: DPLL_SolverMachine
 ) => SvelteSet<number>;
 
-export const pickPendingClauseSet: DPLL_PICK_CLAUSE_SET_FUN = (
+export const pickClauseSet: DPLL_PICK_CLAUSE_SET_FUN = (
 	solverStateMachine: DPLL_SolverMachine
 ) => {
-	const pendingConflict: OccurrenceList = solverStateMachine.consultPostponed();
-	updateClausesToCheck(pendingConflict.clauses, pendingConflict.variableReasonId);
-	return pendingConflict.clauses;
+	const occurrenceList: OccurrenceList = solverStateMachine.consultPostponed();
+	updateClausesToCheck(occurrenceList.clauses, occurrenceList.variableReasonId);
+	return occurrenceList.clauses;
 };
 
 export type DPLL_ALL_CLAUSES_CHECKED_FUN = (clauses: SvelteSet<number>) => boolean;
@@ -187,9 +187,9 @@ export const unsatisfiedClause: DPLL_CONFLICT_DETECTION_FUN = (clauseId: number)
 	return isUnSATClause(evaluation);
 };
 
-export type DPLL_CHECK_PENDING_CLAUSES_FUN = (solverStateMachine: DPLL_SolverMachine) => boolean;
+export type DPLL_CHECK_PENDING_OCCURRENCE_LISTS_FUN = (solverStateMachine: DPLL_SolverMachine) => boolean;
 
-export const thereAreJobPostponed: DPLL_CHECK_PENDING_CLAUSES_FUN = (
+export const thereAreJobPostponed: DPLL_CHECK_PENDING_OCCURRENCE_LISTS_FUN = (
 	solverStateMachine: DPLL_SolverMachine
 ) => {
 	return solverStateMachine.thereArePostponed();
@@ -231,9 +231,9 @@ export const backtracking: DPLL_BACKTRACKING_FUN = () => {
 	return solverBacktracking(pool);
 };
 
-export type DPLL_EMPTY_CLAUSE_SET_FUN = (solverStateMachine: DPLL_SolverMachine) => void;
+export type DPLL_EMPTY_OCCURRENCE_LISTS_FUN = (solverStateMachine: DPLL_SolverMachine) => void;
 
-export const emptyClauseSet: DPLL_EMPTY_CLAUSE_SET_FUN = (
+export const emptyOccurrenceLists: DPLL_EMPTY_OCCURRENCE_LISTS_FUN = (
 	solverStateMachine: DPLL_SolverMachine
 ) => {
 	while (solverStateMachine.leftToPostpone() > 0) {
@@ -246,10 +246,10 @@ export type DPLL_FUN =
 	| DPLL_EMPTY_CLAUSE_FUN
 	| DPLL_UNIT_CLAUSES_DETECTION_FUN
 	| DPLL_PICK_CLAUSE_SET_FUN
-	| DPLL_CHECK_PENDING_CLAUSES_FUN
+	| DPLL_CHECK_PENDING_OCCURRENCE_LISTS_FUN
 	| DPLL_ALL_VARIABLES_ASSIGNED_FUN
-	| DPLL_QUEUE_CLAUSE_SET_FUN
-	| DPLL_UNSTACK_CLAUSE_SET_FUN
+	| DPLL_QUEUE_OCCURRENCE_LIST_FUN
+	| DPLL_UNSTACK_OCCURRENCE_LIST_FUN
 	| DPLL_DELETE_CLAUSE_FUN
 	| DPLL_NEXT_CLAUSE_FUN
 	| DPLL_CONFLICT_DETECTION_FUN
@@ -259,4 +259,4 @@ export type DPLL_FUN =
 	| DPLL_CHECK_NON_DECISION_MADE_FUN
 	| DPLL_BACKTRACKING_FUN
 	| DPLL_DECIDE_FUN
-	| DPLL_EMPTY_CLAUSE_SET_FUN;
+	| DPLL_EMPTY_OCCURRENCE_LISTS_FUN;
