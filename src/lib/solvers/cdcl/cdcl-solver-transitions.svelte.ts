@@ -289,7 +289,10 @@ const queueOccurrenceListTransition = (
 		CDCL_QUEUE_OCCURRENCE_LIST_INPUT
 	>;
 	if (queueOccurrenceListState.run === undefined) {
-		logFatal('Function call error', 'There should be a function in the Queue Occurrence List state');
+		logFatal(
+			'Function call error',
+			'There should be a function in the Queue Occurrence List state'
+		);
 	}
 	const size: number = queueOccurrenceListState.run(variable, clauseSet, solver);
 	if (size > 1) stateMachine.transition('delete_clause_state');
@@ -305,7 +308,10 @@ const checkPendingOccurrenceListsTransition = (
 		CDCL_CHECK_PENDING_OCCURRENCE_LISTS_INPUT
 	>;
 	if (checkPendingOccurrenceListsState.run === undefined) {
-		logFatal('Function call error', 'There should be a function in the Pending Occurrence Lists state');
+		logFatal(
+			'Function call error',
+			'There should be a function in the Pending Occurrence Lists state'
+		);
 	}
 	const result: boolean = checkPendingOccurrenceListsState.run(solver);
 	if (result) stateMachine.transition('pick_clause_set_state');
@@ -436,7 +442,10 @@ const unstackOccurrenceListTransition = (
 		CDCL_UNSTACK_OCCURRENCE_LIST_INPUT
 	>;
 	if (unstackOccurrenceListState.run === undefined) {
-		logFatal('Function call error', 'There should be a function in the Unstack Occurrence List state');
+		logFatal(
+			'Function call error',
+			'There should be a function in the Unstack Occurrence List state'
+		);
 	}
 	unstackOccurrenceListState.run(solver);
 	stateMachine.transition('check_pending_occurrence_lists_state');
@@ -496,7 +505,10 @@ const emptyOccurrenceListsTransition = (
 		CDCL_EMPTY_OCCURRENCE_LISTS_INPUT
 	>;
 	if (emptyClauseSetState.run === undefined) {
-		logFatal('Function call error', 'There should be a function in the Empty Occurrence Lists state');
+		logFatal(
+			'Function call error',
+			'There should be a function in the Empty Occurrence Lists state'
+		);
 	}
 	emptyClauseSetState.run(solver);
 	stateMachine.transition('decision_level_state');
