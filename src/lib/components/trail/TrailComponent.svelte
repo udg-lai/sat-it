@@ -21,6 +21,7 @@
 	let { trail, expanded, isLast = true }: Props = $props();
 
 	let initialPropagations: VariableAssignment[] = $derived(trail.getInitialPropagations());
+	const followUpIndex: number = $derived(trail.getFollowUpIndex());
 
 	let decisions: DecisionLevel[] = $derived(
 		trail.getDecisions().map((a, idx) => {
@@ -50,13 +51,13 @@
 </script>
 
 <trail class="trail" use:listenContentWidth>
-	{#each initialPropagations as assignment (assignment.variableId())}
+	{#each initialPropagations as assignment, index (assignment.variableId())}
 		{#if assignment.isK()}
-			<BacktrackingComponent {assignment} {isLast} />
+			<BacktrackingComponent {assignment} {isLast} fromPreviousTrail={index < followUpIndex}/>
 		{:else if assignment.isBJ()}
-			<BackjumpingComponent {assignment} {isLast} />
+			<BackjumpingComponent {assignment} {isLast} fromPreviousTrail={index < followUpIndex}/>
 		{:else}
-			<UnitPropagationComponent {assignment} {isLast} />
+			<UnitPropagationComponent {assignment} {isLast} fromPreviousTrail={index < followUpIndex}/>
 		{/if}
 	{/each}
 

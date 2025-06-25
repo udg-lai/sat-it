@@ -128,6 +128,10 @@ export class Trail {
 		this.learned = clause;
 	}
 
+	getFollowUpIndex(): number {
+		return this.followUPIndex;
+	}
+
 	updateFollowUpIndex(): void {
 		this.followUPIndex = this.assignments.length - 1;
 	}

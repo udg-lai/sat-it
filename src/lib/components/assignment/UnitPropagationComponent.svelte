@@ -15,9 +15,10 @@
 	interface Props {
 		assignment: VariableAssignment;
 		isLast?: boolean;
+		fromPreviousTrail?: boolean;
 	}
 
-	let { assignment, isLast = false }: Props = $props();
+	let { assignment, isLast = false, fromPreviousTrail = false }: Props = $props();
 	let buttonId: string = 'btn-' + nanoid();
 
 	let inspectedVariable: number = $derived(getInspectedVariable());
@@ -51,7 +52,7 @@
 </script>
 
 <HeadTailComponent {inspecting}>
-	<unit-propagation>
+	<unit-propagation class:previous-assignment={fromPreviousTrail}>
 		<button
 			id={buttonId}
 			class="literal-style decision unit-propagation {chrome ? 'pad-chrome' : 'pad-others'}"
