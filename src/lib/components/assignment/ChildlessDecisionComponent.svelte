@@ -9,9 +9,10 @@
 	interface Props {
 		assignment: VariableAssignment;
 		isLast?: boolean;
+		fromPreviousTrail?: boolean;
 	}
 
-	let { assignment, isLast = false }: Props = $props();
+	let { assignment, isLast = false, fromPreviousTrail = false }: Props = $props();
 
 	const inspectedVariable: number = $derived(getInspectedVariable());
 	let inspecting: boolean = $derived(assignment.variableId() === inspectedVariable && isLast);
@@ -20,7 +21,7 @@
 </script>
 
 <HeadTailComponent {inspecting}>
-	<childless-decision>
+	<childless-decision class:previous-assignment={fromPreviousTrail}>
 		<button
 			class="literal-style decision level-expanded childless {chrome ? 'pad-chrome' : 'pad-others'}"
 		>

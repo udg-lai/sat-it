@@ -177,7 +177,7 @@ export const backtracking = (pool: VariablePool): number => {
 
 	const variable = pool.getVariableCopy(lastVariable.getInt());
 	trail.push(VariableAssignment.newBacktrackingAssignment(variable));
-	trail.updateFollowUpIndex();
+	trail.setFollowUpIndex();
 
 	increaseNoConflicts();
 	stackTrail(trail);

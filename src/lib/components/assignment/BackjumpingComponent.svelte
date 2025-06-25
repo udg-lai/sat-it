@@ -59,15 +59,14 @@
 		>
 			<MathTexComponent equation={assignment.toTeX()} />
 		</button>
+		<Popover triggeredBy={'#' + buttonId} class="app-popover" trigger="click" placement="bottom">
+			<div class="popover-content">
+				<span class="clause-id">{conflictClauseId}.</span>
+				<MathTexComponent equation={conflictClauseString} fontSize="var(--popover-font-size)" />
+			</div>
+		</Popover>
 	</backtracking>
 </HeadTailComponent>
-
-<Popover triggeredBy={'#' + buttonId} class="app-popover" trigger="click" placement="bottom">
-	<div class="popover-content">
-		<span class="clause-id">{conflictClauseId}.</span>
-		<MathTexComponent equation={conflictClauseString} fontSize="var(--popover-font-size)" />
-	</div>
-</Popover>
 
 <style>
 	.backjumping {

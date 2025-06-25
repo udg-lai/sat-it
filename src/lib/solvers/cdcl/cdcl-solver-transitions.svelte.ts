@@ -5,7 +5,7 @@ import {
 } from '$lib/states/conflict-detection-state.svelte.ts';
 import { increaseNoConflicts } from '$lib/states/statistics.svelte.ts';
 import { logFatal } from '$lib/stores/toasts.ts';
-import { updateLastTrailEnding } from '$lib/states/trails.svelte.ts';
+import { getLatestTrail, updateLastTrailEnding } from '$lib/states/trails.svelte.ts';
 import { conflictDetectionEventBus } from '$lib/events/events.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import { type NonFinalState } from '../StateMachine.svelte.ts';
@@ -151,6 +151,13 @@ export const conflictAnalysis = (solver: CDCL_SolverMachine): void => {
 	backjumpingTransition(stateMachine, conflictAnalysis, secondHighestDL);
 	pushTrailTransition(stateMachine, conflictAnalysis);
 	const literalToPropagate = propagateCCTransition(stateMachine, clauseId);
+
+	const latestTrail = getLatestTrail();
+	if (latestTrail === undefined) {
+		logFatal('There should be a trail to update the followUpIndex');
+	}
+	latestTrail.setFollowUpIndex();
+
 	const complementaryClauses: SvelteSet<number> = complementaryOccurrencesTransition(
 		stateMachine,
 		literalToPropagate

@@ -47,14 +47,14 @@ export const dummyAssignmentAlgorithm: StepAlgorithm = (params: DummySearchParam
 				variables.assign(lastVariable.getInt(), !lastVariable.getAssignment());
 				const variable = variables.getVariableCopy(lastVariable.getInt());
 				copyWorkingTrail.push(VariableAssignment.newBacktrackingAssignment(variable));
-				copyWorkingTrail.updateFollowUpIndex();
+				copyWorkingTrail.setFollowUpIndex();
 			} else {
 				lastDecision = copyWorkingTrail.pop();
 			}
 		}
 		if (lastDecision === undefined) {
 			// this denotes that no backward decision was found in the trail
-			copyWorkingTrail.updateFollowUpIndex();
+			copyWorkingTrail.setFollowUpIndex();
 		}
 		nextTrailsState.push(copyWorkingTrail);
 	}
