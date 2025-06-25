@@ -175,7 +175,7 @@ const afterComplementaryBlock = (
 		return;
 	}
 	pickClauseSetTransition(stateMachine, solver);
-	if(!solver.isInAutoMode()) conflictDetectionEventBus.emit();
+	if (!solver.isInAutoMode()) conflictDetectionEventBus.emit();
 };
 
 const conflictDetectionBlock = (

@@ -93,7 +93,7 @@ const afterAssignmentBlock = (
 	);
 	queueOccurrenceListTransition(stateMachine, solver, variable, complementaryClauses);
 	pickPendingOccurrenceListTransition(stateMachine, solver);
-	if(!solver.isInAutoMode()) conflictDetectionEventBus.emit();
+	if (!solver.isInAutoMode()) conflictDetectionEventBus.emit();
 };
 
 const conflictDetectionBlock = (
