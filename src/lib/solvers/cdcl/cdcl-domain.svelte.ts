@@ -46,7 +46,9 @@ export type CDCL_CHECK_PENDING_OCCURRENCE_LISTS_INPUT =
 	| 'all_variables_assigned_state'
 	| 'pick_clause_set_state';
 
-export type CDCL_QUEUE_OCCURRENCE_LIST_INPUT = 'check_pending_occurrence_lists_state' | 'delete_clause_state';
+export type CDCL_QUEUE_OCCURRENCE_LIST_INPUT =
+	| 'check_pending_occurrence_lists_state'
+	| 'delete_clause_state';
 
 export type CDCL_UNSTACK_OCCURRENCE_LIST_INPUT = 'check_pending_clauses_state';
 
@@ -231,7 +233,9 @@ export const unsatisfiedClause: CDCL_CONFLICT_DETECTION_FUN = (clauseId: number)
 	return isUnSATClause(evaluation);
 };
 
-export type CDCL_CHECK_PENDING_OCCURRENCE_LISTS_FUN = (solverStateMachine: CDCL_SolverMachine) => boolean;
+export type CDCL_CHECK_PENDING_OCCURRENCE_LISTS_FUN = (
+	solverStateMachine: CDCL_SolverMachine
+) => boolean;
 
 export const thereAreJobPostponed: CDCL_CHECK_PENDING_OCCURRENCE_LISTS_FUN = (
 	solverStateMachine: CDCL_SolverMachine

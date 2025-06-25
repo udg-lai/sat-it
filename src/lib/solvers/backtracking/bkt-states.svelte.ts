@@ -181,7 +181,10 @@ const conflict_detection_state: NonFinalState<
 	description: 'Check if current clause is unsatisfied',
 	transitions: new Map<BKT_CONFLICT_DETECTION_INPUT, number>()
 		.set('delete_clause_state', bkt_stateName2StateId['delete_clause_state'])
-		.set('empty_pending_occurrence_list_state', bkt_stateName2StateId['empty_pending_occurrence_list_state'])
+		.set(
+			'empty_pending_occurrence_list_state',
+			bkt_stateName2StateId['empty_pending_occurrence_list_state']
+		)
 };
 
 const delete_clause_state: NonFinalState<BKT_DELETE_CLAUSE_FUN, BKT_DELETE_CLAUSE_INPUT> = {

@@ -27,7 +27,9 @@ export type BKT_QUEUE_OCCURRENCE_LIST_INPUT = 'pick_pending_occurrence_list_stat
 export type BKT_PENDING_OCCURRENCE_LIST_INPUT = 'all_clauses_checked_state';
 export type BKT_ALL_CLAUSES_CHECKED_INPUT = 'next_clause_state' | 'all_variables_assigned_state';
 export type BKT_NEXT_CLAUSE_INPUT = 'conflict_detection_state';
-export type BKT_CONFLICT_DETECTION_INPUT = 'delete_clause_state' | 'empty_pending_occurrence_list_state';
+export type BKT_CONFLICT_DETECTION_INPUT =
+	| 'delete_clause_state'
+	| 'empty_pending_occurrence_list_state';
 export type BKT_DELETE_CLAUSE_INPUT = 'all_clauses_checked_state';
 export type BKT_EMPTY_PENDING_OCCURRENCE_LIST_INPUT = 'decision_level_state';
 export type BKT_DECISION_LEVEL_INPUT = 'backtracking_state' | 'unsat_state';

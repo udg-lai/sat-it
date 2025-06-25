@@ -278,7 +278,10 @@ const queue_occurrence_list_state: NonFinalState<
 	run: queueClauseSet,
 	description: 'Stack an occurrence list as pending',
 	transitions: new Map<CDCL_QUEUE_OCCURRENCE_LIST_INPUT, number>()
-		.set('check_pending_occurrence_lists_state', cdcl_stateName2StateId['check_pending_occurrence_lists_state'])
+		.set(
+			'check_pending_occurrence_lists_state',
+			cdcl_stateName2StateId['check_pending_occurrence_lists_state']
+		)
 		.set('delete_clause_state', cdcl_stateName2StateId['delete_clause_state'])
 };
 
