@@ -16,12 +16,12 @@ import {
 	type CDCL_INPUT,
 	type CDCL_PICK_CLAUSE_SET_FUN,
 	type CDCL_PICK_CLAUSE_SET_INPUT,
-	type CDCL_QUEUE_CLAUSE_SET_FUN,
-	type CDCL_QUEUE_CLAUSE_SET_INPUT,
+	type CDCL_QUEUE_OCCURRENCE_LIST_FUN,
+	type CDCL_QUEUE_OCCURRENCE_LIST_INPUT,
 	type CDCL_UNIT_CLAUSES_DETECTION_FUN,
 	type CDCL_UNIT_CLAUSES_DETECTION_INPUT,
-	type CDCL_UNSTACK_CLAUSE_SET_FUN,
-	type CDCL_UNSTACK_CLAUSE_SET_INPUT,
+	type CDCL_UNSTACK_OCCURRENCE_LIST_FUN,
+	type CDCL_UNSTACK_OCCURRENCE_LIST_INPUT,
 	pickPendingClauseSet,
 	type CDCL_ALL_CLAUSES_CHECKED_INPUT,
 	type CDCL_ALL_CLAUSES_CHECKED_FUN,
@@ -30,8 +30,8 @@ import {
 	type CDCL_NEXT_CLAUSE_INPUT,
 	type CDCL_CONFLICT_DETECTION_INPUT,
 	unsatisfiedClause,
-	type CDCL_CHECK_PENDING_CLAUSES_INPUT,
-	type CDCL_CHECK_PENDING_CLAUSES_FUN,
+	type CDCL_CHECK_PENDING_OCCURRENCE_LISTS_INPUT,
+	type CDCL_CHECK_PENDING_OCCURRENCE_LISTS_FUN,
 	thereAreJobPostponed,
 	type CDCL_DELETE_CLAUSE_FUN,
 	type CDCL_DELETE_CLAUSE_INPUT,
@@ -51,10 +51,10 @@ import {
 	type CDCL_DECIDE_INPUT,
 	decide,
 	unitClause,
-	type CDCL_EMPTY_CLAUSE_SET_FUN,
-	type CDCL_EMPTY_CLAUSE_SET_INPUT,
+	type CDCL_EMPTY_OCCURRENCE_LISTS_FUN,
+	type CDCL_EMPTY_OCCURRENCE_LISTS_INPUT,
 	emptyClauseSet,
-	type CDLC_BUILD_CONFLICT_ANALYSIS_STRUCTURE_INPUT,
+	type CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_INPUT,
 	type CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN,
 	buildConflictAnalysis,
 	type CDCL_ASSERTING_CLAUSE_FUN,
@@ -69,8 +69,8 @@ import {
 	type CDCL_DELETE_LAST_ASSIGNMENT_FUN,
 	type CDCL_DELETE_LAST_ASSIGNMENT_INPUT,
 	deleteLastAssignment,
-	type CDCL_LEARN_CONCLICT_CLAUSE_FUN,
-	type CDCL_LEARN_CONCLICT_CLAUSE_INPUT,
+	type CDCL_LEARN_CONFLICT_CLAUSE_FUN,
+	type CDCL_LEARN_CONFLICT_CLAUSE_INPUT,
 	type CDCL_SECOND_HIGHEST_DL_FUN,
 	type CDCL_SECOND_HIGHEST_DL_INPUT,
 	secondHighestDL,
@@ -95,11 +95,11 @@ export const cdcl_stateName2StateId = {
 	decide_state: DECIDE_STATE_ID,
 	empty_clause_state: 0,
 	unit_clauses_detection_state: 1,
-	queue_clause_set_state: 2,
-	check_pending_clauses_state: 3,
+	queue_occurrence_list_state: 2,
+	check_pending_occurrence_lists_state: 3,
 	pick_clause_set_state: 4,
 	all_variables_assigned_state: 5,
-	unstack_clause_set_state: 6,
+	unstack_occurrence_list_state: 6,
 	clause_evaluation_state: 7,
 	all_clauses_checked_state: 8,
 	next_clause_state: 9,
@@ -143,7 +143,7 @@ const unit_clauses_detection_state: NonFinalState<
 	description: 'Seeks for the problem s unit clauses',
 	transitions: new Map<CDCL_UNIT_CLAUSES_DETECTION_INPUT, number>().set(
 		'queue_occurrence_list_state',
-		cdcl_stateName2StateId['queue_clause_set_state']
+		cdcl_stateName2StateId['queue_occurrence_list_state']
 	)
 };
 
@@ -178,14 +178,14 @@ const all_variables_assigned_state: NonFinalState<
 		.set('decide_state', cdcl_stateName2StateId['decide_state'])
 };
 
-const check_pending_clauses_state: NonFinalState<
-	CDCL_CHECK_PENDING_CLAUSES_FUN,
-	CDCL_CHECK_PENDING_CLAUSES_INPUT
+const check_pending_occurrence_lists_state: NonFinalState<
+	CDCL_CHECK_PENDING_OCCURRENCE_LISTS_FUN,
+	CDCL_CHECK_PENDING_OCCURRENCE_LISTS_INPUT
 > = {
-	id: cdcl_stateName2StateId['check_pending_clauses_state'],
-	description: 'True if there are set of clauses postponed, false otherwise',
+	id: cdcl_stateName2StateId['check_pending_occurrence_lists_state'],
+	description: 'True if there are occurrence lists postponed, false otherwise',
 	run: thereAreJobPostponed,
-	transitions: new Map<CDCL_CHECK_PENDING_CLAUSES_INPUT, number>()
+	transitions: new Map<CDCL_CHECK_PENDING_OCCURRENCE_LISTS_INPUT, number>()
 		.set('pick_clause_set_state', cdcl_stateName2StateId['pick_clause_set_state'])
 		.set('all_variables_assigned_state', cdcl_stateName2StateId['all_variables_assigned_state'])
 };
@@ -210,7 +210,7 @@ const all_clauses_checked_state: NonFinalState<
 	run: allClausesChecked,
 	transitions: new Map<CDCL_ALL_CLAUSES_CHECKED_INPUT, number>()
 		.set('next_clause_state', cdcl_stateName2StateId['next_clause_state'])
-		.set('unstack_clause_set_state', cdcl_stateName2StateId['unstack_clause_set_state'])
+		.set('unstack_occurrence_list_state', cdcl_stateName2StateId['unstack_occurrence_list_state'])
 };
 
 const next_clause_state: NonFinalState<CDCL_NEXT_CLAUSE_FUN, CDCL_NEXT_CLAUSE_INPUT> = {
@@ -232,7 +232,7 @@ const conflict_detection_state: NonFinalState<
 	description: 'Check if current clause is unsatisfied',
 	transitions: new Map<CDCL_CONFLICT_DETECTION_INPUT, number>()
 		.set('unit_clause_state', cdcl_stateName2StateId['unit_clause_state'])
-		.set('empty_clause_set_state', cdcl_stateName2StateId['empty_clause_set_state'])
+		.set('empty_occurrence_lists_state', cdcl_stateName2StateId['empty_clause_set_state'])
 };
 
 const unit_clause_state: NonFinalState<CDCL_UNIT_CLAUSE_FUN, CDCL_UNIT_CLAUSE_INPUT> = {
@@ -266,32 +266,32 @@ const complementary_occurrences_state: NonFinalState<
 	description: 'Get the clauses where the complementary of the last assigned literal appear',
 	transitions: new Map<CDCL_COMPLEMENTARY_OCCURRENCES_INPUT, number>().set(
 		'queue_occurrence_list_state',
-		cdcl_stateName2StateId['queue_clause_set_state']
+		cdcl_stateName2StateId['queue_occurrence_list_state']
 	)
 };
 
-const queue_clause_set_state: NonFinalState<
-	CDCL_QUEUE_CLAUSE_SET_FUN,
-	CDCL_QUEUE_CLAUSE_SET_INPUT
+const queue_occurrence_list_state: NonFinalState<
+	CDCL_QUEUE_OCCURRENCE_LIST_FUN,
+	CDCL_QUEUE_OCCURRENCE_LIST_INPUT
 > = {
-	id: cdcl_stateName2StateId['queue_clause_set_state'],
+	id: cdcl_stateName2StateId['queue_occurrence_list_state'],
 	run: queueClauseSet,
-	description: 'Stack a set of clause as pending',
-	transitions: new Map<CDCL_QUEUE_CLAUSE_SET_INPUT, number>()
-		.set('check_pending_clauses_state', cdcl_stateName2StateId['check_pending_clauses_state'])
+	description: 'Stack an occurrence list as pending',
+	transitions: new Map<CDCL_QUEUE_OCCURRENCE_LIST_INPUT, number>()
+		.set('check_pending_occurrence_lists_state', cdcl_stateName2StateId['check_pending_occurrence_lists_state'])
 		.set('delete_clause_state', cdcl_stateName2StateId['delete_clause_state'])
 };
 
-const unstack_clause_set_state: NonFinalState<
-	CDCL_UNSTACK_CLAUSE_SET_FUN,
-	CDCL_UNSTACK_CLAUSE_SET_INPUT
+const unstack_occurrence_list_state: NonFinalState<
+	CDCL_UNSTACK_OCCURRENCE_LIST_FUN,
+	CDCL_UNSTACK_OCCURRENCE_LIST_INPUT
 > = {
-	id: cdcl_stateName2StateId['unstack_clause_set_state'],
+	id: cdcl_stateName2StateId['unstack_occurrence_list_state'],
 	run: unstackClauseSet,
 	description: 'Unstack the set of clause',
-	transitions: new Map<CDCL_UNSTACK_CLAUSE_SET_INPUT, number>().set(
+	transitions: new Map<CDCL_UNSTACK_OCCURRENCE_LIST_INPUT, number>().set(
 		'check_pending_clauses_state',
-		cdcl_stateName2StateId['check_pending_clauses_state']
+		cdcl_stateName2StateId['check_pending_occurrence_lists_state']
 	)
 };
 
@@ -318,13 +318,13 @@ const decision_level_state: NonFinalState<
 };
 
 const empty_clause_set_state: NonFinalState<
-	CDCL_EMPTY_CLAUSE_SET_FUN,
-	CDCL_EMPTY_CLAUSE_SET_INPUT
+	CDCL_EMPTY_OCCURRENCE_LISTS_FUN,
+	CDCL_EMPTY_OCCURRENCE_LISTS_INPUT
 > = {
 	id: cdcl_stateName2StateId['empty_clause_set_state'],
 	run: emptyClauseSet,
-	description: `Emties the queue of clauses to check`,
-	transitions: new Map<CDCL_EMPTY_CLAUSE_SET_INPUT, number>().set(
+	description: `Empties the queue of occurrence lists to check`,
+	transitions: new Map<CDCL_EMPTY_OCCURRENCE_LISTS_INPUT, number>().set(
 		'decision_level_state',
 		cdcl_stateName2StateId['decision_level_state']
 	)
@@ -334,12 +334,12 @@ const empty_clause_set_state: NonFinalState<
 
 const build_conflict_analysis_state: NonFinalState<
 	CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN,
-	CDLC_BUILD_CONFLICT_ANALYSIS_STRUCTURE_INPUT
+	CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_INPUT
 > = {
 	id: cdcl_stateName2StateId['build_conflict_analysis_state'],
 	run: buildConflictAnalysis,
 	description: `Buidls the Conflict Analysis Structure`,
-	transitions: new Map<CDLC_BUILD_CONFLICT_ANALYSIS_STRUCTURE_INPUT, number>().set(
+	transitions: new Map<CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_INPUT, number>().set(
 		'asserting_clause_state',
 		cdcl_stateName2StateId['asserting_clause_state']
 	)
@@ -406,13 +406,13 @@ const delete_last_assignment_state: NonFinalState<
 };
 
 const learn_cc_state: NonFinalState<
-	CDCL_LEARN_CONCLICT_CLAUSE_FUN,
-	CDCL_LEARN_CONCLICT_CLAUSE_INPUT
+	CDCL_LEARN_CONFLICT_CLAUSE_FUN,
+	CDCL_LEARN_CONFLICT_CLAUSE_INPUT
 > = {
 	id: cdcl_stateName2StateId['learn_cc_state'],
 	run: learnConflictClause,
 	description: `Inserts the new clause inside the clause pool`,
-	transitions: new Map<CDCL_LEARN_CONCLICT_CLAUSE_INPUT, number>().set(
+	transitions: new Map<CDCL_LEARN_CONFLICT_CLAUSE_INPUT, number>().set(
 		'second_highest_dl_state',
 		cdcl_stateName2StateId['second_highest_dl_state']
 	)
@@ -468,12 +468,12 @@ states.set(empty_clause_state.id, empty_clause_state);
 states.set(unit_clauses_detection_state.id, unit_clauses_detection_state);
 states.set(unsat_state.id, unsat_state);
 states.set(sat_state.id, sat_state);
-states.set(check_pending_clauses_state.id, check_pending_clauses_state);
-states.set(queue_clause_set_state.id, queue_clause_set_state);
+states.set(check_pending_occurrence_lists_state.id, check_pending_occurrence_lists_state);
+states.set(queue_occurrence_list_state.id, queue_occurrence_list_state);
 states.set(pick_clause_set_state.id, pick_clause_set_state);
 states.set(all_variables_assigned_state.id, all_variables_assigned_state);
 states.set(decide_state.id, decide_state);
-states.set(unstack_clause_set_state.id, unstack_clause_set_state);
+states.set(unstack_occurrence_list_state.id, unstack_occurrence_list_state);
 states.set(next_clause_state.id, next_clause_state);
 states.set(all_clauses_checked_state.id, all_clauses_checked_state);
 states.set(conflict_detection_state.id, conflict_detection_state);

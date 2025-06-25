@@ -20,8 +20,8 @@ import type {
 	CDCL_BACKJUMPING_INPUT,
 	CDCL_CHECK_NON_DECISION_MADE_FUN,
 	CDCL_CHECK_NON_DECISION_MADE_INPUT,
-	CDCL_CHECK_PENDING_CLAUSES_FUN,
-	CDCL_CHECK_PENDING_CLAUSES_INPUT,
+	CDCL_CHECK_PENDING_OCCURRENCE_LISTS_FUN,
+	CDCL_CHECK_PENDING_OCCURRENCE_LISTS_INPUT,
 	CDCL_COMPLEMENTARY_OCCURRENCES_FUN,
 	CDCL_COMPLEMENTARY_OCCURRENCES_INPUT,
 	CDCL_CONFLICT_DETECTION_FUN,
@@ -34,10 +34,10 @@ import type {
 	CDCL_DELETE_LAST_ASSIGNMENT_INPUT,
 	CDCL_EMPTY_CLAUSE_FUN,
 	CDCL_EMPTY_CLAUSE_INPUT,
-	CDCL_EMPTY_CLAUSE_SET_FUN,
-	CDCL_EMPTY_CLAUSE_SET_INPUT,
-	CDCL_LEARN_CONCLICT_CLAUSE_FUN,
-	CDCL_LEARN_CONCLICT_CLAUSE_INPUT,
+	CDCL_EMPTY_OCCURRENCE_LISTS_FUN,
+	CDCL_EMPTY_OCCURRENCE_LISTS_INPUT,
+	CDCL_LEARN_CONFLICT_CLAUSE_FUN,
+	CDCL_LEARN_CONFLICT_CLAUSE_INPUT,
 	CDCL_NEXT_CLAUSE_FUN,
 	CDCL_NEXT_CLAUSE_INPUT,
 	CDCL_PICK_CLAUSE_SET_FUN,
@@ -48,8 +48,8 @@ import type {
 	CDCL_PROPAGATE_CC_INPUT,
 	CDCL_PUSH_TRAIL_FUN,
 	CDCL_PUSH_TRAIL_INPUT,
-	CDCL_QUEUE_CLAUSE_SET_FUN,
-	CDCL_QUEUE_CLAUSE_SET_INPUT,
+	CDCL_QUEUE_OCCURRENCE_LIST_FUN,
+	CDCL_QUEUE_OCCURRENCE_LIST_INPUT,
 	CDCL_RESOLUTION_UPDATE_CC_FUN,
 	CDCL_RESOLUTION_UPDATE_CC_INPUT,
 	CDCL_SECOND_HIGHEST_DL_FUN,
@@ -60,12 +60,12 @@ import type {
 	CDCL_UNIT_CLAUSES_DETECTION_INPUT,
 	CDCL_UNIT_PROPAGATION_FUN,
 	CDCL_UNIT_PROPAGATION_INPUT,
-	CDCL_UNSTACK_CLAUSE_SET_FUN,
-	CDCL_UNSTACK_CLAUSE_SET_INPUT,
+	CDCL_UNSTACK_OCCURRENCE_LIST_FUN,
+	CDCL_UNSTACK_OCCURRENCE_LIST_INPUT,
 	CDCL_VARIABLE_IN_CC_FUN,
 	CDCL_VARIABLE_IN_CC_INPUT,
 	CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN,
-	CDLC_BUILD_CONFLICT_ANALYSIS_STRUCTURE_INPUT
+	CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_INPUT
 } from './cdcl-domain.svelte.ts';
 import type { CDCL_SolverMachine } from './cdcl-solver-machine.svelte.ts';
 import type { CDCL_StateMachine } from './cdcl-state-machine.svelte.ts';
@@ -285,8 +285,8 @@ const queueClauseSetTransition = (
 	clauseSet: SvelteSet<number>
 ): void => {
 	const queueClauseSetState = stateMachine.getActiveState() as NonFinalState<
-		CDCL_QUEUE_CLAUSE_SET_FUN,
-		CDCL_QUEUE_CLAUSE_SET_INPUT
+		CDCL_QUEUE_OCCURRENCE_LIST_FUN,
+		CDCL_QUEUE_OCCURRENCE_LIST_INPUT
 	>;
 	if (queueClauseSetState.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Queue Clause Set state');
@@ -301,8 +301,8 @@ const checkPendingClausesSetTransition = (
 	solver: CDCL_SolverMachine
 ): boolean => {
 	const checkPendingClausesSetState = stateMachine.getActiveState() as NonFinalState<
-		CDCL_CHECK_PENDING_CLAUSES_FUN,
-		CDCL_CHECK_PENDING_CLAUSES_INPUT
+		CDCL_CHECK_PENDING_OCCURRENCE_LISTS_FUN,
+		CDCL_CHECK_PENDING_OCCURRENCE_LISTS_INPUT
 	>;
 	if (checkPendingClausesSetState.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Pending Clauses Set state');
@@ -432,8 +432,8 @@ const unstackClauseSetTransition = (
 	solver: CDCL_SolverMachine
 ): void => {
 	const dequeueClauseSetState = stateMachine.getActiveState() as NonFinalState<
-		CDCL_UNSTACK_CLAUSE_SET_FUN,
-		CDCL_UNSTACK_CLAUSE_SET_INPUT
+		CDCL_UNSTACK_OCCURRENCE_LIST_FUN,
+		CDCL_UNSTACK_OCCURRENCE_LIST_INPUT
 	>;
 	if (dequeueClauseSetState.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Dequeue Clause Set state');
@@ -492,8 +492,8 @@ const emptyClauseSetTransition = (
 	solver: CDCL_SolverMachine
 ): void => {
 	const emptyClauseSetState = stateMachine.getActiveState() as NonFinalState<
-		CDCL_EMPTY_CLAUSE_SET_FUN,
-		CDCL_EMPTY_CLAUSE_SET_INPUT
+		CDCL_EMPTY_OCCURRENCE_LISTS_FUN,
+		CDCL_EMPTY_OCCURRENCE_LISTS_INPUT
 	>;
 	if (emptyClauseSetState.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Empty Clause Set state');
@@ -510,7 +510,7 @@ const buildConflictAnalysisTransition = (
 ) => {
 	const buildConflictAnalysisState = stateMachine.getActiveState() as NonFinalState<
 		CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN,
-		CDLC_BUILD_CONFLICT_ANALYSIS_STRUCTURE_INPUT
+		CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_INPUT
 	>;
 	if (buildConflictAnalysisState.run === undefined) {
 		logFatal(
@@ -613,8 +613,8 @@ const learnConflictClauseTransition = (
 	conflictAnalysis: ConflictAnalysis
 ): number => {
 	const learnConflictClauseState = stateMachine.getActiveState() as NonFinalState<
-		CDCL_LEARN_CONCLICT_CLAUSE_FUN,
-		CDCL_LEARN_CONCLICT_CLAUSE_INPUT
+		CDCL_LEARN_CONFLICT_CLAUSE_FUN,
+		CDCL_LEARN_CONFLICT_CLAUSE_INPUT
 	>;
 	if (learnConflictClauseState.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Variable In CC state');

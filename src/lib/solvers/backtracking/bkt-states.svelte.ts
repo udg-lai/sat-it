@@ -37,14 +37,14 @@ import {
 	type BKT_DELETE_CLAUSE_INPUT,
 	type BKT_EMPTY_CLAUSE_FUN,
 	type BKT_EMPTY_CLAUSE_INPUT,
-	type BKT_EMPTY_PENDING_SET_FUN,
-	type BKT_EMPTY_PENDING_SET_INPUT,
+	type BKT_EMPTY_PENDING_OCCURRENCE_LIST_FUN,
+	type BKT_EMPTY_PENDING_OCCURRENCE_LIST_INPUT,
 	type BKT_FUN,
 	type BKT_INPUT,
 	type BKT_NEXT_CLAUSE_FUN,
 	type BKT_NEXT_CLAUSE_INPUT,
-	type BKT_PICK_PENDING_OCCURRENCE_LIST_FUN,
-	type BKT_PENDING_OCCURRENCE_LIST_INPUT,
+	type BKT_PICK_PENDING_CLAUSE_SET_FUN,
+	type BKT_PENDING_OCCURRENCE_LIST_INPUT as BKT_PICK_PENDING_CLAUSE_SET_INPUT,
 	type BKT_QUEUE_OCCURRENCE_LIST_FUN,
 	type BKT_QUEUE_OCCURRENCE_LIST_INPUT
 } from './bkt-domain.svelte.ts';
@@ -58,12 +58,12 @@ export const bkt_stateName2StateId = {
 	all_variables_assigned_state: 1,
 	complementary_occurrences_state: 2,
 	queue_occurrence_list_state: 3,
-	pick_pending_occurrence_list_state: 4,
+	pick_pending_clause_set_state: 4,
 	all_clauses_checked_state: 5,
 	next_clause_state: 6,
 	conflict_detection_state: 7,
 	delete_clause_state: 8,
-	empty_pending_set_state: 9,
+	empty_pending_occurrence_list_state: 9,
 	decision_level_state: 10
 };
 
@@ -132,18 +132,18 @@ const queue_occurrence_list_state: NonFinalState<
 	description: 'Stack an occurrence list as pending',
 	transitions: new Map<BKT_QUEUE_OCCURRENCE_LIST_INPUT, number>().set(
 		'pick_pending_occurrence_list_state',
-		bkt_stateName2StateId['pick_pending_occurrence_list_state']
+		bkt_stateName2StateId['pick_pending_clause_set_state']
 	)
 };
 
-const pick_pending_occurrence_list_state: NonFinalState<
-	BKT_PICK_PENDING_OCCURRENCE_LIST_FUN,
-	BKT_PENDING_OCCURRENCE_LIST_INPUT
+const pick_pending_clause_set_state: NonFinalState<
+	BKT_PICK_PENDING_CLAUSE_SET_FUN,
+	BKT_PICK_PENDING_CLAUSE_SET_INPUT
 > = {
-	id: bkt_stateName2StateId['pick_pending_occurrence_list_state'],
-	description: 'Get next pending occurrence list from the queue',
+	id: bkt_stateName2StateId['pick_pending_clause_set_state'],
+	description: 'Get next pending clause from the occurrence list',
 	run: pickPendingOccurrenceList,
-	transitions: new Map<BKT_PENDING_OCCURRENCE_LIST_INPUT, number>().set(
+	transitions: new Map<BKT_PICK_PENDING_CLAUSE_SET_INPUT, number>().set(
 		'all_clauses_checked_state',
 		bkt_stateName2StateId['all_clauses_checked_state']
 	)
@@ -181,7 +181,7 @@ const conflict_detection_state: NonFinalState<
 	description: 'Check if current clause is unsatisfied',
 	transitions: new Map<BKT_CONFLICT_DETECTION_INPUT, number>()
 		.set('delete_clause_state', bkt_stateName2StateId['delete_clause_state'])
-		.set('empty_pending_set_state', bkt_stateName2StateId['empty_pending_set_state'])
+		.set('empty_pending_occurrence_list_state', bkt_stateName2StateId['empty_pending_occurrence_list_state'])
 };
 
 const delete_clause_state: NonFinalState<BKT_DELETE_CLAUSE_FUN, BKT_DELETE_CLAUSE_INPUT> = {
@@ -194,14 +194,14 @@ const delete_clause_state: NonFinalState<BKT_DELETE_CLAUSE_FUN, BKT_DELETE_CLAUS
 	)
 };
 
-const empty_pending_set_state: NonFinalState<
-	BKT_EMPTY_PENDING_SET_FUN,
-	BKT_EMPTY_PENDING_SET_INPUT
+const empty_pending_occurrence_list_state: NonFinalState<
+	BKT_EMPTY_PENDING_OCCURRENCE_LIST_FUN,
+	BKT_EMPTY_PENDING_OCCURRENCE_LIST_INPUT
 > = {
-	id: bkt_stateName2StateId['empty_pending_set_state'],
+	id: bkt_stateName2StateId['empty_pending_occurrence_list_state'],
 	run: emptyClauseSet,
-	description: `Emties the queue of clauses to check`,
-	transitions: new Map<BKT_EMPTY_PENDING_SET_INPUT, number>().set(
+	description: `Empties the queue occurrence list to check`,
+	transitions: new Map<BKT_EMPTY_PENDING_OCCURRENCE_LIST_INPUT, number>().set(
 		'decision_level_state',
 		bkt_stateName2StateId['decision_level_state']
 	)
@@ -233,12 +233,12 @@ states.set(all_variables_assigned_state.id, all_variables_assigned_state);
 states.set(decide_state.id, decide_state);
 states.set(complementary_occurrences_state.id, complementary_occurrences_state);
 states.set(queue_occurrence_list_state.id, queue_occurrence_list_state);
-states.set(pick_pending_occurrence_list_state.id, pick_pending_occurrence_list_state);
+states.set(pick_pending_clause_set_state.id, pick_pending_clause_set_state);
 states.set(conflict_detection_state.id, conflict_detection_state);
 states.set(all_clauses_checked_state.id, all_clauses_checked_state);
 states.set(next_clause_state.id, next_clause_state);
 states.set(delete_clause_state.id, delete_clause_state);
-states.set(empty_pending_set_state.id, empty_pending_set_state);
+states.set(empty_pending_occurrence_list_state.id, empty_pending_occurrence_list_state);
 states.set(decision_level_state.id, decision_level_state);
 states.set(sat_state.id, sat_state);
 states.set(unsat_state.id, unsat_state);
@@ -246,7 +246,7 @@ states.set(backtracking_state.id, backtracking_state);
 
 export const initial = empty_clause_state.id;
 
-export const conflict = empty_pending_set_state.id;
+export const conflict = empty_pending_occurrence_list_state.id;
 
 export const sat = sat_state.id;
 

@@ -132,7 +132,10 @@ const conflictDetectionBlock = (
 	const allClausesChecked = allClausesCheckedTransition(stateMachine, clauseSet);
 	if (allClausesChecked) {
 		unstackOccurrenceListTransition(stateMachine, solver);
-		const pendingOccurrenceLists: boolean = checkPendingOccurrenceListsTransition(stateMachine, solver);
+		const pendingOccurrenceLists: boolean = checkPendingOccurrenceListsTransition(
+			stateMachine,
+			solver
+		);
 		if (!pendingOccurrenceLists) {
 			updateClausesToCheck(new SvelteSet<number>(), -1);
 			allVariablesAssignedTransition(stateMachine);
@@ -231,7 +234,10 @@ const queueOccurrenceListTransition = (
 		DPLL_QUEUE_OCCURRENCE_LIST_INPUT
 	>;
 	if (queueOccurrenceListState.run === undefined) {
-		logFatal('Function call error', 'There should be a function in the Queue Occurrence List state');
+		logFatal(
+			'Function call error',
+			'There should be a function in the Queue Occurrence List state'
+		);
 	}
 	const size: number = queueOccurrenceListState.run(variable, clauseSet, solver);
 	if (size > 1) stateMachine.transition('delete_clause_state');
@@ -247,7 +253,10 @@ const checkPendingOccurrenceListsTransition = (
 		DPLL_CHECK_PENDING_OCCURRENCE_LISTS_INPUT
 	>;
 	if (checkPendingOccurrenceListsState.run === undefined) {
-		logFatal('Function call error', 'There should be a function in the Pending Occurrence Lists state');
+		logFatal(
+			'Function call error',
+			'There should be a function in the Pending Occurrence Lists state'
+		);
 	}
 	const result: boolean = checkPendingOccurrenceListsState.run(solver);
 	if (result) stateMachine.transition('pick_clause_set_state');
@@ -378,7 +387,10 @@ const unstackOccurrenceListTransition = (
 		DPLL_UNSTACK_CLAUSE_SET_INPUT
 	>;
 	if (unstackOccurrenceListSetState.run === undefined) {
-		logFatal('Function call error', 'There should be a function in the Unstack Occurrence List state');
+		logFatal(
+			'Function call error',
+			'There should be a function in the Unstack Occurrence List state'
+		);
 	}
 	unstackOccurrenceListSetState.run(solver);
 	stateMachine.transition('check_pending_occurrence_lists_state');

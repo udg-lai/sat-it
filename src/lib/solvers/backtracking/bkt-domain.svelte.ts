@@ -27,9 +27,9 @@ export type BKT_QUEUE_OCCURRENCE_LIST_INPUT = 'pick_pending_occurrence_list_stat
 export type BKT_PENDING_OCCURRENCE_LIST_INPUT = 'all_clauses_checked_state';
 export type BKT_ALL_CLAUSES_CHECKED_INPUT = 'next_clause_state' | 'all_variables_assigned_state';
 export type BKT_NEXT_CLAUSE_INPUT = 'conflict_detection_state';
-export type BKT_CONFLICT_DETECTION_INPUT = 'delete_clause_state' | 'empty_pending_set_state';
+export type BKT_CONFLICT_DETECTION_INPUT = 'delete_clause_state' | 'empty_pending_occurrence_list_state';
 export type BKT_DELETE_CLAUSE_INPUT = 'all_clauses_checked_state';
-export type BKT_EMPTY_PENDING_SET_INPUT = 'decision_level_state';
+export type BKT_EMPTY_PENDING_OCCURRENCE_LIST_INPUT = 'decision_level_state';
 export type BKT_DECISION_LEVEL_INPUT = 'backtracking_state' | 'unsat_state';
 export type BKT_BACKTRACKING_INPUT = 'complementary_occurrences_state';
 
@@ -44,7 +44,7 @@ export type BKT_INPUT =
 	| BKT_NEXT_CLAUSE_INPUT
 	| BKT_CONFLICT_DETECTION_INPUT
 	| BKT_DELETE_CLAUSE_INPUT
-	| BKT_EMPTY_PENDING_SET_INPUT
+	| BKT_EMPTY_PENDING_OCCURRENCE_LIST_INPUT
 	| BKT_DECISION_LEVEL_INPUT;
 
 // ** state functions **
@@ -91,11 +91,11 @@ export const queueOccurrenceList: BKT_QUEUE_OCCURRENCE_LIST_FUN = (
 	solverStateMachine.setOccurrenceList({ clauses, variableReasonId: variable });
 };
 
-export type BKT_PICK_PENDING_OCCURRENCE_LIST_FUN = (
+export type BKT_PICK_PENDING_CLAUSE_SET_FUN = (
 	solverStateMachine: BKT_SolverMachine
 ) => SvelteSet<number>;
 
-export const pickPendingOccurrenceList: BKT_PICK_PENDING_OCCURRENCE_LIST_FUN = (
+export const pickPendingOccurrenceList: BKT_PICK_PENDING_CLAUSE_SET_FUN = (
 	solverStateMachine: BKT_SolverMachine
 ) => {
 	const { clauses, variableReasonId }: OccurrenceList = solverStateMachine.consultOccurrenceList();
@@ -140,9 +140,9 @@ export const deleteClause: BKT_DELETE_CLAUSE_FUN = (
 	pending.delete(clauseId);
 };
 
-export type BKT_EMPTY_PENDING_SET_FUN = (solverStateMachine: BKT_SolverMachine) => void;
+export type BKT_EMPTY_PENDING_OCCURRENCE_LIST_FUN = (solverStateMachine: BKT_SolverMachine) => void;
 
-export const emptyClauseSet: BKT_EMPTY_PENDING_SET_FUN = (
+export const emptyClauseSet: BKT_EMPTY_PENDING_OCCURRENCE_LIST_FUN = (
 	solverStateMachine: BKT_SolverMachine
 ) => {
 	solverStateMachine.resolveOccurrences();
@@ -168,11 +168,11 @@ export type BKT_FUN =
 	| BKT_DECIDE_FUN
 	| BKT_COMPLEMENTARY_OCCURRENCES_FUN
 	| BKT_QUEUE_OCCURRENCE_LIST_FUN
-	| BKT_PICK_PENDING_OCCURRENCE_LIST_FUN
+	| BKT_PICK_PENDING_CLAUSE_SET_FUN
 	| BKT_ALL_CLAUSES_CHECKED_FUN
 	| BKT_NEXT_CLAUSE_FUN
 	| BKT_CONFLICT_DETECTION_FUN
 	| BKT_DELETE_CLAUSE_FUN
-	| BKT_EMPTY_PENDING_SET_FUN
+	| BKT_EMPTY_PENDING_OCCURRENCE_LIST_FUN
 	| BKT_DECISION_LEVEL_FUN
 	| BKT_BACKTRACKING_FUN;

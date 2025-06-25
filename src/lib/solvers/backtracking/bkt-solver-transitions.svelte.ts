@@ -19,11 +19,11 @@ import type {
 	BKT_DELETE_CLAUSE_INPUT,
 	BKT_EMPTY_CLAUSE_FUN,
 	BKT_EMPTY_CLAUSE_INPUT,
-	BKT_EMPTY_PENDING_SET_FUN,
-	BKT_EMPTY_PENDING_SET_INPUT,
+	BKT_EMPTY_PENDING_OCCURRENCE_LIST_FUN,
+	BKT_EMPTY_PENDING_OCCURRENCE_LIST_INPUT,
 	BKT_NEXT_CLAUSE_FUN,
 	BKT_NEXT_CLAUSE_INPUT,
-	BKT_PICK_PENDING_OCCURRENCE_LIST_FUN,
+	BKT_PICK_PENDING_CLAUSE_SET_FUN,
 	BKT_PENDING_OCCURRENCE_LIST_INPUT,
 	BKT_QUEUE_OCCURRENCE_LIST_FUN,
 	BKT_QUEUE_OCCURRENCE_LIST_INPUT
@@ -194,8 +194,8 @@ const emptyPendingSetTransition = (
 	solver: BKT_SolverMachine
 ): void => {
 	const emptyClauseSetState = stateMachine.getActiveState() as NonFinalState<
-		BKT_EMPTY_PENDING_SET_FUN,
-		BKT_EMPTY_PENDING_SET_INPUT
+		BKT_EMPTY_PENDING_OCCURRENCE_LIST_FUN,
+		BKT_EMPTY_PENDING_OCCURRENCE_LIST_INPUT
 	>;
 	if (emptyClauseSetState.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Empty Clause Set state');
@@ -319,7 +319,7 @@ const pickPendingOccurrenceListTransition = (
 	solver: BKT_SolverMachine
 ): SvelteSet<number> => {
 	const pickPendingOccurrenceListState = stateMachine.getActiveState() as NonFinalState<
-		BKT_PICK_PENDING_OCCURRENCE_LIST_FUN,
+		BKT_PICK_PENDING_CLAUSE_SET_FUN,
 		BKT_PENDING_OCCURRENCE_LIST_INPUT
 	>;
 	if (pickPendingOccurrenceListState.run === undefined) {

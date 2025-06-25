@@ -36,7 +36,9 @@ export type DPLL_CHECK_PENDING_OCCURRENCE_LISTS_INPUT =
 	| 'all_variables_assigned_state'
 	| 'pick_clause_set_state';
 
-export type DPLL_QUEUE_OCCURRENCE_LIST_INPUT = 'check_pending_occurrence_lists_state' | 'delete_clause_state';
+export type DPLL_QUEUE_OCCURRENCE_LIST_INPUT =
+	| 'check_pending_occurrence_lists_state'
+	| 'delete_clause_state';
 
 export type DPLL_UNSTACK_CLAUSE_SET_INPUT = 'check_pending_occurrence_lists_state';
 
@@ -154,9 +156,7 @@ export type DPLL_PICK_CLAUSE_SET_FUN = (
 	solverStateMachine: DPLL_SolverMachine
 ) => SvelteSet<number>;
 
-export const pickClauseSet: DPLL_PICK_CLAUSE_SET_FUN = (
-	solverStateMachine: DPLL_SolverMachine
-) => {
+export const pickClauseSet: DPLL_PICK_CLAUSE_SET_FUN = (solverStateMachine: DPLL_SolverMachine) => {
 	const occurrenceList: OccurrenceList = solverStateMachine.consultPostponed();
 	updateClausesToCheck(occurrenceList.clauses, occurrenceList.variableReasonId);
 	return occurrenceList.clauses;
@@ -187,7 +187,9 @@ export const unsatisfiedClause: DPLL_CONFLICT_DETECTION_FUN = (clauseId: number)
 	return isUnSATClause(evaluation);
 };
 
-export type DPLL_CHECK_PENDING_OCCURRENCE_LISTS_FUN = (solverStateMachine: DPLL_SolverMachine) => boolean;
+export type DPLL_CHECK_PENDING_OCCURRENCE_LISTS_FUN = (
+	solverStateMachine: DPLL_SolverMachine
+) => boolean;
 
 export const thereAreJobPostponed: DPLL_CHECK_PENDING_OCCURRENCE_LISTS_FUN = (
 	solverStateMachine: DPLL_SolverMachine

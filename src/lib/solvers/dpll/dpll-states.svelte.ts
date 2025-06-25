@@ -243,7 +243,10 @@ const queue_occurrence_list_state: NonFinalState<
 	run: queueOccurrenceList,
 	description: 'Stack a set of clause as pending',
 	transitions: new Map<DPLL_QUEUE_OCCURRENCE_LIST_INPUT, number>()
-		.set('check_pending_occurrence_lists_state', dpll_stateName2StateId['check_pending_occurrence_lists_state'])
+		.set(
+			'check_pending_occurrence_lists_state',
+			dpll_stateName2StateId['check_pending_occurrence_lists_state']
+		)
 		.set('delete_clause_state', dpll_stateName2StateId['delete_clause_state'])
 };
 
@@ -298,7 +301,7 @@ const empty_occurrence_lists_state: NonFinalState<
 > = {
 	id: dpll_stateName2StateId['empty_occurrence_lists_state'],
 	run: emptyOccurrenceLists,
-	description: `Emits the queue of clauses to check`,
+	description: `Empties the queue occurrence lists to check`,
 	transitions: new Map<DPLL_EMPTY_OCCURRENCE_LISTS_INPUT, number>().set(
 		'decision_level_state',
 		dpll_stateName2StateId['decision_level_state']
