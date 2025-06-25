@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { getProblemStore, type Problem } from '$lib/store/problem.svelte.ts';
-	import { changeInstanceEventBus } from '$lib/transversal/events.ts';
+	import { getProblemStore, type Problem } from '$lib/states/problem.svelte.ts';
 	import { onMount } from 'svelte';
 	import StatisticsComponent from './StatisticsComponent.svelte';
+	import { changeInstanceEventBus } from '$lib/events/events.ts';
 
 	let activeInstance: string = $state('');
 	const problem: Problem = $derived(getProblemStore());
@@ -12,10 +12,10 @@
 	};
 
 	onMount(() => {
-		const unsuscribeInstanceStore = changeInstanceEventBus.subscribe(updateActiveInstance);
+		const unsubscribe = changeInstanceEventBus.subscribe(updateActiveInstance);
 
 		return () => {
-			unsuscribeInstanceStore();
+			unsubscribe();
 		};
 	});
 </script>

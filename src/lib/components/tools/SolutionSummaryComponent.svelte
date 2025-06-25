@@ -1,7 +1,7 @@
 <script lang="ts">
 	import ClauseComponent from '$lib/components/ClauseComponent.svelte';
-	import { getClausePool } from '$lib/store/problem.svelte.ts';
-	import type Clause from '$lib/transversal/entities/Clause.svelte.ts';
+	import type Clause from '$lib/entities/Clause.svelte.ts';
+	import { getClausePool } from '$lib/states/problem.svelte.ts';
 	import {
 		isRight,
 		makeLeft,
@@ -10,7 +10,7 @@
 		type Either,
 		type Left,
 		type Right
-	} from '$lib/transversal/types/either.ts';
+	} from '$lib/types/either.ts';
 	import VirtualList from 'svelte-tiny-virtual-list';
 
 	interface Props {

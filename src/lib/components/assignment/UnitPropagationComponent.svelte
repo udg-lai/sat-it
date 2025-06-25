@@ -1,23 +1,23 @@
 <script lang="ts">
 	import { onChrome } from '$lib/app.svelte.ts';
 	import MathTexComponent from '$lib/components/MathTexComponent.svelte';
-	import { getInspectedVariable } from '$lib/store/conflict-detection-state.svelte.ts';
-	import { getProblemStore, type Problem } from '$lib/store/problem.svelte.ts';
-	import { logFatal } from '$lib/store/toasts.ts';
-	import type Clause from '$lib/transversal/entities/Clause.svelte.ts';
-	import type VariableAssignment from '$lib/transversal/entities/VariableAssignment.ts';
-	import { isUnitPropagationReason } from '$lib/transversal/entities/VariableAssignment.ts';
+	import type Clause from '$lib/entities/Clause.svelte.ts';
+	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
+	import { isUnitPropagationReason } from '$lib/entities/VariableAssignment.ts';
+	import { getInspectedVariable } from '$lib/states/conflict-detection-state.svelte.ts';
+	import { getProblemStore, type Problem } from '$lib/states/problem.svelte.ts';
+	import { logFatal } from '$lib/stores/toasts.ts';
 	import { Popover } from 'flowbite-svelte';
 	import { nanoid } from 'nanoid';
 	import HeadTailComponent from './../HeadTailComponent.svelte';
-	import './_style.css';
+	import './style.css';
 
 	interface Props {
 		assignment: VariableAssignment;
-		isLast: boolean;
+		isLast?: boolean;
 	}
 
-	let { assignment, isLast }: Props = $props();
+	let { assignment, isLast = false }: Props = $props();
 	let buttonId: string = 'btn-' + nanoid();
 
 	let inspectedVariable: number = $derived(getInspectedVariable());

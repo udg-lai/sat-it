@@ -4,13 +4,13 @@
 	import SettingsComponent from '$lib/components/settings/SettingsComponent.svelte';
 	import ToastComponent from '$lib/components/ToastComponent.svelte';
 	import ToolsComponent from '$lib/components/tools/ToolsComponent.svelte';
+	import { closeSettingsViewEventBus, openSettingsViewEventBus } from '$lib/events/events.ts';
 	import {
 		initializeInstancesStore,
 		setDefaultInstanceToSolve
-	} from '$lib/store/instances.store.ts';
-	import { logError, toasts } from '$lib/store/toasts.ts';
-	import { closeSettingsViewEventBus, openSettingsViewEventBus } from '$lib/transversal/events.ts';
-	import { disableContextMenu } from '$lib/transversal/utils.ts';
+	} from '$lib/stores/instances.store.ts';
+	import { logError, toasts } from '$lib/stores/toasts.ts';
+	import { disableContextMenu } from '$lib/utils.ts';
 	import { onMount } from 'svelte';
 
 	let renderSettings = $state(true);

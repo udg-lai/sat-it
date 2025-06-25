@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { closeSettingsViewEventBus } from '$lib/transversal/events.ts';
+	import { closeSettingsViewEventBus } from '$lib/events/events.ts';
 	import { fly } from 'svelte/transition';
+	import { getActiveView, setActiveView } from '../../stores/settings.svelte.ts';
 	import BookmarkInstances from './BookmarkInstances.svelte';
 	import EngineComponent from './engine/EngineComponent.svelte';
 	import LegendComponent from './LegendComponent.svelte';
 	import NavBarComponent, { type OptionEmit } from './NavBarComponent.svelte';
-	import { getActiveView, setActiveView } from './_store.svelte.ts';
 
 	type ActiveView = 'bookmark' | 'engine' | 'legend' | 'info';
 

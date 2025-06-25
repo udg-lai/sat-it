@@ -1,4 +1,4 @@
-import { testNavigatorAgent } from './transversal/utils.ts';
+import { testNavigatorAgent } from './utils.ts';
 
 const onChromeState: boolean = $state(testNavigatorAgent());
 

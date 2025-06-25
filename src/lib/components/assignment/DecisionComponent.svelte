@@ -1,19 +1,19 @@
 <script lang="ts">
-	import type VariableAssignment from '$lib/transversal/entities/VariableAssignment.ts';
-	import MathTexComponent from '$lib/components/MathTexComponent.svelte';
-	import './_style.css';
-	import { getInspectedVariable } from '$lib/store/conflict-detection-state.svelte.ts';
-	import HeadTailComponent from '../HeadTailComponent.svelte';
 	import { onChrome } from '$lib/app.svelte.ts';
+	import MathTexComponent from '$lib/components/MathTexComponent.svelte';
+	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
+	import { getInspectedVariable } from '$lib/states/conflict-detection-state.svelte.ts';
+	import HeadTailComponent from '../HeadTailComponent.svelte';
+	import './style.css';
 
 	interface Props {
 		assignment: VariableAssignment;
-		isLast: boolean;
-		expanded: boolean;
-		emitToggle: () => void;
+		isLast?: boolean;
+		expanded?: boolean;
+		emitToggle?: () => void;
 	}
 
-	let { assignment, isLast, expanded, emitToggle }: Props = $props();
+	let { assignment, isLast = false, expanded = false, emitToggle }: Props = $props();
 
 	let openLevel: boolean = $state(false);
 
@@ -28,7 +28,7 @@
 
 	function emitLevelOpen(): void {
 		openLevel = !openLevel;
-		emitToggle();
+		emitToggle?.();
 	}
 </script>
 
@@ -36,6 +36,7 @@
 	<decision>
 		<button
 			class="literal-style decision {chrome ? 'pad-chrome' : 'pad-others'}"
+			class:open={openLevel}
 			onclick={emitLevelOpen}
 		>
 			<MathTexComponent equation={assignment.toTeX()} />
@@ -46,6 +47,10 @@
 <style>
 	.decision {
 		border-left: 1px solid;
+		border-right: 1px solid;
+	}
+
+	.open {
 		border-right: 1px solid transparent;
 	}
 </style>

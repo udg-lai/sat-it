@@ -1,22 +1,6 @@
 <script lang="ts">
 	import TrailEditor from '$lib/components/trail/TrailEditorComponent.svelte';
-	import type { SolverMachine } from '$lib/machine/SolverMachine.svelte.ts';
-	import type { StateFun, StateInput } from '$lib/machine/StateMachine.svelte.ts';
-	import { clearBreakpoints } from '$lib/store/breakpoints.svelte.ts';
-	import { resetProblem, updateProblemFromTrail } from '$lib/store/problem.svelte.ts';
-	import { record, redo, resetStack, undo, type Snapshot } from '$lib/store/stack.svelte.ts';
-	import {
-		getSolverMachine,
-		setSolverStateMachine,
-		updateSolverMachine
-	} from '$lib/store/solver-machine.svelte.ts';
-	import {
-		getStatistics,
-		resetStatistics,
-		updateStatistics
-	} from '$lib/store/statistics.svelte.ts';
-	import { getTrails, updateTrails } from '$lib/store/trails.svelte.ts';
-	import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
+	import type { Trail } from '$lib/entities/Trail.svelte.ts';
 	import {
 		changeAlgorithmEventBus,
 		changeInstanceEventBus,
@@ -24,10 +8,26 @@
 		userActionEventBus,
 		type ActionEvent,
 		type StateMachineEvent
-	} from '$lib/transversal/events.ts';
+	} from '$lib/events/events.ts';
+	import type { SolverMachine } from '$lib/solvers/SolverMachine.svelte.ts';
+	import type { StateFun, StateInput } from '$lib/solvers/StateMachine.svelte.ts';
+	import { clearBreakpoints } from '$lib/states/breakpoints.svelte.ts';
+	import { resetProblem, updateProblemFromTrail } from '$lib/states/problem.svelte.ts';
+	import {
+		getSolverMachine,
+		setSolverStateMachine,
+		updateSolverMachine
+	} from '$lib/states/solver-machine.svelte.ts';
+	import { record, redo, resetStack, undo, type Snapshot } from '$lib/states/stack.svelte.ts';
+	import {
+		getStatistics,
+		resetStatistics,
+		updateStatistics
+	} from '$lib/states/statistics.svelte.ts';
+	import { getTrails, updateTrails } from '$lib/states/trails.svelte.ts';
 	import { onMount } from 'svelte';
+	import { editorViewEventStore, type EditorViewEvent } from '../stores/debugger.svelte.ts';
 	import DebuggerComponent from './debugger/DebuggerComponent.svelte';
-	import { editorViewEventStore, type EditorViewEvent } from './debugger/events.svelte.ts';
 	import SolvingInformationComponent from './SolvingInformationComponent.svelte';
 
 	let expandPropagations: boolean = $state(true);

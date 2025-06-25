@@ -1,15 +1,15 @@
 <script lang="ts">
-	import { getProblemStore, type Problem } from '$lib/store/problem.svelte.ts';
-	import { getSolverMachine } from '$lib/store/solver-machine.svelte.ts';
+	import type { Trail } from '$lib/entities/Trail.svelte.ts';
+	import { getProblemStore, type Problem } from '$lib/states/problem.svelte.ts';
+	import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 	import {
 		getClausesLeft,
 		getNoConflicts,
 		getNoDecisions,
 		getNoUnitPropagations,
 		type ClauseCountEntry
-	} from '$lib/store/statistics.svelte.ts';
-	import { getLatestTrail, getTrails } from '$lib/store/trails.svelte.ts';
-	import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
+	} from '$lib/states/statistics.svelte.ts';
+	import { getLatestTrail, getTrails } from '$lib/states/trails.svelte.ts';
 
 	const problem: Problem = $derived(getProblemStore());
 	const decisions: number = $derived(getNoDecisions());

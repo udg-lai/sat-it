@@ -1,8 +1,8 @@
-import ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';
-import { VariablePool } from '$lib/transversal/entities/VariablePool.svelte.ts';
-import { isSAT, isUnresolved, isUnSAT } from '$lib/transversal/interfaces/IClausePool.ts';
-import type { Summary } from '$lib/transversal/parsers/dimacs.ts';
-import parseDimacs from '$lib/transversal/parsers/dimacs.ts';
+import ClausePool from '$lib/entities/ClausePool.svelte.ts';
+import { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
+import { isSAT, isUnresolved, isUnSAT } from '$lib/interfaces/IClausePool.ts';
+import type { Summary } from '$lib/parsers/dimacs.ts';
+import parseDimacs from '$lib/parsers/dimacs.ts';
 import { describe, expect, it } from 'vitest';
 
 const example01 = `

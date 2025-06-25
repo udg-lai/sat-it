@@ -1,18 +1,18 @@
 <script lang="ts">
-	import type VariableAssignment from '$lib/transversal/entities/VariableAssignment.ts';
 	import MathTexComponent from '$lib/components/MathTexComponent.svelte';
-	import './_style.css';
-	import { getInspectedVariable } from '$lib/store/conflict-detection-state.svelte.ts';
-	import HeadTailComponent from '../HeadTailComponent.svelte';
 	import { onChrome } from '$lib/app.svelte.ts';
+	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
+	import { getInspectedVariable } from '$lib/states/conflict-detection-state.svelte.ts';
+	import HeadTailComponent from '../HeadTailComponent.svelte';
+	import './style.css';
 
 	interface Props {
 		assignment: VariableAssignment;
-		isLast: boolean;
+		isLast?: boolean;
 		eventClick?: () => void;
 	}
 
-	let { assignment, isLast, eventClick }: Props = $props();
+	let { assignment, isLast = false, eventClick }: Props = $props();
 
 	const inspectedVariable: number = $derived(getInspectedVariable());
 	let inspecting: boolean = $derived(assignment.variableId() === inspectedVariable && isLast);
@@ -22,6 +22,7 @@
 	}
 
 	let chrome: boolean = $derived(onChrome());
+
 </script>
 
 <HeadTailComponent {inspecting}>
