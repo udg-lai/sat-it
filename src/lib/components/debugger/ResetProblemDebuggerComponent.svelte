@@ -1,9 +1,10 @@
 <script lang="ts">
+	import { changeInstanceEventBus } from '$lib/events/events.ts';
+	import { getActiveInstance } from '$lib/stores/instances.store.ts';
+	import { Modal } from 'flowbite-svelte';
 	import { ExclamationCircleOutline, RefreshOutline } from 'flowbite-svelte-icons';
 	import DynamicRender from '../DynamicRender.svelte';
-	import { changeInstanceEventBus } from '$lib/transversal/events.ts';
-	import { Modal } from 'flowbite-svelte';
-	import { getActiveInstance } from '$lib/store/instances.store.ts';
+
 	const resetProps = {
 		size: 'md'
 	};

@@ -1,15 +1,15 @@
 <script lang="ts">
-	import type { SolverMachine } from '$lib/machine/SolverMachine.svelte.ts';
-	import type { StateFun, StateInput } from '$lib/machine/StateMachine.svelte.ts';
-	import { getProblemStore, type Problem } from '$lib/store/problem.svelte.ts';
-	import { getSolverMachine } from '$lib/store/solver-machine.svelte.ts';
-	import AutomaticDebugger from './DecisionDebuggerComponent.svelte';
+	import type { SolverMachine } from '$lib/solvers/SolverMachine.svelte.ts';
+	import type { StateFun, StateInput } from '$lib/solvers/StateMachine.svelte.ts';
+	import { getBaselinePolarity } from '$lib/states/parameters.svelte.ts';
+	import { getProblemStore, type Problem } from '$lib/states/problem.svelte.ts';
+	import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 	import AutoModeComponent from './AutoModeComponent.svelte';
-	import ConflictDetectionDebugger from './ConflictDetectionDebuggerComponent.svelte';
 	import ConflictAnalysisDebugger from './ConflictAnalysisDebuggerComponent.svelte';
+	import ConflictDetectionDebugger from './ConflictDetectionDebuggerComponent.svelte';
+	import AutomaticDebugger from './DecisionDebuggerComponent.svelte';
 	import GeneralDebuggerButtons from './GeneralDebuggerComponent.svelte';
 	import InitialStepDebugger from './InitialStepDebuggerComponent.svelte';
-	import { getBaselinePolarity } from '$lib/store/parameters.svelte.ts';
 
 	const problem: Problem = $derived(getProblemStore());
 	let defaultNextVariable: number | undefined = $derived(problem.variables.nextVariable());

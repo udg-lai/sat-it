@@ -1,0 +1,175 @@
+<script lang="ts">
+	import DynamicRender from '$lib/components/DynamicRender.svelte';
+	import {
+		addBreakpoint,
+		getBreakpoints,
+		isBreakpoint,
+		removeBreakpoint
+	} from '$lib/states/breakpoints.svelte.ts';
+	import { getProblemStore, type Problem } from '$lib/states/problem.svelte.ts';
+	import { logInfo } from '$lib/stores/toasts.ts';
+	import { BugOutline } from 'flowbite-svelte-icons';
+	import './style.css';
+
+	interface Props {
+		iconClass: { size: string };
+	}
+
+	let { iconClass }: Props = $props();
+	const elementClass: string =
+		'rounded-lg bg-[var(--main-bg-color)] border border-[var(--border-color)] p-2';
+
+	const breakpoints: number[][] = $derived(
+		Array.from(getBreakpoints().values())
+			.map((lit) => [Math.abs(lit), lit])
+			.sort((a, b) => {
+				const [va, la] = a;
+				const [vb, lb] = b;
+				if (va === vb) {
+					return la - lb;
+				} else {
+					return va - vb;
+				}
+			})
+	);
+
+	let literalBreakpoint: number | undefined = $state();
+
+	const problem: Problem = $derived(getProblemStore());
+
+	let max: number = $derived(problem.variables.size());
+	let min: number = $derived(max * -1);
+
+	const addLiteralBreakpoint = (): void => {
+		if (literalBreakpoint === undefined) return;
+
+		if (isBreakpoint(literalBreakpoint)) {
+			logInfo(
+				'Breakpoint',
+				`Variable ${Math.abs(literalBreakpoint)} for ${literalBreakpoint > 0} assignment already added`
+			);
+		}
+		if (!isNaN(literalBreakpoint) && problem.variables.includes(Math.abs(literalBreakpoint))) {
+			addBreakpoint({ type: 'literal', literal: literalBreakpoint });
+		}
+		literalBreakpoint = undefined;
+	};
+
+	const validateInput = (event: Event): void => {
+		const input: HTMLInputElement = event.target as HTMLInputElement;
+
+		if (input.value === '-') {
+			return;
+		}
+
+		if (input.value === '') {
+			return;
+		}
+
+		const value: number = Number(input.value);
+
+		if (isNaN(value)) {
+			literalBreakpoint = undefined;
+			input.value = '';
+			return;
+		}
+
+		if (value < min || value > max || value === 0) {
+			literalBreakpoint = undefined;
+			input.setCustomValidity(`Valid breakpoints in [${min} : ${max}] except zero`);
+			input.reportValidity();
+			return;
+		} else {
+			input.setCustomValidity('');
+		}
+
+		literalBreakpoint = value;
+	};
+</script>
+
+<div class="heading-class">
+	<DynamicRender component={BugOutline} props={iconClass} />
+	<span class="pt-1">Breakpoints</span>
+</div>
+<div class="body-class">
+	<variables class="{elementClass} flex items-center justify-between">
+		<label for="baselineDelay" class="whitespace-nowrap text-gray-900">Variable:</label>
+		<input
+			id="baselineDelay"
+			type="text"
+			class="w-32 rounded-lg border border-[var(--border-color)] text-right focus:outline-none focus:ring-0"
+			bind:value={literalBreakpoint}
+			onchange={addLiteralBreakpoint}
+			oninput={validateInput}
+			placeholder=""
+			{max}
+		/>
+	</variables>
+	<variables-display class="breakpoint-display">
+		<div class="{elementClass} scroll-container">
+			<ul class="items scrollable">
+				{#each breakpoints as [, literal]}
+					<li>
+						<button
+							onclick={() => {
+								removeBreakpoint(literal);
+							}}
+							class="variable-text"
+						>
+							{literal}
+						</button>
+					</li>
+				{/each}
+			</ul>
+		</div>
+	</variables-display>
+</div>
+
+<style>
+	.breakpoint-display {
+		height: 90%;
+		width: 100%;
+	}
+
+	.variable-text {
+		width: 100%;
+		border-radius: 10px;
+		background-color: white;
+		border: solid;
+		border-width: 1px;
+		border-color: var(--border-color);
+		padding: 0.5rem;
+		transition:
+			color 300ms,
+			background-color 300ms,
+			border-color 300ms;
+	}
+	.variable-text:hover {
+		background-color: rgb(255, 185, 185);
+		color: rgb(202, 53, 53);
+		border-color: rgb(245, 42, 42);
+	}
+
+	.scroll-container {
+		height: 100%;
+		width: 100%;
+		overflow: auto;
+		scrollbar-width: none;
+	}
+
+	.scroll-container::-webkit-scrollbar {
+		display: none;
+	}
+
+	.items {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+		width: 100%;
+	}
+
+	li {
+		display: flex;
+		width: 100%;
+	}
+</style>

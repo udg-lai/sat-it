@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type VariableAssignment from '$lib/transversal/entities/VariableAssignment.ts';
+	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
 	import BackjumpingComponent from '../assignment/BackjumpingComponent.svelte';
 	import BacktrackingComponent from '../assignment/BacktrackingComponent.svelte';
 	import ChildlessDecisionComponent from '../assignment/ChildlessDecisionComponent.svelte';

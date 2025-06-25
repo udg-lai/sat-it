@@ -1,18 +1,18 @@
 <script lang="ts">
-	import { Range } from 'flowbite-svelte';
-	import { StopOutline } from 'flowbite-svelte-icons';
-	import DynamicRender from '../DynamicRender.svelte';
-	import './_style.css';
-	import type { SolverMachine } from '$lib/machine/SolverMachine.svelte.ts';
-	import type { StateFun, StateInput } from '$lib/machine/StateMachine.svelte.ts';
-	import { getSolverMachine } from '$lib/store/solver-machine.svelte.ts';
-	import { MAX_DELAY_MS, MIN_DELAY_MS, setStepDelay } from '$lib/store/delay-ms.svelte.ts';
+	import type { SolverMachine } from '$lib/solvers/SolverMachine.svelte.ts';
+	import type { StateFun, StateInput } from '$lib/solvers/StateMachine.svelte.ts';
+	import { MAX_DELAY_MS, MIN_DELAY_MS, setStepDelay } from '$lib/states/delay-ms.svelte.ts';
 	import {
 		getBaselineDelay,
 		MAX_DELAY,
 		MIN_DELAY,
 		STEP_DELAY
-	} from '$lib/store/parameters.svelte.ts';
+	} from '$lib/states/parameters.svelte.ts';
+	import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
+	import { Range } from 'flowbite-svelte';
+	import { StopOutline } from 'flowbite-svelte-icons';
+	import DynamicRender from '../DynamicRender.svelte';
+	import './style.css';
 
 	let solverMachine: SolverMachine<StateFun, StateInput> = $derived(getSolverMachine());
 

@@ -1,17 +1,17 @@
 <script lang="ts">
-	import type VariableAssignment from '$lib/transversal/entities/VariableAssignment.ts';
 	import MathTexComponent from '$lib/components/MathTexComponent.svelte';
-	import { nanoid } from 'nanoid';
-	import './_style.css';
-	import type Clause from '$lib/transversal/entities/Clause.svelte.ts';
-	import { isBackjumpingReason } from '$lib/transversal/entities/VariableAssignment.ts';
-	import { getProblemStore, type Problem } from '$lib/store/problem.svelte.ts';
+	import type Clause from '$lib/entities/Clause.svelte.ts';
+	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
+	import { isBackjumpingReason } from '$lib/entities/VariableAssignment.ts';
+	import { getInspectedVariable } from '$lib/states/conflict-detection-state.svelte.ts';
+	import { getProblemStore, type Problem } from '$lib/states/problem.svelte.ts';
+	import { logFatal } from '$lib/stores/toasts.ts';
+	import { runningOnChrome } from '$lib/utils.ts';
 	import { Popover } from 'flowbite-svelte';
-	import { runningOnChrome } from '$lib/transversal/utils.ts';
+	import { nanoid } from 'nanoid';
 	import { onMount } from 'svelte';
-	import { logFatal } from '$lib/store/toasts.ts';
-	import { getInspectedVariable } from '$lib/store/conflict-detection-state.svelte.ts';
 	import HeadTailComponent from '../HeadTailComponent.svelte';
+	import './style.css';
 
 	interface Props {
 		assignment: VariableAssignment;
