@@ -10,10 +10,11 @@
 	interface Props {
 		assignment: VariableAssignment;
 		isLast?: boolean;
+		fromPreviousTrail?: boolean;
 		eventClick?: () => void;
 	}
 
-	let { assignment, isLast = false, eventClick }: Props = $props();
+	let { assignment, isLast = false, fromPreviousTrail = false, eventClick }: Props = $props();
 
 	const inspectedVariable: number = $derived(getInspectedVariable());
 	let inspecting: boolean = $derived(assignment.variableId() === inspectedVariable && isLast);
@@ -30,7 +31,7 @@
 </script>
 
 <HeadTailComponent {inspecting}>
-	<backtracking>
+	<backtracking class:previous-assignment={fromPreviousTrail}>
 		<button
 			class="literal-style backtracking {onChrome ? 'pad-chrome' : 'pad-others'}"
 			onclick={onClick}

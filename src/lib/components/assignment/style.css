@@ -23,3 +23,7 @@
 .pad-others {
 	padding-bottom: var(--literal-padding-bottom-others);
 }
+
+.previous-assignment {
+	opacity: 0.5;
+}
