@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { stateMachineEventBus } from '$lib/events/events.ts';
-	import { resetStack } from '$lib/states/stack.svelte.ts';
+	import './_style.css';
 	import { CaretRightOutline } from 'flowbite-svelte-icons';
 	import DynamicRender from '../DynamicRender.svelte';
-	import './style.css';
+	import { stateMachineEventBus } from '$lib/transversal/events.ts';
+	import { resetStack } from '$lib/store/stack.svelte.ts';
 
 	const assignmentProps = {
 		size: 'md'

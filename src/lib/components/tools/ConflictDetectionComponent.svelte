@@ -1,18 +1,18 @@
 <script lang="ts">
-	import type Clause from '$lib/entities/Clause.svelte.ts';
+	import {
+		getCheckingIndex,
+		getClausesToCheck
+	} from '$lib/store/conflict-detection-state.svelte.ts';
+	import { getProblemStore, type Problem } from '$lib/store/problem.svelte.ts';
+	import type Clause from '$lib/transversal/entities/Clause.svelte.ts';
+	import ClauseComponent from '../ClauseComponent.svelte';
+	import type ClausePool from '$lib/transversal/entities/ClausePool.svelte.ts';
 	import {
 		isSatClause,
 		isUnitClause,
 		isUnresolvedClause,
 		isUnSATClause
-	} from '$lib/entities/Clause.svelte.ts';
-	import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
-	import {
-		getCheckingIndex,
-		getClausesToCheck
-	} from '$lib/states/conflict-detection-state.svelte.ts';
-	import { getProblemStore, type Problem } from '$lib/states/problem.svelte.ts';
-	import ClauseComponent from '../ClauseComponent.svelte';
+	} from '$lib/transversal/entities/Clause.svelte.ts';
 	import HeadTailComponent from '../HeadTailComponent.svelte';
 
 	const problem: Problem = $derived(getProblemStore());

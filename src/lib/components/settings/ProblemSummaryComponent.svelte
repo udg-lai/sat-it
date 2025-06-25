@@ -1,8 +1,14 @@
 <script lang="ts">
-	import type { DimacsInstance } from '$lib/instances/dimacs-instance.interface.ts';
-	import type { Claim } from '$lib/parsers/dimacs.ts';
-	import { isRight, makeLeft, makeRight, unwrapEither, type Either } from '$lib/types/either.ts';
-	import { makeTuple, type Tuple } from '$lib/types/tuple.ts';
+	import type { DimacsInstance } from '$lib/dimacs/dimacs-instance.interface.ts';
+	import type { Claim } from '$lib/transversal/parsers/dimacs.ts';
+	import {
+		isRight,
+		makeLeft,
+		makeRight,
+		unwrapEither,
+		type Either
+	} from '$lib/transversal/types/either.ts';
+	import { makeTuple, type Tuple } from '$lib/transversal/types/tuple.ts';
 	import VirtualList from 'svelte-tiny-virtual-list';
 	import LiteralsComponent from '../LiteralsComponent.svelte';
 

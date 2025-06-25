@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { stateMachineEventBus, toggleTrailExpandEventBus } from '$lib/events/events.ts';
-	import { CodeMergeOutline, ForwardOutline } from 'flowbite-svelte-icons';
+	import './_style.css';
+	import { ForwardOutline, CodeMergeOutline } from 'flowbite-svelte-icons';
 	import DynamicRender from '../DynamicRender.svelte';
-	import './style.css';
+	import { stateMachineEventBus, toggleTrailExpandEventBus } from '$lib/transversal/events.ts';
 
 	const assignmentProps = {
 		size: 'md'

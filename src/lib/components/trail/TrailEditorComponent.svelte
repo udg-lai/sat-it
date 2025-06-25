@@ -1,16 +1,16 @@
 <script lang="ts">
-	import type { Trail } from '$lib/entities/Trail.svelte.ts';
+	import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
+	import { onMount } from 'svelte';
+	import TrailComponent from './TrailComponent.svelte';
 	import {
 		solverStartedAutoMode,
 		toggleTrailExpandEventBus,
 		trailTrackingEventBus
-	} from '$lib/events/events.ts';
-	import type { SolverMachine } from '$lib/solvers/SolverMachine.svelte.ts';
-	import type { StateFun, StateInput } from '$lib/solvers/StateMachine.svelte.ts';
-	import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
-	import { onMount } from 'svelte';
+	} from '$lib/transversal/events.ts';
 	import InformationComponent from './InformationComponent.svelte';
-	import TrailComponent from './TrailComponent.svelte';
+	import type { SolverMachine } from '$lib/machine/SolverMachine.svelte.ts';
+	import { getSolverMachine } from '$lib/store/solver-machine.svelte.ts';
+	import type { StateFun, StateInput } from '$lib/machine/StateMachine.svelte.ts';
 
 	interface Props {
 		trails: Trail[];

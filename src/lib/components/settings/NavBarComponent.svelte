@@ -1,8 +1,8 @@
 <script lang="ts">
-	import type { DimacsInstance } from '$lib/instances/dimacs-instance.interface.ts';
-	import parser, { type Summary } from '$lib/parsers/dimacs.ts';
-	import { addInstance } from '$lib/stores/instances.store.ts';
-	import { logError, logInfo } from '$lib/stores/toasts.ts';
+	import type { DimacsInstance } from '$lib/dimacs/dimacs-instance.interface.ts';
+	import { addInstance } from '$lib/store/instances.store.ts';
+	import { logError, logInfo } from '$lib/store/toasts.ts';
+	import parser, { type Summary } from '$lib/transversal/parsers/dimacs.ts';
 	import { BottomNav, BottomNavItem, Tooltip } from 'flowbite-svelte';
 	import {
 		AdjustmentsVerticalOutline,
@@ -11,7 +11,7 @@
 		ExclamationCircleOutline,
 		PlusOutline
 	} from 'flowbite-svelte-icons';
-	import { getActiveView, type ActiveView } from '../../stores/settings.svelte.ts';
+	import { getActiveView, type ActiveView } from './_store.svelte.ts';
 
 	export type OptionEmit = 'bookmark' | 'engine' | 'info' | 'close';
 

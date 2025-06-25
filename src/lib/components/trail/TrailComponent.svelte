@@ -1,11 +1,11 @@
 <script lang="ts">
-	import type { Trail } from '$lib/entities/Trail.svelte.ts';
-	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
+	import type { Trail } from '$lib/transversal/entities/Trail.svelte.ts';
+	import type VariableAssignment from '$lib/transversal/entities/VariableAssignment.ts';
 	import BackjumpingComponent from '../assignment/BackjumpingComponent.svelte';
 	import BacktrackingComponent from '../assignment/BacktrackingComponent.svelte';
 	import UnitPropagationComponent from '../assignment/UnitPropagationComponent.svelte';
 	import DecisionLevelComponent from './DecisionLevelComponent.svelte';
-	import { setLastTrailSize } from '../../states/trail-size.svelte.ts';
+	import { setLastTrailSize } from './_state.svelte.ts';
 
 	interface DecisionLevel {
 		assignment: VariableAssignment;

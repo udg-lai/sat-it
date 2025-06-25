@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Clause from '$lib/entities/Clause.svelte.ts';
+	import Clause from '$lib/transversal/entities/Clause.svelte.ts';
 	import LiteralComponent from './LiteralComponent.svelte';
 	import MathTexComponent from './MathTexComponent.svelte';
 

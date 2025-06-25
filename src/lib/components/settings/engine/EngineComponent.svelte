@@ -1,7 +1,7 @@
 <script lang="ts">
 	import AlgorithmComponent from './AlgorithmComponent.svelte';
-	import BreakpointsComponent from './BreakpointsComponent.svelte';
-	import ParametersComponent from './ParametersComponent.svelte';
+	import BreakingpointComponent from './BreakingpointComponent.svelte';
+	import ParametersComponent from './PrametersComponent.svelte';
 
 	const iconClass = { size: 'xl' };
 </script>
@@ -11,7 +11,7 @@
 </div>
 <div class="division-container"></div>
 <div class="content-container">
-	<BreakpointsComponent {iconClass} />
+	<BreakingpointComponent {iconClass} />
 </div>
 <div class="division-container"></div>
 <div class="content-container">

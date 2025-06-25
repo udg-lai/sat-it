@@ -1,7 +1,7 @@
 <script lang="ts">
 	import DynamicRender from '$lib/components/DynamicRender.svelte';
-	import { changeAlgorithmEventBus } from '$lib/events/events.ts';
-	import { getProblemStore, updateAlgorithm, type Algorithm } from '$lib/states/problem.svelte.ts';
+	import { getProblemStore, updateAlgorithm, type Algorithm } from '$lib/store/problem.svelte.ts';
+	import { changeAlgorithmEventBus } from '$lib/transversal/events.ts';
 	import { Modal } from 'flowbite-svelte';
 	import { CodePullRequestOutline, ExclamationCircleOutline } from 'flowbite-svelte-icons';
 

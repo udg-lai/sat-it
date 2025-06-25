@@ -1,5 +1,5 @@
-import { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
-import { fromJust, isJust } from '$lib/types/maybe.ts';
+import { VariablePool } from '$lib/transversal/entities/VariablePool.svelte.ts';
+import { fromJust, isJust } from '$lib/transversal/types/maybe.ts';
 import { describe, it, expect } from 'vitest';
 
 describe('variable pool', () => {

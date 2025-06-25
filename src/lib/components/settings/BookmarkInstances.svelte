@@ -5,8 +5,8 @@
 		getActiveInstance,
 		instanceStore,
 		type InteractiveInstance
-	} from '$lib/stores/instances.store.ts';
-	import { logInfo } from '$lib/stores/toasts.ts';
+	} from '$lib/store/instances.store.ts';
+	import { logInfo } from '$lib/store/toasts.ts';
 	import { Modal } from 'flowbite-svelte';
 	import {
 		DatabaseOutline,

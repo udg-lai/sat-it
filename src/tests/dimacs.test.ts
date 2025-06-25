@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import parseDimacs, { type Summary } from '$lib/parsers/dimacs.ts';
+import parseDimacs, { type Summary } from '$lib/transversal/parsers/dimacs.ts';
 
 const example01 = `
 c
