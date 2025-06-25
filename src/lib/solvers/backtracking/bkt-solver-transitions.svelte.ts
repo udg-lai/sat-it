@@ -49,10 +49,17 @@ export const initialTransition = (solver: BKT_SolverMachine): void => {
 	allVariablesAssignedTransition(stateMachine);
 };
 
+export const preConflictDetection = (solver: BKT_SolverMachine): void => {
+	const stateMachine: BKT_StateMachine = solver.getStateMachine();
+	const pendingOccurrenceList: OccurrenceList = solver.consultOccurrenceList();
+	const pendingClauses: SvelteSet<number> = pendingOccurrenceList.clauses;
+	conflictDetectionBlock(stateMachine, pendingClauses);
+};
+
 export const analyzeClause = (solver: BKT_SolverMachine): void => {
 	const stateMachine: BKT_StateMachine = solver.getStateMachine();
-	const pendingConflict: OccurrenceList = solver.consultOccurrenceList();
-	const pendingClauses: SvelteSet<number> = pendingConflict.clauses;
+	const pendingOccurrenceList: OccurrenceList = solver.consultOccurrenceList();
+	const pendingClauses: SvelteSet<number> = pendingOccurrenceList.clauses;
 	const clauseId: number = getCheckedClause();
 	deleteClauseTransition(stateMachine, pendingClauses, clauseId);
 	conflictDetectionBlock(stateMachine, pendingClauses);
@@ -61,16 +68,7 @@ export const analyzeClause = (solver: BKT_SolverMachine): void => {
 export const decide = (solver: BKT_SolverMachine): void => {
 	const stateMachine: BKT_StateMachine = solver.getStateMachine();
 	const literalToPropagate: number = decideTransition(stateMachine);
-	const complementaryClauses: SvelteSet<number> = complementaryOccurrencesTransition(
-		stateMachine,
-		literalToPropagate
-	);
-	preConflictDetectionBlock(
-		solver,
-		stateMachine,
-		Math.abs(literalToPropagate),
-		complementaryClauses
-	);
+	afterAssignmentBlock(solver, stateMachine, Math.abs(literalToPropagate), literalToPropagate);
 };
 
 export const backtracking = (solver: BKT_SolverMachine): void => {
@@ -79,31 +77,26 @@ export const backtracking = (solver: BKT_SolverMachine): void => {
 	const firstLevel: boolean = decisionLevelTransition(stateMachine);
 	if (firstLevel) return;
 	const literalToPropagate = backtrackingTransition(stateMachine);
+
+	afterAssignmentBlock(solver, stateMachine, Math.abs(literalToPropagate), literalToPropagate);
+};
+
+const afterAssignmentBlock = (
+	solver: BKT_SolverMachine,
+	stateMachine: BKT_StateMachine,
+	variable: number,
+	literalToPropagate: number
+): void => {
 	const complementaryClauses: SvelteSet<number> = complementaryOccurrencesTransition(
 		stateMachine,
 		literalToPropagate
 	);
-	preConflictDetectionBlock(
-		solver,
-		stateMachine,
-		Math.abs(literalToPropagate),
-		complementaryClauses
-	);
-};
-
-const preConflictDetectionBlock = (
-	solver: BKT_SolverMachine,
-	stateMachine: BKT_StateMachine,
-	variable: number,
-	complementaryClauses: SvelteSet<number>
-): void => {
 	queueOccurrenceListTransition(stateMachine, solver, variable, complementaryClauses);
-	if (complementaryClauses.size !== 0) conflictDetectionEventBus.emit();
-	const occurrenceList: SvelteSet<number> = pickPendingOccurrenceListTransition(
+	conflictDetectionEventBus.emit();
+	pickPendingOccurrenceListTransition(
 		stateMachine,
 		solver
 	);
-	conflictDetectionBlock(stateMachine, occurrenceList);
 };
 
 const conflictDetectionBlock = (

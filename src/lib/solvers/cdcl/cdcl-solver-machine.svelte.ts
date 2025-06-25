@@ -8,7 +8,8 @@ import {
 	conflictAnalysis,
 	decide,
 	initialTransition,
-	preConflictAnalysis
+	preConflictAnalysis,
+	preConflictDetection
 } from './cdcl-solver-transitions.svelte.ts';
 import { CDCL_StateMachine, makeCDCLStateMachine } from './cdcl-state-machine.svelte.ts';
 import { cdcl_stateName2StateId } from './cdcl-states.svelte.ts';
@@ -161,6 +162,10 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 		//The initial state
 		if (activeId === cdcl_stateName2StateId.empty_clause_state) {
 			initialTransition(this);
+		}
+		//Waiting to enter or not the clause analysis
+		else if (activeId === cdcl_stateName2StateId.all_clauses_checked_state) {
+			preConflictDetection(this);
 		}
 		//Waiting to analyze the next clause of the clauses to revise
 		else if (activeId === cdcl_stateName2StateId.delete_clause_state) {

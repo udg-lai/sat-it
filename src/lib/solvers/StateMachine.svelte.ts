@@ -46,6 +46,7 @@ export abstract class StateMachine<F extends StateFun, I extends StateInput>
 	private states: Map<number, State<F, I>>;
 	private active: number = $state(-1);
 	private initial: number = -1;
+	private preConflict: number = -1;
 	private conflict: number = -1;
 	private sat: number = -1;
 	private unsat: number = -1;
@@ -53,6 +54,7 @@ export abstract class StateMachine<F extends StateFun, I extends StateInput>
 	constructor(
 		states: Map<number, State<F, I>>,
 		initial: number,
+		preConflict: number,
 		conflict: number,
 		sat: number,
 		unsat: number
@@ -60,6 +62,7 @@ export abstract class StateMachine<F extends StateFun, I extends StateInput>
 		this.states = states;
 		this.initial = initial;
 		this.active = initial;
+		this.preConflict = preConflict;
 		this.conflict = conflict;
 		this.sat = sat;
 		this.unsat = unsat;
@@ -72,6 +75,10 @@ export abstract class StateMachine<F extends StateFun, I extends StateInput>
 
 	onInitialState(): boolean {
 		return this.getActiveState().id === this.initial;
+	}
+
+	onPreConflictState(): boolean {
+		return this.getActiveState().id === this.preConflict;
 	}
 
 	onConflictState(): boolean {

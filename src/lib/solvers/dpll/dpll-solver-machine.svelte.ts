@@ -8,7 +8,8 @@ import {
 	analyzeClause,
 	conflictiveState,
 	decide,
-	initialTransition
+	initialTransition,
+	preConflictDetection
 } from './dpll-solver-transitions.svelte.ts';
 import { DPLL_StateMachine, makeDPLLMachine } from './dpll-state-machine.svelte.ts';
 import { dpll_stateName2StateId } from './dpll-states.svelte.ts';
@@ -93,6 +94,10 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 		//The initial state
 		if (activeId === dpll_stateName2StateId.empty_clause_state) {
 			initialTransition(this);
+		}
+		//Waiting to enter or not the clause analysis
+		else if (activeId === dpll_stateName2StateId.all_clauses_checked_state) {
+			preConflictDetection(this);
 		}
 		//Waiting to analyze the next clause or changing the clause set
 		else if (activeId === dpll_stateName2StateId.delete_clause_state) {

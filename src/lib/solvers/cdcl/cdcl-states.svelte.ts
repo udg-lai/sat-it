@@ -498,10 +498,10 @@ states.set(undo_trail_to_shdl_state.id, undo_trail_to_shdl_state);
 states.set(push_trail_state.id, push_trail_state);
 states.set(propagate_cc_state.id, propagate_cc_state);
 
-// export initial node
 export const initial = empty_clause_state.id;
 
-// export conflict node
+export const preConflict = all_clauses_checked_state.id;
+
 export const conflict = pick_last_assignment_state.id;
 
 export const sat = sat_state.id;

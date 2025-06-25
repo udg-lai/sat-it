@@ -57,7 +57,14 @@ export const initialTransition = (solver: DPLL_SolverMachine): void => {
 	ecTransition(stateMachine);
 	if (stateMachine.onFinalState()) return;
 	const complementaryClauses: SvelteSet<number> = ucdTransition(stateMachine);
-	preConflictDetectionBlock(solver, stateMachine, -1, complementaryClauses);
+	afterComplementaryBlock(solver, stateMachine, -1, complementaryClauses);
+};
+
+export const preConflictDetection = (solver: DPLL_SolverMachine): void => {
+	const stateMachine: DPLL_StateMachine = solver.getStateMachine();
+	const pendingConflict: OccurrenceList = solver.consultPostponed();
+	const clauseSet: SvelteSet<number> = pendingConflict.clauses;
+	conflictDetectionBlock(solver, stateMachine, clauseSet);
 };
 
 export const analyzeClause = (solver: DPLL_SolverMachine): void => {
@@ -79,12 +86,7 @@ export const decide = (solver: DPLL_SolverMachine): void => {
 		stateMachine,
 		literalToPropagate
 	);
-	preConflictDetectionBlock(
-		solver,
-		stateMachine,
-		Math.abs(literalToPropagate),
-		complementaryClauses
-	);
+	afterComplementaryBlock(solver, stateMachine, Math.abs(literalToPropagate), complementaryClauses);
 };
 
 export const conflictiveState = (solver: DPLL_SolverMachine): void => {
@@ -97,31 +99,25 @@ export const conflictiveState = (solver: DPLL_SolverMachine): void => {
 		stateMachine,
 		literalToPropagate
 	);
-	preConflictDetectionBlock(
-		solver,
-		stateMachine,
-		Math.abs(literalToPropagate),
-		complementaryClauses
-	);
+	afterComplementaryBlock(solver, stateMachine, Math.abs(literalToPropagate), complementaryClauses);
 };
 
 /* General non-exported transitions */
 
-const preConflictDetectionBlock = (
+const afterComplementaryBlock = (
 	solver: DPLL_SolverMachine,
 	stateMachine: DPLL_StateMachine,
 	variable: number,
 	complementaryClauses: SvelteSet<number>
 ): void => {
 	queueOccurrenceListTransition(stateMachine, solver, variable, complementaryClauses);
-	if (complementaryClauses.size !== 0) conflictDetectionEventBus.emit();
+	conflictDetectionEventBus.emit();
 	const pendingClausesSet: boolean = checkPendingOccurrenceListsTransition(stateMachine, solver);
 	if (!pendingClausesSet) {
 		allVariablesAssignedTransition(stateMachine);
 		return;
 	}
-	const clausesToCheck = pickClauseSetTransition(stateMachine, solver);
-	conflictDetectionBlock(solver, stateMachine, clausesToCheck);
+	pickClauseSetTransition(stateMachine, solver);
 };
 
 const conflictDetectionBlock = (
