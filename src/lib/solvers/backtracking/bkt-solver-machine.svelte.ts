@@ -101,7 +101,7 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 			analyzeClause(this);
 		} else if (activeId === bkt_stateName2StateId.decide_state) {
 			decide(this);
-		} else if (activeId === bkt_stateName2StateId.empty_pending_set_state) {
+		} else if (activeId === bkt_stateName2StateId.empty_pending_occurrence_list_state) {
 			backtracking(this);
 		}
 	}

@@ -184,7 +184,7 @@ const conflictDetectionTransition = (stateMachine: BKT_StateMachine, clauseId: n
 		logFatal('Function call error', 'There should be a function in the Conflict Detection state');
 	}
 	const result: boolean = conflictDetectionState.run(clauseId);
-	if (result) stateMachine.transition('empty_pending_set_state');
+	if (result) stateMachine.transition('empty_pending_occurrence_list_state');
 	else stateMachine.transition('delete_clause_state');
 	return result;
 };

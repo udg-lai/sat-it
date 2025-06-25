@@ -293,7 +293,7 @@ const unstack_occurrence_list_state: NonFinalState<
 	run: unstackClauseSet,
 	description: 'Unstack the set of clause',
 	transitions: new Map<CDCL_UNSTACK_OCCURRENCE_LIST_INPUT, number>().set(
-		'check_pending_clauses_state',
+		'check_pending_occurrence_lists_state',
 		cdcl_stateName2StateId['check_pending_occurrence_lists_state']
 	)
 };

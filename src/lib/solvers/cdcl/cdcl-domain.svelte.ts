@@ -50,7 +50,7 @@ export type CDCL_QUEUE_OCCURRENCE_LIST_INPUT =
 	| 'check_pending_occurrence_lists_state'
 	| 'delete_clause_state';
 
-export type CDCL_UNSTACK_OCCURRENCE_LIST_INPUT = 'check_pending_clauses_state';
+export type CDCL_UNSTACK_OCCURRENCE_LIST_INPUT = 'check_pending_occurrence_lists_state';
 
 export type CDCL_DELETE_CLAUSE_INPUT = 'all_clauses_checked_state';
 
