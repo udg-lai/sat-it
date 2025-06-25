@@ -17,7 +17,7 @@
 	import HeadTailComponent from '../HeadTailComponent.svelte';
 
 	const problem: Problem = $derived(getProblemStore());
-	
+
 	const solverMachine = $derived(getSolverMachine());
 	const onPreConflictState: boolean = $derived(solverMachine.onPreConflictState());
 
@@ -42,9 +42,10 @@
 		return isUnresolvedClause(evaluation) || isUnitClause(evaluation);
 	}
 </script>
-	<HeadTailComponent inspecting={onPreConflictState}>
-			<div class="static"></div>
-	</HeadTailComponent>
+
+<HeadTailComponent inspecting={onPreConflictState}>
+	<div class="static"></div>
+</HeadTailComponent>
 <conflict-detection>
 	{#each clauses as clause, index (index)}
 		<div class="enumerate-clause">

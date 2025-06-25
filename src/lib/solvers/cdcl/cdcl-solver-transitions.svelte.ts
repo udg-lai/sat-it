@@ -169,13 +169,13 @@ const afterComplementaryBlock = (
 	complementaryClauses: SvelteSet<number>
 ): void => {
 	queueOccurrenceListTransition(stateMachine, solver, variable, complementaryClauses);
-	if (complementaryClauses.size !== 0) conflictDetectionEventBus.emit();
 	const pendingClausesSet: boolean = checkPendingOccurrenceListsTransition(stateMachine, solver);
 	if (!pendingClausesSet) {
 		allVariablesAssignedTransition(stateMachine);
 		return;
 	}
 	pickClauseSetTransition(stateMachine, solver);
+	if(!solver.isInAutoMode()) conflictDetectionEventBus.emit();
 };
 
 const conflictDetectionBlock = (
@@ -192,8 +192,7 @@ const conflictDetectionBlock = (
 			allVariablesAssignedTransition(stateMachine);
 			return;
 		}
-		const clausesToCheck = pickClauseSetTransition(stateMachine, solver);
-		conflictDetectionBlock(solver, stateMachine, clausesToCheck);
+		pickClauseSetTransition(stateMachine, solver);
 		return;
 	}
 	const clauseId: number = nextClauseTransition(stateMachine, clauseSet);

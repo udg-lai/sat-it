@@ -92,8 +92,8 @@ const afterAssignmentBlock = (
 		literalToPropagate
 	);
 	queueOccurrenceListTransition(stateMachine, solver, variable, complementaryClauses);
-	conflictDetectionEventBus.emit();
 	pickPendingOccurrenceListTransition(stateMachine, solver);
+	if(!solver.isInAutoMode()) conflictDetectionEventBus.emit();
 };
 
 const conflictDetectionBlock = (
