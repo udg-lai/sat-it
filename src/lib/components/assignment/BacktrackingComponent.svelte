@@ -22,7 +22,6 @@
 	}
 
 	let chrome: boolean = $derived(onChrome());
-
 </script>
 
 <HeadTailComponent {inspecting}>
