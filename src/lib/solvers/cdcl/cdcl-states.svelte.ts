@@ -142,7 +142,7 @@ const unit_clauses_detection_state: NonFinalState<
 	run: unitClauseDetection,
 	description: 'Seeks for the problem s unit clauses',
 	transitions: new Map<CDCL_UNIT_CLAUSES_DETECTION_INPUT, number>().set(
-		'queue_clause_set_state',
+		'queue_occurrence_list_state',
 		cdcl_stateName2StateId['queue_clause_set_state']
 	)
 };
@@ -265,7 +265,7 @@ const complementary_occurrences_state: NonFinalState<
 	run: complementaryOccurrences,
 	description: 'Get the clauses where the complementary of the last assigned literal appear',
 	transitions: new Map<CDCL_COMPLEMENTARY_OCCURRENCES_INPUT, number>().set(
-		'queue_clause_set_state',
+		'queue_occurrence_list_state',
 		cdcl_stateName2StateId['queue_clause_set_state']
 	)
 };

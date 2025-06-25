@@ -11,38 +11,38 @@ import {
 } from './bkt-solver-transitions.svelte.ts';
 import { BKT_StateMachine, makeBKTStateMachine } from './bkt-state-machine.svelte.ts';
 import { bkt_stateName2StateId } from './bkt-states.svelte.ts';
-import type { ConflictDetection } from '../types.ts';
+import type { OccurrenceList } from '../types.ts';
 
 export const makeBKTSolver = (): BKT_SolverMachine => {
 	return new BKT_SolverMachine();
 };
 
 export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
-	conflictDetection: ConflictDetection | undefined = $state(undefined);
+	occurrenceList: OccurrenceList | undefined = $state(undefined);
 
 	constructor() {
 		const stateMachine: BKT_StateMachine = makeBKTStateMachine();
 		super(stateMachine, 'bkt');
-		this.conflictDetection = undefined;
+		this.occurrenceList = undefined;
 	}
 
-	resolveConflict(): void {
-		this.conflictDetection = undefined;
+	resolveOccurrences(): void {
+		this.occurrenceList = undefined;
 	}
 
-	setConflict(conflict: ConflictDetection): void {
-		this.conflictDetection = conflict;
+	setOccurrenceList(conflict: OccurrenceList): void {
+		this.occurrenceList = conflict;
 	}
 
 	visitClause(clauseId: number): void {
-		if (this.conflictDetection === undefined) {
+		if (this.occurrenceList === undefined) {
 			logFatal(
 				'Conflict analysis not initialized',
 				'Error at visiting a clause in the BKT Solver Machine'
 			);
 		}
 
-		const { clauses }: ConflictDetection = this.conflictDetection;
+		const { clauses }: OccurrenceList = this.occurrenceList;
 
 		if (!clauses.has(clauseId)) {
 			logFatal('Clause not found', 'Error at removing a clause from the BKT Solver Machine');
@@ -51,28 +51,28 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 		}
 	}
 
-	consultConflict(): ConflictDetection {
-		if (this.conflictDetection === undefined) {
+	consultOccurrenceList(): OccurrenceList {
+		if (this.occurrenceList === undefined) {
 			logFatal(
 				'Conflict analysis not initialized',
 				'Error at consulting a conflict in the BKT Solver Machine'
 			);
 		}
-		return this.conflictDetection;
+		return this.occurrenceList;
 	}
 
 	getRecord(): Record<string, unknown> {
 		return {
-			pending: this.makeConflictDetectionCopy()
+			pending: this.makeOccurrenceListCopy()
 		};
 	}
 
-	private makeConflictDetectionCopy(): ConflictDetection | undefined {
-		if (this.conflictDetection !== undefined) {
+	private makeOccurrenceListCopy(): OccurrenceList | undefined {
+		if (this.occurrenceList !== undefined) {
 			const clauses: SvelteSet<number> = new SvelteSet<number>([
-				...this.conflictDetection.clauses.values()
+				...this.occurrenceList.clauses.values()
 			]);
-			const variableReasonId: number = this.conflictDetection.variableReasonId;
+			const variableReasonId: number = this.occurrenceList.variableReasonId;
 			return { clauses, variableReasonId };
 		}
 		return undefined;
@@ -81,14 +81,14 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 	// ** abstract functions **
 	updateFromRecord(record: Record<string, unknown> | undefined): void {
 		if (record === undefined) {
-			this.conflictDetection = undefined;
+			this.occurrenceList = undefined;
 			updateClausesToCheck(new SvelteSet<number>(), -1);
 			return;
 		}
-		const conflictRecord: ConflictDetection = record['pending'] as ConflictDetection;
-		this.setConflict(conflictRecord);
+		const occurrenceListRecord: OccurrenceList = record['pending'] as OccurrenceList;
+		this.setOccurrenceList(occurrenceListRecord);
 		if (this.onConflictDetection()) {
-			const { clauses, variableReasonId }: ConflictDetection = conflictRecord;
+			const { clauses, variableReasonId }: OccurrenceList = occurrenceListRecord;
 			updateClausesToCheck(clauses, variableReasonId);
 		}
 	}
@@ -115,10 +115,10 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 	}
 
 	onConflictDetection(): boolean {
-		if (this.conflictDetection === undefined) {
+		if (this.occurrenceList === undefined) {
 			return false;
 		} else {
-			const { clauses }: ConflictDetection = this.conflictDetection;
+			const { clauses }: OccurrenceList = this.occurrenceList;
 			return clauses.size > 0 && !this.stateMachine.onConflictState();
 		}
 	}

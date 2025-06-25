@@ -29,7 +29,7 @@ import {
 import { getLatestTrail, getTrails } from '$lib/states/trails.svelte.ts';
 import { logFatal, logInfo } from '$lib/stores/toasts.ts';
 import { SvelteSet } from 'svelte/reactivity';
-import type { ConflictDetection } from '../types.ts';
+import type { OccurrenceList } from '../types.ts';
 import type { CDCL_SolverMachine } from './cdcl-solver-machine.svelte.ts';
 
 const problem: Problem = $derived(getProblemStore());
@@ -38,7 +38,7 @@ const problem: Problem = $derived(getProblemStore());
 
 export type CDCL_EMPTY_CLAUSE_INPUT = 'unit_clauses_detection_state' | 'unsat_state';
 
-export type CDCL_UNIT_CLAUSES_DETECTION_INPUT = 'queue_clause_set_state';
+export type CDCL_UNIT_CLAUSES_DETECTION_INPUT = 'queue_occurrence_list_state';
 
 export type CDCL_PICK_CLAUSE_SET_INPUT = 'all_clauses_checked_state';
 
@@ -64,7 +64,7 @@ export type CDCL_ALL_VARIABLES_ASSIGNED_INPUT = 'sat_state' | 'decide_state';
 
 export type CDCL_UNIT_PROPAGATION_INPUT = 'complementary_occurrences_state';
 
-export type CDCL_COMPLEMENTARY_OCCURRENCES_INPUT = 'queue_clause_set_state';
+export type CDCL_COMPLEMENTARY_OCCURRENCES_INPUT = 'queue_occurrence_list_state';
 
 export type CDCL_CHECK_NON_DECISION_MADE_INPUT = 'build_conflict_analysis_state' | 'unsat_state';
 
@@ -164,7 +164,7 @@ export const queueClauseSet: CDCL_QUEUE_CLAUSE_SET_FUN = (
 	clauses: SvelteSet<number>,
 	solverStateMachine: CDCL_SolverMachine
 ) => {
-	const conflict: ConflictDetection = { clauses: clauses, variableReasonId: variable };
+	const conflict: OccurrenceList = { clauses: clauses, variableReasonId: variable };
 	solverStateMachine.postpone(conflict);
 	return solverStateMachine.leftToPostpone();
 };
@@ -203,7 +203,7 @@ export type CDCL_PICK_CLAUSE_SET_FUN = (
 export const pickPendingClauseSet: CDCL_PICK_CLAUSE_SET_FUN = (
 	solverStateMachine: CDCL_SolverMachine
 ) => {
-	const pendingConflict: ConflictDetection = solverStateMachine.consultPostponed();
+	const pendingConflict: OccurrenceList = solverStateMachine.consultPostponed();
 	updateClausesToCheck(pendingConflict.clauses, pendingConflict.variableReasonId);
 	return pendingConflict.clauses;
 };

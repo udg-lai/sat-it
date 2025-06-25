@@ -48,7 +48,7 @@ import {
 } from '$lib/states/conflict-detection-state.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import { conflictDetectionEventBus } from '$lib/events/events.ts';
-import type { ConflictDetection } from '../types.ts';
+import type { OccurrenceList } from '../types.ts';
 
 /* exported transitions */
 
@@ -62,7 +62,7 @@ export const initialTransition = (solver: DPLL_SolverMachine): void => {
 
 export const analyzeClause = (solver: DPLL_SolverMachine): void => {
 	const stateMachine: DPLL_StateMachine = solver.getStateMachine();
-	const pendingConflict: ConflictDetection = solver.consultPostponed();
+	const pendingConflict: OccurrenceList = solver.consultPostponed();
 	const clauseSet: SvelteSet<number> = pendingConflict.clauses;
 	const clauseId: number | undefined = getCheckedClause();
 	if (clauseId === undefined) {

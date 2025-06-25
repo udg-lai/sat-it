@@ -69,7 +69,7 @@ import type {
 } from './cdcl-domain.svelte.ts';
 import type { CDCL_SolverMachine } from './cdcl-solver-machine.svelte.ts';
 import type { CDCL_StateMachine } from './cdcl-state-machine.svelte.ts';
-import type { ConflictAnalysis, ConflictDetection } from '../types.ts';
+import type { ConflictAnalysis, OccurrenceList } from '../types.ts';
 import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
 
 /* exported transitions */
@@ -83,7 +83,7 @@ export const initialTransition = (solver: CDCL_SolverMachine): void => {
 
 export const analyzeClause = (solver: CDCL_SolverMachine): void => {
 	const stateMachine: CDCL_StateMachine = solver.getStateMachine();
-	const pendingConflict: ConflictDetection = solver.consultPostponed();
+	const pendingConflict: OccurrenceList = solver.consultPostponed();
 	const clauseSet: SvelteSet<number> = pendingConflict.clauses;
 	const clauseId: number | undefined = getCheckedClause();
 	if (clauseId === undefined) {

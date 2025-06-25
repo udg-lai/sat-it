@@ -14,7 +14,7 @@ import { SvelteSet } from 'svelte/reactivity';
 import type { BKT_SolverMachine } from './bkt-solver-machine.svelte.ts';
 import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
 import type { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
-import type { ConflictDetection } from '../types.ts';
+import type { OccurrenceList } from '../types.ts';
 import { isUnSATClause, type ClauseEval } from '$lib/entities/Clause.svelte.ts';
 
 // **state inputs **
@@ -22,9 +22,9 @@ import { isUnSATClause, type ClauseEval } from '$lib/entities/Clause.svelte.ts';
 export type BKT_EMPTY_CLAUSE_INPUT = 'all_variables_assigned_state' | 'unsat_state';
 export type BKT_ALL_VARIABLES_ASSIGNED_INPUT = 'sat_state' | 'decide_state';
 export type BKT_DECIDE_INPUT = 'complementary_occurrences_state';
-export type BKT_COMPLEMENTARY_OCCURRENCES_INPUT = 'queue_clause_set_state';
-export type BKT_QUEUE_CLAUSE_SET_INPUT = 'pick_pending_set_state';
-export type BKT_PICK_PENDING_SET_INPUT = 'all_clauses_checked_state';
+export type BKT_COMPLEMENTARY_OCCURRENCES_INPUT = 'queue_occurrence_list_state';
+export type BKT_QUEUE_OCCURRENCE_LIST_INPUT = 'pick_pending_occurrence_list_state';
+export type BKT_PENDING_OCCURRENCE_LIST_INPUT = 'all_clauses_checked_state';
 export type BKT_ALL_CLAUSES_CHECKED_INPUT = 'next_clause_state' | 'all_variables_assigned_state';
 export type BKT_NEXT_CLAUSE_INPUT = 'conflict_detection_state';
 export type BKT_CONFLICT_DETECTION_INPUT = 'delete_clause_state' | 'empty_pending_set_state';
@@ -38,8 +38,8 @@ export type BKT_INPUT =
 	| BKT_ALL_VARIABLES_ASSIGNED_INPUT
 	| BKT_DECIDE_INPUT
 	| BKT_COMPLEMENTARY_OCCURRENCES_INPUT
-	| BKT_QUEUE_CLAUSE_SET_INPUT
-	| BKT_PICK_PENDING_SET_INPUT
+	| BKT_QUEUE_OCCURRENCE_LIST_INPUT
+	| BKT_PENDING_OCCURRENCE_LIST_INPUT
 	| BKT_ALL_CLAUSES_CHECKED_INPUT
 	| BKT_NEXT_CLAUSE_INPUT
 	| BKT_CONFLICT_DETECTION_INPUT
@@ -77,24 +77,24 @@ export const complementaryOccurrences: BKT_COMPLEMENTARY_OCCURRENCES_FUN = (lite
 	return solverComplementaryOccurrences(mapping, literal);
 };
 
-export type BKT_QUEUE_CLAUSE_SET_FUN = (
+export type BKT_QUEUE_OCCURRENCE_LIST_FUN = (
 	variable: number,
 	clauses: SvelteSet<number>,
 	solverStateMachine: BKT_SolverMachine
 ) => void;
 
-export const queueClauseSet: BKT_QUEUE_CLAUSE_SET_FUN = (
+export const queueOccurrenceList: BKT_QUEUE_OCCURRENCE_LIST_FUN = (
 	variable: number,
 	clauses: SvelteSet<number>,
 	solverStateMachine: BKT_SolverMachine
 ) => {
-	solverStateMachine.setConflict({ clauses, variableReasonId: variable });
+	solverStateMachine.setOccurrenceList({ clauses, variableReasonId: variable });
 };
 
-export type BKT_PICK_PENDING_SET_FUN = (solverStateMachine: BKT_SolverMachine) => SvelteSet<number>;
+export type BKT_PICK_PENDING_OCCURRENCE_LIST_FUN = (solverStateMachine: BKT_SolverMachine) => SvelteSet<number>;
 
-export const pickPendingSet: BKT_PICK_PENDING_SET_FUN = (solverStateMachine: BKT_SolverMachine) => {
-	const { clauses, variableReasonId }: ConflictDetection = solverStateMachine.consultConflict();
+export const pickPendingOccurrenceList: BKT_PICK_PENDING_OCCURRENCE_LIST_FUN = (solverStateMachine: BKT_SolverMachine) => {
+	const { clauses, variableReasonId }: OccurrenceList = solverStateMachine.consultOccurrenceList();
 	updateClausesToCheck(clauses, variableReasonId);
 	return clauses;
 };
@@ -141,7 +141,7 @@ export type BKT_EMPTY_PENDING_SET_FUN = (solverStateMachine: BKT_SolverMachine) 
 export const emptyClauseSet: BKT_EMPTY_PENDING_SET_FUN = (
 	solverStateMachine: BKT_SolverMachine
 ) => {
-	solverStateMachine.resolveConflict();
+	solverStateMachine.resolveOccurrences();
 	updateClausesToCheck(new SvelteSet<number>(), -1);
 };
 
@@ -163,8 +163,8 @@ export type BKT_FUN =
 	| BKT_ALL_VARIABLES_ASSIGNED_FUN
 	| BKT_DECIDE_FUN
 	| BKT_COMPLEMENTARY_OCCURRENCES_FUN
-	| BKT_QUEUE_CLAUSE_SET_FUN
-	| BKT_PICK_PENDING_SET_FUN
+	| BKT_QUEUE_OCCURRENCE_LIST_FUN
+	| BKT_PICK_PENDING_OCCURRENCE_LIST_FUN
 	| BKT_ALL_CLAUSES_CHECKED_FUN
 	| BKT_NEXT_CLAUSE_FUN
 	| BKT_CONFLICT_DETECTION_FUN

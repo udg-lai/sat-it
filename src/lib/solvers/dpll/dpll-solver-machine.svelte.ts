@@ -2,7 +2,7 @@ import { Queue } from '$lib/entities/Queue.svelte.ts';
 import { updateClausesToCheck } from '$lib/states/conflict-detection-state.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import { SolverMachine } from '../SolverMachine.svelte.ts';
-import type { ConflictDetection } from '../types.ts';
+import type { OccurrenceList } from '../types.ts';
 import type { DPLL_FUN, DPLL_INPUT } from './dpll-domain.svelte.ts';
 import {
 	analyzeClause,
@@ -18,23 +18,23 @@ export const makeDPLLSolver = (): DPLL_SolverMachine => {
 };
 
 export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
-	pendingConflicts: Queue<ConflictDetection> = $state(new Queue<ConflictDetection>());
+	pendingConflicts: Queue<OccurrenceList> = $state(new Queue<OccurrenceList>());
 
 	constructor() {
 		const stateMachine: DPLL_StateMachine = makeDPLLMachine();
 		super(stateMachine, 'dpll');
-		this.pendingConflicts = new Queue<ConflictDetection>();
+		this.pendingConflicts = new Queue<OccurrenceList>();
 	}
 
-	postpone(pendingItem: ConflictDetection): void {
+	postpone(pendingItem: OccurrenceList): void {
 		this.pendingConflicts.enqueue(pendingItem);
 	}
 
-	resolvePostponed(): ConflictDetection | undefined {
+	resolvePostponed(): OccurrenceList | undefined {
 		return this.pendingConflicts.dequeue();
 	}
 
-	consultPostponed(): ConflictDetection {
+	consultPostponed(): OccurrenceList {
 		return this.pendingConflicts.pick();
 	}
 
@@ -46,11 +46,11 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 		return this.pendingConflicts.size();
 	}
 
-	getQueue(): Queue<ConflictDetection> {
-		const returnQueue: Queue<ConflictDetection> = new Queue();
+	getQueue(): Queue<OccurrenceList> {
+		const returnQueue: Queue<OccurrenceList> = new Queue();
 		for (const originalItem of this.pendingConflicts.toArray()) {
 			const copiedSet = new SvelteSet<number>(originalItem.clauses);
-			const copiedItem: ConflictDetection = {
+			const copiedItem: OccurrenceList = {
 				clauses: copiedSet,
 				variableReasonId: originalItem.variableReasonId
 			};
@@ -71,18 +71,18 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 			updateClausesToCheck(new SvelteSet<number>(), -1);
 			return;
 		}
-		const recordedPendingConflicts = record['queue'] as Queue<ConflictDetection>;
+		const recordedPendingConflicts = record['queue'] as Queue<OccurrenceList>;
 		this.pendingConflicts.clear();
 		for (const pendingConflict of recordedPendingConflicts.toArray()) {
 			const copiedSet = new SvelteSet<number>(pendingConflict.clauses);
-			const copiedItem: ConflictDetection = {
+			const copiedItem: OccurrenceList = {
 				clauses: copiedSet,
 				variableReasonId: pendingConflict.variableReasonId
 			};
 			this.pendingConflicts.enqueue(copiedItem);
 		}
 		if (!this.pendingConflicts.isEmpty()) {
-			const conflict: ConflictDetection = this.pendingConflicts.pick();
+			const conflict: OccurrenceList = this.pendingConflicts.pick();
 			updateClausesToCheck(conflict.clauses, conflict.variableReasonId);
 		}
 	}

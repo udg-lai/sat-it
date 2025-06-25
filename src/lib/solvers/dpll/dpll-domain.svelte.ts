@@ -20,7 +20,7 @@ import { logFatal } from '$lib/stores/toasts.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import type { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
 import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
-import type { ConflictDetection } from '../types.ts';
+import type { OccurrenceList } from '../types.ts';
 import { isUnitClause, isUnSATClause, type ClauseEval } from '$lib/entities/Clause.svelte.ts';
 
 const problem: Problem = $derived(getProblemStore());
@@ -28,7 +28,7 @@ const problem: Problem = $derived(getProblemStore());
 
 export type DPLL_EMPTY_CLAUSE_INPUT = 'unit_clauses_detection_state' | 'unsat_state';
 
-export type DPLL_UNIT_CLAUSES_DETECTION_INPUT = 'queue_clause_set_state';
+export type DPLL_UNIT_CLAUSES_DETECTION_INPUT = 'queue_occurrence_list_state';
 
 export type DPLL_PICK_CLAUSE_SET_INPUT = 'all_clauses_checked_state';
 
@@ -54,7 +54,7 @@ export type DPLL_ALL_VARIABLES_ASSIGNED_INPUT = 'sat_state' | 'decide_state';
 
 export type DPLL_UNIT_PROPAGATION_INPUT = 'complementary_occurrences_state';
 
-export type DPLL_COMPLEMENTARY_OCCURRENCES_INPUT = 'queue_clause_set_state';
+export type DPLL_COMPLEMENTARY_OCCURRENCES_INPUT = 'queue_occurrence_list_state';
 
 export type DPLL_CHECK_NON_DECISION_MADE_INPUT = 'backtracking_state' | 'unsat_state';
 
@@ -118,7 +118,7 @@ export const queueClauseSet: DPLL_QUEUE_CLAUSE_SET_FUN = (
 	clauses: SvelteSet<number>,
 	solverStateMachine: DPLL_SolverMachine
 ) => {
-	const conflict: ConflictDetection = { clauses: clauses, variableReasonId: variable };
+	const conflict: OccurrenceList = { clauses: clauses, variableReasonId: variable };
 	solverStateMachine.postpone(conflict);
 	return solverStateMachine.leftToPostpone();
 };
@@ -157,7 +157,7 @@ export type DPLL_PICK_CLAUSE_SET_FUN = (
 export const pickPendingClauseSet: DPLL_PICK_CLAUSE_SET_FUN = (
 	solverStateMachine: DPLL_SolverMachine
 ) => {
-	const pendingConflict: ConflictDetection = solverStateMachine.consultPostponed();
+	const pendingConflict: OccurrenceList = solverStateMachine.consultPostponed();
 	updateClausesToCheck(pendingConflict.clauses, pendingConflict.variableReasonId);
 	return pendingConflict.clauses;
 };
