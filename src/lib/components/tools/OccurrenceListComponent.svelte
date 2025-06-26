@@ -70,7 +70,6 @@
 </conflict-detection>
 
 <style>
-
 	.static {
 		width: 100%;
 	}
