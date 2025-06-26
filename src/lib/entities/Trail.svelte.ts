@@ -48,7 +48,7 @@ export class Trail {
 	}
 
 	getFollowUpAssignments(): VariableAssignment[] {
-		return this.assignments.slice(this.followUPIndex)
+		return this.assignments.slice(this.followUPIndex);
 	}
 
 	pickLastAssignment(): VariableAssignment {

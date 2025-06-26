@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { onChrome } from '$lib/app.svelte.ts';
 	import MathTexComponent from '$lib/components/MathTexComponent.svelte';
-	import type { Trail } from '$lib/entities/Trail.svelte.ts';
 	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
 	import { getInspectedVariable } from '$lib/states/conflict-detection-state.svelte.ts';
 	import HeadTailComponent from './../HeadTailComponent.svelte';
@@ -21,9 +20,9 @@
 
 	let chrome: boolean = $derived(onChrome());
 
-	const emitAlgorithmicUndo =  (): void => {
+	const emitAlgorithmicUndo = (): void => {
 		emitUndo?.(assignment);
-	}
+	};
 </script>
 
 <HeadTailComponent {inspecting}>
