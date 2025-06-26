@@ -68,7 +68,7 @@
 
 <style>
 	statistics {
-		border: none
+		border: none;
 	}
 	.metric {
 		display: flex;

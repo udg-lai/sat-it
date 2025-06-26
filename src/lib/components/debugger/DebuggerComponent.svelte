@@ -7,7 +7,7 @@
 	import AutoModeComponent from './AutoModeComponent.svelte';
 	import ConflictAnalysisDebugger from './ConflictAnalysisDebuggerComponent.svelte';
 	import ConflictDetectionDebugger from './ConflictDetectionDebuggerComponent.svelte';
-	import AutomaticDebugger from './DecisionDebuggerComponent.svelte';
+	import DecisionDebugger from './DecisionDebuggerComponent.svelte';
 	import GeneralDebuggerButtons from './GeneralDebuggerComponent.svelte';
 	import InitialStepDebugger from './InitialStepDebuggerComponent.svelte';
 
@@ -33,7 +33,7 @@
 		{:else if onConflict && problem.algorithm === 'cdcl'}
 			<ConflictAnalysisDebugger />
 		{:else if !finished}
-			<AutomaticDebugger
+			<DecisionDebugger
 				{onConflict}
 				{finished}
 				{onConflictDetection}
