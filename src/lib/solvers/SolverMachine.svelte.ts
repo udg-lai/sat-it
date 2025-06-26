@@ -18,6 +18,7 @@ export interface SolverStateInterface<F extends StateFun, I extends StateInput> 
 	isInAutoMode: () => boolean;
 	stopAutoMode: () => void;
 	completed: () => boolean;
+	onPreConflictState: () => boolean;
 	onConflictState: () => boolean;
 	onInitialState: () => boolean;
 	onFinalState: () => boolean;
@@ -63,6 +64,10 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 
 	completed(): boolean {
 		return this.stateMachine.onFinalState();
+	}
+
+	onPreConflictState(): boolean {
+		return this.stateMachine.onPreConflictState();
 	}
 
 	onConflictState(): boolean {
