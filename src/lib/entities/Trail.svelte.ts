@@ -1,12 +1,12 @@
 import { logFatal } from '$lib/stores/toasts.ts';
 import { getProblemStore } from '$lib/states/problem.svelte.ts';
-import TemporalClause from './TemporalClause.ts';
 import type VariableAssignment from './VariableAssignment.ts';
+import type Clause from './Clause.svelte.ts';
 
 export class Trail {
 	private assignments: VariableAssignment[] = $state([]);
 	private decisionLevelBookmark: number[] = $state([-1]);
-	private learned: TemporalClause | undefined = undefined;
+	private learnedClauseId: Clause | undefined = undefined;
 	private followUPIndex: number = -1;
 	private decisionLevel: number = 0;
 	private trailCapacity: number = 0;
@@ -20,7 +20,7 @@ export class Trail {
 		const newTrail = new Trail(this.trailCapacity);
 		newTrail.assignments = this.assignments.map((assignment) => assignment.copy());
 		newTrail.decisionLevelBookmark = [...this.decisionLevelBookmark];
-		newTrail.learned = this.learned;
+		newTrail.learnedClauseId = this.learnedClauseId;
 		newTrail.followUPIndex = this.followUPIndex;
 		newTrail.decisionLevel = this.decisionLevel;
 		newTrail.trailCapacity = this.trailCapacity;
@@ -120,12 +120,12 @@ export class Trail {
 		return returnValue;
 	}
 
-	getLearnedClause(): TemporalClause | undefined {
-		return this.learned;
+	getLearnedClause(): Clause | undefined {
+		return this.learnedClauseId;
 	}
 
-	learn(clause: TemporalClause): void {
-		this.learned = clause;
+	learnClause(clauseId: Clause): void {
+		this.learnedClauseId = clauseId;
 	}
 
 	getFollowUpIndex(): number {

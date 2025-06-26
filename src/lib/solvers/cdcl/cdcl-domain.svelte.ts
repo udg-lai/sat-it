@@ -14,7 +14,6 @@ import Clause, {
 	type ClauseEval
 } from '$lib/entities/Clause.svelte.ts';
 import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
-import TemporalClause from '$lib/entities/TemporalClause.ts';
 import type { Trail } from '$lib/entities/Trail.svelte.ts';
 import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
 import { isPropagationReason, type Reason } from '$lib/entities/VariableAssignment.ts';
@@ -313,7 +312,7 @@ export const buildConflictAnalysis: CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN =
 		);
 	}
 	const conflictiveClause: Clause = getProblemStore().clauses.get(conflictiveClauseId);
-	const conflictiveClauseCopy: TemporalClause = new TemporalClause(conflictiveClause.getLiterals());
+	const conflictiveClauseCopy: Clause = new Clause(conflictiveClause.getLiterals());
 	//Lastly, generate the conflict analysis structure
 	solver.setConflictAnalysis(
 		latestTrail.partialCopy(),
@@ -335,12 +334,12 @@ export const pickLastAssignment = (trail: Trail) => {
 };
 
 export type CDCL_VARIABLE_IN_CC_FUN = (
-	conflictClause: TemporalClause,
+	conflictClause: Clause,
 	assignment: VariableAssignment
 ) => boolean;
 
 export const variableInCC: CDCL_VARIABLE_IN_CC_FUN = (
-	conflictClause: TemporalClause,
+	conflictClause: Clause,
 	assignment: VariableAssignment
 ) => {
 	return conflictClause.containsVariable(assignment.getVariable().getInt());
@@ -348,13 +347,13 @@ export const variableInCC: CDCL_VARIABLE_IN_CC_FUN = (
 
 export type CDCL_RESOLUTION_UPDATE_CC_FUN = (
 	solver: CDCL_SolverMachine,
-	conflictClause: TemporalClause,
+	conflictClause: Clause,
 	assignment: VariableAssignment
 ) => void;
 
 export const resolutionUpdateCC: CDCL_RESOLUTION_UPDATE_CC_FUN = (
 	solver: CDCL_SolverMachine,
-	conflictClause: TemporalClause,
+	conflictClause: Clause,
 	assignment: VariableAssignment
 ) => {
 	const reason: Reason = assignment.getReason();
@@ -363,7 +362,7 @@ export const resolutionUpdateCC: CDCL_RESOLUTION_UPDATE_CC_FUN = (
 	}
 	const upClauseId: number = reason.clauseId;
 	const upClause: Clause = getProblemStore().clauses.get(upClauseId);
-	const newCC: TemporalClause = conflictClause.resolution(upClause.toTemporalClause());
+	const newCC: Clause = conflictClause.resolution(upClause);
 	solver.updateConflictClause(newCC);
 };
 
@@ -376,31 +375,31 @@ export const deleteLastAssignment: CDCL_DELETE_LAST_ASSIGNMENT_FUN = (trail: Tra
 
 export type CDCL_LEARN_CONFLICT_CLAUSE_FUN = (
 	trail: Trail,
-	conflictClause: TemporalClause
+	conflictClause: Clause
 ) => number;
 
 export const learnConflictClause: CDCL_LEARN_CONFLICT_CLAUSE_FUN = (
 	trail: Trail,
-	conflictClause: TemporalClause
+	conflictClause: Clause
 ) => {
-	// Saves learned clause in the trail
-	trail.learn(conflictClause);
-
 	//Generate the "Clause" that will be added to the pool.
 	const lemma: Clause = new Clause(conflictClause.getLiterals(), { learnt: true });
 
 	//The clause is stored inside the pool
 	addClauseToClausePool(lemma);
 
+	// Saves learned clause Id in the trail. IMPORTANT: The clause id IS SET once this is in the clause pool so the learn needs to be done here.
+	trail.learnClause(lemma);
+
 	logInfo('New clause learn', `Clause ${lemma.getTag()} learned`);
 	return lemma.getTag();
 };
 
-export type CDCL_SECOND_HIGHEST_DL_FUN = (trail: Trail, conflictClause: TemporalClause) => number;
+export type CDCL_SECOND_HIGHEST_DL_FUN = (trail: Trail, conflictClause: Clause) => number;
 
 export const secondHighestDL: CDCL_SECOND_HIGHEST_DL_FUN = (
 	trail: Trail,
-	conflictClause: TemporalClause
+	conflictClause: Clause
 ) => {
 	const clauseVariables: number[] = conflictClause.getLiterals().map((literal) => {
 		return literal.getVariable().getInt();

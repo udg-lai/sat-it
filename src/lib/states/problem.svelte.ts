@@ -1,7 +1,6 @@
 import type { DimacsInstance } from '$lib/instances/dimacs-instance.interface.ts';
 import Clause from '$lib/entities/Clause.svelte.ts';
 import ClausePool from '$lib/entities/ClausePool.svelte.ts';
-import type TemporalClause from '$lib/entities/TemporalClause.ts';
 import type { Trail } from '$lib/entities/Trail.svelte.ts';
 import type Variable from '$lib/entities/Variable.svelte.ts';
 import { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
@@ -66,7 +65,7 @@ export function updateProblemFromTrail(trail: Trail) {
 		variables.assign(variable.getInt(), variable.getAssignment());
 	});
 
-	//Reset the caluses
+	//Reset the clauses
 	const clauses: ClausePool = new ClausePool(obtainProblemClauses());
 
 	//Reset the mapping
@@ -122,19 +121,13 @@ const addClauseToMapping = (clause: Clause, clauseId: number, mapping: MappingLi
 
 const obtainProblemClauses = (): Clause[] => {
 	//Get all the clauses from the problem
-	const defaultClauses: TemporalClause[] = getDefaultClauses();
-	const learnedClauses: TemporalClause[] = [];
+	const defaultClauses: Clause[] = getDefaultClauses();
+	const learnedClauses: Clause[] = [];
 	for (const trail of getTrails()) {
-		const learnedClause: TemporalClause | undefined = trail.getLearnedClause();
+		const learnedClause: Clause | undefined = trail.getLearnedClause();
 		if (learnedClause !== undefined) learnedClauses.push(learnedClause);
 	}
-	const problemUnindexedClauses: TemporalClause[] = [...defaultClauses, ...learnedClauses];
-
-	//Generate the clause pool clauses
-	const problemClauses: Clause[] = [];
-	for (const uClause of problemUnindexedClauses) {
-		problemClauses.push(new Clause(uClause.getLiterals()));
-	}
+	const problemClauses: Clause[] = [...defaultClauses, ...learnedClauses];
 	return problemClauses;
 };
 

@@ -1,9 +1,9 @@
+import logicResolution from '$lib/algorithms/resolution.ts';
 import { logFatal } from '$lib/stores/toasts.ts';
 import type { Comparable } from '../interfaces/Comparable.ts';
 import type { Claim } from '../parsers/dimacs.ts';
 import { arraysEqual } from '../types/array.ts';
 import Literal from './Literal.svelte.ts';
-import TemporalClause from './TemporalClause.ts';
 import type { VariablePool } from './VariablePool.svelte.ts';
 
 type ClauseOptions = {
@@ -128,14 +128,7 @@ class Clause implements Comparable<Clause> {
 	}
 
 	resolution(other: Clause): Clause {
-		const thisTemp: TemporalClause = new TemporalClause(this.getLiterals());
-		const otherTemp: TemporalClause = new TemporalClause(other.getLiterals());
-		const result: TemporalClause = thisTemp.resolution(otherTemp);
-		return new Clause(result.getLiterals());
-	}
-
-	toTemporalClause(): TemporalClause {
-		return new TemporalClause(this.getLiterals());
+		return logicResolution(this , other);
 	}
 
 	equals(other: Clause): boolean {

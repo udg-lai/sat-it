@@ -1,20 +1,16 @@
 import type Clause from '$lib/entities/Clause.svelte.ts';
-import type TemporalClause from '$lib/entities/TemporalClause.ts';
 
-let defaultClauses: TemporalClause[] = $state([]);
+let defaultClauses: Clause[] = $state([]);
 
 export const setDefaultClauses = (clauses: Clause[]) => {
-	defaultClauses = [];
-	for (const clause of clauses) {
-		defaultClauses.push(clause.toTemporalClause());
-	}
+	defaultClauses = [...clauses]
 };
 
 export const getDefaultClauses = () => defaultClauses;
 
-let conflictAnalysisClause: TemporalClause | undefined = $state(undefined);
+let conflictAnalysisClause: Clause | undefined = $state(undefined);
 
-export const setConflictAnalysisClause = (cc: TemporalClause) => {
+export const setConflictAnalysisClause = (cc: Clause) => {
 	conflictAnalysisClause = cc;
 };
 
