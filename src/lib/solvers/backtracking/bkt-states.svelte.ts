@@ -249,6 +249,8 @@ states.set(backtracking_state.id, backtracking_state);
 
 export const initial = empty_clause_state.id;
 
+export const preConflict = all_clauses_checked_state.id;
+
 export const conflict = empty_pending_occurrence_list_state.id;
 
 export const sat = sat_state.id;

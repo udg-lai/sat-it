@@ -78,7 +78,14 @@ export const initialTransition = (solver: CDCL_SolverMachine): void => {
 	ecTransition(solver.getStateMachine());
 	if (solver.onFinalState()) return;
 	const complementaryClauses: SvelteSet<number> = ucdTransition(solver.getStateMachine());
-	preConflictDetectionBlock(solver, solver.getStateMachine(), -1, complementaryClauses);
+	afterComplementaryBlock(solver, solver.getStateMachine(), -1, complementaryClauses);
+};
+
+export const preConflictDetection = (solver: CDCL_SolverMachine): void => {
+	const stateMachine: CDCL_StateMachine = solver.getStateMachine();
+	const pendingConflict: OccurrenceList = solver.consultPostponed();
+	const clauseSet: SvelteSet<number> = pendingConflict.clauses;
+	conflictDetectionBlock(solver, stateMachine, clauseSet);
 };
 
 export const analyzeClause = (solver: CDCL_SolverMachine): void => {
@@ -100,12 +107,7 @@ export const decide = (solver: CDCL_SolverMachine): void => {
 		stateMachine,
 		literalToPropagate
 	);
-	preConflictDetectionBlock(
-		solver,
-		stateMachine,
-		Math.abs(literalToPropagate),
-		complementaryClauses
-	);
+	afterComplementaryBlock(solver, stateMachine, Math.abs(literalToPropagate), complementaryClauses);
 };
 
 export const preConflictAnalysis = (solver: CDCL_SolverMachine) => {
@@ -155,31 +157,25 @@ export const conflictAnalysis = (solver: CDCL_SolverMachine): void => {
 		stateMachine,
 		literalToPropagate
 	);
-	preConflictDetectionBlock(
-		solver,
-		stateMachine,
-		Math.abs(literalToPropagate),
-		complementaryClauses
-	);
+	afterComplementaryBlock(solver, stateMachine, Math.abs(literalToPropagate), complementaryClauses);
 };
 
 /* General non-exported transitions */
 
-const preConflictDetectionBlock = (
+const afterComplementaryBlock = (
 	solver: CDCL_SolverMachine,
 	stateMachine: CDCL_StateMachine,
 	variable: number,
 	complementaryClauses: SvelteSet<number>
 ): void => {
 	queueOccurrenceListTransition(stateMachine, solver, variable, complementaryClauses);
-	if (complementaryClauses.size !== 0) conflictDetectionEventBus.emit();
 	const pendingClausesSet: boolean = checkPendingOccurrenceListsTransition(stateMachine, solver);
 	if (!pendingClausesSet) {
 		allVariablesAssignedTransition(stateMachine);
 		return;
 	}
-	const clausesToCheck = pickClauseSetTransition(stateMachine, solver);
-	conflictDetectionBlock(solver, stateMachine, clausesToCheck);
+	pickClauseSetTransition(stateMachine, solver);
+	if (!solver.isInAutoMode()) conflictDetectionEventBus.emit();
 };
 
 const conflictDetectionBlock = (
@@ -196,8 +192,7 @@ const conflictDetectionBlock = (
 			allVariablesAssignedTransition(stateMachine);
 			return;
 		}
-		const clausesToCheck = pickClauseSetTransition(stateMachine, solver);
-		conflictDetectionBlock(solver, stateMachine, clausesToCheck);
+		pickClauseSetTransition(stateMachine, solver);
 		return;
 	}
 	const clauseId: number = nextClauseTransition(stateMachine, clauseSet);

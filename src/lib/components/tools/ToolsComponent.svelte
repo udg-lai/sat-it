@@ -220,7 +220,7 @@
 		onClick={() => activateTool(id)}
 		icon={BookOutline}
 		active={tools[id].active}
-		title="Problem Clauses"
+		title="Clauses"
 	/>
 {/snippet}
 
@@ -229,7 +229,7 @@
 		onClick={() => activateTool(id)}
 		icon={ClipboardOutline}
 		active={tools[id].active}
-		title="Occurrence List"
+		title="Occurrence list"
 	/>
 {/snippet}
 

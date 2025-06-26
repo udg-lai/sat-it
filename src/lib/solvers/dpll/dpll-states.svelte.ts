@@ -335,7 +335,8 @@ states.set(empty_occurrence_lists_state.id, empty_occurrence_lists_state);
 // export initial node
 export const initial = empty_clause_state.id;
 
-// export conflict node
+export const preConflict = all_clauses_checked_state.id;
+
 export const conflict = empty_occurrence_lists_state.id;
 
 export const sat = sat_state.id;

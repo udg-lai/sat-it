@@ -7,7 +7,8 @@ import {
 	analyzeClause,
 	backtracking,
 	decide,
-	initialTransition
+	initialTransition,
+	preConflictDetection
 } from './bkt-solver-transitions.svelte.ts';
 import { BKT_StateMachine, makeBKTStateMachine } from './bkt-state-machine.svelte.ts';
 import { bkt_stateName2StateId } from './bkt-states.svelte.ts';
@@ -97,6 +98,8 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 		const activeId: number = this.stateMachine.getActiveId();
 		if (activeId === bkt_stateName2StateId.empty_clause_state) {
 			initialTransition(this);
+		} else if (activeId === bkt_stateName2StateId.all_clauses_checked_state) {
+			preConflictDetection(this);
 		} else if (activeId === bkt_stateName2StateId.delete_clause_state) {
 			analyzeClause(this);
 		} else if (activeId === bkt_stateName2StateId.decide_state) {
