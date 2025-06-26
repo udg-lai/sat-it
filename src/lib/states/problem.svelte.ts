@@ -134,17 +134,21 @@ const addClauseToMapping = (clause: Clause, clauseId: number, mapping: MappingLi
 	});
 };
 
-const removeClauseFromMapping = (clause: Clause, clauseId: number, mapping: MappingLiteral2Clauses) => {
+const removeClauseFromMapping = (
+	clause: Clause,
+	clauseId: number,
+	mapping: MappingLiteral2Clauses
+) => {
 	clause.getLiterals().forEach((literal) => {
 		const literalId = literal.toInt();
 		if (mapping.has(literalId)) {
 			const s = mapping.get(literalId);
 			s?.delete(clauseId);
 		} else {
-			logFatal("Forget Clause Error", `The literal ${literalId} does not exist in the mapping`);
+			logFatal('Forget Clause Error', `The literal ${literalId} does not exist in the mapping`);
 		}
 	});
-}
+};
 
 const obtainProblemClauses = (): Clause[] => {
 	//Get all the clauses from the problem
@@ -152,7 +156,8 @@ const obtainProblemClauses = (): Clause[] => {
 	const learnedClauses: TemporalClause[] = [];
 	for (const trail of getTrails()) {
 		const learnedClause: Clause | undefined = trail.getLearnedClause();
-		if (learnedClause !== undefined) learnedClauses.push(new TemporalClause(learnedClause.getLiterals()));
+		if (learnedClause !== undefined)
+			learnedClauses.push(new TemporalClause(learnedClause.getLiterals()));
 	}
 	const problemUnindexedClauses: TemporalClause[] = [...defaultClauses, ...learnedClauses];
 

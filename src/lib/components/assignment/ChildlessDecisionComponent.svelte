@@ -3,6 +3,7 @@
 	import MathTexComponent from '$lib/components/MathTexComponent.svelte';
 	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
 	import { getInspectedVariable } from '$lib/states/conflict-detection-state.svelte.ts';
+	import { Dropdown, DropdownItem } from 'flowbite-svelte';
 	import HeadTailComponent from './../HeadTailComponent.svelte';
 	import './style.css';
 
@@ -19,8 +20,10 @@
 	let inspecting: boolean = $derived(assignment.variableId() === inspectedVariable && isLast);
 
 	let chrome: boolean = $derived(onChrome());
+	let isOpen: boolean = $state(false);
 
 	const emitAlgorithmicUndo = (): void => {
+		isOpen = false;
 		emitUndo?.(assignment);
 	};
 </script>
@@ -29,10 +32,19 @@
 	<childless-decision class:previous-assignment={fromPreviousTrail}>
 		<button
 			class="literal-style decision level-expanded childless {chrome ? 'pad-chrome' : 'pad-others'}"
-			onclick={emitAlgorithmicUndo}
+			onclick={() => {
+				isOpen = !isOpen;
+			}}
 		>
 			<MathTexComponent equation={assignment.toTeX()} />
 		</button>
+		{#if !fromPreviousTrail}
+			<Dropdown bind:isOpen simple placement="bottom" class="dropdownClass">
+				<DropdownItem>
+					<button onclick={emitAlgorithmicUndo}> Algorithmic Undo </button>
+				</DropdownItem>
+			</Dropdown>
+		{/if}
 	</childless-decision>
 </HeadTailComponent>
 
@@ -50,5 +62,9 @@
 
 	.childless {
 		cursor: unset;
+	}
+
+	:global(.dropdownClass) {
+		overflow: visible;
 	}
 </style>

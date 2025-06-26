@@ -25,7 +25,7 @@ export const algorithmicUndo = (
 
 		//Once we have cleaned the trail, we have to check if there was a learned clause to delete it.
 		const learnedClause: Clause | undefined = latestTrail.getLearnedClause();
-		if(learnedClause !== undefined) forgetClause(learnedClause);
+		if (learnedClause !== undefined) forgetClause(learnedClause);
 
 		unstackTrail();
 		latestTrail = getLatestTrail();

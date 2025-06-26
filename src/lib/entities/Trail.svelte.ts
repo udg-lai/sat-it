@@ -1,6 +1,5 @@
 import { logFatal } from '$lib/stores/toasts.ts';
 import { getProblemStore } from '$lib/states/problem.svelte.ts';
-import TemporalClause from './TemporalClause.ts';
 import type VariableAssignment from './VariableAssignment.ts';
 import type Clause from './Clause.svelte.ts';
 

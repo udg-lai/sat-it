@@ -3,6 +3,7 @@
 	import MathTexComponent from '$lib/components/MathTexComponent.svelte';
 	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
 	import { getInspectedVariable } from '$lib/states/conflict-detection-state.svelte.ts';
+	import { Dropdown, DropdownItem } from 'flowbite-svelte';
 	import HeadTailComponent from '../HeadTailComponent.svelte';
 	import './style.css';
 
@@ -31,16 +32,20 @@
 
 	let chrome: boolean = $derived(onChrome());
 
+	let isOpen: boolean = $state(false);
+
 	$effect(() => {
 		openLevel = expanded;
 	});
 
 	function emitLevelOpen(): void {
 		openLevel = !openLevel;
+		isOpen = false;
 		emitToggle?.();
 	}
 
 	const emitAlgorithmicUndo = (): void => {
+		isOpen = false;
 		emitUndo?.(assignment);
 	};
 </script>
@@ -50,10 +55,29 @@
 		<button
 			class="literal-style decision {chrome ? 'pad-chrome' : 'pad-others'}"
 			class:open={openLevel}
-			onclick={emitAlgorithmicUndo}
+			onclick={() => {
+				isOpen = !isOpen;
+			}}
 		>
 			<MathTexComponent equation={assignment.toTeX()} />
 		</button>
+
+		<Dropdown bind:isOpen simple class="dropdownClass">
+			<DropdownItem>
+				<button onclick={emitLevelOpen}>
+					{#if openLevel}
+						Collapse DL
+					{:else}
+						Open DL
+					{/if}
+				</button>
+			</DropdownItem>
+			{#if !fromPreviousTrail}
+				<DropdownItem>
+					<button onclick={emitAlgorithmicUndo}> Algorithmic Undo </button>
+				</DropdownItem>
+			{/if}
+		</Dropdown>
 	</decision>
 </HeadTailComponent>
 
@@ -65,5 +89,9 @@
 
 	.open {
 		border-right: 1px solid transparent;
+	}
+
+	:global(.dropdownClass) {
+		overflow: visible;
 	}
 </style>
