@@ -3,7 +3,7 @@ import type Clause from '$lib/entities/Clause.svelte.ts';
 let defaultClauses: Clause[] = $state([]);
 
 export const setDefaultClauses = (clauses: Clause[]) => {
-	defaultClauses = [...clauses]
+	defaultClauses = [...clauses];
 };
 
 export const getDefaultClauses = () => defaultClauses;

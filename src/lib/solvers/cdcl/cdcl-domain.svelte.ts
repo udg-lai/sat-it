@@ -373,10 +373,7 @@ export const deleteLastAssignment: CDCL_DELETE_LAST_ASSIGNMENT_FUN = (trail: Tra
 	getProblemStore().variables.unassign(assignment.getVariable().getInt());
 };
 
-export type CDCL_LEARN_CONFLICT_CLAUSE_FUN = (
-	trail: Trail,
-	conflictClause: Clause
-) => number;
+export type CDCL_LEARN_CONFLICT_CLAUSE_FUN = (trail: Trail, conflictClause: Clause) => number;
 
 export const learnConflictClause: CDCL_LEARN_CONFLICT_CLAUSE_FUN = (
 	trail: Trail,

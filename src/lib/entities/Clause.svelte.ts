@@ -128,7 +128,7 @@ class Clause implements Comparable<Clause> {
 	}
 
 	resolution(other: Clause): Clause {
-		return logicResolution(this , other);
+		return logicResolution(this, other);
 	}
 
 	equals(other: Clause): boolean {
