@@ -11,9 +11,16 @@
 		isLast?: boolean;
 		expanded?: boolean;
 		emitToggle?: () => void;
+		fromPreviousTrail?: boolean;
 	}
 
-	let { assignment, isLast = false, expanded = false, emitToggle }: Props = $props();
+	let {
+		assignment,
+		isLast = false,
+		expanded = false,
+		emitToggle,
+		fromPreviousTrail = false
+	}: Props = $props();
 
 	let openLevel: boolean = $state(false);
 
@@ -33,7 +40,7 @@
 </script>
 
 <HeadTailComponent {inspecting}>
-	<decision>
+	<decision class:previous-assignment={fromPreviousTrail}>
 		<button
 			class="literal-style decision {chrome ? 'pad-chrome' : 'pad-others'}"
 			class:open={openLevel}

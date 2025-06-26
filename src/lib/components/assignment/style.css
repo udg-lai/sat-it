@@ -10,3 +10,7 @@
 	border: none;
 	border-bottom: 1px solid;
 }
+
+.previous-assignment {
+	opacity: 0.6;
+}

@@ -128,8 +128,17 @@ export class Trail {
 		this.learned = clause;
 	}
 
-	updateFollowUpIndex(): void {
+	getFollowUpIndex(): number {
+		return this.followUPIndex;
+	}
+
+	setFollowUpIndex(): void {
 		this.followUPIndex = this.assignments.length - 1;
+	}
+
+	isAssignmentFromPreviousTrail(assignment: VariableAssignment): boolean {
+		const assignmentIndex: number = this.assignments.indexOf(assignment);
+		return assignmentIndex < this.followUPIndex;
 	}
 
 	backjump(dl: number): void {

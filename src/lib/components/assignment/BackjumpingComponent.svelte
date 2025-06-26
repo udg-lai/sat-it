@@ -15,9 +15,10 @@
 	interface Props {
 		assignment: VariableAssignment;
 		isLast: boolean;
+		fromPreviousTrail?: boolean;
 	}
 
-	let { assignment, isLast }: Props = $props();
+	let { assignment, isLast, fromPreviousTrail = false }: Props = $props();
 	let buttonId: string = 'btn-' + nanoid();
 
 	const inspectedVariable: number = $derived(getInspectedVariable());
@@ -51,22 +52,21 @@
 </script>
 
 <HeadTailComponent {inspecting}>
-	<backtracking>
+	<backtracking class:previous-assignment={fromPreviousTrail}>
 		<button
 			id={buttonId}
 			class="literal-style decision backjumping {chrome ? 'pad-chrome' : 'pad-others'}"
 		>
 			<MathTexComponent equation={assignment.toTeX()} />
 		</button>
+		<Popover triggeredBy={'#' + buttonId} class="app-popover" trigger="click" placement="bottom">
+			<div class="popover-content">
+				<span class="clause-id">{conflictClauseId}.</span>
+				<MathTexComponent equation={conflictClauseString} fontSize="var(--popover-font-size)" />
+			</div>
+		</Popover>
 	</backtracking>
 </HeadTailComponent>
-
-<Popover triggeredBy={'#' + buttonId} class="app-popover" trigger="click" placement="bottom">
-	<div class="popover-content">
-		<span class="clause-id">{conflictClauseId}.</span>
-		<MathTexComponent equation={conflictClauseString} fontSize="var(--popover-font-size)" />
-	</div>
-</Popover>
 
 <style>
 	.backjumping {
