@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { writable } from 'svelte/store';
 	import type { Trail } from '$lib/entities/Trail.svelte.ts';
 	import {
 		solverStartedAutoMode,
@@ -10,7 +11,6 @@
 	import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 	import { onMount } from 'svelte';
 	import InformationComponent from './InformationComponent.svelte';
-	import TrailComponent from './TrailComponent.svelte';
 	import ComposedTrailComponent from './ComposedTrailComponent.svelte';
 
 	interface Props {
@@ -113,8 +113,8 @@
 		};
 	}
 
-	function digIntoTrail(trailId: number) {
-		console.log('widder trail', trailId);
+	function toggleTrailView(trailId: number) {
+		trails.at(trailId)?.toggleView()
 	}
 
 	onMount(() => {
@@ -145,7 +145,7 @@
 	<editor-leaf use:listenContentHeight>
 		<editor-indexes class="enumerate container-padding">
 			{#each indexes as index (index)}
-				<button class="item" onclick={() => digIntoTrail(index)}>
+				<button class="item" onclick={() => toggleTrailView(index)}>
 					<div class="enumerate-item">
 						<span>{index + 1}.</span>
 					</div>
@@ -160,6 +160,8 @@
 						{trail}
 						expanded={expandedTrails}
 						isLast={trails.length === index + 1}
+						showCAView={cdcl && trail.getView()}
+						showUPView={trail.getView()}
 					/>
 				{/each}
 			</editor-trails>

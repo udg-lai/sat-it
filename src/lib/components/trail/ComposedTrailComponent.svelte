@@ -13,9 +13,11 @@
 		trail: Trail;
 		expanded: boolean;
 		isLast?: boolean;
+		showUPView: boolean;
+		showCAView: boolean;
 	}
 
-	let { trail, expanded, isLast = true }: Props = $props();
+	let { trail, expanded, isLast = true, showUPView, showCAView }: Props = $props();
 
 	let upContext: Either<Clause, undefined>[] = $derived.by(() => {
 		const upContext: Either<number, undefined>[] = trail.getUPContext();
@@ -50,21 +52,25 @@
 </script>
 
 <composed-trail class="composed-trail">
-	<div class="canvas" style="--width: {trailWidth}px">
-		<div class="canvas-sheet">
-			{#each upContext as clause}
-				{#if isLeft(clause)}
-					<PlainClauseComponent clause={unwrapEither(clause)} />
-				{:else}
-					<div class="empty-slot"></div>
-				{/if}
-			{/each}
+	{#if showUPView}
+		<div class="canvas" style="--width: {trailWidth}px">
+			<div class="canvas-sheet">
+				{#each upContext as clause}
+					{#if isLeft(clause)}
+						<PlainClauseComponent clause={unwrapEither(clause)} />
+					{:else}
+						<div class="empty-slot"></div>
+					{/if}
+				{/each}
+			</div>
 		</div>
-	</div>
+	{/if}
 	<div use:observeWidth class="fit-content">
 		<TrailComponent {trail} {expanded} {isLast} />
 	</div>
-	<div class="canvas" style="--width: {trailWidth}px"></div>
+	{#if showCAView}
+		<div class="canvas" style="--width: {trailWidth}px"></div>
+	{/if}
 </composed-trail>
 
 <style>

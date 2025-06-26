@@ -19,6 +19,8 @@ export class Trail {
 	private conflictAnalysisCtx: Either<TemporalClause, undefined>[] = $state([]); // this is just for representing the conflict analysis view
 	private latestLevelUPCtx: number[] = $derived.by(() => this._computeLatestLevelUPContext());
 	private upContext: Either<number, undefined>[] = $derived.by(() => this._upContext());
+	private fullView: boolean = $state(false);
+
 
 	constructor(trailCapacity: number = 0) {
 		this.trailCapacity = trailCapacity;
@@ -184,6 +186,14 @@ export class Trail {
 
 	getUPContext(): Either<number, undefined>[] {
 		return this.upContext;
+	}
+
+	toggleView(): void {
+		this.fullView = !this.fullView;
+	}
+
+	getView(): boolean {
+		return this.fullView;
 	}
 
 	[Symbol.iterator]() {
