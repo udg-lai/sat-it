@@ -1,13 +1,14 @@
 import type { DimacsInstance } from '$lib/instances/dimacs-instance.interface.ts';
 import Clause from '$lib/entities/Clause.svelte.ts';
 import ClausePool from '$lib/entities/ClausePool.svelte.ts';
-import type TemporalClause from '$lib/entities/TemporalClause.ts';
+import TemporalClause from '$lib/entities/TemporalClause.ts';
 import type { Trail } from '$lib/entities/Trail.svelte.ts';
 import type Variable from '$lib/entities/Variable.svelte.ts';
 import { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import { getDefaultClauses, setDefaultClauses } from './clause-pool.svelte.ts';
 import { getTrails } from './trails.svelte.ts';
+import { logFatal } from '$lib/stores/toasts.ts';
 
 export type MappingLiteral2Clauses = Map<number, SvelteSet<number>>;
 
@@ -66,7 +67,7 @@ export function updateProblemFromTrail(trail: Trail) {
 		variables.assign(variable.getInt(), variable.getAssignment());
 	});
 
-	//Reset the caluses
+	//Reset the clauses
 	const clauses: ClausePool = new ClausePool(obtainProblemClauses());
 
 	//Reset the mapping
@@ -97,6 +98,19 @@ export function addClauseToClausePool(lemma: Clause) {
 	problemStore = { ...currentProblem, clauses, mapping };
 }
 
+export function forgetClause(lemma: Clause) {
+	const { clauses, ...currentProblem } = problemStore;
+
+	//Remove clause from the pool
+	clauses.removeClause(lemma);
+
+	//remove clause from mapping
+	const mapping: MappingLiteral2Clauses = problemStore.mapping;
+	removeClauseFromMapping(lemma, lemma.getTag(), mapping);
+
+	problemStore = { ...currentProblem, clauses, mapping };
+}
+
 function literalToClauses(clauses: ClausePool): MappingLiteral2Clauses {
 	const mapping: Map<number, SvelteSet<number>> = new Map();
 
@@ -120,13 +134,25 @@ const addClauseToMapping = (clause: Clause, clauseId: number, mapping: MappingLi
 	});
 };
 
+const removeClauseFromMapping = (clause: Clause, clauseId: number, mapping: MappingLiteral2Clauses) => {
+	clause.getLiterals().forEach((literal) => {
+		const literalId = literal.toInt();
+		if (mapping.has(literalId)) {
+			const s = mapping.get(literalId);
+			s?.delete(clauseId);
+		} else {
+			logFatal("Forget Clause Error", `The literal ${literalId} does not exist in the mapping`);
+		}
+	});
+}
+
 const obtainProblemClauses = (): Clause[] => {
 	//Get all the clauses from the problem
 	const defaultClauses: TemporalClause[] = getDefaultClauses();
 	const learnedClauses: TemporalClause[] = [];
 	for (const trail of getTrails()) {
-		const learnedClause: TemporalClause | undefined = trail.getLearnedClause();
-		if (learnedClause !== undefined) learnedClauses.push(learnedClause);
+		const learnedClause: Clause | undefined = trail.getLearnedClause();
+		if (learnedClause !== undefined) learnedClauses.push(new TemporalClause(learnedClause.getLiterals()));
 	}
 	const problemUnindexedClauses: TemporalClause[] = [...defaultClauses, ...learnedClauses];
 

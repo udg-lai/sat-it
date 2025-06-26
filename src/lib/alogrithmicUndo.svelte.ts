@@ -7,7 +7,8 @@ import {
 } from '$lib/states/statistics.svelte.ts';
 import { getLatestTrail, unstackTrail } from '$lib/states/trails.svelte.ts';
 import { logFatal } from '$lib/stores/toasts.ts';
-import type TemporalClause from './entities/TemporalClause.ts';
+import type Clause from './entities/Clause.svelte.ts';
+import { forgetClause } from './states/problem.svelte.ts';
 
 export const algorithmicUndo = (
 	objectiveAssignment: VariableAssignment,
@@ -23,8 +24,8 @@ export const algorithmicUndo = (
 		});
 
 		//Once we have cleaned the trail, we have to check if there was a learned clause to delete it.
-		//THIS NEEDS TO BE CHECKED
-		//const learnedClauseId: TemporalClause | undefined = latestTrail.getLearnedClause();
+		const learnedClause: Clause | undefined = latestTrail.getLearnedClause();
+		if(learnedClause !== undefined) forgetClause(learnedClause);
 
 		unstackTrail();
 		latestTrail = getLatestTrail();

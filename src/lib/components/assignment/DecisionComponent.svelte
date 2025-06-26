@@ -12,7 +12,7 @@
 		expanded?: boolean;
 		emitToggle?: () => void;
 		fromPreviousTrail?: boolean;
-		emitUndo?: () => void;
+		emitUndo?: (assignment: VariableAssignment) => void;
 	}
 
 	let {
@@ -39,6 +39,10 @@
 		openLevel = !openLevel;
 		emitToggle?.();
 	}
+
+	const emitAlgorithmicUndo = (): void => {
+		emitUndo?.(assignment);
+	};
 </script>
 
 <HeadTailComponent {inspecting}>
@@ -46,7 +50,7 @@
 		<button
 			class="literal-style decision {chrome ? 'pad-chrome' : 'pad-others'}"
 			class:open={openLevel}
-			onclick={emitLevelOpen}
+			onclick={emitAlgorithmicUndo}
 		>
 			<MathTexComponent equation={assignment.toTeX()} />
 		</button>

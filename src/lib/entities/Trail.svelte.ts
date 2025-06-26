@@ -2,11 +2,12 @@ import { logFatal } from '$lib/stores/toasts.ts';
 import { getProblemStore } from '$lib/states/problem.svelte.ts';
 import TemporalClause from './TemporalClause.ts';
 import type VariableAssignment from './VariableAssignment.ts';
+import type Clause from './Clause.svelte.ts';
 
 export class Trail {
 	private assignments: VariableAssignment[] = $state([]);
 	private decisionLevelBookmark: number[] = $state([-1]);
-	private learned: TemporalClause | undefined = undefined;
+	private learned: Clause | undefined = undefined;
 	private followUPIndex: number = 0;
 	private decisionLevel: number = 0;
 	private trailCapacity: number = 0;
@@ -124,11 +125,11 @@ export class Trail {
 		return returnValue;
 	}
 
-	getLearnedClause(): TemporalClause | undefined {
+	getLearnedClause(): Clause | undefined {
 		return this.learned;
 	}
 
-	learn(clause: TemporalClause): void {
+	learn(clause: Clause): void {
 		this.learned = clause;
 	}
 

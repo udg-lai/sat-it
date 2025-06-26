@@ -58,6 +58,10 @@ class ClausePool implements IClausePool {
 		this._addClause(clause);
 	}
 
+	removeClause(clause: Clause): void {
+		this._removeClause(clause);
+	}
+
 	get(tag: number): Clause {
 		return this._get(tag);
 	}
@@ -105,6 +109,10 @@ class ClausePool implements IClausePool {
 		if (clause.wasLearnt()) {
 			this.learnt.add(id);
 		}
+	}
+
+	private _removeClause(clause: Clause): void {
+		this.clauses.delete(clause.getTag());
 	}
 
 	private _get(tag: number): Clause {
