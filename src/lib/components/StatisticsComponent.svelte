@@ -75,7 +75,6 @@
 		flex: 1;
 		min-width: 5rem;
 		max-width: 12rem;
-		background-color: white;
 		border-radius: 5px;
 		border: 1px solid var(--border-color);
 	}
