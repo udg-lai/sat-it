@@ -13,7 +13,7 @@
 		expanded?: boolean;
 		emitToggle?: () => void;
 		fromPreviousTrail?: boolean;
-		emitUndo?: (assignment: VariableAssignment) => void;
+		emitUndo?: () => void;
 	}
 
 	let {
@@ -26,13 +26,14 @@
 	}: Props = $props();
 
 	let openLevel: boolean = $state(false);
-	//FOR THE MOMENT I WON'T ADD THE EMIT UNDO HERE
+
 	const inspectedVariable: number = $derived(getInspectedVariable());
+
 	let inspecting: boolean = $derived(assignment.variableId() === inspectedVariable && isLast);
 
 	let chrome: boolean = $derived(onChrome());
 
-	let isOpen: boolean = $state(false);
+	let isDropdownOpen: boolean = $state(false);
 
 	$effect(() => {
 		openLevel = expanded;
@@ -40,13 +41,13 @@
 
 	function emitLevelOpen(): void {
 		openLevel = !openLevel;
-		isOpen = false;
+		isDropdownOpen = !isDropdownOpen;
 		emitToggle?.();
 	}
 
 	const emitAlgorithmicUndo = (): void => {
-		isOpen = false;
-		emitUndo?.(assignment);
+		isDropdownOpen = !isDropdownOpen;
+		emitUndo?.();
 	};
 </script>
 
@@ -56,13 +57,13 @@
 			class="literal-style decision {chrome ? 'pad-chrome' : 'pad-others'}"
 			class:open={openLevel}
 			onclick={() => {
-				isOpen = !isOpen;
+				isDropdownOpen = !isDropdownOpen;
 			}}
 		>
 			<MathTexComponent equation={assignment.toTeX()} />
 		</button>
 
-		<Dropdown bind:isOpen simple class="dropdownClass">
+		<Dropdown bind:isOpen={isDropdownOpen} simple class="dropdownClass">
 			<DropdownItem>
 				<button onclick={emitLevelOpen}>
 					{#if openLevel}

@@ -11,7 +11,7 @@
 		assignment: VariableAssignment;
 		isLast?: boolean;
 		fromPreviousTrail?: boolean;
-		emitUndo?: (assignment: VariableAssignment) => void;
+		emitUndo?: () => void;
 	}
 
 	let { assignment, isLast = false, fromPreviousTrail = false, emitUndo }: Props = $props();
@@ -20,11 +20,11 @@
 	let inspecting: boolean = $derived(assignment.variableId() === inspectedVariable && isLast);
 
 	let chrome: boolean = $derived(onChrome());
-	let isOpen: boolean = $state(false);
+	let isDropdownOpen: boolean = $state(false);
 
 	const emitAlgorithmicUndo = (): void => {
-		isOpen = false;
-		emitUndo?.(assignment);
+		isDropdownOpen = !isDropdownOpen;
+		emitUndo?.();
 	};
 </script>
 
@@ -33,13 +33,13 @@
 		<button
 			class="literal-style decision level-expanded childless {chrome ? 'pad-chrome' : 'pad-others'}"
 			onclick={() => {
-				isOpen = !isOpen;
+				isDropdownOpen = !isDropdownOpen;
 			}}
 		>
 			<MathTexComponent equation={assignment.toTeX()} />
 		</button>
 		{#if !fromPreviousTrail}
-			<Dropdown bind:isOpen simple placement="bottom" class="dropdownClass">
+			<Dropdown bind:isDropdownOpen simple placement="bottom" class="dropdownClass">
 				<DropdownItem>
 					<button onclick={emitAlgorithmicUndo}> Algorithmic Undo </button>
 				</DropdownItem>

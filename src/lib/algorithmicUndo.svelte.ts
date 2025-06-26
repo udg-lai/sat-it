@@ -7,13 +7,11 @@ import {
 } from '$lib/states/statistics.svelte.ts';
 import { getLatestTrail, unstackTrail } from '$lib/states/trails.svelte.ts';
 import { logFatal } from '$lib/stores/toasts.ts';
-import type Clause from './entities/Clause.svelte.ts';
-import { forgetClause } from './states/problem.svelte.ts';
 
 export const algorithmicUndo = (
 	objectiveAssignment: VariableAssignment,
 	objectiveTrail: Trail
-): void => {
+): Trail => {
 	//First of all we have to reach the trail we want to go to.
 	let latestTrail: Trail | undefined = getLatestTrail();
 	while (latestTrail !== undefined && latestTrail !== objectiveTrail) {
@@ -22,10 +20,6 @@ export const algorithmicUndo = (
 		trailAssignments.forEach((assignment) => {
 			undoAssignmentFromStatistics(assignment);
 		});
-
-		//Once we have cleaned the trail, we have to check if there was a learned clause to delete it.
-		const learnedClause: Clause | undefined = latestTrail.getLearnedClause();
-		if (learnedClause !== undefined) forgetClause(learnedClause);
 
 		unstackTrail();
 		latestTrail = getLatestTrail();
@@ -54,6 +48,9 @@ export const algorithmicUndo = (
 
 	//Now we are in the position the user said, we just have to reset the state machine in the app component and we are good to go
 	//It is also needed a snapshot to be saved
+
+	latestTrail.resetLearned();
+	return latestTrail;
 };
 
 const undoAssignmentFromStatistics = (assignment: VariableAssignment): void => {

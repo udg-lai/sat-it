@@ -1,3 +1,5 @@
+import type { Trail } from '$lib/entities/Trail.svelte.ts';
+import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
 import type { LiteralBreakpoint } from '$lib/states/breakpoints.svelte.ts';
 import { createEventBus } from './createEventBus.ts';
 
@@ -47,3 +49,11 @@ export const solverFinishedAutoMode = createEventBus<void>();
 
 // event bus for opening the conflict detection view
 export const conflictDetectionEventBus = createEventBus<void>();
+
+export type AlgorithmicUndoEvent = {
+	objectiveAssignment: VariableAssignment;
+	objectiveTrail: Trail;
+};
+
+// event bus for opening the conflict detection view
+export const algorithmicUndoEventBus = createEventBus<AlgorithmicUndoEvent>();

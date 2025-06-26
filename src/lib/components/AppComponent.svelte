@@ -2,11 +2,13 @@
 	import TrailEditor from '$lib/components/trail/TrailEditorComponent.svelte';
 	import type { Trail } from '$lib/entities/Trail.svelte.ts';
 	import {
+		algorithmicUndoEventBus,
 		changeAlgorithmEventBus,
 		changeInstanceEventBus,
 		stateMachineEventBus,
 		userActionEventBus,
 		type ActionEvent,
+		type AlgorithmicUndoEvent,
 		type StateMachineEvent
 	} from '$lib/events/events.ts';
 	import type { SolverMachine } from '$lib/solvers/SolverMachine.svelte.ts';
@@ -29,6 +31,8 @@
 	import { editorViewEventStore, type EditorViewEvent } from '../stores/debugger.svelte.ts';
 	import DebuggerComponent from './debugger/DebuggerComponent.svelte';
 	import SolvingInformationComponent from './SolvingInformationComponent.svelte';
+	import { algorithmicUndo } from '$lib/algorithmicUndo.svelte.ts';
+	import { DECIDE_STATE_ID } from '$lib/solvers/reserved.ts';
 
 	let expandPropagations: boolean = $state(true);
 
@@ -83,12 +87,20 @@
 		reset();
 	}
 
+	function algorithmicUndoSafe(a: AlgorithmicUndoEvent): void {
+		const latestTrail: Trail = algorithmicUndo(a.objectiveAssignment, a.objectiveTrail);
+		updateProblemFromTrail(latestTrail);
+		updateSolverMachine(DECIDE_STATE_ID, undefined);
+		record(trails, solverMachine.getActiveStateId(), getStatistics(), solverMachine.getRecord());
+	}
+
 	onMount(() => {
 		const unsubscribeToggleEditor = editorViewEventStore.subscribe(togglePropagations);
 		const unsubscribeActionEvent = userActionEventBus.subscribe(onActionEvent);
 		const unsubscribeStateMachineEvent = stateMachineEventBus.subscribe(stateMachineEvent);
 		const unsubscribeChangeInstanceEvent = changeInstanceEventBus.subscribe(fullyReset);
 		const unsubscribeChangeAlgorithmEvent = changeAlgorithmEventBus.subscribe(reset);
+		const unsubscribeAlgorithmicUndoEvent = algorithmicUndoEventBus.subscribe(algorithmicUndoSafe);
 
 		return () => {
 			unsubscribeToggleEditor();
@@ -96,6 +108,7 @@
 			unsubscribeChangeInstanceEvent();
 			unsubscribeStateMachineEvent();
 			unsubscribeChangeAlgorithmEvent();
+			unsubscribeAlgorithmicUndoEvent();
 		};
 	});
 </script>

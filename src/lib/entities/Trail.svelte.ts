@@ -164,6 +164,11 @@ export class Trail {
 		this.decisionLevel = dl;
 	}
 
+	resetLearned(): void {
+		this.learned = undefined;
+		this.trailConflict = undefined;
+	}
+
 	[Symbol.iterator]() {
 		return this.assignments.values();
 	}
