@@ -12,6 +12,7 @@
 		expanded?: boolean;
 		emitToggle?: () => void;
 		fromPreviousTrail?: boolean;
+		emitUndo?: () => void;
 	}
 
 	let {
@@ -19,11 +20,12 @@
 		isLast = false,
 		expanded = false,
 		emitToggle,
-		fromPreviousTrail = false
+		fromPreviousTrail = false,
+		emitUndo
 	}: Props = $props();
 
 	let openLevel: boolean = $state(false);
-
+	//FOR THE MOMENT I WON'T ADD THE EMIT UNDO HERE
 	const inspectedVariable: number = $derived(getInspectedVariable());
 	let inspecting: boolean = $derived(assignment.variableId() === inspectedVariable && isLast);
 

@@ -7,7 +7,7 @@ export class Trail {
 	private assignments: VariableAssignment[] = $state([]);
 	private decisionLevelBookmark: number[] = $state([-1]);
 	private learned: TemporalClause | undefined = undefined;
-	private followUPIndex: number = -1;
+	private followUPIndex: number = 0;
 	private decisionLevel: number = 0;
 	private trailCapacity: number = 0;
 	private trailConflict: number | undefined = $state(undefined);
@@ -45,6 +45,10 @@ export class Trail {
 
 	getAssignments(): VariableAssignment[] {
 		return [...this.assignments];
+	}
+
+	getFollowUpAssignments(): VariableAssignment[] {
+		return this.assignments.slice(this.followUPIndex)
 	}
 
 	pickLastAssignment(): VariableAssignment {

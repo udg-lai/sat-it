@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { algorithmicUndo } from '$lib/alogrithmicUndo.svelte.ts';
 	import type { Trail } from '$lib/entities/Trail.svelte.ts';
 	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
 	import BackjumpingComponent from '../assignment/BackjumpingComponent.svelte';
@@ -23,6 +24,7 @@
 		assignment={decision}
 		{isLast}
 		fromPreviousTrail={trail.isAssignmentFromPreviousTrail(decision)}
+		emitUndo={() => algorithmicUndo(decision, trail)}
 	/>
 {:else}
 	<DecisionComponent
@@ -31,6 +33,7 @@
 		{isLast}
 		emitToggle={() => (expanded = !expanded)}
 		fromPreviousTrail={trail.isAssignmentFromPreviousTrail(decision)}
+		emitUndo={() => algorithmicUndo(decision, trail)}
 	/>
 	{#if expanded}
 		{#each propagations as assignment (assignment.variableId())}
