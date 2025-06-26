@@ -43,9 +43,10 @@
 	}
 </script>
 
-<HeadTailComponent inspecting={onPreConflictState}>
+<HeadTailComponent padding="2px" inspecting={onPreConflictState}>
 	<div class="static"></div>
 </HeadTailComponent>
+
 <conflict-detection>
 	{#each clauses as clause, index (index)}
 		<div class="enumerate-clause">
@@ -70,9 +71,9 @@
 
 <style>
 	.static {
-		height: 1px;
 		width: 100%;
 	}
+
 	.enumerate-clause {
 		display: flex;
 		height: 100%;

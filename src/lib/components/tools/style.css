@@ -8,7 +8,7 @@
 .options-tools {
 	width: var(--bar-width);
 	position: relative;
-	padding: 1rem 0rem;
+	padding: 23px 0rem;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
