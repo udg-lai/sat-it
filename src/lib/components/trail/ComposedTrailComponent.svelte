@@ -7,6 +7,7 @@
 	import { isLeft, makeLeft, makeRight, unwrapEither, type Either } from '$lib/types/either.ts';
 	import PlainClauseComponent from '../PlainClauseComponent.svelte';
 	import PlainLiteralComponent from '../PlainLiteralComponent.svelte';
+	import CanvasComponent from './CanvasComponent.svelte';
 	import TrailComponent from './TrailComponent.svelte';
 
 	interface Props {
@@ -53,23 +54,13 @@
 
 <composed-trail class="composed-trail">
 	{#if showUPView}
-		<div class="canvas" style="--width: {trailWidth}px">
-			<div class="canvas-sheet">
-				{#each upContext as clause}
-					{#if isLeft(clause)}
-						<PlainClauseComponent clause={unwrapEither(clause)} />
-					{:else}
-						<div class="empty-slot"></div>
-					{/if}
-				{/each}
-			</div>
-		</div>
+		<CanvasComponent context={upContext} width={trailWidth} align={'end'}/>
 	{/if}
 	<div use:observeWidth class="fit-content">
 		<TrailComponent {trail} {expanded} {isLast} />
 	</div>
 	{#if showCAView}
-		<div class="canvas" style="--width: {trailWidth}px"></div>
+		<CanvasComponent context={upContext} width={trailWidth} align={'start'}/>
 	{/if}
 </composed-trail>
 
@@ -81,29 +72,7 @@
 		border: 1px solid red;
 	}
 
-	.canvas {
-		height: 9rem;
-		width: var(--width);
-		overflow-y: auto;
-		overflow-x: hidden;
-	}
-
-	.canvas-sheet {
-		width: fit-content;
-		display: flex;
-		align-items: end;
-		min-height: 100%;
-	}
-
 	.fit-content {
 		width: fit-content;
-	}
-
-	.vertical-container {
-		display: flex;
-	}
-
-	.empty-slot {
-		width: 55px;
 	}
 </style>
