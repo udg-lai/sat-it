@@ -31,7 +31,7 @@
 	let { finished, backtrackingState }: Props = $props();
 
 	let expanded = $derived(getTrailsExpanded());
-	let textCollapse = $derived(expanded ? 'Collapse Propagations' : 'Expand Propagations');
+	let textCollapse = $derived(expanded ? 'Collapse propagations' : 'Expand propagations');
 
 	let btnRedoActive = $derived(getStackPointer() < getStackLength() - 1);
 	let btnUndoActive = $derived(getStackPointer() > 0);
