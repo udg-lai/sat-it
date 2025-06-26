@@ -67,6 +67,9 @@
 </statistics>
 
 <style>
+	statistics {
+		border: none
+	}
 	.metric {
 		display: flex;
 		justify-content: space-around;
@@ -75,9 +78,7 @@
 		flex: 1;
 		min-width: 5rem;
 		max-width: 12rem;
-		background-color: white;
-		border-radius: 5px;
-		border: 1px solid var(--border-color);
+		border: none;
 	}
 
 	.statistic-value {
