@@ -11,6 +11,7 @@
 	import { onMount } from 'svelte';
 	import InformationComponent from './InformationComponent.svelte';
 	import TrailComponent from './TrailComponent.svelte';
+	import ComposedTrailComponent from './ComposedTrailComponent.svelte';
 
 	interface Props {
 		trails: Trail[];
@@ -36,6 +37,8 @@
 
 	let solverMachine: SolverMachine<StateFun, StateInput> = $derived(getSolverMachine());
 
+	let cdcl: boolean = $derived(solverMachine.identify() === 'cdcl');
+
 	const scrollToBottom = (editorElement: HTMLElement) => {
 		editorElement.scrollTo({ top: editorElement.scrollHeight, behavior: 'smooth' });
 	};
@@ -49,31 +52,35 @@
 		if (scrollTimeout !== undefined) {
 			clearTimeout(scrollTimeout);
 		}
-		userScrolling = true;
-		scrollTimeout = setTimeout(() => {
-			userScrolling = false;
-			rearrangeTrailEditor(lastReference);
-		}, recoveryTimeout);
+		if (isSolverRunningSolo()) {
+			userScrolling = true;
+			scrollTimeout = setTimeout(() => {
+				userScrolling = false;
+				rearrangeTrailEditor(lastReference);
+			}, recoveryTimeout);
+		}
 	}
 
 	function handleMouseDown() {
 		if (interactingTimeout !== undefined) {
 			clearTimeout(interactingTimeout);
 		}
-		if (!isSolverRunningSolo()) return;
-		userInteracting = true;
-		grabbing = true;
+		if (isSolverRunningSolo()) {
+			userInteracting = true;
+			grabbing = true;
+		}
 	}
 
 	function handleMouseUp() {
 		if (interactingTimeout !== undefined) {
 			clearTimeout(interactingTimeout);
 		}
-		if (!isSolverRunningSolo()) return;
-		interactingTimeout = setTimeout(() => {
-			userInteracting = false;
-			rearrangeTrailEditor(lastReference);
-		}, recoveryTimeout);
+		if (isSolverRunningSolo()) {
+			interactingTimeout = setTimeout(() => {
+				userInteracting = false;
+				rearrangeTrailEditor(lastReference);
+			}, recoveryTimeout);
+		}
 		grabbing = false;
 	}
 
@@ -106,6 +113,10 @@
 		};
 	}
 
+	function digIntoTrail(trailId: number) {
+		console.log('widder trail', trailId);
+	}
+
 	onMount(() => {
 		const unsubscribeTrailTracking = trailTrackingEventBus.subscribe(rearrangeTrailEditor);
 		const unsubscribeExpandedTrails = toggleTrailExpandEventBus.subscribe(
@@ -132,25 +143,29 @@
 	class:grabbing
 >
 	<editor-leaf use:listenContentHeight>
-		<editor-indexes class="enumerate">
+		<editor-indexes class="enumerate container-padding">
 			{#each indexes as index (index)}
-				<div class="item">
+				<button class="item" onclick={() => digIntoTrail(index)}>
 					<div class="enumerate-item">
 						<span>{index + 1}.</span>
 					</div>
-				</div>
+				</button>
 			{/each}
 		</editor-indexes>
 
 		<trails-leaf bind:this={trailsLeafElement}>
-			<editor-trails>
+			<editor-trails class="container-padding">
 				{#each trails as trail, index (index)}
-					<TrailComponent {trail} expanded={expandedTrails} isLast={trails.length === index + 1} />
+					<ComposedTrailComponent
+						{trail}
+						expanded={expandedTrails}
+						isLast={trails.length === index + 1}
+					/>
 				{/each}
 			</editor-trails>
 		</trails-leaf>
 
-		<editor-info>
+		<editor-info class="container-padding">
 			{#each trails as trail, index (index)}
 				<div class="item">
 					<InformationComponent {trail} isLast={trails.length === index + 1} />
@@ -196,13 +211,14 @@
 		display: flex;
 		flex-direction: column;
 		width: max-content;
+		gap: 0.25rem;
 	}
 
 	.item {
 		height: var(--trail-height);
 		width: var(--trail-height);
 		display: flex;
-		align-items: start;
+		align-items: center;
 		justify-content: center;
 	}
 
@@ -217,5 +233,9 @@
 
 	.item span {
 		opacity: var(--opacity-50);
+	}
+
+	.container-padding {
+		padding: 1rem 0rem;
 	}
 </style>

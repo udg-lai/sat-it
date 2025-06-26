@@ -4,7 +4,7 @@ import { makeLeft, makeRight, type Either } from '../types/either.ts';
 import type Clause from './Clause.svelte.ts';
 import type ClausePool from './ClausePool.svelte.ts';
 import type TemporalClause from './TemporalClause.ts';
-import { isUnitPropagationReason, type Reason } from './VariableAssignment.ts';
+import { isUnitPropagationReason, type Reason, type UnitPropagation } from './VariableAssignment.ts';
 import type VariableAssignment from './VariableAssignment.ts';
 
 export class Trail {
@@ -18,6 +18,7 @@ export class Trail {
 	private learntClause: number | undefined = $state(undefined); // this is for doing undo algorithmic
 	private conflictAnalysisCtx: Either<TemporalClause, undefined>[] = $state([]); // this is just for representing the conflict analysis view
 	private latestLevelUPCtx: number[] = $derived.by(() => this._computeLatestLevelUPContext());
+	private upContext: Either<number, undefined>[] = $derived.by(() => this._upContext());
 
 	constructor(trailCapacity: number = 0) {
 		this.trailCapacity = trailCapacity;
@@ -181,6 +182,10 @@ export class Trail {
 		this.updateFollowUpIndex();
 	}
 
+	getUPContext(): Either<number, undefined>[] {
+		return this.upContext;
+	}
+
 	[Symbol.iterator]() {
 		return this.assignments.values();
 	}
@@ -261,6 +266,17 @@ export class Trail {
 	private hasDecisions(): boolean {
 		const levels = this.getDecisionLevelMarks();
 		return levels.length > 0;
+	}
+
+	private _upContext(): Either<number, undefined>[] {
+		return this.assignments.map(a => {
+			if (a.isUP()) {
+				const reason =  a.getReason() as UnitPropagation
+				return makeLeft(reason.clauseId);
+			} else {
+				return makeRight(undefined);
+			}
+		})
 	}
 
 	private _computeLatestLevelUPContext(): number[] {

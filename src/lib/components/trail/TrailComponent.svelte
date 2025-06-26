@@ -76,7 +76,7 @@
 		min-height: var(--trail-height);
 		display: flex;
 		flex-direction: row;
-		align-items: start;
+		align-items: end;
 		width: fit-content;
 	}
 </style>
