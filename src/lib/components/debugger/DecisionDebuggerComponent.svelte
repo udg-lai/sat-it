@@ -161,6 +161,7 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 	}
 
 	.next-variable {
@@ -190,6 +191,7 @@
 	.join-right {
 		border-radius: 6px 0px 0px 6px;
 		border-right: none;
+		box-shadow: none;
 	}
 
 	.join-left {

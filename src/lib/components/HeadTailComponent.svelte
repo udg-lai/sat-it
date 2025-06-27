@@ -25,6 +25,6 @@
 		padding: var(--padding);
 		border-radius: 1px;
 		border: 1px solid var(--color);
-		width: fit-content;
+		width: 100%;
 	}
 </style>

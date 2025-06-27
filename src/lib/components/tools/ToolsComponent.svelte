@@ -3,7 +3,7 @@
 	import { ArrowUpFromBracketOutline, BookOutline, ClipboardOutline } from 'flowbite-svelte-icons';
 	import { onMount } from 'svelte';
 	import Button from './Button.svelte';
-	import ConflictDetectionComponent from './ConflictDetectionComponent.svelte';
+	import OccurrenceListComponent from './OccurrenceListComponent.svelte';
 	import SolutionSummaryComponent from './SolutionSummaryComponent.svelte';
 	import './style.css';
 
@@ -199,7 +199,7 @@
 						{#if name === 'viewA'}
 							<SolutionSummaryComponent />
 						{:else if name === 'viewB'}
-							{@render snippetClausesToCheck()}
+							{@render snippetOccurrenceList()}
 						{:else}
 							{@render notImplementedYet()}
 						{/if}
@@ -220,7 +220,7 @@
 		onClick={() => activateTool(id)}
 		icon={BookOutline}
 		active={tools[id].active}
-		title="Problem Clauses"
+		title="Clauses"
 	/>
 {/snippet}
 
@@ -229,7 +229,7 @@
 		onClick={() => activateTool(id)}
 		icon={ClipboardOutline}
 		active={tools[id].active}
-		title="Conflict Detection"
+		title="Occurrence list"
 	/>
 {/snippet}
 
@@ -237,8 +237,8 @@
 	<Button onClick={onOpenViewMoreEvent} icon={ArrowUpFromBracketOutline} title="Settings" />
 {/snippet}
 
-{#snippet snippetClausesToCheck()}
-	<ConflictDetectionComponent />
+{#snippet snippetOccurrenceList()}
+	<OccurrenceListComponent />
 {/snippet}
 
 <!--

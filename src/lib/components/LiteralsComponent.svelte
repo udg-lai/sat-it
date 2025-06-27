@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onChrome } from '$lib/app.svelte.ts';
 	import MathTexComponent from './MathTexComponent.svelte';
 
 	interface Props {
@@ -12,9 +13,11 @@
 		const negative = literal < 0;
 		return negative ? `\\overline{${variable}}` : `${variable}`;
 	}
+
+	let chrome: boolean = $derived(onChrome());
 </script>
 
-<clause>
+<clause class={chrome ? 'pad-chrome' : 'pad-others'}>
 	{#each literals as lit, i (i)}
 		<MathTexComponent equation={toTeX(lit)} />
 		{#if i < literals.length - 1}
@@ -30,6 +33,5 @@
 		flex-direction: row;
 		gap: 0.5rem;
 		align-items: end;
-		padding: 0.25rem;
 	}
 </style>

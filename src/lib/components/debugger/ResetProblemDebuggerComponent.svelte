@@ -28,7 +28,7 @@
 				By resetting the problem, all the assignments made will be erased. Are you sure?
 			</h3>
 			<button
-				class="btn mr-4"
+				class="btn btn-modal mr-4"
 				onclick={() => {
 					changeInstanceEventBus.emit(getActiveInstance()?.name as string);
 					resetModal = false;
@@ -43,3 +43,13 @@
 		</div>
 	</Modal>
 </button>
+
+<style>
+	.btn {
+		border: solid;
+		border-width: 1px;
+		border-radius: 0.5rem;
+		border-color: var(--border-color);
+		padding: 0.75rem;
+	}
+</style>

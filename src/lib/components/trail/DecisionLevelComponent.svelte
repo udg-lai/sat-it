@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { Trail } from '$lib/entities/Trail.svelte.ts';
 	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
 	import BackjumpingComponent from '../assignment/BackjumpingComponent.svelte';
 	import BacktrackingComponent from '../assignment/BacktrackingComponent.svelte';
@@ -11,28 +12,46 @@
 		expanded: boolean;
 		propagations?: VariableAssignment[];
 		isLast?: boolean;
+		trail: Trail;
 	}
 
-	let { decision, expanded, propagations = [], isLast = false }: Props = $props();
+	let { decision, expanded, propagations = [], isLast = false, trail }: Props = $props();
 </script>
 
 {#if propagations?.length === 0}
-	<ChildlessDecisionComponent assignment={decision} {isLast} />
+	<ChildlessDecisionComponent
+		assignment={decision}
+		{isLast}
+		fromPreviousTrail={trail.isAssignmentFromPreviousTrail(decision)}
+	/>
 {:else}
 	<DecisionComponent
 		{expanded}
 		assignment={decision}
 		{isLast}
 		emitToggle={() => (expanded = !expanded)}
+		fromPreviousTrail={trail.isAssignmentFromPreviousTrail(decision)}
 	/>
 	{#if expanded}
 		{#each propagations as assignment (assignment.variableId())}
 			{#if assignment.isK()}
-				<BacktrackingComponent {assignment} {isLast} />
+				<BacktrackingComponent
+					{assignment}
+					{isLast}
+					fromPreviousTrail={trail.isAssignmentFromPreviousTrail(assignment)}
+				/>
 			{:else if assignment.isBJ()}
-				<BackjumpingComponent {assignment} {isLast} />
+				<BackjumpingComponent
+					{assignment}
+					{isLast}
+					fromPreviousTrail={trail.isAssignmentFromPreviousTrail(assignment)}
+				/>
 			{:else}
-				<UnitPropagationComponent {assignment} {isLast} />
+				<UnitPropagationComponent
+					{assignment}
+					{isLast}
+					fromPreviousTrail={trail.isAssignmentFromPreviousTrail(assignment)}
+				/>
 			{/if}
 		{/each}
 	{/if}

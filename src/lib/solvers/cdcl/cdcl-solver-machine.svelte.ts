@@ -8,13 +8,14 @@ import {
 	conflictAnalysis,
 	decide,
 	initialTransition,
-	preConflictAnalysis
+	preConflictAnalysis,
+	preConflictDetection
 } from './cdcl-solver-transitions.svelte.ts';
 import { CDCL_StateMachine, makeCDCLStateMachine } from './cdcl-state-machine.svelte.ts';
 import { cdcl_stateName2StateId } from './cdcl-states.svelte.ts';
 import { type StateMachineEvent } from '$lib/events/events.ts';
 import { SvelteSet } from 'svelte/reactivity';
-import type { ConflictAnalysis, ConflictDetection } from '../types.ts';
+import type { ConflictAnalysis, OccurrenceList } from '../types.ts';
 import { Queue } from '$lib/entities/Queue.svelte.ts';
 import type { Trail } from '$lib/entities/Trail.svelte.ts';
 import type TemporalClause from '$lib/entities/TemporalClause.ts';
@@ -25,42 +26,42 @@ export const makeCDCLSolver = (): CDCL_SolverMachine => {
 
 export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 	// Queue that will contain all those Set of clauses that need to be checked.
-	pendingConflicts: Queue<ConflictDetection> = $state(new Queue<ConflictDetection>());
+	pendingOccurrenceLists: Queue<OccurrenceList> = $state(new Queue<OccurrenceList>());
 	// This variable contains all the information for the machine to find the firstUIP.
 	conflictAnalysis: ConflictAnalysis | undefined = $state(undefined);
 
 	constructor() {
 		const stateMachine: CDCL_StateMachine = makeCDCLStateMachine();
 		super(stateMachine, 'cdcl');
-		this.pendingConflicts = new Queue<ConflictDetection>();
+		this.pendingOccurrenceLists = new Queue<OccurrenceList>();
 	}
 
 	// ** functions related to pendingConflicts **
-	postpone(pendingConflict: ConflictDetection): void {
-		this.pendingConflicts.enqueue(pendingConflict);
+	postpone(pendingConflict: OccurrenceList): void {
+		this.pendingOccurrenceLists.enqueue(pendingConflict);
 	}
 
-	resolvePostponed(): ConflictDetection | undefined {
-		return this.pendingConflicts.dequeue();
+	resolvePostponed(): OccurrenceList | undefined {
+		return this.pendingOccurrenceLists.dequeue();
 	}
 
-	consultPostponed(): ConflictDetection {
-		return this.pendingConflicts.pick();
+	consultPostponed(): OccurrenceList {
+		return this.pendingOccurrenceLists.pick();
 	}
 
 	thereArePostponed(): boolean {
-		return !this.pendingConflicts.isEmpty();
+		return !this.pendingOccurrenceLists.isEmpty();
 	}
 
 	leftToPostpone(): number {
-		return this.pendingConflicts.size();
+		return this.pendingOccurrenceLists.size();
 	}
 
-	getQueue(): Queue<ConflictDetection> {
-		const returnQueue: Queue<ConflictDetection> = new Queue();
-		for (const originalItem of this.pendingConflicts.toArray()) {
+	getQueue(): Queue<OccurrenceList> {
+		const returnQueue: Queue<OccurrenceList> = new Queue();
+		for (const originalItem of this.pendingOccurrenceLists.toArray()) {
 			const copiedSet = new SvelteSet<number>(originalItem.clauses);
-			const copiedItem: ConflictDetection = {
+			const copiedItem: OccurrenceList = {
 				clauses: copiedSet,
 				variableReasonId: originalItem.variableReasonId
 			};
@@ -129,22 +130,22 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 
 	updateFromRecord(record: Record<string, unknown> | undefined): void {
 		if (record === undefined) {
-			this.pendingConflicts = new Queue();
+			this.pendingOccurrenceLists = new Queue();
 			updateClausesToCheck(new SvelteSet<number>(), -1);
 			return;
 		}
-		const recordedPendingConflicts = record['queue'] as Queue<ConflictDetection>;
-		this.pendingConflicts.clear();
+		const recordedPendingConflicts = record['queue'] as Queue<OccurrenceList>;
+		this.pendingOccurrenceLists.clear();
 		for (const pendingConflict of recordedPendingConflicts.toArray()) {
 			const copiedSet = new SvelteSet<number>(pendingConflict.clauses);
-			const copiedItem: ConflictDetection = {
+			const copiedItem: OccurrenceList = {
 				clauses: copiedSet,
 				variableReasonId: pendingConflict.variableReasonId
 			};
-			this.pendingConflicts.enqueue(copiedItem);
+			this.pendingOccurrenceLists.enqueue(copiedItem);
 		}
-		if (!this.pendingConflicts.isEmpty()) {
-			const conflict: ConflictDetection = this.pendingConflicts.pick();
+		if (!this.pendingOccurrenceLists.isEmpty()) {
+			const conflict: OccurrenceList = this.pendingOccurrenceLists.pick();
 			updateClausesToCheck(conflict.clauses, conflict.variableReasonId);
 		}
 	}
@@ -161,6 +162,10 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 		//The initial state
 		if (activeId === cdcl_stateName2StateId.empty_clause_state) {
 			initialTransition(this);
+		}
+		//Waiting to enter or not the clause analysis
+		else if (activeId === cdcl_stateName2StateId.all_clauses_checked_state) {
+			preConflictDetection(this);
 		}
 		//Waiting to analyze the next clause of the clauses to revise
 		else if (activeId === cdcl_stateName2StateId.delete_clause_state) {
@@ -186,7 +191,7 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 	}
 
 	protected async solveCDStepByStep(): Promise<void> {
-		this.stepByStep(() => !this.pendingConflicts.isEmpty());
+		this.stepByStep(() => !this.pendingOccurrenceLists.isEmpty());
 	}
 
 	protected async solveCAStepByStep(): Promise<void> {
@@ -194,6 +199,6 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 	}
 
 	onConflictDetection(): boolean {
-		return !this.pendingConflicts.isEmpty() && !this.stateMachine.onConflictState();
+		return !this.pendingOccurrenceLists.isEmpty() && !this.stateMachine.onConflictState();
 	}
 }

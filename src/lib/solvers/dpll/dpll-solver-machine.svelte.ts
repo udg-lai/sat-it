@@ -2,13 +2,14 @@ import { Queue } from '$lib/entities/Queue.svelte.ts';
 import { updateClausesToCheck } from '$lib/states/conflict-detection-state.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import { SolverMachine } from '../SolverMachine.svelte.ts';
-import type { ConflictDetection } from '../types.ts';
+import type { OccurrenceList } from '../types.ts';
 import type { DPLL_FUN, DPLL_INPUT } from './dpll-domain.svelte.ts';
 import {
 	analyzeClause,
 	conflictiveState,
 	decide,
-	initialTransition
+	initialTransition,
+	preConflictDetection
 } from './dpll-solver-transitions.svelte.ts';
 import { DPLL_StateMachine, makeDPLLMachine } from './dpll-state-machine.svelte.ts';
 import { dpll_stateName2StateId } from './dpll-states.svelte.ts';
@@ -18,39 +19,39 @@ export const makeDPLLSolver = (): DPLL_SolverMachine => {
 };
 
 export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
-	pendingConflicts: Queue<ConflictDetection> = $state(new Queue<ConflictDetection>());
+	pendingOccurrenceLists: Queue<OccurrenceList> = $state(new Queue<OccurrenceList>());
 
 	constructor() {
 		const stateMachine: DPLL_StateMachine = makeDPLLMachine();
 		super(stateMachine, 'dpll');
-		this.pendingConflicts = new Queue<ConflictDetection>();
+		this.pendingOccurrenceLists = new Queue<OccurrenceList>();
 	}
 
-	postpone(pendingItem: ConflictDetection): void {
-		this.pendingConflicts.enqueue(pendingItem);
+	postpone(pendingItem: OccurrenceList): void {
+		this.pendingOccurrenceLists.enqueue(pendingItem);
 	}
 
-	resolvePostponed(): ConflictDetection | undefined {
-		return this.pendingConflicts.dequeue();
+	resolvePostponed(): OccurrenceList | undefined {
+		return this.pendingOccurrenceLists.dequeue();
 	}
 
-	consultPostponed(): ConflictDetection {
-		return this.pendingConflicts.pick();
+	consultPostponed(): OccurrenceList {
+		return this.pendingOccurrenceLists.pick();
 	}
 
 	thereArePostponed(): boolean {
-		return !this.pendingConflicts.isEmpty();
+		return !this.pendingOccurrenceLists.isEmpty();
 	}
 
 	leftToPostpone(): number {
-		return this.pendingConflicts.size();
+		return this.pendingOccurrenceLists.size();
 	}
 
-	getQueue(): Queue<ConflictDetection> {
-		const returnQueue: Queue<ConflictDetection> = new Queue();
-		for (const originalItem of this.pendingConflicts.toArray()) {
+	getQueue(): Queue<OccurrenceList> {
+		const returnQueue: Queue<OccurrenceList> = new Queue();
+		for (const originalItem of this.pendingOccurrenceLists.toArray()) {
 			const copiedSet = new SvelteSet<number>(originalItem.clauses);
-			const copiedItem: ConflictDetection = {
+			const copiedItem: OccurrenceList = {
 				clauses: copiedSet,
 				variableReasonId: originalItem.variableReasonId
 			};
@@ -67,22 +68,22 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 
 	updateFromRecord(record: Record<string, unknown> | undefined): void {
 		if (record === undefined) {
-			this.pendingConflicts = new Queue();
+			this.pendingOccurrenceLists = new Queue();
 			updateClausesToCheck(new SvelteSet<number>(), -1);
 			return;
 		}
-		const recordedPendingConflicts = record['queue'] as Queue<ConflictDetection>;
-		this.pendingConflicts.clear();
-		for (const pendingConflict of recordedPendingConflicts.toArray()) {
+		const recordedPendingOccurrenceLists = record['queue'] as Queue<OccurrenceList>;
+		this.pendingOccurrenceLists.clear();
+		for (const pendingConflict of recordedPendingOccurrenceLists.toArray()) {
 			const copiedSet = new SvelteSet<number>(pendingConflict.clauses);
-			const copiedItem: ConflictDetection = {
+			const copiedItem: OccurrenceList = {
 				clauses: copiedSet,
 				variableReasonId: pendingConflict.variableReasonId
 			};
-			this.pendingConflicts.enqueue(copiedItem);
+			this.pendingOccurrenceLists.enqueue(copiedItem);
 		}
-		if (!this.pendingConflicts.isEmpty()) {
-			const conflict: ConflictDetection = this.pendingConflicts.pick();
+		if (!this.pendingOccurrenceLists.isEmpty()) {
+			const conflict: OccurrenceList = this.pendingOccurrenceLists.pick();
 			updateClausesToCheck(conflict.clauses, conflict.variableReasonId);
 		}
 	}
@@ -94,6 +95,10 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 		if (activeId === dpll_stateName2StateId.empty_clause_state) {
 			initialTransition(this);
 		}
+		//Waiting to enter or not the clause analysis
+		else if (activeId === dpll_stateName2StateId.all_clauses_checked_state) {
+			preConflictDetection(this);
+		}
 		//Waiting to analyze the next clause or changing the clause set
 		else if (activeId === dpll_stateName2StateId.delete_clause_state) {
 			analyzeClause(this);
@@ -103,7 +108,7 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 			decide(this);
 		}
 		//Waiting to backtrack an assignment
-		else if (activeId === dpll_stateName2StateId.empty_clause_set_state) {
+		else if (activeId === dpll_stateName2StateId.empty_occurrence_lists_state) {
 			conflictiveState(this);
 		}
 	}
@@ -114,10 +119,10 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 	}
 
 	protected async solveCDStepByStep(): Promise<void> {
-		this.stepByStep(() => !this.pendingConflicts.isEmpty());
+		this.stepByStep(() => !this.pendingOccurrenceLists.isEmpty());
 	}
 
 	onConflictDetection(): boolean {
-		return !this.pendingConflicts.isEmpty() && !this.onConflictState();
+		return !this.pendingOccurrenceLists.isEmpty() && !this.onConflictState();
 	}
 }

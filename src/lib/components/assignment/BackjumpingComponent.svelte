@@ -1,24 +1,24 @@
 <script lang="ts">
+	import { onChrome } from '$lib/app.svelte.ts';
 	import MathTexComponent from '$lib/components/MathTexComponent.svelte';
-	import type Clause from '$lib/entities/Clause.svelte.ts';
-	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
-	import { isBackjumpingReason } from '$lib/entities/VariableAssignment.ts';
-	import { getInspectedVariable } from '$lib/states/conflict-detection-state.svelte.ts';
-	import { getProblemStore, type Problem } from '$lib/states/problem.svelte.ts';
-	import { logFatal } from '$lib/stores/toasts.ts';
-	import { runningOnChrome } from '$lib/utils.ts';
 	import { Popover } from 'flowbite-svelte';
 	import { nanoid } from 'nanoid';
-	import { onMount } from 'svelte';
 	import HeadTailComponent from '../HeadTailComponent.svelte';
 	import './style.css';
+	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
+	import { getInspectedVariable } from '$lib/states/conflict-detection-state.svelte.ts';
+	import { getProblemStore, type Problem } from '$lib/states/problem.svelte.ts';
+	import type Clause from '$lib/entities/Clause.svelte.ts';
+	import { logFatal } from '$lib/stores/toasts.ts';
+	import { isBackjumpingReason } from '$lib/entities/VariableAssignment.ts';
 
 	interface Props {
 		assignment: VariableAssignment;
 		isLast: boolean;
+		fromPreviousTrail?: boolean;
 	}
 
-	let { assignment, isLast }: Props = $props();
+	let { assignment, isLast, fromPreviousTrail = false }: Props = $props();
 	let buttonId: string = 'btn-' + nanoid();
 
 	const inspectedVariable: number = $derived(getInspectedVariable());
@@ -48,30 +48,25 @@
 			.join('\\: \\:')
 	);
 
-	let onChrome = $state(false);
-
-	onMount(() => {
-		onChrome = runningOnChrome();
-	});
+	let chrome: boolean = $derived(onChrome());
 </script>
 
 <HeadTailComponent {inspecting}>
-	<backtracking>
+	<backtracking class:previous-assignment={fromPreviousTrail}>
 		<button
 			id={buttonId}
-			class="literal-style decision backjumping {onChrome ? 'pad-chrome' : 'pad-others'}"
+			class="literal-style decision backjumping {chrome ? 'pad-chrome' : 'pad-others'}"
 		>
 			<MathTexComponent equation={assignment.toTeX()} />
 		</button>
+		<Popover triggeredBy={'#' + buttonId} class="app-popover" trigger="click" placement="bottom">
+			<div class="popover-content">
+				<span class="clause-id">{conflictClauseId}.</span>
+				<MathTexComponent equation={conflictClauseString} fontSize="var(--popover-font-size)" />
+			</div>
+		</Popover>
 	</backtracking>
 </HeadTailComponent>
-
-<Popover triggeredBy={'#' + buttonId} class="app-popover" trigger="click" placement="bottom">
-	<div class="popover-content">
-		<span class="clause-id">{conflictClauseId}.</span>
-		<MathTexComponent equation={conflictClauseString} fontSize="var(--popover-font-size)" />
-	</div>
-</Popover>
 
 <style>
 	.backjumping {

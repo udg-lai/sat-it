@@ -50,7 +50,7 @@ export const isBackjumpingReason = (r: Reason): r is Backjumping => {
 	return r.type === 'backjumping';
 };
 
-export const isPropagatioReason = (r: Reason): r is Propagation => {
+export const isPropagationReason = (r: Reason): r is Propagation => {
 	return r.type === 'propagated' || r.type === 'backjumping';
 };
 

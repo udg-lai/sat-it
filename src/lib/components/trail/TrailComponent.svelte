@@ -52,11 +52,23 @@
 <trail class="trail" use:listenContentWidth>
 	{#each initialPropagations as assignment (assignment.variableId())}
 		{#if assignment.isK()}
-			<BacktrackingComponent {assignment} {isLast} />
+			<BacktrackingComponent
+				{assignment}
+				{isLast}
+				fromPreviousTrail={trail.isAssignmentFromPreviousTrail(assignment)}
+			/>
 		{:else if assignment.isBJ()}
-			<BackjumpingComponent {assignment} {isLast} />
+			<BackjumpingComponent
+				{assignment}
+				{isLast}
+				fromPreviousTrail={trail.isAssignmentFromPreviousTrail(assignment)}
+			/>
 		{:else}
-			<UnitPropagationComponent {assignment} {isLast} />
+			<UnitPropagationComponent
+				{assignment}
+				{isLast}
+				fromPreviousTrail={trail.isAssignmentFromPreviousTrail(assignment)}
+			/>
 		{/if}
 	{/each}
 
@@ -66,6 +78,7 @@
 			propagations={trail.getPropagations(level)}
 			{expanded}
 			{isLast}
+			{trail}
 		/>
 	{/each}
 </trail>

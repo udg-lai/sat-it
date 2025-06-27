@@ -7,15 +7,16 @@
 	import AutoModeComponent from './AutoModeComponent.svelte';
 	import ConflictAnalysisDebugger from './ConflictAnalysisDebuggerComponent.svelte';
 	import ConflictDetectionDebugger from './ConflictDetectionDebuggerComponent.svelte';
-	import AutomaticDebugger from './DecisionDebuggerComponent.svelte';
+	import DecisionDebugger from './DecisionDebuggerComponent.svelte';
 	import GeneralDebuggerButtons from './GeneralDebuggerComponent.svelte';
-	import InitialStepDebugger from './InitialStepDebuggerComponent.svelte';
+	import SingleStepDebugger from './SingleStepDebuggerComponent.svelte';
 
 	const problem: Problem = $derived(getProblemStore());
 	let defaultNextVariable: number | undefined = $derived(problem.variables.nextVariable());
 
 	let solverMachine: SolverMachine<StateFun, StateInput> = $derived(getSolverMachine());
 	let enablePreprocess = $derived(solverMachine.onInitialState());
+	let onPreConflictDetection = $derived(solverMachine.onPreConflictState());
 	let onConflictDetection = $derived(solverMachine.onConflictDetection());
 	let onConflict = $derived(solverMachine.onConflictState());
 	let finished = $derived(solverMachine.completed());
@@ -26,14 +27,16 @@
 	{#if inAutoMode}
 		<AutoModeComponent />
 	{:else if enablePreprocess}
-		<InitialStepDebugger />
+		<SingleStepDebugger />
 	{:else}
-		{#if onConflictDetection}
+		{#if onPreConflictDetection}
+			<SingleStepDebugger />
+		{:else if onConflictDetection}
 			<ConflictDetectionDebugger />
 		{:else if onConflict && problem.algorithm === 'cdcl'}
 			<ConflictAnalysisDebugger />
 		{:else if !finished}
-			<AutomaticDebugger
+			<DecisionDebugger
 				{onConflict}
 				{finished}
 				{onConflictDetection}

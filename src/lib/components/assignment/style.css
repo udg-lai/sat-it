@@ -1,8 +1,3 @@
-:root {
-	--literal-padding-bottom-chrome: 9px;
-	--literal-padding-bottom-others: 3px;
-}
-
 .literal-style {
 	min-width: var(--trail-literal-min-width);
 	width: var(--trail-literal-min-width);
@@ -16,10 +11,6 @@
 	border-bottom: 1px solid;
 }
 
-.pad-chrome {
-	padding-bottom: var(--literal-padding-bottom-chrome);
-}
-
-.pad-others {
-	padding-bottom: var(--literal-padding-bottom-others);
+.previous-assignment {
+	opacity: 0.6;
 }

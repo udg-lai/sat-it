@@ -1,35 +1,29 @@
 <script lang="ts">
+	import { onChrome } from '$lib/app.svelte.ts';
 	import MathTexComponent from '$lib/components/MathTexComponent.svelte';
 	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
 	import { getInspectedVariable } from '$lib/states/conflict-detection-state.svelte.ts';
-	import { runningOnChrome } from '$lib/utils.ts';
-	import { onMount } from 'svelte';
 	import HeadTailComponent from './../HeadTailComponent.svelte';
 	import './style.css';
 
 	interface Props {
 		assignment: VariableAssignment;
 		isLast?: boolean;
+		fromPreviousTrail?: boolean;
 	}
 
-	let { assignment, isLast = false }: Props = $props();
+	let { assignment, isLast = false, fromPreviousTrail = false }: Props = $props();
 
 	const inspectedVariable: number = $derived(getInspectedVariable());
 	let inspecting: boolean = $derived(assignment.variableId() === inspectedVariable && isLast);
 
-	let onChrome = $state(false);
-
-	onMount(() => {
-		onChrome = runningOnChrome();
-	});
+	let chrome: boolean = $derived(onChrome());
 </script>
 
 <HeadTailComponent {inspecting}>
-	<childless-decision>
+	<childless-decision class:previous-assignment={fromPreviousTrail}>
 		<button
-			class="literal-style decision level-expanded childless {onChrome
-				? 'pad-chrome'
-				: 'pad-others'}"
+			class="literal-style decision level-expanded childless {chrome ? 'pad-chrome' : 'pad-others'}"
 		>
 			<MathTexComponent equation={assignment.toTeX()} />
 		</button>
