@@ -29,9 +29,10 @@
 </script>
 
 <HeadTailComponent {inspecting}>
-	<childless-decision class:previous-assignment={fromPreviousTrail}>
+	<childless-decision class:current-trail={!fromPreviousTrail}>
 		<button
 			class="literal-style decision level-expanded childless {chrome ? 'pad-chrome' : 'pad-others'}"
+			class:previous-assignment={fromPreviousTrail}
 			onclick={() => {
 				isDropdownOpen = !isDropdownOpen;
 			}}

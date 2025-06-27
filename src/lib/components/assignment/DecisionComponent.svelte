@@ -52,9 +52,10 @@
 </script>
 
 <HeadTailComponent {inspecting}>
-	<decision class:previous-assignment={fromPreviousTrail}>
+	<decision>
 		<button
 			class="literal-style decision {chrome ? 'pad-chrome' : 'pad-others'}"
+			class:previous-assignment={fromPreviousTrail}
 			class:open={openLevel}
 			onclick={() => {
 				isDropdownOpen = !isDropdownOpen;
