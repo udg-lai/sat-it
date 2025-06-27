@@ -91,8 +91,4 @@
 	.open {
 		border-right: 1px solid transparent;
 	}
-
-	:global(.dropdownClass) {
-		overflow: visible;
-	}
 </style>
