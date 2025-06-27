@@ -22,6 +22,7 @@ import type { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
 import { updateClausesToCheck } from '$lib/states/conflict-detection-state.svelte.ts';
 import {
 	addClauseToClausePool,
+	getClausePool,
 	getProblemStore,
 	type MappingLiteral2Clauses,
 	type Problem
@@ -317,11 +318,10 @@ export const buildConflictAnalysis: CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN =
 	const trail: Trail | undefined = getLatestTrail();
 	if (trail === undefined) logFatal('CDCL domain', 'Undefined latest trail');
 
-	const conflictAnalysisCtx: Either<TemporalClause, undefined>[] = trail.getConflictAnalysisCtx();
-	const conflictiveClause: Either<TemporalClause, undefined> = conflictAnalysisCtx[0];
+	const conflictiveClause: number | undefined = trail.getConflict();
 	if (conflictiveClause === undefined)
 		logFatal('CDCL domain', 'Conflictive clause can not be undefined');
-	const temporalClause: TemporalClause = unwrapEither(conflictiveClause);
+	const temporalClause: TemporalClause = getClausePool().get(conflictiveClause).toTemporalClause();
 
 	//Lastly, generate the conflict analysis structure
 	solver.setConflictAnalysis(latestTrail.partialCopy(), temporalClause, variablesLastDecisionLevel);

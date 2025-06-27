@@ -21,7 +21,6 @@ export class Trail {
 	private conflictiveClause: number | undefined = $state(undefined);
 	private learntClause: number | undefined = $state(undefined); // this is for doing undo algorithmic
 	private conflictAnalysisCtx: Either<TemporalClause, undefined>[] = $state([]); // this is just for representing the conflict analysis view
-	private latestLevelUPCtx: number[] = $derived.by(() => this._computeLatestLevelUPContext());
 	private upContext: Either<number, undefined>[] = $derived.by(() => this._upContext());
 	private fullView: boolean = $state(false); // UI state for knowing whenever for that trail it was required to show more information
 	private trailHeight: number = $state(0); // trail height in px
@@ -109,20 +108,24 @@ export class Trail {
 
 	setConflict(clauseId: number): void {
 		this.conflictiveClause = clauseId;
-		this._initConflictAnalysisCtx(clauseId);
 	}
 
+
+	getConflict(): number | undefined  {
+		return this.conflictiveClause;
+	}
+
+
 	getConflictAnalysisCtx(): Either<TemporalClause, undefined>[] {
-		return this.conflictAnalysisCtx;
+		const nAssignments = this.assignments.length;
+		const diff = Math.max(nAssignments - this.conflictAnalysisCtx.length, 0)
+		const ctx = [...Array(diff).fill(makeRight(undefined)),  ...this.conflictAnalysisCtx];
+		return ctx;
 	}
 
 	updateConflictAnalysisCtx(clause: TemporalClause | undefined = undefined): void {
-		this.conflictAnalysisCtx.push(clause === undefined ? makeRight(clause) : makeLeft(clause));
-	}
-
-	getLatestLevelUPCtx(): Clause[] {
-		const clauses = getClausePool();
-		return this.latestLevelUPCtx.map(clauses.get);
+		const ca = clause === undefined ? makeRight(undefined) : makeLeft(clause);
+		this.conflictAnalysisCtx = [...this.conflictAnalysisCtx, ca];
 	}
 
 	private _initConflictAnalysisCtx(clauseId: number): void {
@@ -311,18 +314,4 @@ export class Trail {
 		});
 	}
 
-	private _computeLatestLevelUPContext(): number[] {
-		const latestLevelIndex = this.decisionLevelBookmark.at(-1);
-		if (latestLevelIndex === undefined || latestLevelIndex === -1) return [];
-		else {
-			const propagations: VariableAssignment[] = this.assignments.slice(latestLevelIndex + 1);
-			const reasons: number[] = propagations.map((p) => {
-				const reason: Reason = p.getReason();
-				if (!isUnitPropagationReason(reason))
-					logFatal('Trail', `Unexpected UP reason but ${reason} was given`);
-				return reason.clauseId;
-			});
-			return reasons;
-		}
-	}
 }
