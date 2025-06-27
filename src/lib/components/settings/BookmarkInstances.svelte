@@ -186,8 +186,7 @@
 	}
 
 	.item:hover {
-		background-color: var(--icon-light);
-		color: var(--icon-strong);
+		background-color: var(--lighter-bg-color);
 	}
 
 	.item.selected {

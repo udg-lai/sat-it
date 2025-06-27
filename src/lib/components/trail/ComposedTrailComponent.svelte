@@ -66,7 +66,6 @@
 		display: flex;
 		flex-direction: column;
 		gap: 0.1rem;
-		border: 1px solid red;
 	}
 
 	.fit-content {
