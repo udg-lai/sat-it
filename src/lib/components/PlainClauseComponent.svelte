@@ -21,11 +21,13 @@
 <clause>
 	{#each literals as lit, i (i)}
 		<PlainLiteralComponent literal={lit} />
+		<!--
 		{#if i < clause.nLiterals() - 1}
 			<div class="lor">
 				<MathTexComponent equation={'\\lor'} fontSize={'1rem'} />
 			</div>
 		{/if}
+		-->
 	{/each}
 </clause>
 

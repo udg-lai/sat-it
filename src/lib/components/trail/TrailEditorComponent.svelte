@@ -201,7 +201,7 @@
 
 		<editor-info class="container-padding">
 			{#each trails as trail, index (index)}
-				<div class="item">
+				<div class="item" style="height: {trail.getHeight()}px; --align: {computeAlign()}">
 					<InformationComponent {trail} isLast={trails.length === index + 1} />
 				</div>
 			{/each}
