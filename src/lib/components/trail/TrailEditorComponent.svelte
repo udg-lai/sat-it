@@ -175,15 +175,11 @@
 	<editor-leaf use:listenContentHeight>
 		<editor-indexes class="enumerate container-padding">
 			{#each trails as trail, index (index)}
-				<button
-					class="item"
-					style="--height: {trail.getHeight()}px; --align: {computeAlign()}"
-					onclick={() => toggleTrailView(index)}
-				>
-					<div class="enumerate-item">
-						<span>{index + 1}.</span>
-					</div>
-				</button>
+				{#if !caConstraint && !upConstraint}
+					{@render snippetPlaceholderToggleTrail(trail, index)}
+				{:else}
+					{@render snippetToggleTrail(trail, index)}
+				{/if}
 			{/each}
 		</editor-indexes>
 
@@ -212,6 +208,26 @@
 		</editor-info>
 	</editor-leaf>
 </trail-editor>
+
+{#snippet snippetToggleTrail(trail: Trail, index: number)}
+	<button
+		class="item"
+		style="--height: {trail.getHeight()}px; --align: {computeAlign()}"
+		onclick={() => toggleTrailView(index)}
+	>
+		<div class="enumerate-item">
+			<span>{index + 1}.</span>
+		</div>
+	</button>
+{/snippet}
+
+{#snippet snippetPlaceholderToggleTrail(trail: Trail, index: number)}
+	<div class="item" style="--height: {trail.getHeight()}px; --align: {computeAlign()}">
+		<div class="enumerate-item">
+			<span>{index + 1}.</span>
+		</div>
+	</div>
+{/snippet}
 
 <style>
 	trail-editor {

@@ -1,12 +1,9 @@
 <script lang="ts">
 	import type Clause from '$lib/entities/Clause.svelte.ts';
 	import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
-	import type Literal from '$lib/entities/Literal.svelte.ts';
 	import type { Trail } from '$lib/entities/Trail.svelte.ts';
 	import { getClausePool } from '$lib/states/problem.svelte.ts';
 	import { isLeft, makeLeft, makeRight, unwrapEither, type Either } from '$lib/types/either.ts';
-	import PlainClauseComponent from '../PlainClauseComponent.svelte';
-	import PlainLiteralComponent from '../PlainLiteralComponent.svelte';
 	import CanvasComponent from './CanvasComponent.svelte';
 	import TrailComponent from './TrailComponent.svelte';
 
