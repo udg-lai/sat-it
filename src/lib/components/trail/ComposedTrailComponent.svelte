@@ -54,13 +54,13 @@
 
 <composed-trail class="composed-trail">
 	{#if showUPView}
-		<CanvasComponent context={upContext} width={trailWidth} align={'end'}/>
+		<CanvasComponent context={upContext} width={trailWidth} align={'end'} reverse={true} />
 	{/if}
 	<div use:observeWidth class="fit-content">
 		<TrailComponent {trail} {expanded} {isLast} />
 	</div>
 	{#if showCAView}
-		<CanvasComponent context={upContext} width={trailWidth} align={'start'}/>
+		<CanvasComponent context={upContext} width={trailWidth} align={'start'} />
 	{/if}
 </composed-trail>
 

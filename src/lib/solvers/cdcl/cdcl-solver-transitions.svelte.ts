@@ -143,10 +143,15 @@ export const conflictAnalysis = (solver: CDCL_SolverMachine): void => {
 		lastAssignment
 	);
 	const latestTrail: Trail | undefined = getLatestTrail();
-	if (latestTrail === undefined) logFatal("CDCL solver", "Latest trail should not be undefined");
+	if (latestTrail === undefined) logFatal('CDCL solver', 'Latest trail should not be undefined');
 
 	if (variableAppear) {
-		const temporalClause: TemporalClause = resolutionUpdateCCTransition(stateMachine, solver, conflictAnalysis, lastAssignment);
+		const temporalClause: TemporalClause = resolutionUpdateCCTransition(
+			stateMachine,
+			solver,
+			conflictAnalysis,
+			lastAssignment
+		);
 		latestTrail.updateConflictAnalysisCtx(temporalClause);
 	} else {
 		latestTrail.updateConflictAnalysisCtx();
@@ -600,7 +605,11 @@ const resolutionUpdateCCTransition = (
 	if (resolutionUpdateCCState.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Variable In CC state');
 	}
-	const temporalClause: TemporalClause = resolutionUpdateCCState.run(solver, conflictAnalysis.conflictClause, lastAssignment);
+	const temporalClause: TemporalClause = resolutionUpdateCCState.run(
+		solver,
+		conflictAnalysis.conflictClause,
+		lastAssignment
+	);
 	stateMachine.transition('delete_last_assignment_state');
 	return temporalClause;
 };

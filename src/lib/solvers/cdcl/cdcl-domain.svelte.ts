@@ -312,20 +312,17 @@ export const buildConflictAnalysis: CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN =
 		);
 	}
 
-	const trail: Trail| undefined = getLatestTrail()
-	if (trail === undefined) logFatal("CDCL domain", "Undefined latest trail");
+	const trail: Trail | undefined = getLatestTrail();
+	if (trail === undefined) logFatal('CDCL domain', 'Undefined latest trail');
 
 	const conflictAnalysisCtx: Either<TemporalClause, undefined>[] = trail.getConflictAnalysisCtx();
 	const conflictiveClause: Either<TemporalClause, undefined> = conflictAnalysisCtx[0];
-	if (conflictiveClause === undefined) logFatal("CDCL domain", "Conflictive clause can not be undefined");
+	if (conflictiveClause === undefined)
+		logFatal('CDCL domain', 'Conflictive clause can not be undefined');
 	const temporalClause: TemporalClause = unwrapEither(conflictiveClause);
 
 	//Lastly, generate the conflict analysis structure
-	solver.setConflictAnalysis(
-		latestTrail.partialCopy(),
-		temporalClause,
-		variablesLastDecisionLevel
-	);
+	solver.setConflictAnalysis(latestTrail.partialCopy(), temporalClause, variablesLastDecisionLevel);
 };
 
 export type CDCL_ASSERTING_CLAUSE_FUN = (solver: CDCL_SolverMachine) => boolean;

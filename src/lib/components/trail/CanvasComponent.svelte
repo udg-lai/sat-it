@@ -6,17 +6,18 @@
 	interface Props {
 		context: Either<Clause, undefined>[];
 		width: number;
-        align: 'end' | 'start'
+		align: 'end' | 'start';
+		reverse?: boolean;
 	}
 
-	let { context, width, align }: Props = $props();
+	let { context, width, align, reverse = false }: Props = $props();
 </script>
 
 <trail-canvas class="canvas" style="--width: {width}px">
 	<div class="canvas-sheet" style="--align: {align}">
 		{#each context as clause}
 			{#if isLeft(clause)}
-				<PlainClauseComponent clause={unwrapEither(clause)} />
+				<PlainClauseComponent {reverse} clause={unwrapEither(clause)} />
 			{:else}
 				<div class="empty-slot"></div>
 			{/if}
@@ -24,10 +25,7 @@
 	</div>
 </trail-canvas>
 
-
 <style>
-
-
 	.empty-slot {
 		width: 55px;
 	}

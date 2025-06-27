@@ -19,10 +19,6 @@
 
 	let { trails }: Props = $props();
 
-	let indexes: number[] = $derived.by(() => {
-		return trails.map((_, index) => index);
-	});
-
 	let editorElement: HTMLDivElement;
 	let trailsLeafElement: HTMLElement;
 	let userInteracting: boolean = $state(false);
@@ -37,7 +33,15 @@
 
 	let solverMachine: SolverMachine<StateFun, StateInput> = $derived(getSolverMachine());
 
-	let cdcl: boolean = $derived(solverMachine.identify() === 'cdcl');
+	let upConstraint: boolean = $derived.by(() => {
+		const identity = solverMachine.identify();
+		return identity === 'cdcl' || identity === 'dpll';
+	});
+
+	let caConstraint: boolean = $derived.by(() => {
+		const identity = solverMachine.identify();
+		return identity === 'cdcl';
+	});
 
 	const scrollToBottom = (editorElement: HTMLElement) => {
 		editorElement.scrollTo({ top: editorElement.scrollHeight, behavior: 'smooth' });
@@ -114,7 +118,33 @@
 	}
 
 	function toggleTrailView(trailId: number) {
-		trails.at(trailId)?.toggleView()
+		for (let i = 0; i < trails.length; i++) {
+			if (trailId != i) {
+				trails.at(i)?.setView(false);
+			}
+		}
+		trails.at(trailId)?.toggleView();
+	}
+
+	function computeAlign(): 'center' | 'end' {
+		if (caConstraint) return 'center';
+		else if (upConstraint) return 'end';
+		else return 'center';
+	}
+
+	function observeHeight(element: HTMLElement, trail: Trail) {
+		const previewObserver = new ResizeObserver((entries) => {
+			for (const entry of entries) {
+				const height: number = entry.contentRect.height;
+				trail.setHeight(height);
+			}
+		});
+		previewObserver.observe(element);
+		return {
+			destroy() {
+				previewObserver.disconnect();
+			}
+		};
 	}
 
 	onMount(() => {
@@ -144,8 +174,12 @@
 >
 	<editor-leaf use:listenContentHeight>
 		<editor-indexes class="enumerate container-padding">
-			{#each indexes as index (index)}
-				<button class="item" onclick={() => toggleTrailView(index)}>
+			{#each trails as trail, index (index)}
+				<button
+					class="item"
+					style="--height: {trail.getHeight()}px; --align: {computeAlign()}"
+					onclick={() => toggleTrailView(index)}
+				>
 					<div class="enumerate-item">
 						<span>{index + 1}.</span>
 					</div>
@@ -156,13 +190,15 @@
 		<trails-leaf bind:this={trailsLeafElement}>
 			<editor-trails class="container-padding">
 				{#each trails as trail, index (index)}
-					<ComposedTrailComponent
-						{trail}
-						expanded={expandedTrails}
-						isLast={trails.length === index + 1}
-						showCAView={cdcl && trail.getView()}
-						showUPView={trail.getView()}
-					/>
+					<div use:observeHeight={trail}>
+						<ComposedTrailComponent
+							{trail}
+							expanded={expandedTrails}
+							isLast={trails.length === index + 1}
+							showCAView={caConstraint && trail.view()}
+							showUPView={upConstraint && trail.view()}
+						/>
+					</div>
 				{/each}
 			</editor-trails>
 		</trails-leaf>
@@ -217,11 +253,12 @@
 	}
 
 	.item {
-		height: var(--trail-height);
+		height: var(--height, var(--trail-height));
 		width: var(--trail-height);
 		display: flex;
-		align-items: center;
+		align-items: var(--align);
 		justify-content: center;
+		padding: 0.5rem 0rem;
 	}
 
 	.enumerate-item {

@@ -4,7 +4,11 @@ import { makeLeft, makeRight, type Either } from '../types/either.ts';
 import type Clause from './Clause.svelte.ts';
 import type ClausePool from './ClausePool.svelte.ts';
 import type TemporalClause from './TemporalClause.ts';
-import { isUnitPropagationReason, type Reason, type UnitPropagation } from './VariableAssignment.ts';
+import {
+	isUnitPropagationReason,
+	type Reason,
+	type UnitPropagation
+} from './VariableAssignment.ts';
 import type VariableAssignment from './VariableAssignment.ts';
 
 export class Trail {
@@ -19,8 +23,8 @@ export class Trail {
 	private conflictAnalysisCtx: Either<TemporalClause, undefined>[] = $state([]); // this is just for representing the conflict analysis view
 	private latestLevelUPCtx: number[] = $derived.by(() => this._computeLatestLevelUPContext());
 	private upContext: Either<number, undefined>[] = $derived.by(() => this._upContext());
-	private fullView: boolean = $state(false);
-
+	private fullView: boolean = $state(false); // UI state for knowing whenever for that trail it was required to show more information
+	private trailHeight: number = $state(0); // trail height in px
 
 	constructor(trailCapacity: number = 0) {
 		this.trailCapacity = trailCapacity;
@@ -127,7 +131,6 @@ export class Trail {
 		this.conflictAnalysisCtx.push(makeLeft(clause));
 	}
 
-
 	hasPropagations(level: number): boolean {
 		return this.getPropagations(level).length > 0;
 	}
@@ -192,8 +195,20 @@ export class Trail {
 		this.fullView = !this.fullView;
 	}
 
-	getView(): boolean {
+	setView(view: boolean): void {
+		this.fullView = view;
+	}
+
+	view(): boolean {
 		return this.fullView;
+	}
+
+	setHeight(height: number): void {
+		this.trailHeight = height;
+	}
+
+	getHeight(): number {
+		return this.trailHeight;
 	}
 
 	[Symbol.iterator]() {
@@ -279,14 +294,14 @@ export class Trail {
 	}
 
 	private _upContext(): Either<number, undefined>[] {
-		return this.assignments.map(a => {
+		return this.assignments.map((a) => {
 			if (a.isUP()) {
-				const reason =  a.getReason() as UnitPropagation
+				const reason = a.getReason() as UnitPropagation;
 				return makeLeft(reason.clauseId);
 			} else {
 				return makeRight(undefined);
 			}
-		})
+		});
 	}
 
 	private _computeLatestLevelUPContext(): number[] {
@@ -294,9 +309,10 @@ export class Trail {
 		if (latestLevelIndex === undefined || latestLevelIndex === -1) return [];
 		else {
 			const propagations: VariableAssignment[] = this.assignments.slice(latestLevelIndex + 1);
-			const reasons: number[] = propagations.map(p => {
+			const reasons: number[] = propagations.map((p) => {
 				const reason: Reason = p.getReason();
-				if (!isUnitPropagationReason(reason)) logFatal("Trail", `Unexpected UP reason but ${reason} was given`);
+				if (!isUnitPropagationReason(reason))
+					logFatal('Trail', `Unexpected UP reason but ${reason} was given`);
 				return reason.clauseId;
 			});
 			return reasons;

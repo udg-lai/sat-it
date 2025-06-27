@@ -1,17 +1,25 @@
 <script lang="ts">
+	import { BookOutline } from 'flowbite-svelte-icons';
 	import Clause from '$lib/entities/Clause.svelte.ts';
 	import MathTexComponent from './MathTexComponent.svelte';
 	import PlainLiteralComponent from './PlainLiteralComponent.svelte';
+	import type Literal from '$lib/entities/Literal.svelte.ts';
 
 	interface Props {
 		clause: Clause;
+		reverse?: boolean;
 	}
 
-	let { clause }: Props = $props();
+	let { clause, reverse = false }: Props = $props();
+
+	let literals: Literal[] = $derived.by(() => {
+		const lits = [...clause];
+		return reverse ? lits.reverse() : lits;
+	});
 </script>
 
 <clause>
-	{#each clause as lit, i (i)}
+	{#each literals as lit, i (i)}
 		<PlainLiteralComponent literal={lit} />
 		{#if i < clause.nLiterals() - 1}
 			<div class="lor">

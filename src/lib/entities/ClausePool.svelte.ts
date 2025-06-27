@@ -1,10 +1,15 @@
 import { logFatal } from '$lib/stores/toasts.ts';
 import { SvelteMap, SvelteSet } from 'svelte/reactivity';
-import { makeSat, makeUnresolved, makeUnSAT, type AssignmentEval, type IClausePool } from '../interfaces/IClausePool.ts';
+import {
+	makeSat,
+	makeUnresolved,
+	makeUnSAT,
+	type AssignmentEval,
+	type IClausePool
+} from '../interfaces/IClausePool.ts';
 import type { Claim } from '../parsers/dimacs.ts';
 import Clause, { type ClauseEval, isSatClause, isUnSATClause } from './Clause.svelte.ts';
 import type { VariablePool } from './VariablePool.svelte.ts';
-
 
 export interface IClausePool {
 	eval(): AssignmentEval;
@@ -14,7 +19,6 @@ export interface IClausePool {
 	getClauses(): Clause[];
 	size(): number;
 }
-
 
 class ClausePool implements IClausePool {
 	private clauses: SvelteMap<number, Clause> = new SvelteMap();
@@ -53,7 +57,7 @@ class ClausePool implements IClausePool {
 		}
 		let state: AssignmentEval;
 		if (unsat) {
-			state = makeUnSAT(conflict?.getTag() as number)
+			state = makeUnSAT(conflict?.getTag() as number);
 		} else if (nSatisfied === i) {
 			state = makeSat();
 		} else {
@@ -106,7 +110,7 @@ class ClausePool implements IClausePool {
 		this.learnt.clear();
 	}
 
-	clear
+	clear;
 
 	private _addClause(clause: Clause): void {
 		const id = this.clauses.size;
