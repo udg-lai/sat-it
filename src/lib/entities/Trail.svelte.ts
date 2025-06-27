@@ -192,8 +192,6 @@ export class Trail {
 		//Set the new dl parameters
 		this.decisionLevelBookmark = this.decisionLevelBookmark.slice(0, dl + 1);
 		this.decisionLevel = dl;
-
-		this.updateFollowUpIndex();
 	}
 
 	getUPContext(): Either<number, undefined>[] {
