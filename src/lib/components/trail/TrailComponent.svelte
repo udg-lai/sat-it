@@ -85,7 +85,6 @@
 
 <style>
 	.trail {
-		position: relative;
 		min-height: var(--trail-height);
 		display: flex;
 		flex-direction: row;

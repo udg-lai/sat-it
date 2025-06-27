@@ -162,6 +162,7 @@
 
 <style>
 	trail-editor {
+		position: relative;
 		display: block;
 		height: 75%;
 		overflow-y: auto;
