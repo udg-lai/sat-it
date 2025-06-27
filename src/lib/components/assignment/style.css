@@ -16,11 +16,10 @@
 }
 
 .dropdownClass {
-	background-color:var(--main-bg-color);
+	background-color: var(--main-bg-color);
 	border-radius: 5px;
 	color: black;
-	transition: 
-			background-color 0.7s;
+	transition: background-color 0.7s;
 }
 
 .dropdownClass button {
