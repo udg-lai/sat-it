@@ -173,7 +173,7 @@
 	class:grabbing
 >
 	<editor-leaf use:listenContentHeight>
-		<editor-indexes class="enumerate container-padding">
+		<editor-indexes class="enumerate container-padding direction">
 			{#each trails as trail, index (index)}
 				{#if !caConstraint && !upConstraint}
 					{@render snippetPlaceholderToggleTrail(trail, index)}
@@ -199,7 +199,7 @@
 			</editor-trails>
 		</trails-leaf>
 
-		<editor-info class="container-padding">
+		<editor-info class="container-padding direction">
 			{#each trails as trail, index (index)}
 				<div class="item" style="height: {trail.getHeight()}px; --align: {computeAlign()}">
 					<InformationComponent {trail} isLast={trails.length === index + 1} />
@@ -293,5 +293,11 @@
 
 	.container-padding {
 		padding: 1rem 0rem;
+		gap: 1rem;
+	}
+
+	.direction {
+		display: flex;
+		flex-direction: column;
 	}
 </style>
