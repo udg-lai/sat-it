@@ -1,4 +1,5 @@
 import type { Trail } from '$lib/entities/Trail.svelte.ts';
+import { logFatal } from '$lib/stores/toasts.ts';
 import { getSnapshot } from './stack.svelte.ts';
 
 let trails: Trail[] = $state(getSnapshot().snapshot);
@@ -11,6 +12,13 @@ export const stackTrail = (trail: Trail): void => {
 
 export const unstackTrail = (): void => {
 	trails = trails.slice(0, length - 1);
+};
+
+export const unstackFromBeginningToX = (x: number): void => {
+	if (x < 0) {
+		logFatal('unstack trail error', `The value x is too low: ${x}`);
+	}
+	trails = trails.slice(0, x + 1);
 };
 
 export const getTrails = () => trails;

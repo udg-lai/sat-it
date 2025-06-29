@@ -88,7 +88,8 @@
 	}
 
 	function algorithmicUndoSafe(a: AlgorithmicUndoEvent): void {
-		const latestTrail: Trail = algorithmicUndo(a.objectiveAssignment, a.objectiveTrail);
+		console.log(a);
+		const latestTrail: Trail = algorithmicUndo(a.objectiveAssignment, a.trailIndex);
 		updateProblemFromTrail(latestTrail);
 		updateSolverMachine(DECIDE_STATE_ID, undefined);
 		record(trails, solverMachine.getActiveStateId(), getStatistics(), solverMachine.getRecord());

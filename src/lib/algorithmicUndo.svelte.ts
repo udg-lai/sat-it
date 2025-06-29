@@ -1,30 +1,19 @@
 import type { Trail } from '$lib/entities/Trail.svelte.ts';
 import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
-import {
-	decreaseNoConflicts,
-	decreaseNoDecision,
-	decreaseNoUnitPropagations
-} from '$lib/states/statistics.svelte.ts';
-import { getLatestTrail, unstackTrail } from '$lib/states/trails.svelte.ts';
+import { getLatestTrail, unstackFromBeginningToX } from '$lib/states/trails.svelte.ts';
 import { logFatal } from '$lib/stores/toasts.ts';
 
 export const algorithmicUndo = (
 	objectiveAssignment: VariableAssignment,
-	objectiveTrail: Trail
+	trailIndex: number
 ): Trail => {
-	//First of all we have to reach the trail we want to go to.
-	let latestTrail: Trail | undefined = getLatestTrail();
-	while (latestTrail !== undefined && latestTrail !== objectiveTrail) {
-		//We can't delete all the trail at once as we have to get rid of all the assignments that were made in this trail to update the statistics
-		const trailAssignments: VariableAssignment[] = latestTrail.getFollowUpAssignments();
-		trailAssignments.forEach((assignment) => {
-			undoAssignmentFromStatistics(assignment);
-		});
-
-		unstackTrail();
-		latestTrail = getLatestTrail();
+	//First of all we have to slice the trail until the trailIndexValue.
+	if (trailIndex < 0) {
+		logFatal('Algorithmic Undo Error', `The value "trailIndex" is too low: ${trailIndex}`);
 	}
+	unstackFromBeginningToX(trailIndex);
 
+	const latestTrail: Trail | undefined = getLatestTrail();
 	if (latestTrail === undefined) {
 		logFatal(
 			'Algorithmic undo error',
@@ -32,7 +21,7 @@ export const algorithmicUndo = (
 		);
 	}
 
-	// Then it is needed to reach the assignment the user has said.
+	// Then it is needed to reach the assignment the user has said. I used a "do while" because we don't want to keep the decision.
 	let latestAssignment: VariableAssignment | undefined;
 
 	do {
@@ -43,7 +32,6 @@ export const algorithmicUndo = (
 				'It is not possible to undo the problem to a position that does not exist xD'
 			);
 		}
-		undoAssignmentFromStatistics(latestAssignment);
 	} while (latestAssignment !== objectiveAssignment && latestAssignment !== undefined);
 
 	//Now we are in the position the user said, we just have to reset the state machine in the app component and we are good to go
@@ -51,11 +39,4 @@ export const algorithmicUndo = (
 
 	latestTrail.resetLearned();
 	return latestTrail;
-};
-
-const undoAssignmentFromStatistics = (assignment: VariableAssignment): void => {
-	if (assignment.isD()) decreaseNoDecision();
-	else if (assignment.isBJ() || assignment.isK()) decreaseNoConflicts();
-	else if (assignment.isUP()) decreaseNoUnitPropagations();
-	else logFatal('Statistics error', 'There is an assignment that was no registered kind');
 };
