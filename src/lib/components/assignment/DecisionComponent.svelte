@@ -33,21 +33,22 @@
 
 	let chrome: boolean = $derived(onChrome());
 
-	let isDropdownOpen: boolean = $state(false);
+	let isOpen: boolean = $state(false);
 
 	$effect(() => {
 		openLevel = expanded;
+		console.log(isOpen);
 	});
 
 	function emitLevelOpen(): void {
-		openLevel = !openLevel;
-		isDropdownOpen = !isDropdownOpen;
 		emitToggle?.();
+		openLevel = !openLevel;
+		isOpen = !isOpen;
 	}
 
 	const emitAlgorithmicUndo = (): void => {
-		isDropdownOpen = !isDropdownOpen;
 		emitUndo?.();
+		isOpen = !isOpen;
 	};
 </script>
 
@@ -58,15 +59,15 @@
 			class:previous-assignment={fromPreviousTrail}
 			class:open={openLevel}
 			onclick={() => {
-				isDropdownOpen = !isDropdownOpen;
+				isOpen = !isOpen;
 			}}
 		>
 			<MathTexComponent equation={assignment.toTeX()} />
 		</button>
 
-		<Dropdown bind:isOpen={isDropdownOpen} simple class="dropdownClass">
-			<DropdownItem>
-				<button onclick={emitLevelOpen}>
+		<Dropdown open={isOpen} class="dropdownClass">
+			<DropdownItem onclick={emitLevelOpen}>
+				<button>
 					{#if openLevel}
 						Collapse DL
 					{:else}
@@ -75,8 +76,8 @@
 				</button>
 			</DropdownItem>
 			{#if !fromPreviousTrail}
-				<DropdownItem>
-					<button onclick={emitAlgorithmicUndo}> Algorithmic Undo </button>
+				<DropdownItem onclick={emitAlgorithmicUndo}>
+					<button> Algorithmic Undo </button>
 				</DropdownItem>
 			{/if}
 		</Dropdown>
