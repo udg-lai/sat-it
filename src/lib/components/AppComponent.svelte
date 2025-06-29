@@ -87,8 +87,7 @@
 		reset();
 	}
 
-	function algorithmicUndoSafe(a: AlgorithmicUndoEvent): void {
-		console.log(a);
+	function algorithmicUndoSave(a: AlgorithmicUndoEvent): void {
 		const latestTrail: Trail = algorithmicUndo(a.objectiveAssignment, a.trailIndex);
 		updateProblemFromTrail(latestTrail);
 		updateSolverMachine(DECIDE_STATE_ID, undefined);
@@ -101,7 +100,7 @@
 		const unsubscribeStateMachineEvent = stateMachineEventBus.subscribe(stateMachineEvent);
 		const unsubscribeChangeInstanceEvent = changeInstanceEventBus.subscribe(fullyReset);
 		const unsubscribeChangeAlgorithmEvent = changeAlgorithmEventBus.subscribe(reset);
-		const unsubscribeAlgorithmicUndoEvent = algorithmicUndoEventBus.subscribe(algorithmicUndoSafe);
+		const unsubscribeAlgorithmicUndoEvent = algorithmicUndoEventBus.subscribe(algorithmicUndoSave);
 
 		return () => {
 			unsubscribeToggleEditor();

@@ -34,9 +34,10 @@ export const algorithmicUndo = (
 		}
 	} while (latestAssignment !== objectiveAssignment && latestAssignment !== undefined);
 
+	//This extra step is to clear the conflictive clause of the trail in case there was one
+	latestTrail.resetConflictClause();
+
 	//Now we are in the position the user said, we just have to reset the state machine in the app component and we are good to go
 	//It is also needed a snapshot to be saved
-
-	latestTrail.resetLearned();
 	return latestTrail;
 };
