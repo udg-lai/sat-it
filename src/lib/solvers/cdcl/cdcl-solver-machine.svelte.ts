@@ -1,4 +1,3 @@
-import { setConflictAnalysisClause } from '$lib/states/clause-pool.svelte.ts';
 import { updateClausesToCheck } from '$lib/states/conflict-detection-state.svelte.ts';
 import { logFatal } from '$lib/stores/toasts.ts';
 import { SolverMachine } from '../SolverMachine.svelte.ts';
@@ -78,7 +77,6 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 		decisionLevelVariables: number[]
 	): void {
 		this.conflictAnalysis = { trail, conflictClause, decisionLevelVariables };
-		setConflictAnalysisClause(this.conflictAnalysis.conflictClause);
 	}
 
 	updateConflictClause(conflictClause: Clause): void {
@@ -89,7 +87,6 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 			);
 		}
 		this.conflictAnalysis.conflictClause = conflictClause;
-		setConflictAnalysisClause(this.conflictAnalysis.conflictClause);
 	}
 
 	consultConflictAnalysis(): ConflictAnalysis | undefined {
