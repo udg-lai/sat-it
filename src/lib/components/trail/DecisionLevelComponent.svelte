@@ -1,7 +1,6 @@
 <script lang="ts">
 	import type { Trail } from '$lib/entities/Trail.svelte.ts';
 	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
-	import { algorithmicUndoEventBus } from '$lib/events/events.ts';
 	import BackjumpingComponent from '../assignment/BackjumpingComponent.svelte';
 	import BacktrackingComponent from '../assignment/BacktrackingComponent.svelte';
 	import ChildlessDecisionComponent from '../assignment/ChildlessDecisionComponent.svelte';
@@ -14,13 +13,17 @@
 		propagations?: VariableAssignment[];
 		isLast?: boolean;
 		trail: Trail;
+		emitAlgorithmicUndo: () => void;
 	}
 
-	let { decision, expanded, propagations = [], isLast = false, trail }: Props = $props();
-
-	function emitUndoAssignment(): void {
-		algorithmicUndoEventBus.emit({ objectiveAssignment: decision, objectiveTrail: trail });
-	}
+	let {
+		decision,
+		expanded,
+		propagations = [],
+		isLast = false,
+		trail,
+		emitAlgorithmicUndo
+	}: Props = $props();
 </script>
 
 {#if propagations?.length === 0}
@@ -28,7 +31,7 @@
 		assignment={decision}
 		{isLast}
 		fromPreviousTrail={trail.isAssignmentFromPreviousTrail(decision)}
-		emitUndo={() => emitUndoAssignment()}
+		{emitAlgorithmicUndo}
 	/>
 {:else}
 	<DecisionComponent
@@ -37,7 +40,7 @@
 		{isLast}
 		emitToggle={() => (expanded = !expanded)}
 		fromPreviousTrail={trail.isAssignmentFromPreviousTrail(decision)}
-		emitUndo={() => emitUndoAssignment()}
+		{emitAlgorithmicUndo}
 	/>
 	{#if expanded}
 		{#each propagations as assignment (assignment.variableId())}

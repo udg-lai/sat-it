@@ -386,13 +386,13 @@ export const learnConflictClause: CDCL_LEARN_CONFLICT_CLAUSE_FUN = (
 	//Generate the "Clause" that will be added to the pool.
 	const lemma: Clause = new Clause(conflictClause.getLiterals(), { learnt: true });
 
-	// Saves learned clause in the trail
-	trail.learn(lemma);
-
 	//The clause is stored inside the pool
 	addClauseToClausePool(lemma);
 
-	logInfo('New clause learn', `Clause ${lemma.getTag()} learned`);
+	// Saves the learnt clauseId in the trail
+	trail.learn(lemma.getTag());
+
+	logInfo('New clause learnt', `Clause ${lemma.getTag()} learnt`);
 	return lemma.getTag();
 };
 
