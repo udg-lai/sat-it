@@ -14,9 +14,9 @@ export const unstackTrail = (): void => {
 	trails = trails.slice(0, length - 1);
 };
 
-export const unstackFromBeginningToX = (x: number): void => {
+export const keepTrailsFromBeginningToX = (x: number): void => {
 	if (x < 0) {
-		logFatal('unstack trail error', `The value x is too low: ${x}`);
+		logFatal('Keep trail error', `The value x is too low: ${x}`);
 	}
 	trails = trails.slice(0, x + 1);
 };

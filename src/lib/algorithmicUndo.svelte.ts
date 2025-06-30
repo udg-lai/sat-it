@@ -1,6 +1,6 @@
 import type { Trail } from '$lib/entities/Trail.svelte.ts';
 import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
-import { getLatestTrail, unstackFromBeginningToX } from '$lib/states/trails.svelte.ts';
+import { getLatestTrail, keepTrailsFromBeginningToX } from '$lib/states/trails.svelte.ts';
 import { logFatal } from '$lib/stores/toasts.ts';
 
 export const algorithmicUndo = (
@@ -11,7 +11,7 @@ export const algorithmicUndo = (
 	if (trailIndex < 0) {
 		logFatal('Algorithmic Undo Error', `The value "trailIndex" is too low: ${trailIndex}`);
 	}
-	unstackFromBeginningToX(trailIndex);
+	keepTrailsFromBeginningToX(trailIndex);
 
 	const latestTrail: Trail | undefined = getLatestTrail();
 	if (latestTrail === undefined) {
