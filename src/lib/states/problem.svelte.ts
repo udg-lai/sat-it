@@ -65,7 +65,7 @@ export function updateProblemFromTrail(trail: Trail) {
 	//Now we need to relearn the clauses
 	clauses.clearLearnt();
 
-	//Then we add the learned clauses to the clause pool
+	//The learnt clauses from the trails are added to the clause pool
 	getTrails().forEach((trail) => {
 		const learntClause = trail.getLearnedClause();
 		if (learntClause !== undefined) {
