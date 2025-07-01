@@ -92,6 +92,9 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 			const { clauses, variableReasonId }: OccurrenceList = occurrenceListRecord;
 			updateClausesToCheck(clauses, variableReasonId);
 		}
+		else {
+			updateClausesToCheck(new SvelteSet<number>(), -1);
+		}
 	}
 
 	step(): void {

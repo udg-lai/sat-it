@@ -86,6 +86,9 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 			const conflict: OccurrenceList = this.pendingOccurrenceLists.pick();
 			updateClausesToCheck(conflict.clauses, conflict.variableReasonId);
 		}
+		else {
+			updateClausesToCheck(new SvelteSet<number>(), -1);
+		}
 	}
 
 	step(): void {

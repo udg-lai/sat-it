@@ -6,7 +6,6 @@ import type Variable from '$lib/entities/Variable.svelte.ts';
 import { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import { getTrails } from './trails.svelte.ts';
-
 export type MappingLiteral2Clauses = Map<number, SvelteSet<number>>;
 
 export type Algorithm = 'backtracking' | 'dpll' | 'cdcl';
@@ -63,20 +62,15 @@ export function updateProblemFromTrail(trail: Trail) {
 		variables.assign(variable.getInt(), variable.getAssignment());
 	});
 
-	//FIX: This was causing some problems. What we have to do is as it follows. If not, the learned clauses where not erasing once an "undo" was done.
-	const newLearnedClauses: Clause[] = [];
-	getTrails().forEach((trail) => {
-		const learntClauseId = trail.getLearnedClauseId();
-		if (learntClauseId !== undefined) {
-			newLearnedClauses.push(clauses.get(learntClauseId));
-		}
-	});
 	//Now we need to relearn the clauses
 	clauses.clearLearnt();
 
-	//Then we get the trails and learn their clauses
-	newLearnedClauses.forEach((clause) => {
-		clauses.addClause(clause);
+	//Then we add the learned clauses to the clause pool
+	getTrails().forEach((trail) => {
+		const learntClause = trail.getLearnedClause();
+		if (learntClause !== undefined) {
+			clauses.addClause(learntClause);
+		}
 	});
 
 	//Reset the mapping
