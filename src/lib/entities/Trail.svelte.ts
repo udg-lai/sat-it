@@ -1,6 +1,7 @@
 import { logFatal } from '$lib/stores/toasts.ts';
 import { getProblemStore } from '$lib/states/problem.svelte.ts';
 import type VariableAssignment from './VariableAssignment.ts';
+import type Clause from './Clause.svelte.ts';
 
 export class Trail {
 	private assignments: VariableAssignment[] = $state([]);
@@ -8,7 +9,7 @@ export class Trail {
 	private followUPIndex: number = 0;
 	private decisionLevel: number = 0;
 	private trailCapacity: number = 0;
-	private learntClause: number | undefined = $state(undefined);
+	private learntClause: Clause | undefined = $state(undefined);
 	private trailConflict: number | undefined = $state(undefined);
 
 	constructor(trailCapacity: number = 0) {
@@ -123,11 +124,11 @@ export class Trail {
 		return returnValue;
 	}
 
-	getLearnedClause(): number | undefined {
+	getLearnedClause(): Clause | undefined {
 		return this.learntClause;
 	}
 
-	learn(clauseId: number): void {
+	learnClause(clauseId: Clause): void {
 		this.learntClause = clauseId;
 	}
 
