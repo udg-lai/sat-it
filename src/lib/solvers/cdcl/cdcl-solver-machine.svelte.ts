@@ -144,8 +144,7 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 		if (!this.pendingOccurrenceLists.isEmpty()) {
 			const conflict: OccurrenceList = this.pendingOccurrenceLists.pick();
 			updateClausesToCheck(conflict.clauses, conflict.variableReasonId);
-		}
-		else {
+		} else {
 			updateClausesToCheck(new SvelteSet<number>(), -1);
 		}
 	}
