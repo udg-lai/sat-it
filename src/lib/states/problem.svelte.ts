@@ -5,7 +5,6 @@ import type { Trail } from '$lib/entities/Trail.svelte.ts';
 import type Variable from '$lib/entities/Variable.svelte.ts';
 import { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
-import { setDefaultClauses } from './clause-pool.svelte.ts';
 import { getTrails } from './trails.svelte.ts';
 
 export type MappingLiteral2Clauses = Map<number, SvelteSet<number>>;
@@ -31,7 +30,6 @@ export function updateProblemDomain(instance: DimacsInstance) {
 
 	const variablePool: VariablePool = new VariablePool(varCount);
 	const clausePool: ClausePool = ClausePool.buildFrom(claims, variablePool);
-	setDefaultClauses(clausePool.getClauses());
 	const mapping: MappingLiteral2Clauses = literalToClauses(clausePool);
 
 	const params = {
@@ -68,7 +66,7 @@ export function updateProblemFromTrail(trail: Trail) {
 	//FIX: This was causing some problems. What we have to do is as it follows. If not, the learned clauses where not erasing once an "undo" was done.
 	const newLearnedClauses: Clause[] = [];
 	getTrails().forEach((trail) => {
-		const learntClauseId = trail.getLearnedClause();
+		const learntClauseId = trail.getLearnedClauseId();
 		if (learntClauseId !== undefined) {
 			newLearnedClauses.push(clauses.get(learntClauseId));
 		}

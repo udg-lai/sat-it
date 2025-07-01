@@ -8,7 +8,7 @@ export class Trail {
 	private followUPIndex: number = 0;
 	private decisionLevel: number = 0;
 	private trailCapacity: number = 0;
-	private learntClause: number | undefined = $state(undefined);
+	private learntClauseId: number | undefined = $state(undefined);
 	private trailConflict: number | undefined = $state(undefined);
 
 	constructor(trailCapacity: number = 0) {
@@ -19,7 +19,7 @@ export class Trail {
 		const newTrail = new Trail(this.trailCapacity);
 		newTrail.assignments = this.assignments.map((assignment) => assignment.copy());
 		newTrail.decisionLevelBookmark = [...this.decisionLevelBookmark];
-		newTrail.learntClause = this.learntClause;
+		newTrail.learntClauseId = this.learntClauseId;
 		newTrail.followUPIndex = this.followUPIndex;
 		newTrail.decisionLevel = this.decisionLevel;
 		newTrail.trailCapacity = this.trailCapacity;
@@ -123,12 +123,12 @@ export class Trail {
 		return returnValue;
 	}
 
-	getLearnedClause(): number | undefined {
-		return this.learntClause;
+	getLearnedClauseId(): number | undefined {
+		return this.learntClauseId;
 	}
 
 	learn(clauseId: number): void {
-		this.learntClause = clauseId;
+		this.learntClauseId = clauseId;
 	}
 
 	getFollowUpIndex(): number {

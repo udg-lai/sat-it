@@ -1,4 +1,3 @@
-import { setConflictAnalysisClause } from '$lib/states/clause-pool.svelte.ts';
 import { updateClausesToCheck } from '$lib/states/conflict-detection-state.svelte.ts';
 import { logFatal } from '$lib/stores/toasts.ts';
 import { SolverMachine } from '../SolverMachine.svelte.ts';
@@ -18,7 +17,7 @@ import { SvelteSet } from 'svelte/reactivity';
 import type { ConflictAnalysis, OccurrenceList } from '../types.ts';
 import { Queue } from '$lib/entities/Queue.svelte.ts';
 import type { Trail } from '$lib/entities/Trail.svelte.ts';
-import type TemporalClause from '$lib/entities/TemporalClause.ts';
+import type Clause from '$lib/entities/Clause.svelte.ts';
 
 export const makeCDCLSolver = (): CDCL_SolverMachine => {
 	return new CDCL_SolverMachine();
@@ -74,14 +73,13 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 
 	setConflictAnalysis(
 		trail: Trail,
-		conflictClause: TemporalClause,
+		conflictClause: Clause,
 		decisionLevelVariables: number[]
 	): void {
 		this.conflictAnalysis = { trail, conflictClause, decisionLevelVariables };
-		setConflictAnalysisClause(this.conflictAnalysis.conflictClause);
 	}
 
-	updateConflictClause(conflictClause: TemporalClause): void {
+	updateConflictClause(conflictClause: Clause): void {
 		if (!this.conflictAnalysis) {
 			logFatal(
 				'Not possible to update the Conflict Clause',
@@ -89,7 +87,6 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 			);
 		}
 		this.conflictAnalysis.conflictClause = conflictClause;
-		setConflictAnalysisClause(this.conflictAnalysis.conflictClause);
 	}
 
 	consultConflictAnalysis(): ConflictAnalysis | undefined {
@@ -100,7 +97,7 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 		if (this.conflictAnalysis === undefined) return false;
 
 		const variables: number[] = this.conflictAnalysis.decisionLevelVariables;
-		const conflictClause: TemporalClause = this.conflictAnalysis.conflictClause;
+		const conflictClause: Clause = this.conflictAnalysis.conflictClause;
 
 		let variablesFound: number = 0;
 		let i: number = 0;
