@@ -386,7 +386,7 @@ export const learnConflictClause: CDCL_LEARN_CONFLICT_CLAUSE_FUN = (
 	addClauseToClausePool(lemma);
 
 	// Saves the learnt clauseId in the trail
-	trail.learn(lemma);
+	trail.learnClause(lemma);
 
 	logInfo('New clause learnt', `Clause ${lemma.getTag()} learnt`);
 

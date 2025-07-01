@@ -128,8 +128,9 @@ export class Trail {
 		return this.learntClause;
 	}
 
-	learn(clause: Clause): void {
+	learnClause(clause: Clause): void {
 		this.learntClause = clause;
+
 	}
 
 	getFollowUpIndex(): number {
