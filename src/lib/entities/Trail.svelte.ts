@@ -1,26 +1,21 @@
-import { getClausePool, getProblemStore } from '$lib/states/problem.svelte.ts';
+import { getProblemStore } from '$lib/states/problem.svelte.ts';
 import { logFatal } from '$lib/stores/toasts.ts';
 import { makeLeft, makeRight, type Either } from '../types/either.ts';
 import type Clause from './Clause.svelte.ts';
-import type ClausePool from './ClausePool.svelte.ts';
-import type TemporalClause from './TemporalClause.ts';
+import type VariableAssignment from './VariableAssignment.ts';
 import {
-	isUnitPropagationReason,
-	type Reason,
 	type UnitPropagation
 } from './VariableAssignment.ts';
-import type VariableAssignment from './VariableAssignment.ts';
 
 export class Trail {
 	private assignments: VariableAssignment[] = $state([]);
 	private decisionLevelBookmark: number[] = $state([-1]);
-	private learned: TemporalClause | undefined = undefined;
+	private learnedClauseId: Clause | undefined = undefined;
 	private followUPIndex: number = -1;
 	private decisionLevel: number = 0;
 	private trailCapacity: number = 0;
 	private conflictiveClause: number | undefined = $state(undefined);
-	private learntClause: number | undefined = $state(undefined); // this is for doing undo algorithmic
-	private conflictAnalysisCtx: Either<TemporalClause, undefined>[] = $state([]); // this is just for representing the conflict analysis view
+	private conflictAnalysisCtx: Either<Clause, undefined>[] = $state([]); // this is just for representing the conflict analysis view
 	private upContext: Either<number, undefined>[] = $derived.by(() => this._upContext());
 	private fullView: boolean = $state(false); // UI state for knowing whenever for that trail it was required to show more information
 	private trailHeight: number = $state(0); // trail height in px
@@ -33,7 +28,7 @@ export class Trail {
 		const newTrail = new Trail(this.trailCapacity);
 		newTrail.assignments = this.assignments.map((assignment) => assignment.copy());
 		newTrail.decisionLevelBookmark = [...this.decisionLevelBookmark];
-		newTrail.learned = this.learned;
+		newTrail.learnedClauseId = this.learnedClauseId;
 		newTrail.followUPIndex = this.followUPIndex;
 		newTrail.decisionLevel = this.decisionLevel;
 		newTrail.trailCapacity = this.trailCapacity;
@@ -88,10 +83,6 @@ export class Trail {
 		}
 	}
 
-	getTrailConflict(): number | undefined {
-		return this.conflictiveClause;
-	}
-
 	getVariableDecisionLevel(variable: number): number {
 		const index = this.assignments.findIndex((a) => a.getVariable().getInt() === variable);
 		if (index === -1) {
@@ -110,28 +101,21 @@ export class Trail {
 		this.conflictiveClause = clauseId;
 	}
 
-
 	getConflict(): number | undefined  {
 		return this.conflictiveClause;
 	}
 
 
-	getConflictAnalysisCtx(): Either<TemporalClause, undefined>[] {
+	getConflictAnalysisCtx(): Either<Clause, undefined>[] {
 		const nAssignments = this.assignments.length;
 		const diff = Math.max(nAssignments - this.conflictAnalysisCtx.length, 0)
 		const ctx = [...Array(diff).fill(makeRight(undefined)),  ...this.conflictAnalysisCtx];
 		return ctx;
 	}
 
-	updateConflictAnalysisCtx(clause: TemporalClause | undefined = undefined): void {
-		const ca = clause === undefined ? makeRight(undefined) : makeLeft(clause);
+	updateConflictAnalysisCtx(clause: Clause | undefined = undefined): void {
+		const ca: Either<Clause, undefined> = clause === undefined ? makeRight(undefined) : makeLeft(clause);
 		this.conflictAnalysisCtx = [...this.conflictAnalysisCtx, ca];
-	}
-
-	private _initConflictAnalysisCtx(clauseId: number): void {
-		const clauses: ClausePool = getClausePool();
-		const clause: TemporalClause = clauses.get(clauseId).toTemporalClause();
-		this.conflictAnalysisCtx.push(makeLeft(clause));
 	}
 
 	hasPropagations(level: number): boolean {
@@ -157,12 +141,12 @@ export class Trail {
 		return returnValue;
 	}
 
-	getLearnedClause(): TemporalClause | undefined {
-		return this.learned;
+	getLearnedClause(): Clause | undefined {
+		return this.learnedClauseId;
 	}
 
-	learn(clause: TemporalClause): void {
-		this.learned = clause;
+	learnClause(clauseId: Clause): void {
+		this.learnedClauseId = clauseId;
 	}
 
 	getFollowUpIndex(): number {

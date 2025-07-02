@@ -1,7 +1,6 @@
 <script lang="ts">
 	import type Clause from '$lib/entities/Clause.svelte.ts';
 	import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
-	import type TemporalClause from '$lib/entities/TemporalClause.ts';
 	import type { Trail } from '$lib/entities/Trail.svelte.ts';
 	import { getClausePool } from '$lib/states/problem.svelte.ts';
 	import { isLeft, makeLeft, makeRight, unwrapEither, type Either } from '$lib/types/either.ts';
@@ -27,7 +26,7 @@
 		});
 	});
 
-	let caContext: Either<TemporalClause, undefined>[] = $derived.by(() => {
+	let caContext: Either<Clause, undefined>[] = $derived.by(() => {
 		if (!showCAView) return [];
 		else return trail.getConflictAnalysisCtx();
 	});

@@ -333,10 +333,10 @@ const decisionLevelTransition = (stateMachine: DPLL_StateMachine): boolean => {
 	if (decisionLevelState.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Decision Level state');
 	}
-	const result: boolean = decisionLevelState.run();
-	if (result) stateMachine.transition('unsat_state');
+	const onLevelZero: boolean = decisionLevelState.run();
+	if (onLevelZero) stateMachine.transition('unsat_state');
 	else stateMachine.transition('backtracking_state');
-	return result;
+	return onLevelZero;
 };
 
 const unitClauseTransition = (stateMachine: DPLL_StateMachine, clauseId: number): boolean => {

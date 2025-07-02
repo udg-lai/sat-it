@@ -341,7 +341,7 @@ const build_conflict_analysis_state: NonFinalState<
 > = {
 	id: cdcl_stateName2StateId['build_conflict_analysis_state'],
 	run: buildConflictAnalysis,
-	description: `Buidls the Conflict Analysis Structure`,
+	description: `Builds the Conflict Analysis Structure`,
 	transitions: new Map<CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_INPUT, number>().set(
 		'asserting_clause_state',
 		cdcl_stateName2StateId['asserting_clause_state']
@@ -388,7 +388,7 @@ const resolution_update_cc_state: NonFinalState<
 > = {
 	id: cdcl_stateName2StateId['resolution_update_cc_state'],
 	run: resolutionUpdateCC,
-	description: `Resoultion rule is applyed and Conclict clause is updated`,
+	description: `Resolution rule is applied and Conflict clause is updated`,
 	transitions: new Map<CDCL_RESOLUTION_UPDATE_CC_INPUT, number>().set(
 		'delete_last_assignment_state',
 		cdcl_stateName2StateId['delete_last_assignment_state']
@@ -427,7 +427,7 @@ const second_highest_dl_state: NonFinalState<
 > = {
 	id: cdcl_stateName2StateId['second_highest_dl_state'],
 	run: secondHighestDL,
-	description: `Gets the second highst decision level`,
+	description: `Gets the second highest decision level`,
 	transitions: new Map<CDCL_SECOND_HIGHEST_DL_INPUT, number>().set(
 		'undo_backjumping_state',
 		cdcl_stateName2StateId['undo_trail_to_shdl_state']

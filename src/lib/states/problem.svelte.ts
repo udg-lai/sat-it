@@ -1,12 +1,10 @@
 import type { DimacsInstance } from '$lib/instances/dimacs-instance.interface.ts';
 import Clause from '$lib/entities/Clause.svelte.ts';
 import ClausePool from '$lib/entities/ClausePool.svelte.ts';
-import type TemporalClause from '$lib/entities/TemporalClause.ts';
 import type { Trail } from '$lib/entities/Trail.svelte.ts';
 import type Variable from '$lib/entities/Variable.svelte.ts';
 import { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
-import { getDefaultClauses, setDefaultClauses } from './clause-pool.svelte.ts';
 import { getTrails } from './trails.svelte.ts';
 
 export type MappingLiteral2Clauses = Map<number, SvelteSet<number>>;
@@ -32,7 +30,6 @@ export function updateProblemDomain(instance: DimacsInstance) {
 
 	const variablePool: VariablePool = new VariablePool(varCount);
 	const clausePool: ClausePool = ClausePool.buildFrom(claims, variablePool);
-	setDefaultClauses(clausePool.getClauses());
 	const mapping: MappingLiteral2Clauses = literalToClauses(clausePool);
 
 	const params = {
@@ -57,7 +54,7 @@ export function updateAlgorithm(algorithm: Algorithm) {
 }
 
 export function updateProblemFromTrail(trail: Trail) {
-	const { variables, ...currentProblem } = problemStore;
+	const { variables, clauses, ...currentProblem } = problemStore;
 
 	//Reset the variables
 	variables.reset();
@@ -66,8 +63,21 @@ export function updateProblemFromTrail(trail: Trail) {
 		variables.assign(variable.getInt(), variable.getAssignment());
 	});
 
-	//Reset the caluses
-	const clauses: ClausePool = new ClausePool(obtainProblemClauses());
+	//FIX: This was causing some problems. What we have to do is as it follows. If not, the learned clauses where not erasing once an "undo" was done.
+	const newLearnedClauses: Clause[] = [];
+	getTrails().forEach((trail) => {
+		const learntClause = trail.getLearnedClause();
+		if (learntClause !== undefined) {
+			newLearnedClauses.push(learntClause);
+		}
+	});
+	//Now we need to relearn the clauses
+	clauses.clearLearnt();
+
+	//Then we get the trails and learn their clauses
+	newLearnedClauses.forEach((clause) => {
+		clauses.addClause(clause);
+	});
 
 	//Reset the mapping
 	const mapping: MappingLiteral2Clauses = literalToClauses(clauses);
@@ -118,24 +128,6 @@ const addClauseToMapping = (clause: Clause, clauseId: number, mapping: MappingLi
 			mapping.set(literalId, s);
 		}
 	});
-};
-
-const obtainProblemClauses = (): Clause[] => {
-	//Get all the clauses from the problem
-	const defaultClauses: TemporalClause[] = getDefaultClauses();
-	const learnedClauses: TemporalClause[] = [];
-	for (const trail of getTrails()) {
-		const learnedClause: TemporalClause | undefined = trail.getLearnedClause();
-		if (learnedClause !== undefined) learnedClauses.push(learnedClause);
-	}
-	const problemUnindexedClauses: TemporalClause[] = [...defaultClauses, ...learnedClauses];
-
-	//Generate the clause pool clauses
-	const problemClauses: Clause[] = [];
-	for (const uClause of problemUnindexedClauses) {
-		problemClauses.push(new Clause(uClause.getLiterals()));
-	}
-	return problemClauses;
 };
 
 export const getProblemStore = () => problemStore;

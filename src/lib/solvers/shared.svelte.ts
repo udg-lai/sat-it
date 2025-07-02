@@ -133,7 +133,10 @@ export const complementaryOccurrences = (
 };
 
 export const nonDecisionMade = (): boolean => {
-	const trail: Trail = getLatestTrail() as Trail;
+	const trail: Trail | undefined = getLatestTrail();
+	if (trail === undefined) {
+		logFatal('Non Decision Made', 'There is no trail to check for non decisions');
+	}
 	return trail.getDecisionLevel() === 0;
 };
 

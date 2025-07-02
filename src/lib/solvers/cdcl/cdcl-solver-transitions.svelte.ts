@@ -71,9 +71,8 @@ import type { CDCL_SolverMachine } from './cdcl-solver-machine.svelte.ts';
 import type { CDCL_StateMachine } from './cdcl-state-machine.svelte.ts';
 import type { ConflictAnalysis, OccurrenceList } from '../types.ts';
 import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
-import type TemporalClause from '$lib/entities/TemporalClause.ts';
-import { getLastTrailSize } from '$lib/states/trail-size.svelte.ts';
 import type { Trail } from '$lib/entities/Trail.svelte.ts';
+import type Clause from '$lib/entities/Clause.svelte.ts';
 
 /* exported transitions */
 
@@ -116,8 +115,8 @@ export const decide = (solver: CDCL_SolverMachine): void => {
 export const preConflictAnalysis = (solver: CDCL_SolverMachine) => {
 	const stateMachine: CDCL_StateMachine = solver.getStateMachine();
 	emptyOccurrenceListsTransition(stateMachine, solver);
-	const firstLevel: boolean = decisionLevelTransition(stateMachine);
-	if (firstLevel) return;
+	const onLevelZero: boolean = decisionLevelTransition(stateMachine);
+	if (onLevelZero) return;
 	buildConflictAnalysisTransition(stateMachine, solver);
 	const asserting: boolean = assertingClauseTransition(stateMachine, solver);
 	if (asserting) {
@@ -147,13 +146,13 @@ export const conflictAnalysis = (solver: CDCL_SolverMachine): void => {
 	if (latestTrail === undefined) logFatal('CDCL solver', 'Latest trail should not be undefined');
 
 	if (variableAppear) {
-		const temporalClause: TemporalClause = resolutionUpdateCCTransition(
+		const resolvent: Clause = resolutionUpdateCCTransition(
 			stateMachine,
 			solver,
 			conflictAnalysis,
 			lastAssignment
 		);
-		latestTrail.updateConflictAnalysisCtx(temporalClause);
+		latestTrail.updateConflictAnalysisCtx(resolvent);
 	} else {
 		latestTrail.updateConflictAnalysisCtx();
 	}
@@ -406,10 +405,10 @@ const decisionLevelTransition = (stateMachine: CDCL_StateMachine): boolean => {
 	if (decisionLevelState.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Decision Level state');
 	}
-	const result: boolean = decisionLevelState.run();
-	if (result) stateMachine.transition('unsat_state');
+	const onLevelZero: boolean = decisionLevelState.run();
+	if (onLevelZero) stateMachine.transition('unsat_state');
 	else stateMachine.transition('build_conflict_analysis_state');
-	return result;
+	return onLevelZero;
 };
 
 const unitClauseTransition = (stateMachine: CDCL_StateMachine, clauseId: number): boolean => {
@@ -606,7 +605,7 @@ const resolutionUpdateCCTransition = (
 	solver: CDCL_SolverMachine,
 	conflictAnalysis: ConflictAnalysis,
 	lastAssignment: VariableAssignment
-): TemporalClause => {
+): Clause => {
 	const resolutionUpdateCCState = stateMachine.getActiveState() as NonFinalState<
 		CDCL_RESOLUTION_UPDATE_CC_FUN,
 		CDCL_RESOLUTION_UPDATE_CC_INPUT
@@ -614,13 +613,13 @@ const resolutionUpdateCCTransition = (
 	if (resolutionUpdateCCState.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Variable In CC state');
 	}
-	const temporalClause: TemporalClause = resolutionUpdateCCState.run(
+	const resolvent: Clause = resolutionUpdateCCState.run(
 		solver,
 		conflictAnalysis.conflictClause,
 		lastAssignment
 	);
 	stateMachine.transition('delete_last_assignment_state');
-	return temporalClause;
+	return resolvent;
 };
 
 const deleteLastAssignmentTransition = (
