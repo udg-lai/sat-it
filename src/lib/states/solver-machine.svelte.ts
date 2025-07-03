@@ -31,6 +31,7 @@ export const updateSolverMachine = (
 	stateId: number,
 	record: Record<string, unknown> | undefined
 ): void => {
+	solverMachine.stopAutoMode();
 	solverMachine.updateActiveStateId(stateId);
 	solverMachine.updateFromRecord(record);
 };

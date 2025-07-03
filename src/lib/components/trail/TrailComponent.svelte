@@ -16,9 +16,11 @@
 		trail: Trail;
 		expanded: boolean;
 		isLast?: boolean;
+		emitUndo?: () => void;
+		emitAlgorithmicUndo: (objectiveAssignment: VariableAssignment) => void;
 	}
 
-	let { trail, expanded, isLast = true }: Props = $props();
+	let { trail, expanded, isLast = true, emitAlgorithmicUndo }: Props = $props();
 
 	let initialPropagations: VariableAssignment[] = $derived(trail.getInitialPropagations());
 
@@ -79,13 +81,15 @@
 			{expanded}
 			{isLast}
 			{trail}
+			emitAlgorithmicUndo={() => {
+				emitAlgorithmicUndo(assignment);
+			}}
 		/>
 	{/each}
 </trail>
 
 <style>
 	.trail {
-		position: relative;
 		min-height: var(--trail-height);
 		display: flex;
 		flex-direction: row;
