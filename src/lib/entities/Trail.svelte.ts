@@ -6,10 +6,10 @@ import type Clause from './Clause.svelte.ts';
 export class Trail {
 	private assignments: VariableAssignment[] = $state([]);
 	private decisionLevelBookmark: number[] = $state([-1]);
-	private learnedClauseId: Clause | undefined = undefined;
-	private followUPIndex: number = -1;
+	private followUPIndex: number = 0;
 	private decisionLevel: number = 0;
 	private trailCapacity: number = 0;
+	private learntClause: Clause | undefined = $state(undefined);
 	private trailConflict: number | undefined = $state(undefined);
 
 	constructor(trailCapacity: number = 0) {
@@ -20,7 +20,7 @@ export class Trail {
 		const newTrail = new Trail(this.trailCapacity);
 		newTrail.assignments = this.assignments.map((assignment) => assignment.copy());
 		newTrail.decisionLevelBookmark = [...this.decisionLevelBookmark];
-		newTrail.learnedClauseId = this.learnedClauseId;
+		newTrail.learntClause = this.learntClause;
 		newTrail.followUPIndex = this.followUPIndex;
 		newTrail.decisionLevel = this.decisionLevel;
 		newTrail.trailCapacity = this.trailCapacity;
@@ -45,6 +45,10 @@ export class Trail {
 
 	getAssignments(): VariableAssignment[] {
 		return [...this.assignments];
+	}
+
+	getFollowUpAssignments(): VariableAssignment[] {
+		return this.assignments.slice(this.followUPIndex);
 	}
 
 	pickLastAssignment(): VariableAssignment {
@@ -121,11 +125,11 @@ export class Trail {
 	}
 
 	getLearnedClause(): Clause | undefined {
-		return this.learnedClauseId;
+		return this.learntClause;
 	}
 
-	learnClause(clauseId: Clause): void {
-		this.learnedClauseId = clauseId;
+	learnClause(clause: Clause): void {
+		this.learntClause = clause;
 	}
 
 	getFollowUpIndex(): number {
@@ -158,6 +162,10 @@ export class Trail {
 		//Set the new dl parameters
 		this.decisionLevelBookmark = this.decisionLevelBookmark.slice(0, dl + 1);
 		this.decisionLevel = dl;
+	}
+
+	resetConflictClause(): void {
+		this.trailConflict = undefined;
 	}
 
 	[Symbol.iterator]() {

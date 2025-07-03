@@ -14,3 +14,22 @@
 .previous-assignment {
 	opacity: 0.6;
 }
+
+.current-trail {
+	cursor: pointer;
+}
+
+.dropdownClass {
+	background-color: var(--main-bg-color);
+	border-radius: 5px;
+	color: black;
+	transition: background-color 0.7s;
+}
+
+.dropdownClass button {
+	border-radius: 5px;
+}
+
+.dropdownClass button:hover {
+	background-color: rgb(255, 255, 255);
+}

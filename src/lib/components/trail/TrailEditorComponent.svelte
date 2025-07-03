@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Trail } from '$lib/entities/Trail.svelte.ts';
 	import {
+		algorithmicUndoEventBus,
 		solverStartedAutoMode,
 		toggleTrailExpandEventBus,
 		trailTrackingEventBus
@@ -11,6 +12,7 @@
 	import { onMount } from 'svelte';
 	import InformationComponent from './InformationComponent.svelte';
 	import TrailComponent from './TrailComponent.svelte';
+	import VariableAssignment from '$lib/entities/VariableAssignment.ts';
 
 	interface Props {
 		trails: Trail[];
@@ -145,7 +147,17 @@
 		<trails-leaf bind:this={trailsLeafElement}>
 			<editor-trails>
 				{#each trails as trail, index (index)}
-					<TrailComponent {trail} expanded={expandedTrails} isLast={trails.length === index + 1} />
+					<TrailComponent
+						{trail}
+						expanded={expandedTrails}
+						isLast={trails.length === index + 1}
+						emitAlgorithmicUndo={(objectiveAssignment: VariableAssignment) => {
+							algorithmicUndoEventBus.emit({
+								objectiveAssignment,
+								trailIndex: index
+							});
+						}}
+					/>
 				{/each}
 			</editor-trails>
 		</trails-leaf>
@@ -162,6 +174,7 @@
 
 <style>
 	trail-editor {
+		position: relative;
 		display: block;
 		height: 75%;
 		overflow-y: auto;
