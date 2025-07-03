@@ -9,7 +9,6 @@ export interface IVariablePool {
 	unassign(variableId: number): void;
 	getVariable(variable: number): void;
 	getVariableCopy(variable: number): Variable;
-	nextVariable(): number | undefined;
 	reset(): void;
 	allAssigned(): boolean;
 	size(): number;
@@ -48,10 +47,6 @@ export class VariablePool implements IVariablePool {
 
 	assign(variableId: number, assignment: Assignment): void {
 		this._assign(variableId, assignment);
-	}
-
-	nextVariable(): number | undefined {
-		return this.variables.at(this.nvPointer)?.getInt();
 	}
 
 	getVariable(variable: number): Variable {

@@ -4,6 +4,7 @@
 	import { getBaselinePolarity } from '$lib/states/parameters.svelte.ts';
 	import { getProblemStore, type Problem } from '$lib/states/problem.svelte.ts';
 	import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
+	import { fromJust, isJust, type Maybe } from '$lib/types/maybe.ts';
 	import AutoModeComponent from './AutoModeComponent.svelte';
 	import ConflictAnalysisDebugger from './ConflictAnalysisDebuggerComponent.svelte';
 	import ConflictDetectionDebugger from './ConflictDetectionDebuggerComponent.svelte';
@@ -12,7 +13,11 @@
 	import StepComponent from './StepDebuggerComponent.svelte';
 
 	const problem: Problem = $derived(getProblemStore());
-	let defaultNextVariable: number | undefined = $derived(problem.variables.nextVariable());
+	
+	let defaultNextVariable: number | undefined = $derived.by(() => {
+		const nextVariable: Maybe<number> = problem.variables.nextVariableToAssign();
+		return isJust(nextVariable) ? fromJust(nextVariable) : undefined
+	});
 
 	let solverMachine: SolverMachine<StateFun, StateInput> = $derived(getSolverMachine());
 	let enablePreprocess = $derived(solverMachine.onInitialState());

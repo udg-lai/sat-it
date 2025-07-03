@@ -1,9 +1,6 @@
 <script lang="ts">
 	import { stateMachineEventBus, toggleTrailExpandEventBus } from '$lib/events/events.ts';
-	import {
-		ChevronDoubleRightOutline,
-		ForwardOutline
-	} from 'flowbite-svelte-icons';
+	import { ChevronDoubleRightOutline, ForwardOutline } from 'flowbite-svelte-icons';
 	import DynamicRender from '../DynamicRender.svelte';
 	import StepComponent from './StepDebuggerComponent.svelte';
 

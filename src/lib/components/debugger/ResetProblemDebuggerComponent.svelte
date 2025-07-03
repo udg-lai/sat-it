@@ -4,7 +4,7 @@
 	import { Modal } from 'flowbite-svelte';
 	import { ExclamationCircleOutline, RefreshOutline } from 'flowbite-svelte-icons';
 	import DynamicRender from '../DynamicRender.svelte';
-	import "./style.css"
+	import './style.css';
 
 	const resetProps = {
 		size: 'md'
@@ -44,4 +44,3 @@
 		</div>
 	</Modal>
 </button>
-
