@@ -67,16 +67,15 @@
 		width: 100%;
 		min-height: var(--debugger-height);
 		padding-left: calc(var(--windows-padding) + 15px);
-		padding-right: calc(var(--windows-padding) + 30px);
+		padding-right: calc(var(--windows-padding) + 27px);
 		border-bottom: 1px solid var(--border-color);
 	}
 	algorithm-buttons {
 		display: flex;
-		gap: 0.5rem; /* optional, controls spacing between buttons */
+		gap: 0.5rem;
 	}
 	general-debugger {
 		display: flex;
-		gap: 0.5rem; /* optional, controls spacing between buttons */
-		align-items: center;
+		gap: 0.5rem;
 	}
 </style>
