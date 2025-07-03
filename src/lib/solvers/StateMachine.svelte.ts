@@ -110,7 +110,10 @@ export abstract class StateMachine<F extends StateFun, I extends StateInput>
 
 	getNextState(input: I): State<F, I> {
 		if (this.onFinalState()) {
-			logFatal('Final state exception', 'It is not possible to perform a transition in a final state');
+			logFatal(
+				'Final state exception',
+				'It is not possible to perform a transition in a final state'
+			);
 		} else {
 			const activeState = this.getActiveState() as NonFinalState<F, I>;
 			const activeStateTransitions = activeState.transitions;
@@ -130,7 +133,10 @@ export abstract class StateMachine<F extends StateFun, I extends StateInput>
 
 	transition(input: I): void {
 		if (this.onFinalState()) {
-			logFatal('Final state exception', 'It is not possible to perform a transition in a final state');
+			logFatal(
+				'Final state exception',
+				'It is not possible to perform a transition in a final state'
+			);
 		} else {
 			const nextState = this.getNextState(input);
 			this.active = nextState.id;
