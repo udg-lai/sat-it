@@ -13,10 +13,10 @@
 	import StepComponent from './StepDebuggerComponent.svelte';
 
 	const problem: Problem = $derived(getProblemStore());
-	
+
 	let defaultNextVariable: number | undefined = $derived.by(() => {
 		const nextVariable: Maybe<number> = problem.variables.nextVariableToAssign();
-		return isJust(nextVariable) ? fromJust(nextVariable) : undefined
+		return isJust(nextVariable) ? fromJust(nextVariable) : undefined;
 	});
 
 	let solverMachine: SolverMachine<StateFun, StateInput> = $derived(getSolverMachine());
