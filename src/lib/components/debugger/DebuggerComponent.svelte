@@ -58,12 +58,11 @@
 	</general-debugger>
 </debugger>
 
-
 <style>
 	debugger {
 		display: flex;
 		align-items: center;
-		justify-content: space-between; /* Changed from left */
+		justify-content: space-between;
 		height: var(--debugger-height);
 		width: 100%;
 		min-height: var(--debugger-height);
