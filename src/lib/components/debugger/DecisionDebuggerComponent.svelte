@@ -1,6 +1,6 @@
 <script lang="ts">
 	import DynamicRender from '$lib/components/DynamicRender.svelte';
-	import { stateMachineEventBus, userActionEventBus } from '$lib/events/events.ts';
+	import { stateMachineEventBus } from '$lib/events/events.ts';
 	import { updateAssignment } from '$lib/states/assignment.svelte.ts';
 	import { getProblemStore, type Problem } from '$lib/states/problem.svelte.ts';
 	import { logInfo, logWarning } from '$lib/stores/toasts.ts';
@@ -86,7 +86,6 @@
 		if (literal === undefined) {
 			updateAssignment('automated');
 			stateMachineEventBus.emit('step');
-			userActionEventBus.emit('record');
 		} else {
 			if (alreadyAssignedTruthValue(literal)) {
 				const variable: number = Math.abs(literal);
@@ -99,7 +98,6 @@
 				const variable: number = Math.abs(literal);
 				updateAssignment('manual', truthValue, variable);
 				stateMachineEventBus.emit('step');
-				userActionEventBus.emit('record');
 			}
 			inputLiteral = undefined;
 		}

@@ -3,6 +3,7 @@ import { logFatal, logWarning } from '$lib/stores/toasts.ts';
 import {
 	solverFinishedAutoMode,
 	solverStartedAutoMode,
+	userActionEventBus,
 	type StateMachineEvent
 } from '$lib/events/events.ts';
 import { tick } from 'svelte';
@@ -100,6 +101,7 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 		//If receive a step, the state machine can be waiting in 4 possible states
 		if (input === 'step') {
 			this.step();
+			userActionEventBus.emit('record');
 		} else if (input === 'nextVariable') {
 			await this.solveToNextVariableStepByStep();
 		} else if (input === 'finishCD') {
@@ -127,6 +129,7 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 			await tick();
 			await new Promise((r) => times.push(setTimeout(r, getStepDelay())));
 		}
+		userActionEventBus.emit('record');
 		times.forEach(clearTimeout);
 		this.setFlagsPostAuto();
 		this.notifyFinishRunningOnAuto();

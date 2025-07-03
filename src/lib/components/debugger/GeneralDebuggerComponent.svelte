@@ -90,7 +90,6 @@
 		onclick={() => {
 			updateAssignment('automated');
 			stateMachineEventBus.emit('solve_trail');
-			userActionEventBus.emit('record');
 			toggleTrailExpandEventBus.emit(true);
 		}}
 		disabled={finished || backtrackingState}
@@ -105,7 +104,6 @@
 		onclick={() => {
 			updateAssignment('automated');
 			stateMachineEventBus.emit('solve_all');
-			userActionEventBus.emit('record');
 			toggleTrailExpandEventBus.emit(true);
 		}}
 		disabled={finished || backtrackingState}
