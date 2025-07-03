@@ -185,16 +185,16 @@ export const unitClauseDetection: CDCL_UNIT_CLAUSES_DETECTION_FUN = () => {
 	return solverUnitClauseDetection(pool);
 };
 
-export type CDCL_DELETE_CLAUSE_FUN = (clauses: SvelteSet<number>, clauseId: number) => void;
+export type CDCL_DELETE_CLAUSE_FUN = (clauses: SvelteSet<number>, clauseTag: number) => void;
 
 export const deleteClause: CDCL_DELETE_CLAUSE_FUN = (
 	clauses: SvelteSet<number>,
-	clauseId: number
+	clauseTag: number
 ) => {
-	if (!clauses.has(clauseId)) {
-		logFatal('Clause not found', `Clause - ${clauseId} not found`);
+	if (!clauses.has(clauseTag)) {
+		logFatal('Clause not found', `Clause - ${clauseTag} not found`);
 	}
-	clauses.delete(clauseId);
+	clauses.delete(clauseTag);
 };
 
 export type CDCL_PICK_CLAUSE_SET_FUN = (
@@ -222,15 +222,15 @@ export const nextClause: CDCL_NEXT_CLAUSE_FUN = (clauses: SvelteSet<number>) => 
 		logFatal('A non empty set was expected');
 	}
 	const clausesIterator = clauses.values().next();
-	const clauseId = clausesIterator.value;
-	return clauseId as number;
+	const clauseTag = clausesIterator.value;
+	return clauseTag as number;
 };
 
-export type CDCL_CONFLICT_DETECTION_FUN = (clauseId: number) => boolean;
+export type CDCL_CONFLICT_DETECTION_FUN = (clauseTag: number) => boolean;
 
-export const unsatisfiedClause: CDCL_CONFLICT_DETECTION_FUN = (clauseId: number) => {
+export const unsatisfiedClause: CDCL_CONFLICT_DETECTION_FUN = (clauseTag: number) => {
 	const pool: ClausePool = problem.clauses;
-	const evaluation: ClauseEval = clauseEvaluation(pool, clauseId);
+	const evaluation: ClauseEval = clauseEvaluation(pool, clauseTag);
 	return isUnSATClause(evaluation);
 };
 
@@ -244,20 +244,20 @@ export const thereAreJobPostponed: CDCL_CHECK_PENDING_OCCURRENCE_LISTS_FUN = (
 	return solverStateMachine.thereArePostponed();
 };
 
-export type CDCL_UNIT_CLAUSE_FUN = (clauseId: number) => boolean;
+export type CDCL_UNIT_CLAUSE_FUN = (clauseTag: number) => boolean;
 
-export const unitClause: CDCL_UNIT_CLAUSE_FUN = (clauseId: number) => {
+export const unitClause: CDCL_UNIT_CLAUSE_FUN = (clauseTag: number) => {
 	const pool: ClausePool = problem.clauses;
-	const evaluation: ClauseEval = clauseEvaluation(pool, clauseId);
+	const evaluation: ClauseEval = clauseEvaluation(pool, clauseTag);
 	return isUnitClause(evaluation);
 };
 
-export type CDCL_UNIT_PROPAGATION_FUN = (clauseId: number) => number;
+export type CDCL_UNIT_PROPAGATION_FUN = (clauseTag: number) => number;
 
-export const unitPropagation: CDCL_UNIT_PROPAGATION_FUN = (clauseId: number) => {
+export const unitPropagation: CDCL_UNIT_PROPAGATION_FUN = (clauseTag: number) => {
 	const variables: VariablePool = problem.variables;
 	const clauses: ClausePool = problem.clauses;
-	return solverUnitPropagation(variables, clauses, clauseId, 'up');
+	return solverUnitPropagation(variables, clauses, clauseTag, 'up');
 };
 
 export type CDCL_COMPLEMENTARY_OCCURRENCES_FUN = (literal: number) => SvelteSet<number>;
@@ -294,11 +294,11 @@ export const buildConflictAnalysis: CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN =
 	// Firstly the last trail is achieved
 	const latestTrail: Trail | undefined = getLatestTrail();
 	if (latestTrail === undefined) {
-		logFatal('Not possible result', 'There is no last trail to work with');
+		logFatal('Conflict analysis', 'There is no last trail to work with');
 	}
 
 	// Then the variables from the last decision level are retrieved.
-	const assignmentsLastDecisionLevel: VariableAssignment[] = latestTrail.getLevelAssignments(
+	const assignmentsLastDecisionLevel: VariableAssignment[] = latestTrail.getAssignmentsAt(
 		latestTrail.getDecisionLevel()
 	);
 	const variablesLastDecisionLevel: number[] = assignmentsLastDecisionLevel.map((assignment) => {
@@ -306,10 +306,10 @@ export const buildConflictAnalysis: CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN =
 	});
 
 	// Thirdly the conflict clause is retrieved
-	const ccId: number | undefined = latestTrail.getConflict();
+	const ccId: number | undefined = latestTrail.getConflictClauseTag();
 	if (ccId === undefined) {
 		logFatal(
-			'Not possible result',
+			'Conflict analysis',
 			'It is not possible to do the CA if no conflicts have been found'
 		);
 	}
@@ -360,8 +360,8 @@ export const resolutionUpdateCC: CDCL_RESOLUTION_UPDATE_CC_FUN = (
 	if (!isPropagationReason(reason)) {
 		logFatal('CDCL', 'The reason is not a propagation reason');
 	}
-	const reasonClauseId: number = reason.clauseId;
-	const reasonClause: Clause = getClausePool().get(reasonClauseId);
+	const reasonclauseTag: number = reason.clauseTag;
+	const reasonClause: Clause = getClausePool().get(reasonclauseTag);
 	const resolvent: Clause = conflictClause.resolution(reasonClause);
 	solver.updateConflictClause(resolvent);
 	return resolvent;
@@ -422,12 +422,12 @@ export const pushTrail: CDCL_PUSH_TRAIL_FUN = (trail: Trail) => {
 	getTrails().push(trail);
 };
 
-export type CDCL_PROPAGATE_CC_FUN = (clauseId: number) => number;
+export type CDCL_PROPAGATE_CC_FUN = (clauseTag: number) => number;
 
-export const propagateCC: CDCL_PROPAGATE_CC_FUN = (clauseId: number) => {
+export const propagateCC: CDCL_PROPAGATE_CC_FUN = (clauseTag: number) => {
 	const variables: VariablePool = problem.variables;
 	const clauses: ClausePool = problem.clauses;
-	return solverUnitPropagation(variables, clauses, clauseId, 'backjumping');
+	return solverUnitPropagation(variables, clauses, clauseTag, 'backjumping');
 };
 
 export type CDCL_FUN =

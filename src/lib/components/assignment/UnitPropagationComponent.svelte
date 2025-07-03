@@ -29,7 +29,7 @@
 		if (assignment.isUP()) {
 			const reason = assignment.getReason();
 			if (isUnitPropagationReason(reason)) {
-				return problem.clauses.get(reason.clauseId);
+				return problem.clauses.get(reason.clauseTag);
 			} else {
 				logFatal('Reason error', 'The reason is not a backtracking');
 			}
@@ -38,7 +38,7 @@
 		}
 	});
 
-	const conflictClauseId: number = $derived(propagatedClause.getTag());
+	const conflictclauseTag: number = $derived(propagatedClause.getTag());
 
 	const conflictClauseString: string = $derived(
 		propagatedClause
@@ -64,7 +64,7 @@
 
 <Popover triggeredBy={'#' + buttonId} class="app-popover" trigger="click" placement="bottom">
 	<div class="popover-content">
-		<span class="clause-id">{conflictClauseId}.</span>
+		<span class="clause-id">{conflictclauseTag}.</span>
 		<MathTexComponent equation={conflictClauseString} fontSize="var(--popover-font-size)" />
 	</div>
 </Popover>

@@ -75,7 +75,7 @@
 	{#each decisions as { level, assignment } (level)}
 		<DecisionLevelComponent
 			decision={assignment}
-			propagations={trail.getPropagations(level)}
+			propagations={trail.getPropagationsAt(level)}
 			{expanded}
 			{isLast}
 			{trail}

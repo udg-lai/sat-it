@@ -66,7 +66,7 @@ export function updateProblemFromTrail(trail: Trail) {
 	//FIX: This was causing some problems. What we have to do is as it follows. If not, the learned clauses where not erasing once an "undo" was done.
 	const newLearnedClauses: Clause[] = [];
 	getTrails().forEach((trail) => {
-		const learntClause = trail.getLearnedClause();
+		const learntClause = trail.getLearntClause();
 		if (learntClause !== undefined) {
 			newLearnedClauses.push(learntClause);
 		}
@@ -110,21 +110,21 @@ export function addClauseToClausePool(lemma: Clause) {
 function literalToClauses(clauses: ClausePool): MappingLiteral2Clauses {
 	const mapping: Map<number, SvelteSet<number>> = new Map();
 
-	clauses.getClauses().forEach((clause, clauseId) => {
-		addClauseToMapping(clause, clauseId, mapping);
+	clauses.getClauses().forEach((clause, clauseTag) => {
+		addClauseToMapping(clause, clauseTag, mapping);
 	});
 
 	return mapping;
 }
 
-const addClauseToMapping = (clause: Clause, clauseId: number, mapping: MappingLiteral2Clauses) => {
+const addClauseToMapping = (clause: Clause, clauseTag: number, mapping: MappingLiteral2Clauses) => {
 	clause.getLiterals().forEach((literal) => {
 		const literalId = literal.toInt();
 		if (mapping.has(literalId)) {
 			const s = mapping.get(literalId);
-			s?.add(clauseId);
+			s?.add(clauseTag);
 		} else {
-			const s = new SvelteSet([clauseId]);
+			const s = new SvelteSet([clauseTag]);
 			mapping.set(literalId, s);
 		}
 	});

@@ -99,8 +99,7 @@ class Clause implements Comparable<Clause> {
 
 	containsVariable(variableId: number): boolean {
 		const found = this.literals.find((lit) => {
-			const id = lit.toInt();
-			return Math.abs(id) === variableId;
+			return Math.abs(lit.toInt()) === variableId;
 		});
 		return found !== undefined;
 	}
@@ -151,6 +150,10 @@ class Clause implements Comparable<Clause> {
 			tag: this.tag,
 			learnt: this.learnt
 		});
+	}
+
+	isEmpty(): boolean {
+		return this.literals.length === 0;
 	}
 
 	[Symbol.iterator]() {

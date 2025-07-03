@@ -23,10 +23,10 @@
 		class: 'h-7 w-7 cursor-pointer'
 	};
 
-	const clauseId: number | undefined = $derived(trail.getConflict());
+	const clauseTag: number | undefined = $derived(trail.getConflictClauseTag());
 	const clause: string | undefined = $derived.by(() => {
-		if (clauseId === undefined) return undefined;
-		const clause: Clause = problem.clauses.get(clauseId);
+		if (clauseTag === undefined) return undefined;
+		const clause: Clause = problem.clauses.get(clauseTag);
 		return clause
 			.map((literal) => {
 				return literal.toTeX();
@@ -57,7 +57,7 @@
 
 <Popover triggeredBy={'#' + buttonId} class="app-popover" trigger="click" placement="bottom">
 	<div class="popover-content">
-		<span class="clause-id">{clauseId}.</span>
+		<span class="clause-id">{clauseTag}.</span>
 		<MathTexComponent equation={clause as string} fontSize="var(--popover-font-size)" />
 	</div>
 </Popover>

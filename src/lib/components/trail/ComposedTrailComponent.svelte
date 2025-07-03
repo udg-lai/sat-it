@@ -51,8 +51,8 @@
 		};
 	}
 
-	function getClause(clauseId: number): Clause {
-		return clausePool.get(clauseId);
+	function getClause(clauseTag: number): Clause {
+		return clausePool.get(clauseTag);
 	}
 </script>
 

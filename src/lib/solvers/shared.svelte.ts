@@ -74,8 +74,8 @@ export const decide = (pool: VariablePool, algorithm: string): number => {
 	return assignmentEvent.polarity ? variableId : -variableId;
 };
 
-export const clauseEvaluation = (pool: ClausePool, clauseId: number): ClauseEval => {
-	const clause = pool.get(clauseId);
+export const clauseEvaluation = (pool: ClausePool, clauseTag: number): ClauseEval => {
+	const clause = pool.get(clauseTag);
 	const evaluation: ClauseEval = clause.eval();
 	return evaluation;
 };
@@ -83,11 +83,11 @@ export const clauseEvaluation = (pool: ClausePool, clauseId: number): ClauseEval
 export const unitPropagation = (
 	variables: VariablePool,
 	clauses: ClausePool,
-	clauseId: number,
+	clauseTag: number,
 	assignmentReason: 'up' | 'backjumping'
 ): number => {
 	const trail: Trail = obtainTrail(variables);
-	const clause: Clause = clauses.get(clauseId);
+	const clause: Clause = clauses.get(clauseTag);
 	const literalToPropagate: number = clause.findUnassignedLiteral();
 
 	const polarity: boolean = literalToPropagate > 0;
@@ -102,9 +102,9 @@ export const unitPropagation = (
 
 	const variable: Variable = variables.getVariableCopy(variableId);
 	if (assignmentReason === 'up') {
-		trail.push(VariableAssignment.newUnitPropagationAssignment(variable, clauseId));
+		trail.push(VariableAssignment.newUnitPropagationAssignment(variable, clauseTag));
 	} else {
-		trail.push(VariableAssignment.newBackjumpingAssignment(variable, clauseId));
+		trail.push(VariableAssignment.newBackjumpingAssignment(variable, clauseTag));
 	}
 
 	increaseNoUnitPropagations();

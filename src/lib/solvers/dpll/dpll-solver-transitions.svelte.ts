@@ -71,11 +71,11 @@ export const analyzeClause = (solver: DPLL_SolverMachine): void => {
 	const stateMachine: DPLL_StateMachine = solver.getStateMachine();
 	const pendingConflict: OccurrenceList = solver.consultPostponed();
 	const clauseSet: SvelteSet<number> = pendingConflict.clauses;
-	const clauseId: number | undefined = getCheckedClause();
-	if (clauseId === undefined) {
+	const clauseTag: number | undefined = getCheckedClause();
+	if (clauseTag === undefined) {
 		logFatal('Unexpected undefined in inspectedClause');
 	}
-	deleteClauseTransition(stateMachine, clauseSet, clauseId);
+	deleteClauseTransition(stateMachine, clauseSet, clauseTag);
 	conflictDetectionBlock(solver, stateMachine, clauseSet);
 };
 
@@ -140,15 +140,15 @@ const conflictDetectionBlock = (
 		pickClauseSetTransition(stateMachine, solver);
 		return;
 	}
-	const clauseId: number = nextClauseTransition(stateMachine, clauseSet);
-	const conflict: boolean = conflictDetectionTransition(stateMachine, clauseId);
+	const clauseTag: number = nextClauseTransition(stateMachine, clauseSet);
+	const conflict: boolean = conflictDetectionTransition(stateMachine, clauseTag);
 	if (conflict) {
-		updateLastTrailEnding(clauseId);
+		updateLastTrailEnding(clauseTag);
 		return;
 	}
-	const unitClause: boolean = unitClauseTransition(stateMachine, clauseId);
+	const unitClause: boolean = unitClauseTransition(stateMachine, clauseTag);
 	if (!unitClause) return;
-	const literalToPropagate: number = unitPropagationTransition(stateMachine, clauseId);
+	const literalToPropagate: number = unitPropagationTransition(stateMachine, clauseTag);
 	const complementaryClauses: SvelteSet<number> = complementaryOccurrencesTransition(
 		stateMachine,
 		literalToPropagate
@@ -303,14 +303,14 @@ const nextClauseTransition = (
 	if (nextClauseState.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Next Clause state');
 	}
-	const clauseId: number = nextClauseState.run(clauseSet);
+	const clauseTag: number = nextClauseState.run(clauseSet);
 	stateMachine.transition('conflict_detection_state');
-	return clauseId;
+	return clauseTag;
 };
 
 const conflictDetectionTransition = (
 	stateMachine: DPLL_StateMachine,
-	clauseId: number
+	clauseTag: number
 ): boolean => {
 	const conflictDetectionState = stateMachine.getActiveState() as NonFinalState<
 		DPLL_CONFLICT_DETECTION_FUN,
@@ -319,7 +319,7 @@ const conflictDetectionTransition = (
 	if (conflictDetectionState.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Conflict Detection state');
 	}
-	const result: boolean = conflictDetectionState.run(clauseId);
+	const result: boolean = conflictDetectionState.run(clauseTag);
 	if (result) stateMachine.transition('empty_occurrence_lists_state');
 	else stateMachine.transition('unit_clause_state');
 	return result;
@@ -339,7 +339,7 @@ const decisionLevelTransition = (stateMachine: DPLL_StateMachine): boolean => {
 	return onLevelZero;
 };
 
-const unitClauseTransition = (stateMachine: DPLL_StateMachine, clauseId: number): boolean => {
+const unitClauseTransition = (stateMachine: DPLL_StateMachine, clauseTag: number): boolean => {
 	const unitClauseState = stateMachine.getActiveState() as NonFinalState<
 		DPLL_UNIT_CLAUSE_FUN,
 		DPLL_UNIT_CLAUSE_INPUT
@@ -350,7 +350,7 @@ const unitClauseTransition = (stateMachine: DPLL_StateMachine, clauseId: number)
 			'There should be a function in the Unit Clause Detection state'
 		);
 	}
-	const result: boolean = unitClauseState.run(clauseId);
+	const result: boolean = unitClauseState.run(clauseTag);
 	if (result) stateMachine.transition('unit_propagation_state');
 	else stateMachine.transition('delete_clause_state');
 	return result;
@@ -359,7 +359,7 @@ const unitClauseTransition = (stateMachine: DPLL_StateMachine, clauseId: number)
 const deleteClauseTransition = (
 	stateMachine: DPLL_StateMachine,
 	clauseSet: SvelteSet<number>,
-	clauseId: number
+	clauseTag: number
 ): void => {
 	const deleteClauseState = stateMachine.getActiveState() as NonFinalState<
 		DPLL_DELETE_CLAUSE_FUN,
@@ -368,7 +368,7 @@ const deleteClauseTransition = (
 	if (deleteClauseState.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Delete Clause state');
 	}
-	deleteClauseState.run(clauseSet, clauseId);
+	deleteClauseState.run(clauseSet, clauseTag);
 	stateMachine.transition('all_clauses_checked_state');
 	incrementCheckingIndex();
 };
@@ -391,7 +391,7 @@ const unstackOccurrenceListTransition = (
 	stateMachine.transition('check_pending_occurrence_lists_state');
 };
 
-const unitPropagationTransition = (stateMachine: DPLL_StateMachine, clauseId: number): number => {
+const unitPropagationTransition = (stateMachine: DPLL_StateMachine, clauseTag: number): number => {
 	const unitPropagationState = stateMachine.getActiveState() as NonFinalState<
 		DPLL_UNIT_PROPAGATION_FUN,
 		DPLL_UNIT_PROPAGATION_INPUT
@@ -399,7 +399,7 @@ const unitPropagationTransition = (stateMachine: DPLL_StateMachine, clauseId: nu
 	if (unitPropagationState.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Unit Propagation state');
 	}
-	const literalToPropagate: number = unitPropagationState.run(clauseId);
+	const literalToPropagate: number = unitPropagationState.run(clauseTag);
 	stateMachine.transition('complementary_occurrences_state');
 	return literalToPropagate;
 };

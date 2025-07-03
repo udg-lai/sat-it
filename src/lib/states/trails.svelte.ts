@@ -19,6 +19,6 @@ export const updateTrails = (snapshot: Trail[]): void => {
 	trails = snapshot.map((trail) => trail.copy());
 };
 
-export const updateLastTrailEnding = (clauseId: number): void => {
-	trails[trails.length - 1].setConflict(clauseId);
+export const updateLastTrailEnding = (clauseTag: number): void => {
+	trails[trails.length - 1].setConflictClauseTag(clauseTag);
 };
