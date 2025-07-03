@@ -2,6 +2,7 @@
 	import type Clause from '$lib/entities/Clause.svelte.ts';
 	import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
 	import type { Trail } from '$lib/entities/Trail.svelte.ts';
+	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
 	import { getClausePool } from '$lib/states/problem.svelte.ts';
 	import { isLeft, makeLeft, makeRight, unwrapEither, type Either } from '$lib/types/either.ts';
 	import CanvasComponent from './CanvasComponent.svelte';
@@ -13,9 +14,10 @@
 		isLast?: boolean;
 		showUPView: boolean;
 		showCAView: boolean;
+		emitUndo?: (assignment: VariableAssignment) => void;
 	}
 
-	let { trail, expanded, isLast = true, showUPView, showCAView }: Props = $props();
+	let { trail, expanded, isLast = true, showUPView, showCAView, emitUndo }: Props = $props();
 
 	let upContext: Either<Clause, undefined>[] = $derived.by(() => {
 		const upContext: Either<number, undefined>[] = trail.getUPContext();
@@ -30,8 +32,6 @@
 		if (!showCAView) return [];
 		else return trail.getConflictAnalysisCtx();
 	});
-
-	$effect(() => console.log(caContext));
 
 	let clausePool: ClausePool = $derived(getClausePool());
 
@@ -61,7 +61,7 @@
 		<CanvasComponent context={upContext} width={trailWidth} align={'end'} reverse={true} />
 	{/if}
 	<div use:observeWidth class="fit-content">
-		<TrailComponent {trail} {expanded} {isLast} />
+		<TrailComponent {trail} {expanded} {isLast} {emitUndo} />
 	</div>
 	{#if showCAView}
 		<CanvasComponent context={upContext} width={trailWidth} align={'start'} />

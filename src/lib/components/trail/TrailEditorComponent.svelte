@@ -1,7 +1,8 @@
 <script lang="ts">
-	import { writable } from 'svelte/store';
 	import type { Trail } from '$lib/entities/Trail.svelte.ts';
+	import VariableAssignment from '$lib/entities/VariableAssignment.ts';
 	import {
+		algorithmicUndoEventBus,
 		solverStartedAutoMode,
 		toggleTrailExpandEventBus,
 		trailTrackingEventBus
@@ -10,8 +11,8 @@
 	import type { StateFun, StateInput } from '$lib/solvers/StateMachine.svelte.ts';
 	import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 	import { onMount } from 'svelte';
-	import InformationComponent from './InformationComponent.svelte';
 	import ComposedTrailComponent from './ComposedTrailComponent.svelte';
+	import InformationComponent from './InformationComponent.svelte';
 
 	interface Props {
 		trails: Trail[];
@@ -147,6 +148,13 @@
 		};
 	}
 
+	function emitUndo(assignment: VariableAssignment, index: number) {
+		algorithmicUndoEventBus.emit({
+			objectiveAssignment: assignment,
+			trailIndex: index
+		});
+	}
+
 	onMount(() => {
 		const unsubscribeTrailTracking = trailTrackingEventBus.subscribe(rearrangeTrailEditor);
 		const unsubscribeExpandedTrails = toggleTrailExpandEventBus.subscribe(
@@ -193,6 +201,7 @@
 							isLast={trails.length === index + 1}
 							showCAView={caConstraint && trail.view()}
 							showUPView={upConstraint && trail.view()}
+							emitUndo={(assignment: VariableAssignment) => emitUndo(assignment, index)}
 						/>
 					</div>
 				{/each}
@@ -231,6 +240,7 @@
 
 <style>
 	trail-editor {
+		position: relative;
 		display: block;
 		height: 75%;
 		overflow-y: auto;

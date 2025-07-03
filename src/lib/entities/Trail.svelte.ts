@@ -10,15 +10,15 @@ import {
 export class Trail {
 	private assignments: VariableAssignment[] = $state([]);
 	private decisionLevelBookmark: number[] = $state([-1]);
-	private followUPIndex: number = -1;
+	private followUPIndex: number = 0;
 	private decisionLevel: number = 0;
 	private trailCapacity: number = 0;
-	private learntClause: Clause | undefined = undefined;
-	private ccTag: number | undefined = $state(undefined); // conflict clause tag, used for conflict analysis
 	private conflictAnalysisCtx: Either<Clause, undefined>[] = $state([]); // this is just for representing the conflict analysis view
 	private upContext: Either<number, undefined>[] = $derived.by(() => this._upContext());
 	private fullView: boolean = $state(false); // UI state for knowing whenever for that trail it was required to show more information
 	private trailHeight: number = $state(0); // trail height in px
+	private learntClause: Clause | undefined = $state(undefined);
+	private conflictClauseTag: number | undefined = $state(undefined);
 
 	constructor(trailCapacity: number = 0) {
 		this.trailCapacity = trailCapacity;
@@ -31,7 +31,8 @@ export class Trail {
 		newTrail.followUPIndex = this.followUPIndex;
 		newTrail.decisionLevel = this.decisionLevel;
 		newTrail.trailCapacity = this.trailCapacity;
-		newTrail.ccTag = this.ccTag;
+		newTrail.learnClause = this.learnClause;
+		newTrail.conflictClauseTag = this.conflictClauseTag;
 		return newTrail;
 	}
 
@@ -52,6 +53,10 @@ export class Trail {
 
 	getAssignments(): VariableAssignment[] {
 		return [...this.assignments];
+	}
+
+	getFollowUpAssignments(): VariableAssignment[] {
+		return this.assignments.slice(this.followUPIndex);
 	}
 
 	pickLastAssignment(): VariableAssignment {
@@ -93,11 +98,15 @@ export class Trail {
 	}
 
 	setConflictClauseTag(clauseTag: number): void {
-		this.ccTag = clauseTag;
+		this.conflictClauseTag = clauseTag;
 	}
 
 	getConflictClauseTag(): number | undefined {
-		return this.ccTag;
+		return this.conflictClauseTag;
+	}
+
+	cleanConflictClause(): void {
+		this.conflictClauseTag = undefined;
 	}
 
 	getConflictAnalysisCtx(): Either<Clause, undefined>[] {

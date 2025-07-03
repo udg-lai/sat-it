@@ -113,8 +113,6 @@
 		<DynamicRender component={BarsOutline} props={generalProps} />
 	</button>
 
-	<ResetProblem />
-
 	<button
 		class="btn general-btn"
 		class:invalidOption={!btnUndoActive}
@@ -134,6 +132,8 @@
 	>
 		<DynamicRender component={ReplyOutline} props={reverseProps} />
 	</button>
+
+	<ResetProblem />
 
 	<button class="btn general-btn" title={textCollapse} onclick={toggleExpand}>
 		<DynamicRender

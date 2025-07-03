@@ -20,12 +20,24 @@ export const increaseNoDecisions = (): void => {
 	noDecisions += 1;
 };
 
+export const decreaseNoDecision = (): void => {
+	noDecisions -= 1;
+};
+
 export const increaseNoConflicts = (): void => {
 	noConflicts += 1;
 };
 
+export const decreaseNoConflicts = (): void => {
+	noConflicts -= 1;
+};
+
 export const increaseNoUnitPropagations = (): void => {
 	noUnitPropagations += 1;
+};
+
+export const decreaseNoUnitPropagations = (): void => {
+	noUnitPropagations -= 1;
 };
 
 export const updateClausesLeft = (nTrail: number): void => {
