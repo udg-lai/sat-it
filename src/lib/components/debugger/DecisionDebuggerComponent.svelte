@@ -43,7 +43,6 @@
 		}
 
 		if (input.value === '') {
-			//This line is necessary because if not userLiteral will be an empty string
 			inputLiteral = undefined;
 			return;
 		}
@@ -70,7 +69,7 @@
 		inputLiteral = literal;
 	};
 
-	//It can happen that a user enters just a '-' which is an invalid "final input".
+	//It can happen that a user enters just a '-', which it's an invalid "final input", so it needs to be cleaned.
 	const checkForMinus = () => {
 		if (inputLiteral !== undefined && inputLiteral.toString() === '-') {
 			inputLiteral = undefined;
@@ -92,7 +91,7 @@
 				const variable: number = Math.abs(literal);
 				logWarning(
 					'Manual assignment',
-					`Variable '${variable}' has been already assigned with a truth value.`
+					`Variable '${variable}' has already been assigned with a truth value.`
 				);
 			} else {
 				const truthValue: boolean = literal > 0;

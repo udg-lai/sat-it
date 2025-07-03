@@ -9,7 +9,7 @@
 	import ConflictDetectionDebugger from './ConflictDetectionDebuggerComponent.svelte';
 	import DecisionDebugger from './DecisionDebuggerComponent.svelte';
 	import GeneralDebuggerButtons from './GeneralDebuggerComponent.svelte';
-	import SingleStepDebugger from './SingleStepDebuggerComponent.svelte';
+	import StepComponent from './StepDebuggerComponent.svelte';
 
 	const problem: Problem = $derived(getProblemStore());
 	let defaultNextVariable: number | undefined = $derived(problem.variables.nextVariable());
@@ -27,10 +27,14 @@
 	{#if inAutoMode}
 		<AutoModeComponent />
 	{:else if enablePreprocess}
-		<SingleStepDebugger />
+		<init-step>
+			<StepComponent />
+		</init-step>
 	{:else}
 		{#if onPreConflictDetection}
-			<SingleStepDebugger />
+			<preConf-step>
+				<StepComponent />
+			</preConf-step>
 		{:else if onConflictDetection}
 			<ConflictDetectionDebugger />
 		{:else if onConflict && problem.algorithm === 'cdcl'}
