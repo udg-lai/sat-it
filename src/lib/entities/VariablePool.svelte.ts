@@ -62,11 +62,7 @@ export class VariablePool implements IVariablePool {
 	getVariableCopy(variable: number): Variable {
 		return this.getVariable(variable).copy();
 	}
-
-	nVariables(): number {
-		return this.capacity;
-	}
-
+	
 	includes(varId: number): boolean {
 		return varId >= 1 && varId <= this.size();
 	}

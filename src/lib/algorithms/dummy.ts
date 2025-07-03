@@ -19,7 +19,7 @@ export const dummyAssignmentAlgorithm: StepAlgorithm = (params: DummySearchParam
 	let nextTrailsState: Trail[] = [];
 
 	if (trails.length === 0) {
-		nextTrailsState = [new Trail(variables.nVariables())];
+		nextTrailsState = [new Trail(variables.size())];
 	} else {
 		nextTrailsState = [...trails];
 	}
