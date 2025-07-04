@@ -5,7 +5,6 @@ import {
 	makeUnresolved,
 	makeUnSAT,
 	type AssignmentEval,
-	type IClausePool
 } from '../interfaces/IClausePool.ts';
 import type { Claim } from '../parsers/dimacs.ts';
 import Clause, { type ClauseEval, isSatClause, isUnSATClause } from './Clause.svelte.ts';
@@ -77,7 +76,7 @@ class ClausePool implements IClausePool {
 	getUnitClauses(): SvelteSet<number> {
 		const S = new SvelteSet<number>();
 		for (const c of this.getClauses()) {
-			if (c.optimalCheckUnit()) S.add(c.getTag() as number);
+			if (c.isUnit()) S.add(c.getTag() as number);
 		}
 		return S;
 	}

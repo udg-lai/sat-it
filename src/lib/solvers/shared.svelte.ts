@@ -113,7 +113,7 @@ export const unitPropagation = (
 };
 
 const obtainTrail = (variables: VariablePool): Trail => {
-	const trail: Trail = getLatestTrail() ?? new Trail(variables.nVariables());
+	const trail: Trail = getLatestTrail() ?? new Trail(variables.size());
 	unstackTrail();
 	return trail;
 };

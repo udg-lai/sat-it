@@ -110,17 +110,20 @@ export abstract class StateMachine<F extends StateFun, I extends StateInput>
 
 	getNextState(input: I): State<F, I> {
 		if (this.onFinalState()) {
-			logFatal('No next state for a completed state machine');
+			logFatal(
+				'Final state exception',
+				'It is not possible to perform a transition in a final state'
+			);
 		} else {
 			const activeState = this.getActiveState() as NonFinalState<F, I>;
 			const activeStateTransitions = activeState.transitions;
 			const nextStateId = activeStateTransitions.get(input);
 			if (nextStateId === undefined) {
-				logFatal('Unexpected input to active state');
+				logFatal('Non expected input for the current active state');
 			} else {
 				const nextState = this.states.get(nextStateId);
 				if (nextState === undefined) {
-					logFatal('Next state does not appear in set of states by id');
+					logFatal('State is not defined in the states mapping');
 				} else {
 					return nextState;
 				}
@@ -130,7 +133,10 @@ export abstract class StateMachine<F extends StateFun, I extends StateInput>
 
 	transition(input: I): void {
 		if (this.onFinalState()) {
-			logFatal('Already in a final state');
+			logFatal(
+				'Final state exception',
+				'It is not possible to perform a transition in a final state'
+			);
 		} else {
 			const nextState = this.getNextState(input);
 			this.active = nextState.id;

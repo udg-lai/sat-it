@@ -31,10 +31,10 @@
 			if (isUnitPropagationReason(reason)) {
 				return problem.clauses.get(reason.clauseTag);
 			} else {
-				logFatal('Reason error', 'The reason is not a backtracking');
+				logFatal('Reason error', 'The reason is not a unit propagation');
 			}
 		} else {
-			logFatal('Reason error', 'The variable assignment is not a backtracking');
+			logFatal('Reason error', 'The variable assignment is not a unit propagation');
 		}
 	});
 

@@ -94,21 +94,6 @@ class Clause implements Comparable<Clause> {
 	}
 
 	isUnit(): boolean {
-		return this.optimalCheckUnit();
-	}
-
-	containsVariable(variableId: number): boolean {
-		const found = this.literals.find((lit) => {
-			return Math.abs(lit.toInt()) === variableId;
-		});
-		return found !== undefined;
-	}
-
-	getLiterals(): Literal[] {
-		return [...this.literals];
-	}
-
-	optimalCheckUnit(): boolean {
 		let nNotAssigned = 0;
 		let i = 0;
 		const len = this.literals.length;
@@ -124,6 +109,18 @@ class Clause implements Comparable<Clause> {
 		}
 		const unit = !satisfied && nNotAssigned == 1;
 		return unit;
+	}
+
+	containsVariable(variableId: number): boolean {
+		const found = this.literals.find((lit) => {
+			const id = lit.toInt();
+			return Math.abs(id) === variableId;
+		});
+		return found !== undefined;
+	}
+
+	getLiterals(): Literal[] {
+		return [...this.literals];
 	}
 
 	resolution(other: Clause): Clause {

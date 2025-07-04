@@ -95,7 +95,9 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 	}
 
 	isAssertive() {
-		if (this.conflictAnalysis === undefined) return false;
+		if (this.conflictAnalysis === undefined) {
+			logFatal('Assertive exception', 'The conflict analysis can not be undefined');
+		}
 		const { conflictClause, decisionLevelVariables } = this.conflictAnalysis;
 		return assertiveness(conflictClause, decisionLevelVariables);
 	}

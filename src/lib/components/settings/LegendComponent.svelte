@@ -18,11 +18,11 @@
 <div class="legend pointer-events-none flex flex-col items-center text-center">
 	<div class="flex w-full max-w-4xl flex-row items-start justify-center">
 		<div class="flex flex-1 flex-col items-center">
-			<p class="mb-2"><strong>Decision expanded</strong></p>
+			<p class="mb-2"><strong>Propagations expanded</strong></p>
 			<ChildlessDecisionComponent assignment={decisionExample} />
 		</div>
 		<div class="flex flex-1 flex-col items-center">
-			<p class="mb-2"><strong>Decision collapsed</strong></p>
+			<p class="mb-2"><strong>Propagations collapsed</strong></p>
 			<DecisionComponent assignment={decisionExample} expanded={false} />
 		</div>
 	</div>
