@@ -65,7 +65,7 @@ class ClausePool implements IClausePool {
 	getUnitClauses(): SvelteSet<number> {
 		const S = new SvelteSet<number>();
 		for (const c of this.getClauses()) {
-			if (c.optimalCheckUnit()) S.add(c.getTag() as number);
+			if (c.isUnit()) S.add(c.getTag() as number);
 		}
 		return S;
 	}

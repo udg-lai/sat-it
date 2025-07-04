@@ -4,6 +4,7 @@
 	import { Modal } from 'flowbite-svelte';
 	import { ExclamationCircleOutline, RefreshOutline } from 'flowbite-svelte-icons';
 	import DynamicRender from '../DynamicRender.svelte';
+	import './style.css';
 
 	const resetProps = {
 		size: 'md'
@@ -35,7 +36,7 @@
 				}}>Yes, I'm sure</button
 			>
 			<button
-				class="btn"
+				class="btn btn-modal"
 				onclick={() => {
 					resetModal = false;
 				}}>No, cancel</button
@@ -45,7 +46,7 @@
 </button>
 
 <style>
-	.btn {
+	.btn-modal {
 		border: solid;
 		border-width: 1px;
 		border-radius: 0.5rem;
