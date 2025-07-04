@@ -109,8 +109,6 @@ class ClausePool implements IClausePool {
 		this.learnt.clear();
 	}
 
-	clear;
-
 	private _addClause(clause: Clause): void {
 		const id = this.clauses.size;
 		clause.setTag(id);
