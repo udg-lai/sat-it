@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { stateMachineEventBus, toggleTrailExpandEventBus } from '$lib/events/events.ts';
-	import { CodeMergeOutline, ForwardOutline } from 'flowbite-svelte-icons';
+	import { ForwardOutline } from 'flowbite-svelte-icons';
 	import DynamicRender from '../DynamicRender.svelte';
 	import './style.css';
+	import StepComponent from './StepDebuggerComponent.svelte';
 
 	const assignmentProps = {
 		size: 'md'
@@ -10,15 +11,7 @@
 </script>
 
 <conflict-analysis-debugger>
-	<button
-		class="btn general-btn conflict-btn"
-		title="Step"
-		onclick={() => {
-			stateMachineEventBus.emit('step');
-		}}
-	>
-		<DynamicRender component={CodeMergeOutline} props={assignmentProps} />
-	</button>
+	<StepComponent />
 
 	<button
 		class="btn general-btn conflict-btn"

@@ -148,10 +148,10 @@ export class Trail {
 	backjump(dl: number): void {
 		// Security check
 		if (dl < 0 || dl > this.decisionLevel) {
-			logFatal('DL error', 'The entered DL is not valid');
+			logFatal('Decision level error', 'The entered decision level is not valid');
 		}
 
-		// We get the mark of the DL+1 as we don't want to remove the propagations.
+		// As the propagations are not meant to be deleted, the DL+1 is obtained
 		const targetIndex =
 			dl === 0 ? this.getMarkOfDecisionLevel(1) : this.getMarkOfDecisionLevel(dl + 1);
 		while (this.assignments.length > targetIndex) {
@@ -159,7 +159,7 @@ export class Trail {
 			getProblemStore().variables.unassign(last.getVariable().getInt());
 		}
 
-		//Set the new dl parameters
+		// Set the new decision level parameters
 		this.decisionLevelBookmark = this.decisionLevelBookmark.slice(0, dl + 1);
 		this.decisionLevel = dl;
 	}
