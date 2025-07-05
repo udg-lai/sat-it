@@ -8,13 +8,18 @@
 	import { Popover } from 'flowbite-svelte';
 	import MathTexComponent from '../MathTexComponent.svelte';
 	import DynamicRender from '../DynamicRender.svelte';
-	import { CheckOutline, CloseOutline, HammerOutline } from 'flowbite-svelte-icons';
+	import { ArrowUpRightDownLeftOutline, CheckOutline, CloseOutline, HammerOutline, HorizontalLinesOutline, MinimizeOutline } from 'flowbite-svelte-icons';
+	import type { SolverMachine } from '$lib/solvers/SolverMachine.svelte.ts';
+	import type { StateFun, StateInput } from '$lib/solvers/StateMachine.svelte.ts';
+	import { on } from 'svelte/events';
 
 	interface Props {
-		trail: Trail;
 		isLast: boolean;
+		onToggleExpand?: () => void;
+		expanded: boolean
 	}
-	let { trail, isLast }: Props = $props();
+
+	let {  isLast, onToggleExpand, expanded }: Props = $props();
 
 	let buttonId: string = 'btn-' + nanoid();
 
@@ -23,44 +28,23 @@
 		class: 'h-7 w-7 cursor-pointer'
 	};
 
-	const clauseTag: number | undefined = $derived(trail.getConflictClauseTag());
-	const clause: string | undefined = $derived.by(() => {
-		if (clauseTag === undefined) return undefined;
-		const clause: Clause = problem.clauses.get(clauseTag);
-		return clause
-			.map((literal) => {
-				return literal.toTeX();
-			})
-			.join('\\: \\:');
-	});
+	const solver: SolverMachine<StateFun, StateInput> = $derived(getSolverMachine());
 
-	const activeId = $derived(getSolverMachine().getActiveStateId());
+
+	function onToggleExpandClick() {
+		onToggleExpand?.();
+	}
+
+
+	const activeId = $derived(solver.getActiveStateId());
 	const satState = $derived(activeId === SAT_STATE_ID);
 	const unsatState = $derived(activeId === UNSAT_STATE_ID);
 </script>
 
-<button
-	id={buttonId}
-	class="notification"
-	class:conflict={clause !== undefined}
-	class:unsat={unsatState && isLast}
-	class:sat={satState && clause === undefined}
->
-	{#if unsatState && isLast}
-		<DynamicRender component={CloseOutline} props={iconProps} />
-	{:else if clause !== undefined}
-		<DynamicRender component={HammerOutline} props={iconProps} />
-	{:else if satState}
-		<DynamicRender component={CheckOutline} props={iconProps} />
-	{/if}
-</button>
+	<button onclick={onToggleExpandClick} >
+		<DynamicRender component={expanded ? MinimizeOutline : HorizontalLinesOutline} props={iconProps} />
+	</button>
 
-<Popover triggeredBy={'#' + buttonId} class="app-popover" trigger="click" placement="bottom">
-	<div class="popover-content">
-		<span class="clause-id">{clauseTag}.</span>
-		<MathTexComponent equation={clause as string} fontSize="var(--popover-font-size)" />
-	</div>
-</Popover>
 
 <style>
 	.notification {
