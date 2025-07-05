@@ -165,7 +165,10 @@ const nextClauseTransition = (
 	return clauseTag;
 };
 
-const conflictDetectionTransition = (stateMachine: BKT_StateMachine, clauseTag: number): boolean => {
+const conflictDetectionTransition = (
+	stateMachine: BKT_StateMachine,
+	clauseTag: number
+): boolean => {
 	const conflictDetectionState = stateMachine.getActiveState() as NonFinalState<
 		BKT_CONFLICT_DETECTION_FUN,
 		BKT_CONFLICT_DETECTION_INPUT

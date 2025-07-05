@@ -3,9 +3,7 @@ import { logFatal } from '$lib/stores/toasts.ts';
 import { makeLeft, makeRight, type Either } from '../types/either.ts';
 import type Clause from './Clause.svelte.ts';
 import type VariableAssignment from './VariableAssignment.ts';
-import {
-	type UnitPropagation
-} from './VariableAssignment.ts';
+import { type UnitPropagation } from './VariableAssignment.ts';
 
 export class Trail {
 	private assignments: VariableAssignment[] = $state([]);
@@ -72,7 +70,7 @@ export class Trail {
 	}
 
 	getPropagationsAt(level: number): VariableAssignment[] {
-			return this._propagationsAt(level);
+		return this._propagationsAt(level);
 	}
 
 	getAssignmentsAt(level: number): VariableAssignment[] {
@@ -111,13 +109,14 @@ export class Trail {
 
 	getConflictAnalysisCtx(): Either<Clause, undefined>[] {
 		const nAssignments = this.assignments.length;
-		const diff = Math.max(nAssignments - this.conflictAnalysisCtx.length, 0)
+		const diff = Math.max(nAssignments - this.conflictAnalysisCtx.length, 0);
 		const ctx = [...Array(diff).fill(makeRight(undefined)), ...this.conflictAnalysisCtx];
 		return ctx;
 	}
 
 	updateConflictAnalysisCtx(clause: Clause | undefined = undefined): void {
-		const ca: Either<Clause, undefined> = clause === undefined ? makeRight(undefined) : makeLeft(clause);
+		const ca: Either<Clause, undefined> =
+			clause === undefined ? makeRight(undefined) : makeLeft(clause);
 		this.conflictAnalysisCtx = [...this.conflictAnalysisCtx, ca];
 	}
 
@@ -227,8 +226,7 @@ export class Trail {
 				endMark = this.getMarkOfDecisionLevel(1);
 			}
 			return this.assignments.slice(startMark, endMark);
-		}
-		else {
+		} else {
 			const startMark = this.getMarkOfDecisionLevel(level);
 			let endMark;
 			if (this.decisionLevelExists(level + 1)) {
@@ -301,5 +299,4 @@ export class Trail {
 			}
 		});
 	}
-
 }

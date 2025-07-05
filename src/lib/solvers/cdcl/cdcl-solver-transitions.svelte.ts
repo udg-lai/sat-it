@@ -591,10 +591,7 @@ const variableInCCTransition = (
 	if (variableInCCState.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Variable In CC state');
 	}
-	const variableAppears: boolean = variableInCCState.run(
-		conflictClause,
-		lastAssignment
-	);
+	const variableAppears: boolean = variableInCCState.run(conflictClause, lastAssignment);
 	if (variableAppears) stateMachine.transition('resolution_update_cc_state');
 	else stateMachine.transition('delete_last_assignment_state');
 	return variableAppears;
@@ -613,11 +610,7 @@ const resolutionUpdateCCTransition = (
 	if (resolutionUpdateCCState.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Variable In CC state');
 	}
-	const resolvent: Clause = resolutionUpdateCCState.run(
-		solver,
-		conflictClause,
-		lastAssignment
-	);
+	const resolvent: Clause = resolutionUpdateCCState.run(solver, conflictClause, lastAssignment);
 	stateMachine.transition('delete_last_assignment_state');
 	return resolvent;
 };

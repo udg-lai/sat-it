@@ -318,7 +318,11 @@ export const buildConflictAnalysis: CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN =
 	const conflictiveClause: Clause = pool.get(ccId).copy();
 
 	//Lastly, generate the conflict analysis structure
-	solver.setConflictAnalysis(latestTrail.partialCopy(), conflictiveClause, variablesLastDecisionLevel);
+	solver.setConflictAnalysis(
+		latestTrail.partialCopy(),
+		conflictiveClause,
+		variablesLastDecisionLevel
+	);
 };
 
 export type CDCL_ASSERTING_CLAUSE_FUN = (solver: CDCL_SolverMachine) => boolean;

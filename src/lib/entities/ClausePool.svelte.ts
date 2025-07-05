@@ -4,7 +4,7 @@ import {
 	makeSat,
 	makeUnresolved,
 	makeUnSAT,
-	type AssignmentEval,
+	type AssignmentEval
 } from '../interfaces/IClausePool.ts';
 import type { Claim } from '../parsers/dimacs.ts';
 import Clause, { type ClauseEval, isSatClause, isUnSATClause } from './Clause.svelte.ts';
