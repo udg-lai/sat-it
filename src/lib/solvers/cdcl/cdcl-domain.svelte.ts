@@ -295,6 +295,8 @@ export const buildConflictAnalysis: CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN =
 	const latestTrail: Trail | undefined = getLatestTrail();
 	if (latestTrail === undefined) {
 		logFatal('Conflict analysis', 'There is no last trail to work with');
+	} else {
+		latestTrail.setState('conflict');
 	}
 
 	// Then the variables from the last decision level are retrieved.

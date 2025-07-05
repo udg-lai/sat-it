@@ -1,73 +1,91 @@
 <script lang="ts">
-	import { SAT_STATE_ID, UNSAT_STATE_ID } from '$lib/solvers/reserved.ts';
-	import { nanoid } from 'nanoid';
-	import { getProblemStore, type Problem } from '$lib/states/problem.svelte.ts';
-	import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
-	import type Clause from '$lib/entities/Clause.svelte.ts';
-	import type { Trail } from '$lib/entities/Trail.svelte.ts';
-	import { Popover } from 'flowbite-svelte';
-	import MathTexComponent from '../MathTexComponent.svelte';
+	import type { TrailState } from '$lib/entities/Trail.svelte.ts';
+	import {
+		CheckOutline,
+		CloseOutline,
+		CogOutline,
+		HammerOutline,
+		MinimizeOutline,
+	} from 'flowbite-svelte-icons';
 	import DynamicRender from '../DynamicRender.svelte';
-	import { ArrowUpRightDownLeftOutline, CheckOutline, CloseOutline, HammerOutline, HorizontalLinesOutline, MinimizeOutline } from 'flowbite-svelte-icons';
-	import type { SolverMachine } from '$lib/solvers/SolverMachine.svelte.ts';
-	import type { StateFun, StateInput } from '$lib/solvers/StateMachine.svelte.ts';
-	import { on } from 'svelte/events';
 
 	interface Props {
-		isLast: boolean;
 		onToggleExpand?: () => void;
-		expanded: boolean
+		expanded: boolean;
+		trailState: TrailState;
+		classStyle?: string;
 	}
 
-	let {  isLast, onToggleExpand, expanded }: Props = $props();
+	let { trailState, onToggleExpand, expanded, classStyle = ''}: Props = $props();
 
-	let buttonId: string = 'btn-' + nanoid();
-
-	const problem: Problem = $derived(getProblemStore());
 	const iconProps = {
 		class: 'h-7 w-7 cursor-pointer'
 	};
 
-	const solver: SolverMachine<StateFun, StateInput> = $derived(getSolverMachine());
-
-
 	function onToggleExpandClick() {
 		onToggleExpand?.();
 	}
-
-
-	const activeId = $derived(solver.getActiveStateId());
-	const satState = $derived(activeId === SAT_STATE_ID);
-	const unsatState = $derived(activeId === UNSAT_STATE_ID);
 </script>
 
-	<button onclick={onToggleExpandClick} >
-		<DynamicRender component={expanded ? MinimizeOutline : HorizontalLinesOutline} props={iconProps} />
-	</button>
-
+<button
+	onclick={onToggleExpandClick}
+	class="notification {classStyle}"
+	class:unsat={trailState === 'unsat'}
+	class:sat={trailState === 'sat'}
+	class:conflict={trailState === 'conflict'}
+>
+	{#if expanded}
+		<DynamicRender component={MinimizeOutline} props={iconProps} />
+	{:else if trailState === 'unsat'}
+		<DynamicRender component={CloseOutline} props={iconProps} />
+	{:else if trailState === 'sat'}
+		<DynamicRender component={CheckOutline} props={iconProps} />
+	{:else if trailState === 'conflict'}
+		<DynamicRender component={HammerOutline} props={iconProps} />
+	{:else}
+		<div class="running">
+			<DynamicRender component={CogOutline} props={iconProps} />
+		</div>
+	{/if}
+</button>
 
 <style>
 	.notification {
-		pointer-events: none;
 		width: var(--trail-literal-min-width);
 		height: var(--trail-literal-min-width);
 		display: flex;
 		justify-content: center;
 		align-items: end;
+		cursor: none;
 	}
 
 	.notification.conflict {
 		color: var(--conflict-color);
 		cursor: pointer;
-		pointer-events: auto;
 	}
 
 	.notification.unsat {
 		color: var(--unsatisfied-color);
+		cursor: pointer;
 	}
+
 	.notification.sat {
-		cursor: default;
+		cursor: pointer;
 		color: var(--satisfied-color);
+	}
+
+	.notification .running {
+		animation: rotate-once 1s linear infinite;
+		cursor: none;
+	}
+
+	@keyframes rotate-once {
+		0% {
+			transform: rotate(0deg);
+		}
+		100% {
+			transform: rotate(180deg);
+		}
 	}
 
 	:global(.app-popover) {
@@ -76,6 +94,7 @@
 		color: black;
 		padding: 0.3rem 0.5rem;
 	}
+
 	:global(.app-popover .popover-content) {
 		display: flex;
 		flex-direction: row;

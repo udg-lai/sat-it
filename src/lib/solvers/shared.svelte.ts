@@ -150,11 +150,8 @@ const doAssignment = (truthAssignment: TruthAssignment): void => {
 const handleBreakpoints = (truthAssignment: TruthAssignment): void => {
 	const solverMachine = getSolverMachine();
 	const runningInAutoMode: boolean = solverMachine.isInAutoMode();
-
 	const { variable, polarity } = truthAssignment;
-
 	const literal: number = polarity ? variable : variable * -1;
-
 	const isBP: boolean = isBreakpoint(literal);
 	if (isBP) {
 		logBreakpoint('Breakpoint', `Variable ${variable} assigned to ${polarity}`);
@@ -165,8 +162,16 @@ const handleBreakpoints = (truthAssignment: TruthAssignment): void => {
 };
 
 export const backtracking = (pool: VariablePool): number => {
-	const trail: Trail = (getLatestTrail() as Trail).partialCopy();
-	const lastVariableAssignment: VariableAssignment = disposeUntilDecision(trail, pool);
+	const latestTrail = getLatestTrail();
+	if (latestTrail === undefined) {
+		logFatal('Backtracking', 'No trail found')
+	}
+	else {
+		latestTrail.setState('conflict');
+	}
+
+	const newTrail: Trail = latestTrail.partialCopy();
+	const lastVariableAssignment: VariableAssignment = disposeUntilDecision(newTrail, pool);
 
 	const lastVariable: Variable = lastVariableAssignment.getVariable();
 	const polarity: boolean = !lastVariable.getAssignment();
@@ -179,11 +184,11 @@ export const backtracking = (pool: VariablePool): number => {
 	doAssignment(assignment);
 
 	const variable = pool.getVariableCopy(lastVariable.getInt());
-	trail.push(VariableAssignment.newBacktrackingAssignment(variable));
-	trail.setFollowUpIndex();
+	newTrail.push(VariableAssignment.newBacktrackingAssignment(variable));
+	newTrail.setFollowUpIndex();
 
 	increaseNoConflicts();
-	stackTrail(trail);
+	stackTrail(newTrail);
 	return polarity ? lastVariable.getInt() : -lastVariable.getInt();
 };
 
@@ -198,3 +203,20 @@ const disposeUntilDecision = (trail: Trail, variables: VariablePool): VariableAs
 	}
 	return last;
 };
+
+export const finalStateRun = (): void => {
+	const latest = getLatestTrail();
+	if (latest === undefined) {
+		logFatal('Final state', 'Should be at least one trail')
+	}
+	const solver = getSolverMachine();
+	if (solver.onFinalState()) {
+		if (solver.onSatSate()) {
+			latest.setState('sat');
+		} else {
+			latest.setState('unsat');
+		}
+	} else {
+		logFatal('Final state', 'Solver is not on final state');
+	}
+}

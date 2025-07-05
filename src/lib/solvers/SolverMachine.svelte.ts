@@ -78,6 +78,10 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 		return this.stateMachine.onUnsatState();
 	}
 
+	onSatSate(): boolean {
+		return this.stateMachine.onSatState();
+	}
+
 	onFinalState(): boolean {
 		return this.stateMachine.onFinalState();
 	}

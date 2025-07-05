@@ -13,6 +13,7 @@
 	import { onMount } from 'svelte';
 	import ComposedTrailComponent from './ComposedTrailComponent.svelte';
 	import InformationComponent from './InformationComponent.svelte';
+	import { logFatal } from '$lib/stores/toasts.ts';
 
 	interface Props {
 		trails: Trail[];
@@ -32,16 +33,11 @@
 
 	let expandedTrails: boolean = $state(true);
 
-	let solverMachine: SolverMachine<StateFun, StateInput> = $derived(getSolverMachine());
+	let solver: SolverMachine<StateFun, StateInput> = $derived(getSolverMachine());
 
-	let upConstraint: boolean = $derived.by(() => {
-		const identity = solverMachine.identify();
+	let showUPs: boolean = $derived.by(() => {
+		const identity = solver.identify();
 		return identity === 'cdcl' || identity === 'dpll';
-	});
-
-	let caConstraint: boolean = $derived.by(() => {
-		const identity = solverMachine.identify();
-		return identity === 'cdcl';
 	});
 
 	const scrollToBottom = (editorElement: HTMLElement) => {
@@ -49,7 +45,7 @@
 	};
 
 	function isSolverRunningSolo(): boolean {
-		const autoMode: boolean = solverMachine.isInAutoMode();
+		const autoMode: boolean = solver.isInAutoMode();
 		return autoMode;
 	}
 
@@ -119,6 +115,17 @@
 	}
 
 	function toggleTrailView(trailId: number) {
+		const trail: Trail | undefined = trails.at(trailId);
+		if (trail === undefined) {
+			logFatal('Trail not found for ID: ' + trailId);
+		}
+		if (
+			solver.identify() === 'bkt' &&
+			(trail.getState() === 'running' || trail.getState() === 'sat')
+		) {
+			// If the trail is running or is a model, we do not allow toggling the view
+			return;
+		}
 		for (let i = 0; i < trails.length; i++) {
 			if (trailId != i) {
 				trails.at(i)?.setView(false);
@@ -127,10 +134,9 @@
 		trails.at(trailId)?.toggleView();
 	}
 
-	function computeAlign(): 'center' | 'end' {
-		if (caConstraint) return 'center';
-		else if (upConstraint) return 'end';
-		else return 'center';
+	function computeAlign(): 'center' | 'start' {
+		if (showUPs) return 'center';
+		else return 'start';
 	}
 
 	function observeHeight(element: HTMLElement, trail: Trail) {
@@ -195,8 +201,8 @@
 							{trail}
 							expanded={expandedTrails}
 							isLast={trails.length === index + 1}
-							showCAView={caConstraint && trail.view()}
-							showUPView={upConstraint && trail.view()}
+							showUPView={showUPs && trail.view()}
+							showCAView={trail.view()}
 							emitUndo={(assignment: VariableAssignment) => emitUndo(assignment, index)}
 						/>
 					</div>
@@ -207,7 +213,12 @@
 		<editor-info class="container-padding direction">
 			{#each trails as trail, index (index)}
 				<div class="item" style="height: {trail.getHeight()}px; --align: {computeAlign()}">
-					<InformationComponent expanded={trail.view()} isLast={trails.length === index + 1} onToggleExpand={() => toggleTrailView(index)} />
+					<InformationComponent
+						classStyle={index + 1 < trails.length ? 'opacity' : ''}
+						trailState={trail.getState()}
+						expanded={trail.view()}
+						onToggleExpand={() => toggleTrailView(index)}
+					/>
 				</div>
 			{/each}
 		</editor-info>
@@ -217,7 +228,7 @@
 {#snippet enumerateSnippet(trail: Trail, index: number)}
 	<div class="item" style="--height: {trail.getHeight()}px; --align: {computeAlign()}">
 		<div class="enumerate-item">
-			<span>{index + 1}.</span>
+			<span class:opacity={index + 1 < trails.length}>{index + 1}.</span>
 		</div>
 	</div>
 {/snippet}
@@ -281,7 +292,7 @@
 		align-items: end;
 	}
 
-	.item span {
+	:global(.opacity) {
 		opacity: var(--opacity-50);
 	}
 

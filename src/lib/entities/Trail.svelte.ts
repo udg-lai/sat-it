@@ -5,6 +5,8 @@ import type Clause from './Clause.svelte.ts';
 import type VariableAssignment from './VariableAssignment.ts';
 import { type UnitPropagation } from './VariableAssignment.ts';
 
+export type TrailState = 'sat' | 'unsat' | 'conflict' | 'running';
+
 export class Trail {
 	private assignments: VariableAssignment[] = $state([]);
 	private decisionLevelBookmark: number[] = $state([-1]);
@@ -17,6 +19,7 @@ export class Trail {
 	private trailHeight: number = $state(0); // trail height in px
 	private learntClause: Clause | undefined = $state(undefined);
 	private conflictClauseTag: number | undefined = $state(undefined);
+	private state: TrailState = $state('running');
 
 	constructor(trailCapacity: number = 0) {
 		this.trailCapacity = trailCapacity;
@@ -32,6 +35,14 @@ export class Trail {
 		newTrail.learnClause = this.learnClause;
 		newTrail.conflictClauseTag = this.conflictClauseTag;
 		return newTrail;
+	}
+
+	setState(state: TrailState): void {
+		this.state = state;
+	}
+
+	getState(): TrailState {
+		return this.state;
 	}
 
 	//This partial copy is needed as we don't want to have the same "conflictiveClause" and "learnedClause" as this function is meant for creating the new "latestTrail"
