@@ -134,11 +134,6 @@
 		trails.at(trailId)?.toggleView();
 	}
 
-	function computeAlign(): 'center' | 'start' {
-		if (showUPs) return 'center';
-		else return 'start';
-	}
-
 	function observeHeight(element: HTMLElement, trail: Trail) {
 		const previewObserver = new ResizeObserver((entries) => {
 			for (const entry of entries) {
@@ -212,7 +207,7 @@
 
 		<editor-info class="container-padding direction">
 			{#each trails as trail, index (index)}
-				<div class="item" style="height: {trail.getHeight()}px; --align: {computeAlign()}">
+				<div class="item" style="height: {trail.getHeight()}px;">
 					<StatusIndicator
 						classStyle={index + 1 < trails.length ? 'opacity' : ''}
 						trailState={trail.getState()}
@@ -226,7 +221,7 @@
 </trail-editor>
 
 {#snippet enumerateSnippet(trail: Trail, index: number)}
-	<div class="item" style="--height: {trail.getHeight()}px; --align: {computeAlign()}">
+	<div class="item" style="--height: {trail.getHeight()}px;">
 		<div class="enumerate">
 			<span class:opacity={index + 1 < trails.length}>{index + 1}.</span>
 		</div>
@@ -278,7 +273,7 @@
 		height: var(--height, var(--trail-height));
 		width: var(--trail-height);
 		display: flex;
-		align-items: var(--align);
+		align-items: center;
 		justify-content: center;
 	}
 
