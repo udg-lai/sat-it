@@ -12,13 +12,18 @@ export interface UPContext {
 	literal: number;
 }
 
+export interface ConflictAnalysisContext {
+	clause: Clause;
+	literal: number;
+}
+
 export class Trail {
 	private assignments: VariableAssignment[] = $state([]);
 	private decisionLevelBookmark: number[] = $state([-1]);
 	private followUPIndex: number = 0;
 	private decisionLevel: number = 0;
 	private trailCapacity: number = 0;
-	private conflictAnalysisCtx: Either<Clause, undefined>[] = $state([]); // this is just for representing the conflict analysis view
+	private conflictAnalysisCtx: Either<ConflictAnalysisContext, undefined>[] = $state([]); // this is just for representing the conflict analysis view
 	private upContext: Either<UPContext, undefined>[] = $derived.by(() => this._upContext());
 	private fullView: boolean = $state(false); // UI state for knowing whenever for that trail it was required to show more information
 	private trailHeight: number = $state(0); // trail height in px
@@ -123,17 +128,20 @@ export class Trail {
 		this.conflictClauseTag = undefined;
 	}
 
-	getConflictAnalysisCtx(): Either<Clause, undefined>[] {
+	getConflictAnalysisCtx(): Either<ConflictAnalysisContext, undefined>[] {
 		const nAssignments = this.assignments.length;
 		const diff = Math.max(nAssignments - this.conflictAnalysisCtx.length, 0);
-		const ctx = [...Array(diff).fill(makeRight(undefined)), ...this.conflictAnalysisCtx];
+		const ctx: Either<ConflictAnalysisContext, undefined>[] = [
+			...Array<Either<ConflictAnalysisContext, undefined>>(diff).fill(makeRight(undefined)),
+			...this.conflictAnalysisCtx
+		];
 		return ctx;
 	}
 
-	updateConflictAnalysisCtx(clause: Clause | undefined = undefined): void {
-		const ca: Either<Clause, undefined> =
-			clause === undefined ? makeRight(undefined) : makeLeft(clause);
-		this.conflictAnalysisCtx = [...this.conflictAnalysisCtx, ca];
+	updateConflictAnalysisCtx(ctx: ConflictAnalysisContext | undefined = undefined): void {
+		const ca: Either<ConflictAnalysisContext, undefined> =
+			ctx === undefined ? makeRight(undefined) : makeLeft(ctx);
+		this.conflictAnalysisCtx = [ca, ...this.conflictAnalysisCtx];
 	}
 
 	hasPropagations(level: number): boolean {

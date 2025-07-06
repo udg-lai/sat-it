@@ -137,6 +137,7 @@ export const conflictAnalysis = (solver: CDCL_SolverMachine): void => {
 		stateMachine,
 		conflictAnalysis
 	);
+
 	const variableAppear: boolean = variableInCCTransition(
 		stateMachine,
 		conflictAnalysis,
@@ -152,7 +153,10 @@ export const conflictAnalysis = (solver: CDCL_SolverMachine): void => {
 			conflictAnalysis,
 			lastAssignment
 		);
-		latestTrail.updateConflictAnalysisCtx(resolvent);
+		latestTrail.updateConflictAnalysisCtx({
+			clause: resolvent,
+			literal: lastAssignment.toInt()
+		});
 	} else {
 		latestTrail.updateConflictAnalysisCtx();
 	}
