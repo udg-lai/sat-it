@@ -47,20 +47,18 @@
 <div class="enumerate-clause">
 	<div class="enumerate"></div>
 	<HeadTailComponent inspecting={onPreConflictState}>
-		{#if clauses.length !== 0}
-			<div class="static">
+		<div class="static">
+			{#if clauses.length !== 0}
 				{#each clauses[0] as lit, i (i)}
 					<MathTexComponent equation={lit.toTeX()} />
 					{#if i < clauses[0].nLiterals() - 1}
 						<MathTexComponent equation={'\\lor'} fontSize={'1rem'} />
 					{/if}
 				{/each}
-			</div>
-		{:else}
-			<div class="static">
+			{:else}
 				<MathTexComponent equation={'1'} />
-			</div>
-		{/if}
+			{/if}
+		</div>
 	</HeadTailComponent>
 </div>
 
