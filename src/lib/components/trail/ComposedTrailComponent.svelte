@@ -65,7 +65,7 @@
 
 <composed-trail class="composed-trail" class:opened-views={showUPView || showCAView}>
 	{#if showUPView}
-		<CanvasComponent context={ups} width={trailWidth} align={'end'} reverse={true} repeat={false} />
+		<CanvasComponent context={ups} width={trailWidth} align={'end'} reverse={true} repeat={false} displayBackground={true} />
 	{/if}
 	<div use:observeWidth class="fit-content" class:views-opened={showCAView || showUPView}>
 		<TrailComponent {trail} {expanded} {isLast} {emitUndo} />

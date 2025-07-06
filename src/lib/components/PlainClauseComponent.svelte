@@ -7,9 +7,10 @@
 		clause: Clause;
 		reverse?: boolean;
 		hide?: number[];
+		displayBackground?: boolean;
 	}
 
-	let { clause, reverse = false, hide = [] }: Props = $props();
+	let { clause, reverse = false, hide = [], displayBackground = false }: Props = $props();
 
 	const hideSet = new Set(hide);
 
@@ -20,7 +21,7 @@
 	});
 </script>
 
-<clause>
+<clause class:display-background={displayBackground}>
 	{#each literals as lit, i (i)}
 		<PlainLiteralComponent literal={lit} />
 	{/each}
@@ -34,6 +35,11 @@
 		align-items: center;
 		padding: 0 calc(4px + 0.25rem);
 		min-width: var(--empty-slot);
+	}
+	
+	.display-background {
 		background-color: var(--satisfied-color-o);
 	}
 </style>
+
+

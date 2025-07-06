@@ -16,9 +16,10 @@
 		align: 'end' | 'start';
 		reverse?: boolean;
 		repeat?: boolean;
+		displayBackground?: boolean;
 	}
 
-	let { context, width, align, reverse = false, repeat = true }: Props = $props();
+	let { context, width, align, reverse = false, repeat = true, displayBackground = false }: Props = $props();
 </script>
 
 <trail-canvas class="canvas" style="--width: {width}px">
@@ -29,6 +30,7 @@
 					{reverse}
 					clause={unwrapEither(ctx).clause}
 					hide={repeat ? [] : [unwrapEither(ctx).literal]}
+					{displayBackground}
 				/>
 			{:else}
 				<div class="empty-slot"></div>
