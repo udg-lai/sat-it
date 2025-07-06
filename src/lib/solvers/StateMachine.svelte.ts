@@ -3,7 +3,7 @@ import type { BKT_FUN, BKT_INPUT } from './backtracking/bkt-domain.svelte.ts';
 import type { CDCL_FUN, CDCL_INPUT } from './cdcl/cdcl-domain.svelte.ts';
 import type { DPLL_FUN, DPLL_INPUT } from './dpll/dpll-domain.svelte.ts';
 import { SAT_STATE_ID, UNSAT_STATE_ID } from './reserved.ts';
-import { finalStateRun } from './shared.svelte.ts';
+import { finalStateControl } from './shared.svelte.ts';
 
 export type StateFun = BKT_FUN | DPLL_FUN | CDCL_FUN | never;
 
@@ -146,7 +146,7 @@ export abstract class StateMachine<F extends StateFun, I extends StateInput>
 			const nextState = this.getNextState(input);
 			this.active = nextState.id;
 			if (this.onFinalState()) {
-				finalStateRun();
+				finalStateControl();
 				this.notifyFinalState();
 			}
 		}

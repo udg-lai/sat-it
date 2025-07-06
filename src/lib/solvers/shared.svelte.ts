@@ -203,7 +203,7 @@ const disposeUntilDecision = (trail: Trail, variables: VariablePool): VariableAs
 	return last;
 };
 
-export const finalStateRun = (): void => {
+export const finalStateControl = (): void => {
 	const latest = getLatestTrail();
 	if (latest === undefined) {
 		logFatal('Final state', 'Should be at least one trail');
