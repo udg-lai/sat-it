@@ -40,14 +40,6 @@
 
 	const conflictclauseTag: number = $derived(propagatedClause.getTag());
 
-	const conflictClauseString: string = $derived(
-		propagatedClause
-			.map((literal) => {
-				return literal.toTeX();
-			})
-			.join('\\: \\:')
-	);
-
 	let chrome: boolean = $derived(onChrome());
 </script>
 
@@ -65,7 +57,6 @@
 <Popover triggeredBy={'#' + buttonId} class="app-popover" trigger="click" placement="bottom">
 	<div class="popover-content">
 		<span class="clause-id">{conflictclauseTag}.</span>
-		<MathTexComponent equation={conflictClauseString} fontSize="var(--popover-font-size)" />
 	</div>
 </Popover>
 
