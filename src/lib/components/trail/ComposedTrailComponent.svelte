@@ -1,11 +1,11 @@
 <script lang="ts">
 	import type Clause from '$lib/entities/Clause.svelte.ts';
 	import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
-	import type { Trail } from '$lib/entities/Trail.svelte.ts';
+	import type { Trail, UPContext } from '$lib/entities/Trail.svelte.ts';
 	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
 	import { getClausePool } from '$lib/states/problem.svelte.ts';
 	import { isLeft, makeLeft, makeRight, unwrapEither, type Either } from '$lib/types/either.ts';
-	import CanvasComponent from './CanvasComponent.svelte';
+	import CanvasComponent, { type CanvasContext, type UPRelation } from './CanvasComponent.svelte';
 	import TrailComponent from './TrailComponent.svelte';
 
 	interface Props {
@@ -19,14 +19,21 @@
 
 	let { trail, expanded, isLast = true, showUPView, showCAView, emitUndo }: Props = $props();
 
-	let upContext: Either<Clause, undefined>[] = $derived.by(() => {
-		const upContext: Either<number, undefined>[] = trail.getUPContext();
+	function computeUPs(): CanvasContext {
+		const upContext: Either<UPContext, undefined>[] = trail.getUPContext();
 		return upContext.map((c) => {
 			if (isLeft(c)) {
-				return makeLeft(getClause(unwrapEither(c)));
+				const { clauseTag, literal }: UPContext = unwrapEither(c);
+				const clause: Clause = getClause(clauseTag);
+				return makeLeft({
+					clause,
+					literal
+				});
 			} else return makeRight(undefined);
 		});
-	});
+	}
+
+	let ups: Either<UPRelation, undefined>[] = $derived.by(computeUPs);
 
 	let caContext: Either<Clause, undefined>[] = $derived.by(() => {
 		if (!showCAView) return [];
@@ -58,13 +65,13 @@
 
 <composed-trail class="composed-trail">
 	{#if showUPView}
-		<CanvasComponent context={upContext} width={trailWidth} align={'end'} reverse={true} />
+		<CanvasComponent context={ups} width={trailWidth} align={'end'} reverse={true} repeat={false} />
 	{/if}
 	<div use:observeWidth class="fit-content">
 		<TrailComponent {trail} {expanded} {isLast} {emitUndo} />
 	</div>
 	{#if showCAView}
-		<CanvasComponent context={upContext} width={trailWidth} align={'start'} />
+		<CanvasComponent context={ups} width={trailWidth} align={'start'} />
 	{/if}
 </composed-trail>
 

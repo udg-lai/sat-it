@@ -3,21 +3,29 @@
 	import { isLeft, unwrapEither, type Either } from '$lib/types/either.ts';
 	import PlainClauseComponent from '../PlainClauseComponent.svelte';
 
+	export interface UPRelation {
+		clause: Clause;
+		literal: number;
+	}
+
+	export type CanvasContext = Either<UPRelation, undefined>[];
+
 	interface Props {
-		context: Either<Clause, undefined>[];
+		context: CanvasContext;
 		width: number;
 		align: 'end' | 'start';
 		reverse?: boolean;
+		repeat?: boolean
 	}
 
-	let { context, width, align, reverse = false }: Props = $props();
+	let { context, width, align, reverse = false, repeat = true}: Props = $props();
 </script>
 
 <trail-canvas class="canvas" style="--width: {width}px">
 	<div class="canvas-sheet" style="--align: {align}">
-		{#each context as clause}
-			{#if isLeft(clause)}
-				<PlainClauseComponent {reverse} clause={unwrapEither(clause)} />
+		{#each context as ctx}
+			{#if isLeft(ctx)}
+				<PlainClauseComponent {reverse} clause={unwrapEither(ctx).clause} hide={repeat ? [] : [unwrapEither(ctx).literal]} />
 			{:else}
 				<div class="empty-slot"></div>
 			{/if}
@@ -27,7 +35,7 @@
 
 <style>
 	.empty-slot {
-		width: 55px;
+		width: var(--empty-slot);
 	}
 
 	.canvas {
@@ -35,6 +43,13 @@
 		width: var(--width);
 		overflow-y: auto;
 		overflow-x: hidden;
+		-ms-overflow-style: none; /* Internet Explorer 10+ */
+		scrollbar-width: none; /* Firefox */
+	}
+
+
+	.canvas::-webkit-scrollbar {
+		display: none; /* Safari and Chrome */
 	}
 
 	.canvas-sheet {

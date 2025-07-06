@@ -47,6 +47,7 @@
 	--solving-info-height: calc(var(--debugger-height) * 1);
 	--TeX-padding-bottom-chrome: 9px;
 	--TeX-padding-bottom-others: 3px;
+	--empty-slot: 55px;
 }
 
 html,

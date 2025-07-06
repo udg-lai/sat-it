@@ -7,6 +7,11 @@ import { type UnitPropagation } from './VariableAssignment.ts';
 
 export type TrailState = 'sat' | 'unsat' | 'conflict' | 'running';
 
+export interface UPContext {
+	clauseTag: number;
+	literal: number;
+}
+
 export class Trail {
 	private assignments: VariableAssignment[] = $state([]);
 	private decisionLevelBookmark: number[] = $state([-1]);
@@ -14,7 +19,7 @@ export class Trail {
 	private decisionLevel: number = 0;
 	private trailCapacity: number = 0;
 	private conflictAnalysisCtx: Either<Clause, undefined>[] = $state([]); // this is just for representing the conflict analysis view
-	private upContext: Either<number, undefined>[] = $derived.by(() => this._upContext());
+	private upContext: Either<UPContext, undefined>[] = $derived.by(() => this._upContext());
 	private fullView: boolean = $state(false); // UI state for knowing whenever for that trail it was required to show more information
 	private trailHeight: number = $state(0); // trail height in px
 	private learntClause: Clause | undefined = $state(undefined);
@@ -194,7 +199,7 @@ export class Trail {
 		this.decisionLevel = dl;
 	}
 
-	getUPContext(): Either<number, undefined>[] {
+	getUPContext(): Either<UPContext, undefined>[] {
 		return this.upContext;
 	}
 
@@ -300,11 +305,14 @@ export class Trail {
 		return levels.length > 0;
 	}
 
-	private _upContext(): Either<number, undefined>[] {
-		return this.assignments.map((a) => {
+	private _upContext(): Either<UPContext, undefined>[] {
+		return this.assignments.map((a: VariableAssignment) => {
 			if (a.isUP()) {
 				const reason = a.getReason() as UnitPropagation;
-				return makeLeft(reason.clauseTag);
+				return makeLeft({
+					clauseTag: reason.clauseTag,
+					literal: a.toInt()
+				})
 			} else {
 				return makeRight(undefined);
 			}

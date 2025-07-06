@@ -4,6 +4,7 @@
 		CheckOutline,
 		CloseOutline,
 		CogOutline,
+		CompressOutline,
 		HammerOutline,
 		MinimizeOutline,
 	} from 'flowbite-svelte-icons';
@@ -35,7 +36,7 @@
 	class:conflict={trailState === 'conflict'}
 >
 	{#if expanded}
-		<DynamicRender component={MinimizeOutline} props={iconProps} />
+		<DynamicRender component={CompressOutline} props={iconProps} />
 	{:else if trailState === 'unsat'}
 		<DynamicRender component={CloseOutline} props={iconProps} />
 	{:else if trailState === 'sat'}
@@ -75,7 +76,7 @@
 	}
 
 	.notification .running {
-		animation: rotate-once 1s linear infinite;
+		animation: rotate-once 5s linear infinite;
 		cursor: none;
 	}
 
@@ -84,7 +85,7 @@
 			transform: rotate(0deg);
 		}
 		100% {
-			transform: rotate(180deg);
+			transform: rotate(360deg);
 		}
 	}
 

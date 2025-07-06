@@ -10,10 +10,10 @@
 	import type { SolverMachine } from '$lib/solvers/SolverMachine.svelte.ts';
 	import type { StateFun, StateInput } from '$lib/solvers/StateMachine.svelte.ts';
 	import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
+	import { logFatal } from '$lib/stores/toasts.ts';
 	import { onMount } from 'svelte';
 	import ComposedTrailComponent from './ComposedTrailComponent.svelte';
-	import InformationComponent from './InformationComponent.svelte';
-	import { logFatal } from '$lib/stores/toasts.ts';
+	import StatusIndicator from './StatusIndicator.svelte';
 
 	interface Props {
 		trails: Trail[];
@@ -213,7 +213,7 @@
 		<editor-info class="container-padding direction">
 			{#each trails as trail, index (index)}
 				<div class="item" style="height: {trail.getHeight()}px; --align: {computeAlign()}">
-					<InformationComponent
+					<StatusIndicator
 						classStyle={index + 1 < trails.length ? 'opacity' : ''}
 						trailState={trail.getState()}
 						expanded={trail.view()}
