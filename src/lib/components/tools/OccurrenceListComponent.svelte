@@ -44,25 +44,25 @@
 	}
 </script>
 
-	<div class="enumerate-clause">
-		<div class="enumerate"> </div>
-		<HeadTailComponent inspecting={onPreConflictState}>
-			{#if clauses.length !== 0}
-				<div class="static">
-					{#each clauses[0] as lit, i (i)}
-						<MathTexComponent equation={lit.toTeX()} />
-						{#if i < clauses[0].nLiterals() - 1}
-							<MathTexComponent equation={'\\lor'} fontSize={'1rem'} />
-						{/if}
-					{/each}
-				</div>
-			{:else}
-				<div class="static">
-					<MathTexComponent equation={"1"} />
-				</div>
-			{/if}
-		</HeadTailComponent>
-	</div>
+<div class="enumerate-clause">
+	<div class="enumerate"></div>
+	<HeadTailComponent inspecting={onPreConflictState}>
+		{#if clauses.length !== 0}
+			<div class="static">
+				{#each clauses[0] as lit, i (i)}
+					<MathTexComponent equation={lit.toTeX()} />
+					{#if i < clauses[0].nLiterals() - 1}
+						<MathTexComponent equation={'\\lor'} fontSize={'1rem'} />
+					{/if}
+				{/each}
+			</div>
+		{:else}
+			<div class="static">
+				<MathTexComponent equation={'1'} />
+			</div>
+		{/if}
+	</HeadTailComponent>
+</div>
 
 <conflict-detection>
 	{#each clauses as clause, index (index)}
