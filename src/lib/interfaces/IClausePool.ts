@@ -6,7 +6,7 @@ export interface IClausePool {
 	addClause(clause: Clause): void;
 	get(clause: number): Clause;
 	getUnitClauses(): SvelteSet<number>;
-	getSingleLiteralClauses(): SvelteSet<number>
+	getSingleLiteralClauses(): SvelteSet<number>;
 	getClauses(): Clause[];
 	size(): number;
 }
