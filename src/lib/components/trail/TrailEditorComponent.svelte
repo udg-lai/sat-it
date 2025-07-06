@@ -196,8 +196,8 @@
 							{trail}
 							expanded={expandedTrails}
 							isLast={trails.length === index + 1}
-							showUPView={showUPs && trail.view()}
-							showCAView={trail.view()}
+							showUPView={showUPs && (trails.length === index + 1 ||  trail.view())}
+							showCAView={trails.length === index + 1 || trail.view()}
 							emitUndo={(assignment: VariableAssignment) => emitUndo(assignment, index)}
 						/>
 					</div>
@@ -209,6 +209,7 @@
 			{#each trails as trail, index (index)}
 				<div class="item" style="height: {trail.getHeight()}px;">
 					<StatusIndicator
+						ofLastTrail={trails.length === index + 1}
 						classStyle={index + 1 < trails.length ? 'opacity' : ''}
 						trailState={trail.getState()}
 						expanded={trail.view()}

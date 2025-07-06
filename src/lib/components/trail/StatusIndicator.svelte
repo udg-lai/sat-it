@@ -14,15 +14,17 @@
 		expanded: boolean;
 		trailState: TrailState;
 		classStyle?: string;
+		ofLastTrail?: boolean; // Optional prop to indicate if this is the last trail
 	}
 
-	let { trailState, onToggleExpand, expanded, classStyle = '' }: Props = $props();
+	let { trailState, onToggleExpand, expanded, classStyle = '', ofLastTrail = false }: Props = $props();
 
 	const iconProps = {
-		class: 'h-7 w-7 cursor-pointer'
+		class: `h-7 w-7 ${ofLastTrail ? 'cursor-default' : 'cursor-pointer'}`,
 	};
 
 	function onToggleExpandClick() {
+		if (ofLastTrail) return;
 		onToggleExpand?.();
 	}
 
@@ -46,12 +48,13 @@
 		title={status}
 		onclick={onToggleExpandClick}
 		class="notification {classStyle}"
+		class:ofLastTrail={ofLastTrail}
 		class:unsat={trailState === 'unsat'}
 		class:sat={trailState === 'sat'}
 		class:conflict={trailState === 'conflict'}
 	>
 		<div class="indicator">
-			{#if expanded}
+			{#if expanded && !ofLastTrail}
 				<DynamicRender component={CompressOutline} props={iconProps} />
 			{:else if trailState === 'unsat'}
 				<DynamicRender component={CloseOutline} props={iconProps} />
@@ -89,18 +92,19 @@
 		align-items: center;
 	}
 
+	.ofLastTrail {
+		cursor:default;
+	}
+
 	.notification.conflict {
 		color: var(--conflict-color);
-		cursor: pointer;
 	}
 
 	.notification.unsat {
 		color: var(--unsatisfied-color);
-		cursor: pointer;
 	}
 
 	.notification.sat {
-		cursor: pointer;
 		color: var(--satisfied-color);
 	}
 
