@@ -93,8 +93,26 @@ class Clause implements Comparable<Clause> {
 		return state;
 	}
 
-	// This function will check if the clause has 1 literal (not if it is assigned)
 	isUnit(): boolean {
+		let nNotAssigned = 0;
+		let i = 0;
+		const len = this.literals.length;
+		let satisfied = false;
+		while (i < len && nNotAssigned < 2 && !satisfied) {
+			const lit: Literal = this.literals[i];
+			if (!lit.isAssigned()) {
+				nNotAssigned += 1;
+			} else {
+				satisfied = lit.isTrue();
+			}
+			i++;
+		}
+		const unit = !satisfied && nNotAssigned == 1;
+		return unit;
+	}
+
+	// This function will check if the clause has 1 literal (not if it is assigned)
+	isSingleLiteralClause(): boolean {
 		return this.literals.length === 1;
 	}
 

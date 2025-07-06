@@ -13,7 +13,7 @@ export function updateClausesToCheck(stateMachineSet: SvelteSet<number>, literal
 		const clauses: SvelteSet<number> =
 			literal !== 0
 				? (getMapping().get(literal) as SvelteSet<number>)
-				: getClausePool().getUnitClauses();
+				: getClausePool().getSingleLiteralClauses();
 		clausesToCheck = [...clauses];
 		checkingIndex = clausesToCheck.length - stateMachineSet.size;
 	}

@@ -70,6 +70,14 @@ class ClausePool implements IClausePool {
 		return S;
 	}
 
+	getSingleLiteralClauses(): SvelteSet<number> {
+		const S = new SvelteSet<number>();
+		for (const c of this.getClauses()) {
+			if (c.isSingleLiteralClause()) S.add(c.getTag() as number);
+		}
+		return S;
+	}
+
 	getClauses(): Clause[] {
 		return [...this.clauses.values()];
 	}
