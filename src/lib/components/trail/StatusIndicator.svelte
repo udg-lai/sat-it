@@ -26,9 +26,26 @@
 	function onToggleExpandClick() {
 		onToggleExpand?.();
 	}
+
+	let status = $derived.by(() => {
+		if (expanded) {
+			return 'Click to collapse';
+		}
+		else if (trailState === 'unsat') {
+			return 'The problem is unsatisfiable';
+		} else if (trailState === 'sat') {
+			return 'The problem has been satisfied';
+		} else if (trailState === 'conflict') {
+			return 'A conflict has been detected';
+		} else {
+			return 'Running...';
+		}
+	});
+
 </script>
 
 <button
+	title={status}
 	onclick={onToggleExpandClick}
 	class="notification {classStyle}"
 	class:unsat={trailState === 'unsat'}
