@@ -36,10 +36,8 @@
 		padding: 0 calc(4px + 0.25rem);
 		min-width: var(--empty-slot);
 	}
-	
+
 	.display-background {
 		background-color: var(--satisfied-color-o);
 	}
 </style>
-
-

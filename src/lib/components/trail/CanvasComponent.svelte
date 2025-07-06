@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type Clause from '$lib/entities/Clause.svelte.ts';
 	import { isLeft, unwrapEither, type Either } from '$lib/types/either.ts';
+	import { onMount } from 'svelte';
 	import PlainClauseComponent from '../PlainClauseComponent.svelte';
 
 	export interface UPRelation {
@@ -19,10 +20,29 @@
 		displayBackground?: boolean;
 	}
 
-	let { context, width, align, reverse = false, repeat = true, displayBackground = false }: Props = $props();
+	let {
+		context,
+		width,
+		align,
+		reverse = false,
+		repeat = true,
+		displayBackground = false
+	}: Props = $props();
+
+	let canvasContainer: HTMLDivElement;
+
+	function scrollToBottom() {
+		if (reverse && canvasContainer) {
+			canvasContainer.scrollTop = canvasContainer.scrollHeight;
+		}
+	}
+
+	onMount(() => {
+		scrollToBottom();
+	});
 </script>
 
-<trail-canvas class="canvas" style="--width: {width}px">
+<trail-canvas class="canvas" bind:this={canvasContainer} style="--width: {width}px">
 	<div class="canvas-sheet" style="--align: {align}">
 		{#each context as ctx}
 			{#if isLeft(ctx)}
