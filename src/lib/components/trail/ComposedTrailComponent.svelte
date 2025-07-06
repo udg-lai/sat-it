@@ -98,6 +98,7 @@
 	}
 
 	.views-opened {
+		color: var(--satisfied-color);
 		background-color: var(--satisfied-color-o);
 	}
 </style>
