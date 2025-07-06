@@ -93,7 +93,6 @@ class Clause implements Comparable<Clause> {
 		return state;
 	}
 
-
 	// This function will check if the clause has 1 literal (not if it is assigned)
 	isUnit(): boolean {
 		return this.literals.length === 1;
