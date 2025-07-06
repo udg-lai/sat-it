@@ -102,12 +102,12 @@ export const analyzeClause = (solver: CDCL_SolverMachine): void => {
 
 export const decide = (solver: CDCL_SolverMachine): void => {
 	const stateMachine: CDCL_StateMachine = solver.getStateMachine();
-	const literalToPropagate: number = decideTransition(stateMachine);
+	const assignedLiteral: number = decideTransition(stateMachine);
 	const complementaryClauses: SvelteSet<number> = complementaryOccurrencesTransition(
 		stateMachine,
-		literalToPropagate
+		assignedLiteral
 	);
-	afterComplementaryBlock(solver, stateMachine, Math.abs(literalToPropagate), complementaryClauses);
+	afterComplementaryBlock(solver, stateMachine, assignedLiteral, complementaryClauses);
 };
 
 export const preConflictAnalysis = (solver: CDCL_SolverMachine) => {
@@ -152,7 +152,7 @@ export const conflictAnalysis = (solver: CDCL_SolverMachine): void => {
 	const secondHighestDL: number = getSecondHighestDLTransition(stateMachine, conflictAnalysis);
 	backjumpingTransition(stateMachine, conflictAnalysis, secondHighestDL);
 	pushTrailTransition(stateMachine, conflictAnalysis);
-	const literalToPropagate = propagateCCTransition(stateMachine, clauseId);
+	const assignedLiteral = propagateCCTransition(stateMachine, clauseId);
 
 	const latestTrail = getLatestTrail();
 	if (latestTrail === undefined) {
@@ -162,9 +162,9 @@ export const conflictAnalysis = (solver: CDCL_SolverMachine): void => {
 
 	const complementaryClauses: SvelteSet<number> = complementaryOccurrencesTransition(
 		stateMachine,
-		literalToPropagate
+		assignedLiteral
 	);
-	afterComplementaryBlock(solver, stateMachine, Math.abs(literalToPropagate), complementaryClauses);
+	afterComplementaryBlock(solver, stateMachine, assignedLiteral, complementaryClauses);
 };
 
 /* General non-exported transitions */
@@ -172,10 +172,10 @@ export const conflictAnalysis = (solver: CDCL_SolverMachine): void => {
 const afterComplementaryBlock = (
 	solver: CDCL_SolverMachine,
 	stateMachine: CDCL_StateMachine,
-	variable: number,
+	assignedLiteral: number,
 	complementaryClauses: SvelteSet<number>
 ): void => {
-	queueOccurrenceListTransition(stateMachine, solver, variable, complementaryClauses);
+	queueOccurrenceListTransition(stateMachine, solver, -assignedLiteral, complementaryClauses);
 	const pendingClausesSet: boolean = checkPendingOccurrenceListsTransition(stateMachine, solver);
 	if (!pendingClausesSet) {
 		allVariablesAssignedTransition(stateMachine);
@@ -195,7 +195,7 @@ const conflictDetectionBlock = (
 		unstackOccurrenceListTransition(stateMachine, solver);
 		const pendingClausesSet: boolean = checkPendingOccurrenceListsTransition(stateMachine, solver);
 		if (!pendingClausesSet) {
-			updateClausesToCheck(new SvelteSet<number>(), -1);
+			updateClausesToCheck(new SvelteSet<number>(), 0);
 			allVariablesAssignedTransition(stateMachine);
 			return;
 		}

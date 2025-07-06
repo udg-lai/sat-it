@@ -73,8 +73,8 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 			const clauses: SvelteSet<number> = new SvelteSet<number>([
 				...this.occurrenceList.clauses.values()
 			]);
-			const variableReasonId: number = this.occurrenceList.variableReasonId;
-			return { clauses, variableReasonId };
+			const literal: number = this.occurrenceList.literal;
+			return { clauses, literal };
 		}
 		return undefined;
 	}
@@ -83,16 +83,16 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 	updateFromRecord(record: Record<string, unknown> | undefined): void {
 		if (record === undefined) {
 			this.occurrenceList = undefined;
-			updateClausesToCheck(new SvelteSet<number>(), -1);
+			updateClausesToCheck(new SvelteSet<number>(), 0);
 			return;
 		}
 		const occurrenceListRecord: OccurrenceList = record['pending'] as OccurrenceList;
 		this.setOccurrenceList(occurrenceListRecord);
 		if (this.onConflictDetection()) {
-			const { clauses, variableReasonId }: OccurrenceList = occurrenceListRecord;
-			updateClausesToCheck(clauses, variableReasonId);
+			const { clauses, literal }: OccurrenceList = occurrenceListRecord;
+			updateClausesToCheck(clauses, literal);
 		} else {
-			updateClausesToCheck(new SvelteSet<number>(), -1);
+			updateClausesToCheck(new SvelteSet<number>(), 0);
 		}
 	}
 

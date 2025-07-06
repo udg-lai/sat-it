@@ -53,7 +53,7 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 			const copiedSet = new SvelteSet<number>(originalItem.clauses);
 			const copiedItem: OccurrenceList = {
 				clauses: copiedSet,
-				variableReasonId: originalItem.variableReasonId
+				literal: originalItem.literal
 			};
 			returnQueue.enqueue(copiedItem);
 		}
@@ -69,7 +69,7 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 	updateFromRecord(record: Record<string, unknown> | undefined): void {
 		if (record === undefined) {
 			this.pendingOccurrenceLists = new Queue();
-			updateClausesToCheck(new SvelteSet<number>(), -1);
+			updateClausesToCheck(new SvelteSet<number>(), 0);
 			return;
 		}
 		const recordedPendingOccurrenceLists = record['queue'] as Queue<OccurrenceList>;
@@ -78,15 +78,15 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 			const copiedSet = new SvelteSet<number>(pendingConflict.clauses);
 			const copiedItem: OccurrenceList = {
 				clauses: copiedSet,
-				variableReasonId: pendingConflict.variableReasonId
+				literal: pendingConflict.literal
 			};
 			this.pendingOccurrenceLists.enqueue(copiedItem);
 		}
 		if (!this.pendingOccurrenceLists.isEmpty()) {
-			const conflict: OccurrenceList = this.pendingOccurrenceLists.pick();
-			updateClausesToCheck(conflict.clauses, conflict.variableReasonId);
+			const {clauses, literal}: OccurrenceList = this.pendingOccurrenceLists.pick();
+			updateClausesToCheck(clauses, literal);
 		} else {
-			updateClausesToCheck(new SvelteSet<number>(), -1);
+			updateClausesToCheck(new SvelteSet<number>(), 0);
 		}
 	}
 

@@ -1,16 +1,26 @@
 import type { SvelteSet } from 'svelte/reactivity';
+import { getClausePool, getMapping } from './problem.svelte.ts';
 
-let inspectedVariable: number = $state(-1);
+let inspectedLiteral: number = $state(0);
 let clausesToCheck: number[] = $state([]);
 let checkingIndex: number = $state(0);
 
-export function updateClausesToCheck(toCheck: SvelteSet<number>, variable: number) {
-	inspectedVariable = variable;
-	checkingIndex = 0;
-	clausesToCheck = [...toCheck];
+export function updateClausesToCheck(stateMachineSet: SvelteSet<number>, literal: number) {
+	if (stateMachineSet.size === 0) {
+		clausesToCheck = []
+		checkingIndex = 0;
+	}
+	else {
+		const clauses: SvelteSet<number> = literal !== 0
+			? getMapping().get(literal) as SvelteSet<number>
+			: getClausePool().getUnitClauses();
+		clausesToCheck = [...clauses];
+		checkingIndex = clausesToCheck.length - stateMachineSet.size;
+	}
+	inspectedLiteral = literal;
 }
 
-export const getInspectedVariable = () => inspectedVariable;
+export const getInspectedVariable = () => Math.abs(inspectedLiteral);
 
 export const getClausesToCheck = () => clausesToCheck;
 

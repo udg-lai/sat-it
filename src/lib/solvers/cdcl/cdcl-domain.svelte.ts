@@ -153,17 +153,17 @@ export const emptyClauseDetection: CDCL_EMPTY_CLAUSE_FUN = () => {
 };
 
 export type CDCL_QUEUE_OCCURRENCE_LIST_FUN = (
-	variable: number,
+	literal: number,
 	clauses: SvelteSet<number>,
 	solverStateMachine: CDCL_SolverMachine
 ) => number;
 
 export const queueClauseSet: CDCL_QUEUE_OCCURRENCE_LIST_FUN = (
-	variable: number,
+	literal: number,
 	clauses: SvelteSet<number>,
 	solverStateMachine: CDCL_SolverMachine
 ) => {
-	const occurrenceList: OccurrenceList = { clauses: clauses, variableReasonId: variable };
+	const occurrenceList: OccurrenceList = { clauses, literal };
 	solverStateMachine.postpone(occurrenceList);
 	return solverStateMachine.leftToPostpone();
 };
@@ -202,9 +202,9 @@ export type CDCL_PICK_CLAUSE_SET_FUN = (
 export const pickPendingClauseSet: CDCL_PICK_CLAUSE_SET_FUN = (
 	solverStateMachine: CDCL_SolverMachine
 ) => {
-	const occurrenceList: OccurrenceList = solverStateMachine.consultPostponed();
-	updateClausesToCheck(occurrenceList.clauses, occurrenceList.variableReasonId);
-	return occurrenceList.clauses;
+	const {clauses, literal}: OccurrenceList = solverStateMachine.consultPostponed();
+	updateClausesToCheck(clauses, literal);
+	return clauses;
 };
 
 export type CDCL_ALL_CLAUSES_CHECKED_FUN = (clauses: SvelteSet<number>) => boolean;
@@ -279,7 +279,7 @@ export const emptyClauseSet: CDCL_EMPTY_OCCURRENCE_LISTS_FUN = (
 	while (solverStateMachine.leftToPostpone() > 0) {
 		solverStateMachine.resolvePostponed();
 	}
-	updateClausesToCheck(new SvelteSet<number>(), -1);
+	updateClausesToCheck(new SvelteSet<number>(), 0);
 };
 
 // ** additional cdcl function **

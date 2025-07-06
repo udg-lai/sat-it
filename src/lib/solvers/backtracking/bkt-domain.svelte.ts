@@ -80,17 +80,17 @@ export const complementaryOccurrences: BKT_COMPLEMENTARY_OCCURRENCES_FUN = (lite
 };
 
 export type BKT_QUEUE_OCCURRENCE_LIST_FUN = (
-	variable: number,
+	literal: number,
 	clauses: SvelteSet<number>,
 	solverStateMachine: BKT_SolverMachine
 ) => void;
 
 export const queueOccurrenceList: BKT_QUEUE_OCCURRENCE_LIST_FUN = (
-	variable: number,
+	literal: number,
 	clauses: SvelteSet<number>,
 	solverStateMachine: BKT_SolverMachine
 ) => {
-	solverStateMachine.setOccurrenceList({ clauses, variableReasonId: variable });
+	solverStateMachine.setOccurrenceList({ clauses, literal });
 };
 
 export type BKT_PICK_PENDING_CLAUSE_SET_FUN = (
@@ -100,8 +100,8 @@ export type BKT_PICK_PENDING_CLAUSE_SET_FUN = (
 export const pickPendingOccurrenceList: BKT_PICK_PENDING_CLAUSE_SET_FUN = (
 	solverStateMachine: BKT_SolverMachine
 ) => {
-	const { clauses, variableReasonId }: OccurrenceList = solverStateMachine.consultOccurrenceList();
-	updateClausesToCheck(clauses, variableReasonId);
+	const { clauses, literal }: OccurrenceList = solverStateMachine.consultOccurrenceList();
+	updateClausesToCheck(clauses, literal);
 	return clauses;
 };
 
@@ -148,7 +148,7 @@ export const emptyClauseSet: BKT_EMPTY_PENDING_OCCURRENCE_LIST_FUN = (
 	solverStateMachine: BKT_SolverMachine
 ) => {
 	solverStateMachine.resolveOccurrences();
-	updateClausesToCheck(new SvelteSet<number>(), -1);
+	updateClausesToCheck(new SvelteSet<number>(), 0);
 };
 
 export type BKT_DECISION_LEVEL_FUN = () => boolean;

@@ -127,3 +127,5 @@ const addClauseToMapping = (clause: Clause, clauseId: number, mapping: MappingLi
 export const getProblemStore = () => problemStore;
 
 export const getClausePool = () => problemStore.clauses;
+
+export const getMapping = () => problemStore.mapping;
