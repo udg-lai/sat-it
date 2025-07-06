@@ -28,12 +28,12 @@
 
 <style>
 	clause {
-		color: var(--clause-color);
 		display: flex;
 		flex-direction: column;
 		gap: 0.5rem;
 		align-items: center;
 		padding: 0 calc(4px + 0.25rem);
 		min-width: var(--empty-slot);
+		background-color: var(--satisfied-color-o);
 	}
 </style>

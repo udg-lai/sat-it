@@ -94,6 +94,5 @@
 		flex-direction: row;
 		align-items: end;
 		width: fit-content;
-		background-color: var(--main-bg-color);
 	}
 </style>

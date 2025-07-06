@@ -5,8 +5,7 @@
 		CloseOutline,
 		CogOutline,
 		CompressOutline,
-		HammerOutline,
-		MinimizeOutline,
+		HammerOutline
 	} from 'flowbite-svelte-icons';
 	import DynamicRender from '../DynamicRender.svelte';
 
@@ -17,7 +16,7 @@
 		classStyle?: string;
 	}
 
-	let { trailState, onToggleExpand, expanded, classStyle = ''}: Props = $props();
+	let { trailState, onToggleExpand, expanded, classStyle = '' }: Props = $props();
 
 	const iconProps = {
 		class: 'h-7 w-7 cursor-pointer'
@@ -30,8 +29,7 @@
 	let status = $derived.by(() => {
 		if (expanded) {
 			return 'Click to collapse';
-		}
-		else if (trailState === 'unsat') {
+		} else if (trailState === 'unsat') {
 			return 'The problem is unsatisfiable';
 		} else if (trailState === 'sat') {
 			return 'The problem has been satisfied';
@@ -41,7 +39,6 @@
 			return 'Running...';
 		}
 	});
-
 </script>
 
 <button

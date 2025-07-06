@@ -15,17 +15,21 @@
 		width: number;
 		align: 'end' | 'start';
 		reverse?: boolean;
-		repeat?: boolean
+		repeat?: boolean;
 	}
 
-	let { context, width, align, reverse = false, repeat = true}: Props = $props();
+	let { context, width, align, reverse = false, repeat = true }: Props = $props();
 </script>
 
 <trail-canvas class="canvas" style="--width: {width}px">
 	<div class="canvas-sheet" style="--align: {align}">
 		{#each context as ctx}
 			{#if isLeft(ctx)}
-				<PlainClauseComponent {reverse} clause={unwrapEither(ctx).clause} hide={repeat ? [] : [unwrapEither(ctx).literal]} />
+				<PlainClauseComponent
+					{reverse}
+					clause={unwrapEither(ctx).clause}
+					hide={repeat ? [] : [unwrapEither(ctx).literal]}
+				/>
 			{:else}
 				<div class="empty-slot"></div>
 			{/if}
@@ -47,7 +51,6 @@
 		scrollbar-width: none; /* Firefox */
 	}
 
-
 	.canvas::-webkit-scrollbar {
 		display: none; /* Safari and Chrome */
 	}
@@ -57,5 +60,6 @@
 		display: flex;
 		align-items: var(--align);
 		min-height: 100%;
+		color: var(--unsatisfied-color);
 	}
 </style>
