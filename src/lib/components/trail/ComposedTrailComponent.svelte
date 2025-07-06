@@ -63,11 +63,18 @@
 	}
 </script>
 
-<composed-trail class="composed-trail">
+<composed-trail class="composed-trail" class:opened-views={showUPView || showCAView}>
 	{#if showUPView}
-		<CanvasComponent context={ups} width={trailWidth} align={'end'} reverse={true} repeat={false} />
+		<CanvasComponent
+			context={ups}
+			width={trailWidth}
+			align={'end'}
+			reverse={true}
+			repeat={false}
+			displayBackground={true}
+		/>
 	{/if}
-	<div use:observeWidth class="fit-content">
+	<div use:observeWidth class="fit-content" class:views-opened={showCAView || showUPView}>
 		<TrailComponent {trail} {expanded} {isLast} {emitUndo} />
 	</div>
 	{#if showCAView}
@@ -79,10 +86,19 @@
 	.composed-trail {
 		display: flex;
 		flex-direction: column;
-		gap: 0.1rem;
+	}
+
+	.opened-views {
+		background-color: var(--main-bg-color);
+		border-radius: 10px;
 	}
 
 	.fit-content {
 		width: fit-content;
+	}
+
+	.views-opened {
+		color: var(--satisfied-color);
+		background-color: var(--satisfied-color-o);
 	}
 </style>

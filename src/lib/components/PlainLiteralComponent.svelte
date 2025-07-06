@@ -16,9 +16,9 @@
 <style>
 	.literal-component {
 		width: var(--trail-literal-min-width);
-		height: calc(var(--trail-literal-min-width) - 10px);
+		height: var(--trail-height);
 		display: flex;
 		flex-direction: column;
-		justify-content: end;
+		justify-content: center;
 	}
 </style>

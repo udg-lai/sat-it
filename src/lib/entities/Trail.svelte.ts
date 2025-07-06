@@ -312,7 +312,7 @@ export class Trail {
 				return makeLeft({
 					clauseTag: reason.clauseTag,
 					literal: a.toInt()
-				})
+				});
 			} else {
 				return makeRight(undefined);
 			}

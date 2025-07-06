@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type Clause from '$lib/entities/Clause.svelte.ts';
 	import { isLeft, unwrapEither, type Either } from '$lib/types/either.ts';
+	import { onMount } from 'svelte';
 	import PlainClauseComponent from '../PlainClauseComponent.svelte';
 
 	export interface UPRelation {
@@ -15,17 +16,42 @@
 		width: number;
 		align: 'end' | 'start';
 		reverse?: boolean;
-		repeat?: boolean
+		repeat?: boolean;
+		displayBackground?: boolean;
 	}
 
-	let { context, width, align, reverse = false, repeat = true}: Props = $props();
+	let {
+		context,
+		width,
+		align,
+		reverse = false,
+		repeat = true,
+		displayBackground = false
+	}: Props = $props();
+
+	let canvasContainer: HTMLDivElement;
+
+	function scrollToBottom() {
+		if (reverse && canvasContainer) {
+			canvasContainer.scrollTop = canvasContainer.scrollHeight;
+		}
+	}
+
+	onMount(() => {
+		scrollToBottom();
+	});
 </script>
 
-<trail-canvas class="canvas" style="--width: {width}px">
+<trail-canvas class="canvas" bind:this={canvasContainer} style="--width: {width}px">
 	<div class="canvas-sheet" style="--align: {align}">
 		{#each context as ctx}
 			{#if isLeft(ctx)}
-				<PlainClauseComponent {reverse} clause={unwrapEither(ctx).clause} hide={repeat ? [] : [unwrapEither(ctx).literal]} />
+				<PlainClauseComponent
+					{reverse}
+					clause={unwrapEither(ctx).clause}
+					hide={repeat ? [] : [unwrapEither(ctx).literal]}
+					{displayBackground}
+				/>
 			{:else}
 				<div class="empty-slot"></div>
 			{/if}
@@ -47,7 +73,6 @@
 		scrollbar-width: none; /* Firefox */
 	}
 
-
 	.canvas::-webkit-scrollbar {
 		display: none; /* Safari and Chrome */
 	}
@@ -57,5 +82,6 @@
 		display: flex;
 		align-items: var(--align);
 		min-height: 100%;
+		color: var(--unsatisfied-color);
 	}
 </style>

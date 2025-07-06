@@ -168,7 +168,7 @@ export const conflictAnalysis = (solver: CDCL_SolverMachine): void => {
 	pushTrailTransition(stateMachine, conflictAnalysis);
 	const literalToPropagate = propagateCCTransition(stateMachine, clauseTag);
 
-	latestTrail.setFollowUpIndex();
+	(getLatestTrail() as Trail).setFollowUpIndex();
 
 	const complementaryClauses: SvelteSet<number> = complementaryOccurrencesTransition(
 		stateMachine,

@@ -55,7 +55,6 @@
 <style>
 	.decision {
 		border-color: var(--decision-color);
-		color: var(--decision-color);
 		border-left: 1px solid;
 		border-right: 1px solid;
 	}

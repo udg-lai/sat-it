@@ -164,9 +164,8 @@ const handleBreakpoints = (truthAssignment: TruthAssignment): void => {
 export const backtracking = (pool: VariablePool): number => {
 	const latestTrail = getLatestTrail();
 	if (latestTrail === undefined) {
-		logFatal('Backtracking', 'No trail found')
-	}
-	else {
+		logFatal('Backtracking', 'No trail found');
+	} else {
 		latestTrail.setState('conflict');
 	}
 
@@ -207,7 +206,7 @@ const disposeUntilDecision = (trail: Trail, variables: VariablePool): VariableAs
 export const finalStateRun = (): void => {
 	const latest = getLatestTrail();
 	if (latest === undefined) {
-		logFatal('Final state', 'Should be at least one trail')
+		logFatal('Final state', 'Should be at least one trail');
 	}
 	const solver = getSolverMachine();
 	if (solver.onFinalState()) {
@@ -219,4 +218,4 @@ export const finalStateRun = (): void => {
 	} else {
 		logFatal('Final state', 'Solver is not on final state');
 	}
-}
+};
