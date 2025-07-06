@@ -227,7 +227,7 @@
 
 {#snippet enumerateSnippet(trail: Trail, index: number)}
 	<div class="item" style="--height: {trail.getHeight()}px; --align: {computeAlign()}">
-		<div class="enumerate-item">
+		<div class="enumerate">
 			<span class:opacity={index + 1 < trails.length}>{index + 1}.</span>
 		</div>
 	</div>
@@ -280,16 +280,14 @@
 		display: flex;
 		align-items: var(--align);
 		justify-content: center;
-		padding: 0.5rem 0rem;
 	}
 
-	.enumerate-item {
-		pointer-events: none;
-		width: var(--trail-literal-min-width);
-		height: var(--trail-literal-min-width);
-		display: flex;
-		justify-content: center;
-		align-items: end;
+	.enumerate {
+		position: relative;
+	}
+
+	.enumerate span {
+		position: absolute;
 	}
 
 	:global(.opacity) {

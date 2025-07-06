@@ -41,37 +41,52 @@
 	});
 </script>
 
-<button
-	title={status}
-	onclick={onToggleExpandClick}
-	class="notification {classStyle}"
-	class:unsat={trailState === 'unsat'}
-	class:sat={trailState === 'sat'}
-	class:conflict={trailState === 'conflict'}
->
-	{#if expanded}
-		<DynamicRender component={CompressOutline} props={iconProps} />
-	{:else if trailState === 'unsat'}
-		<DynamicRender component={CloseOutline} props={iconProps} />
-	{:else if trailState === 'sat'}
-		<DynamicRender component={CheckOutline} props={iconProps} />
-	{:else if trailState === 'conflict'}
-		<DynamicRender component={HammerOutline} props={iconProps} />
-	{:else}
-		<div class="running">
-			<DynamicRender component={CogOutline} props={iconProps} />
+<status-indicator class="status">
+	<button
+		title={status}
+		onclick={onToggleExpandClick}
+		class="notification {classStyle}"
+		class:unsat={trailState === 'unsat'}
+		class:sat={trailState === 'sat'}
+		class:conflict={trailState === 'conflict'}
+	>
+		<div class="indicator">
+			{#if expanded}
+				<DynamicRender component={CompressOutline} props={iconProps} />
+			{:else if trailState === 'unsat'}
+				<DynamicRender component={CloseOutline} props={iconProps} />
+			{:else if trailState === 'sat'}
+				<DynamicRender component={CheckOutline} props={iconProps} />
+			{:else if trailState === 'conflict'}
+				<DynamicRender component={HammerOutline} props={iconProps} />
+			{:else}
+				<div class="running">
+					<DynamicRender component={CogOutline} props={iconProps} />
+				</div>
+			{/if}
 		</div>
-	{/if}
-</button>
+	</button>
+</status-indicator>
 
 <style>
-	.notification {
-		width: var(--trail-literal-min-width);
-		height: var(--trail-literal-min-width);
+	.status {
+		height: 100%;
+		width: 100%;
 		display: flex;
 		justify-content: center;
-		align-items: end;
-		cursor: none;
+		align-items: center;
+	}
+
+	.indicator {
+		margin-top: 0.5rem;
+	}
+
+	.notification {
+		width: 100%;
+		height: 100%;
+		display: flex;
+		justify-content: center;
+		align-items: center;
 	}
 
 	.notification.conflict {
