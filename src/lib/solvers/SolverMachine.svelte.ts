@@ -98,7 +98,6 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 	}
 
 	async transition(input: StateMachineEvent): Promise<void> {
-		//If receive a step, the state machine can be waiting in 4 possible states
 		if (input === 'step') {
 			this.step();
 			userActionEventBus.emit('record');
@@ -111,7 +110,7 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 		} else if (input === 'solve_all') {
 			await this.solveAllStepByStep();
 		} else {
-			logFatal('Non expected input Solver State Machine');
+			logFatal('Non expected input in Solver State Machine');
 		}
 	}
 

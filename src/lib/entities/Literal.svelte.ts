@@ -54,10 +54,6 @@ export default class Literal implements Comparable<Literal> {
 		return this.variable.getInt() * (this.polarity === 'Negative' ? -1 : 1);
 	}
 
-	copy(): Literal {
-		return new Literal(this.variable, this.polarity);
-	}
-
 	private evaluate(): boolean {
 		if (!this.variable.hasTruthValue()) {
 			logFatal(
