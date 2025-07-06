@@ -75,7 +75,7 @@
 					class="clause-highlighter"
 					class:inspectedTrue={isSat(clause)}
 					class:inspectedFalse={isUnSat(clause)}
-					class:visited-clause={checkingIndex > index && isPartial(clause)}
+					class:visited-clause={checkingIndex >= index && isPartial(clause) && !onPreConflictState}
 				>
 					<ClauseComponent {clause} />
 				</div>
