@@ -78,7 +78,7 @@ export const initialTransition = (solver: CDCL_SolverMachine): void => {
 	ecTransition(solver.getStateMachine());
 	if (solver.onFinalState()) return;
 	const complementaryClauses: SvelteSet<number> = ucdTransition(solver.getStateMachine());
-	afterComplementaryBlock(solver, solver.getStateMachine(), -1, complementaryClauses);
+	afterComplementaryBlock(solver, solver.getStateMachine(), 0, complementaryClauses);
 };
 
 export const preConflictDetection = (solver: CDCL_SolverMachine): void => {
@@ -210,15 +210,15 @@ const conflictDetectionBlock = (
 	}
 	const unitClause: boolean = unitClauseTransition(stateMachine, clauseId);
 	if (!unitClause) return;
-	const literalToPropagate: number = unitPropagationTransition(stateMachine, clauseId);
+	const assignedLiteral: number = unitPropagationTransition(stateMachine, clauseId);
 	const complementaryClauses: SvelteSet<number> = complementaryOccurrencesTransition(
 		stateMachine,
-		literalToPropagate
+		assignedLiteral
 	);
 	queueOccurrenceListTransition(
 		stateMachine,
 		solver,
-		Math.abs(literalToPropagate),
+		-assignedLiteral,
 		complementaryClauses
 	);
 };
@@ -283,7 +283,7 @@ const allVariablesAssignedTransition = (stateMachine: CDCL_StateMachine): void =
 const queueOccurrenceListTransition = (
 	stateMachine: CDCL_StateMachine,
 	solver: CDCL_SolverMachine,
-	variable: number,
+	literal: number,
 	clauseSet: SvelteSet<number>
 ): void => {
 	const queueOccurrenceListState = stateMachine.getActiveState() as NonFinalState<
@@ -296,7 +296,7 @@ const queueOccurrenceListTransition = (
 			'There should be a function in the Queue Occurrence List state'
 		);
 	}
-	const size: number = queueOccurrenceListState.run(variable, clauseSet, solver);
+	const size: number = queueOccurrenceListState.run(literal, clauseSet, solver);
 	if (size > 1) stateMachine.transition('delete_clause_state');
 	else stateMachine.transition('check_pending_occurrence_lists_state');
 };
