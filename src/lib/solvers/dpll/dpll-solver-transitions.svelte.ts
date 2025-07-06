@@ -153,12 +153,7 @@ const conflictDetectionBlock = (
 		stateMachine,
 		assignedLiteral
 	);
-	queueOccurrenceListTransition(
-		stateMachine,
-		solver,
-		-assignedLiteral,
-		complementaryClauses
-	);
+	queueOccurrenceListTransition(stateMachine, solver, -assignedLiteral, complementaryClauses);
 };
 
 /* Specific Transitions */

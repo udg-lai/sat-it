@@ -142,7 +142,7 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 			this.pendingOccurrenceLists.enqueue(copiedItem);
 		}
 		if (!this.pendingOccurrenceLists.isEmpty()) {
-			const {clauses, literal}: OccurrenceList = this.pendingOccurrenceLists.pick();
+			const { clauses, literal }: OccurrenceList = this.pendingOccurrenceLists.pick();
 			updateClausesToCheck(clauses, literal);
 		} else {
 			updateClausesToCheck(new SvelteSet<number>(), 0);

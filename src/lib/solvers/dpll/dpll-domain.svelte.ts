@@ -157,7 +157,7 @@ export type DPLL_PICK_CLAUSE_SET_FUN = (
 ) => SvelteSet<number>;
 
 export const pickClauseSet: DPLL_PICK_CLAUSE_SET_FUN = (solverStateMachine: DPLL_SolverMachine) => {
-	const {clauses, literal}: OccurrenceList = solverStateMachine.consultPostponed();
+	const { clauses, literal }: OccurrenceList = solverStateMachine.consultPostponed();
 	updateClausesToCheck(clauses, literal);
 	return clauses;
 };

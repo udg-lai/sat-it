@@ -202,7 +202,7 @@ export type CDCL_PICK_CLAUSE_SET_FUN = (
 export const pickPendingClauseSet: CDCL_PICK_CLAUSE_SET_FUN = (
 	solverStateMachine: CDCL_SolverMachine
 ) => {
-	const {clauses, literal}: OccurrenceList = solverStateMachine.consultPostponed();
+	const { clauses, literal }: OccurrenceList = solverStateMachine.consultPostponed();
 	updateClausesToCheck(clauses, literal);
 	return clauses;
 };

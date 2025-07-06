@@ -83,7 +83,7 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 			this.pendingOccurrenceLists.enqueue(copiedItem);
 		}
 		if (!this.pendingOccurrenceLists.isEmpty()) {
-			const {clauses, literal}: OccurrenceList = this.pendingOccurrenceLists.pick();
+			const { clauses, literal }: OccurrenceList = this.pendingOccurrenceLists.pick();
 			updateClausesToCheck(clauses, literal);
 		} else {
 			updateClausesToCheck(new SvelteSet<number>(), 0);

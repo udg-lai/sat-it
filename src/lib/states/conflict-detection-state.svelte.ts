@@ -7,13 +7,13 @@ let checkingIndex: number = $state(0);
 
 export function updateClausesToCheck(stateMachineSet: SvelteSet<number>, literal: number) {
 	if (stateMachineSet.size === 0) {
-		clausesToCheck = []
+		clausesToCheck = [];
 		checkingIndex = 0;
-	}
-	else {
-		const clauses: SvelteSet<number> = literal !== 0
-			? getMapping().get(literal) as SvelteSet<number>
-			: getClausePool().getUnitClauses();
+	} else {
+		const clauses: SvelteSet<number> =
+			literal !== 0
+				? (getMapping().get(literal) as SvelteSet<number>)
+				: getClausePool().getUnitClauses();
 		clausesToCheck = [...clauses];
 		checkingIndex = clausesToCheck.length - stateMachineSet.size;
 	}
