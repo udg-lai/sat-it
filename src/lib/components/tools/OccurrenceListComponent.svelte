@@ -15,6 +15,7 @@
 	import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 	import ClauseComponent from '../ClauseComponent.svelte';
 	import HeadTailComponent from '../HeadTailComponent.svelte';
+	import MathTexComponent from '../MathTexComponent.svelte';
 
 	const problem: Problem = $derived(getProblemStore());
 
@@ -43,9 +44,23 @@
 	}
 </script>
 
-<HeadTailComponent padding="2px" inspecting={onPreConflictState}>
-	<div class="static"></div>
-</HeadTailComponent>
+<div class="enumerate-clause">
+	<div class="enumerate"></div>
+	<HeadTailComponent inspecting={onPreConflictState}>
+		<div class="static">
+			{#if clauses.length !== 0}
+				{#each clauses[0] as lit, i (i)}
+					<MathTexComponent equation={lit.toTeX()} />
+					{#if i < clauses[0].nLiterals() - 1}
+						<MathTexComponent equation={'\\lor'} fontSize={'1rem'} />
+					{/if}
+				{/each}
+			{:else}
+				<MathTexComponent equation={'1'} />
+			{/if}
+		</div>
+	</HeadTailComponent>
+</div>
 
 <conflict-detection>
 	{#each clauses as clause, index (index)}
@@ -60,7 +75,7 @@
 					class="clause-highlighter"
 					class:inspectedTrue={isSat(clause)}
 					class:inspectedFalse={isUnSat(clause)}
-					class:visited-clause={checkingIndex >= index && isPartial(clause)}
+					class:visited-clause={checkingIndex >= index && isPartial(clause) && !onPreConflictState}
 				>
 					<ClauseComponent {clause} />
 				</div>
@@ -71,7 +86,12 @@
 
 <style>
 	.static {
-		width: 100%;
+		color: var(--main-bg-color);
+		display: flex;
+		flex-direction: row;
+		gap: 0.5rem;
+		align-items: end;
+		padding: 0.25rem;
 	}
 
 	.enumerate-clause {
