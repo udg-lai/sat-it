@@ -235,7 +235,6 @@
 						onToggleExpand={() => toggleTrailView(index)}
 					/>
 				</div>
-				{trail.getHeight()}
 			{/each}
 		</editor-info>
 	</editor-leaf>

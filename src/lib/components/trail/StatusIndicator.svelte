@@ -61,7 +61,7 @@
 		class:sat={trailState === 'sat'}
 		class:conflict={trailState === 'conflict'}
 	>
-		<div class="{iconClassStyle}">
+		<div class="dynamic-render">
 			{#if expanded && !ofLastTrail}
 				<DynamicRender component={CompressOutline} props={iconProps} />
 			{:else if trailState === 'unsat'}
@@ -85,6 +85,7 @@
 		width: 100%;
 		display: flex;
 		justify-content: center;
+		align-items: center;
 	}
 
 	.notification {
@@ -92,6 +93,7 @@
 		height: var(--trail-height);
 		display: flex;
 		justify-content: center;
+		align-items: center;
 	}
 
 	.ofLastTrail {
@@ -113,6 +115,10 @@
 	.notification .running {
 		animation: rotate-once 5s linear infinite;
 		cursor: none;
+	}
+
+	.dynamic-render {
+		margin-top: 0.5rem;
 	}
 
 	@keyframes rotate-once {
