@@ -9,7 +9,8 @@
 	import ConflictAnalysisDebugger from './ConflictAnalysisDebuggerComponent.svelte';
 	import ConflictDetectionDebugger from './ConflictDetectionDebuggerComponent.svelte';
 	import DecisionDebugger from './DecisionDebuggerComponent.svelte';
-	import GeneralDebuggerButtons from './GeneralDebuggerComponent.svelte';
+	import AutomaticSolvingComponent from './AutomaticSolvingComponent.svelte';
+	import GeneralPurposeDebuggerComponent from './GeneralPurposeDebuggerComponent.svelte';
 	import StepComponent from './StepDebuggerComponent.svelte';
 
 	const problem: Problem = $derived(getProblemStore());
@@ -29,48 +30,62 @@
 </script>
 
 <debugger>
-	{#if inAutoMode}
-		<AutoModeComponent />
-	{:else if enablePreprocess}
-		<init-step>
-			<StepComponent />
-		</init-step>
-	{:else}
-		{#if onPreConflictDetection}
-			<preConf-step>
+	<algorithm-buttons>
+		{#if inAutoMode}
+			<AutoModeComponent />
+		{:else if enablePreprocess}
+			<init-step>
 				<StepComponent />
-			</preConf-step>
-		{:else if onConflictDetection}
-			<ConflictDetectionDebugger />
-		{:else if onConflict && problem.algorithm === 'cdcl'}
-			<ConflictAnalysisDebugger />
-		{:else if !finished}
-			<DecisionDebugger
-				{onConflict}
-				{finished}
-				{onConflictDetection}
-				nextLiteral={defaultNextVariable !== undefined && !onConflict
-					? getBaselinePolarity() === true
-						? defaultNextVariable
-						: -defaultNextVariable
-					: undefined}
-			/>
+			</init-step>
+		{:else}
+			{#if onPreConflictDetection}
+				<preConf-step>
+					<StepComponent />
+				</preConf-step>
+			{:else if onConflictDetection}
+				<ConflictDetectionDebugger />
+			{:else if onConflict && problem.algorithm === 'cdcl'}
+				<ConflictAnalysisDebugger />
+			{:else if !finished}
+				<DecisionDebugger
+					{onConflict}
+					{finished}
+					{onConflictDetection}
+					nextLiteral={defaultNextVariable !== undefined && !onConflict
+						? getBaselinePolarity() === true
+							? defaultNextVariable
+							: -defaultNextVariable
+						: undefined}
+				/>
+			{/if}
+			<AutomaticSolvingComponent {finished} backtrackingState={onConflict} />
 		{/if}
+	</algorithm-buttons>
 
-		<GeneralDebuggerButtons {finished} backtrackingState={onConflict} />
-	{/if}
+	<general-debugger>
+		<GeneralPurposeDebuggerComponent />
+	</general-debugger>
 </debugger>
 
 <style>
 	debugger {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
 		height: var(--debugger-height);
 		width: 100%;
 		min-height: var(--debugger-height);
-		display: flex;
-		align-items: center;
-		justify-content: left;
-		gap: 0.5rem;
 		padding-left: calc(var(--windows-padding) + 15px);
+		padding-right: calc(var(--windows-padding) + 27px);
 		border-bottom: 1px solid var(--border-color);
+		gap: 0.5rem;
+	}
+	algorithm-buttons {
+		display: flex;
+		gap: 0.5rem;
+	}
+	general-debugger {
+		display: flex;
+		gap: 0.5rem;
 	}
 </style>

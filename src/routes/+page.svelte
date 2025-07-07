@@ -72,10 +72,10 @@
 
 	.toasts {
 		position: fixed;
-		top: 0.5rem;
+		bottom: 0.5rem;
 		right: 0.5rem;
 		display: flex;
-		flex-direction: column;
+		flex-direction: column-reverse;
 		gap: 0.5rem;
 		z-index: var(--notification-z-index);
 	}
