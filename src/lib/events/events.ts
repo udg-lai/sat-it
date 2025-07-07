@@ -56,3 +56,12 @@ export type AlgorithmicUndoEvent = {
 
 // event bus for opening the conflict detection view
 export const algorithmicUndoEventBus = createEventBus<AlgorithmicUndoEvent>();
+
+export type StateMachineLifeCycleEvent =
+	| 'begin-step'
+	| 'begin-step-by-step'
+	| 'finish-step'
+	| 'finish-step-by-step';
+
+// event bus dedicated to the life cycle of the state machine
+export const stateMachineLifeCycleEventBus = createEventBus<StateMachineLifeCycleEvent>();

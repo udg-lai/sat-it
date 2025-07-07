@@ -3,7 +3,7 @@ import { logFatal, logWarning } from '$lib/stores/toasts.ts';
 import {
 	solverFinishedAutoMode,
 	solverStartedAutoMode,
-	userActionEventBus,
+	stateMachineLifeCycleEventBus,
 	type StateMachineEvent
 } from '$lib/events/events.ts';
 import { tick } from 'svelte';
@@ -99,8 +99,9 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 
 	async transition(input: StateMachineEvent): Promise<void> {
 		if (input === 'step') {
+			stateMachineLifeCycleEventBus.emit('begin-step');
 			this.step();
-			userActionEventBus.emit('record');
+			stateMachineLifeCycleEventBus.emit('finish-step');
 		} else if (input === 'nextVariable') {
 			await this.solveToNextVariableStepByStep();
 		} else if (input === 'finishCD') {
@@ -120,6 +121,7 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 		if (!this.assertPreAuto()) {
 			return;
 		}
+		stateMachineLifeCycleEventBus.emit('begin-step-by-step');
 		this.setFlagsPreAuto();
 		this.notifyRunningOnAuto();
 		const times: number[] = [];
@@ -128,10 +130,10 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 			await tick();
 			await new Promise((r) => times.push(setTimeout(r, getStepDelay())));
 		}
-		userActionEventBus.emit('record');
 		times.forEach(clearTimeout);
 		this.setFlagsPostAuto();
 		this.notifyFinishRunningOnAuto();
+		stateMachineLifeCycleEventBus.emit('finish-step-by-step');
 	}
 
 	private notifyRunningOnAuto(): void {

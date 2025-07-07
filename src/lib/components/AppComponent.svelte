@@ -6,10 +6,12 @@
 		changeAlgorithmEventBus,
 		changeInstanceEventBus,
 		stateMachineEventBus,
+		stateMachineLifeCycleEventBus,
 		userActionEventBus,
 		type ActionEvent,
 		type AlgorithmicUndoEvent,
-		type StateMachineEvent
+		type StateMachineEvent,
+		type StateMachineLifeCycleEvent
 	} from '$lib/events/events.ts';
 	import type { SolverMachine } from '$lib/solvers/SolverMachine.svelte.ts';
 	import type { StateFun, StateInput } from '$lib/solvers/StateMachine.svelte.ts';
@@ -94,6 +96,12 @@
 		record(trails, solverMachine.getActiveStateId(), getStatistics(), solverMachine.getRecord());
 	}
 
+	function lifeCycleController(l: StateMachineLifeCycleEvent): void {
+		if (l === 'finish-step' || l === 'finish-step-by-step') {
+			userActionEventBus.emit('record');
+		}
+	}
+
 	onMount(() => {
 		const unsubscribeToggleEditor = editorViewEventStore.subscribe(togglePropagations);
 		const unsubscribeActionEvent = userActionEventBus.subscribe(onActionEvent);
@@ -101,6 +109,8 @@
 		const unsubscribeChangeInstanceEvent = changeInstanceEventBus.subscribe(fullyReset);
 		const unsubscribeChangeAlgorithmEvent = changeAlgorithmEventBus.subscribe(reset);
 		const unsubscribeAlgorithmicUndoEvent = algorithmicUndoEventBus.subscribe(algorithmicUndoSave);
+		const unsubscribeStateMachineLifeCycleEventBus =
+			stateMachineLifeCycleEventBus.subscribe(lifeCycleController);
 
 		return () => {
 			unsubscribeToggleEditor();
@@ -109,6 +119,7 @@
 			unsubscribeStateMachineEvent();
 			unsubscribeChangeAlgorithmEvent();
 			unsubscribeAlgorithmicUndoEvent();
+			unsubscribeStateMachineLifeCycleEventBus();
 		};
 	});
 </script>
