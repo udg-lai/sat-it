@@ -79,7 +79,7 @@
 		<div class:views-opened={showCAView || showUPView}>
 			<TrailComponent {trail} {expanded} {isLast} {emitUndo} />
 		</div>
-			<div class="empty-slot"></div>
+		<div class="empty-slot"></div>
 	</div>
 	{#if showCAView}
 		<CanvasComponent context={conflictAnalysis} width={trailWidth} align={'start'} />

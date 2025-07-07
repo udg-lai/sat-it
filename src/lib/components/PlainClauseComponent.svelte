@@ -21,8 +21,10 @@
 	});
 </script>
 
-<clause class:satisfied-background={state === 'satisfied'}
-		class:unsatisfied-background={state === 'unsatisfied'}>
+<clause
+	class:satisfied-background={state === 'satisfied'}
+	class:unsatisfied-background={state === 'unsatisfied'}
+>
 	{#each literals as lit, i (i)}
 		<PlainLiteralComponent literal={lit} />
 	{/each}
@@ -45,5 +47,4 @@
 	.unsatisfied-background {
 		background-color: var(--unsatisfied-color-o);
 	}
-
 </style>

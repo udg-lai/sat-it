@@ -1,6 +1,3 @@
-import type Clause from '$lib/entities/Clause.svelte.ts';
-import type { SvelteSet } from 'svelte/reactivity';
-
 type UnSAT = {
 	type: 'UnSAT';
 	conflictClause: number;

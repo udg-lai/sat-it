@@ -1,7 +1,6 @@
 <script lang="ts">
 	import type Clause from '$lib/entities/Clause.svelte.ts';
 	import { isLeft, unwrapEither, type Either } from '$lib/types/either.ts';
-	import { onMount } from 'svelte';
 	import PlainClauseComponent from '../PlainClauseComponent.svelte';
 
 	export interface UPRelation {
@@ -19,13 +18,7 @@
 		repeat?: boolean;
 	}
 
-	let {
-		context,
-		width,
-		align,
-		reverse = false,
-		repeat = true,
-	}: Props = $props();
+	let { context, width, align, reverse = false, repeat = true }: Props = $props();
 
 	let canvasContainer: HTMLDivElement;
 
@@ -50,7 +43,7 @@
 					{reverse}
 					clause={unwrapEither(ctx).clause}
 					hide={repeat ? [] : [unwrapEither(ctx).literal]}
-					state={!repeat ? 'satisfied' : index === context.length -1 ? 'unsatisfied' : undefined}
+					state={!repeat ? 'satisfied' : index === context.length - 1 ? 'unsatisfied' : undefined}
 				/>
 			{:else}
 				<div class="empty-slot"></div>
@@ -83,9 +76,5 @@
 		align-items: var(--align);
 		min-height: 100%;
 		color: var(--unsatisfied-color);
-	}
-
-	.conflictive-clause {
-		color: var(--conflictive-color);
 	}
 </style>

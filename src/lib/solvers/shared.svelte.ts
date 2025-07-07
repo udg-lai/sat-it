@@ -15,7 +15,7 @@ import {
 	increaseNoUnitPropagations,
 	updateClausesLeft
 } from '$lib/states/statistics.svelte.ts';
-import { getLatestTrail, getTrails, stackTrail, unstackTrail } from '$lib/states/trails.svelte.ts';
+import { getLatestTrail, getTrails, stackTrail } from '$lib/states/trails.svelte.ts';
 import { logBreakpoint, logFatal } from '$lib/stores/toasts.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import { isUnSAT } from '../interfaces/IClausePool.ts';
