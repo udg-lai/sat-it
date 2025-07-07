@@ -69,7 +69,7 @@ export const decide = (pool: VariablePool, algorithm: string): number => {
 
 	increaseNoDecisions();
 
-	stackTrail(trail);
+	 // stackTrail(trail);
 
 	return assignmentEvent.polarity ? variableId : -variableId;
 };
@@ -108,13 +108,13 @@ export const unitPropagation = (
 	}
 
 	increaseNoUnitPropagations();
-	stackTrail(trail);
+	// stackTrail(trail);
 	return literalToPropagate;
 };
 
 const obtainTrail = (variables: VariablePool): Trail => {
 	const trail: Trail = getLatestTrail() ?? new Trail(variables.size());
-	unstackTrail();
+	// unstackTrail();
 	return trail;
 };
 

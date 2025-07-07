@@ -38,7 +38,7 @@
 		}
 	});
 
-	const conflictclauseTag: number = $derived(propagatedClause.getTag());
+	const conflictiveClauseTag: number | undefined = $derived(propagatedClause.getTag());
 
 	const conflictClauseString: string = $derived(
 		propagatedClause
@@ -61,7 +61,7 @@
 		</button>
 		<Popover triggeredBy={'#' + buttonId} class="app-popover" trigger="click" placement="bottom">
 			<div class="popover-content">
-				<span class="clause-id">{conflictclauseTag}.</span>
+				<span class="clause-id">{conflictiveClauseTag}.</span>
 				<MathTexComponent equation={conflictClauseString} fontSize="var(--popover-font-size)" />
 			</div>
 		</Popover>

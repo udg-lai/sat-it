@@ -13,19 +13,19 @@ type ClauseOptions = {
 };
 
 class Clause implements Comparable<Clause> {
-	private literals: Literal[] = [];
-	private comments: string[] = $state([]);
-	private tag: number;
-	private learnt: boolean = false;
+	private _literals: Literal[] = [];
+	private _comments: string[] = $state([]);
+	private _tag: number | undefined;
+	private _learnt: boolean = false;
 
 	constructor(
 		literals: Literal[],
-		{ comments = [], tag = -1, learnt = false }: ClauseOptions = {}
+		{ comments = [], tag = undefined, learnt = false }: ClauseOptions = {}
 	) {
-		this.literals = literals;
-		this.comments = comments;
-		this.tag = tag;
-		this.learnt = learnt;
+		this._literals = literals;
+		this._comments = comments;
+		this._tag = tag;
+		this._learnt = learnt;
 	}
 
 	static buildFrom(claim: Claim, variables: VariablePool): Clause {
@@ -40,27 +40,27 @@ class Clause implements Comparable<Clause> {
 	}
 
 	addLiteral(lit: Literal) {
-		this.literals.push(lit);
+		this._literals.push(lit);
 	}
 
-	getTag(): number {
-		return this.tag;
+	getTag(): number | undefined {
+		return this._tag;
 	}
 
 	setTag(tag: number): void {
-		this.tag = tag;
+		this._tag = tag;
 	}
 
-	wasLearnt(): boolean {
-		return this.learnt;
+	learnt(): boolean {
+		return this._learnt;
 	}
 
 	findUnassignedLiteral(): number {
 		let i = 0;
 		let literal = undefined;
-		while (i < this.literals.length && !literal) {
-			if (!this.literals[i].isAssigned()) {
-				literal = this.literals[i].toInt();
+		while (i < this._literals.length && !literal) {
+			if (!this._literals[i].isAssigned()) {
+				literal = this._literals[i].toInt();
 			} else {
 				i++;
 			}
@@ -76,8 +76,8 @@ class Clause implements Comparable<Clause> {
 		const unassignedLiterals: number[] = [];
 
 		let i = 0;
-		while (i < this.literals.length && !satisfied) {
-			const lit: Literal = this.literals[i];
+		while (i < this._literals.length && !satisfied) {
+			const lit: Literal = this._literals[i];
 			if (lit.isTrue()) satisfied = true;
 			else {
 				if (!lit.isAssigned()) unassignedLiterals.push(lit.toInt());
@@ -96,10 +96,10 @@ class Clause implements Comparable<Clause> {
 	isUnit(): boolean {
 		let nNotAssigned = 0;
 		let i = 0;
-		const len = this.literals.length;
+		const len = this._literals.length;
 		let satisfied = false;
 		while (i < len && nNotAssigned < 2 && !satisfied) {
-			const lit: Literal = this.literals[i];
+			const lit: Literal = this._literals[i];
 			if (!lit.isAssigned()) {
 				nNotAssigned += 1;
 			} else {
@@ -112,7 +112,7 @@ class Clause implements Comparable<Clause> {
 	}
 
 	containsVariable(variableId: number): boolean {
-		const found = this.literals.find((lit) => {
+		const found = this._literals.find((lit) => {
 			const id = lit.toInt();
 			return Math.abs(id) === variableId;
 		});
@@ -120,7 +120,7 @@ class Clause implements Comparable<Clause> {
 	}
 
 	getLiterals(): Literal[] {
-		return [...this.literals];
+		return [...this._literals];
 	}
 
 	resolution(other: Clause): Clause {
@@ -128,47 +128,47 @@ class Clause implements Comparable<Clause> {
 	}
 
 	equals(other: Clause): boolean {
-		const c1 = this.literals.map((l) => l.toInt());
-		const c2 = other.literals.map((l) => l.toInt());
+		const c1 = this._literals.map((l) => l.toInt());
+		const c2 = other._literals.map((l) => l.toInt());
 		return arraysEqual(c1.sort(), c2.sort());
 	}
 
 	nLiterals(): number {
-		return this.literals.length;
+		return this._literals.length;
 	}
 
 	getComments(): string[] {
-		return this.comments;
+		return this._comments;
 	}
 
 	copy(): Clause {
-		return new Clause(this.literals, {
-			comments: [...this.comments],
-			tag: this.tag,
-			learnt: this.learnt
+		return new Clause(this._literals, {
+			comments: [...this._comments],
+			tag: this._tag,
+			learnt: this._learnt
 		});
 	}
 
 	isEmpty(): boolean {
-		return this.literals.length === 0;
+		return this._literals.length === 0;
 	}
 
 	[Symbol.iterator]() {
-		return this.literals.values();
+		return this._literals.values();
 	}
 
 	map<T>(
 		callback: (literal: Literal, index: number, array: Literal[]) => T,
 		thisArg?: unknown
 	): T[] {
-		return this.literals.map(callback, thisArg);
+		return this._literals.map(callback, thisArg);
 	}
 
 	forEach(
 		callback: (literal: Literal, index: number, array: Literal[]) => void,
 		thisArg?: unknown
 	): void {
-		this.literals.forEach(callback, thisArg);
+		this._literals.forEach(callback, thisArg);
 	}
 }
 

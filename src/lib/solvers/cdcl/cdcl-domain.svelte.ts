@@ -26,7 +26,7 @@ import {
 	type MappingLiteral2Clauses,
 	type Problem
 } from '$lib/states/problem.svelte.ts';
-import { getLatestTrail, getTrails } from '$lib/states/trails.svelte.ts';
+import { getLatestTrail, getTrails, stackTrail } from '$lib/states/trails.svelte.ts';
 import { logFatal, logInfo } from '$lib/stores/toasts.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import type { OccurrenceList } from '../types.ts';
@@ -308,7 +308,7 @@ export const buildConflictAnalysis: CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN =
 	});
 
 	// Thirdly the conflict clause is retrieved
-	const ccId: number | undefined = latestTrail.getConflictClauseTag();
+	const ccId: number | undefined = latestTrail.getConflictiveClause()?.getTag();
 	if (ccId === undefined) {
 		logFatal(
 			'Conflict analysis',
@@ -397,7 +397,7 @@ export const learnConflictClause: CDCL_LEARN_CONFLICT_CLAUSE_FUN = (
 
 	logInfo('New clause learnt', `Clause ${lemma.getTag()} learnt`);
 
-	return lemma.getTag();
+	return lemma.getTag() as number;
 };
 
 export type CDCL_SECOND_HIGHEST_DL_FUN = (trail: Trail, conflictClause: Clause) => number;
@@ -426,7 +426,7 @@ export const backjumping = (trail: Trail, decisionLevel: number) => {
 export type CDCL_PUSH_TRAIL_FUN = (trail: Trail) => void;
 
 export const pushTrail: CDCL_PUSH_TRAIL_FUN = (trail: Trail) => {
-	getTrails().push(trail);
+	stackTrail(trail);
 };
 
 export type CDCL_PROPAGATE_CC_FUN = (clauseTag: number) => number;

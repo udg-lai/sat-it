@@ -22,28 +22,22 @@ export class Trail {
 	private decisionLevelBookmark: number[] = $state([-1]);
 	private followUPIndex: number = 0;
 	private decisionLevel: number = 0;
-	private trailCapacity: number = 0;
 	private conflictAnalysisCtx: Either<ConflictAnalysisContext, undefined>[] = $state([]); // this is just for representing the conflict analysis view
 	private upContext: Either<UPContext, undefined>[] = $derived.by(() => this._upContext());
-	private fullView: boolean = $state(false); // UI state for knowing whenever for that trail it was required to show more information
+	private fullView: boolean = $state(true); // UI state for knowing whenever for that trail it was required to show more information
 	private trailHeight: number = $state(0); // trail height in px
 	private learntClause: Clause | undefined = $state(undefined);
-	private conflictClauseTag: number | undefined = $state(undefined);
+	private conflictiveClause: Clause | undefined = $state(undefined);
 	private state: TrailState = $state('running');
 
-	constructor(trailCapacity: number = 0) {
-		this.trailCapacity = trailCapacity;
-	}
-
 	copy(): Trail {
-		const newTrail = new Trail(this.trailCapacity);
+		const newTrail = new Trail();
 		newTrail.assignments = this.assignments.map((assignment) => assignment.copy());
 		newTrail.decisionLevelBookmark = [...this.decisionLevelBookmark];
 		newTrail.followUPIndex = this.followUPIndex;
 		newTrail.decisionLevel = this.decisionLevel;
-		newTrail.trailCapacity = this.trailCapacity;
 		newTrail.learnClause = this.learnClause;
-		newTrail.conflictClauseTag = this.conflictClauseTag;
+		newTrail.conflictiveClause = this.conflictiveClause;
 		return newTrail;
 	}
 
@@ -57,12 +51,11 @@ export class Trail {
 
 	//This partial copy is needed as we don't want to have the same "conflictiveClause" and "learnedClause" as this function is meant for creating the new "latestTrail"
 	partialCopy(): Trail {
-		const newTrail = new Trail(this.trailCapacity);
+		const newTrail = new Trail();
 		newTrail.assignments = this.assignments.map((assignment) => assignment.copy());
 		newTrail.decisionLevelBookmark = [...this.decisionLevelBookmark];
 		newTrail.followUPIndex = this.followUPIndex;
 		newTrail.decisionLevel = this.decisionLevel;
-		newTrail.trailCapacity = this.trailCapacity;
 		return newTrail;
 	}
 
@@ -116,34 +109,24 @@ export class Trail {
 		logFatal(`Unable to determine decision level for variable ${variable}`);
 	}
 
-	setConflictClauseTag(clauseTag: number): void {
-		this.conflictClauseTag = clauseTag;
+	setConflictiveClause(clause: Clause): void {
+		this.conflictiveClause = clause;
 	}
 
-	getConflictClauseTag(): number | undefined {
-		return this.conflictClauseTag;
+	hasConflictiveClause(): boolean {
+		return this.conflictiveClause !== undefined;
+	}
+
+	getConflictiveClause(): Clause | undefined {
+		return this.conflictiveClause;
 	}
 
 	clean(): void {
-		this.cleanConflictClause();
-		this.conflictAnalysisCtx = [];
-		this.learntClause = undefined;
-		this.conflictClauseTag = undefined;
-		this.state = 'running';
-	}
-
-	cleanConflictClause(): void {
-		this.conflictClauseTag = undefined;
+		this._clean();
 	}
 
 	getConflictAnalysisCtx(): Either<ConflictAnalysisContext, undefined>[] {
-		const nAssignments = this.assignments.length;
-		const diff = Math.max(nAssignments - this.conflictAnalysisCtx.length, 0);
-		const ctx: Either<ConflictAnalysisContext, undefined>[] = [
-			...Array<Either<ConflictAnalysisContext, undefined>>(diff).fill(makeRight(undefined)),
-			...this.conflictAnalysisCtx
-		];
-		return ctx;
+		return this._makeConflictAnalysisCtx();
 	}
 
 	updateConflictAnalysisCtx(ctx: ConflictAnalysisContext | undefined = undefined): void {
@@ -157,13 +140,9 @@ export class Trail {
 	}
 
 	push(assignment: VariableAssignment) {
-		if (this.assignments.length == this.trailCapacity)
-			logFatal('skipped allocating assignment as trail capacity is fulfilled');
-		else {
-			this.assignments.push(assignment);
-			if (assignment.isD()) {
-				this.registerNewDecisionLevel();
-			}
+		this.assignments.push(assignment);
+		if (assignment.isD()) {
+			this.registerNewDecisionLevel();
 		}
 	}
 
@@ -333,5 +312,34 @@ export class Trail {
 				return makeRight(undefined);
 			}
 		});
+	}
+
+	private _clean(): void {
+		this.conflictiveClause = undefined;
+		this.conflictAnalysisCtx = [];
+		this.learntClause = undefined;
+		this.conflictiveClause = undefined;
+		this.state = 'running';
+	}
+
+	private _makeConflictAnalysisCtx(): Either<ConflictAnalysisContext, undefined>[] {
+		const nAssignments: number = this.assignments.length;
+		const gaps: number = Math.max(nAssignments - this.conflictAnalysisCtx.length, 0);
+		const ctx: Either<ConflictAnalysisContext, undefined>[] = [
+			...Array<Either<ConflictAnalysisContext, undefined>>(gaps).fill(makeRight(undefined)),
+			...this.conflictAnalysisCtx,
+			this._makeConflictAnalysisCtxTail()
+		];
+		return ctx;
+	}
+
+	private _makeConflictAnalysisCtxTail(): Either<ConflictAnalysisContext, undefined> {
+		if (this.getConflictiveClause() === undefined) {
+			logFatal('Trail', 'Can not generate conflict analysis context when there is no conflictive declared');
+		}
+		return makeLeft({
+			clause: this.getConflictiveClause() as Clause,
+			literal: 0
+		})
 	}
 }

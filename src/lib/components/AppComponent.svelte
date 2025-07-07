@@ -33,6 +33,7 @@
 	import SolvingInformationComponent from './SolvingInformationComponent.svelte';
 	import { algorithmicUndo } from '$lib/algorithmicUndo.svelte.ts';
 	import { DECIDE_STATE_ID } from '$lib/solvers/reserved.ts';
+	import { logFatal } from '$lib/stores/toasts.ts';
 
 	let expandPropagations: boolean = $state(true);
 
@@ -60,12 +61,13 @@
 		updateTrails([...snapshot]);
 		updateStatistics(statistics);
 		updateSolverMachine(activeState, record);
-		const len = snapshot.length;
-		if (len > 0) {
-			const latest = snapshot[len - 1];
+		const snapshotSize = snapshot.length;
+		if (snapshotSize <= 0) {
+			logFatal('Reloading snapshot', 'Unexpected empty array of trails')
+		}
+		else {
+			const latest: Trail = snapshot[snapshotSize - 1];
 			updateProblemFromTrail(latest);
-		} else {
-			resetProblem();
 		}
 	}
 

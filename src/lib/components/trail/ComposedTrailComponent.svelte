@@ -37,6 +37,7 @@
 
 	let conflictAnalysis: Either<ConflictAnalysisContext, undefined>[] = $derived.by(() => {
 		if (!showCAView) return [];
+		else if (!trail.hasConflictiveClause()) return [];
 		else return trail.getConflictAnalysisCtx();
 	});
 
@@ -74,8 +75,9 @@
 			displayBackground={true}
 		/>
 	{/if}
-	<div use:observeWidth class="fit-content" class:views-opened={showCAView || showUPView}>
+	<div use:observeWidth class="fit-content width-observer" class:views-opened={showCAView || showUPView}>
 		<TrailComponent {trail} {expanded} {isLast} {emitUndo} />
+		<div class="empty-slot"></div>
 	</div>
 	{#if showCAView}
 		<CanvasComponent context={conflictAnalysis} width={trailWidth} align={'start'} />
@@ -93,6 +95,10 @@
 		border-radius: 10px;
 	}
 
+	.width-observer {
+		display: flex;
+	}
+
 	.fit-content {
 		width: fit-content;
 	}
@@ -100,5 +106,11 @@
 	.views-opened {
 		color: var(--satisfied-color);
 		background-color: var(--satisfied-color-o);
+	}
+
+	.empty-slot {
+		width: var(--empty-slot);
+		background-color: red;
+		height: auto;
 	}
 </style>

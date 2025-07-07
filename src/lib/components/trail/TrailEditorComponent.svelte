@@ -21,6 +21,12 @@
 
 	let { trails }: Props = $props();
 
+	$effect(() => console.log(trails))
+
+	setTimeout(() => {
+		console.log(trails.length)
+	}, 1000)
+
 	let editorElement: HTMLDivElement;
 	let trailsLeafElement: HTMLElement;
 	let userInteracting: boolean = $state(false);
@@ -126,7 +132,7 @@
 			// If the trail is running or is a model, we do not allow toggling the view
 			return;
 		}
-		for (let i = 0; i < trails.length; i++) {
+		for (let i = 0; i < trails.length - 1; i++) {
 			if (trailId != i) {
 				trails.at(i)?.setView(false);
 			}
@@ -154,6 +160,38 @@
 			objectiveAssignment: assignment,
 			trailIndex: index
 		});
+	}
+
+	function makeStatusBtnStyle(index: number, trail: Trail): string {
+		let classStyle = '';
+		if (index + 1 < trails.length) {
+			classStyle += 'opacity';
+		}
+		if (showUPs && trail.hasConflictiveClause()) {
+			classStyle += ' center';
+		} else if (showUPs) {
+			classStyle += ' bottom';
+		} else if (trail.hasConflictiveClause()) {
+			classStyle += ' top';
+		}
+
+		return classStyle;
+	}
+
+	function makeStatusIconStyle(trail: Trail): string {
+		let classStyle = '';
+		if (trail.view()) {
+			if (showUPs && !trail.hasConflictiveClause()) {
+				classStyle = 'icon-bottom';
+			} else if (!showUPs && trail.hasConflictiveClause()) {
+				classStyle = 'icon-top';
+			} else {
+				classStyle = 'icon-center';
+			}
+		} else {
+				classStyle = 'icon-center';
+		}
+		return classStyle;
 	}
 
 	onMount(() => {
@@ -196,8 +234,9 @@
 							{trail}
 							expanded={expandedTrails}
 							isLast={trails.length === index + 1}
-							showUPView={showUPs && (trails.length === index + 1 ||  trail.view())}
-							showCAView={trails.length === index + 1 || trail.view()}
+							showUPView={showUPs && trail.view()}
+							showCAView={(trails.length === index + 1 || trail.view()) &&
+								trail.hasConflictiveClause()}
 							emitUndo={(assignment: VariableAssignment) => emitUndo(assignment, index)}
 						/>
 					</div>
@@ -210,7 +249,8 @@
 				<div class="item" style="height: {trail.getHeight()}px;">
 					<StatusIndicator
 						ofLastTrail={trails.length === index + 1}
-						classStyle={index + 1 < trails.length ? 'opacity' : ''}
+						btnClassStyle={makeStatusBtnStyle(index, trail)}
+						iconClassStyle={makeStatusIconStyle(trail)}
 						trailState={trail.getState()}
 						expanded={trail.view()}
 						onToggleExpand={() => toggleTrailView(index)}
@@ -288,6 +328,33 @@
 
 	:global(.opacity) {
 		opacity: var(--opacity-50);
+	}
+
+	:global(.top) {
+		align-items: start;
+	}
+
+	:global(.bottom) {
+		align-items: end;
+	}
+
+	:global(.center) {
+		align-items: center;
+	}
+
+
+	:global(.icon-top) {
+		margin-top: 0.6rem;
+	}
+
+
+	:global(.icon-center) {
+		margin-top: 0.6rem;
+	}
+
+
+	:global(.icon-bottom) {
+		margin-bottom: 0.6rem;
 	}
 
 	.container-padding {

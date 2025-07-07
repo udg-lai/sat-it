@@ -38,7 +38,7 @@
 		}
 	});
 
-	const conflictclauseTag: number = $derived(propagatedClause.getTag());
+	const conflictiveClauseTag: number | undefined = $derived(propagatedClause.getTag());
 
 	let chrome: boolean = $derived(onChrome());
 </script>
@@ -56,7 +56,7 @@
 
 <Popover triggeredBy={'#' + buttonId} class="app-popover" trigger="click" placement="bottom">
 	<div class="popover-content">
-		<span class="clause-id">{conflictclauseTag}.</span>
+		<span class="clause-id">{conflictiveClauseTag}.</span>
 	</div>
 </Popover>
 

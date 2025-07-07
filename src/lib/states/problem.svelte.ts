@@ -6,6 +6,7 @@ import type Variable from '$lib/entities/Variable.svelte.ts';
 import { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import { getTrails } from './trails.svelte.ts';
+import { logFatal } from '$lib/stores/toasts.ts';
 export type MappingLiteral2Clauses = Map<number, SvelteSet<number>>;
 
 export type Algorithm = 'backtracking' | 'dpll' | 'cdcl';
@@ -96,7 +97,11 @@ export function addClauseToClausePool(lemma: Clause) {
 
 	//Add clause to mapping
 	const mapping: MappingLiteral2Clauses = problemStore.mapping;
-	addClauseToMapping(lemma, lemma.getTag(), mapping);
+
+	if (lemma.getTag() === undefined)
+		logFatal('Saving lemma', 'Lemma clause was not giving a tag at adding it into the pool');
+
+	addClauseToMapping(lemma, lemma.getTag() as number, mapping);
 
 	problemStore = { ...currentProblem, clauses, mapping };
 }

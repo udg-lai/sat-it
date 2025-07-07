@@ -13,7 +13,8 @@
 		onToggleExpand?: () => void;
 		expanded: boolean;
 		trailState: TrailState;
-		classStyle?: string;
+		btnClassStyle?: string;
+		iconClassStyle?: string;
 		ofLastTrail?: boolean; // Optional prop to indicate if this is the last trail
 	}
 
@@ -21,7 +22,8 @@
 		trailState,
 		onToggleExpand,
 		expanded,
-		classStyle = '',
+		btnClassStyle = '',
+		iconClassStyle = '',
 		ofLastTrail = false
 	}: Props = $props();
 
@@ -53,13 +55,13 @@
 	<button
 		title={status}
 		onclick={onToggleExpandClick}
-		class="notification {classStyle}"
+		class="notification {btnClassStyle}"
 		class:ofLastTrail
 		class:unsat={trailState === 'unsat'}
 		class:sat={trailState === 'sat'}
 		class:conflict={trailState === 'conflict'}
 	>
-		<div class="indicator">
+		<div class="{iconClassStyle}">
 			{#if expanded && !ofLastTrail}
 				<DynamicRender component={CompressOutline} props={iconProps} />
 			{:else if trailState === 'unsat'}
@@ -83,11 +85,6 @@
 		width: 100%;
 		display: flex;
 		justify-content: center;
-		align-items: center;
-	}
-
-	.indicator {
-		margin-top: 0.5rem;
 	}
 
 	.notification {
@@ -95,7 +92,6 @@
 		height: 100%;
 		display: flex;
 		justify-content: center;
-		align-items: center;
 	}
 
 	.ofLastTrail {

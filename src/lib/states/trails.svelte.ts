@@ -1,5 +1,7 @@
+import type Clause from '$lib/entities/Clause.svelte.ts';
 import type { Trail } from '$lib/entities/Trail.svelte.ts';
 import { logFatal } from '$lib/stores/toasts.ts';
+import { getClausePool } from './problem.svelte.ts';
 import { getSnapshot } from './stack.svelte.ts';
 
 let trails: Trail[] = $state(getSnapshot().snapshot);
@@ -7,6 +9,10 @@ let trails: Trail[] = $state(getSnapshot().snapshot);
 export const getLatestTrail = (): Trail | undefined => trails[trails.length - 1];
 
 export const stackTrail = (trail: Trail): void => {
+	for (const trail of trails) {
+		trail.setView(false);
+	}
+	trail.setView(true);
 	trails = [...trails, trail];
 };
 
@@ -28,5 +34,6 @@ export const updateTrails = (snapshot: Trail[]): void => {
 };
 
 export const updateLastTrailEnding = (clauseTag: number): void => {
-	trails[trails.length - 1].setConflictClauseTag(clauseTag);
+	const clause: Clause = getClausePool().get(clauseTag);
+	trails[trails.length - 1].setConflictiveClause(clause);
 };
