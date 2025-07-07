@@ -17,11 +17,17 @@
 		ofLastTrail?: boolean; // Optional prop to indicate if this is the last trail
 	}
 
-	let { trailState, onToggleExpand, expanded, classStyle = '', ofLastTrail = false }: Props = $props();
+	let {
+		trailState,
+		onToggleExpand,
+		expanded,
+		classStyle = '',
+		ofLastTrail = false
+	}: Props = $props();
 
-	const iconProps = {
-		class: `h-7 w-7 ${ofLastTrail ? 'cursor-default' : 'cursor-pointer'}`,
-	};
+	let iconProps = $derived({
+		class: `h-7 w-7 ${ofLastTrail ? 'cursor-default' : 'cursor-pointer'}`
+	});
 
 	function onToggleExpandClick() {
 		if (ofLastTrail) return;
@@ -48,7 +54,7 @@
 		title={status}
 		onclick={onToggleExpandClick}
 		class="notification {classStyle}"
-		class:ofLastTrail={ofLastTrail}
+		class:ofLastTrail
 		class:unsat={trailState === 'unsat'}
 		class:sat={trailState === 'sat'}
 		class:conflict={trailState === 'conflict'}
@@ -93,7 +99,7 @@
 	}
 
 	.ofLastTrail {
-		cursor:default;
+		cursor: default;
 	}
 
 	.notification.conflict {
