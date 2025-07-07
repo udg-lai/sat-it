@@ -6,6 +6,7 @@ import type Variable from '$lib/entities/Variable.svelte.ts';
 import { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import { getTrails } from './trails.svelte.ts';
+import { logFatal } from '$lib/stores/toasts.ts';
 export type MappingLiteral2Clauses = Map<number, SvelteSet<number>>;
 
 export type Algorithm = 'backtracking' | 'dpll' | 'cdcl';
@@ -67,7 +68,7 @@ export function updateProblemFromTrail(trail: Trail) {
 
 	//The learnt clauses from the trails are added to the clause pool
 	getTrails().forEach((trail) => {
-		const learntClause = trail.getLearnedClause();
+		const learntClause = trail.getLearntClause();
 		if (learntClause !== undefined) {
 			clauses.addClause(learntClause);
 		}
@@ -96,7 +97,11 @@ export function addClauseToClausePool(lemma: Clause) {
 
 	//Add clause to mapping
 	const mapping: MappingLiteral2Clauses = problemStore.mapping;
-	addClauseToMapping(lemma, lemma.getTag(), mapping);
+
+	if (lemma.getTag() === undefined)
+		logFatal('Saving lemma', 'Lemma clause was not giving a tag at adding it into the pool');
+
+	addClauseToMapping(lemma, lemma.getTag() as number, mapping);
 
 	problemStore = { ...currentProblem, clauses, mapping };
 }
@@ -104,21 +109,21 @@ export function addClauseToClausePool(lemma: Clause) {
 function literalToClauses(clauses: ClausePool): MappingLiteral2Clauses {
 	const mapping: Map<number, SvelteSet<number>> = new Map();
 
-	clauses.getClauses().forEach((clause, clauseId) => {
-		addClauseToMapping(clause, clauseId, mapping);
+	clauses.getClauses().forEach((clause, clauseTag) => {
+		addClauseToMapping(clause, clauseTag, mapping);
 	});
 
 	return mapping;
 }
 
-const addClauseToMapping = (clause: Clause, clauseId: number, mapping: MappingLiteral2Clauses) => {
+const addClauseToMapping = (clause: Clause, clauseTag: number, mapping: MappingLiteral2Clauses) => {
 	clause.getLiterals().forEach((literal) => {
 		const literalId = literal.toInt();
 		if (mapping.has(literalId)) {
 			const s = mapping.get(literalId);
-			s?.add(clauseId);
+			s?.add(clauseTag);
 		} else {
-			const s = new SvelteSet([clauseId]);
+			const s = new SvelteSet([clauseTag]);
 			mapping.set(literalId, s);
 		}
 	});

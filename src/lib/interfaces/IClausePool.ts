@@ -1,15 +1,3 @@
-import type Clause from '$lib/entities/Clause.svelte.ts';
-import type { SvelteSet } from 'svelte/reactivity';
-
-export interface IClausePool {
-	eval(): AssignmentEval;
-	addClause(clause: Clause): void;
-	get(clause: number): Clause;
-	getUnitClauses(): SvelteSet<number>;
-	getClauses(): Clause[];
-	size(): number;
-}
-
 type UnSAT = {
 	type: 'UnSAT';
 	conflictClause: number;

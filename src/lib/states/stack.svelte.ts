@@ -1,4 +1,4 @@
-import type { Trail } from '$lib/entities/Trail.svelte.ts';
+import { Trail } from '$lib/entities/Trail.svelte.ts';
 import { type Statistics } from './statistics.svelte.ts';
 
 export interface Snapshot {
@@ -10,7 +10,7 @@ export interface Snapshot {
 
 let stack: Snapshot[] = $state([
 	{
-		snapshot: [],
+		snapshot: [new Trail()],
 		activeState: 0,
 		statistics: { noDecisions: 0, noConflicts: 0, noUnitPropagations: 0, clausesLeft: {} }
 	}

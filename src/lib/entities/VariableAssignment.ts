@@ -1,30 +1,30 @@
 import { logFatal } from '$lib/stores/toasts.ts';
 import type Variable from './Variable.svelte.ts';
 
-type Automated = {
+export type Automated = {
 	type: 'automated';
 	algorithm: string;
 };
 
-type Manual = {
+export type Manual = {
 	type: 'manual';
 };
 
-type Decision = Automated | Manual;
+export type Decision = Automated | Manual;
 
-type UnitPropagation = {
+export type UnitPropagation = {
 	type: 'propagated';
-	clauseId: number;
+	clauseTag: number;
 };
 
-type Backjumping = {
+export type Backjumping = {
 	type: 'backjumping';
-	clauseId: number;
+	clauseTag: number;
 };
 
-type Propagation = UnitPropagation | Backjumping;
+export type Propagation = UnitPropagation | Backjumping;
 
-type Backtracking = {
+export type Backtracking = {
 	type: 'backtracking';
 };
 
@@ -71,17 +71,17 @@ export const makeManualReason = (): Manual => {
 	};
 };
 
-export const makeUnitPropagationReason = (clauseId: number): UnitPropagation => {
+export const makeUnitPropagationReason = (clauseTag: number): UnitPropagation => {
 	return {
 		type: 'propagated',
-		clauseId
+		clauseTag
 	};
 };
 
-export const makeBackjumpingResason = (clauseId: number): Backjumping => {
+export const makeBackjumpingResason = (clauseTag: number): Backjumping => {
 	return {
 		type: 'backjumping',
-		clauseId
+		clauseTag
 	};
 };
 
@@ -108,12 +108,12 @@ export default class VariableAssignment {
 		return new VariableAssignment(variable, makeManualReason());
 	}
 
-	static newUnitPropagationAssignment(variable: Variable, clauseId: number) {
-		return new VariableAssignment(variable, makeUnitPropagationReason(clauseId));
+	static newUnitPropagationAssignment(variable: Variable, clauseTag: number) {
+		return new VariableAssignment(variable, makeUnitPropagationReason(clauseTag));
 	}
 
-	static newBackjumpingAssignment(variable: Variable, clauseId: number) {
-		return new VariableAssignment(variable, makeBackjumpingResason(clauseId));
+	static newBackjumpingAssignment(variable: Variable, clauseTag: number) {
+		return new VariableAssignment(variable, makeBackjumpingResason(clauseTag));
 	}
 
 	static newBacktrackingAssignment(variable: Variable) {

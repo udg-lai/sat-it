@@ -18,6 +18,7 @@ import type { ConflictAnalysis, OccurrenceList } from '../types.ts';
 import { Queue } from '$lib/entities/Queue.svelte.ts';
 import type { Trail } from '$lib/entities/Trail.svelte.ts';
 import type Clause from '$lib/entities/Clause.svelte.ts';
+import { assertiveness } from '$lib/algorithms/assertive.ts';
 
 export const makeCDCLSolver = (): CDCL_SolverMachine => {
 	return new CDCL_SolverMachine();
@@ -97,25 +98,8 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 		if (this.conflictAnalysis === undefined) {
 			logFatal('Assertive exception', 'The conflict analysis can not be undefined');
 		}
-
-		const variables: number[] = this.conflictAnalysis.decisionLevelVariables;
-		const conflictClause: Clause = this.conflictAnalysis.conflictClause;
-
-		let variablesFound: number = 0;
-		let i: number = 0;
-		while (i < variables.length && variablesFound < 2) {
-			if (conflictClause.containsVariable(variables[i])) {
-				variablesFound += 1;
-			}
-			i += 1;
-		}
-		if (variablesFound === 0) {
-			logFatal(
-				'Not possible result',
-				'There must be at least one variable inside the conflict clause'
-			);
-		}
-		return variablesFound === 1;
+		const { conflictClause, decisionLevelVariables } = this.conflictAnalysis;
+		return assertiveness(conflictClause, decisionLevelVariables);
 	}
 
 	// ** general functions **

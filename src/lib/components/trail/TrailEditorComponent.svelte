@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Trail } from '$lib/entities/Trail.svelte.ts';
+	import VariableAssignment from '$lib/entities/VariableAssignment.ts';
 	import {
 		algorithmicUndoEventBus,
 		solverStartedAutoMode,
@@ -9,20 +10,16 @@
 	import type { SolverMachine } from '$lib/solvers/SolverMachine.svelte.ts';
 	import type { StateFun, StateInput } from '$lib/solvers/StateMachine.svelte.ts';
 	import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
+	import { logFatal } from '$lib/stores/toasts.ts';
 	import { onMount } from 'svelte';
-	import InformationComponent from './InformationComponent.svelte';
-	import TrailComponent from './TrailComponent.svelte';
-	import VariableAssignment from '$lib/entities/VariableAssignment.ts';
+	import ComposedTrailComponent from './ComposedTrailComponent.svelte';
+	import StatusIndicator from './StatusIndicator.svelte';
 
 	interface Props {
 		trails: Trail[];
 	}
 
 	let { trails }: Props = $props();
-
-	let indexes: number[] = $derived.by(() => {
-		return trails.map((_, index) => index);
-	});
 
 	let editorElement: HTMLDivElement;
 	let trailsLeafElement: HTMLElement;
@@ -36,14 +33,19 @@
 
 	let expandedTrails: boolean = $state(true);
 
-	let solverMachine: SolverMachine<StateFun, StateInput> = $derived(getSolverMachine());
+	let solver: SolverMachine<StateFun, StateInput> = $derived(getSolverMachine());
+
+	let showUPs: boolean = $derived.by(() => {
+		const identity = solver.identify();
+		return identity === 'cdcl' || identity === 'dpll';
+	});
 
 	const scrollToBottom = (editorElement: HTMLElement) => {
 		editorElement.scrollTo({ top: editorElement.scrollHeight, behavior: 'smooth' });
 	};
 
 	function isSolverRunningSolo(): boolean {
-		const autoMode: boolean = solverMachine.isInAutoMode();
+		const autoMode: boolean = solver.isInAutoMode();
 		return autoMode;
 	}
 
@@ -51,31 +53,35 @@
 		if (scrollTimeout !== undefined) {
 			clearTimeout(scrollTimeout);
 		}
-		userScrolling = true;
-		scrollTimeout = setTimeout(() => {
-			userScrolling = false;
-			rearrangeTrailEditor(lastReference);
-		}, recoveryTimeout);
+		if (isSolverRunningSolo()) {
+			userScrolling = true;
+			scrollTimeout = setTimeout(() => {
+				userScrolling = false;
+				rearrangeTrailEditor(lastReference);
+			}, recoveryTimeout);
+		}
 	}
 
 	function handleMouseDown() {
 		if (interactingTimeout !== undefined) {
 			clearTimeout(interactingTimeout);
 		}
-		if (!isSolverRunningSolo()) return;
-		userInteracting = true;
-		grabbing = true;
+		if (isSolverRunningSolo()) {
+			userInteracting = true;
+			grabbing = true;
+		}
 	}
 
 	function handleMouseUp() {
 		if (interactingTimeout !== undefined) {
 			clearTimeout(interactingTimeout);
 		}
-		if (!isSolverRunningSolo()) return;
-		interactingTimeout = setTimeout(() => {
-			userInteracting = false;
-			rearrangeTrailEditor(lastReference);
-		}, recoveryTimeout);
+		if (isSolverRunningSolo()) {
+			interactingTimeout = setTimeout(() => {
+				userInteracting = false;
+				rearrangeTrailEditor(lastReference);
+			}, recoveryTimeout);
+		}
 		grabbing = false;
 	}
 
@@ -108,6 +114,72 @@
 		};
 	}
 
+	function toggleTrailView(trailId: number) {
+		const trail: Trail | undefined = trails.at(trailId);
+		if (trail === undefined) {
+			logFatal('Trail not found for ID: ' + trailId);
+		}
+		if (
+			solver.identify() === 'bkt' &&
+			(trail.getState() === 'running' || trail.getState() === 'sat')
+		) {
+			// If the trail is running or is a model, we do not allow toggling the view
+			return;
+		}
+
+		const limit = Math.abs(trails.length - 1);
+
+		if (trailId >= limit) {
+			return;
+		}
+
+		for (let i = 0; i < limit; i++) {
+			if (trailId != i) {
+				trails.at(i)?.setView(false);
+			}
+		}
+
+		trails.at(trailId)?.toggleView();
+	}
+
+	function emitUndo(assignment: VariableAssignment, index: number) {
+		algorithmicUndoEventBus.emit({
+			objectiveAssignment: assignment,
+			trailIndex: index
+		});
+	}
+
+	function alignItem(index: number, trail: Trail): string {
+		let classStyle = '';
+		if (index + 1 < trails.length) {
+			classStyle += 'opacity';
+		}
+		if (showUPs && trail.hasConflictiveClause()) {
+			classStyle += ' center';
+		} else if (showUPs) {
+			classStyle += ' bottom';
+		} else if (trail.hasConflictiveClause()) {
+			classStyle += ' top';
+		}
+		return classStyle;
+	}
+
+	function makeStatusIconStyle(trail: Trail): string {
+		let classStyle = '';
+		if (trail.view()) {
+			if (showUPs && !trail.hasConflictiveClause()) {
+				classStyle = 'icon-bottom';
+			} else if (!showUPs && trail.hasConflictiveClause()) {
+				classStyle = 'icon-top';
+			} else {
+				classStyle = 'icon-center';
+			}
+		} else {
+			classStyle = 'icon-center';
+		}
+		return classStyle;
+	}
+
 	onMount(() => {
 		const unsubscribeTrailTracking = trailTrackingEventBus.subscribe(rearrangeTrailEditor);
 		const unsubscribeExpandedTrails = toggleTrailExpandEventBus.subscribe(
@@ -134,43 +206,53 @@
 	class:grabbing
 >
 	<editor-leaf use:listenContentHeight>
-		<editor-indexes class="enumerate">
-			{#each indexes as index (index)}
-				<div class="item">
-					<div class="enumerate-item">
-						<span>{index + 1}.</span>
-					</div>
-				</div>
+		<editor-indexes class="direction container-padding">
+			{#each trails as trail, index (index)}
+				{@render enumerateSnippet(trail, index)}
 			{/each}
 		</editor-indexes>
 
 		<trails-leaf bind:this={trailsLeafElement}>
-			<editor-trails>
+			<editor-trails class="container-padding">
 				{#each trails as trail, index (index)}
-					<TrailComponent
-						{trail}
-						expanded={expandedTrails}
-						isLast={trails.length === index + 1}
-						emitAlgorithmicUndo={(objectiveAssignment: VariableAssignment) => {
-							algorithmicUndoEventBus.emit({
-								objectiveAssignment,
-								trailIndex: index
-							});
-						}}
-					/>
+					<div class="composed-trail-observer">
+						<ComposedTrailComponent
+							{trail}
+							expanded={expandedTrails}
+							isLast={trails.length === index + 1}
+							showUPView={showUPs && trail.view()}
+							showCAView={(trails.length === index + 1 || trail.view()) &&
+								trail.hasConflictiveClause()}
+							emitUndo={(assignment: VariableAssignment) => emitUndo(assignment, index)}
+						/>
+					</div>
 				{/each}
 			</editor-trails>
 		</trails-leaf>
 
-		<editor-info>
+		<editor-info class="container-padding direction">
 			{#each trails as trail, index (index)}
-				<div class="item">
-					<InformationComponent {trail} isLast={trails.length === index + 1} />
+				<div class="item {alignItem(index, trail)}" style="--height: {trail.getHeight()}px;">
+					<StatusIndicator
+						ofLastTrail={trails.length === index + 1}
+						iconClassStyle={makeStatusIconStyle(trail)}
+						trailState={trail.getState()}
+						expanded={trail.view()}
+						onToggleExpand={() => toggleTrailView(index)}
+					/>
 				</div>
 			{/each}
 		</editor-info>
 	</editor-leaf>
 </trail-editor>
+
+{#snippet enumerateSnippet(trail: Trail, index: number)}
+	<div class="item {alignItem(index, trail)}" style="--height: {trail.getHeight()}px;">
+		<div class="enumerate">
+			<span class:opacity={index + 1 < trails.length}>{index + 1}.</span>
+		</div>
+	</div>
+{/snippet}
 
 <style>
 	trail-editor {
@@ -210,26 +292,67 @@
 		display: flex;
 		flex-direction: column;
 		width: max-content;
+		gap: 0.25rem;
 	}
 
 	.item {
-		height: var(--trail-height);
+		height: var(--height);
 		width: var(--trail-height);
 		display: flex;
-		align-items: start;
 		justify-content: center;
 	}
 
-	.enumerate-item {
-		pointer-events: none;
-		width: var(--trail-literal-min-width);
-		height: var(--trail-literal-min-width);
-		display: flex;
+	.enumerate {
+		min-height: var(--trail-height);
+		width: 100%;
+		align-items: center;
 		justify-content: center;
+		display: flex;
+	}
+
+	.enumerate span {
+		position: absolute;
+		margin-top: var(--trail-gap);
+	}
+
+	.opacity {
+		opacity: var(--opacity-50);
+	}
+
+	.top {
+		align-items: start;
+	}
+
+	.bottom {
 		align-items: end;
 	}
 
-	.item span {
-		opacity: var(--opacity-50);
+	.center {
+		align-items: center;
+	}
+
+	:global(.icon-top) {
+		margin-top: 0.6rem;
+	}
+
+	:global(.icon-center) {
+		margin-top: 0.6rem;
+	}
+
+	:global(.icon-bottom) {
+		margin-bottom: 0.6rem;
+	}
+
+	.container-padding {
+		gap: 1rem;
+	}
+
+	.direction {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.composed-trail-observer {
+		height: fit-content;
 	}
 </style>
