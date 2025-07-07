@@ -124,6 +124,14 @@ export class Trail {
 		return this.conflictClauseTag;
 	}
 
+	clean(): void {
+		this.cleanConflictClause();
+		this.conflictAnalysisCtx = [];
+		this.learntClause = undefined;
+		this.conflictClauseTag = undefined;
+		this.state = 'running';
+	}
+
 	cleanConflictClause(): void {
 		this.conflictClauseTag = undefined;
 	}
