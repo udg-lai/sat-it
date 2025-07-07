@@ -111,6 +111,7 @@
 		<button
 			class="btn"
 			onclick={() => {
+				instanceClicked = '';
 				openModal = false;
 			}}
 		>

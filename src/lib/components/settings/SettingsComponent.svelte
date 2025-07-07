@@ -58,7 +58,7 @@
 		border-style: solid;
 		border-color: var(--border-color);
 		border-width: 1px;
-		background-color: var(--main-bg-color);
+		background-color: var(--settings-bg-color);
 	}
 
 	.settings {
