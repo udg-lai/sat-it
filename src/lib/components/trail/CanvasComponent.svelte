@@ -31,15 +31,20 @@
 
 	let canvasContainer: HTMLDivElement;
 
-	function scrollToBottom() {
-		if (reverse && canvasContainer) {
+	function scrollToBottom(): void {
+		if (reverse) {
 			canvasContainer.scrollTop = canvasContainer.scrollHeight;
+		} else {
+			canvasContainer.scrollTop = 0;
 		}
 	}
 
-	onMount(() => {
-		scrollToBottom();
-	});
+
+	$effect(() => {
+		if (context) scrollToBottom(); // Scroll to bottom when context changes
+	})
+
+
 </script>
 
 <trail-canvas class="canvas" bind:this={canvasContainer} style="--width: {width}px">
