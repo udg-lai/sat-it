@@ -1,5 +1,5 @@
 import { Queue } from '$lib/entities/Queue.svelte.ts';
-import { updateClausesToCheck } from '$lib/states/conflict-detection-state.svelte.ts';
+import { cleanClausesToCheck, updateClausesToCheck } from '$lib/states/conflict-detection-state.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import { SolverMachine } from '../SolverMachine.svelte.ts';
 import type { OccurrenceList } from '../types.ts';
@@ -69,7 +69,7 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 	updateFromRecord(record: Record<string, unknown> | undefined): void {
 		if (record === undefined) {
 			this.pendingOccurrenceLists = new Queue();
-			updateClausesToCheck(new SvelteSet<number>(), 0);
+			cleanClausesToCheck();
 			return;
 		}
 		const recordedPendingOccurrenceLists = record['queue'] as Queue<OccurrenceList>;
@@ -86,7 +86,7 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 			const { clauses, literal }: OccurrenceList = this.pendingOccurrenceLists.pick();
 			updateClausesToCheck(clauses, literal);
 		} else {
-			updateClausesToCheck(new SvelteSet<number>(), 0);
+			cleanClausesToCheck();
 		}
 	}
 

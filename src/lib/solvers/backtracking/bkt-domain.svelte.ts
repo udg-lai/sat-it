@@ -1,4 +1,4 @@
-import { updateClausesToCheck } from '$lib/states/conflict-detection-state.svelte.ts';
+import { cleanClausesToCheck, updateClausesToCheck } from '$lib/states/conflict-detection-state.svelte.ts';
 import { getProblemStore, type MappingLiteral2Clauses } from '$lib/states/problem.svelte.ts';
 import { logFatal } from '$lib/stores/toasts.ts';
 import {
@@ -148,7 +148,7 @@ export const emptyClauseSet: BKT_EMPTY_PENDING_OCCURRENCE_LIST_FUN = (
 	solverStateMachine: BKT_SolverMachine
 ) => {
 	solverStateMachine.resolveOccurrences();
-	updateClausesToCheck(new SvelteSet<number>(), 0);
+	cleanClausesToCheck();
 };
 
 export type BKT_DECISION_LEVEL_FUN = () => boolean;

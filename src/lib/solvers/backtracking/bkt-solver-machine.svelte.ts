@@ -1,4 +1,4 @@
-import { updateClausesToCheck } from '$lib/states/conflict-detection-state.svelte.ts';
+import { cleanClausesToCheck, updateClausesToCheck } from '$lib/states/conflict-detection-state.svelte.ts';
 import { logFatal } from '$lib/stores/toasts.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import { SolverMachine } from '../SolverMachine.svelte.ts';
@@ -83,7 +83,7 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 	updateFromRecord(record: Record<string, unknown> | undefined): void {
 		if (record === undefined) {
 			this.occurrenceList = undefined;
-			updateClausesToCheck(new SvelteSet<number>(), 0);
+			cleanClausesToCheck();
 			return;
 		}
 		const occurrenceListRecord: OccurrenceList = record['pending'] as OccurrenceList;
@@ -92,7 +92,7 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 			const { clauses, literal }: OccurrenceList = occurrenceListRecord;
 			updateClausesToCheck(clauses, literal);
 		} else {
-			updateClausesToCheck(new SvelteSet<number>(), 0);
+			cleanClausesToCheck();
 		}
 	}
 

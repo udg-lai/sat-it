@@ -18,7 +18,7 @@ import type { Trail } from '$lib/entities/Trail.svelte.ts';
 import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
 import { isPropagationReason, type Reason } from '$lib/entities/VariableAssignment.ts';
 import type { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
-import { updateClausesToCheck } from '$lib/states/conflict-detection-state.svelte.ts';
+import { cleanClausesToCheck, updateClausesToCheck } from '$lib/states/conflict-detection-state.svelte.ts';
 import {
 	addClauseToClausePool,
 	getProblemStore,
@@ -279,7 +279,7 @@ export const emptyClauseSet: CDCL_EMPTY_OCCURRENCE_LISTS_FUN = (
 	while (solverStateMachine.leftToPostpone() > 0) {
 		solverStateMachine.resolvePostponed();
 	}
-	updateClausesToCheck(new SvelteSet<number>(), 0);
+	cleanClausesToCheck();
 };
 
 // ** additional cdcl function **

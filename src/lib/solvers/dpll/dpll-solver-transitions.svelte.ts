@@ -42,9 +42,9 @@ import type {
 import type { DPLL_SolverMachine } from './dpll-solver-machine.svelte.ts';
 import type { DPLL_StateMachine } from './dpll-state-machine.svelte.ts';
 import {
+	cleanClausesToCheck,
 	getCheckedClause,
-	incrementCheckingIndex,
-	updateClausesToCheck
+	incrementCheckingIndex
 } from '$lib/states/conflict-detection-state.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import { conflictDetectionEventBus } from '$lib/events/events.ts';
@@ -133,7 +133,7 @@ const conflictDetectionBlock = (
 			solver
 		);
 		if (!pendingOccurrenceLists) {
-			updateClausesToCheck(new SvelteSet<number>(), 0);
+			cleanClausesToCheck();
 			allVariablesAssignedTransition(stateMachine);
 			return;
 		}

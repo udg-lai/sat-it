@@ -1,7 +1,7 @@
 import {
+	cleanClausesToCheck,
 	getCheckedClause,
-	incrementCheckingIndex,
-	updateClausesToCheck
+	incrementCheckingIndex
 } from '$lib/states/conflict-detection-state.svelte.ts';
 import { increaseNoConflicts } from '$lib/states/statistics.svelte.ts';
 import { logFatal } from '$lib/stores/toasts.ts';
@@ -195,7 +195,7 @@ const conflictDetectionBlock = (
 		unstackOccurrenceListTransition(stateMachine, solver);
 		const pendingClausesSet: boolean = checkPendingOccurrenceListsTransition(stateMachine, solver);
 		if (!pendingClausesSet) {
-			updateClausesToCheck(new SvelteSet<number>(), 0);
+			cleanClausesToCheck();
 			allVariablesAssignedTransition(stateMachine);
 			return;
 		}

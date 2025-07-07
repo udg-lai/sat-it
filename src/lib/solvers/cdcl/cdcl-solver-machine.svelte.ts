@@ -1,4 +1,4 @@
-import { updateClausesToCheck } from '$lib/states/conflict-detection-state.svelte.ts';
+import { cleanClausesToCheck, updateClausesToCheck } from '$lib/states/conflict-detection-state.svelte.ts';
 import { logFatal } from '$lib/stores/toasts.ts';
 import { SolverMachine } from '../SolverMachine.svelte.ts';
 import type { CDCL_FUN, CDCL_INPUT } from './cdcl-domain.svelte.ts';
@@ -130,7 +130,7 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 	updateFromRecord(record: Record<string, unknown> | undefined): void {
 		if (record === undefined) {
 			this.pendingOccurrenceLists = new Queue();
-			updateClausesToCheck(new SvelteSet<number>(), 0);
+			cleanClausesToCheck();
 			return;
 		}
 		const recordedPendingConflicts = record['queue'] as Queue<OccurrenceList>;
@@ -147,7 +147,7 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 			const { clauses, literal }: OccurrenceList = this.pendingOccurrenceLists.pick();
 			updateClausesToCheck(clauses, literal);
 		} else {
-			updateClausesToCheck(new SvelteSet<number>(), 0);
+			cleanClausesToCheck();
 		}
 	}
 

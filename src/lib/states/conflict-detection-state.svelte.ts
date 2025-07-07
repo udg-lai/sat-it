@@ -20,6 +20,12 @@ export function updateClausesToCheck(stateMachineSet: SvelteSet<number>, literal
 	inspectedLiteral = literal;
 }
 
+export const cleanClausesToCheck = () => {
+	clausesToCheck = [];
+	checkingIndex = 0;
+	inspectedLiteral = 0;
+}
+
 export const getInspectedVariable = () => Math.abs(inspectedLiteral);
 
 export const getClausesToCheck = () => clausesToCheck;
