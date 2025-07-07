@@ -31,7 +31,7 @@ class Clause implements Comparable<Clause> {
 	static buildFrom(claim: Claim, variables: VariablePool): Clause {
 		const literals: Literal[] = claim.literals.map((lit) => Literal.buildFrom(lit, variables));
 		const comments = claim.comments;
-		const tag = claim.id;
+		const tag: number | undefined = claim.id;
 		return new Clause(literals, {
 			comments,
 			tag,
