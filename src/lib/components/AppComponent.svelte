@@ -63,9 +63,8 @@
 		updateSolverMachine(activeState, record);
 		const snapshotSize = snapshot.length;
 		if (snapshotSize <= 0) {
-			logFatal('Reloading snapshot', 'Unexpected empty array of trails')
-		}
-		else {
+			logFatal('Reloading snapshot', 'Unexpected empty array of trails');
+		} else {
 			const latest: Trail = snapshot[snapshotSize - 1];
 			updateProblemFromTrail(latest);
 		}

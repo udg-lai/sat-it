@@ -20,7 +20,7 @@
 	--decision-color: var(--unassigned-color);
 	--clause-color: var(--unassigned-color);
 	--unsatisfied-color: #d12771;
-	--shaded-unsatisfied-color: #d127711c;
+	--unsatisfied-color-o: #d127711c;
 	--satisfied-color: #24a148;
 	--satisfied-color-o: #24a14811;
 	--shaded-satisfied-color: #24a1481c;

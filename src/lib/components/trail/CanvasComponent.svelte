@@ -17,7 +17,6 @@
 		align: 'end' | 'start';
 		reverse?: boolean;
 		repeat?: boolean;
-		displayBackground?: boolean;
 	}
 
 	let {
@@ -26,7 +25,6 @@
 		align,
 		reverse = false,
 		repeat = true,
-		displayBackground = false
 	}: Props = $props();
 
 	let canvasContainer: HTMLDivElement;
@@ -39,23 +37,20 @@
 		}
 	}
 
-
 	$effect(() => {
 		if (context) scrollToBottom(); // Scroll to bottom when context changes
-	})
-
-
+	});
 </script>
 
 <trail-canvas class="canvas" bind:this={canvasContainer} style="--width: {width}px">
 	<div class="canvas-sheet" style="--align: {align}">
-		{#each context as ctx}
+		{#each context as ctx, index (index)}
 			{#if isLeft(ctx)}
 				<PlainClauseComponent
 					{reverse}
 					clause={unwrapEither(ctx).clause}
 					hide={repeat ? [] : [unwrapEither(ctx).literal]}
-					{displayBackground}
+					state={!repeat ? 'satisfied' : index === context.length -1 ? 'unsatisfied' : undefined}
 				/>
 			{:else}
 				<div class="empty-slot"></div>
@@ -88,5 +83,9 @@
 		align-items: var(--align);
 		min-height: 100%;
 		color: var(--unsatisfied-color);
+	}
+
+	.conflictive-clause {
+		color: var(--conflictive-color);
 	}
 </style>

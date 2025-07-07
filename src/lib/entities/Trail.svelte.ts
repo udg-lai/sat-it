@@ -338,12 +338,15 @@ export class Trail {
 
 	private _makeConflictAnalysisCtxTail(): Either<ConflictAnalysisContext, undefined> {
 		if (this.getConflictiveClause() === undefined) {
-			logFatal('Trail', 'Can not generate conflict analysis context when there is no conflictive declared');
+			logFatal(
+				'Trail',
+				'Can not generate conflict analysis context when there is no conflictive declared'
+			);
 		}
 		return makeLeft({
 			clause: this.getConflictiveClause() as Clause,
 			literal: 0
-		})
+		});
 	}
 
 	private _computeHeight(): number {
