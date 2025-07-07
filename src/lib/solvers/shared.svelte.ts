@@ -37,7 +37,7 @@ export const allAssigned = (pool: VariablePool): boolean => {
 };
 
 export const decide = (pool: VariablePool, algorithm: string): number => {
-	const trail: Trail = obtainTrail(pool);
+	const trail: Trail = obtainTrail();
 	const assignmentEvent: AssignmentEvent = getAssignment();
 	let manualAssignment: boolean = false;
 
@@ -69,8 +69,6 @@ export const decide = (pool: VariablePool, algorithm: string): number => {
 
 	increaseNoDecisions();
 
-	 // stackTrail(trail);
-
 	return assignmentEvent.polarity ? variableId : -variableId;
 };
 
@@ -86,7 +84,7 @@ export const unitPropagation = (
 	clauseTag: number,
 	assignmentReason: 'up' | 'backjumping'
 ): number => {
-	const trail: Trail = obtainTrail(variables);
+	const trail: Trail = obtainTrail();
 	const clause: Clause = clauses.get(clauseTag);
 	const literalToPropagate: number = clause.findUnassignedLiteral();
 
@@ -108,13 +106,12 @@ export const unitPropagation = (
 	}
 
 	increaseNoUnitPropagations();
-	// stackTrail(trail);
+
 	return literalToPropagate;
 };
 
-const obtainTrail = (variables: VariablePool): Trail => {
-	const trail: Trail = getLatestTrail() ?? new Trail(variables.size());
-	// unstackTrail();
+const obtainTrail = (): Trail => {
+	const trail: Trail = getLatestTrail() ?? new Trail();
 	return trail;
 };
 

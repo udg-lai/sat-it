@@ -21,12 +21,6 @@
 
 	let { trails }: Props = $props();
 
-	$effect(() => console.log(trails))
-
-	setTimeout(() => {
-		console.log(trails.length)
-	}, 1000)
-
 	let editorElement: HTMLDivElement;
 	let trailsLeafElement: HTMLElement;
 	let userInteracting: boolean = $state(false);
@@ -140,20 +134,6 @@
 		trails.at(trailId)?.toggleView();
 	}
 
-	function observeHeight(element: HTMLElement, trail: Trail) {
-		const previewObserver = new ResizeObserver((entries) => {
-			for (const entry of entries) {
-				const height: number = entry.contentRect.height;
-				trail.setHeight(height);
-			}
-		});
-		previewObserver.observe(element);
-		return {
-			destroy() {
-				previewObserver.disconnect();
-			}
-		};
-	}
 
 	function emitUndo(assignment: VariableAssignment, index: number) {
 		algorithmicUndoEventBus.emit({
@@ -228,8 +208,8 @@
 
 		<trails-leaf bind:this={trailsLeafElement}>
 			<editor-trails class="container-padding">
-				{#each trails as trail, index (index)}
-					<div use:observeHeight={trail}>
+				{#each trails as trail, index (index) }
+					<div class="composed-trail-observer">
 						<ComposedTrailComponent
 							{trail}
 							expanded={expandedTrails}
@@ -246,16 +226,16 @@
 
 		<editor-info class="container-padding direction">
 			{#each trails as trail, index (index)}
-				<div class="item" style="height: {trail.getHeight()}px;">
+				<div class="item {makeStatusBtnStyle(index, trail)}" style="--height: {trail.getHeight()}px;">
 					<StatusIndicator
 						ofLastTrail={trails.length === index + 1}
-						btnClassStyle={makeStatusBtnStyle(index, trail)}
 						iconClassStyle={makeStatusIconStyle(trail)}
 						trailState={trail.getState()}
 						expanded={trail.view()}
 						onToggleExpand={() => toggleTrailView(index)}
 					/>
 				</div>
+				{trail.getHeight()}
 			{/each}
 		</editor-info>
 	</editor-leaf>
@@ -311,10 +291,9 @@
 	}
 
 	.item {
-		height: var(--height, var(--trail-height));
+		height: var(--height);
 		width: var(--trail-height);
 		display: flex;
-		align-items: center;
 		justify-content: center;
 	}
 
@@ -326,19 +305,19 @@
 		position: absolute;
 	}
 
-	:global(.opacity) {
+	.opacity {
 		opacity: var(--opacity-50);
 	}
 
-	:global(.top) {
+	.top {
 		align-items: start;
 	}
 
-	:global(.bottom) {
+	.bottom {
 		align-items: end;
 	}
 
-	:global(.center) {
+	.center {
 		align-items: center;
 	}
 
@@ -365,5 +344,9 @@
 	.direction {
 		display: flex;
 		flex-direction: column;
+	}
+
+	.composed-trail-observer {
+		height: fit-content;
 	}
 </style>

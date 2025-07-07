@@ -81,7 +81,7 @@
 
 <style>
 	.status {
-		height: 100%;
+		height: fit-content;
 		width: 100%;
 		display: flex;
 		justify-content: center;
@@ -89,7 +89,7 @@
 
 	.notification {
 		width: 100%;
-		height: 100%;
+		height: var(--trail-height);
 		display: flex;
 		justify-content: center;
 	}

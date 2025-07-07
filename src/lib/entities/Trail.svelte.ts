@@ -1,4 +1,5 @@
 import { getProblemStore } from '$lib/states/problem.svelte.ts';
+import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 import { logFatal } from '$lib/stores/toasts.ts';
 import { makeLeft, makeRight, type Either } from '../types/either.ts';
 import type Clause from './Clause.svelte.ts';
@@ -25,10 +26,12 @@ export class Trail {
 	private conflictAnalysisCtx: Either<ConflictAnalysisContext, undefined>[] = $state([]); // this is just for representing the conflict analysis view
 	private upContext: Either<UPContext, undefined>[] = $derived.by(() => this._upContext());
 	private fullView: boolean = $state(true); // UI state for knowing whenever for that trail it was required to show more information
-	private trailHeight: number = $state(0); // trail height in px
 	private learntClause: Clause | undefined = $state(undefined);
 	private conflictiveClause: Clause | undefined = $state(undefined);
 	private state: TrailState = $state('running');
+	private trailHeight: number = $derived.by(() => this._computeHeight());
+	private readonly defaultTrailHeight: number = 56;
+	private readonly canvasHeight: number = 126;
 
 	copy(): Trail {
 		const newTrail = new Trail();
@@ -341,5 +344,23 @@ export class Trail {
 			clause: this.getConflictiveClause() as Clause,
 			literal: 0
 		})
+	}
+
+	private _computeHeight(): number {
+		let height = this.defaultTrailHeight;
+		if (this.fullView) {
+			const solver = getSolverMachine();
+			if (solver.identify() === 'bkt') {
+				if (this.conflictiveClause !== undefined) {
+					height += this.canvasHeight; // Extra height for conflictive clause
+				}
+			} else {
+				height += this.canvasHeight; // Extra height for ups
+				if (this.hasConflictiveClause()) {
+					height += this.canvasHeight; // Extra height for conflictive clause and conflict analysis
+				}
+			}
+		}
+		return height;
 	}
 }
