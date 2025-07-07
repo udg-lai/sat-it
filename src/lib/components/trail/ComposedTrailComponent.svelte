@@ -72,7 +72,6 @@
 			align={'end'}
 			reverse={true}
 			repeat={false}
-			displayBackground={true}
 		/>
 	{/if}
 	<div use:observeWidth class="fit-content width-observer">
