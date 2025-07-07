@@ -15,7 +15,10 @@ import {
 	decide as solverDecide
 } from '$lib/solvers/shared.svelte.ts';
 import type { DPLL_SolverMachine } from './dpll-solver-machine.svelte.ts';
-import { cleanClausesToCheck, updateClausesToCheck } from '$lib/states/conflict-detection-state.svelte.ts';
+import {
+	cleanClausesToCheck,
+	updateClausesToCheck
+} from '$lib/states/conflict-detection-state.svelte.ts';
 import { logFatal } from '$lib/stores/toasts.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import type { VariablePool } from '$lib/entities/VariablePool.svelte.ts';

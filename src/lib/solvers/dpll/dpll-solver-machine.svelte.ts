@@ -1,5 +1,8 @@
 import { Queue } from '$lib/entities/Queue.svelte.ts';
-import { cleanClausesToCheck, updateClausesToCheck } from '$lib/states/conflict-detection-state.svelte.ts';
+import {
+	cleanClausesToCheck,
+	updateClausesToCheck
+} from '$lib/states/conflict-detection-state.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import { SolverMachine } from '../SolverMachine.svelte.ts';
 import type { OccurrenceList } from '../types.ts';

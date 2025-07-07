@@ -1,4 +1,7 @@
-import { cleanClausesToCheck, updateClausesToCheck } from '$lib/states/conflict-detection-state.svelte.ts';
+import {
+	cleanClausesToCheck,
+	updateClausesToCheck
+} from '$lib/states/conflict-detection-state.svelte.ts';
 import { getProblemStore, type MappingLiteral2Clauses } from '$lib/states/problem.svelte.ts';
 import { logFatal } from '$lib/stores/toasts.ts';
 import {
