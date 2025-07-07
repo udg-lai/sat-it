@@ -7,10 +7,10 @@
 		clause: Clause;
 		reverse?: boolean;
 		hide?: number[];
-		displayBackground?: boolean;
+		state?: 'unsatisfied' | 'satisfied';
 	}
 
-	let { clause, reverse = false, hide = [], displayBackground = false }: Props = $props();
+	let { clause, reverse = false, hide = [], state }: Props = $props();
 
 	const hideSet = new Set(hide);
 
@@ -21,7 +21,10 @@
 	});
 </script>
 
-<clause class:display-background={displayBackground}>
+<clause
+	class:satisfied-background={state === 'satisfied'}
+	class:unsatisfied-background={state === 'unsatisfied'}
+>
 	{#each literals as lit, i (i)}
 		<PlainLiteralComponent literal={lit} />
 	{/each}
@@ -37,7 +40,11 @@
 		min-width: var(--empty-slot);
 	}
 
-	.display-background {
+	.satisfied-background {
 		background-color: var(--satisfied-color-o);
+	}
+
+	.unsatisfied-background {
+		background-color: var(--unsatisfied-color-o);
 	}
 </style>

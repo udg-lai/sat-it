@@ -72,15 +72,12 @@
 			align={'end'}
 			reverse={true}
 			repeat={false}
-			displayBackground={true}
 		/>
 	{/if}
-	<div
-		use:observeWidth
-		class="fit-content width-observer"
-		class:views-opened={showCAView || showUPView}
-	>
-		<TrailComponent {trail} {expanded} {isLast} {emitUndo} />
+	<div use:observeWidth class="fit-content width-observer">
+		<div class:views-opened={showCAView || showUPView}>
+			<TrailComponent {trail} {expanded} {isLast} {emitUndo} />
+		</div>
 		<div class="empty-slot"></div>
 	</div>
 	{#if showCAView}

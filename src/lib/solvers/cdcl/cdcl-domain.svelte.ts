@@ -1,13 +1,3 @@
-import {
-	clauseEvaluation,
-	allAssigned as solverAllAssigned,
-	complementaryOccurrences as solverComplementaryOccurrences,
-	decide as solverDecide,
-	emptyClauseDetection as solverEmptyClauseDetection,
-	nonDecisionMade as solverNonDecisionMade,
-	unitClauseDetection as solverUnitClauseDetection,
-	unitPropagation as solverUnitPropagation
-} from '$lib/solvers/shared.svelte.ts';
 import Clause, {
 	isUnitClause,
 	isUnSATClause,
@@ -18,6 +8,16 @@ import type { Trail } from '$lib/entities/Trail.svelte.ts';
 import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
 import { isPropagationReason, type Reason } from '$lib/entities/VariableAssignment.ts';
 import type { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
+import {
+	clauseEvaluation,
+	allAssigned as solverAllAssigned,
+	complementaryOccurrences as solverComplementaryOccurrences,
+	decide as solverDecide,
+	emptyClauseDetection as solverEmptyClauseDetection,
+	nonDecisionMade as solverNonDecisionMade,
+	unitClauseDetection as solverUnitClauseDetection,
+	unitPropagation as solverUnitPropagation
+} from '$lib/solvers/shared.svelte.ts';
 import { updateClausesToCheck } from '$lib/states/conflict-detection-state.svelte.ts';
 import {
 	addClauseToClausePool,
@@ -26,12 +26,11 @@ import {
 	type MappingLiteral2Clauses,
 	type Problem
 } from '$lib/states/problem.svelte.ts';
-import { getLatestTrail, getTrails, stackTrail } from '$lib/states/trails.svelte.ts';
+import { getLatestTrail, stackTrail } from '$lib/states/trails.svelte.ts';
 import { logFatal, logInfo } from '$lib/stores/toasts.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import type { OccurrenceList } from '../types.ts';
 import type { CDCL_SolverMachine } from './cdcl-solver-machine.svelte.ts';
-import { unwrapEither, type Either } from '$lib/types/either.ts';
 
 const problem: Problem = $derived(getProblemStore());
 
