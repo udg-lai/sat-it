@@ -17,19 +17,27 @@
 	import { onMount } from 'svelte';
 	import ProblemSummaryComponent from './ProblemSummaryComponent.svelte';
 
+	let activeInstance: InteractiveInstance | undefined = $state(undefined);
 	let previewingInstance: InteractiveInstance | undefined = $state(undefined);
 	let openModal: boolean = $state(false);
 	let instanceClicked: string = $state('');
+	let activeInstanceName: string = $derived.by(() => {
+		if (activeInstance === undefined) return '';
+		else return activeInstance.name;
+	});
 
 	onMount(() => {
-		const unsubscribe = instanceStore.subscribe(() => (previewingInstance = getActiveInstance()));
+		const unsubscribe = instanceStore.subscribe(() => {
+			previewingInstance = getActiveInstance();
+			activeInstance = getActiveInstance();
+		});
 		return () => {
 			unsubscribe();
 		};
 	});
 
 	function onClick(instanceName: string) {
-		if (instanceClicked === instanceName) return;
+		if (activeInstanceName === instanceName) return;
 		openModal = true;
 		instanceClicked = instanceName;
 	}
