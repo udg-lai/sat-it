@@ -36,7 +36,7 @@
 				}}>Yes, I'm sure</button
 			>
 			<button
-				class="btn"
+				class="btn btn-modal"
 				onclick={() => {
 					resetModal = false;
 				}}>No, cancel</button
@@ -44,3 +44,13 @@
 		</div>
 	</Modal>
 </button>
+
+<style>
+	.btn-modal {
+		border: solid;
+		border-width: 1px;
+		border-radius: 0.5rem;
+		border-color: var(--border-color);
+		padding: 0.75rem;
+	}
+</style>
