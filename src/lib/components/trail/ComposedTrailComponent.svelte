@@ -110,7 +110,7 @@
 
 	.empty-slot {
 		width: var(--empty-slot);
-		background-color: red;
+		background-color: transparent;
 		height: auto;
 	}
 </style>

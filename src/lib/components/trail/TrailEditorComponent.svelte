@@ -126,14 +126,21 @@
 			// If the trail is running or is a model, we do not allow toggling the view
 			return;
 		}
-		for (let i = 0; i < trails.length - 1; i++) {
+
+		const limit = Math.abs(trails.length - 1);
+
+		if (trailId >= limit) {
+			return;
+		}
+
+		for (let i = 0; i < limit; i++) {
 			if (trailId != i) {
 				trails.at(i)?.setView(false);
 			}
 		}
+
 		trails.at(trailId)?.toggleView();
 	}
-
 
 	function emitUndo(assignment: VariableAssignment, index: number) {
 		algorithmicUndoEventBus.emit({
@@ -142,7 +149,7 @@
 		});
 	}
 
-	function makeStatusBtnStyle(index: number, trail: Trail): string {
+	function alignItem(index: number, trail: Trail): string {
 		let classStyle = '';
 		if (index + 1 < trails.length) {
 			classStyle += 'opacity';
@@ -154,7 +161,6 @@
 		} else if (trail.hasConflictiveClause()) {
 			classStyle += ' top';
 		}
-
 		return classStyle;
 	}
 
@@ -169,7 +175,7 @@
 				classStyle = 'icon-center';
 			}
 		} else {
-				classStyle = 'icon-center';
+			classStyle = 'icon-center';
 		}
 		return classStyle;
 	}
@@ -200,7 +206,7 @@
 	class:grabbing
 >
 	<editor-leaf use:listenContentHeight>
-		<editor-indexes class="enumerate container-padding direction">
+		<editor-indexes class="direction container-padding">
 			{#each trails as trail, index (index)}
 				{@render enumerateSnippet(trail, index)}
 			{/each}
@@ -208,7 +214,7 @@
 
 		<trails-leaf bind:this={trailsLeafElement}>
 			<editor-trails class="container-padding">
-				{#each trails as trail, index (index) }
+				{#each trails as trail, index (index)}
 					<div class="composed-trail-observer">
 						<ComposedTrailComponent
 							{trail}
@@ -226,7 +232,7 @@
 
 		<editor-info class="container-padding direction">
 			{#each trails as trail, index (index)}
-				<div class="item {makeStatusBtnStyle(index, trail)}" style="--height: {trail.getHeight()}px;">
+				<div class="item {alignItem(index, trail)}" style="--height: {trail.getHeight()}px;">
 					<StatusIndicator
 						ofLastTrail={trails.length === index + 1}
 						iconClassStyle={makeStatusIconStyle(trail)}
@@ -241,7 +247,7 @@
 </trail-editor>
 
 {#snippet enumerateSnippet(trail: Trail, index: number)}
-	<div class="item" style="--height: {trail.getHeight()}px;">
+	<div class="item {alignItem(index, trail)}" style="--height: {trail.getHeight()}px;">
 		<div class="enumerate">
 			<span class:opacity={index + 1 < trails.length}>{index + 1}.</span>
 		</div>
@@ -297,11 +303,16 @@
 	}
 
 	.enumerate {
-		position: relative;
+		min-height: var(--trail-height);
+		width: 100%;
+		align-items: center;
+		justify-content: center;
+		display: flex;
 	}
 
 	.enumerate span {
 		position: absolute;
+		margin-top: var(--trail-gap);
 	}
 
 	.opacity {
@@ -320,23 +331,19 @@
 		align-items: center;
 	}
 
-
 	:global(.icon-top) {
 		margin-top: 0.6rem;
 	}
 
-
 	:global(.icon-center) {
 		margin-top: 0.6rem;
 	}
-
 
 	:global(.icon-bottom) {
 		margin-bottom: 0.6rem;
 	}
 
 	.container-padding {
-		padding: 1rem 0rem;
 		gap: 1rem;
 	}
 

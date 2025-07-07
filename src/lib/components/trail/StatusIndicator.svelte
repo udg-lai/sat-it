@@ -23,7 +23,6 @@
 		onToggleExpand,
 		expanded,
 		btnClassStyle = '',
-		iconClassStyle = '',
 		ofLastTrail = false
 	}: Props = $props();
 
@@ -118,7 +117,7 @@
 	}
 
 	.dynamic-render {
-		margin-top: 0.5rem;
+		margin-top: var(--trail-gap);
 	}
 
 	@keyframes rotate-once {
