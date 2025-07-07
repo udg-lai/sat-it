@@ -78,6 +78,7 @@
 		padding-left: calc(var(--windows-padding) + 15px);
 		padding-right: calc(var(--windows-padding) + 27px);
 		border-bottom: 1px solid var(--border-color);
+		gap: 0.5rem;
 	}
 	algorithm-buttons {
 		display: flex;
