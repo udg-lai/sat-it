@@ -22,14 +22,14 @@
 	let openModal: boolean = $state(false);
 	let instanceClicked: string = $state('');
 	let activeInstanceName: string = $derived.by(() => {
-		if(activeInstance === undefined) return '';
+		if (activeInstance === undefined) return '';
 		else return activeInstance.name;
 	});
 
 	onMount(() => {
 		const unsubscribe = instanceStore.subscribe(() => {
-			previewingInstance = getActiveInstance(); 
-			activeInstance = getActiveInstance()
+			previewingInstance = getActiveInstance();
+			activeInstance = getActiveInstance();
 		});
 		return () => {
 			unsubscribe();
