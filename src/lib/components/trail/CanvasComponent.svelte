@@ -39,12 +39,9 @@
 		}
 	}
 
-
 	$effect(() => {
 		if (context) scrollToBottom(); // Scroll to bottom when context changes
-	})
-
-
+	});
 </script>
 
 <trail-canvas class="canvas" bind:this={canvasContainer} style="--width: {width}px">

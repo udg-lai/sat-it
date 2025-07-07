@@ -75,7 +75,11 @@
 			displayBackground={true}
 		/>
 	{/if}
-	<div use:observeWidth class="fit-content width-observer" class:views-opened={showCAView || showUPView}>
+	<div
+		use:observeWidth
+		class="fit-content width-observer"
+		class:views-opened={showCAView || showUPView}
+	>
 		<TrailComponent {trail} {expanded} {isLast} {emitUndo} />
 		<div class="empty-slot"></div>
 	</div>
