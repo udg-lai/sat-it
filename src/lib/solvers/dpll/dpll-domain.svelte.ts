@@ -143,16 +143,16 @@ export const unitClauseDetection: DPLL_UNIT_CLAUSES_DETECTION_FUN = () => {
 	return solverUnitClauseDetection(pool);
 };
 
-export type DPLL_DELETE_CLAUSE_FUN = (clauses: SvelteSet<number>, clauseId: number) => void;
+export type DPLL_DELETE_CLAUSE_FUN = (clauses: SvelteSet<number>, clauseTag: number) => void;
 
 export const deleteClause: DPLL_DELETE_CLAUSE_FUN = (
 	clauses: SvelteSet<number>,
-	clauseId: number
+	clauseTag: number
 ) => {
-	if (!clauses.has(clauseId)) {
-		logFatal('Clause not found', `Clause - ${clauseId} not found`);
+	if (!clauses.has(clauseTag)) {
+		logFatal('Clause not found', `Clause - ${clauseTag} not found`);
 	}
-	clauses.delete(clauseId);
+	clauses.delete(clauseTag);
 };
 
 export type DPLL_PICK_CLAUSE_SET_FUN = (
@@ -178,15 +178,15 @@ export const nextClause: DPLL_NEXT_CLAUSE_FUN = (clauses: SvelteSet<number>) => 
 		logFatal('A non empty set was expected');
 	}
 	const clausesIterator = clauses.values().next();
-	const clauseId = clausesIterator.value;
-	return clauseId as number;
+	const clauseTag = clausesIterator.value;
+	return clauseTag as number;
 };
 
-export type DPLL_CONFLICT_DETECTION_FUN = (clauseId: number) => boolean;
+export type DPLL_CONFLICT_DETECTION_FUN = (clauseTag: number) => boolean;
 
-export const unsatisfiedClause: DPLL_CONFLICT_DETECTION_FUN = (clauseId: number) => {
+export const unsatisfiedClause: DPLL_CONFLICT_DETECTION_FUN = (clauseTag: number) => {
 	const pool: ClausePool = problem.clauses;
-	const evaluation: ClauseEval = clauseEvaluation(pool, clauseId);
+	const evaluation: ClauseEval = clauseEvaluation(pool, clauseTag);
 	return isUnSATClause(evaluation);
 };
 
@@ -200,20 +200,20 @@ export const thereAreJobPostponed: DPLL_CHECK_PENDING_OCCURRENCE_LISTS_FUN = (
 	return solverStateMachine.thereArePostponed();
 };
 
-export type DPLL_UNIT_CLAUSE_FUN = (clauseId: number) => boolean;
+export type DPLL_UNIT_CLAUSE_FUN = (clauseTag: number) => boolean;
 
-export const unitClause: DPLL_UNIT_CLAUSE_FUN = (clauseId: number) => {
+export const unitClause: DPLL_UNIT_CLAUSE_FUN = (clauseTag: number) => {
 	const pool: ClausePool = problem.clauses;
-	const evaluation: ClauseEval = clauseEvaluation(pool, clauseId);
+	const evaluation: ClauseEval = clauseEvaluation(pool, clauseTag);
 	return isUnitClause(evaluation);
 };
 
-export type DPLL_UNIT_PROPAGATION_FUN = (clauseId: number) => number;
+export type DPLL_UNIT_PROPAGATION_FUN = (clauseTag: number) => number;
 
-export const unitPropagation: DPLL_UNIT_PROPAGATION_FUN = (clauseId: number) => {
+export const unitPropagation: DPLL_UNIT_PROPAGATION_FUN = (clauseTag: number) => {
 	const variables: VariablePool = problem.variables;
 	const clauses: ClausePool = problem.clauses;
-	return solverUnitPropagation(variables, clauses, clauseId, 'up');
+	return solverUnitPropagation(variables, clauses, clauseTag, 'up');
 };
 
 export type DPLL_COMPLEMENTARY_OCCURRENCES_FUN = (literal: number) => SvelteSet<number>;

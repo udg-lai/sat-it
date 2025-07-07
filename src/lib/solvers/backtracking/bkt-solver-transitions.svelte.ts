@@ -57,9 +57,10 @@ export const preConflictDetection = (solver: BKT_SolverMachine): void => {
 
 export const analyzeClause = (solver: BKT_SolverMachine): void => {
 	const stateMachine: BKT_StateMachine = solver.getStateMachine();
-	const { clauses: pendingClauses }: OccurrenceList = solver.consultOccurrenceList();
-	const clauseId: number = getCheckedClause();
-	deleteClauseTransition(stateMachine, pendingClauses, clauseId);
+	const pendingOccurrenceList: OccurrenceList = solver.consultOccurrenceList();
+	const pendingClauses: SvelteSet<number> = pendingOccurrenceList.clauses;
+	const clauseTag: number = getCheckedClause();
+	deleteClauseTransition(stateMachine, pendingClauses, clauseTag);
 	conflictDetectionBlock(stateMachine, pendingClauses);
 };
 
@@ -103,10 +104,10 @@ const conflictDetectionBlock = (
 		allVariablesAssignedTransition(stateMachine);
 		return;
 	}
-	const clauseId: number = nextClauseTransition(stateMachine, pendingClauses);
-	const conflict: boolean = conflictDetectionTransition(stateMachine, clauseId);
+	const clauseTag: number = nextClauseTransition(stateMachine, pendingClauses);
+	const conflict: boolean = conflictDetectionTransition(stateMachine, clauseTag);
 	if (conflict) {
-		updateLastTrailEnding(clauseId);
+		updateLastTrailEnding(clauseTag);
 		return;
 	}
 };
@@ -157,12 +158,15 @@ const nextClauseTransition = (
 	if (nextClauseState.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Next Clause state');
 	}
-	const clauseId: number = nextClauseState.run(pendingSet);
+	const clauseTag: number = nextClauseState.run(pendingSet);
 	stateMachine.transition('conflict_detection_state');
-	return clauseId;
+	return clauseTag;
 };
 
-const conflictDetectionTransition = (stateMachine: BKT_StateMachine, clauseId: number): boolean => {
+const conflictDetectionTransition = (
+	stateMachine: BKT_StateMachine,
+	clauseTag: number
+): boolean => {
 	const conflictDetectionState = stateMachine.getActiveState() as NonFinalState<
 		BKT_CONFLICT_DETECTION_FUN,
 		BKT_CONFLICT_DETECTION_INPUT
@@ -170,7 +174,7 @@ const conflictDetectionTransition = (stateMachine: BKT_StateMachine, clauseId: n
 	if (conflictDetectionState.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Conflict Detection state');
 	}
-	const result: boolean = conflictDetectionState.run(clauseId);
+	const result: boolean = conflictDetectionState.run(clauseTag);
 	if (result) stateMachine.transition('empty_pending_occurrence_list_state');
 	else stateMachine.transition('delete_clause_state');
 	return result;
@@ -208,7 +212,7 @@ const decisionLevelTransition = (stateMachine: BKT_StateMachine): boolean => {
 const deleteClauseTransition = (
 	stateMachine: BKT_StateMachine,
 	pendingSet: SvelteSet<number>,
-	clauseId: number
+	clauseTag: number
 ): void => {
 	const deleteClauseState = stateMachine.getActiveState() as NonFinalState<
 		BKT_DELETE_CLAUSE_FUN,
@@ -217,7 +221,7 @@ const deleteClauseTransition = (
 	if (deleteClauseState.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Delete Clause state');
 	}
-	deleteClauseState.run(pendingSet, clauseId);
+	deleteClauseState.run(pendingSet, clauseTag);
 	stateMachine.transition('all_clauses_checked_state');
 	incrementCheckingIndex();
 };

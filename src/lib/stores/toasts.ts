@@ -100,7 +100,6 @@ export const logSAT = (description: string): void => {
 };
 
 export const logUnSAT = (description: string): void => {
-	console.warn('UNSAT:', description);
 	addToast({
 		type: 'unsat',
 		title: 'UNSAT',

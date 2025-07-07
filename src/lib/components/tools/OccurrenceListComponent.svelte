@@ -119,7 +119,7 @@
 	}
 
 	.inspectedFalse {
-		background-color: var(--shaded-unsatisfied-color);
+		background-color: var(--unsatisfied-color-o);
 	}
 
 	.visited-clause {

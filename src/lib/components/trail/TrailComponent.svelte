@@ -16,11 +16,10 @@
 		trail: Trail;
 		expanded: boolean;
 		isLast?: boolean;
-		emitUndo?: () => void;
-		emitAlgorithmicUndo: (objectiveAssignment: VariableAssignment) => void;
+		emitUndo?: (assignment: VariableAssignment) => void;
 	}
 
-	let { trail, expanded, isLast = true, emitAlgorithmicUndo }: Props = $props();
+	let { trail, expanded, isLast = true, emitUndo = () => {} }: Props = $props();
 
 	let initialPropagations: VariableAssignment[] = $derived(trail.getInitialPropagations());
 
@@ -77,12 +76,12 @@
 	{#each decisions as { level, assignment } (level)}
 		<DecisionLevelComponent
 			decision={assignment}
-			propagations={trail.getPropagations(level)}
+			propagations={trail.getPropagationsAt(level)}
 			{expanded}
 			{isLast}
 			{trail}
 			emitAlgorithmicUndo={() => {
-				emitAlgorithmicUndo(assignment);
+				emitUndo(assignment);
 			}}
 		/>
 	{/each}
@@ -93,7 +92,7 @@
 		min-height: var(--trail-height);
 		display: flex;
 		flex-direction: row;
-		align-items: start;
+		align-items: end;
 		width: fit-content;
 	}
 </style>

@@ -121,28 +121,28 @@ export const nextClause: BKT_NEXT_CLAUSE_FUN = (pendingSet: SvelteSet<number>) =
 		logFatal('A non empty set was expected');
 	}
 	const clausesIterator = pendingSet.values().next();
-	const clauseId = clausesIterator.value;
-	return clauseId as number;
+	const clauseTag = clausesIterator.value;
+	return clauseTag as number;
 };
 
-export type BKT_CONFLICT_DETECTION_FUN = (clauseId: number) => boolean;
+export type BKT_CONFLICT_DETECTION_FUN = (clauseTag: number) => boolean;
 
-export const unsatisfiedClause: BKT_CONFLICT_DETECTION_FUN = (clauseId: number) => {
+export const unsatisfiedClause: BKT_CONFLICT_DETECTION_FUN = (clauseTag: number) => {
 	const pool: ClausePool = getProblemStore().clauses;
-	const evaluation: ClauseEval = solverClauseEvaluation(pool, clauseId);
+	const evaluation: ClauseEval = solverClauseEvaluation(pool, clauseTag);
 	return isUnSATClause(evaluation);
 };
 
-export type BKT_DELETE_CLAUSE_FUN = (pending: SvelteSet<number>, clauseId: number) => void;
+export type BKT_DELETE_CLAUSE_FUN = (pending: SvelteSet<number>, clauseTag: number) => void;
 
 export const deleteClause: BKT_DELETE_CLAUSE_FUN = (
 	pending: SvelteSet<number>,
-	clauseId: number
+	clauseTag: number
 ) => {
-	if (!pending.has(clauseId)) {
-		logFatal('Clause not found', `Clause - ${clauseId} not found`);
+	if (!pending.has(clauseTag)) {
+		logFatal('Clause not found', `Clause - ${clauseTag} not found`);
 	}
-	pending.delete(clauseId);
+	pending.delete(clauseTag);
 };
 
 export type BKT_EMPTY_PENDING_OCCURRENCE_LIST_FUN = (solverStateMachine: BKT_SolverMachine) => void;

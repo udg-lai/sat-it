@@ -1,9 +1,23 @@
 import { logFatal } from '$lib/stores/toasts.ts';
 import { SvelteMap, SvelteSet } from 'svelte/reactivity';
-import type { AssignmentEval, IClausePool } from '../interfaces/IClausePool.ts';
+import {
+	makeSat,
+	makeUnresolved,
+	makeUnSAT,
+	type AssignmentEval
+} from '../interfaces/IClausePool.ts';
 import type { Claim } from '../parsers/dimacs.ts';
 import Clause, { type ClauseEval, isSatClause, isUnSATClause } from './Clause.svelte.ts';
 import type { VariablePool } from './VariablePool.svelte.ts';
+
+export interface IClausePool {
+	eval(): AssignmentEval;
+	addClause(clause: Clause): void;
+	get(clause: number): Clause;
+	getUnitClauses(): SvelteSet<number>;
+	getClauses(): Clause[];
+	size(): number;
+}
 
 class ClausePool implements IClausePool {
 	private clauses: SvelteMap<number, Clause> = new SvelteMap();
@@ -23,16 +37,15 @@ class ClausePool implements IClausePool {
 	}
 
 	eval(): AssignmentEval {
-		let unsat = false;
 		let nSatisfied = 0;
 		let i = 0;
 		let conflict: Clause | undefined = undefined;
 		const clauses: Clause[] = [...this.clauses.values()];
-		while (i < clauses.length && !unsat) {
+		while (i < clauses.length && conflict === undefined) {
 			const clause: Clause = clauses[i];
 			const evaluation: ClauseEval = clause.eval();
-			unsat = isUnSATClause(evaluation);
-			if (!unsat) {
+			const unSAT = isUnSATClause(evaluation);
+			if (!unSAT) {
 				const sat = isSatClause(evaluation);
 				if (sat) nSatisfied++;
 				i++;
@@ -41,15 +54,12 @@ class ClausePool implements IClausePool {
 			}
 		}
 		let state: AssignmentEval;
-		if (unsat) {
-			state = {
-				type: 'UnSAT',
-				conflictClause: conflict?.getTag() as number
-			};
+		if (conflict !== undefined) {
+			state = makeUnSAT(conflict.getTag() as number); // all clauses in variable pool has its own tag
 		} else if (nSatisfied === i) {
-			state = { type: 'SAT' };
+			state = makeSat();
 		} else {
-			state = { type: 'UNRESOLVED' };
+			state = makeUnresolved();
 		}
 		return state;
 	}
@@ -107,11 +117,11 @@ class ClausePool implements IClausePool {
 	}
 
 	private _addClause(clause: Clause): void {
-		const id = this.clauses.size;
-		clause.setTag(id);
-		this.clauses.set(id, clause);
-		if (clause.wasLearnt()) {
-			this.learnt.add(id);
+		const tag: number = this.clauses.size;
+		clause.setTag(tag);
+		this.clauses.set(tag, clause);
+		if (clause.learnt()) {
+			this.learnt.add(tag);
 		}
 	}
 

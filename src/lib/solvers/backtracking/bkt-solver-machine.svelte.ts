@@ -38,7 +38,7 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 		this.occurrenceList = conflict;
 	}
 
-	visitClause(clauseId: number): void {
+	visitClause(clauseTag: number): void {
 		if (this.occurrenceList === undefined) {
 			logFatal(
 				'Conflict analysis not initialized',
@@ -48,10 +48,10 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 
 		const { clauses }: OccurrenceList = this.occurrenceList;
 
-		if (!clauses.has(clauseId)) {
+		if (!clauses.has(clauseTag)) {
 			logFatal('Clause not found', 'Error at removing a clause from the BKT Solver Machine');
 		} else {
-			clauses.delete(clauseId);
+			clauses.delete(clauseTag);
 		}
 	}
 

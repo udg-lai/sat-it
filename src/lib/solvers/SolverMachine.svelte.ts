@@ -34,7 +34,7 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 	protected stateMachine!: StateMachine<F, I>;
 	private runningOnAuto: boolean = $state(false);
 	private forcedStop: boolean = $state(false);
-	private solverId!: KnownSolver;
+	private solverId: KnownSolver = $state('bkt');
 
 	constructor(stateMachine: StateMachine<F, I>, solverId: KnownSolver) {
 		this.stateMachine = stateMachine;
@@ -77,6 +77,10 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 
 	onUnsatState(): boolean {
 		return this.stateMachine.onUnsatState();
+	}
+
+	onSatSate(): boolean {
+		return this.stateMachine.onSatState();
 	}
 
 	onFinalState(): boolean {

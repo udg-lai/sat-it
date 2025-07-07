@@ -143,7 +143,7 @@
 
 	.comment {
 		color: rgb(107 114 128 / var(--tw-text-opacity, 1));
-		background-color: #f6f8fa;
+		background-color: var(--lighter-bg-color);
 		font-family: monospace;
 		font-style: italic;
 		display: block;
