@@ -125,9 +125,7 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 		if (!this.assertPreAuto()) {
 			return;
 		}
-		stateMachineLifeCycleEventBus.emit('begin-step-by-step');
-		this.setFlagsPreAuto();
-		this.notifyRunningOnAuto();
+		this._preStepByStep();
 		const times: number[] = [];
 		while (continueCond() && !this.forcedStop) {
 			this.step();
@@ -135,6 +133,16 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 			await new Promise((r) => times.push(setTimeout(r, getStepDelay())));
 		}
 		times.forEach(clearTimeout);
+		this._postStepByStep();
+	}
+
+	private _preStepByStep(): void {
+		this.setFlagsPreAuto();
+		this.notifyRunningOnAuto();
+		stateMachineLifeCycleEventBus.emit('begin-step-by-step');
+	}
+
+	private _postStepByStep(): void {
 		this.setFlagsPostAuto();
 		this.notifyFinishRunningOnAuto();
 		stateMachineLifeCycleEventBus.emit('finish-step-by-step');
