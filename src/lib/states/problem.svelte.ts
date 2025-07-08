@@ -132,3 +132,5 @@ const addClauseToMapping = (clause: Clause, clauseTag: number, mapping: MappingL
 export const getProblemStore = () => problemStore;
 
 export const getClausePool = () => problemStore.clauses;
+
+export const getVariablePool = () => problemStore.variables;

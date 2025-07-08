@@ -4,13 +4,14 @@
 	import MathTexComponent from './MathTexComponent.svelte';
 
 	interface Props {
+		classStyle?: string;
 		clause: Clause;
 	}
 
-	let { clause }: Props = $props();
+	let { clause, classStyle }: Props = $props();
 </script>
 
-<clause>
+<clause class={classStyle ?? ''}>
 	{#each clause as lit, i (i)}
 		<LiteralComponent literal={lit} />
 		{#if i < clause.nLiterals() - 1}
