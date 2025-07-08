@@ -42,9 +42,9 @@ import type {
 import type { DPLL_SolverMachine } from './dpll-solver-machine.svelte.ts';
 import type { DPLL_StateMachine } from './dpll-state-machine.svelte.ts';
 import {
+	cleanClausesToCheck,
 	getCheckedClause,
-	incrementCheckingIndex,
-	updateClausesToCheck
+	incrementCheckingIndex
 } from '$lib/states/conflict-detection-state.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import { conflictDetectionEventBus } from '$lib/events/events.ts';
@@ -57,7 +57,7 @@ export const initialTransition = (solver: DPLL_SolverMachine): void => {
 	ecTransition(stateMachine);
 	if (stateMachine.onFinalState()) return;
 	const complementaryClauses: SvelteSet<number> = ucdTransition(stateMachine);
-	afterComplementaryBlock(solver, stateMachine, -1, complementaryClauses);
+	afterComplementaryBlock(solver, stateMachine, 0, complementaryClauses);
 };
 
 export const preConflictDetection = (solver: DPLL_SolverMachine): void => {
@@ -81,12 +81,12 @@ export const analyzeClause = (solver: DPLL_SolverMachine): void => {
 
 export const decide = (solver: DPLL_SolverMachine): void => {
 	const stateMachine: DPLL_StateMachine = solver.getStateMachine();
-	const literalToPropagate: number = decideTransition(stateMachine);
+	const assignedLiteral: number = decideTransition(stateMachine);
 	const complementaryClauses: SvelteSet<number> = complementaryOccurrencesTransition(
 		stateMachine,
-		literalToPropagate
+		assignedLiteral
 	);
-	afterComplementaryBlock(solver, stateMachine, Math.abs(literalToPropagate), complementaryClauses);
+	afterComplementaryBlock(solver, stateMachine, assignedLiteral, complementaryClauses);
 };
 
 export const conflictiveState = (solver: DPLL_SolverMachine): void => {
@@ -94,12 +94,12 @@ export const conflictiveState = (solver: DPLL_SolverMachine): void => {
 	emptyClauseSetTransition(stateMachine, solver);
 	const firstLevel: boolean = decisionLevelTransition(stateMachine);
 	if (firstLevel) return;
-	const literalToPropagate = backtrackingTransition(stateMachine);
+	const assignedLiteral = backtrackingTransition(stateMachine);
 	const complementaryClauses: SvelteSet<number> = complementaryOccurrencesTransition(
 		stateMachine,
-		literalToPropagate
+		assignedLiteral
 	);
-	afterComplementaryBlock(solver, stateMachine, Math.abs(literalToPropagate), complementaryClauses);
+	afterComplementaryBlock(solver, stateMachine, assignedLiteral, complementaryClauses);
 };
 
 /* General non-exported transitions */
@@ -107,10 +107,10 @@ export const conflictiveState = (solver: DPLL_SolverMachine): void => {
 const afterComplementaryBlock = (
 	solver: DPLL_SolverMachine,
 	stateMachine: DPLL_StateMachine,
-	variable: number,
+	assignedLiteral: number,
 	complementaryClauses: SvelteSet<number>
 ): void => {
-	queueOccurrenceListTransition(stateMachine, solver, variable, complementaryClauses);
+	queueOccurrenceListTransition(stateMachine, solver, -assignedLiteral, complementaryClauses);
 	const pendingClausesSet: boolean = checkPendingOccurrenceListsTransition(stateMachine, solver);
 	if (!pendingClausesSet) {
 		allVariablesAssignedTransition(stateMachine);
@@ -133,7 +133,7 @@ const conflictDetectionBlock = (
 			solver
 		);
 		if (!pendingOccurrenceLists) {
-			updateClausesToCheck(new SvelteSet<number>(), -1);
+			cleanClausesToCheck();
 			allVariablesAssignedTransition(stateMachine);
 			return;
 		}
@@ -148,17 +148,12 @@ const conflictDetectionBlock = (
 	}
 	const unitClause: boolean = unitClauseTransition(stateMachine, clauseTag);
 	if (!unitClause) return;
-	const literalToPropagate: number = unitPropagationTransition(stateMachine, clauseTag);
+	const assignedLiteral: number = unitPropagationTransition(stateMachine, clauseTag);
 	const complementaryClauses: SvelteSet<number> = complementaryOccurrencesTransition(
 		stateMachine,
-		literalToPropagate
+		assignedLiteral
 	);
-	queueOccurrenceListTransition(
-		stateMachine,
-		solver,
-		Math.abs(literalToPropagate),
-		complementaryClauses
-	);
+	queueOccurrenceListTransition(stateMachine, solver, -assignedLiteral, complementaryClauses);
 };
 
 /* Specific Transitions */
@@ -284,7 +279,7 @@ const allClausesCheckedTransition = (
 		DPLL_ALL_CLAUSES_CHECKED_INPUT
 	>;
 	if (allClausesCheckedState.run === undefined) {
-		logFatal('Function call error', 'There should be a function in the All Clausees Checked state');
+		logFatal('Function call error', 'There should be a function in the All Clauses Checked state');
 	}
 	const result: boolean = allClausesCheckedState.run(clauses);
 	if (result) stateMachine.transition('unstack_clause_set_state');

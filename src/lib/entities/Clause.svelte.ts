@@ -111,6 +111,11 @@ class Clause implements Comparable<Clause> {
 		return unit;
 	}
 
+	// This function will check if the clause has 1 literal (not if it is assigned)
+	isSingleLiteralClause(): boolean {
+		return this._literals.length === 1;
+	}
+
 	containsVariable(variableId: number): boolean {
 		const found = this._literals.find((lit) => {
 			const id = lit.toInt();

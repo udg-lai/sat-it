@@ -15,7 +15,10 @@ import {
 	decide as solverDecide
 } from '$lib/solvers/shared.svelte.ts';
 import type { DPLL_SolverMachine } from './dpll-solver-machine.svelte.ts';
-import { updateClausesToCheck } from '$lib/states/conflict-detection-state.svelte.ts';
+import {
+	cleanClausesToCheck,
+	updateClausesToCheck
+} from '$lib/states/conflict-detection-state.svelte.ts';
 import { logFatal } from '$lib/stores/toasts.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import type { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
@@ -110,17 +113,17 @@ export const emptyClauseDetection: DPLL_EMPTY_CLAUSE_FUN = () => {
 };
 
 export type DPLL_QUEUE_OCCURRENCE_LIST_FUN = (
-	variable: number,
+	literal: number,
 	clauses: SvelteSet<number>,
 	solverStateMachine: DPLL_SolverMachine
 ) => number;
 
 export const queueOccurrenceList: DPLL_QUEUE_OCCURRENCE_LIST_FUN = (
-	variable: number,
+	literal: number,
 	clauses: SvelteSet<number>,
 	solverStateMachine: DPLL_SolverMachine
 ) => {
-	const occurrenceList: OccurrenceList = { clauses: clauses, variableReasonId: variable };
+	const occurrenceList: OccurrenceList = { clauses, literal };
 	solverStateMachine.postpone(occurrenceList);
 	return solverStateMachine.leftToPostpone();
 };
@@ -157,9 +160,9 @@ export type DPLL_PICK_CLAUSE_SET_FUN = (
 ) => SvelteSet<number>;
 
 export const pickClauseSet: DPLL_PICK_CLAUSE_SET_FUN = (solverStateMachine: DPLL_SolverMachine) => {
-	const occurrenceList: OccurrenceList = solverStateMachine.consultPostponed();
-	updateClausesToCheck(occurrenceList.clauses, occurrenceList.variableReasonId);
-	return occurrenceList.clauses;
+	const { clauses, literal }: OccurrenceList = solverStateMachine.consultPostponed();
+	updateClausesToCheck(clauses, literal);
+	return clauses;
 };
 
 export type DPLL_ALL_CLAUSES_CHECKED_FUN = (clauses: SvelteSet<number>) => boolean;
@@ -241,7 +244,7 @@ export const emptyOccurrenceLists: DPLL_EMPTY_OCCURRENCE_LISTS_FUN = (
 	while (solverStateMachine.leftToPostpone() > 0) {
 		solverStateMachine.resolvePostponed();
 	}
-	updateClausesToCheck(new SvelteSet<number>(), -1);
+	cleanClausesToCheck();
 };
 
 export type DPLL_FUN =

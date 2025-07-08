@@ -7,10 +7,12 @@
 		changeAlgorithmEventBus,
 		changeInstanceEventBus,
 		stateMachineEventBus,
+		stateMachineLifeCycleEventBus,
 		userActionEventBus,
 		type ActionEvent,
 		type AlgorithmicUndoEvent,
-		type StateMachineEvent
+		type StateMachineEvent,
+		type StateMachineLifeCycleEvent
 	} from '$lib/events/events.ts';
 	import { DECIDE_STATE_ID } from '$lib/solvers/reserved.ts';
 	import type { SolverMachine } from '$lib/solvers/SolverMachine.svelte.ts';
@@ -59,8 +61,6 @@
 
 	function reloadFromSnapshot({ snapshot, activeState, statistics, record }: Snapshot): void {
 		updateTrails([...snapshot]);
-		updateStatistics(statistics);
-		updateSolverMachine(activeState, record);
 		const snapshotSize = snapshot.length;
 		if (snapshotSize <= 0) {
 			logFatal('Reloading snapshot', 'Unexpected empty array of trails');
@@ -68,6 +68,8 @@
 			const latest: Trail = snapshot[snapshotSize - 1];
 			updateProblemFromTrail(latest);
 		}
+		updateStatistics(statistics);
+		updateSolverMachine(activeState, record);
 	}
 
 	function togglePropagations(e: EditorViewEvent) {
@@ -95,6 +97,12 @@
 		record(trails, solverMachine.getActiveStateId(), getStatistics(), solverMachine.getRecord());
 	}
 
+	function lifeCycleController(l: StateMachineLifeCycleEvent): void {
+		if (l === 'finish-step' || l === 'finish-step-by-step') {
+			userActionEventBus.emit('record');
+		}
+	}
+
 	onMount(() => {
 		const unsubscribeToggleEditor = editorViewEventStore.subscribe(togglePropagations);
 		const unsubscribeActionEvent = userActionEventBus.subscribe(onActionEvent);
@@ -102,6 +110,8 @@
 		const unsubscribeChangeInstanceEvent = changeInstanceEventBus.subscribe(fullyReset);
 		const unsubscribeChangeAlgorithmEvent = changeAlgorithmEventBus.subscribe(reset);
 		const unsubscribeAlgorithmicUndoEvent = algorithmicUndoEventBus.subscribe(algorithmicUndoSave);
+		const unsubscribeStateMachineLifeCycleEventBus =
+			stateMachineLifeCycleEventBus.subscribe(lifeCycleController);
 
 		return () => {
 			unsubscribeToggleEditor();
@@ -110,6 +120,7 @@
 			unsubscribeStateMachineEvent();
 			unsubscribeChangeAlgorithmEvent();
 			unsubscribeAlgorithmicUndoEvent();
+			unsubscribeStateMachineLifeCycleEventBus();
 		};
 	});
 </script>

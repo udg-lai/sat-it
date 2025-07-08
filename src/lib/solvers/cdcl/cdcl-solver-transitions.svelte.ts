@@ -1,7 +1,7 @@
 import {
+	cleanClausesToCheck,
 	getCheckedClause,
-	incrementCheckingIndex,
-	updateClausesToCheck
+	incrementCheckingIndex
 } from '$lib/states/conflict-detection-state.svelte.ts';
 import { increaseNoConflicts } from '$lib/states/statistics.svelte.ts';
 import { logFatal } from '$lib/stores/toasts.ts';
@@ -80,7 +80,7 @@ export const initialTransition = (solver: CDCL_SolverMachine): void => {
 	ecTransition(solver.getStateMachine());
 	if (solver.onFinalState()) return;
 	const complementaryClauses: SvelteSet<number> = ucdTransition(solver.getStateMachine());
-	afterComplementaryBlock(solver, solver.getStateMachine(), -1, complementaryClauses);
+	afterComplementaryBlock(solver, solver.getStateMachine(), 0, complementaryClauses);
 };
 
 export const preConflictDetection = (solver: CDCL_SolverMachine): void => {
@@ -104,12 +104,12 @@ export const analyzeClause = (solver: CDCL_SolverMachine): void => {
 
 export const decide = (solver: CDCL_SolverMachine): void => {
 	const stateMachine: CDCL_StateMachine = solver.getStateMachine();
-	const literalToPropagate: number = decideTransition(stateMachine);
+	const assignedLiteral: number = decideTransition(stateMachine);
 	const complementaryClauses: SvelteSet<number> = complementaryOccurrencesTransition(
 		stateMachine,
-		literalToPropagate
+		assignedLiteral
 	);
-	afterComplementaryBlock(solver, stateMachine, Math.abs(literalToPropagate), complementaryClauses);
+	afterComplementaryBlock(solver, stateMachine, assignedLiteral, complementaryClauses);
 };
 
 export const preConflictAnalysis = (solver: CDCL_SolverMachine) => {
@@ -170,15 +170,15 @@ export const conflictAnalysis = (solver: CDCL_SolverMachine): void => {
 	const secondHighestDL: number = getSecondHighestDLTransition(stateMachine, conflictAnalysis);
 	backjumpingTransition(stateMachine, conflictAnalysis, secondHighestDL);
 	pushTrailTransition(stateMachine, conflictAnalysis);
-	const literalToPropagate = propagateCCTransition(stateMachine, clauseTag);
+	const assignedLiteral = propagateCCTransition(stateMachine, clauseTag);
 
 	(getLatestTrail() as Trail).setFollowUpIndex();
 
 	const complementaryClauses: SvelteSet<number> = complementaryOccurrencesTransition(
 		stateMachine,
-		literalToPropagate
+		assignedLiteral
 	);
-	afterComplementaryBlock(solver, stateMachine, Math.abs(literalToPropagate), complementaryClauses);
+	afterComplementaryBlock(solver, stateMachine, assignedLiteral, complementaryClauses);
 };
 
 /* General non-exported transitions */
@@ -186,10 +186,10 @@ export const conflictAnalysis = (solver: CDCL_SolverMachine): void => {
 const afterComplementaryBlock = (
 	solver: CDCL_SolverMachine,
 	stateMachine: CDCL_StateMachine,
-	variable: number,
+	assignedLiteral: number,
 	complementaryClauses: SvelteSet<number>
 ): void => {
-	queueOccurrenceListTransition(stateMachine, solver, variable, complementaryClauses);
+	queueOccurrenceListTransition(stateMachine, solver, -assignedLiteral, complementaryClauses);
 	const pendingClausesSet: boolean = checkPendingOccurrenceListsTransition(stateMachine, solver);
 	if (!pendingClausesSet) {
 		allVariablesAssignedTransition(stateMachine);
@@ -209,7 +209,7 @@ const conflictDetectionBlock = (
 		unstackOccurrenceListTransition(stateMachine, solver);
 		const pendingClausesSet: boolean = checkPendingOccurrenceListsTransition(stateMachine, solver);
 		if (!pendingClausesSet) {
-			updateClausesToCheck(new SvelteSet<number>(), -1);
+			cleanClausesToCheck();
 			allVariablesAssignedTransition(stateMachine);
 			return;
 		}
@@ -224,17 +224,12 @@ const conflictDetectionBlock = (
 	}
 	const unitClause: boolean = unitClauseTransition(stateMachine, clauseTag);
 	if (!unitClause) return;
-	const literalToPropagate: number = unitPropagationTransition(stateMachine, clauseTag);
+	const assignedLiteral: number = unitPropagationTransition(stateMachine, clauseTag);
 	const complementaryClauses: SvelteSet<number> = complementaryOccurrencesTransition(
 		stateMachine,
-		literalToPropagate
+		assignedLiteral
 	);
-	queueOccurrenceListTransition(
-		stateMachine,
-		solver,
-		Math.abs(literalToPropagate),
-		complementaryClauses
-	);
+	queueOccurrenceListTransition(stateMachine, solver, -assignedLiteral, complementaryClauses);
 };
 
 /* Specific Transitions */
@@ -297,7 +292,7 @@ const allVariablesAssignedTransition = (stateMachine: CDCL_StateMachine): void =
 const queueOccurrenceListTransition = (
 	stateMachine: CDCL_StateMachine,
 	solver: CDCL_SolverMachine,
-	variable: number,
+	literal: number,
 	clauseSet: SvelteSet<number>
 ): void => {
 	const queueOccurrenceListState = stateMachine.getActiveState() as NonFinalState<
@@ -310,7 +305,7 @@ const queueOccurrenceListTransition = (
 			'There should be a function in the Queue Occurrence List state'
 		);
 	}
-	const size: number = queueOccurrenceListState.run(variable, clauseSet, solver);
+	const size: number = queueOccurrenceListState.run(literal, clauseSet, solver);
 	if (size > 1) stateMachine.transition('delete_clause_state');
 	else stateMachine.transition('check_pending_occurrence_lists_state');
 };

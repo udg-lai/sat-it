@@ -1,4 +1,7 @@
-import { updateClausesToCheck } from '$lib/states/conflict-detection-state.svelte.ts';
+import {
+	cleanClausesToCheck,
+	updateClausesToCheck
+} from '$lib/states/conflict-detection-state.svelte.ts';
 import { logFatal } from '$lib/stores/toasts.ts';
 import { SolverMachine } from '../SolverMachine.svelte.ts';
 import type { CDCL_FUN, CDCL_INPUT } from './cdcl-domain.svelte.ts';
@@ -63,7 +66,7 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 			const copiedSet = new SvelteSet<number>(originalItem.clauses);
 			const copiedItem: OccurrenceList = {
 				clauses: copiedSet,
-				variableReasonId: originalItem.variableReasonId
+				literal: originalItem.literal
 			};
 			returnQueue.enqueue(copiedItem);
 		}
@@ -114,7 +117,7 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 	updateFromRecord(record: Record<string, unknown> | undefined): void {
 		if (record === undefined) {
 			this.pendingOccurrenceLists = new Queue();
-			updateClausesToCheck(new SvelteSet<number>(), -1);
+			cleanClausesToCheck();
 			return;
 		}
 		const recordedPendingConflicts = record['queue'] as Queue<OccurrenceList>;
@@ -123,15 +126,15 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 			const copiedSet = new SvelteSet<number>(pendingConflict.clauses);
 			const copiedItem: OccurrenceList = {
 				clauses: copiedSet,
-				variableReasonId: pendingConflict.variableReasonId
+				literal: pendingConflict.literal
 			};
 			this.pendingOccurrenceLists.enqueue(copiedItem);
 		}
 		if (!this.pendingOccurrenceLists.isEmpty()) {
-			const conflict: OccurrenceList = this.pendingOccurrenceLists.pick();
-			updateClausesToCheck(conflict.clauses, conflict.variableReasonId);
+			const { clauses, literal }: OccurrenceList = this.pendingOccurrenceLists.pick();
+			updateClausesToCheck(clauses, literal);
 		} else {
-			updateClausesToCheck(new SvelteSet<number>(), -1);
+			cleanClausesToCheck();
 		}
 	}
 
