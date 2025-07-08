@@ -1,12 +1,15 @@
 <script lang="ts">
+	import ClauseComponent from '$lib/components/ClauseComponent.svelte';
 	import DynamicRender from '$lib/components/DynamicRender.svelte';
+	import Clause from '$lib/entities/Clause.svelte.ts';
+	import Literal from '$lib/entities/Literal.svelte.ts';
 	import {
 		addBreakpoint,
 		getBreakpoints,
 		isBreakpoint,
 		removeBreakpoint
 	} from '$lib/states/breakpoints.svelte.ts';
-	import { getProblemStore, type Problem } from '$lib/states/problem.svelte.ts';
+	import { getProblemStore, getVariablePool, type Problem } from '$lib/states/problem.svelte.ts';
 	import { logInfo } from '$lib/stores/toasts.ts';
 	import { BugOutline } from 'flowbite-svelte-icons';
 	import './style.css';
@@ -32,6 +35,17 @@
 				}
 			})
 	);
+
+	const variables = $derived(getVariablePool());
+
+	const clauses: Clause[] = $derived.by(() => {
+		return breakpoints.map(([, literal]) => {
+			return new Clause([Literal.buildFrom(literal, variables)], {
+				comments: [`Breakpoint: ${literal}`],
+				tag: literal
+			});
+		});
+	});
 
 	let literalBreakpoint: number | undefined = $state();
 
@@ -93,7 +107,7 @@
 </div>
 <div class="body-class">
 	<variables class="{elementClass} flex items-center justify-between">
-		<label for="baselineDelay" class="whitespace-nowrap text-gray-900">Variable:</label>
+		<label for="baselineDelay" class="whitespace-nowrap text-gray-900">Literal:</label>
 		<input
 			id="baselineDelay"
 			type="text"
@@ -106,17 +120,17 @@
 		/>
 	</variables>
 	<variables-display class="breakpoint-display">
-		<div class="{elementClass} scroll-container">
-			<ul class="items scrollable">
-				{#each breakpoints as [, literal]}
+		<div class="scrollable">
+			<ul>
+				{#each clauses as clause}
 					<li>
 						<button
 							onclick={() => {
-								removeBreakpoint(literal);
+								removeBreakpoint(clause.getTag() as number);
 							}}
 							class="variable-text"
 						>
-							{literal}
+							<ClauseComponent {clause} classStyle={'bp-clause'} />
 						</button>
 					</li>
 				{/each}
@@ -127,8 +141,19 @@
 
 <style>
 	.breakpoint-display {
-		height: 90%;
+		flex: 1;
 		width: 100%;
+		scrollbar-width: none; /* Firefox */
+		display: flex;
+		padding: 1rem 0rem;
+		height: calc(100% - 4rem);
+		border: 1px solid var(--border-color);
+		border-radius: 0.5rem;
+		background-color: var(--main-bg-color);
+	}
+
+	.breakpoint-display::-webkit-scrollbar {
+		display: none; /* Safari and Chrome */
 	}
 
 	.variable-text {
@@ -143,33 +168,41 @@
 			color 300ms,
 			background-color 300ms,
 			border-color 300ms;
+		height: 3rem;
 	}
+
 	.variable-text:hover {
 		background-color: rgb(255, 185, 185);
 		color: rgb(202, 53, 53);
 		border-color: rgb(245, 42, 42);
 	}
 
-	.scroll-container {
+	.scrollable {
 		height: 100%;
 		width: 100%;
 		overflow: auto;
 		scrollbar-width: none;
+		padding: var(--breakpoints-gap);
+		scroll-behavior: smooth;
 	}
 
-	.scroll-container::-webkit-scrollbar {
+	.scrollable::-webkit-scrollbar {
 		display: none;
 	}
 
-	.items {
+	ul {
 		display: flex;
 		flex-direction: column;
-		gap: 1rem;
-		width: 100%;
+		gap: var(--breakpoints-gap);
 	}
 
 	li {
-		display: flex;
 		width: 100%;
+		list-style-type: none;
+	}
+
+	:global(.bp-clause) {
+		justify-content: center;
+		align-items: center;
 	}
 </style>

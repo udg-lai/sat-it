@@ -4,7 +4,7 @@ import { isRight, makeLeft, makeRight, unwrapEither, type Either } from '$lib/ty
 import { type ErrorMessage } from '$lib/types/types.ts';
 
 export interface Claim {
-	id: number;
+	id?: number;
 	comments: string[];
 	literals: number[];
 }

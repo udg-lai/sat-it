@@ -134,3 +134,5 @@ export const getProblemStore = () => problemStore;
 export const getClausePool = () => problemStore.clauses;
 
 export const getMapping = () => problemStore.mapping;
+
+export const getVariablePool = () => problemStore.variables;

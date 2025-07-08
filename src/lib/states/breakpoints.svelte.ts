@@ -1,4 +1,4 @@
-import { logError } from '$lib/stores/toasts.ts';
+import { logError, logInfo } from '$lib/stores/toasts.ts';
 import { SvelteSet } from 'svelte/reactivity';
 
 const breakpoints: SvelteSet<number> = $state(new SvelteSet<number>());
@@ -21,6 +21,7 @@ export const isBreakpoint = (literal: number): boolean => {
 };
 
 export const removeBreakpoint = (literal: number): void => {
+	logInfo('Breakpoint', `Breakpoint of literal ${literal} removed`);
 	breakpoints.delete(literal);
 };
 
