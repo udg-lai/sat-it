@@ -16,9 +16,15 @@
 		assignment: VariableAssignment;
 		isLast?: boolean;
 		fromPreviousTrail?: boolean;
+		detailsExpanded?: boolean;
 	}
 
-	let { assignment, isLast = false, fromPreviousTrail = false }: Props = $props();
+	let {
+		assignment,
+		isLast = false,
+		fromPreviousTrail = false,
+		detailsExpanded = false
+	}: Props = $props();
 	let buttonId: string = 'btn-' + nanoid();
 
 	let inspectedVariable: number = $derived(getInspectedVariable());
@@ -48,6 +54,7 @@
 		<button
 			id={buttonId}
 			class="literal-style decision unit-propagation {chrome ? 'pad-chrome' : 'pad-others'}"
+			class:paint-background={detailsExpanded}
 		>
 			<MathTexComponent equation={assignment.toTeX()} />
 		</button>
@@ -87,5 +94,20 @@
 
 	:global(.app-popover > .px-3) {
 		padding: 0rem;
+	}
+
+	.paint-background {
+		position: relative;
+		color: var(--satisfied-color);
+		background-color: var(--satisfied-color-o);
+	}
+
+	.paint-background::after {
+		content: '';
+		position: absolute;
+		background-color: var(--satisfied-color-o);
+		top: -9px;
+		height: 9px;
+		width: 40px;
 	}
 </style>

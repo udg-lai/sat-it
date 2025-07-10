@@ -64,6 +64,7 @@
 		overflow-x: hidden;
 		-ms-overflow-style: none; /* Internet Explorer 10+ */
 		scrollbar-width: none; /* Firefox */
+		cursor: ns-resize;
 	}
 
 	.canvas::-webkit-scrollbar {

@@ -75,8 +75,14 @@
 		/>
 	{/if}
 	<div use:observeWidth class="fit-content width-observer">
-		<div class:views-opened={showCAView || showUPView}>
-			<TrailComponent {trail} {expanded} {isLast} {emitUndo} />
+		<div>
+			<TrailComponent
+				{trail}
+				{expanded}
+				{isLast}
+				{emitUndo}
+				detailsExpanded={showCAView || showUPView}
+			/>
 		</div>
 		<div class="empty-slot"></div>
 	</div>
@@ -102,11 +108,6 @@
 
 	.fit-content {
 		width: fit-content;
-	}
-
-	.views-opened {
-		color: var(--satisfied-color);
-		background-color: var(--satisfied-color-o);
 	}
 
 	.empty-slot {

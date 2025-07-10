@@ -14,6 +14,7 @@
 		isLast?: boolean;
 		trail: Trail;
 		emitAlgorithmicUndo: () => void;
+		detailsExpanded?: boolean;
 	}
 
 	let {
@@ -22,7 +23,8 @@
 		propagations = [],
 		isLast = false,
 		trail,
-		emitAlgorithmicUndo
+		emitAlgorithmicUndo,
+		detailsExpanded = false
 	}: Props = $props();
 </script>
 
@@ -61,6 +63,7 @@
 					{assignment}
 					{isLast}
 					fromPreviousTrail={trail.isAssignmentFromPreviousTrail(assignment)}
+					{detailsExpanded}
 				/>
 			{/if}
 		{/each}

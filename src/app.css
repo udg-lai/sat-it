@@ -22,9 +22,12 @@
 	--clause-color: var(--unassigned-color);
 	--unsatisfied-color: #d12771;
 	--unsatisfied-color-o: #d127711c;
+	--unsatisfied-border-color-o: #d127713c;
 	--satisfied-color: #24a148;
 	--satisfied-color-o: #24a14811;
+	--satisfied-border-color-o: #24a14831;
 	--shaded-satisfied-color: #24a1481c;
+	--temporal-color: #cacaca70;
 	--visited-clause-color: #bdbdbd2b;
 	--inspecting-color: #bdbdbd;
 	--trail-height: 56px;
@@ -50,6 +53,8 @@
 	--TeX-padding-bottom-others: 3px;
 	--empty-slot: 55px;
 	--breakpoints-gap: 0.5rem;
+	--plain-literal-width: 40px;
+	--plain-literal-height: 40px;
 }
 
 html,
