@@ -28,7 +28,11 @@
 	class:lemma-background={state === undefined && clause.getTag() !== undefined}
 >
 	{#each literals as lit, i (i)}
-		<PlainLiteralComponent literal={lit} {state} learned={state === undefined && clause.getTag() !== undefined}  />
+		<PlainLiteralComponent
+			literal={lit}
+			{state}
+			learned={state === undefined && clause.getTag() !== undefined}
+		/>
 	{/each}
 </clause>
 
@@ -109,12 +113,11 @@
 		border-top: 1px solid;
 		border-color: var(--temporal-color);
 		content: '';
-	} 	
+	}
 
 	.lemma-background {
 		position: relative;
 	}
-
 
 	.lemma-background::before {
 		position: absolute;
@@ -134,5 +137,5 @@
 		border-top: 1px solid;
 		border-color: var(--lemma-border-color);
 		content: '';
-	} 	
+	}
 </style>

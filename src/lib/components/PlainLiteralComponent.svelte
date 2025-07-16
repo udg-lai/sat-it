@@ -4,15 +4,15 @@
 
 	interface Props {
 		literal: Literal;
-		state?: 'unsatisfied' | 'satisfied' ;
-		learned?: boolean; 
+		state?: 'unsatisfied' | 'satisfied';
+		learned?: boolean;
 	}
 
 	let { literal, state = undefined, learned = false }: Props = $props();
 </script>
 
 <plain-literal
-	class='literal-component' 
+	class="literal-component"
 	class:satisfied-background={state === 'satisfied'}
 	class:unsatisfied-background={state === 'unsatisfied'}
 	class:temporal-background={state === undefined && !learned}
