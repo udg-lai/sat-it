@@ -34,6 +34,10 @@ import { logFatal, logInfo } from '$lib/stores/toasts.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import type { OccurrenceList } from '../types.ts';
 import type { CDCL_SolverMachine } from './cdcl-solver-machine.svelte.ts';
+import {
+	resetInspectedVariable,
+	setInspectedVariable
+} from '$lib/states/inspectedVariable.svelte.ts';
 
 const problem: Problem = $derived(getProblemStore());
 
@@ -338,7 +342,9 @@ export const assertingClause: CDCL_ASSERTING_CLAUSE_FUN = (solver: CDCL_SolverMa
 export type CDCL_PICK_LAST_ASSIGNMENT_FUN = (trail: Trail) => VariableAssignment;
 
 export const pickLastAssignment = (trail: Trail) => {
-	return trail.pickLastAssignment();
+	const lastAssignment: VariableAssignment = trail.pickLastAssignment();
+	setInspectedVariable(lastAssignment.getVariable().getInt());
+	return lastAssignment;
 };
 
 export type CDCL_VARIABLE_IN_CC_FUN = (
@@ -368,8 +374,8 @@ export const resolutionUpdateCC: CDCL_RESOLUTION_UPDATE_CC_FUN = (
 	if (!isPropagationReason(reason)) {
 		logFatal('CDCL', 'The reason is not a propagation reason');
 	}
-	const reasonclauseTag: number = reason.clauseTag;
-	const reasonClause: Clause = getClausePool().get(reasonclauseTag);
+	const reasonClauseTag: number = reason.clauseTag;
+	const reasonClause: Clause = getClausePool().get(reasonClauseTag);
 	const resolvent: Clause = conflictClause.resolution(reasonClause);
 	solver.updateConflictClause(resolvent);
 	return resolvent;
@@ -398,6 +404,8 @@ export const learnConflictClause: CDCL_LEARN_CONFLICT_CLAUSE_FUN = (
 	trail.learnClause(lemma);
 
 	logInfo('New clause learnt', `Clause ${lemma.getTag()} learnt`);
+
+	resetInspectedVariable();
 
 	return lemma.getTag() as number;
 };

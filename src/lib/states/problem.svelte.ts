@@ -22,7 +22,7 @@ let problemStore: Problem = $state({
 	variables: new VariablePool(0),
 	clauses: new ClausePool(),
 	mapping: new Map<number, SvelteSet<number>>(),
-	algorithm: 'backtracking'
+	algorithm: 'cdcl'
 });
 
 export function updateProblemDomain(instance: DimacsInstance) {

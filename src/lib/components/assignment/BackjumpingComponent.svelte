@@ -6,7 +6,7 @@
 	import HeadTailComponent from '../HeadTailComponent.svelte';
 	import './style.css';
 	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
-	import { getInspectedVariable } from '$lib/states/conflict-detection-state.svelte.ts';
+	import { getInspectedVariable } from '$lib/states/inspectedVariable.svelte.ts';
 	import { getProblemStore, type Problem } from '$lib/states/problem.svelte.ts';
 	import type Clause from '$lib/entities/Clause.svelte.ts';
 	import { logFatal } from '$lib/stores/toasts.ts';

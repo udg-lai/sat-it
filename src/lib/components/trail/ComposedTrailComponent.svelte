@@ -95,6 +95,7 @@
 	.composed-trail {
 		display: flex;
 		flex-direction: column;
+		overflow: hidden;
 	}
 
 	.opened-views {

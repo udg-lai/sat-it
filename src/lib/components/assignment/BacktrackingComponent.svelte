@@ -2,7 +2,7 @@
 	import MathTexComponent from '$lib/components/MathTexComponent.svelte';
 	import { onChrome } from '$lib/app.svelte.ts';
 	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
-	import { getInspectedVariable } from '$lib/states/conflict-detection-state.svelte.ts';
+	import { getInspectedVariable } from '$lib/states/inspectedVariable.svelte.ts';
 	import HeadTailComponent from '../HeadTailComponent.svelte';
 	import './style.css';
 

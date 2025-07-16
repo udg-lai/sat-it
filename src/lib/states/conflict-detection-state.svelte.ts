@@ -1,7 +1,7 @@
 import type { SvelteSet } from 'svelte/reactivity';
 import { getClausePool, getMapping } from './problem.svelte.ts';
+import { resetInspectedVariable, setInspectedVariable } from './inspectedVariable.svelte.ts';
 
-let inspectedLiteral: number = $state(0);
 let clausesToCheck: number[] = $state([]);
 let checkingIndex: number = $state(0);
 
@@ -17,16 +17,14 @@ export function updateClausesToCheck(stateMachineSet: SvelteSet<number>, literal
 		clausesToCheck = [...clauses];
 		checkingIndex = clausesToCheck.length - stateMachineSet.size;
 	}
-	inspectedLiteral = literal;
+	setInspectedVariable(Math.abs(literal));
 }
 
 export const cleanClausesToCheck = () => {
 	clausesToCheck = [];
 	checkingIndex = 0;
-	inspectedLiteral = 0;
+	resetInspectedVariable();
 };
-
-export const getInspectedVariable = () => Math.abs(inspectedLiteral);
 
 export const getClausesToCheck = () => clausesToCheck;
 
