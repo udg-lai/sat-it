@@ -14,12 +14,7 @@
 		emitRevertUpToX?: () => void;
 	}
 
-	let {
-		assignment,
-		isLast = false,
-		fromPreviousTrail = false,
-		emitRevertUpToX
-	}: Props = $props();
+	let { assignment, isLast = false, fromPreviousTrail = false, emitRevertUpToX }: Props = $props();
 
 	const inspectedVariable: number = $derived(getInspectedVariable());
 	let inspecting: boolean = $derived(assignment.variableId() === inspectedVariable && isLast);
