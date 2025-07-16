@@ -35,8 +35,7 @@ import { SvelteSet } from 'svelte/reactivity';
 import type { OccurrenceList } from '../types.ts';
 import type { CDCL_SolverMachine } from './cdcl-solver-machine.svelte.ts';
 import {
-	resetInspectedVariable,
-	setInspectedVariable
+	resetInspectedVariable
 } from '$lib/states/inspectedVariable.svelte.ts';
 
 const problem: Problem = $derived(getProblemStore());
@@ -343,7 +342,6 @@ export type CDCL_PICK_LAST_ASSIGNMENT_FUN = (trail: Trail) => VariableAssignment
 
 export const pickLastAssignment = (trail: Trail) => {
 	const lastAssignment: VariableAssignment = trail.pickLastAssignment();
-	setInspectedVariable(lastAssignment.getVariable().getInt());
 	return lastAssignment;
 };
 

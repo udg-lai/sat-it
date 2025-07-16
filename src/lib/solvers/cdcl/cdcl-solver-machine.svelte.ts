@@ -22,10 +22,8 @@ import { Queue } from '$lib/entities/Queue.svelte.ts';
 import type { Trail } from '$lib/entities/Trail.svelte.ts';
 import type Clause from '$lib/entities/Clause.svelte.ts';
 import { assertiveness } from '$lib/algorithms/assertive.ts';
-import {
-	resetInspectedVariable,
-	setInspectedVariable
-} from '$lib/states/inspectedVariable.svelte.ts';
+import { setInspectedVariable } from '$lib/states/inspectedVariable.svelte.ts';
+import { updateProblemFromTrail } from '$lib/states/problem.svelte.ts';
 
 export const makeCDCLSolver = (): CDCL_SolverMachine => {
 	return new CDCL_SolverMachine();
@@ -155,13 +153,13 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 		const conflictAnalysis = record['conflictAnalysis'] as ConflictAnalysis;
 		if (conflictAnalysis === undefined) {
 			this.conflictAnalysis = undefined;
-			resetInspectedVariable();
 		} else {
 			this.setConflictAnalysis(
 				conflictAnalysis.trail.copy(),
 				conflictAnalysis.conflictClause.copy(),
 				[...conflictAnalysis.decisionLevelVariables]
 			);
+			updateProblemFromTrail(conflictAnalysis.trail);
 			setInspectedVariable(conflictAnalysis.trail.pickLastAssignment().getVariable().getInt());
 		}
 	}

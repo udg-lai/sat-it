@@ -39,8 +39,9 @@ export class Trail {
 		newTrail.decisionLevelBookmark = [...this.decisionLevelBookmark];
 		newTrail.followUPIndex = this.followUPIndex;
 		newTrail.decisionLevel = this.decisionLevel;
-		newTrail.learnClause = this.learnClause;
+		newTrail.learntClause = this.learntClause;
 		newTrail.conflictiveClause = this.conflictiveClause;
+		newTrail.conflictAnalysisCtx = [...this.conflictAnalysisCtx];
 		return newTrail;
 	}
 

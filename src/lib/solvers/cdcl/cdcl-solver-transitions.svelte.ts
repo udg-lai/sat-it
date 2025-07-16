@@ -73,6 +73,7 @@ import type { ConflictAnalysis, OccurrenceList } from '../types.ts';
 import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
 import type { Trail } from '$lib/entities/Trail.svelte.ts';
 import type Clause from '$lib/entities/Clause.svelte.ts';
+import { setInspectedVariable } from '$lib/states/inspectedVariable.svelte.ts';
 
 /* exported transitions */
 
@@ -164,6 +165,7 @@ export const conflictAnalysis = (solver: CDCL_SolverMachine): void => {
 	deleteLastAssignmentTransition(stateMachine, conflictAnalysis);
 	const isAsserting: boolean = assertingClauseTransition(stateMachine, solver);
 	if (!isAsserting) {
+		setInspectedVariable(conflictAnalysis.trail.pickLastAssignment().getVariable().getInt());
 		return;
 	}
 	const clauseTag: number = learnConflictClauseTransition(stateMachine, conflictAnalysis);
