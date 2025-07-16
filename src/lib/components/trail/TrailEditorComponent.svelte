@@ -234,6 +234,7 @@
 						trailState={trail.getState()}
 						expanded={trail.view()}
 						onToggleExpand={() => toggleTrailView(index)}
+						disableClick={solver.identify() === 'bkt' && trail.getConflictiveClause() === undefined}
 					/>
 				</div>
 			{/each}

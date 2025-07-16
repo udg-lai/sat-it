@@ -16,6 +16,7 @@
 		btnClassStyle?: string;
 		iconClassStyle?: string;
 		ofLastTrail?: boolean; // Optional prop to indicate if this is the last trail
+		disableClick?: boolean;
 	}
 
 	let {
@@ -23,11 +24,12 @@
 		onToggleExpand,
 		expanded,
 		btnClassStyle = '',
-		ofLastTrail = false
+		ofLastTrail = false,
+		disableClick = true
 	}: Props = $props();
 
 	let iconProps = $derived({
-		class: `h-7 w-7 cursor-pointer`
+		class: `h-7 w-7 ${disableClick ? 'cursor-default' : 'cursor-pointer'}`
 	});
 
 	function onToggleExpandClick() {
@@ -57,6 +59,7 @@
 		class:unsat={trailState === 'unsat'}
 		class:sat={trailState === 'sat'}
 		class:conflict={trailState === 'conflict'}
+		class:disableClick
 	>
 		<div class="dynamic-render">
 			{#if expanded && !ofLastTrail}
@@ -83,6 +86,10 @@
 		display: flex;
 		justify-content: center;
 		align-items: center;
+	}
+
+	.disableClick {
+		cursor : default;
 	}
 
 	.notification {
