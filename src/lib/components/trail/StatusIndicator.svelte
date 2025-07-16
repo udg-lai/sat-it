@@ -89,7 +89,7 @@
 	}
 
 	.disableClick {
-		cursor : default;
+		cursor: default;
 	}
 
 	.notification {
