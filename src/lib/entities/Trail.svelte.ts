@@ -25,7 +25,7 @@ export class Trail {
 	private decisionLevel: number = 0;
 	private conflictAnalysisCtx: Either<ConflictAnalysisContext, undefined>[] = $state([]); // this is just for representing the conflict analysis view
 	private upContext: Either<UPContext, undefined>[] = $derived.by(() => this._upContext());
-	private fullView: boolean = $state(true); // UI state for knowing whenever for that trail it was required to show more information
+	private fullView: boolean = $state(false); // UI state for knowing whenever for that trail it was required to show more information
 	private learntClause: Clause | undefined = $state(undefined);
 	private conflictiveClause: Clause | undefined = $state(undefined);
 	private state: TrailState = $state('running');

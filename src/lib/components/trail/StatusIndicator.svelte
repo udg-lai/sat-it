@@ -27,11 +27,10 @@
 	}: Props = $props();
 
 	let iconProps = $derived({
-		class: `h-7 w-7 ${ofLastTrail ? 'cursor-default' : 'cursor-pointer'}`
+		class: `h-7 w-7 cursor-pointer`
 	});
 
 	function onToggleExpandClick() {
-		if (ofLastTrail) return;
 		onToggleExpand?.();
 	}
 
@@ -55,7 +54,6 @@
 		title={status}
 		onclick={onToggleExpandClick}
 		class="notification {btnClassStyle}"
-		class:ofLastTrail
 		class:unsat={trailState === 'unsat'}
 		class:sat={trailState === 'sat'}
 		class:conflict={trailState === 'conflict'}
@@ -93,10 +91,6 @@
 		display: flex;
 		justify-content: center;
 		align-items: center;
-	}
-
-	.ofLastTrail {
-		cursor: default;
 	}
 
 	.notification.conflict {

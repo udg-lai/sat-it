@@ -34,9 +34,7 @@ import { logFatal, logInfo } from '$lib/stores/toasts.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import type { OccurrenceList } from '../types.ts';
 import type { CDCL_SolverMachine } from './cdcl-solver-machine.svelte.ts';
-import {
-	resetInspectedVariable
-} from '$lib/states/inspectedVariable.svelte.ts';
+import { resetInspectedVariable } from '$lib/states/inspectedVariable.svelte.ts';
 
 const problem: Problem = $derived(getProblemStore());
 

@@ -5,6 +5,7 @@
 		algorithmicUndoEventBus,
 		solverStartedAutoMode,
 		toggleTrailExpandEventBus,
+		toggleTrailViewEventBus,
 		trailTrackingEventBus
 	} from '$lib/events/events.ts';
 	import type { SolverMachine } from '$lib/solvers/SolverMachine.svelte.ts';
@@ -121,19 +122,13 @@
 		}
 		if (
 			solver.identify() === 'bkt' &&
-			(trail.getState() === 'running' || trail.getState() === 'sat')
+			(trail.getConflictiveClause() === undefined)
 		) {
 			// If the trail is running or is a model, we do not allow toggling the view
 			return;
 		}
 
-		const limit = Math.abs(trails.length - 1);
-
-		if (trailId >= limit) {
-			return;
-		}
-
-		for (let i = 0; i < limit; i++) {
+		for (let i = 0; i < trails.length; i++) {
 			if (trailId != i) {
 				trails.at(i)?.setView(false);
 			}
@@ -188,10 +183,14 @@
 		const unsubscribeRunningOnAuto = solverStartedAutoMode.subscribe(() =>
 			rearrangeTrailEditor(lastReference)
 		);
+		const unsubscribeToggleTrailView = toggleTrailViewEventBus.subscribe(() =>
+			toggleTrailView(trails.length - 1)
+		);
 		return () => {
 			unsubscribeTrailTracking();
 			unsubscribeExpandedTrails();
 			unsubscribeRunningOnAuto();
+			unsubscribeToggleTrailView()
 		};
 	});
 </script>
@@ -220,9 +219,8 @@
 							{trail}
 							expanded={expandedTrails}
 							isLast={trails.length === index + 1}
-							showUPView={showUPs && trail.view()}
-							showCAView={(trails.length === index + 1 || trail.view()) &&
-								trail.hasConflictiveClause()}
+							showUPView={trail.view() && showUPs}
+							showCAView={trail.view() && trail.hasConflictiveClause()}
 							emitUndo={(assignment: VariableAssignment) => emitUndo(assignment, index)}
 						/>
 					</div>

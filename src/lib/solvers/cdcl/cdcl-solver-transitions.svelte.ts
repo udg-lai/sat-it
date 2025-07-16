@@ -6,7 +6,7 @@ import {
 import { increaseNoConflicts } from '$lib/states/statistics.svelte.ts';
 import { logFatal } from '$lib/stores/toasts.ts';
 import { getLatestTrail, updateLastTrailEnding } from '$lib/states/trails.svelte.ts';
-import { conflictDetectionEventBus } from '$lib/events/events.ts';
+import { conflictDetectionEventBus, toggleTrailViewEventBus } from '$lib/events/events.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import { type NonFinalState } from '../StateMachine.svelte.ts';
 import type {
@@ -222,6 +222,7 @@ const conflictDetectionBlock = (
 	const conflict: boolean = conflictDetectionTransition(stateMachine, clauseTag);
 	if (conflict) {
 		updateLastTrailEnding(clauseTag);
+		toggleTrailViewEventBus.emit();
 		return;
 	}
 	const unitClause: boolean = unitClauseTransition(stateMachine, clauseTag);
