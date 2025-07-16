@@ -120,10 +120,7 @@
 		if (trail === undefined) {
 			logFatal('Trail not found for ID: ' + trailId);
 		}
-		if (
-			solver.identify() === 'bkt' &&
-			(trail.getConflictiveClause() === undefined)
-		) {
+		if (solver.identify() === 'bkt' && trail.getConflictiveClause() === undefined) {
 			// If the trail is running or is a model, we do not allow toggling the view
 			return;
 		}
@@ -190,7 +187,7 @@
 			unsubscribeTrailTracking();
 			unsubscribeExpandedTrails();
 			unsubscribeRunningOnAuto();
-			unsubscribeToggleTrailView()
+			unsubscribeToggleTrailView();
 		};
 	});
 </script>
