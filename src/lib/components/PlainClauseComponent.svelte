@@ -24,10 +24,11 @@
 <clause
 	class:satisfied-background={state === 'satisfied'}
 	class:unsatisfied-background={state === 'unsatisfied'}
-	class:temporal-background={state !== 'unsatisfied' && state !== 'satisfied'}
+	class:temporal-background={state === undefined && clause.getTag() === undefined}
+	class:lemma-background={state === undefined && clause.getTag() !== undefined}
 >
 	{#each literals as lit, i (i)}
-		<PlainLiteralComponent literal={lit} {state} />
+		<PlainLiteralComponent literal={lit} {state} learned={state === undefined && clause.getTag() !== undefined}  />
 	{/each}
 </clause>
 
@@ -108,5 +109,30 @@
 		border-top: 1px solid;
 		border-color: var(--temporal-color);
 		content: '';
+	} 	
+
+	.lemma-background {
+		position: relative;
 	}
+
+
+	.lemma-background::before {
+		position: absolute;
+		top: 0px;
+		width: var(--plain-literal-width);
+		height: 1px;
+		border-top: 1px solid;
+		border-color: var(--lemma-border-color);
+		content: '';
+	}
+
+	.lemma-background::after {
+		position: absolute;
+		bottom: 0px;
+		width: var(--plain-literal-width);
+		height: 1px;
+		border-top: 1px solid;
+		border-color: var(--lemma-border-color);
+		content: '';
+	} 	
 </style>

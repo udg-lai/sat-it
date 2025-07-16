@@ -55,6 +55,10 @@ class Clause implements Comparable<Clause> {
 		return this._learnt;
 	}
 
+	setAsLearntClause(): void {
+		this._learnt = true;
+	}
+
 	findUnassignedLiteral(): number {
 		let i = 0;
 		let literal = undefined;

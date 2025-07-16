@@ -4,17 +4,19 @@
 
 	interface Props {
 		literal: Literal;
-		state?: 'unsatisfied' | 'satisfied';
+		state?: 'unsatisfied' | 'satisfied' ;
+		learned?: boolean; 
 	}
 
-	let { literal, state = undefined }: Props = $props();
+	let { literal, state = undefined, learned = false }: Props = $props();
 </script>
 
 <plain-literal
-	class="literal-component"
+	class='literal-component' 
 	class:satisfied-background={state === 'satisfied'}
 	class:unsatisfied-background={state === 'unsatisfied'}
-	class:temporal-background={state !== 'unsatisfied' && state !== 'satisfied'}
+	class:temporal-background={state === undefined && !learned}
+	class:lemma-background={learned}
 >
 	<MathTexComponent equation={literal.toTeX()} />
 </plain-literal>
@@ -46,5 +48,12 @@
 		border-left: 1px solid;
 		border-right: 1px solid;
 		border-color: var(--temporal-color);
+	}
+
+	.lemma-background {
+		background-color: var(--lemma-color);
+		border-left: 1px solid;
+		border-right: 1px solid;
+		border-color: var(--lemma-border-color);
 	}
 </style>

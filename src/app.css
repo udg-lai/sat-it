@@ -28,6 +28,8 @@
 	--satisfied-border-color-o: #24a14831;
 	--shaded-satisfied-color: #24a1481c;
 	--temporal-color: #cacaca70;
+	--lemma-color: #fff0191c;
+	--lemma-border-color: #fff0198c;
 	--visited-clause-color: #bdbdbd2b;
 	--inspecting-color: #bdbdbd;
 	--trail-height: 56px;

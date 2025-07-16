@@ -386,12 +386,12 @@ export type CDCL_LEARN_CONFLICT_CLAUSE_FUN = (trail: Trail, conflictClause: Clau
 
 export const learnConflictClause: CDCL_LEARN_CONFLICT_CLAUSE_FUN = (
 	trail: Trail,
-	conflictClause: Clause
+	lemma: Clause
 ) => {
-	//Generate the "Clause" that will be added to the pool.
-	const lemma: Clause = new Clause(conflictClause.getLiterals(), { learnt: true });
+	//Set the lemma as learnt. This will be the clause that will be added to the pool.
+	lemma.setAsLearntClause()
 
-	//The clause is stored inside the pool
+	//The lemma is stored inside the pool
 	addClauseToClausePool(lemma);
 
 	// Saves the learnt clause in the trail
