@@ -19,7 +19,12 @@
 		showUPInfo?: boolean;
 	}
 
-	let { assignment, isLast = false, fromPreviousTrail = false, showUPInfo = false }: Props = $props();
+	let {
+		assignment,
+		isLast = false,
+		fromPreviousTrail = false,
+		showUPInfo = false
+	}: Props = $props();
 	let buttonId: string = 'btn-' + nanoid();
 
 	let inspectedVariable: number = $derived(getInspectedVariable());

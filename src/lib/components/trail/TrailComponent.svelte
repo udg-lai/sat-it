@@ -17,10 +17,16 @@
 		expanded: boolean;
 		isLast?: boolean;
 		emitRevert?: (assignment: VariableAssignment) => void;
-		showUPInfo?: boolean
+		showUPInfo?: boolean;
 	}
 
-	let { trail, expanded, isLast = true, emitRevert = () => {}, showUPInfo = false }: Props = $props();
+	let {
+		trail,
+		expanded,
+		isLast = true,
+		emitRevert = () => {},
+		showUPInfo = false
+	}: Props = $props();
 
 	let initialPropagations: VariableAssignment[] = $derived(trail.getInitialPropagations());
 
