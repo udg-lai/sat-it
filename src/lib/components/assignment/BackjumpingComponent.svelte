@@ -79,6 +79,10 @@
 		cursor: pointer;
 	}
 
+	.previous-assignment {
+		color: color-mix(in srgb, var(--conflict-color) 60%, transparent);
+	}
+
 	:global(.app-popover) {
 		background-color: var(--main-bg-color);
 		border-color: var(--border-color);

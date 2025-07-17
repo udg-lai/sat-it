@@ -61,6 +61,10 @@
 		cursor: unset;
 	}
 
+	.previous-assignment {
+		color: color-mix(in srgb, var(--decision-color) 60%, transparent);
+	}
+
 	:global(.dropdownClass) {
 		overflow: visible;
 	}

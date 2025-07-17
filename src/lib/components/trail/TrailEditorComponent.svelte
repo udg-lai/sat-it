@@ -116,7 +116,7 @@
 	}
 
 	function openTrailView(trailId: number) {
-		if(!trails.at(trailId)?.view()) {
+		if (!trails.at(trailId)?.view()) {
 			toggleTrailView(trailId);
 		}
 	}
