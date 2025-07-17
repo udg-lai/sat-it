@@ -20,7 +20,13 @@
 		detailsExpanded?: boolean;
 	}
 
-	let { trail, expanded, isLast = true, emitRevert = () => {}, detailsExpanded = false}: Props = $props();
+	let {
+		trail,
+		expanded,
+		isLast = true,
+		emitRevert = () => {},
+		detailsExpanded = false
+	}: Props = $props();
 
 	let initialPropagations: VariableAssignment[] = $derived(trail.getInitialPropagations());
 
