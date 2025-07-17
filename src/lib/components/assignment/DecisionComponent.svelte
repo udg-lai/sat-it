@@ -13,7 +13,7 @@
 		expanded?: boolean;
 		emitToggle?: () => void;
 		fromPreviousTrail?: boolean;
-		emitAlgorithmicUndo?: () => void;
+		emitRevertUpToX?: () => void;
 	}
 
 	let {
@@ -22,7 +22,7 @@
 		expanded = false,
 		emitToggle,
 		fromPreviousTrail = false,
-		emitAlgorithmicUndo
+		emitRevertUpToX
 	}: Props = $props();
 
 	let openLevel: boolean = $state(false);
@@ -45,8 +45,8 @@
 		isOpen = !isOpen;
 	}
 
-	const emitUndo = (): void => {
-		emitAlgorithmicUndo?.();
+	const emitRevert = (): void => {
+		emitRevertUpToX?.();
 		isOpen = !isOpen;
 	};
 </script>
@@ -75,8 +75,8 @@
 				</button>
 			</DropdownItem>
 			{#if !fromPreviousTrail}
-				<DropdownItem onclick={emitUndo}>
-					<button> Algorithmic Undo </button>
+				<DropdownItem onclick={emitRevert}>
+					<button> Revert up to here </button>
 				</DropdownItem>
 			{/if}
 		</Dropdown>

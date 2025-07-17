@@ -11,15 +11,10 @@
 		assignment: VariableAssignment;
 		isLast?: boolean;
 		fromPreviousTrail?: boolean;
-		emitAlgorithmicUndo?: () => void;
+		emitRevertUpToX?: () => void;
 	}
 
-	let {
-		assignment,
-		isLast = false,
-		fromPreviousTrail = false,
-		emitAlgorithmicUndo
-	}: Props = $props();
+	let { assignment, isLast = false, fromPreviousTrail = false, emitRevertUpToX }: Props = $props();
 
 	const inspectedVariable: number = $derived(getInspectedVariable());
 	let inspecting: boolean = $derived(assignment.variableId() === inspectedVariable && isLast);
@@ -27,9 +22,9 @@
 	let chrome: boolean = $derived(onChrome());
 	let isOpen: boolean = $state(false);
 
-	const emitUndo = (): void => {
+	const emitRevert = (): void => {
 		isOpen = !isOpen;
-		emitAlgorithmicUndo?.();
+		emitRevertUpToX?.();
 	};
 </script>
 
@@ -46,7 +41,7 @@
 		</button>
 		{#if !fromPreviousTrail}
 			<Dropdown open={isOpen} placement="bottom" class="dropdownClass">
-				<DropdownItem onclick={emitUndo}>Algorithmic Undo</DropdownItem>
+				<DropdownItem onclick={emitRevert}>Revert up to here</DropdownItem>
 			</Dropdown>
 		{/if}
 	</childless-decision>
