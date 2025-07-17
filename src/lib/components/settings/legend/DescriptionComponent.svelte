@@ -8,12 +8,16 @@
 	}
 
 	let { icon, description }: Props = $props();
+
+    const iconProps = {
+		size: 'md'
+	};
 </script>
 
 <div class="container">
 	<div class="icon-zone">
 		{#if icon}
-			<DynamicRender component={icon} />
+			<DynamicRender component={icon} props={iconProps} />
 		{/if}
 	</div>
 	<div class="description-zone">

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Variable from '$lib/entities/Variable.svelte.ts';
 	import VariableAssignment from '$lib/entities/VariableAssignment.ts';
+	import DescriptionComponent from './DescriptionComponent.svelte';
 
 	const exampleVariable = new Variable(1, true);
 	const decisionExample = VariableAssignment.newManualAssignment(exampleVariable);
@@ -14,4 +15,7 @@
 <div class="heading-class">
 	<span class="pt-1">Trail</span>
 </div>
-<div class="body-class"></div>
+<div class="body-class">
+    
+
+</div>
