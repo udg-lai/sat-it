@@ -16,10 +16,10 @@
 		isLast?: boolean;
 		showUPView: boolean;
 		showCAView: boolean;
-		emitUndo?: (assignment: VariableAssignment) => void;
+		emitRevert?: (assignment: VariableAssignment) => void;
 	}
 
-	let { trail, expanded, isLast = true, showUPView, showCAView, emitUndo }: Props = $props();
+	let { trail, expanded, isLast = true, showUPView, showCAView, emitRevert }: Props = $props();
 
 	function computeUPs(): CanvasContext {
 		const upContext: Either<UPContext, undefined>[] = trail.getUPContext();
@@ -82,12 +82,12 @@
 		</div>
 	{/if}
 	<div use:observeWidth class="fit-content width-observer">
-		<div>
+		<div class:views-opened={showCAView || showUPView}>
 			<TrailComponent
 				{trail}
 				{expanded}
 				{isLast}
-				{emitUndo}
+				{emitRevert}
 				detailsExpanded={showCAView || showUPView}
 			/>
 		</div>
