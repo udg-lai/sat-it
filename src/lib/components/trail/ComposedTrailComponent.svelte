@@ -5,7 +5,9 @@
 	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
 	import { getClausePool } from '$lib/states/problem.svelte.ts';
 	import { isLeft, makeLeft, makeRight, unwrapEither, type Either } from '$lib/types/either.ts';
+	import { error } from '$lib/utils.ts';
 	import CanvasComponent, { type CanvasContext, type UPRelation } from './CanvasComponent.svelte';
+	import FillComponent from './FillComponent.svelte';
 	import TrailComponent from './TrailComponent.svelte';
 
 	interface Props {
@@ -29,13 +31,13 @@
 					clause,
 					literal
 				});
-			} else return makeRight(undefined);
+			} else return makeRight(error);
 		});
 	}
 
-	let unitPropagations: Either<UPRelation, undefined>[] = $derived.by(computeUPs);
+	let unitPropagations: Either<UPRelation, () => never>[] = $derived.by(computeUPs);
 
-	let conflictAnalysis: Either<ConflictAnalysisContext, undefined>[] = $derived.by(() => {
+	let conflictAnalysis: Either<ConflictAnalysisContext, () => never>[] = $derived.by(() => {
 		if (!showCAView) return [];
 		else if (!trail.hasConflictiveClause()) return [];
 		else return trail.getConflictAnalysisCtx();
@@ -66,13 +68,18 @@
 
 <composed-trail class="composed-trail" class:opened-views={showUPView || showCAView}>
 	{#if showUPView}
-		<CanvasComponent
-			context={unitPropagations}
-			width={trailWidth}
-			align={'end'}
-			reverse={true}
-			repeat={false}
-		/>
+		<div class="up-view">
+			<CanvasComponent
+				context={unitPropagations}
+				width={trailWidth}
+				align={'end'}
+				reverse={true}
+				repeat={false}
+			/>
+			<div class="fill">
+				<FillComponent context={unitPropagations} width={trailWidth} />
+			</div>
+		</div>
 	{/if}
 	<div use:observeWidth class="fit-content width-observer">
 		<div>
@@ -115,5 +122,16 @@
 		width: var(--empty-slot);
 		background-color: transparent;
 		height: auto;
+	}
+
+	.up-view {
+		display: flex;
+		flex-direction: column;
+		position: relative;
+	}
+
+	.fill {
+		position: absolute;
+		bottom: -8.5px;
 	}
 </style>

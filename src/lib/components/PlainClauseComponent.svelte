@@ -43,6 +43,7 @@
 		align-items: center;
 		padding: 0 calc(4px + 0.25rem);
 		min-width: var(--empty-slot);
+		top: -0.5px;
 	}
 
 	.satisfied-background {
@@ -55,15 +56,6 @@
 		width: var(--plain-literal-width);
 		border-top: 1px solid;
 		border-color: var(--satisfied-border-color-o);
-		content: '';
-	}
-
-	.satisfied-background::before {
-		position: absolute;
-		bottom: -1px;
-		height: 1px;
-		width: var(--plain-literal-width);
-		background-color: var(--satisfied-color-o);
 		content: '';
 	}
 

@@ -102,12 +102,4 @@
 		background-color: var(--satisfied-color-o);
 	}
 
-	.paint-background::after {
-		content: '';
-		position: absolute;
-		background-color: var(--satisfied-color-o);
-		top: -9px;
-		height: 9px;
-		width: 40px;
-	}
 </style>
