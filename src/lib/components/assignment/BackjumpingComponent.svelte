@@ -14,11 +14,11 @@
 
 	interface Props {
 		assignment: VariableAssignment;
-		isLast: boolean;
+		isLast?: boolean;
 		fromPreviousTrail?: boolean;
 	}
 
-	let { assignment, isLast, fromPreviousTrail = false }: Props = $props();
+	let { assignment, isLast = false, fromPreviousTrail = false }: Props = $props();
 	let buttonId: string = 'btn-' + nanoid();
 
 	const inspectedVariable: number = $derived(getInspectedVariable());
