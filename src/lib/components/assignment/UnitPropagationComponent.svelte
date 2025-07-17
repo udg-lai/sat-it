@@ -95,7 +95,7 @@
 	:global(.app-popover > .px-3) {
 		padding: 0rem;
 	}
-	
+
 	.previous-assignment {
 		color: color-mix(in srgb, var(--decision-color) 60%, transparent);
 	}
@@ -109,6 +109,4 @@
 	:global(.previous-assignment.paint-background) {
 		color: color-mix(in srgb, var(--satisfied-color) 60%, transparent);
 	}
-
-	
 </style>
