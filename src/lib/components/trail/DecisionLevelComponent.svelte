@@ -13,7 +13,7 @@
 		propagations?: VariableAssignment[];
 		isLast?: boolean;
 		trail: Trail;
-		emitAlgorithmicUndo: () => void;
+		emitRevertUpToX: () => void;
 		detailsExpanded?: boolean;
 	}
 
@@ -23,7 +23,7 @@
 		propagations = [],
 		isLast = false,
 		trail,
-		emitAlgorithmicUndo,
+		emitRevertUpToX,
 		detailsExpanded = false
 	}: Props = $props();
 </script>
@@ -33,7 +33,7 @@
 		assignment={decision}
 		{isLast}
 		fromPreviousTrail={trail.isAssignmentFromPreviousTrail(decision)}
-		{emitAlgorithmicUndo}
+		{emitRevertUpToX}
 	/>
 {:else}
 	<DecisionComponent
@@ -42,7 +42,7 @@
 		{isLast}
 		emitToggle={() => (expanded = !expanded)}
 		fromPreviousTrail={trail.isAssignmentFromPreviousTrail(decision)}
-		{emitAlgorithmicUndo}
+		{emitRevertUpToX}
 	/>
 	{#if expanded}
 		{#each propagations as assignment (assignment.variableId())}

@@ -16,17 +16,11 @@
 		trail: Trail;
 		expanded: boolean;
 		isLast?: boolean;
-		emitUndo?: (assignment: VariableAssignment) => void;
+		emitRevert?: (assignment: VariableAssignment) => void;
 		detailsExpanded?: boolean;
 	}
 
-	let {
-		trail,
-		expanded,
-		isLast = true,
-		emitUndo = () => {},
-		detailsExpanded = false
-	}: Props = $props();
+	let { trail, expanded, isLast = true, emitRevert = () => {}, detailsExpanded = false}: Props = $props();
 
 	let initialPropagations: VariableAssignment[] = $derived(trail.getInitialPropagations());
 
@@ -88,8 +82,8 @@
 			{expanded}
 			{isLast}
 			{trail}
-			emitAlgorithmicUndo={() => {
-				emitUndo(assignment);
+			emitRevertUpToX={() => {
+				emitRevert(assignment);
 			}}
 			{detailsExpanded}
 		/>
