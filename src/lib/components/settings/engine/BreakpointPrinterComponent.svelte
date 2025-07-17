@@ -9,9 +9,7 @@
 	let { literal }: Props = $props();
 </script>
 
-<div
-	class="breakpoint-component"
->
+<div class="breakpoint-component">
 	<MathTexComponent equation={literal.toTeX()} />
 </div>
 
