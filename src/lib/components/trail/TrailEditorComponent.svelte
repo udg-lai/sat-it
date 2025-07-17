@@ -134,7 +134,7 @@
 		trails.at(trailId)?.toggleView();
 	}
 
-	function emitUndo(assignment: VariableAssignment, index: number) {
+	function emitRevert(assignment: VariableAssignment, index: number) {
 		algorithmicUndoEventBus.emit({
 			objectiveAssignment: assignment,
 			trailIndex: index
@@ -216,9 +216,10 @@
 							{trail}
 							expanded={expandedTrails}
 							isLast={trails.length === index + 1}
-							showUPView={trail.view() && showUPs}
-							showCAView={trail.view() && trail.hasConflictiveClause()}
-							emitUndo={(assignment: VariableAssignment) => emitUndo(assignment, index)}
+							showUPView={showUPs && trail.view()}
+							showCAView={(trails.length === index + 1 || trail.view()) &&
+								trail.hasConflictiveClause()}
+							emitRevert={(assignment: VariableAssignment) => emitRevert(assignment, index)}
 						/>
 					</div>
 				{/each}

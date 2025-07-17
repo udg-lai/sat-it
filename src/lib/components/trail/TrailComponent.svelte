@@ -16,7 +16,7 @@
 		trail: Trail;
 		expanded: boolean;
 		isLast?: boolean;
-		emitUndo?: (assignment: VariableAssignment) => void;
+		emitRevert?: (assignment: VariableAssignment) => void;
 		detailsExpanded?: boolean;
 	}
 
@@ -24,7 +24,7 @@
 		trail,
 		expanded,
 		isLast = true,
-		emitUndo = () => {},
+		emitRevert = () => {},
 		detailsExpanded = false
 	}: Props = $props();
 
@@ -88,8 +88,8 @@
 			{expanded}
 			{isLast}
 			{trail}
-			emitAlgorithmicUndo={() => {
-				emitUndo(assignment);
+			emitRevertUpToX={() => {
+				emitRevert(assignment);
 			}}
 			{detailsExpanded}
 		/>

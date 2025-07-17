@@ -6,7 +6,8 @@
 		userActionEventBus
 	} from '$lib/events/events.ts';
 	import { updateAssignment } from '$lib/states/assignment.svelte.ts';
-	import { ArrowRightOutline, BarsOutline } from 'flowbite-svelte-icons';
+	import { ArrowRightOutline } from 'flowbite-svelte-icons';
+	import SolveIcon from './SolveIcon.svelte';
 	import './style.css';
 
 	interface Props {
@@ -49,7 +50,7 @@
 		}}
 		disabled={finished || backtrackingState}
 	>
-		<DynamicRender component={BarsOutline} props={generalProps} />
+		<DynamicRender component={SolveIcon} props={generalProps} />
 	</button>
 </general-debugger>
 
