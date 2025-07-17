@@ -1,7 +1,5 @@
 <script lang="ts">
-	import ClauseComponent from '$lib/components/ClauseComponent.svelte';
 	import DynamicRender from '$lib/components/DynamicRender.svelte';
-	import Clause from '$lib/entities/Clause.svelte.ts';
 	import Literal from '$lib/entities/Literal.svelte.ts';
 	import {
 		addBreakpoint,
@@ -12,6 +10,7 @@
 	import { getProblemStore, getVariablePool, type Problem } from '$lib/states/problem.svelte.ts';
 	import { logInfo } from '$lib/stores/toasts.ts';
 	import { BugOutline } from 'flowbite-svelte-icons';
+	import BreakpointPrinter from './BreakpointPrinterComponent.svelte';
 	import './style.css';
 
 	interface Props {
@@ -38,12 +37,9 @@
 
 	const variables = $derived(getVariablePool());
 
-	const clauses: Clause[] = $derived.by(() => {
+	const literals: Literal[] = $derived.by(() => {
 		return breakpoints.map(([, literal]) => {
-			return new Clause([Literal.buildFrom(literal, variables)], {
-				comments: [`Breakpoint: ${literal}`],
-				tag: literal
-			});
+			return Literal.buildFrom(literal, variables);
 		});
 	});
 
@@ -122,15 +118,15 @@
 	<variables-display class="breakpoint-display">
 		<div class="scrollable">
 			<ul>
-				{#each clauses as clause}
+				{#each literals as literal}
 					<li>
 						<button
 							onclick={() => {
-								removeBreakpoint(clause.getTag() as number);
+								removeBreakpoint(literal.toInt());
 							}}
 							class="variable-text"
 						>
-							<ClauseComponent {clause} classStyle={'bp-clause'} />
+							<BreakpointPrinter {literal} />
 						</button>
 					</li>
 				{/each}
