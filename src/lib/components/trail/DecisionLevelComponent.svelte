@@ -14,6 +14,7 @@
 		isLast?: boolean;
 		trail: Trail;
 		emitRevertUpToX: () => void;
+		showUPInfo?: boolean;
 	}
 
 	let {
@@ -22,7 +23,8 @@
 		propagations = [],
 		isLast = false,
 		trail,
-		emitRevertUpToX
+		emitRevertUpToX,
+		showUPInfo = false
 	}: Props = $props();
 </script>
 
@@ -61,6 +63,7 @@
 					{assignment}
 					{isLast}
 					fromPreviousTrail={trail.isAssignmentFromPreviousTrail(assignment)}
+					{showUPInfo}
 				/>
 			{/if}
 		{/each}
