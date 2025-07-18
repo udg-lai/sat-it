@@ -8,7 +8,7 @@
 		literal: number;
 	}
 
-	export type CanvasContext = Either<UPRelation, undefined>[];
+	export type CanvasContext = Either<UPRelation, () => never>[];
 
 	interface Props {
 		context: CanvasContext;

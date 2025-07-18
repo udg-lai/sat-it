@@ -89,6 +89,10 @@
 		border-right: 1px solid;
 	}
 
+	.previous-assignment {
+		color: color-mix(in srgb, var(--decision-color) 60%, transparent);
+	}
+
 	.open {
 		border-right: 1px solid transparent;
 	}
