@@ -1,38 +1,16 @@
 <script lang="ts">
-	import { stateMachineEventBus, toggleTrailExpandEventBus } from '$lib/events/events.ts';
-	import { ChevronDoubleRightOutline, ForwardOutline } from 'flowbite-svelte-icons';
-	import DynamicRender from '../DynamicRender.svelte';
-	import StepComponent from './StepDebuggerComponent.svelte';
+	import StepComponent from './buttons/StepComponent.svelte';
+	import NextVariableComponent from './buttons/NextVariableComponent.svelte';
+	import FinishConflictDetectionComponent from './buttons/FinishConflictDetectionComponent.svelte';
 
-	const assignmentProps = {
-		size: 'md'
-	};
 </script>
 
 <conflict-detection-debugger>
 	<StepComponent />
 
-	<button
-		class="btn general-btn"
-		title="Next variable"
-		onclick={() => {
-			toggleTrailExpandEventBus.emit(true);
-			stateMachineEventBus.emit('nextVariable');
-		}}
-	>
-		<DynamicRender component={ForwardOutline} props={assignmentProps} />
-	</button>
+	<NextVariableComponent />
 
-	<button
-		class="btn general-btn"
-		title="Finish CD"
-		onclick={() => {
-			toggleTrailExpandEventBus.emit(true);
-			stateMachineEventBus.emit('finishCD');
-		}}
-	>
-		<DynamicRender component={ChevronDoubleRightOutline} props={assignmentProps} />
-	</button>
+	<FinishConflictDetectionComponent />
 </conflict-detection-debugger>
 
 <style>

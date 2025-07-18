@@ -15,7 +15,4 @@
 <div class="heading-class">
 	<span class="pt-1">Trail</span>
 </div>
-<div class="body-class">
-    
-
-</div>
+<div class="body-class"></div>

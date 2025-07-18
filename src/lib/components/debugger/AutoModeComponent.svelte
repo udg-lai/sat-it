@@ -1,6 +1,4 @@
 <script lang="ts">
-	import type { SolverMachine } from '$lib/solvers/SolverMachine.svelte.ts';
-	import type { StateFun, StateInput } from '$lib/solvers/StateMachine.svelte.ts';
 	import { MAX_DELAY_MS, MIN_DELAY_MS, setStepDelay } from '$lib/states/delay-ms.svelte.ts';
 	import {
 		getBaselineDelay,
@@ -8,13 +6,8 @@
 		MIN_DELAY,
 		STEP_DELAY
 	} from '$lib/states/parameters.svelte.ts';
-	import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 	import { Range } from 'flowbite-svelte';
-	import { StopOutline } from 'flowbite-svelte-icons';
-	import DynamicRender from '../DynamicRender.svelte';
-	import './style.css';
-
-	let solverMachine: SolverMachine<StateFun, StateInput> = $derived(getSolverMachine());
+	import StopAutoSolvingComponent from './buttons/StopAutoSolvingComponent.svelte';
 
 	let min = MIN_DELAY;
 	let max = MAX_DELAY;
@@ -37,9 +30,7 @@
 </script>
 
 <auto-mode>
-	<button class="btn general-btn" onclick={() => solverMachine.stopAutoMode()} title="Stop">
-		<DynamicRender component={StopOutline} props={{ size: 'md' }} />
-	</button>
+	<StopAutoSolvingComponent />
 	<div class="range">
 		<Range
 			id="range-steps"

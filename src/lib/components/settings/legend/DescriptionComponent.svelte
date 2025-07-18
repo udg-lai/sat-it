@@ -9,7 +9,7 @@
 
 	let { icon, description }: Props = $props();
 
-    const iconProps = {
+	const iconProps = {
 		size: 'md'
 	};
 </script>
