@@ -1,19 +1,17 @@
 <script lang="ts">
-	import DynamicRender from '$lib/components/DynamicRender.svelte';
-	import type { Component } from 'svelte';
-
 	interface Props {
-		component?: Component;
+		image?: string;
+		imageAlt?: string;
 		description: string;
 	}
 
-	let { component, description }: Props = $props();
+	let { image='', imageAlt='', description }: Props = $props();
 </script>
 
 <div class="container">
 	<div class="icon-zone">
-		{#if component}
-			<DynamicRender {component} />
+		{#if image}
+			<img alt={imageAlt} src={image} />
 		{/if}
 	</div>
 	<div class="description-zone">
@@ -25,7 +23,7 @@
 	.container {
 		display: flex;
 		align-items: center;
-		min-height: 50px;
+		height: 55px;
 		border: 1px solid #ccc;
 		border-radius: 6px;
 		overflow-x: hidden;
@@ -44,6 +42,7 @@
 	.description-zone {
 		flex: 1;
 		padding-left: 12px;
+		padding-right: 5px;
 		background-color: #ffffff;
 		display: flex;
 		align-items: center;
