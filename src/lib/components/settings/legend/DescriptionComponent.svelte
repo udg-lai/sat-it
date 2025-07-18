@@ -3,21 +3,18 @@
 	import type { Component } from 'svelte';
 
 	interface Props {
-		icon?: Component;
+		component?: Component;
 		description: string;
 	}
 
-	let { icon, description }: Props = $props();
+	let { component, description }: Props = $props();
 
-	const iconProps = {
-		size: 'md'
-	};
 </script>
 
 <div class="container">
 	<div class="icon-zone">
-		{#if icon}
-			<DynamicRender component={icon} props={iconProps} />
+		{#if component}
+			<DynamicRender {component} />
 		{/if}
 	</div>
 	<div class="description-zone">
@@ -29,15 +26,15 @@
 	.container {
 		display: flex;
 		align-items: center;
-		height: 48px;
+		min-height: 50px;
 		border: 1px solid #ccc;
 		border-radius: 6px;
-		overflow: hidden;
-		font-family: sans-serif;
+		overflow-x: hidden;
+		overflow-y: auto;
 	}
 
 	.icon-zone {
-		width: 48px;
+		width: 50px;
 		height: 100%;
 		background-color: #f0f0f0;
 		display: flex;
@@ -47,7 +44,7 @@
 
 	.description-zone {
 		flex: 1;
-		padding: 0 12px;
+		padding-left: 12px;
 		background-color: #ffffff;
 		display: flex;
 		align-items: center;
