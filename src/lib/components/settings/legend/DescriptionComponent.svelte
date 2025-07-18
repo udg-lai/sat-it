@@ -5,7 +5,7 @@
 		description: string;
 	}
 
-	let { image='', imageAlt='', description }: Props = $props();
+	let { image = '', imageAlt = '', description }: Props = $props();
 </script>
 
 <div class="container">

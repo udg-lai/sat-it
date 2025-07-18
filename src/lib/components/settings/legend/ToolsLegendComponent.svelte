@@ -16,43 +16,43 @@
 </div>
 <div class="body-class">
 	<DescriptionComponent
-		image={AddInstance} 
-		imageAlt='Add instance option'
+		image={AddInstance}
+		imageAlt="Add instance option"
 		description={'Tool to add one or multiple instances'}
 	/>
 	<DescriptionComponent
-		image={Legend} 
-		imageAlt='Legend option'
+		image={Legend}
+		imageAlt="Legend option"
 		description={'Button to open the legend view where the different main program components are presented'}
 	/>
 	<DescriptionComponent
-		image={Instance} 
-		imageAlt='Instance option'
+		image={Instance}
+		imageAlt="Instance option"
 		description={'Button to open the instance view where the different instances can be selected, previsualized and deleted'}
 	/>
 	<DescriptionComponent
-		image={Engine} 
-		imageAlt='Engine option'
+		image={Engine}
+		imageAlt="Engine option"
 		description={'Button to open the engine view where different solving parameters can be modified'}
 	/>
 	<DescriptionComponent
-		image={CloseSettings} 
-		imageAlt='Close settings option'
+		image={CloseSettings}
+		imageAlt="Close settings option"
 		description={'Button to close the settings view'}
 	/>
 	<DescriptionComponent
-		image={OpenSettings} 
-		imageAlt='Open settings option'
+		image={OpenSettings}
+		imageAlt="Open settings option"
 		description={'Button to open the settings view'}
 	/>
 	<DescriptionComponent
-		image={Summary} 
-		imageAlt='Summary view'
+		image={Summary}
+		imageAlt="Summary view"
 		description={'View to revise the current state of the clauses and learned clauses of selected problem'}
 	/>
 	<DescriptionComponent
-		image={OccurrenceList} 
-		imageAlt='Occurrence list view'
+		image={OccurrenceList}
+		imageAlt="Occurrence list view"
 		description={'Tool that helps the user analyze and see which are the different clauses that are being checked during the revision of a occurrence list'}
 	/>
 </div>

@@ -20,65 +20,69 @@
 	<span class="pt-1">Buttons</span>
 </div>
 <div class="body-class">
-	<DescriptionComponent image={StepButton} imageAlt='Step button' description={'Single step button'} />
 	<DescriptionComponent
-		image={FinishTrailButton} 
-		imageAlt='Finish trail button'
+		image={StepButton}
+		imageAlt="Step button"
+		description={'Single step button'}
+	/>
+	<DescriptionComponent
+		image={FinishTrailButton}
+		imageAlt="Finish trail button"
 		description={'Complete a trail until reaching a final state or a conflict.'}
 	/>
 	<DescriptionComponent
 		image={SolveProblemButton}
-		imageAlt='Finish problem button'
+		imageAlt="Finish problem button"
 		description={'Solve the problem until reaching a final state.'}
 	/>
 	<DescriptionComponent
 		image={NextVariableButton}
-		imageAlt='Next variable button'
+		imageAlt="Next variable button"
 		description={'When an occurrence list is being examined, automatically check its clauses left'}
 	/>
 	<DescriptionComponent
 		image={FinishCDButton}
-		imageAlt='Finish conflict detection button'
+		imageAlt="Finish conflict detection button"
 		description={'When an occurrence list is being examined, automatically check all the occurrence lists left to be checked.'}
 	/>
 	<DescriptionComponent
 		image={BacktrackingButton}
-		imageAlt='Backtracking button'
+		imageAlt="Backtracking button"
 		description={'When a conflict has been detected in a non-conflict analysis algorithm, it does a backtracking.'}
 	/>
 	<DescriptionComponent
 		image={FinishCAButton}
-		imageAlt='Finish conflict analysis button'
+		imageAlt="Finish conflict analysis button"
 		description={'When in conflict analysis, automatically finishes it.'}
 	/>
 	<DescriptionComponent
 		image={StopButton}
-		imageAlt='Stop automatic solving button'
+		imageAlt="Stop automatic solving button"
 		description={'When in automatic solving, stop the process.'}
 	/>
 	<DescriptionComponent
 		image={ResetButton}
-		imageAlt='Reset problem button'
+		imageAlt="Reset problem button"
 		description={'Reset the solving process of the current problem.'}
 	/>
 	<DescriptionComponent
 		image={UndoButton}
-		imageAlt='Undo button'
+		imageAlt="Undo button"
 		description={'Undo until the latest press button.'}
 	/>
-	<DescriptionComponent 
+	<DescriptionComponent
 		image={RedoButton}
-		imageAlt='Redo button'
-		description={'Redo the undone state.'} 
+		imageAlt="Redo button"
+		description={'Redo the undone state.'}
 	/>
 	<DescriptionComponent
 		image={ExpandDLButton}
-		imageAlt='Expand decision level button'
+		imageAlt="Expand decision level button"
 		description={'Expand the decision levels of all trails.'}
 	/>
 	<DescriptionComponent
 		image={CollapseDLButton}
-		imageAlt='Collapse decision level button'
+		imageAlt="Collapse decision level button"
 		description={'Collapse the decision levels of all trails.'}
 	/>
 </div>

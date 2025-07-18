@@ -16,8 +16,6 @@
 	<ToolsLegend />
 </div>
 
-
-
 <style>
 	.division-container {
 		height: 100%;
