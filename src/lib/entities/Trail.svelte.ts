@@ -307,7 +307,7 @@ export class Trail {
 
 	private _upContext(): Either<UPContext, () => never>[] {
 		return this.assignments.map((a: VariableAssignment) => {
-			if (a.isUP()) {
+			if (a.isUP() || a.isBJ()) {
 				const reason = a.getReason() as UnitPropagation;
 				return makeLeft({
 					clauseTag: reason.clauseTag,
