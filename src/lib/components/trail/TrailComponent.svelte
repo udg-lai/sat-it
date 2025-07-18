@@ -17,9 +17,16 @@
 		expanded: boolean;
 		isLast?: boolean;
 		emitRevert?: (assignment: VariableAssignment) => void;
+		showUPInfo?: boolean;
 	}
 
-	let { trail, expanded, isLast = true, emitRevert = () => {} }: Props = $props();
+	let {
+		trail,
+		expanded,
+		isLast = true,
+		emitRevert = () => {},
+		showUPInfo = false
+	}: Props = $props();
 
 	let initialPropagations: VariableAssignment[] = $derived(trail.getInitialPropagations());
 
@@ -69,6 +76,7 @@
 				{assignment}
 				{isLast}
 				fromPreviousTrail={trail.isAssignmentFromPreviousTrail(assignment)}
+				{showUPInfo}
 			/>
 		{/if}
 	{/each}
@@ -83,6 +91,7 @@
 			emitRevertUpToX={() => {
 				emitRevert(assignment);
 			}}
+			{showUPInfo}
 		/>
 	{/each}
 </trail>
