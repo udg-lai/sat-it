@@ -115,6 +115,12 @@
 		};
 	}
 
+	function openTrailView(trailId: number) {
+		if (!trails.at(trailId)?.view()) {
+			toggleTrailView(trailId);
+		}
+	}
+
 	function toggleTrailView(trailId: number) {
 		const trail: Trail | undefined = trails.at(trailId);
 		if (trail === undefined) {
@@ -130,7 +136,6 @@
 				trails.at(i)?.setView(false);
 			}
 		}
-
 		trails.at(trailId)?.toggleView();
 	}
 
@@ -181,7 +186,7 @@
 			rearrangeTrailEditor(lastReference)
 		);
 		const unsubscribeToggleTrailView = toggleTrailViewEventBus.subscribe(() =>
-			toggleTrailView(trails.length - 1)
+			openTrailView(trails.length - 1)
 		);
 		return () => {
 			unsubscribeTrailTracking();
@@ -217,8 +222,7 @@
 							expanded={expandedTrails}
 							isLast={trails.length === index + 1}
 							showUPView={showUPs && trail.view()}
-							showCAView={(trails.length === index + 1 || trail.view()) &&
-								trail.hasConflictiveClause()}
+							showCAView={trail.view() && trail.hasConflictiveClause()}
 							emitRevert={(assignment: VariableAssignment) => emitRevert(assignment, index)}
 						/>
 					</div>

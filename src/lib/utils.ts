@@ -19,4 +19,4 @@ export const testNavigatorAgent = (): boolean => {
 
 export const error = (): never => {
 	throw new Error('This function should not be called');
-}
+};

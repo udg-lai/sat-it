@@ -53,7 +53,7 @@
 	<unit-propagation class:previous-assignment={fromPreviousTrail}>
 		<button
 			id={buttonId}
-			class="literal-style decision unit-propagation {chrome ? 'pad-chrome' : 'pad-others'}"
+			class="literal-style {chrome ? 'pad-chrome' : 'pad-others'}"
 			class:paint-background={detailsExpanded}
 		>
 			<MathTexComponent equation={assignment.toTeX()} />
@@ -96,10 +96,17 @@
 		padding: 0rem;
 	}
 
+	.previous-assignment {
+		color: color-mix(in srgb, var(--decision-color) 60%, transparent);
+	}
+
 	.paint-background {
 		position: relative;
 		color: var(--satisfied-color);
 		background-color: var(--satisfied-color-o);
 	}
 
+	:global(.previous-assignment.paint-background) {
+		color: color-mix(in srgb, var(--satisfied-color) 60%, transparent);
+	}
 </style>

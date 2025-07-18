@@ -24,7 +24,7 @@
 	{#each context as ctx}
 		{#if isPrintable(ctx)}
 			<div class="fill-space-wrapper">
-				<div class="fill-space paint-background" style="--height: 10px"></div>
+				<div class="fill-space paint-background" style="--height: 9px"></div>
 			</div>
 		{:else}
 			<div class="fill-space-wrapper">
@@ -42,15 +42,15 @@
 
 	.fill-space-wrapper {
 		padding: 0 calc(4px + 0.25rem);
-        min-width: 55px;
+		min-width: 55px;
 	}
 
 	.fill-space {
 		width: 40px;
 		height: var(--height);
-        border-right: 1px solid;
-        border-left: 1px solid;
-        border-color: var(--satisfied-border-color-o);
+		border-right: 1px solid;
+		border-left: 1px solid;
+		border-color: var(--satisfied-border-color-o);
 	}
 
 	.paint-background {

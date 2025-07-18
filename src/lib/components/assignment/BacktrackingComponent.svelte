@@ -47,6 +47,10 @@
 		cursor: unset;
 	}
 
+	.previous-assignment {
+		color: color-mix(in srgb, var(--conflict-color) 60%, transparent);
+	}
+
 	:global(mover mo) {
 		margin-bottom: 3px;
 	}
