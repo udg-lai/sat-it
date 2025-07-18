@@ -52,11 +52,13 @@
 		component={ResetProblemComponent}
 		description={'Reset the solving process of the current problem.'}
 	/>
-	<DescriptionComponent component={UndoComponent} description={'Undo until the latest press button.'} />
+	<DescriptionComponent
+		component={UndoComponent}
+		description={'Undo until the latest press button.'}
+	/>
 	<DescriptionComponent component={RedoComponent} description={'Redo the undone state.'} />
 	<DescriptionComponent
 		component={ExpColTrailComponent}
 		description={'Expand or collapse the decision levels of all trails.'}
 	/>
-
 </div>

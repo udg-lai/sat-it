@@ -8,7 +8,6 @@
 	}
 
 	let { component, description }: Props = $props();
-
 </script>
 
 <div class="container">

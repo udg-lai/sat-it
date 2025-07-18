@@ -2,7 +2,6 @@
 	import StepComponent from './buttons/StepComponent.svelte';
 	import NextVariableComponent from './buttons/NextVariableComponent.svelte';
 	import FinishConflictDetectionComponent from './buttons/FinishConflictDetectionComponent.svelte';
-
 </script>
 
 <conflict-detection-debugger>
