@@ -15,6 +15,7 @@
 		trail: Trail;
 		emitRevertUpToX: () => void;
 		detailsExpanded?: boolean;
+		showUPInfo?: boolean;
 	}
 
 	let {
@@ -24,7 +25,8 @@
 		isLast = false,
 		trail,
 		emitRevertUpToX,
-		detailsExpanded = false
+		detailsExpanded = false,
+		showUPInfo = false
 	}: Props = $props();
 </script>
 
@@ -64,6 +66,7 @@
 					{isLast}
 					fromPreviousTrail={trail.isAssignmentFromPreviousTrail(assignment)}
 					{detailsExpanded}
+					{showUPInfo}
 				/>
 			{/if}
 		{/each}

@@ -89,6 +89,7 @@
 				{isLast}
 				{emitRevert}
 				detailsExpanded={showCAView || showUPView}
+				showUPInfo={!showUPView}
 			/>
 		</div>
 		<div class="empty-slot"></div>

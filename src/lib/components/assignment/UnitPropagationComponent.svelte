@@ -17,13 +17,15 @@
 		isLast?: boolean;
 		fromPreviousTrail?: boolean;
 		detailsExpanded?: boolean;
+		showUPInfo?: boolean;
 	}
 
 	let {
 		assignment,
 		isLast = false,
 		fromPreviousTrail = false,
-		detailsExpanded = false
+		detailsExpanded = false,
+		showUPInfo = false
 	}: Props = $props();
 	let buttonId: string = 'btn-' + nanoid();
 
@@ -46,6 +48,14 @@
 
 	const conflictiveClauseTag: number | undefined = $derived(propagatedClause.getTag());
 
+	const conflictClauseString: string = $derived(
+		propagatedClause
+			.map((literal) => {
+				return literal.toTeX();
+			})
+			.join('\\: \\:')
+	);
+
 	let chrome: boolean = $derived(onChrome());
 </script>
 
@@ -64,6 +74,9 @@
 <Popover triggeredBy={'#' + buttonId} class="app-popover" trigger="click" placement="bottom">
 	<div class="popover-content">
 		<span class="clause-id">{conflictiveClauseTag}.</span>
+		{#if showUPInfo}
+			<MathTexComponent equation={conflictClauseString} fontSize="var(--popover-font-size)" />
+		{/if}
 	</div>
 </Popover>
 
