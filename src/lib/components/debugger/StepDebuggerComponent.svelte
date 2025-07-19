@@ -8,7 +8,7 @@
 		myClass?: string;
 	}
 
-	let { myClass = ''}: Props = $props();
+	let { myClass = '' }: Props = $props();
 
 	const assignmentProps = {
 		size: 'md'
