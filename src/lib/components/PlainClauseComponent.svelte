@@ -72,7 +72,7 @@
 		content: '';
 	}
 
-	.unsatisfied-background::after {
+	.unsatisfied-background::before {
 		position: absolute;
 		bottom: 0px;
 		width: var(--plain-literal-width);
