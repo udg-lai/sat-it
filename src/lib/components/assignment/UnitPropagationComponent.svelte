@@ -57,9 +57,6 @@
 	);
 
 	let chrome: boolean = $derived(onChrome());
-	$effect(() => {
-		console.log(detailsExpanded);
-	});
 </script>
 
 <HeadTailComponent {inspecting}>

@@ -32,7 +32,7 @@
 	--lemma-border-color: #fff0198c;
 	--visited-clause-color: #bdbdbd2b;
 	--inspecting-color: #bdbdbd;
-	--trail-height: 56px;
+	--trail-height: 55px;
 	--trail-gap: 1rem;
 	--trail-literal-min-width: var(--trail-literal-large-width);
 	--trail-literal-standard: 40px;
