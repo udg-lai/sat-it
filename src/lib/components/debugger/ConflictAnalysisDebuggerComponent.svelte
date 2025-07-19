@@ -11,7 +11,7 @@
 </script>
 
 <conflict-analysis-debugger>
-	<StepComponent />
+	<StepComponent myClass={'conflict-btn'}/>
 
 	<button
 		class="btn general-btn conflict-btn"
