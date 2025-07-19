@@ -125,6 +125,6 @@
 		display: flex;
 		flex-direction: column;
 		position: relative;
-		top:7.5px
+		top: 7.5px;
 	}
 </style>
