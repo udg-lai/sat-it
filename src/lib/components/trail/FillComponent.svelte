@@ -24,7 +24,7 @@
 	{#each context as ctx}
 		{#if isPrintable(ctx)}
 			<div class="fill-space-wrapper">
-				<div class="fill-space paint-background" style="--height: 9px"></div>
+				<div class="fill-space paint-background" style="--height: 13px"></div>
 			</div>
 		{:else}
 			<div class="fill-space-wrapper">

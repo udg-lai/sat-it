@@ -32,7 +32,7 @@ export class Trail {
 	private state: TrailState = $state('running');
 	private trailHeight: number = $derived.by(() => this._computeHeight());
 	private readonly defaultTrailHeight: number = 56;
-	private readonly canvasHeight: number = 126;
+	private readonly canvasHeight: number = 150;
 
 	copy(): Trail {
 		const newTrail = new Trail();

@@ -25,9 +25,10 @@
 	.literal-component {
 		width: var(--plain-literal-width);
 		height: var(--plain-literal-height);
+		padding-top: 30px;
 		display: flex;
 		flex-direction: column;
-		justify-content: center;
+		justify-content: flex-end;
 	}
 
 	.satisfied-background {
