@@ -20,12 +20,12 @@
 		showUPInfo?: boolean;
 	}
 
-	let { 
-		assignment, 
-		isLast, 
+	let {
+		assignment,
+		isLast,
 		fromPreviousTrail = false,
 		detailsExpanded = false,
-		showUPInfo = false 
+		showUPInfo = false
 	}: Props = $props();
 	let buttonId: string = 'btn-' + nanoid();
 
@@ -59,9 +59,8 @@
 	let chrome: boolean = $derived(onChrome());
 
 	$effect(() => {
-		console.log(detailsExpanded)
-	})
-	
+		console.log(detailsExpanded);
+	});
 </script>
 
 <HeadTailComponent {inspecting}>

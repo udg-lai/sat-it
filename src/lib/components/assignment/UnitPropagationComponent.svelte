@@ -58,8 +58,8 @@
 
 	let chrome: boolean = $derived(onChrome());
 	$effect(() => {
-		console.log(detailsExpanded)
-	})
+		console.log(detailsExpanded);
+	});
 </script>
 
 <HeadTailComponent {inspecting}>
@@ -82,8 +82,6 @@
 		</Popover>
 	</unit-propagation>
 </HeadTailComponent>
-
-
 
 <style>
 	:global(.app-popover) {
