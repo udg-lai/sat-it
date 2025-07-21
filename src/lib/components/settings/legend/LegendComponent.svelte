@@ -25,20 +25,27 @@
 	</legend>
 	<acknowledge>
 		<button onclick={() => (openModal = true)} class="ack-button">Acknowledgements</button>
-		<Modal title="Acknowledgements" bind:open={openModal} size="md" class="modal-style" >
+		<Modal title="Acknowledgements" bind:open={openModal} size="md" class="modal-style">
 			<ack-modal>
 				<content>
-					<span>This project was developed as the thesis of Pau Ferrer i Font, jointly carried out with Wilber B. Quito, and was inspired by the former SAT-IT tool created by Marc Cané and Marc Rojo.</span>
-					<span>It was supervised by Dr. Jordi Coll Caballero and Dr. Mateu Villaret Ausellé, in response to the needs of the LAI (Logic and Artificial Intelligence) research group.</span>
+					<span
+						>This project was developed as the thesis of Pau Ferrer i Font, jointly carried out with
+						Wilber B. Quito, and was inspired by the former SAT-IT tool created by Marc Cané and
+						Marc Rojo.</span
+					>
+					<span
+						>It was supervised by Dr. Jordi Coll Caballero and Dr. Mateu Villaret Ausellé, in
+						response to the needs of the LAI (Logic and Artificial Intelligence) research group.</span
+					>
 					<images>
-						<img src={LAI} alt={'LAI research group logo'}>
-						<img src={UDG} alt={'UDG logo'}>
+						<img src={LAI} alt={'LAI research group logo'} />
+						<img src={UDG} alt={'UDG logo'} />
 					</images>
 					<a href="https://github.com/udg-lai/sat-it" target="_blank" rel="noopener noreferrer">
 						View the project on GitHub
 					</a>
 				</content>
-				
+
 				<button
 					class="btn"
 					onclick={() => {
@@ -120,10 +127,10 @@
 		align-items: center;
 		padding-top: 20px;
 		padding-bottom: 20px;
-		gap: 20px;  
+		gap: 20px;
 	}
 	img {
-		height: 100px; 
+		height: 100px;
 		object-fit: contain;
 	}
 	a {

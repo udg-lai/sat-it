@@ -74,7 +74,7 @@
 		description={'When in automatic solving, stop the process.'}
 	/>
 
-	<division class='pt-1'>Non-algorithmic buttons</division>
+	<division class="pt-1">Non-algorithmic buttons</division>
 	<DescriptionComponent
 		component={RefreshOutline}
 		componentProps={regularProps}
