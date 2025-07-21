@@ -1,0 +1,32 @@
+c There is a graph of 3 vertices with a 2-clique and a 1-coloring
+c
+c Generated with `cnfgen`
+c (C) 2012-2018 Massimo Lauria <lauria.massimo@gmail.com>
+c https://massimolauria.github.io/cnfgen
+c
+c COMMAND LINE: cnfgen cliquecoloring 3 2 1
+c
+p cnf 12 23
+-4 -5 0
+-4 -6 0
+-5 -6 0
+4 5 6 0
+-7 -8 0
+-7 -9 0
+-8 -9 0
+7 8 9 0
+-4 -7 0
+-5 -8 0
+-6 -9 0
+1 -4 -8 0
+1 -7 -5 0
+2 -4 -9 0
+2 -7 -6 0
+3 -5 -9 0
+3 -8 -6 0
+10 0
+11 0
+12 0
+-1 -10 -11 0
+-2 -10 -12 0
+-3 -11 -12 0

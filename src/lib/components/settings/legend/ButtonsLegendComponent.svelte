@@ -32,6 +32,7 @@
 	<span class="pt-1">Buttons</span>
 </div>
 <div class="body-class">
+	<division>Algorithmic buttons</division>
 	<DescriptionComponent
 		component={CaretRightOutline}
 		componentProps={regularProps}
@@ -72,6 +73,8 @@
 		componentProps={regularProps}
 		description={'When in automatic solving, stop the process.'}
 	/>
+
+	<division class='pt-1'>Non-algorithmic buttons</division>
 	<DescriptionComponent
 		component={RefreshOutline}
 		componentProps={regularProps}
@@ -98,3 +101,11 @@
 		description={'Collapse the decision levels of all trails.'}
 	/>
 </div>
+
+<style>
+	division {
+		text-align: center;
+		font-size: 12px;
+		border-bottom: 1px solid var(--border-color);
+	}
+</style>
