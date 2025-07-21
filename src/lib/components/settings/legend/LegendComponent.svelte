@@ -3,6 +3,7 @@
 	import TrailLegend from './TrailLegendComponent.svelte';
 	import ToolsLegend from './ToolsLegendComponent.svelte';
 </script>
+
 <legend-view>
 	<legend>
 		<div class="content-container">
@@ -18,11 +19,12 @@
 		</div>
 	</legend>
 	<acknowledge>
-		<span>This project was made by Pau Ferrer i Font and Wilber B. Quito under the supervision of Dr. Mateu Villaret Auselle and Jordi Coll Caballero. </span>
+		<span
+			>This project was made by Pau Ferrer i Font and Wilber B. Quito under the supervision of Dr.
+			Mateu Villaret Auselle and Jordi Coll Caballero.
+		</span>
 	</acknowledge>
 </legend-view>
-
-
 
 <style>
 	legend-view {
