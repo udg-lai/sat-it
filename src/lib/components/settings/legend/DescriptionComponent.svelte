@@ -1,10 +1,10 @@
 <script lang="ts">
 	import DynamicRender from '$lib/components/DynamicRender.svelte';
-	import type { ComponentType } from 'svelte';
+	import type { Component } from 'svelte';
 
 	interface Props {
-		component?: ComponentType;
-	componentProps?: Record<string, unknown>;
+		component?: Component;
+		componentProps?: Record<string, unknown>;
 		description: string;
 	}
 
