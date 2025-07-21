@@ -20,7 +20,7 @@
 	</legend>
 	<acknowledge>
 		<span
-			>This project was made by Pau Ferrer i Font and Wilber B. Quito under the supervision of Dr.
+			>This project was made by  Wilber B. Quito and Pau Ferrer i Font under the supervision of Dr.
 			Mateu Villaret Auselle and Jordi Coll Caballero.
 		</span>
 	</acknowledge>
