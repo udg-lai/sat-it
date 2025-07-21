@@ -1,14 +1,38 @@
 <script lang="ts">
 	import DescriptionComponent from './DescriptionComponent.svelte';
-	import ChildlessDecision from '$lib/assets/trail/ChildlessImage.png';
-	import CollapsedDecision from '$lib/assets/trail/CollapsedImage.png';
-	import Up from '$lib/assets/trail/UPImage.png';
-	import ConflictTrail from '$lib/assets/trail/ConflictTrailImage.png';
-	import Running from '$lib/assets/trail/RunningImage.png';
-	import Conflict from '$lib/assets/trail/ConflictImage.png';
-	import Close from '$lib/assets/trail/CloseImage.png';
-	import Sat from '$lib/assets/trail/SatImage.png';
-	import Unsat from '$lib/assets/trail/UnsatImage.png';
+	import Variable from '$lib/entities/Variable.svelte.ts';
+	import VariableAssignment from '$lib/entities/VariableAssignment.ts';
+	import ChildlessDecisionComponent from '$lib/components/assignment/ChildlessDecisionComponent.svelte';
+	import DecisionComponent from '$lib/components/assignment/DecisionComponent.svelte';
+	import BacktrackingComponent from '$lib/components/assignment/BacktrackingComponent.svelte';
+	import UnitPropagationComponent from '$lib/components/assignment/UnitPropagationComponent.svelte';
+	import {
+		CheckOutline,
+		CloseOutline,
+		CogOutline,
+		CompressOutline,
+		HammerOutline
+	} from 'flowbite-svelte-icons';
+	const exampleVariable = new Variable(1, true);
+	const decisionExample = VariableAssignment.newManualAssignment(exampleVariable);
+	const regularProps = {
+		size: 'lg'
+	};
+	const satProps = {
+		color: 'var(--satisfied-color)',
+		size: 'lg'
+	};
+	const unsatProps = {
+		color: 'var(--unsatisfied-color)',
+		size: 'lg'
+	};
+	const conflictProps = {
+		color: 'var(--conflict-color)',
+		size: 'lg'
+	};
+	const trailProps = {
+		assignment: decisionExample
+	};
 </script>
 
 <div class="heading-class">
@@ -16,48 +40,48 @@
 </div>
 <div class="body-class">
 	<DescriptionComponent
-		image={ChildlessDecision}
-		imageAlt="Childless decision trail representation"
+		component={ChildlessDecisionComponent}
+		componentProps={trailProps}
 		description={'Decision with no propagations or with expanded propagations. If pressed, collapse decision level and revert up to here options can be displayed'}
 	/>
 	<DescriptionComponent
-		image={CollapsedDecision}
-		imageAlt="Collapsed decision trail representation"
+		component={DecisionComponent}
+		componentProps={trailProps}
 		description={'Decision with collapsed propagations. If pressed, expand decision level and revert up to here options can be displayed'}
 	/>
 	<DescriptionComponent
-		image={Up}
-		imageAlt="Unit propagation trail representation"
+		component={BacktrackingComponent}
+		componentProps={trailProps}
 		description={'Unit propagation. If pressed, it shows the id and literals from the clause that caused the propagation'}
 	/>
 	<DescriptionComponent
-		image={ConflictTrail}
-		imageAlt="Conflict trail representation"
+		component={UnitPropagationComponent}
+		componentProps={trailProps}
 		description={'Conflict representation. If pressed, and is a backjumping, it shows the id and literals from the clauses that caused the propagation'}
 	/>
 	<DescriptionComponent
-		image={Running}
-		imageAlt="Running trail information"
+		component={CogOutline}
+		componentProps={regularProps}
 		description={"Icon that represents that the trail doesn't have an outcome. If pressed, the trail information view is displayed"}
 	/>
 	<DescriptionComponent
-		image={Conflict}
-		imageAlt="Conflict trail information"
+		component={HammerOutline}
+		componentProps={conflictProps}
 		description={'Icon that represents that the trail has a conflict. If pressed, the trail information view is displayed'}
 	/>
 	<DescriptionComponent
-		image={Close}
-		imageAlt="Close trail information"
+		component={CompressOutline}
+		componentProps={regularProps}
 		description={'Icon that represents that the trail information view is opened. If pressed, this view is closed.'}
 	/>
 	<DescriptionComponent
-		image={Sat}
-		imageAlt="Sat trail information"
+		component={CheckOutline}
+		componentProps={satProps}
 		description={'Icon that represents that the trail has reached a SAT state'}
 	/>
 	<DescriptionComponent
-		image={Unsat}
-		imageAlt="Unsat trail information"
+		component={CloseOutline}
+		componentProps={unsatProps}
 		description={'Icon that represents that the trail has reached an UnSAT state'}
 	/>
 </div>

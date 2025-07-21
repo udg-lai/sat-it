@@ -1,18 +1,19 @@
 <script lang="ts">
+	import DynamicRender from '$lib/components/DynamicRender.svelte';
+	import type { ComponentType } from 'svelte';
+
 	interface Props {
-		image?: string;
-		imageAlt?: string;
+		component?: ComponentType;
+	componentProps?: Record<string, unknown>;
 		description: string;
 	}
 
-	let { image = '', imageAlt = '', description }: Props = $props();
+	let { component, componentProps, description }: Props = $props();
 </script>
 
 <div class="container">
 	<div class="icon-zone">
-		{#if image}
-			<img alt={imageAlt} src={image} />
-		{/if}
+		<DynamicRender {component} props={componentProps} />
 	</div>
 	<div class="description-zone">
 		{description}
@@ -21,30 +22,35 @@
 
 <style>
 	.container {
+		min-height: 55px;
 		display: flex;
 		align-items: center;
-		height: 55px;
-		border: 1px solid #ccc;
+		border: 1px solid var(--border-color);
 		border-radius: 6px;
-		overflow-x: hidden;
-		overflow-y: auto;
 	}
 
 	.icon-zone {
-		width: 50px;
 		height: 100%;
-		background-color: #f0f0f0;
+		width: 50px;
+		background-color: var(--button-color);
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		border-radius: 6px;
+		pointer-events: none;
 	}
 
 	.description-zone {
-		flex: 1;
-		padding-left: 12px;
-		padding-right: 5px;
-		background-color: #ffffff;
+		height: 100%;
 		display: flex;
+		flex: 1;
+		background-color: #ffffff;
 		align-items: center;
+		white-space: nowrap;
+		overflow-x: auto;
+		overflow-y: hidden;
+		padding: 0 10px 0 10px;
+		border-bottom-right-radius: 6px;
+		border-top-right-radius: 6px;
 	}
 </style>

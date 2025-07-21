@@ -24,8 +24,8 @@
 	}
 	.content-container {
 		height: 100%;
+		width: calc(33.33% - 4px);
 		display: flex;
-		flex: 1;
 		flex-direction: column;
 	}
 </style>

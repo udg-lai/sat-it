@@ -1,14 +1,25 @@
 <script lang="ts">
 	import DescriptionComponent from './DescriptionComponent.svelte';
-	import AddInstance from '$lib/assets/tools/AddInstance.png';
-	import CloseSettings from '$lib/assets/tools/CloseSettings.png';
-	import OpenSettings from '$lib/assets/tools/OpenSettings.png';
-	import Instance from '$lib/assets/tools/Instance.png';
-	import Legend from '$lib/assets/tools/Legend.png';
-	import Engine from '$lib/assets/tools/Engine.png';
-	import OccurrenceList from '$lib/assets/tools/OccurrenceList.png';
-	import Summary from '$lib/assets/tools/Summary.png';
+	import {
+		AdjustmentsVerticalOutline,
+		ArrowDownToBracketOutline,
+		ArrowUpFromBracketOutline,
+		BookOpenOutline,
+		BookOutline,
+		ClipboardOutline,
+		ExclamationCircleOutline,
+		PlusOutline
+	} from 'flowbite-svelte-icons';
 	import './style.css';
+
+	const regularProps = {
+		size: 'lg'
+	};
+
+	const addInstanceProps = {
+		size: 'lg',
+		class: 'addInstance'
+	};
 </script>
 
 <div class="heading-class">
@@ -16,43 +27,51 @@
 </div>
 <div class="body-class">
 	<DescriptionComponent
-		image={AddInstance}
-		imageAlt="Add instance option"
+		component={PlusOutline}
+		componentProps={addInstanceProps}
 		description={'Tool to add one or multiple instances'}
 	/>
 	<DescriptionComponent
-		image={Legend}
-		imageAlt="Legend option"
+		component={ExclamationCircleOutline}
+		componentProps={regularProps}
 		description={'Button to open the legend view where the different main program components are presented'}
 	/>
 	<DescriptionComponent
-		image={Instance}
-		imageAlt="Instance option"
+		component={BookOpenOutline}
+		componentProps={regularProps}
 		description={'Button to open the instance view where the different instances can be selected, previsualized and deleted'}
 	/>
 	<DescriptionComponent
-		image={Engine}
-		imageAlt="Engine option"
+		component={AdjustmentsVerticalOutline}
+		componentProps={regularProps}
 		description={'Button to open the engine view where different solving parameters can be modified'}
 	/>
 	<DescriptionComponent
-		image={CloseSettings}
-		imageAlt="Close settings option"
+		component={ArrowDownToBracketOutline}
+		componentProps={regularProps}
 		description={'Button to close the settings view'}
 	/>
 	<DescriptionComponent
-		image={OpenSettings}
-		imageAlt="Open settings option"
+		component={ArrowUpFromBracketOutline}
+		componentProps={regularProps}
 		description={'Button to open the settings view'}
 	/>
 	<DescriptionComponent
-		image={Summary}
-		imageAlt="Summary view"
+		component={BookOutline}
+		componentProps={regularProps}
 		description={'View to revise the current state of the clauses and learned clauses of selected problem'}
 	/>
 	<DescriptionComponent
-		image={OccurrenceList}
-		imageAlt="Occurrence list view"
+		component={ClipboardOutline}
+		componentProps={regularProps}
 		description={'Tool that helps the user analyze and see which are the different clauses that are being checked during the revision of a occurrence list'}
 	/>
 </div>
+
+<style>
+	:global(.addInstance) {
+		color: white;
+		background-color: var(--conflict-color);
+		border-radius: 50px;
+	}
+</style>

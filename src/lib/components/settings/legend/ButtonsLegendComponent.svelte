@@ -1,19 +1,31 @@
 <script lang="ts">
-	import DescriptionComponent from './DescriptionComponent.svelte';
-	import StepButton from '$lib/assets/buttons/StepButton.png';
-	import FinishTrailButton from '$lib/assets/buttons/FinishTrailButton.png';
-	import SolveProblemButton from '$lib/assets/buttons/SolveProblemButton.png';
-	import NextVariableButton from '$lib/assets/buttons/FollowingVariableButton.png';
-	import FinishCDButton from '$lib/assets/buttons/FinishCDButton.png';
-	import BacktrackingButton from '$lib/assets/buttons/BacktrackingButton.png';
-	import FinishCAButton from '$lib/assets/buttons/FinishCAButton.png';
-	import StopButton from '$lib/assets/buttons/StopButton.png';
-	import ResetButton from '$lib/assets/buttons/ResetButton.png';
-	import UndoButton from '$lib/assets/buttons/UndoButton.png';
-	import RedoButton from '$lib/assets/buttons/RedoButton.png';
-	import ExpandDLButton from '$lib/assets/buttons/ExpandDLButton.png';
-	import CollapseDLButton from '$lib/assets/buttons/CollapseDLButton.png';
 	import './style.css';
+	import DescriptionComponent from './DescriptionComponent.svelte';
+	import {
+		ArrowRightOutline,
+		CaretRightOutline,
+		ChevronDoubleRightOutline,
+		ChevronLeftOutline,
+		ChevronRightOutline,
+		CodeMergeOutline,
+		ForwardOutline,
+		RefreshOutline,
+		ReplyOutline,
+		StopOutline
+	} from 'flowbite-svelte-icons';
+	import SolveIcon from '$lib/components/debugger/buttons/SolveIcon.svelte';
+
+	const reverseProps = {
+		class: 'transform -scale-x-100',
+		size: 'lg'
+	};
+	const regularProps = {
+		size: 'lg'
+	};
+	const conflictProps = {
+		color: 'var(--conflict-color)',
+		size: 'lg'
+	};
 </script>
 
 <div class="heading-class">
@@ -21,68 +33,68 @@
 </div>
 <div class="body-class">
 	<DescriptionComponent
-		image={StepButton}
-		imageAlt="Step button"
+		component={CaretRightOutline}
+		componentProps={regularProps}
 		description={'Single step button'}
 	/>
 	<DescriptionComponent
-		image={FinishTrailButton}
-		imageAlt="Finish trail button"
+		component={ArrowRightOutline}
+		componentProps={regularProps}
 		description={'Complete a trail until reaching a final state or a conflict.'}
 	/>
 	<DescriptionComponent
-		image={SolveProblemButton}
-		imageAlt="Finish problem button"
+		component={SolveIcon}
+		componentProps={regularProps}
 		description={'Solve the problem until reaching a final state.'}
 	/>
 	<DescriptionComponent
-		image={NextVariableButton}
-		imageAlt="Next variable button"
+		component={ForwardOutline}
+		componentProps={regularProps}
 		description={'When an occurrence list is being examined, automatically check its clauses left'}
 	/>
 	<DescriptionComponent
-		image={FinishCDButton}
-		imageAlt="Finish conflict detection button"
+		component={ChevronDoubleRightOutline}
+		componentProps={regularProps}
 		description={'When an occurrence list is being examined, automatically check all the occurrence lists left to be checked.'}
 	/>
 	<DescriptionComponent
-		image={BacktrackingButton}
-		imageAlt="Backtracking button"
+		component={CodeMergeOutline}
+		componentProps={conflictProps}
 		description={'When a conflict has been detected in a non-conflict analysis algorithm, it does a backtracking.'}
 	/>
 	<DescriptionComponent
-		image={FinishCAButton}
-		imageAlt="Finish conflict analysis button"
+		component={ForwardOutline}
+		componentProps={conflictProps}
 		description={'When in conflict analysis, automatically finishes it.'}
 	/>
 	<DescriptionComponent
-		image={StopButton}
-		imageAlt="Stop automatic solving button"
+		component={StopOutline}
+		componentProps={regularProps}
 		description={'When in automatic solving, stop the process.'}
 	/>
 	<DescriptionComponent
-		image={ResetButton}
-		imageAlt="Reset problem button"
+		component={RefreshOutline}
+		componentProps={regularProps}
 		description={'Reset the solving process of the current problem.'}
 	/>
 	<DescriptionComponent
-		image={UndoButton}
-		imageAlt="Undo button"
+		component={ReplyOutline}
+		componentProps={regularProps}
 		description={'Undo until the latest press button.'}
 	/>
 	<DescriptionComponent
-		image={RedoButton}
-		imageAlt="Redo button"
+		component={ReplyOutline}
+		componentProps={reverseProps}
 		description={'Redo the undone state.'}
 	/>
 	<DescriptionComponent
-		image={ExpandDLButton}
-		imageAlt="Expand decision level button"
+		component={ChevronRightOutline}
+		componentProps={regularProps}
 		description={'Expand the decision levels of all trails.'}
 	/>
 	<DescriptionComponent
-		image={CollapseDLButton}
-		imageAlt="Collapse decision level button"
+		component={ChevronLeftOutline}
+		componentProps={regularProps}
 		description={'Collapse the decision levels of all trails.'}
 	/>
 </div>
