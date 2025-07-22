@@ -72,6 +72,8 @@
 				{assignment}
 				{isLast}
 				fromPreviousTrail={trail.isAssignmentFromPreviousTrail(assignment)}
+				{detailsExpanded}
+				{showUPInfo}
 			/>
 		{:else}
 			<UnitPropagationComponent

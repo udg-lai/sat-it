@@ -68,17 +68,17 @@
 		>
 			<MathTexComponent equation={assignment.toTeX()} />
 		</button>
+
+		<Popover triggeredBy={'#' + buttonId} class="app-popover" trigger="click" placement="bottom">
+			<div class="popover-content">
+				<span class="clause-id">{conflictiveClauseTag}.</span>
+				{#if showUPInfo}
+					<MathTexComponent equation={conflictClauseString} fontSize="var(--popover-font-size)" />
+				{/if}
+			</div>
+		</Popover>
 	</unit-propagation>
 </HeadTailComponent>
-
-<Popover triggeredBy={'#' + buttonId} class="app-popover" trigger="click" placement="bottom">
-	<div class="popover-content">
-		<span class="clause-id">{conflictiveClauseTag}.</span>
-		{#if showUPInfo}
-			<MathTexComponent equation={conflictClauseString} fontSize="var(--popover-font-size)" />
-		{/if}
-	</div>
-</Popover>
 
 <style>
 	:global(.app-popover) {

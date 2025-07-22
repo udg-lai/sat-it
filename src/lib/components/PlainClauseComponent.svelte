@@ -43,7 +43,6 @@
 		align-items: center;
 		padding: 0 calc(4px + 0.25rem);
 		min-width: var(--empty-slot);
-		top: 1px;
 	}
 
 	.satisfied-background {
@@ -73,7 +72,7 @@
 		content: '';
 	}
 
-	.unsatisfied-background::after {
+	.unsatisfied-background::before {
 		position: absolute;
 		bottom: 0px;
 		width: var(--plain-literal-width);

@@ -7,7 +7,6 @@
 	import { isLeft, makeLeft, makeRight, unwrapEither, type Either } from '$lib/types/either.ts';
 	import { error } from '$lib/utils.ts';
 	import CanvasComponent, { type CanvasContext, type UPRelation } from './CanvasComponent.svelte';
-	import FillComponent from './FillComponent.svelte';
 	import TrailComponent from './TrailComponent.svelte';
 
 	interface Props {
@@ -76,9 +75,6 @@
 				reverse={true}
 				repeat={false}
 			/>
-			<div class="fill">
-				<FillComponent context={unitPropagations} width={trailWidth} />
-			</div>
 		</div>
 	{/if}
 	<div use:observeWidth class="fit-content width-observer">
@@ -129,10 +125,6 @@
 		display: flex;
 		flex-direction: column;
 		position: relative;
-	}
-
-	.fill {
-		position: absolute;
-		bottom: -8.5px;
+		top: 7.5px;
 	}
 </style>

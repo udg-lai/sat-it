@@ -16,9 +16,17 @@
 		assignment: VariableAssignment;
 		isLast: boolean;
 		fromPreviousTrail?: boolean;
+		detailsExpanded?: boolean;
+		showUPInfo?: boolean;
 	}
 
-	let { assignment, isLast, fromPreviousTrail = false }: Props = $props();
+	let {
+		assignment,
+		isLast,
+		fromPreviousTrail = false,
+		detailsExpanded = false,
+		showUPInfo = false
+	}: Props = $props();
 	let buttonId: string = 'btn-' + nanoid();
 
 	const inspectedVariable: number = $derived(getInspectedVariable());
@@ -56,13 +64,17 @@
 		<button
 			id={buttonId}
 			class="literal-style decision backjumping {chrome ? 'pad-chrome' : 'pad-others'}"
+			class:paint-background={detailsExpanded}
 		>
 			<MathTexComponent equation={assignment.toTeX()} />
 		</button>
+
 		<Popover triggeredBy={'#' + buttonId} class="app-popover" trigger="click" placement="bottom">
 			<div class="popover-content">
 				<span class="clause-id">{conflictiveClauseTag}.</span>
-				<MathTexComponent equation={conflictClauseString} fontSize="var(--popover-font-size)" />
+				{#if showUPInfo}
+					<MathTexComponent equation={conflictClauseString} fontSize="var(--popover-font-size)" />
+				{/if}
 			</div>
 		</Popover>
 	</backtracking>
@@ -81,6 +93,12 @@
 
 	.previous-assignment {
 		color: color-mix(in srgb, var(--conflict-color) 60%, transparent);
+	}
+
+	.paint-background {
+		position: relative;
+		color: var(--satisfied-color);
+		background-color: var(--satisfied-color-o);
 	}
 
 	:global(.app-popover) {
