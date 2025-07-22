@@ -50,12 +50,12 @@
 		description={'Decision with collapsed propagations. If pressed, expand decision level and revert up to here options can be displayed'}
 	/>
 	<DescriptionComponent
-		component={BacktrackingComponent}
+		component={UnitPropagationComponent}
 		componentProps={trailProps}
 		description={'Unit propagation. If pressed, it shows the id and literals from the clause that caused the propagation'}
 	/>
 	<DescriptionComponent
-		component={UnitPropagationComponent}
+		component={BacktrackingComponent}
 		componentProps={trailProps}
 		description={'Conflict representation. If pressed, and is a backjumping, it shows the id and literals from the clauses that caused the propagation'}
 	/>
