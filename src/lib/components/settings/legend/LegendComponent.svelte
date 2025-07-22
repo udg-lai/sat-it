@@ -1,10 +1,10 @@
 <script lang="ts">
-	import ButtonsLegend from './ButtonsLegendComponent.svelte';
-	import TrailLegend from './TrailLegendComponent.svelte';
-	import ToolsLegend from './ToolsLegendComponent.svelte';
 	import LAI from '$lib/assets/LAI.svg';
 	import UDG from '$lib/assets/UDG.png';
 	import { Modal } from 'flowbite-svelte';
+	import ButtonsLegend from './ButtonsLegendComponent.svelte';
+	import ToolsLegend from './ToolsLegendComponent.svelte';
+	import TrailLegend from './TrailLegendComponent.svelte';
 
 	let openModal: boolean = $state(false);
 </script>
@@ -25,26 +25,45 @@
 	</legend>
 	<acknowledge>
 		<button onclick={() => (openModal = true)} class="ack-button">Acknowledgements</button>
-		<Modal title="Acknowledgements" bind:open={openModal} size="md" class="modal-style">
+		<Modal
+			title="Acknowledgements"
+			bind:open={openModal}
+			size="md"
+			bodyClass="p-2 md:p-4 space-y-4 flex-1 overflow-y-auto overscroll-contain"
+			class="modal-style"
+		>
 			<ack-modal>
 				<content>
 					<span
-						>This project was developed as the thesis of Pau Ferrer i Font, jointly carried out with
-						Wilber B. Quito, and was inspired by the former SAT-IT tool created by Marc Cané and
-						Marc Rojo.</span
-					>
-					<span
-						>It was supervised by Dr. Jordi Coll Caballero and Dr. Mateu Villaret Ausellé, in
-						response to the needs of the LAI (Logic and Artificial Intelligence) research group.</span
-					>
+						>SAT-IT is the result of <span class="people">Pau Ferrer i Font</span>'s thesis,
+						developed in collaboration with the PhD candidate
+						<span class="people">Wilber Bermeo Quito</span>. The work was supervised by
+						<span class="people">Dr. Jordi Coll Caballero</span>
+						and
+						<span class="people">Dr. Mateu Villaret Ausellé</span>, within the Logic and Artificial
+						Intelligence (LAI) research group at the University of Girona. We would like to thank
+						<span class="people">Marc Cané</span>
+						and
+						<span class="people">Marc Rojo</span> for the original version of SAT-IT, which served as
+						inspiration.
+					</span>
 					<images>
-						<img src={LAI} alt={'LAI research group logo'} />
-						<img src={UDG} alt={'UDG logo'} />
+						<a href="https://imae.udg.edu/Recerca/LAI/" target="_blank" rel="noopener noreferrer">
+							<img src={LAI} alt={'LAI research group logo'} class="lai-img" />
+						</a>
+						<a href="https://www.udg.edu/en/" target="_blank" rel="noopener noreferrer">
+							<img src={UDG} alt={'UDG logo'} />
+						</a>
 					</images>
-					<a href="https://github.com/udg-lai/sat-it" target="_blank" rel="noopener noreferrer">
-						View the project on GitHub
-					</a>
-				</content>
+					<span>
+						SAT-IT is an open source GitHub project and can be consulted <a
+							class="github"
+							href="https://github.com/udg-lai/sat-it"
+							target="_blank"
+							rel="noopener noreferrer">here</a
+						>.
+					</span></content
+				>
 
 				<button
 					class="btn"
@@ -109,6 +128,11 @@
 		display: flex;
 		flex: 1;
 		justify-content: center;
+		height: 100%;
+		align-items: center;
+	}
+	.ack-button:hover {
+		color: var(--icon-base);
 	}
 	content {
 		display: flex;
@@ -129,14 +153,28 @@
 		padding-bottom: 20px;
 		gap: 20px;
 	}
+
+	span.people {
+		color: var(--icon-base);
+		padding: 0;
+	}
+
 	img {
 		height: 100px;
 		object-fit: contain;
+		scale: 0.8;
+	}
+	.lai-img {
+		scale: 0.7;
 	}
 	a {
 		padding-top: 10px;
 		padding-bottom: 10px;
 		font-size: 14px;
 		text-align: center;
+	}
+
+	a.github:hover {
+		color: var(--icon-base);
 	}
 </style>
