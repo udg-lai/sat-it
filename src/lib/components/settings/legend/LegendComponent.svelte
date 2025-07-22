@@ -35,17 +35,11 @@
 			<ack-modal>
 				<content>
 					<span
-						>SAT-IT is the result of <span class="people">Pau Ferrer i Font</span>'s thesis,
-						developed in collaboration with the PhD candidate
-						<span class="people">Wilber Bermeo Quito</span>. The work was supervised by
-						<span class="people">Dr. Jordi Coll Caballero</span>
-						and
-						<span class="people">Dr. Mateu Villaret Ausellé</span>, within the Logic and Artificial
-						Intelligence (LAI) research group at the University of Girona. We would like to thank
-						<span class="people">Marc Cané</span>
-						and
-						<span class="people">Marc Rojo</span> for the original version of SAT-IT, which served as
-						inspiration.
+						>SAT-IT is the result of Pau Ferrer i Font's thesis, developed in collaboration with the
+						PhD candidate Wilber Bermeo Quito. The work was supervised by Dr. Jordi Coll Caballero
+						and Dr. Mateu Villaret Ausellé, within the Logic and Artificial Intelligence (LAI)
+						research group at the University of Girona. We would like to thank Marc Cané and Marc
+						Rojo for the original version of SAT-IT, which served as inspiration.
 					</span>
 					<images>
 						<a href="https://imae.udg.edu/Recerca/LAI/" target="_blank" rel="noopener noreferrer">
@@ -152,11 +146,6 @@
 		padding-top: 20px;
 		padding-bottom: 20px;
 		gap: 20px;
-	}
-
-	span.people {
-		color: var(--icon-base);
-		padding: 0;
 	}
 
 	img {
