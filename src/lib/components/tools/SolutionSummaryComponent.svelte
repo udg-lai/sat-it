@@ -39,11 +39,29 @@
 	let clauses: Clause[] = $derived(getClausePool().getClauses());
 
 	let summary: Either<Clause, string>[] = $derived.by(() => {
-		return clauses.flatMap((c) => {
+		const poolSize: number = getClausePool().size();
+		const learntSize: number = getClausePool().getLearnt().length;
+
+		const originalClauses = clauses.slice(0, poolSize - learntSize);
+		const learnedClauses = clauses.slice(poolSize - learntSize);
+
+		const originalPart = originalClauses.flatMap((c) => {
 			const comments: Right<string>[] = c.getComments().map(makeRight);
 			const clause: Left<Clause> = makeLeft(c);
 			return [...comments, clause];
 		});
+
+		const learntPart = learnedClauses.flatMap((c) => {
+			const comments: Right<string>[] = c.getComments().map(makeRight);
+			const clause: Left<Clause> = makeLeft(c);
+			return [...comments, clause];
+		});
+
+		if (learntPart.length > 0) {
+			return [...originalPart, makeRight('Learnt clauses'), ...learntPart];
+		} else {
+			return [...originalPart];
+		}
 	});
 </script>
 

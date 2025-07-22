@@ -4,13 +4,19 @@
 	import DynamicRender from '../../DynamicRender.svelte';
 	import '../style.css';
 
+	interface Props {
+		myClass?: string;
+	}
+
+	let { myClass = '' }: Props = $props();
+
 	const assignmentProps = {
 		size: 'md'
 	};
 </script>
 
 <button
-	class="btn general-btn"
+	class="btn general-btn {myClass}"
 	onclick={() => {
 		stateMachineEventBus.emit('step');
 	}}

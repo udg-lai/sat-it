@@ -16,3 +16,7 @@ export const modifyLiteralWidth = (varCount: number): void => {
 export const testNavigatorAgent = (): boolean => {
 	return /chrom(e|ium)/.test(navigator.userAgent.toLowerCase());
 };
+
+export const error = (): never => {
+	throw new Error('This function should not be called');
+};

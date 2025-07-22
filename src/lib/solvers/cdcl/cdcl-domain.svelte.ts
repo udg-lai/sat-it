@@ -34,6 +34,7 @@ import { logFatal, logInfo } from '$lib/stores/toasts.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import type { OccurrenceList } from '../types.ts';
 import type { CDCL_SolverMachine } from './cdcl-solver-machine.svelte.ts';
+import { resetInspectedVariable } from '$lib/states/inspectedVariable.svelte.ts';
 
 const problem: Problem = $derived(getProblemStore());
 
@@ -338,7 +339,8 @@ export const assertingClause: CDCL_ASSERTING_CLAUSE_FUN = (solver: CDCL_SolverMa
 export type CDCL_PICK_LAST_ASSIGNMENT_FUN = (trail: Trail) => VariableAssignment;
 
 export const pickLastAssignment = (trail: Trail) => {
-	return trail.pickLastAssignment();
+	const lastAssignment: VariableAssignment = trail.pickLastAssignment();
+	return lastAssignment;
 };
 
 export type CDCL_VARIABLE_IN_CC_FUN = (
@@ -368,8 +370,8 @@ export const resolutionUpdateCC: CDCL_RESOLUTION_UPDATE_CC_FUN = (
 	if (!isPropagationReason(reason)) {
 		logFatal('CDCL', 'The reason is not a propagation reason');
 	}
-	const reasonclauseTag: number = reason.clauseTag;
-	const reasonClause: Clause = getClausePool().get(reasonclauseTag);
+	const reasonClauseTag: number = reason.clauseTag;
+	const reasonClause: Clause = getClausePool().get(reasonClauseTag);
 	const resolvent: Clause = conflictClause.resolution(reasonClause);
 	solver.updateConflictClause(resolvent);
 	return resolvent;
@@ -386,18 +388,20 @@ export type CDCL_LEARN_CONFLICT_CLAUSE_FUN = (trail: Trail, conflictClause: Clau
 
 export const learnConflictClause: CDCL_LEARN_CONFLICT_CLAUSE_FUN = (
 	trail: Trail,
-	conflictClause: Clause
+	lemma: Clause
 ) => {
-	//Generate the "Clause" that will be added to the pool.
-	const lemma: Clause = new Clause(conflictClause.getLiterals(), { learnt: true });
+	//Set the lemma as learnt. This will be the clause that will be added to the pool.
+	lemma.setAsLearntClause();
 
-	//The clause is stored inside the pool
+	//The lemma is stored inside the pool
 	addClauseToClausePool(lemma);
 
 	// Saves the learnt clause in the trail
 	trail.learnClause(lemma);
 
 	logInfo('New clause learnt', `Clause ${lemma.getTag()} learnt`);
+
+	resetInspectedVariable();
 
 	return lemma.getTag() as number;
 };

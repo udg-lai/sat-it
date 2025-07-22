@@ -8,7 +8,7 @@
 		literal: number;
 	}
 
-	export type CanvasContext = Either<UPRelation, undefined>[];
+	export type CanvasContext = Either<UPRelation, () => never>[];
 
 	interface Props {
 		context: CanvasContext;
@@ -58,12 +58,13 @@
 	}
 
 	.canvas {
-		height: 126px;
+		height: 150px;
 		width: var(--width);
 		overflow-y: auto;
 		overflow-x: hidden;
 		-ms-overflow-style: none; /* Internet Explorer 10+ */
 		scrollbar-width: none; /* Firefox */
+		cursor: ns-resize;
 	}
 
 	.canvas::-webkit-scrollbar {

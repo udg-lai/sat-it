@@ -65,3 +65,6 @@ export type StateMachineLifeCycleEvent =
 
 // event bus dedicated to the life cycle of the state machine
 export const stateMachineLifeCycleEventBus = createEventBus<StateMachineLifeCycleEvent>();
+
+// event bus dedicated to toggle the trail view
+export const toggleTrailViewEventBus = createEventBus<void>();

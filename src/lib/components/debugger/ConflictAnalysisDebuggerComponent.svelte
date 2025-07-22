@@ -4,7 +4,7 @@
 </script>
 
 <conflict-analysis-debugger>
-	<StepComponent />
+	<StepComponent myClass={'conflict-btn'} />
 
 	<ConflictAnalysisComponent />
 </conflict-analysis-debugger>

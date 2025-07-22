@@ -5,6 +5,7 @@
 		algorithmicUndoEventBus,
 		solverStartedAutoMode,
 		toggleTrailExpandEventBus,
+		toggleTrailViewEventBus,
 		trailTrackingEventBus
 	} from '$lib/events/events.ts';
 	import type { SolverMachine } from '$lib/solvers/SolverMachine.svelte.ts';
@@ -114,31 +115,27 @@
 		};
 	}
 
+	function openTrailView(trailId: number) {
+		if (!trails.at(trailId)?.view()) {
+			toggleTrailView(trailId);
+		}
+	}
+
 	function toggleTrailView(trailId: number) {
 		const trail: Trail | undefined = trails.at(trailId);
 		if (trail === undefined) {
 			logFatal('Trail not found for ID: ' + trailId);
 		}
-		if (
-			solver.identify() === 'bkt' &&
-			(trail.getState() === 'running' || trail.getState() === 'sat')
-		) {
+		if (solver.identify() === 'bkt' && trail.getConflictiveClause() === undefined) {
 			// If the trail is running or is a model, we do not allow toggling the view
 			return;
 		}
 
-		const limit = Math.abs(trails.length - 1);
-
-		if (trailId >= limit) {
-			return;
-		}
-
-		for (let i = 0; i < limit; i++) {
+		for (let i = 0; i < trails.length; i++) {
 			if (trailId != i) {
 				trails.at(i)?.setView(false);
 			}
 		}
-
 		trails.at(trailId)?.toggleView();
 	}
 
@@ -188,10 +185,14 @@
 		const unsubscribeRunningOnAuto = solverStartedAutoMode.subscribe(() =>
 			rearrangeTrailEditor(lastReference)
 		);
+		const unsubscribeToggleTrailView = toggleTrailViewEventBus.subscribe(() =>
+			openTrailView(trails.length - 1)
+		);
 		return () => {
 			unsubscribeTrailTracking();
 			unsubscribeExpandedTrails();
 			unsubscribeRunningOnAuto();
+			unsubscribeToggleTrailView();
 		};
 	});
 </script>
@@ -221,8 +222,7 @@
 							expanded={expandedTrails}
 							isLast={trails.length === index + 1}
 							showUPView={showUPs && trail.view()}
-							showCAView={(trails.length === index + 1 || trail.view()) &&
-								trail.hasConflictiveClause()}
+							showCAView={trail.view() && trail.hasConflictiveClause()}
 							emitRevert={(assignment: VariableAssignment) => emitRevert(assignment, index)}
 						/>
 					</div>
@@ -239,6 +239,7 @@
 						trailState={trail.getState()}
 						expanded={trail.view()}
 						onToggleExpand={() => toggleTrailView(index)}
+						disableClick={solver.identify() === 'bkt' && trail.getConflictiveClause() === undefined}
 					/>
 				</div>
 			{/each}

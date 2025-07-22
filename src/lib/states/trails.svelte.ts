@@ -10,13 +10,9 @@ export const getLatestTrail = (): Trail | undefined => trails[trails.length - 1]
 
 export const stackTrail = (trail: Trail): void => {
 	trails = [...trails, trail];
-	for (let i = 0; i < trails.length - 2; i++) {
+	for (let i = 0; i < trails.length; i++) {
 		trails.at(i)?.setView(false);
 	}
-	const n1 = trails.length;
-	const n2 = n1 - 1;
-	trails.at(n1 - 1)?.setView(true);
-	trails.at(n2 - 1)?.setView(true);
 };
 
 export const unstackTrail = (): void => {
