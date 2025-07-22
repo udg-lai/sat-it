@@ -4,18 +4,19 @@
 	import type Clause from '$lib/entities/Clause.svelte.ts';
 	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
 	import { isUnitPropagationReason } from '$lib/entities/VariableAssignment.ts';
-	import { getInspectedVariable } from '$lib/states/conflict-detection-state.svelte.ts';
 	import { getProblemStore, type Problem } from '$lib/states/problem.svelte.ts';
 	import { logFatal } from '$lib/stores/toasts.ts';
 	import { Popover } from 'flowbite-svelte';
 	import { nanoid } from 'nanoid';
 	import HeadTailComponent from './../HeadTailComponent.svelte';
 	import './style.css';
+	import { getInspectedVariable } from '$lib/states/inspectedVariable.svelte.ts';
 
 	interface Props {
 		assignment: VariableAssignment;
 		isLast?: boolean;
 		fromPreviousTrail?: boolean;
+		detailsExpanded?: boolean;
 		showUPInfo?: boolean;
 	}
 
@@ -23,6 +24,7 @@
 		assignment,
 		isLast = false,
 		fromPreviousTrail = false,
+		detailsExpanded = false,
 		showUPInfo = false
 	}: Props = $props();
 	let buttonId: string = 'btn-' + nanoid();
@@ -61,21 +63,22 @@
 	<unit-propagation class:previous-assignment={fromPreviousTrail}>
 		<button
 			id={buttonId}
-			class="literal-style decision unit-propagation {chrome ? 'pad-chrome' : 'pad-others'}"
+			class="literal-style {chrome ? 'pad-chrome' : 'pad-others'}"
+			class:paint-background={detailsExpanded}
 		>
 			<MathTexComponent equation={assignment.toTeX()} />
 		</button>
+
+		<Popover triggeredBy={'#' + buttonId} class="app-popover" trigger="click" placement="bottom">
+			<div class="popover-content">
+				<span class="clause-id">{conflictiveClauseTag}.</span>
+				{#if showUPInfo}
+					<MathTexComponent equation={conflictClauseString} fontSize="var(--popover-font-size)" />
+				{/if}
+			</div>
+		</Popover>
 	</unit-propagation>
 </HeadTailComponent>
-
-<Popover triggeredBy={'#' + buttonId} class="app-popover" trigger="click" placement="bottom">
-	<div class="popover-content">
-		<span class="clause-id">{conflictiveClauseTag}.</span>
-		{#if showUPInfo}
-			<MathTexComponent equation={conflictClauseString} fontSize="var(--popover-font-size)" />
-		{/if}
-	</div>
-</Popover>
 
 <style>
 	:global(.app-popover) {
@@ -104,5 +107,19 @@
 
 	:global(.app-popover > .px-3) {
 		padding: 0rem;
+	}
+
+	.previous-assignment {
+		color: color-mix(in srgb, var(--decision-color) 60%, transparent);
+	}
+
+	.paint-background {
+		position: relative;
+		color: var(--satisfied-color);
+		background-color: var(--satisfied-color-o);
+	}
+
+	:global(.previous-assignment.paint-background) {
+		color: color-mix(in srgb, var(--satisfied-color) 60%, transparent);
 	}
 </style>

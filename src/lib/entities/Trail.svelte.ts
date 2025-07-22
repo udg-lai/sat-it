@@ -1,6 +1,7 @@
 import { getProblemStore } from '$lib/states/problem.svelte.ts';
 import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 import { logFatal } from '$lib/stores/toasts.ts';
+import { error } from '$lib/utils.ts';
 import { makeLeft, makeRight, type Either } from '../types/either.ts';
 import type Clause from './Clause.svelte.ts';
 import type VariableAssignment from './VariableAssignment.ts';
@@ -23,15 +24,15 @@ export class Trail {
 	private decisionLevelBookmark: number[] = $state([-1]);
 	private followUPIndex: number = 0;
 	private decisionLevel: number = 0;
-	private conflictAnalysisCtx: Either<ConflictAnalysisContext, undefined>[] = $state([]); // this is just for representing the conflict analysis view
-	private upContext: Either<UPContext, undefined>[] = $derived.by(() => this._upContext());
-	private fullView: boolean = $state(true); // UI state for knowing whenever for that trail it was required to show more information
+	private conflictAnalysisCtx: Either<ConflictAnalysisContext, () => never>[] = $state([]); // this is just for representing the conflict analysis view
+	private upContext: Either<UPContext, () => never>[] = $derived.by(() => this._upContext());
+	private fullView: boolean = $state(false); // UI state for knowing whenever for that trail it was required to show more information
 	private learntClause: Clause | undefined = $state(undefined);
 	private conflictiveClause: Clause | undefined = $state(undefined);
 	private state: TrailState = $state('running');
 	private trailHeight: number = $derived.by(() => this._computeHeight());
 	private readonly defaultTrailHeight: number = 56;
-	private readonly canvasHeight: number = 126;
+	private readonly canvasHeight: number = 150;
 
 	copy(): Trail {
 		const newTrail = new Trail();
@@ -39,8 +40,9 @@ export class Trail {
 		newTrail.decisionLevelBookmark = [...this.decisionLevelBookmark];
 		newTrail.followUPIndex = this.followUPIndex;
 		newTrail.decisionLevel = this.decisionLevel;
-		newTrail.learnClause = this.learnClause;
+		newTrail.learntClause = this.learntClause;
 		newTrail.conflictiveClause = this.conflictiveClause;
+		newTrail.conflictAnalysisCtx = [...this.conflictAnalysisCtx];
 		return newTrail;
 	}
 
@@ -128,7 +130,7 @@ export class Trail {
 		this._clean();
 	}
 
-	getConflictAnalysisCtx(): Either<ConflictAnalysisContext, undefined>[] {
+	getConflictAnalysisCtx(): Either<ConflictAnalysisContext, () => never>[] {
 		return this._makeConflictAnalysisCtx();
 	}
 
@@ -197,7 +199,7 @@ export class Trail {
 		this.decisionLevel = dl;
 	}
 
-	getUPContext(): Either<UPContext, undefined>[] {
+	getUPContext(): Either<UPContext, never>[] {
 		return this.upContext;
 	}
 
@@ -303,16 +305,16 @@ export class Trail {
 		return levels.length > 0;
 	}
 
-	private _upContext(): Either<UPContext, undefined>[] {
+	private _upContext(): Either<UPContext, () => never>[] {
 		return this.assignments.map((a: VariableAssignment) => {
-			if (a.isUP()) {
+			if (a.isUP() || a.isBJ()) {
 				const reason = a.getReason() as UnitPropagation;
 				return makeLeft({
 					clauseTag: reason.clauseTag,
 					literal: a.toInt()
 				});
 			} else {
-				return makeRight(undefined);
+				return makeRight(error);
 			}
 		});
 	}
@@ -325,18 +327,18 @@ export class Trail {
 		this.state = 'running';
 	}
 
-	private _makeConflictAnalysisCtx(): Either<ConflictAnalysisContext, undefined>[] {
+	private _makeConflictAnalysisCtx(): Either<ConflictAnalysisContext, () => never>[] {
 		const nAssignments: number = this.assignments.length;
 		const gaps: number = Math.max(nAssignments - this.conflictAnalysisCtx.length, 0);
-		const ctx: Either<ConflictAnalysisContext, undefined>[] = [
-			...Array<Either<ConflictAnalysisContext, undefined>>(gaps).fill(makeRight(undefined)),
+		const ctx: Either<ConflictAnalysisContext, () => never>[] = [
+			...Array<Either<ConflictAnalysisContext, () => never>>(gaps).fill(makeRight(error)),
 			...this.conflictAnalysisCtx,
 			this._makeConflictAnalysisCtxTail()
 		];
 		return ctx;
 	}
 
-	private _makeConflictAnalysisCtxTail(): Either<ConflictAnalysisContext, undefined> {
+	private _makeConflictAnalysisCtxTail(): Either<ConflictAnalysisContext, () => never> {
 		if (this.getConflictiveClause() === undefined) {
 			logFatal(
 				'Trail',

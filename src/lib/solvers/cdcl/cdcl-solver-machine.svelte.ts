@@ -22,6 +22,8 @@ import { Queue } from '$lib/entities/Queue.svelte.ts';
 import type { Trail } from '$lib/entities/Trail.svelte.ts';
 import type Clause from '$lib/entities/Clause.svelte.ts';
 import { assertiveness } from '$lib/algorithms/assertive.ts';
+import { setInspectedVariable } from '$lib/states/inspectedVariable.svelte.ts';
+import { updateProblemFromTrail } from '$lib/states/problem.svelte.ts';
 
 export const makeCDCLSolver = (): CDCL_SolverMachine => {
 	return new CDCL_SolverMachine();
@@ -97,6 +99,18 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 		return this.conflictAnalysis;
 	}
 
+	getConflictAnalysis(): ConflictAnalysis | undefined {
+		if (this.conflictAnalysis === undefined) {
+			return undefined;
+		} else {
+			return {
+				trail: this.conflictAnalysis.trail.copy(),
+				conflictClause: this.conflictAnalysis.conflictClause.copy(),
+				decisionLevelVariables: [...this.conflictAnalysis.decisionLevelVariables]
+			} as ConflictAnalysis;
+		}
+	}
+
 	isAssertive() {
 		if (this.conflictAnalysis === undefined) {
 			logFatal('Assertive exception', 'The conflict analysis can not be undefined');
@@ -110,7 +124,7 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 	getRecord(): Record<string, unknown> {
 		return {
 			queue: this.getQueue(),
-			conflictAnalysis: this.conflictAnalysis
+			conflictAnalysis: this.getConflictAnalysis()
 		};
 	}
 
@@ -135,6 +149,18 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 			updateClausesToCheck(clauses, literal);
 		} else {
 			cleanClausesToCheck();
+		}
+		const conflictAnalysis = record['conflictAnalysis'] as ConflictAnalysis;
+		if (conflictAnalysis === undefined) {
+			this.conflictAnalysis = undefined;
+		} else {
+			this.setConflictAnalysis(
+				conflictAnalysis.trail.copy(),
+				conflictAnalysis.conflictClause.copy(),
+				[...conflictAnalysis.decisionLevelVariables]
+			);
+			updateProblemFromTrail(conflictAnalysis.trail);
+			setInspectedVariable(conflictAnalysis.trail.pickLastAssignment().getVariable().getInt());
 		}
 	}
 

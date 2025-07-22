@@ -5,6 +5,7 @@
 	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
 	import { getClausePool } from '$lib/states/problem.svelte.ts';
 	import { isLeft, makeLeft, makeRight, unwrapEither, type Either } from '$lib/types/either.ts';
+	import { error } from '$lib/utils.ts';
 	import CanvasComponent, { type CanvasContext, type UPRelation } from './CanvasComponent.svelte';
 	import TrailComponent from './TrailComponent.svelte';
 
@@ -29,13 +30,13 @@
 					clause,
 					literal
 				});
-			} else return makeRight(undefined);
+			} else return makeRight(error);
 		});
 	}
 
-	let unitPropagations: Either<UPRelation, undefined>[] = $derived.by(computeUPs);
+	let unitPropagations: Either<UPRelation, () => never>[] = $derived.by(computeUPs);
 
-	let conflictAnalysis: Either<ConflictAnalysisContext, undefined>[] = $derived.by(() => {
+	let conflictAnalysis: Either<ConflictAnalysisContext, () => never>[] = $derived.by(() => {
 		if (!showCAView) return [];
 		else if (!trail.hasConflictiveClause()) return [];
 		else return trail.getConflictAnalysisCtx();
@@ -66,17 +67,26 @@
 
 <composed-trail class="composed-trail" class:opened-views={showUPView || showCAView}>
 	{#if showUPView}
-		<CanvasComponent
-			context={unitPropagations}
-			width={trailWidth}
-			align={'end'}
-			reverse={true}
-			repeat={false}
-		/>
+		<div class="up-view">
+			<CanvasComponent
+				context={unitPropagations}
+				width={trailWidth}
+				align={'end'}
+				reverse={true}
+				repeat={false}
+			/>
+		</div>
 	{/if}
 	<div use:observeWidth class="fit-content width-observer">
 		<div class:views-opened={showCAView || showUPView}>
-			<TrailComponent {trail} {expanded} {isLast} {emitRevert} showUPInfo={!showUPView} />
+			<TrailComponent
+				{trail}
+				{expanded}
+				{isLast}
+				{emitRevert}
+				detailsExpanded={showCAView || showUPView}
+				showUPInfo={!showUPView}
+			/>
 		</div>
 		<div class="empty-slot"></div>
 	</div>
@@ -89,6 +99,7 @@
 	.composed-trail {
 		display: flex;
 		flex-direction: column;
+		overflow: hidden;
 	}
 
 	.opened-views {
@@ -104,14 +115,16 @@
 		width: fit-content;
 	}
 
-	.views-opened {
-		color: var(--satisfied-color);
-		background-color: var(--satisfied-color-o);
-	}
-
 	.empty-slot {
 		width: var(--empty-slot);
 		background-color: transparent;
 		height: auto;
+	}
+
+	.up-view {
+		display: flex;
+		flex-direction: column;
+		position: relative;
+		top: 7.5px;
 	}
 </style>

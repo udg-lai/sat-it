@@ -6,7 +6,7 @@ import {
 import { increaseNoConflicts } from '$lib/states/statistics.svelte.ts';
 import { logFatal } from '$lib/stores/toasts.ts';
 import { getLatestTrail, updateLastTrailEnding } from '$lib/states/trails.svelte.ts';
-import { conflictDetectionEventBus } from '$lib/events/events.ts';
+import { conflictDetectionEventBus, toggleTrailViewEventBus } from '$lib/events/events.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import { type NonFinalState } from '../StateMachine.svelte.ts';
 import type {
@@ -73,6 +73,7 @@ import type { ConflictAnalysis, OccurrenceList } from '../types.ts';
 import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
 import type { Trail } from '$lib/entities/Trail.svelte.ts';
 import type Clause from '$lib/entities/Clause.svelte.ts';
+import { setInspectedVariable } from '$lib/states/inspectedVariable.svelte.ts';
 
 /* exported transitions */
 
@@ -164,6 +165,7 @@ export const conflictAnalysis = (solver: CDCL_SolverMachine): void => {
 	deleteLastAssignmentTransition(stateMachine, conflictAnalysis);
 	const isAsserting: boolean = assertingClauseTransition(stateMachine, solver);
 	if (!isAsserting) {
+		setInspectedVariable(conflictAnalysis.trail.pickLastAssignment().getVariable().getInt());
 		return;
 	}
 	const clauseTag: number = learnConflictClauseTransition(stateMachine, conflictAnalysis);
@@ -220,6 +222,7 @@ const conflictDetectionBlock = (
 	const conflict: boolean = conflictDetectionTransition(stateMachine, clauseTag);
 	if (conflict) {
 		updateLastTrailEnding(clauseTag);
+		toggleTrailViewEventBus.emit();
 		return;
 	}
 	const unitClause: boolean = unitClauseTransition(stateMachine, clauseTag);

@@ -47,7 +47,7 @@ import {
 	incrementCheckingIndex
 } from '$lib/states/conflict-detection-state.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
-import { conflictDetectionEventBus } from '$lib/events/events.ts';
+import { conflictDetectionEventBus, toggleTrailViewEventBus } from '$lib/events/events.ts';
 import type { OccurrenceList } from '../types.ts';
 
 /* exported transitions */
@@ -144,6 +144,7 @@ const conflictDetectionBlock = (
 	const conflict: boolean = conflictDetectionTransition(stateMachine, clauseTag);
 	if (conflict) {
 		updateLastTrailEnding(clauseTag);
+		toggleTrailViewEventBus.emit();
 		return;
 	}
 	const unitClause: boolean = unitClauseTransition(stateMachine, clauseTag);

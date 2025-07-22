@@ -17,6 +17,7 @@
 		expanded: boolean;
 		isLast?: boolean;
 		emitRevert?: (assignment: VariableAssignment) => void;
+		detailsExpanded?: boolean;
 		showUPInfo?: boolean;
 	}
 
@@ -25,6 +26,7 @@
 		expanded,
 		isLast = true,
 		emitRevert = () => {},
+		detailsExpanded = false,
 		showUPInfo = false
 	}: Props = $props();
 
@@ -70,12 +72,15 @@
 				{assignment}
 				{isLast}
 				fromPreviousTrail={trail.isAssignmentFromPreviousTrail(assignment)}
+				{detailsExpanded}
+				{showUPInfo}
 			/>
 		{:else}
 			<UnitPropagationComponent
 				{assignment}
 				{isLast}
 				fromPreviousTrail={trail.isAssignmentFromPreviousTrail(assignment)}
+				{detailsExpanded}
 				{showUPInfo}
 			/>
 		{/if}
@@ -91,6 +96,7 @@
 			emitRevertUpToX={() => {
 				emitRevert(assignment);
 			}}
+			{detailsExpanded}
 			{showUPInfo}
 		/>
 	{/each}

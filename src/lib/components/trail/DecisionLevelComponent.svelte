@@ -14,6 +14,7 @@
 		isLast?: boolean;
 		trail: Trail;
 		emitRevertUpToX: () => void;
+		detailsExpanded?: boolean;
 		showUPInfo?: boolean;
 	}
 
@@ -24,6 +25,7 @@
 		isLast = false,
 		trail,
 		emitRevertUpToX,
+		detailsExpanded = false,
 		showUPInfo = false
 	}: Props = $props();
 </script>
@@ -57,12 +59,15 @@
 					{assignment}
 					{isLast}
 					fromPreviousTrail={trail.isAssignmentFromPreviousTrail(assignment)}
+					{detailsExpanded}
+					{showUPInfo}
 				/>
 			{:else}
 				<UnitPropagationComponent
 					{assignment}
 					{isLast}
 					fromPreviousTrail={trail.isAssignmentFromPreviousTrail(assignment)}
+					{detailsExpanded}
 					{showUPInfo}
 				/>
 			{/if}

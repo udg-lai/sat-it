@@ -58,7 +58,9 @@
 						: undefined}
 				/>
 			{/if}
-			<AutomaticSolvingComponent {finished} backtrackingState={onConflict} />
+			{#if !finished}
+				<AutomaticSolvingComponent {finished} backtrackingState={onConflict} />
+			{/if}
 		{/if}
 	</algorithm-buttons>
 

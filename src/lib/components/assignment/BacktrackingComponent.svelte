@@ -2,7 +2,7 @@
 	import MathTexComponent from '$lib/components/MathTexComponent.svelte';
 	import { onChrome } from '$lib/app.svelte.ts';
 	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
-	import { getInspectedVariable } from '$lib/states/conflict-detection-state.svelte.ts';
+	import { getInspectedVariable } from '$lib/states/inspectedVariable.svelte.ts';
 	import HeadTailComponent from '../HeadTailComponent.svelte';
 	import './style.css';
 
@@ -45,6 +45,10 @@
 		border-right: 1px transparent;
 		border-style: dashed;
 		cursor: unset;
+	}
+
+	.previous-assignment {
+		color: color-mix(in srgb, var(--conflict-color) 60%, transparent);
 	}
 
 	:global(mover mo) {

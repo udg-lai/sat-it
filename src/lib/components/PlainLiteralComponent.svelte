@@ -4,21 +4,57 @@
 
 	interface Props {
 		literal: Literal;
+		state?: 'unsatisfied' | 'satisfied';
+		learned?: boolean;
 	}
 
-	let { literal }: Props = $props();
+	let { literal, state = undefined, learned = false }: Props = $props();
 </script>
 
-<div class="literal-component">
+<plain-literal
+	class="literal-component"
+	class:satisfied-background={state === 'satisfied'}
+	class:unsatisfied-background={state === 'unsatisfied'}
+	class:temporal-background={state === undefined && !learned}
+	class:lemma-background={learned}
+>
 	<MathTexComponent equation={literal.toTeX()} />
-</div>
+</plain-literal>
 
 <style>
 	.literal-component {
-		width: var(--trail-literal-min-width);
-		height: var(--trail-height);
+		width: var(--plain-literal-width);
+		height: var(--plain-literal-height);
+		padding-top: 30px;
 		display: flex;
 		flex-direction: column;
-		justify-content: center;
+		justify-content: flex-end;
+	}
+
+	.satisfied-background {
+		background-color: var(--satisfied-color-o);
+		border-left: 1px solid;
+		border-right: 1px solid;
+		border-color: var(--satisfied-border-color-o);
+	}
+
+	.unsatisfied-background {
+		border-left: 1px solid;
+		border-right: 1px solid;
+		border-color: var(--unsatisfied-border-color-o);
+		background-color: var(--unsatisfied-color-o);
+	}
+
+	.temporal-background {
+		border-left: 1px solid;
+		border-right: 1px solid;
+		border-color: var(--temporal-color);
+	}
+
+	.lemma-background {
+		background-color: var(--lemma-color);
+		border-left: 1px solid;
+		border-right: 1px solid;
+		border-color: var(--lemma-border-color);
 	}
 </style>
