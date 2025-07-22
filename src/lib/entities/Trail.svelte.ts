@@ -43,6 +43,7 @@ export class Trail {
 		newTrail.learntClause = this.learntClause;
 		newTrail.conflictiveClause = this.conflictiveClause;
 		newTrail.conflictAnalysisCtx = [...this.conflictAnalysisCtx];
+		newTrail.state = this.state;
 		return newTrail;
 	}
 

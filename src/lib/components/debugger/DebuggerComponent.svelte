@@ -11,7 +11,7 @@
 	import DecisionDebugger from './DecisionDebuggerComponent.svelte';
 	import AutomaticSolvingComponent from './AutomaticSolvingComponent.svelte';
 	import GeneralPurposeDebuggerComponent from './GeneralPurposeDebuggerComponent.svelte';
-	import StepComponent from './StepDebuggerComponent.svelte';
+	import StepComponent from './buttons/StepComponent.svelte';
 
 	const problem: Problem = $derived(getProblemStore());
 

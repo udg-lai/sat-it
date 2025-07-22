@@ -1,7 +1,5 @@
 <script lang="ts">
-	import { ChevronLeftOutline, ChevronRightOutline, ReplyOutline } from 'flowbite-svelte-icons';
-	import DynamicRender from '../DynamicRender.svelte';
-	import ResetProblem from './ResetProblemDebuggerComponent.svelte';
+	import ResetProblem from './buttons/ResetProblemComponent.svelte';
 	import { userActionEventBus } from '$lib/events/events.ts';
 	import { getStackLength, getStackPointer } from '$lib/states/stack.svelte.ts';
 	import {
@@ -11,19 +9,13 @@
 	import { onDestroy, onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import './style.css';
+	import UndoComponent from './buttons/UndoComponent.svelte';
+	import RedoComponent from './buttons/RedoComponent.svelte';
+	import ExpColTrailComponent from './buttons/ExpColTrailComponent.svelte';
 
 	let expanded = $derived(getTrailsExpanded());
-	let textCollapse = $derived(expanded ? 'Collapse propagations' : 'Expand propagations');
 	let btnRedoActive = $derived(getStackPointer() < getStackLength() - 1);
 	let btnUndoActive = $derived(getStackPointer() > 0);
-
-	const generalProps = {
-		size: 'md'
-	};
-	const reverseProps = {
-		class: 'transform -scale-x-100',
-		size: 'md'
-	};
 
 	function toggleExpand() {
 		setTrailsExpanded(!expanded);
@@ -64,29 +56,8 @@
 
 <ResetProblem />
 
-<button
-	class="btn general-btn"
-	class:invalidOption={!btnUndoActive}
-	title="Undo"
-	disabled={!btnUndoActive}
-	onclick={() => userActionEventBus.emit('undo')}
->
-	<DynamicRender component={ReplyOutline} props={generalProps} />
-</button>
+<UndoComponent {btnUndoActive} />
 
-<button
-	class="btn general-btn"
-	class:invalidOption={!btnRedoActive}
-	title="Redo"
-	onclick={() => userActionEventBus.emit('redo')}
-	disabled={!btnRedoActive}
->
-	<DynamicRender component={ReplyOutline} props={reverseProps} />
-</button>
+<RedoComponent {btnRedoActive} />
 
-<button class="btn general-btn" title={textCollapse} onclick={toggleExpand}>
-	<DynamicRender
-		component={expanded ? ChevronLeftOutline : ChevronRightOutline}
-		props={generalProps}
-	/>
-</button>
+<ExpColTrailComponent {expanded} {toggleExpand} />

@@ -14,7 +14,7 @@
 
 	interface Props {
 		assignment: VariableAssignment;
-		isLast: boolean;
+		isLast?: boolean;
 		fromPreviousTrail?: boolean;
 		detailsExpanded?: boolean;
 		showUPInfo?: boolean;
@@ -22,7 +22,7 @@
 
 	let {
 		assignment,
-		isLast,
+		isLast = false,
 		fromPreviousTrail = false,
 		detailsExpanded = false,
 		showUPInfo = false

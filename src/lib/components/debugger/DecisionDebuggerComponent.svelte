@@ -4,8 +4,9 @@
 	import { updateAssignment } from '$lib/states/assignment.svelte.ts';
 	import { getProblemStore, type Problem } from '$lib/states/problem.svelte.ts';
 	import { logInfo, logWarning } from '$lib/stores/toasts.ts';
-	import { CaretRightOutline, CodeMergeOutline } from 'flowbite-svelte-icons';
+	import { CaretRightOutline } from 'flowbite-svelte-icons';
 	import './style.css';
+	import BacktrackingComponent from './buttons/BacktrackingComponent.svelte';
 
 	const assignmentProps = {
 		size: 'md'
@@ -118,17 +119,7 @@
 				<DynamicRender component={CaretRightOutline} props={assignmentProps} />
 			</button>
 		{:else}
-			<button
-				class="btn general-btn conflict-btn join"
-				class:invalidOption={finished || onConflictDetection}
-				onclick={() => {
-					stateMachineEventBus.emit('step');
-				}}
-				title="Backtrack"
-				disabled={finished || onConflictDetection}
-			>
-				<DynamicRender component={CodeMergeOutline} props={assignmentProps} />
-			</button>
+			<BacktrackingComponent {finished} {onConflictDetection} />
 		{/if}
 		{#if nextLiteral !== undefined}
 			<div class="next-variable join-left">
@@ -195,9 +186,5 @@
 	.join-left {
 		border-radius: 0 6px 6px 0;
 		border-left: none;
-	}
-
-	.join {
-		border-radius: 6px;
 	}
 </style>

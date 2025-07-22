@@ -1,28 +1,12 @@
 <script lang="ts">
-	import { stateMachineEventBus, toggleTrailExpandEventBus } from '$lib/events/events.ts';
-	import { ForwardOutline } from 'flowbite-svelte-icons';
-	import DynamicRender from '../DynamicRender.svelte';
-	import './style.css';
-	import StepComponent from './StepDebuggerComponent.svelte';
-
-	const assignmentProps = {
-		size: 'md'
-	};
+	import ConflictAnalysisComponent from './buttons/ConflictAnalysisComponent.svelte';
+	import StepComponent from './buttons/StepComponent.svelte';
 </script>
 
 <conflict-analysis-debugger>
 	<StepComponent myClass={'conflict-btn'} />
 
-	<button
-		class="btn general-btn conflict-btn"
-		title="Finish Conflict Analysis"
-		onclick={() => {
-			toggleTrailExpandEventBus.emit(true);
-			stateMachineEventBus.emit('finishCA');
-		}}
-	>
-		<DynamicRender component={ForwardOutline} props={assignmentProps} />
-	</button>
+	<ConflictAnalysisComponent />
 </conflict-analysis-debugger>
 
 <style>

@@ -4,7 +4,7 @@
 	import { getActiveView, setActiveView } from '../../stores/settings.svelte.ts';
 	import BookmarkInstances from './BookmarkInstances.svelte';
 	import EngineComponent from './engine/EngineComponent.svelte';
-	import LegendComponent from './LegendComponent.svelte';
+	import LegendComponent from './legend/LegendComponent.svelte';
 	import NavBarComponent, { type OptionEmit } from './NavBarComponent.svelte';
 
 	type ActiveView = 'bookmark' | 'engine' | 'legend' | 'info';

@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { stateMachineEventBus } from '$lib/events/events.ts';
 	import { CaretRightOutline } from 'flowbite-svelte-icons';
-	import DynamicRender from '../DynamicRender.svelte';
-	import './style.css';
+	import DynamicRender from '../../DynamicRender.svelte';
+	import '../style.css';
 
 	interface Props {
 		myClass?: string;
