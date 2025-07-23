@@ -209,7 +209,7 @@
 	a.github:hover {
 		color: var(--icon-base);
 	}
-	
+
 	.how-to-cite {
 		padding: 0px;
 		font-size: 15px;
