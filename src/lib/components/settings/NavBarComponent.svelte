@@ -153,6 +153,7 @@
 		border-color: var(--border-color);
 		color: black;
 		transition: background-color 0.3s ease;
+		z-index: var(--more-options-z-index);
 	}
 	:global(.bottomNavItem:hover) {
 		background-color: var(--main-bg-color);
