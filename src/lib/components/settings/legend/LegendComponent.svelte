@@ -61,27 +61,43 @@
 					<span class="how-to-cite">Cite:</span> <br />
 					<div class="how-to-cite-body">
 						{'@misc{pau2025satit,'}
-						<span class="how-to-cite-line">{'  author       = {Wilber Bermeo and Jordi Coll and Pau Ferrer and Mateu Villaret},'}</span>
-						<span class="how-to-cite-line">{'  title        = {{SAT-IT, The Interactive SAT Tracer}},'}</span>
+						<span class="how-to-cite-line"
+							>{'  author       = {Wilber Bermeo and Jordi Coll and Pau Ferrer and Mateu Villaret},'}</span
+						>
+						<span class="how-to-cite-line"
+							>{'  title        = {{SAT-IT, The Interactive SAT Tracer}},'}</span
+						>
 						<span class="how-to-cite-line">{'  year         = {2025},'}</span>
-						<span class="how-to-cite-line">{'  url          = {https://udg-lai.github.io/sat-it/},'}</span>
+						<span class="how-to-cite-line"
+							>{'  url          = {https://udg-lai.github.io/sat-it/},'}</span
+						>
 						<span class="how-to-cite-line">{'  note         = {Accessed: \\today}'}</span>
 						{'}'}
 					</div>
 
 					<div class="how-to-cite-body">
-					{'@inproceedings{DBLP:conf/ccia/CaneCRV23,'}<br />
-					<span class="how-to-cite-line">{'author       = {Marc Can{\'{e}} and Jordi Coll and Marc Rojo and Mateu Villaret},'}</span>
-					<span class="how-to-cite-line">{'title        = {{SAT-IT:} The Interactive {SAT} Tracer},'}</span>
-					<span class="how-to-cite-line">{'booktitle    = {Artificial Intelligence Research and Development - Proceedings of the 25th International Conference of the Catalan Association for Artificial Intelligence, {CCIA}},'}</span>
-					<span class="how-to-cite-line">{'series       = {Frontiers in Artificial Intelligence and Applications},'}</span>
-					<span class="how-to-cite-line">{'volume       = {375},'}</span>
-					<span class="how-to-cite-line">{'pages        = {337--346},'}</span>
-					<span class="how-to-cite-line">{'publisher    = {{IOS} Press},'}</span>
-					<span class="how-to-cite-line">{'year         = {2023},'}</span>
-					<span class="how-to-cite-line">{'url          = {https://doi.org/10.3233/FAIA230704},'}</span>
-					<span class="how-to-cite-line">{'doi          = {10.3233/FAIA230704}'}</span>
-					{'}'}
+						{'@inproceedings{DBLP:conf/ccia/CaneCRV23,'}<br />
+						<span class="how-to-cite-line"
+							>{"author       = {Marc Can{'{e}} and Jordi Coll and Marc Rojo and Mateu Villaret},"}</span
+						>
+						<span class="how-to-cite-line"
+							>{'title        = {{SAT-IT:} The Interactive {SAT} Tracer},'}</span
+						>
+						<span class="how-to-cite-line"
+							>{'booktitle    = {Artificial Intelligence Research and Development - Proceedings of the 25th International Conference of the Catalan Association for Artificial Intelligence, {CCIA}},'}</span
+						>
+						<span class="how-to-cite-line"
+							>{'series       = {Frontiers in Artificial Intelligence and Applications},'}</span
+						>
+						<span class="how-to-cite-line">{'volume       = {375},'}</span>
+						<span class="how-to-cite-line">{'pages        = {337--346},'}</span>
+						<span class="how-to-cite-line">{'publisher    = {{IOS} Press},'}</span>
+						<span class="how-to-cite-line">{'year         = {2023},'}</span>
+						<span class="how-to-cite-line"
+							>{'url          = {https://doi.org/10.3233/FAIA230704},'}</span
+						>
+						<span class="how-to-cite-line">{'doi          = {10.3233/FAIA230704}'}</span>
+						{'}'}
 					</div>
 				</content>
 
@@ -187,12 +203,13 @@
 		padding-bottom: 10px;
 		font-size: 14px;
 		text-align: center;
+		font-weight: bold;
 	}
 
 	a.github:hover {
 		color: var(--icon-base);
 	}
-
+	
 	.how-to-cite {
 		padding: 0px;
 		font-size: 15px;
@@ -201,7 +218,7 @@
 		padding: 5px;
 		font-size: 12px;
 		border: 1px solid var(--border-color);
-		border-bottom: 1px solid var(--border-color) ;
+		border-bottom: 1px solid var(--border-color);
 		background-color: var(--cite-bg-color);
 		overflow-x: auto;
 		overflow-y: hidden;
