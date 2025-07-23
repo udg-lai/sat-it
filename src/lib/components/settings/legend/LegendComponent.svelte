@@ -30,7 +30,8 @@
 			bind:open={openModal}
 			size="md"
 			bodyClass="p-2 md:p-4 space-y-4 flex-1 overflow-y-auto overscroll-contain"
-			class="modal-style"
+			headerClass="dark:bg-white dark:text-gray-500 dark:border-gray-200 dark:divide-gray-200 flex justify-between items-center p-4 md:p-5 rounded-t-lg"
+			class="modal-style dark:divide-gray-200 dark:border-gray-200 dark:bg-white  dark:text-gray-500 "
 		>
 			<ack-modal>
 				<content>
@@ -56,8 +57,19 @@
 							target="_blank"
 							rel="noopener noreferrer">here</a
 						>.
-					</span></content
-				>
+					</span>
+					<span class="how-to-cite"> How to cite ? </span>
+					<span class="how-to-cite-body">
+						{'@misc{pau2025satit,'}<br />
+						&nbsp;&nbsp;{'  author       = {Wilber Bermeo and Jordi Coll and Pau Ferrer and Mateu Villaret},'}<br
+						/>
+						&nbsp;&nbsp;{'  title        = {{SAT-IT, The Interactive SAT Tracer}},'}<br />
+						&nbsp;&nbsp;{'  year         = {2025},'}<br />
+						&nbsp;&nbsp;{'  url          = {https://udg-lai.github.io/sat-it/},'}<br />
+						&nbsp;&nbsp;{'  note         = {Accessed: \\today}'}<br />
+						{'}'}
+					</span>
+				</content>
 
 				<button
 					class="btn"
@@ -165,5 +177,15 @@
 
 	a.github:hover {
 		color: var(--icon-base);
+	}
+
+	.how-to-cite {
+		font-size: 14px;
+		text-align: center;
+		width: 100%;
+		border-bottom: 1px solid var(--border-color);
+	}
+	.how-to-cite-body {
+		font-size: 12px;
 	}
 </style>
