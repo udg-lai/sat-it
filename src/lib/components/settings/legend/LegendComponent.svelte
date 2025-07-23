@@ -58,8 +58,8 @@
 							rel="noopener noreferrer">here</a
 						>.
 					</span>
-					<span class="how-to-cite"> How to cite ? </span>
 					<span class="how-to-cite-body">
+						<span class="how-to-cite">Cite:</span> <br />
 						{'@misc{pau2025satit,'}<br />
 						&nbsp;&nbsp;{'  author       = {Wilber Bermeo and Jordi Coll and Pau Ferrer and Mateu Villaret},'}<br
 						/>
@@ -180,12 +180,13 @@
 	}
 
 	.how-to-cite {
-		font-size: 14px;
-		text-align: center;
-		width: 100%;
-		border-bottom: 1px solid var(--border-color);
+		padding: 0px;
+		font-size: 15px;
 	}
 	.how-to-cite-body {
 		font-size: 12px;
+		border-top: 1px solid var(--border-color);
+		border-bottom: 1px solid var(--border-color);
+		margin-bottom: 10px;
 	}
 </style>
