@@ -15,7 +15,7 @@
 	headerClass="dark:bg-white dark:text-gray-500 dark:border-gray-200 dark:divide-gray-200 flex justify-between items-center p-4 md:p-5 rounded-t-lg"
 	class="modal-style dark:divide-gray-200 dark:border-gray-200 dark:bg-white  dark:text-gray-500 "
 >
-	<ack-modal>
+	<ack-modal class="acknowledgement">
 		<content>
 			<span
 				>SAT-IT is the result of Pau Ferrer i Font's thesis, developed in collaboration with the PhD
@@ -124,6 +124,7 @@
 		overflow-y: auto;
 		flex-direction: column;
 		text-align: justify;
+		padding-bottom: 0;
 	}
 	content span {
 		font-size: 15px;
@@ -168,16 +169,30 @@
 		border: 1px solid var(--border-color);
 		border-bottom: 1px solid var(--border-color);
 		background-color: var(--cite-bg-color);
-		overflow-x: auto;
-		overflow-y: auto;
 		white-space: nowrap;
 		margin-bottom: 10px;
-		min-height: 10rem;
+		height: fit-content;
 	}
 	.how-to-cite-line {
 		font-size: 12px;
 		padding: 0px 0px 0px 20px;
 		display: flex;
 		flex: 1;
+	}
+
+	span {
+		text-wrap: auto;
+	}
+
+	button {
+		width: 90%;
+	}
+
+	.acknowledgement {
+		max-height: min(75vh, 495px);
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.5rem;
 	}
 </style>
