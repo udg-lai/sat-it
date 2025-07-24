@@ -185,7 +185,7 @@ function parseClaims(
 					throw new Error(`Expected not more than ${clauseCount} clauses but ${count} were parsed`);
 				}
 				line = line.replace(/[−–—]/g, '-');
-				
+
 				let literals = line
 					.trim()
 					.split(/\s+/)
