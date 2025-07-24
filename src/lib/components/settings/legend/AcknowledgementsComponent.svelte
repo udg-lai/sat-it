@@ -1,97 +1,98 @@
 <script lang="ts">
-    import LAI from '$lib/assets/LAI.svg';
+	import LAI from '$lib/assets/LAI.svg';
 	import UDG from '$lib/assets/UDG.png';
 	import { Modal } from 'flowbite-svelte';
 
-    let openModal: boolean = $state(false);
+	let openModal: boolean = $state(false);
 </script>
+
 <button onclick={() => (openModal = true)} class="ack-button">Acknowledgements</button>
 <Modal
-    title="Acknowledgements"
-    bind:open={openModal}
-    size="md"
-    bodyClass="p-2 md:p-4 space-y-4 flex-1 overflow-y-auto overscroll-contain"
-    headerClass="dark:bg-white dark:text-gray-500 dark:border-gray-200 dark:divide-gray-200 flex justify-between items-center p-4 md:p-5 rounded-t-lg"
-    class="modal-style dark:divide-gray-200 dark:border-gray-200 dark:bg-white  dark:text-gray-500 "
+	title="Acknowledgements"
+	bind:open={openModal}
+	size="md"
+	bodyClass="p-2 md:p-4 space-y-4 flex-1 overflow-y-auto overscroll-contain"
+	headerClass="dark:bg-white dark:text-gray-500 dark:border-gray-200 dark:divide-gray-200 flex justify-between items-center p-4 md:p-5 rounded-t-lg"
+	class="modal-style dark:divide-gray-200 dark:border-gray-200 dark:bg-white  dark:text-gray-500 "
 >
-    <ack-modal>
-        <content>
-            <span
-                >SAT-IT is the result of Pau Ferrer i Font's thesis, developed in collaboration with the
-                PhD candidate Wilber Bermeo Quito. The work was supervised by Dr. Jordi Coll Caballero
-                and Dr. Mateu Villaret Ausellé, within the Logic and Artificial Intelligence (LAI)
-                research group at the University of Girona. We would like to thank Marc Cané and Marc
-                Rojo for the original version of SAT-IT, which served as inspiration.
-            </span>
-            <images>
-                <a href="https://imae.udg.edu/Recerca/LAI/" target="_blank" rel="noopener noreferrer">
-                    <img src={LAI} alt={'LAI research group logo'} class="lai-img" />
-                </a>
-                <a href="https://www.udg.edu/en/" target="_blank" rel="noopener noreferrer">
-                    <img src={UDG} alt={'UDG logo'} />
-                </a>
-            </images>
-            <span>
-                SAT-IT is an open source GitHub project and can be consulted <a
-                    class="github"
-                    href="https://github.com/udg-lai/sat-it"
-                    target="_blank"
-                    rel="noopener noreferrer">here</a
-                >.
-            </span>
-            <span class="how-to-cite">Cite:</span> <br />
-            <div class="how-to-cite-body">
-                {'@misc{pau2025satit,'}
-                <span class="how-to-cite-line"
-                    >{'  author       = {Wilber Bermeo and Jordi Coll and Pau Ferrer and Mateu Villaret},'}</span
-                >
-                <span class="how-to-cite-line"
-                    >{'  title        = {{SAT-IT, The Interactive SAT Tracer}},'}</span
-                >
-                <span class="how-to-cite-line">{'  year         = {2025},'}</span>
-                <span class="how-to-cite-line">{'  url          = {https://sat-it.udg.edu/},'}</span>
-                <span class="how-to-cite-line">{'  note         = {Accessed: \\today}'}</span>
-                {'}'}
-            </div>
-            <div class="how-to-cite-body">
-                {'@inproceedings{DBLP:conf/ccia/CaneCRV23,'}<br />
-                <span class="how-to-cite-line"
-                    >{"author       = {Marc Can{'{e}} and Jordi Coll and Marc Rojo and Mateu Villaret},"}</span
-                >
-                <span class="how-to-cite-line"
-                    >{'title        = {{SAT-IT:} The Interactive {SAT} Tracer},'}</span
-                >
-                <span class="how-to-cite-line"
-                    >{'booktitle    = {Artificial Intelligence Research and Development - Proceedings of the 25th International Conference of the Catalan Association for Artificial Intelligence, {CCIA}},'}</span
-                >
-                <span class="how-to-cite-line"
-                    >{'series       = {Frontiers in Artificial Intelligence and Applications},'}</span
-                >
-                <span class="how-to-cite-line">{'volume       = {375},'}</span>
-                <span class="how-to-cite-line">{'pages        = {337--346},'}</span>
-                <span class="how-to-cite-line">{'publisher    = {{IOS} Press},'}</span>
-                <span class="how-to-cite-line">{'year         = {2023},'}</span>
-                <span class="how-to-cite-line"
-                    >{'url          = {https://doi.org/10.3233/FAIA230704},'}</span
-                >
-                <span class="how-to-cite-line">{'doi          = {10.3233/FAIA230704}'}</span>
-                {'}'}
-            </div>
-        </content>
+	<ack-modal>
+		<content>
+			<span
+				>SAT-IT is the result of Pau Ferrer i Font's thesis, developed in collaboration with the PhD
+				candidate Wilber Bermeo Quito. The work was supervised by Dr. Jordi Coll Caballero and Dr.
+				Mateu Villaret Ausellé, within the Logic and Artificial Intelligence (LAI) research group at
+				the University of Girona. We would like to thank Marc Cané and Marc Rojo for the original
+				version of SAT-IT, which served as inspiration.
+			</span>
+			<images>
+				<a href="https://imae.udg.edu/Recerca/LAI/" target="_blank" rel="noopener noreferrer">
+					<img src={LAI} alt={'LAI research group logo'} class="lai-img" />
+				</a>
+				<a href="https://www.udg.edu/en/" target="_blank" rel="noopener noreferrer">
+					<img src={UDG} alt={'UDG logo'} />
+				</a>
+			</images>
+			<span>
+				SAT-IT is an open source GitHub project and can be consulted <a
+					class="github"
+					href="https://github.com/udg-lai/sat-it"
+					target="_blank"
+					rel="noopener noreferrer">here</a
+				>.
+			</span>
+			<span class="how-to-cite">Cite:</span> <br />
+			<div class="how-to-cite-body">
+				{'@misc{pau2025satit,'}
+				<span class="how-to-cite-line"
+					>{'  author       = {Wilber Bermeo and Jordi Coll and Pau Ferrer and Mateu Villaret},'}</span
+				>
+				<span class="how-to-cite-line"
+					>{'  title        = {{SAT-IT, The Interactive SAT Tracer}},'}</span
+				>
+				<span class="how-to-cite-line">{'  year         = {2025},'}</span>
+				<span class="how-to-cite-line">{'  url          = {https://sat-it.udg.edu/},'}</span>
+				<span class="how-to-cite-line">{'  note         = {Accessed: \\today}'}</span>
+				{'}'}
+			</div>
+			<div class="how-to-cite-body">
+				{'@inproceedings{DBLP:conf/ccia/CaneCRV23,'}<br />
+				<span class="how-to-cite-line"
+					>{"author       = {Marc Can{'{e}} and Jordi Coll and Marc Rojo and Mateu Villaret},"}</span
+				>
+				<span class="how-to-cite-line"
+					>{'title        = {{SAT-IT:} The Interactive {SAT} Tracer},'}</span
+				>
+				<span class="how-to-cite-line"
+					>{'booktitle    = {Artificial Intelligence Research and Development - Proceedings of the 25th International Conference of the Catalan Association for Artificial Intelligence, {CCIA}},'}</span
+				>
+				<span class="how-to-cite-line"
+					>{'series       = {Frontiers in Artificial Intelligence and Applications},'}</span
+				>
+				<span class="how-to-cite-line">{'volume       = {375},'}</span>
+				<span class="how-to-cite-line">{'pages        = {337--346},'}</span>
+				<span class="how-to-cite-line">{'publisher    = {{IOS} Press},'}</span>
+				<span class="how-to-cite-line">{'year         = {2023},'}</span>
+				<span class="how-to-cite-line"
+					>{'url          = {https://doi.org/10.3233/FAIA230704},'}</span
+				>
+				<span class="how-to-cite-line">{'doi          = {10.3233/FAIA230704}'}</span>
+				{'}'}
+			</div>
+		</content>
 
-        <button
-            class="btn"
-            onclick={() => {
-                openModal = false;
-            }}
-        >
-            <span>Close</span>
-        </button>
-    </ack-modal>
+		<button
+			class="btn"
+			onclick={() => {
+				openModal = false;
+			}}
+		>
+			<span>Close</span>
+		</button>
+	</ack-modal>
 </Modal>
 
 <style>
-    .btn {
+	.btn {
 		border: solid;
 		border-width: 1px;
 		border-radius: 0.5rem;
@@ -104,7 +105,7 @@
 	:global(ack-modal) {
 		display: flex;
 		flex-direction: column;
-        height: 100%;
+		height: 100%;
 	}
 	.ack-button {
 		display: flex;
@@ -117,10 +118,10 @@
 		color: var(--icon-base);
 	}
 	content {
-        padding: 10px;
+		padding: 10px;
 		display: flex;
-        overflow-x: hidden;
-        overflow-y: auto;
+		overflow-x: hidden;
+		overflow-y: auto;
 		flex-direction: column;
 		text-align: justify;
 	}
@@ -171,8 +172,7 @@
 		overflow-y: auto;
 		white-space: nowrap;
 		margin-bottom: 10px;
-        min-height: 10.1rem;
-        max-height: 11rem;
+		min-height: 10rem;
 	}
 	.how-to-cite-line {
 		font-size: 12px;
