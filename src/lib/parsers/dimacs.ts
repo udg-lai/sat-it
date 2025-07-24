@@ -69,7 +69,6 @@ export default function parseDimacs(dimacs: string): Summary {
 	} else {
 		logFatal('Problem parsing claims', unwrapEither(eitherClaims));
 	}
-
 	const { claims, nTautology, nClauseSimplified } = simplifyClaims(summary.claims);
 	summary.claims = [...claims];
 	summary.nTautology = nTautology;
@@ -185,10 +184,11 @@ function parseClaims(
 				if (count > clauseCount) {
 					throw new Error(`Expected not more than ${clauseCount} clauses but ${count} were parsed`);
 				}
-
+				line = line.replace(/[−–—]/g, '-');
+				
 				let literals = line
 					.trim()
-					.split(' ')
+					.split(/\s+/)
 					.map((lit) => parseInt(lit));
 
 				const eos = literals.at(-1);
