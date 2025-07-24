@@ -13,8 +13,8 @@
 	--focus-border-color: var(--secondary-font-color);
 	--windows-padding: 0.5rem;
 	--font-size: 14px;
-	--notification-z-index: 1000;
-	--more-options-z-index: 100;
+	--notification-z-index: 100;
+	--more-options-z-index: 10;
 	--TeX-font-size: 1.2rem;
 	--conflict-color: #8a3ffc;
 	--unassigned-color: #000000;
@@ -58,6 +58,7 @@
 	--breakpoints-gap: 0.5rem;
 	--plain-literal-width: 40px;
 	--plain-literal-height: 25px;
+	--cite-bg-color: #cacaca60;
 }
 
 html,

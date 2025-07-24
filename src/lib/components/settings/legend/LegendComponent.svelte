@@ -30,7 +30,8 @@
 			bind:open={openModal}
 			size="md"
 			bodyClass="p-2 md:p-4 space-y-4 flex-1 overflow-y-auto overscroll-contain"
-			class="modal-style"
+			headerClass="dark:bg-white dark:text-gray-500 dark:border-gray-200 dark:divide-gray-200 flex justify-between items-center p-4 md:p-5 rounded-t-lg"
+			class="modal-style dark:divide-gray-200 dark:border-gray-200 dark:bg-white  dark:text-gray-500 "
 		>
 			<ack-modal>
 				<content>
@@ -56,8 +57,47 @@
 							target="_blank"
 							rel="noopener noreferrer">here</a
 						>.
-					</span></content
-				>
+					</span>
+					<span class="how-to-cite">Cite:</span> <br />
+					<div class="how-to-cite-body">
+						{'@misc{pau2025satit,'}
+						<span class="how-to-cite-line"
+							>{'  author       = {Wilber Bermeo and Jordi Coll and Pau Ferrer and Mateu Villaret},'}</span
+						>
+						<span class="how-to-cite-line"
+							>{'  title        = {{SAT-IT, The Interactive SAT Tracer}},'}</span
+						>
+						<span class="how-to-cite-line">{'  year         = {2025},'}</span>
+						<span class="how-to-cite-line">{'  url          = {https://sat-it.udg.edu/},'}</span>
+						<span class="how-to-cite-line">{'  note         = {Accessed: \\today}'}</span>
+						{'}'}
+					</div>
+
+					<div class="how-to-cite-body">
+						{'@inproceedings{DBLP:conf/ccia/CaneCRV23,'}<br />
+						<span class="how-to-cite-line"
+							>{"author       = {Marc Can{'{e}} and Jordi Coll and Marc Rojo and Mateu Villaret},"}</span
+						>
+						<span class="how-to-cite-line"
+							>{'title        = {{SAT-IT:} The Interactive {SAT} Tracer},'}</span
+						>
+						<span class="how-to-cite-line"
+							>{'booktitle    = {Artificial Intelligence Research and Development - Proceedings of the 25th International Conference of the Catalan Association for Artificial Intelligence, {CCIA}},'}</span
+						>
+						<span class="how-to-cite-line"
+							>{'series       = {Frontiers in Artificial Intelligence and Applications},'}</span
+						>
+						<span class="how-to-cite-line">{'volume       = {375},'}</span>
+						<span class="how-to-cite-line">{'pages        = {337--346},'}</span>
+						<span class="how-to-cite-line">{'publisher    = {{IOS} Press},'}</span>
+						<span class="how-to-cite-line">{'year         = {2023},'}</span>
+						<span class="how-to-cite-line"
+							>{'url          = {https://doi.org/10.3233/FAIA230704},'}</span
+						>
+						<span class="how-to-cite-line">{'doi          = {10.3233/FAIA230704}'}</span>
+						{'}'}
+					</div>
+				</content>
 
 				<button
 					class="btn"
@@ -161,9 +201,32 @@
 		padding-bottom: 10px;
 		font-size: 14px;
 		text-align: center;
+		font-weight: bold;
 	}
 
 	a.github:hover {
 		color: var(--icon-base);
+	}
+
+	.how-to-cite {
+		padding: 0px;
+		font-size: 15px;
+	}
+	.how-to-cite-body {
+		padding: 5px;
+		font-size: 12px;
+		border: 1px solid var(--border-color);
+		border-bottom: 1px solid var(--border-color);
+		background-color: var(--cite-bg-color);
+		overflow-x: auto;
+		overflow-y: hidden;
+		white-space: nowrap;
+		margin-bottom: 10px;
+	}
+	.how-to-cite-line {
+		font-size: 12px;
+		padding: 0px 0px 0px 20px;
+		display: flex;
+		flex: 1;
 	}
 </style>

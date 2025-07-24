@@ -215,6 +215,7 @@
 	:global(.modal-style) {
 		background-color: var(--main-bg-color);
 		color: black;
+		z-index: var(--modal-z-index);
 	}
 
 	.btn {
