@@ -69,7 +69,7 @@
 						>
 						<span class="how-to-cite-line">{'  year         = {2025},'}</span>
 						<span class="how-to-cite-line"
-							>{'  url          = {https://udg-lai.github.io/sat-it/},'}</span
+							>{'  url          = {https://sat-it.udg.edu/},'}</span
 						>
 						<span class="how-to-cite-line">{'  note         = {Accessed: \\today}'}</span>
 						{'}'}
