@@ -58,7 +58,7 @@
 		});
 
 		if (learntPart.length > 0) {
-			return [...originalPart, makeRight('Learnt clauses'), ...learntPart];
+			return [...originalPart, makeRight('c Learnt clauses'), ...learntPart];
 		} else {
 			return [...originalPart];
 		}
