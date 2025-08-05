@@ -1,0 +1,53 @@
+import parseDimacs from '$lib/parsers/dimacs.ts';
+import type { DimacsInstance } from '../dimacs-instance.interface.ts';
+
+const fileName = `NQueens3.dimacs`;
+
+const content = `
+c SAT encoding for 3 queens
+c Chess board has 9 positions
+p cnf 9 34
+1 2 3 0
+-1 -2 0
+-1 -3 0
+-2 -3 0
+4 5 6 0
+-4 -5 0
+-4 -6 0
+-5 -6 0
+7 8 9 0
+-7 -8 0
+-7 -9 0
+-8 -9 0
+1 4 7 0
+-1 -4 0
+-1 -7 0
+-4 -7 0
+2 5 8 0
+-2 -5 0
+-2 -8 0
+-5 -8 0
+3 6 9 0
+-3 -6 0
+-3 -9 0
+-6 -9 0
+-4 -8 0
+-1 -5 0
+-1 -9 0
+-5 -9 0
+-2 -6 0
+-6 -8 0
+-3 -5 0
+-3 -7 0
+-5 -7 0
+-2 -4 0
+`;
+
+const summary = parseDimacs(content);
+
+const instance: DimacsInstance = {
+	name: fileName.toLowerCase(),
+	summary
+};
+
+export default instance;

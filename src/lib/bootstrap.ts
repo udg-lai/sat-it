@@ -1,6 +1,7 @@
-import dummy from '$lib/instances/dummy.ts';
-import queens8 from '$lib/instances/queens/queens8.ts';
+import pb from '$lib/instances/pb.ts';
+import queens3 from '$lib/instances/queens/queens3.ts';
 import queens4 from '$lib/instances/queens/queens4.ts';
+import logarithmic from '$lib/instances/logarithmic.ts'
 import type { DimacsInstance } from '$lib/instances/dimacs-instance.interface.ts';
 
 function timeout(ms: number): Promise<void> {
@@ -9,7 +10,7 @@ function timeout(ms: number): Promise<void> {
 
 async function fakeRequest(): Promise<DimacsInstance[]> {
 	await timeout(300);
-	return [dummy, queens4, queens8];
+	return [pb, queens3, queens4, logarithmic];
 }
 
 export default async function fetchInstances(): Promise<DimacsInstance[]> {
