@@ -13,8 +13,8 @@ p cnf 2 3
 const summary = parseDimacs(content);
 
 const instance: DimacsInstance = {
-  name: fileName.toLowerCase(),
-  summary
+	name: fileName.toLowerCase(),
+	summary
 };
 
 export default instance;
