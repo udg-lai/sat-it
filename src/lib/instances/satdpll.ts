@@ -4,7 +4,7 @@ import type { DimacsInstance } from './dimacs-instance.interface.ts';
 const fileName = 'satdpll.dimacs';
 
 const content = `
-p cnf 6 5
+p cnf 5 6
 3 4 -1 5 0
 -3 4 5 0
 3 -4 -1 0
@@ -16,8 +16,8 @@ p cnf 6 5
 const summary = parseDimacs(content);
 
 const instance: DimacsInstance = {
-  name: fileName.toLowerCase(),
-  summary
+	name: fileName.toLowerCase(),
+	summary
 };
 
 export default instance;
