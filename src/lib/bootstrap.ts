@@ -1,7 +1,7 @@
 import pb from '$lib/instances/pb.ts';
 import queens3 from '$lib/instances/queens/queens3.ts';
 import queens4 from '$lib/instances/queens/queens4.ts';
-import logarithmic from '$lib/instances/logarithmic.ts'
+import logarithmic from '$lib/instances/logarithmic.ts';
 import type { DimacsInstance } from '$lib/instances/dimacs-instance.interface.ts';
 
 function timeout(ms: number): Promise<void> {
