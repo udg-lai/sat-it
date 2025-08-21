@@ -1,10 +1,10 @@
 import type { DimacsInstance } from '$lib/instances/dimacs-instance.interface.ts';
 import { changeInstanceEventBus } from '$lib/events/events.ts';
-import fetchInstances from '$lib/bootstrap.ts';
+import fetchInstances from '$lib/utils/bootstrap.ts';
 import { logError, logInfo, logWarning } from '$lib/stores/toasts.ts';
 import { get, writable, type Writable } from 'svelte/store';
 import { updateProblemDomain } from '../states/problem.svelte.ts';
-import { modifyLiteralWidth } from '$lib/utils.ts';
+import { modifyLiteralWidth } from '$lib/utils/utils.ts';
 
 export interface InteractiveInstance extends DimacsInstance {
 	removable: boolean;

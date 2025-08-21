@@ -1,4 +1,4 @@
-import { testNavigatorAgent } from './utils.ts';
+import { testNavigatorAgent } from './utils/utils.ts';
 
 const onChromeState: boolean = $state(testNavigatorAgent());
 

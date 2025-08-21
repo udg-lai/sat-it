@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { algorithmicUndo } from '$lib/algorithmicUndo.svelte.ts';
+	import { algorithmicUndo } from '$lib/utils/algorithmicUndo.svelte.ts';
 	import TrailEditor from '$lib/components/trail/TrailEditorComponent.svelte';
 	import type { Trail } from '$lib/entities/Trail.svelte.ts';
 	import {

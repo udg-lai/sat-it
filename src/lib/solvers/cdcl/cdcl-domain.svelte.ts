@@ -1,8 +1,3 @@
-import Clause, {
-	isUnitClause,
-	isUnSATClause,
-	type ClauseEval
-} from '$lib/entities/Clause.svelte.ts';
 import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
 import type { Trail } from '$lib/entities/Trail.svelte.ts';
 import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
@@ -22,6 +17,7 @@ import {
 	cleanClausesToCheck,
 	updateClausesToCheck
 } from '$lib/states/conflict-detection-state.svelte.ts';
+import { resetInspectedVariable } from '$lib/states/inspectedVariable.svelte.ts';
 import {
 	addClauseToClausePool,
 	getClausePool,
@@ -34,7 +30,9 @@ import { logFatal, logInfo } from '$lib/stores/toasts.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import type { OccurrenceList } from '../types.ts';
 import type { CDCL_SolverMachine } from './cdcl-solver-machine.svelte.ts';
-import { resetInspectedVariable } from '$lib/states/inspectedVariable.svelte.ts';
+import type { ClauseEval } from '$lib/entities/Clause.svelte.ts';
+import { isUnitClauseByTag, isUnSATClause } from '$lib/utils/clause-eval.svelte.ts';
+import type Clause from '$lib/entities/Clause.svelte.ts';
 
 const problem: Problem = $derived(getProblemStore());
 
@@ -250,9 +248,7 @@ export const thereAreJobPostponed: CDCL_CHECK_PENDING_OCCURRENCE_LISTS_FUN = (
 export type CDCL_UNIT_CLAUSE_FUN = (clauseTag: number) => boolean;
 
 export const unitClause: CDCL_UNIT_CLAUSE_FUN = (clauseTag: number) => {
-	const pool: ClausePool = problem.clauses;
-	const evaluation: ClauseEval = clauseEvaluation(pool, clauseTag);
-	return isUnitClause(evaluation);
+	return isUnitClauseByTag(clauseTag);
 };
 
 export type CDCL_UNIT_PROPAGATION_FUN = (clauseTag: number) => number;
