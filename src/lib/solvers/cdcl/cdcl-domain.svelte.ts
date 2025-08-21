@@ -26,7 +26,13 @@ import type { CDCL_SolverMachine } from './cdcl-solver-machine.svelte.ts';
 import type { ClauseEval } from '$lib/entities/Clause.svelte.ts';
 import { isUnitClauseByTag, isUnSATClause } from '$lib/utils/clause-eval.svelte.ts';
 import type Clause from '$lib/entities/Clause.svelte.ts';
-import { addClauseToClausePool, getClausePool, getProblemStore, type MappingLiteral2Clauses, type Problem } from '$lib/states/problem.svelte.ts';
+import {
+	addClauseToClausePool,
+	getClausePool,
+	getProblemStore,
+	type MappingLiteral2Clauses,
+	type Problem
+} from '$lib/states/problem.svelte.ts';
 
 const problem: Problem = $derived(getProblemStore());
 
