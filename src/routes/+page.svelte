@@ -10,7 +10,7 @@
 		setDefaultInstanceToSolve
 	} from '$lib/stores/instances.store.ts';
 	import { logError, toasts } from '$lib/stores/toasts.ts';
-	import { disableContextMenu } from '$lib/utils.ts';
+	import { disableContextMenu } from '$lib/utils/utils.ts';
 	import { onMount } from 'svelte';
 
 	let renderSettings = $state(true);

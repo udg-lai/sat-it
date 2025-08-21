@@ -34,6 +34,19 @@ export class Trail {
 	private readonly defaultTrailHeight: number = 56;
 	private readonly canvasHeight: number = 150;
 
+	constructor() {
+		this.assignments = [];
+		this.decisionLevelBookmark = [-1];
+		this.followUPIndex = 0;
+		this.decisionLevel = 0;
+		this.conflictAnalysisCtx = [];
+		this.upContext = this._upContext();
+		this.fullView = false;
+		this.learntClause = undefined;
+		this.conflictiveClause = undefined;
+		this.state = 'running';
+	}
+
 	copy(): Trail {
 		const newTrail = new Trail();
 		newTrail.assignments = this.assignments.map((assignment) => assignment.copy());
@@ -136,8 +149,8 @@ export class Trail {
 	}
 
 	updateConflictAnalysisCtx(ctx: ConflictAnalysisContext | undefined = undefined): void {
-		const ca: Either<ConflictAnalysisContext, undefined> =
-			ctx === undefined ? makeRight(undefined) : makeLeft(ctx);
+		const ca: Either<ConflictAnalysisContext, () => never> =
+			ctx === undefined ? makeRight(error) : makeLeft(ctx);
 		this.conflictAnalysisCtx = [ca, ...this.conflictAnalysisCtx];
 	}
 
@@ -200,7 +213,7 @@ export class Trail {
 		this.decisionLevel = dl;
 	}
 
-	getUPContext(): Either<UPContext, never>[] {
+	getUPContext(): Either<UPContext, () => never>[] {
 		return this.upContext;
 	}
 
