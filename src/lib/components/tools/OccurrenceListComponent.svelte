@@ -5,7 +5,7 @@
 		isUnitClause,
 		isUnresolvedClause,
 		isUnSATClause
-	} from '$lib/entities/Clause.svelte.ts';
+	} from '$lib/utils/clause-eval.svelte.ts';
 	import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
 	import {
 		getCheckingIndex,

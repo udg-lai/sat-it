@@ -18,13 +18,6 @@ import {
 	updateClausesToCheck
 } from '$lib/states/conflict-detection-state.svelte.ts';
 import { resetInspectedVariable } from '$lib/states/inspectedVariable.svelte.ts';
-import {
-	addClauseToClausePool,
-	getClausePool,
-	getProblemStore,
-	type MappingLiteral2Clauses,
-	type Problem
-} from '$lib/states/problem.svelte.ts';
 import { getLatestTrail, stackTrail } from '$lib/states/trails.svelte.ts';
 import { logFatal, logInfo } from '$lib/stores/toasts.ts';
 import { SvelteSet } from 'svelte/reactivity';
@@ -33,6 +26,7 @@ import type { CDCL_SolverMachine } from './cdcl-solver-machine.svelte.ts';
 import type { ClauseEval } from '$lib/entities/Clause.svelte.ts';
 import { isUnitClauseByTag, isUnSATClause } from '$lib/utils/clause-eval.svelte.ts';
 import type Clause from '$lib/entities/Clause.svelte.ts';
+import { addClauseToClausePool, getClausePool, getProblemStore, type MappingLiteral2Clauses, type Problem } from '$lib/states/problem.svelte.ts';
 
 const problem: Problem = $derived(getProblemStore());
 

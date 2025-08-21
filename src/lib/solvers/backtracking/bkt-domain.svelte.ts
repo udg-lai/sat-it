@@ -18,7 +18,8 @@ import type { BKT_SolverMachine } from './bkt-solver-machine.svelte.ts';
 import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
 import type { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
 import type { OccurrenceList } from '../types.ts';
-import { isUnSATClause, type ClauseEval } from '$lib/entities/Clause.svelte.ts';
+import { isUnSATClause } from '$lib/utils/clause-eval.svelte.ts';
+import type { ClauseEval } from '$lib/entities/Clause.svelte.ts';
 
 // **state inputs **
 

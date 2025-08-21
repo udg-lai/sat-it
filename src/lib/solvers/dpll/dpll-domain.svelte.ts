@@ -24,7 +24,8 @@ import { SvelteSet } from 'svelte/reactivity';
 import type { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
 import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
 import type { OccurrenceList } from '../types.ts';
-import { isUnitClause, isUnSATClause, type ClauseEval } from '$lib/entities/Clause.svelte.ts';
+import { type ClauseEval } from '$lib/entities/Clause.svelte.ts';
+import { isUnitClause, isUnSATClause } from '$lib/utils/clause-eval.svelte.ts';
 
 const problem: Problem = $derived(getProblemStore());
 // ** state inputs **
