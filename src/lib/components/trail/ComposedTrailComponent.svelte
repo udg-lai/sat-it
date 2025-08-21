@@ -5,7 +5,7 @@
 	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
 	import { getClausePool } from '$lib/states/problem.svelte.ts';
 	import { isLeft, makeLeft, makeRight, unwrapEither, type Either } from '$lib/types/either.ts';
-	import { error } from '$lib/utils.ts';
+	import { error } from '$lib/utils/utils.ts';
 	import CanvasComponent, { type CanvasContext, type UPRelation } from './CanvasComponent.svelte';
 	import TrailComponent from './TrailComponent.svelte';
 
