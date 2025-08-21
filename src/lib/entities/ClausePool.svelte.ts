@@ -1,4 +1,5 @@
 import { logFatal } from '$lib/stores/toasts.ts';
+import { isSatClause, isUnSATClause } from '$lib/utils/clause-eval.svelte.ts';
 import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 import {
 	makeSat,
@@ -7,7 +8,7 @@ import {
 	type AssignmentEval
 } from '../interfaces/IClausePool.ts';
 import type { Claim } from '../parsers/dimacs.ts';
-import Clause, { type ClauseEval, isSatClause, isUnSATClause } from './Clause.svelte.ts';
+import Clause, { type ClauseEval } from './Clause.svelte.ts';
 import type { VariablePool } from './VariablePool.svelte.ts';
 
 export interface IClausePool {
