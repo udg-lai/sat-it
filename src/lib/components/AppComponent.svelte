@@ -37,8 +37,6 @@
 	import DebuggerComponent from './debugger/DebuggerComponent.svelte';
 	import SolvingInformationComponent from './SolvingInformationComponent.svelte';
 
-	let expandPropagations: boolean = $state(true);
-
 	let trails: Trail[] = $derived(getTrails());
 
 	let solverMachine: SolverMachine<StateFun, StateInput> = $derived(getSolverMachine());
@@ -72,11 +70,6 @@
 		updateSolverMachine(activeState, record);
 	}
 
-	function togglePropagations(e: EditorViewEvent) {
-		if (e === undefined) return;
-		expandPropagations = !expandPropagations;
-	}
-
 	function reset(): void {
 		setSolverStateMachine();
 		resetStack();
@@ -104,7 +97,6 @@
 	}
 
 	onMount(() => {
-		const unsubscribeToggleEditor = editorViewEventStore.subscribe(togglePropagations);
 		const unsubscribeActionEvent = userActionEventBus.subscribe(onActionEvent);
 		const unsubscribeStateMachineEvent = stateMachineEventBus.subscribe(stateMachineEvent);
 		const unsubscribeChangeInstanceEvent = changeInstanceEventBus.subscribe(fullyReset);
@@ -114,7 +106,6 @@
 			stateMachineLifeCycleEventBus.subscribe(lifeCycleController);
 
 		return () => {
-			unsubscribeToggleEditor();
 			unsubscribeActionEvent();
 			unsubscribeChangeInstanceEvent();
 			unsubscribeStateMachineEvent();
