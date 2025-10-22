@@ -3,9 +3,9 @@
 		activateInstanceByName,
 		deleteInstanceByName,
 		getActiveInstance,
-		instanceStore,
+		getInstances,
 		type InteractiveInstance
-	} from '$lib/stores/instances.store.ts';
+	} from '$lib/stores/instances.svelte.ts';
 	import { logInfo } from '$lib/stores/toasts.svelte.ts';
 	import { Modal } from 'flowbite-svelte';
 	import {
@@ -25,15 +25,11 @@
 		if (activeInstance === undefined) return '';
 		else return activeInstance.name;
 	});
+	const instances = $derived(getInstances()) 
 
 	onMount(() => {
-		const unsubscribe = instanceStore.subscribe(() => {
 			previewingInstance = getActiveInstance();
 			activeInstance = getActiveInstance();
-		});
-		return () => {
-			unsubscribe();
-		};
 	});
 
 	function onClick(instanceName: string) {
@@ -65,9 +61,9 @@
 		{/if}
 	</div>
 	<div class="bookmark-list">
-		{#if $instanceStore}
+		{#if instances}
 			<ul class="items scrollable">
-				{#each $instanceStore as instance}
+				{#each instances as instance}
 					<li>
 						<button
 							class="item"

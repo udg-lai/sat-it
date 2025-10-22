@@ -2,7 +2,6 @@ import type { DimacsInstance } from '$lib/instances/dimacs-instance.interface.ts
 import { changeInstanceEventBus } from '$lib/events/events.ts';
 import fetchInstances from '$lib/bootstrap.ts';
 import { logError, logInfo, logWarning } from '$lib/stores/toasts.svelte.ts';
-import { get, writable, type Writable } from 'svelte/store';
 import { updateProblemDomain } from '../states/problem.svelte.ts';
 import { modifyLiteralWidth } from '$lib/utils.ts';
 
@@ -11,7 +10,7 @@ export interface InteractiveInstance extends DimacsInstance {
 	active: boolean;
 }
 
-export const instanceStore: Writable<InteractiveInstance[]> = writable([]);
+let instances: InteractiveInstance[] = $state([]);
 
 const defaultInstanceState = {
 	removable: false,
@@ -47,64 +46,59 @@ export function setDefaultInstanceToSolve(): void {
 	if (emptyInstanceSet()) {
 		logError('Can not set default instance from an empty set');
 	} else {
-		instanceStore.update((instances) => {
-			const newInstances = instances.map((e) => {
+		const newInstances = instances.map((e) => {
 				return {
 					...e,
 					active: false
 				};
 			});
-			const fst = newInstances[0];
-			fst.active = true;
-			afterActivateInstance(fst);
-			return newInstances;
-		});
+		const fst = newInstances[0];
+		fst.active = true;
+		afterActivateInstance(fst);
+		instances = newInstances;	
 	}
 }
 
 function emptyInstanceSet(): boolean {
-	const instances = get(instanceStore);
 	return instances.length === 0;
 }
 
 function updateInstanceStore(newInstances: InteractiveInstance[]): void {
-	instanceStore.set(newInstances);
+	instances = newInstances;
 }
 
 export function addInstance(instance: DimacsInstance): void {
-	const found = get(instanceStore).find((i) => i.name === instance.name);
+	const found = instances.find((i) => i.name === instance.name);
 	if (found) {
 		const title = 'Duplicated instance';
 		const description = `Instance ${instance.name} already loaded`;
 		logWarning(title, description);
 	} else {
-		instanceStore.update((prev) => [...prev, { ...instance, ...newInstanceState }]);
+		instances = [...instances, { ...instance, ...newInstanceState }];
 		logInfo('Instance added', `Instance ${instance.name}`);
 	}
 }
 
 export function activateInstanceByName(name: string): void {
 	// pre: that instance should exist in the store
-	instanceStore.update((instances) => {
-		const newInstances = instances.map((e) => {
-			return {
-				...e,
-				active: false
-			};
-		});
-		const instance = newInstances.find((e) => e.name === name);
-		if (instance !== undefined) {
-			instance.active = true;
-			afterActivateInstance(instance);
-		} else {
-			logError('Not instance found to activate');
-		}
-		return newInstances;
+	const newInstances = instances.map((e) => {
+		return {
+			...e,
+			active: false
+		};
 	});
+	const instance = newInstances.find((e) => e.name === name);
+	if (instance !== undefined) {
+		instance.active = true;
+		afterActivateInstance(instance);
+	} else {
+		logError('Not instance found to activate');
+	}
+	instances =  newInstances;
 }
 
 export function getActiveInstance(): InteractiveInstance | undefined {
-	const active = get(instanceStore).find((i) => i.active);
+	const active = instances.find((i) => i.active);
 	return active;
 }
 
@@ -115,9 +109,7 @@ export function deleteInstanceByName(name: string): void {
 		return e.name !== name || (e.name === name && (e.removable === false || e.active === true));
 	};
 
-	instanceStore.update((instances) => {
-		return instances.filter((e) => filterFun(e, name));
-	});
+	instances = instances.filter((e) => filterFun(e, name));
 
 	logInfo('Instance deleted', `Instance ${name} has been deleted`);
 }
@@ -126,4 +118,8 @@ function afterActivateInstance(instance: DimacsInstance): void {
 	modifyLiteralWidth(instance.summary.varCount);
 	updateProblemDomain(instance);
 	changeInstanceEventBus.emit(instance.name);
+}
+
+export const getInstances = () :InteractiveInstance[] => {
+	return instances
 }

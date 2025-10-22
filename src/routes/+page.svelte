@@ -8,7 +8,7 @@
 	import {
 		initializeInstancesStore,
 		setDefaultInstanceToSolve
-	} from '$lib/stores/instances.store.ts';
+	} from '$lib/stores/instances.svelte.ts';
 	import { getToasts, logError, type Toast } from '$lib/stores/toasts.svelte.ts';
 	import { disableContextMenu } from '$lib/utils.ts';
 	import { onMount } from 'svelte';
