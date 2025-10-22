@@ -81,6 +81,8 @@ export async function initializeInstancesStore() {
 		fetchedInstances.map((di) => {
 			instances.set(di.name, new InteractiveInstance(di, defaultInstanceState))
 		})
+		console.log("The loading has finished");
+		console.log(instances.size)
 	} catch (error) {
 		const description = (error as Error)?.message;
 		logWarning('Could not load instances', `Error: ${description ?? error}`);
@@ -130,16 +132,13 @@ export function activateInstanceByName(name: string): void {
 	}
 }
 
-export function getActiveInstance(): InteractiveInstance {
+export function getActiveInstance(): InteractiveInstance | undefined{
 	let activeInstance: InteractiveInstance | undefined = undefined;
 	for (const [key, instance] of instances.entries()) {
 		if(instance.getActive()) {
 			activeInstance = instance;
 			break;
 		}
-	}
-	if(!activeInstance) {
-		logFatal("There is no active instance")
 	}
 	return activeInstance;
 }
