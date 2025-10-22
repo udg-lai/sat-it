@@ -122,7 +122,7 @@ export function addInstance(instance: DimacsInstance): void {
 
 export function activateInstanceByName(name: string): void {
 	// pre: that instance should exist in the store
-	instances.forEach((instance) => instance.deactivate)
+	instances.forEach((instance) => instance.deactivate())
 	const instance: InteractiveInstance | undefined = instances.get(name);
 	if (instance !== undefined) {
 		instance.active = true;
