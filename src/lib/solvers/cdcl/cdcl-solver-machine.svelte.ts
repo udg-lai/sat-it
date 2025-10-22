@@ -2,7 +2,7 @@ import {
 	cleanClausesToCheck,
 	updateClausesToCheck
 } from '$lib/states/conflict-detection-state.svelte.ts';
-import { logFatal } from '$lib/stores/toasts.ts';
+import { logFatal } from '$lib/stores/toasts.svelte.ts';
 import { SolverMachine } from '../SolverMachine.svelte.ts';
 import type { CDCL_FUN, CDCL_INPUT } from './cdcl-domain.svelte.ts';
 import {

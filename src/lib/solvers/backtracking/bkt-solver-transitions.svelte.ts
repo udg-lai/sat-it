@@ -1,4 +1,4 @@
-import { logFatal } from '$lib/stores/toasts.ts';
+import { logFatal } from '$lib/stores/toasts.svelte.ts';
 import type { NonFinalState } from '../StateMachine.svelte.ts';
 import type {
 	BKT_ALL_CLAUSES_CHECKED_FUN,

@@ -68,10 +68,3 @@ export const stateMachineLifeCycleEventBus = createEventBus<StateMachineLifeCycl
 
 // event bus dedicated to toggle the trail view
 export const toggleTrailViewEventBus = createEventBus<void>();
-
-
-export interface EditorViewEvent {
-	expand: undefined;
-}
-
-// NEW EVENTS CREATED IN THE SECOND SEASON :)

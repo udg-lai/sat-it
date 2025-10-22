@@ -1,4 +1,4 @@
-import { logError, logInfo } from '$lib/stores/toasts.ts';
+import { logError, logInfo } from '$lib/stores/toasts.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
 
 const breakpoints: SvelteSet<number> = $state(new SvelteSet<number>());

@@ -9,11 +9,12 @@
 		initializeInstancesStore,
 		setDefaultInstanceToSolve
 	} from '$lib/stores/instances.store.ts';
-	import { logError, toasts } from '$lib/stores/toasts.ts';
+	import { getToasts, logError, type Toast } from '$lib/stores/toasts.svelte.ts';
 	import { disableContextMenu } from '$lib/utils.ts';
 	import { onMount } from 'svelte';
 
 	let renderSettings = $state(true);
+	const toasts: Toast[] = $derived(getToasts());
 
 	onMount(() => {
 		initializeInstancesStore()
@@ -44,9 +45,9 @@
 
 <svelte:body oncontextmenu={disableContextMenu} />
 <main class="chakra-petch-medium">
-	{#if $toasts}
+	{#if toasts}
 		<div class="toasts">
-			{#each $toasts as toast (toast.id)}
+			{#each toasts as toast (toast.id)}
 				<ToastComponent {toast} />
 			{/each}
 		</div>

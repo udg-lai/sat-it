@@ -1,7 +1,7 @@
 import type { DimacsInstance } from '$lib/instances/dimacs-instance.interface.ts';
 import { changeInstanceEventBus } from '$lib/events/events.ts';
 import fetchInstances from '$lib/bootstrap.ts';
-import { logError, logInfo, logWarning } from '$lib/stores/toasts.ts';
+import { logError, logInfo, logWarning } from '$lib/stores/toasts.svelte.ts';
 import { get, writable, type Writable } from 'svelte/store';
 import { updateProblemDomain } from '../states/problem.svelte.ts';
 import { modifyLiteralWidth } from '$lib/utils.ts';

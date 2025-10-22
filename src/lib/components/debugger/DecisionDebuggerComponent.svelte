@@ -3,7 +3,7 @@
 	import { stateMachineEventBus } from '$lib/events/events.ts';
 	import { updateAssignment } from '$lib/states/assignment.svelte.ts';
 	import { getProblemStore, type Problem } from '$lib/states/problem.svelte.ts';
-	import { logInfo, logWarning } from '$lib/stores/toasts.ts';
+	import { logInfo, logWarning } from '$lib/stores/toasts.svelte.ts';
 	import { CaretRightOutline } from 'flowbite-svelte-icons';
 	import './style.css';
 	import BacktrackingComponent from './buttons/BacktrackingComponent.svelte';

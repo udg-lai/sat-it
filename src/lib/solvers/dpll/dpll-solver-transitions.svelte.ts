@@ -1,4 +1,4 @@
-import { logFatal } from '$lib/stores/toasts.ts';
+import { logFatal } from '$lib/stores/toasts.svelte.ts';
 import { updateLastTrailEnding } from '$lib/states/trails.svelte.ts';
 import { type NonFinalState } from '../StateMachine.svelte.ts';
 import type {

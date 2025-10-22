@@ -1,5 +1,3 @@
-import { writable, type Writable } from 'svelte/store';
-
 type ToastType = 'error' | 'warn' | 'info' | 'breakpoint' | 'sat' | 'unsat';
 
 export interface Toast {
@@ -11,18 +9,19 @@ export interface Toast {
 	timeout?: number;
 }
 
-export const toasts: Writable<Toast[]> = writable([]);
-
-export const dismissToast = (id: number) => {
-	toasts.update((all) => all.filter((t) => t.id !== id));
-};
-
 const DEFAULT_TIMEOUT = 10000; // Default timeout for toasts
 const BREAKPOINT_TIMEOUT = 12000; // Timeout for breakpoint toasts
 const SAT_TIMEOUT = DEFAULT_TIMEOUT; // Timeout for SAT toasts
 const UNSAT_TIMEOUT = DEFAULT_TIMEOUT; // Timeout for UNSAT toasts
 const INFO_TIMEOUT = DEFAULT_TIMEOUT; // Default timeout for info toasts
 const WARNING_TIMEOUT = 3 * DEFAULT_TIMEOUT; // Timeout for warning toasts
+
+let toasts: Toast[] = $state([]);
+
+export const dismissToast = (id: number) => {
+	//toasts.update((all) => all.filter((t) => t.id !== id));
+	toasts = toasts.filter((t) => t.id !== id)
+};
 
 const addToast = (toast: Toast) => {
 	// Create a unique ID so we can easily find/remove it
@@ -41,7 +40,8 @@ const addToast = (toast: Toast) => {
 
 	// Push the toast to the top of the list of toasts
 	const t = { ...defaults, ...toast };
-	toasts.update((all) => [t, ...all]);
+	//toasts.update((all) => [t, ...all]);
+	toasts = [t, ...toasts]
 
 	// If toast is dismissible, dismiss it after "timeout" amount of time.
 	if (t.dismissible && t.timeout) setTimeout(() => dismissToast(id), t.timeout);
@@ -117,3 +117,7 @@ export function logFatal(title: string, description?: string): never {
 const formatText = (text?: string): string => {
 	return text === undefined ? '' : text.at(0)?.toUpperCase() + text.substring(1).toLowerCase();
 };
+
+export const getToasts = (): Toast[] => {
+	return toasts
+}

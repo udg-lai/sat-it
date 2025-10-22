@@ -31,9 +31,8 @@
 		updateStatistics
 	} from '$lib/states/statistics.svelte.ts';
 	import { getTrails, updateTrails } from '$lib/states/trails.svelte.ts';
-	import { logFatal } from '$lib/stores/toasts.ts';
+	import { logFatal } from '$lib/stores/toasts.svelte.ts';
 	import { onMount } from 'svelte';
-	import { editorViewEventStore, type EditorViewEvent } from '../stores/debugger.svelte.ts';
 	import DebuggerComponent from './debugger/DebuggerComponent.svelte';
 	import SolvingInformationComponent from './SolvingInformationComponent.svelte';
 

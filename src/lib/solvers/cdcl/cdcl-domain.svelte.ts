@@ -30,7 +30,7 @@ import {
 	type Problem
 } from '$lib/states/problem.svelte.ts';
 import { getLatestTrail, stackTrail } from '$lib/states/trails.svelte.ts';
-import { logFatal, logInfo } from '$lib/stores/toasts.ts';
+import { logFatal, logInfo } from '$lib/stores/toasts.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import type { OccurrenceList } from '../types.ts';
 import type { CDCL_SolverMachine } from './cdcl-solver-machine.svelte.ts';

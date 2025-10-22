@@ -1,6 +1,6 @@
 import type Clause from '$lib/entities/Clause.svelte.ts';
 import type { Trail } from '$lib/entities/Trail.svelte.ts';
-import { logFatal } from '$lib/stores/toasts.ts';
+import { logFatal } from '$lib/stores/toasts.svelte.ts';
 import { getClausePool } from './problem.svelte.ts';
 import { getSnapshot } from './stack.svelte.ts';
 

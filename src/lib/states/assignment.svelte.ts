@@ -1,4 +1,4 @@
-import { logFatal } from '$lib/stores/toasts.ts';
+import { logFatal } from '$lib/stores/toasts.svelte.ts';
 import { getBaselinePolarity } from './parameters.svelte.ts';
 
 export type ManualAssignment = {

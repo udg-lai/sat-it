@@ -1,5 +1,5 @@
 import type Clause from '$lib/entities/Clause.svelte.ts';
-import { logFatal } from '$lib/stores/toasts.ts';
+import { logFatal } from '$lib/stores/toasts.svelte.ts';
 
 export const assertiveness = (clause: Clause, variables: number[]): boolean => {
 	if (clause.isEmpty()) {

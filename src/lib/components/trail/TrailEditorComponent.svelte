@@ -11,7 +11,7 @@
 	import type { SolverMachine } from '$lib/solvers/SolverMachine.svelte.ts';
 	import type { StateFun, StateInput } from '$lib/solvers/StateMachine.svelte.ts';
 	import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
-	import { logFatal } from '$lib/stores/toasts.ts';
+	import { logFatal } from '$lib/stores/toasts.svelte.ts';
 	import { onMount } from 'svelte';
 	import ComposedTrailComponent from './ComposedTrailComponent.svelte';
 	import StatusIndicator from './StatusIndicator.svelte';

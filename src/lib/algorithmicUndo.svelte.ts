@@ -1,7 +1,7 @@
 import type { Trail } from '$lib/entities/Trail.svelte.ts';
 import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
 import { getLatestTrail, keepTrailsFromBeginningToX } from '$lib/states/trails.svelte.ts';
-import { logFatal } from '$lib/stores/toasts.ts';
+import { logFatal } from '$lib/stores/toasts.svelte.ts';
 
 export const algorithmicUndo = (
 	objectiveAssignment: VariableAssignment,

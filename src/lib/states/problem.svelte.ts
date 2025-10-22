@@ -6,7 +6,7 @@ import type Variable from '$lib/entities/Variable.svelte.ts';
 import { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import { getTrails } from './trails.svelte.ts';
-import { logFatal } from '$lib/stores/toasts.ts';
+import { logFatal } from '$lib/stores/toasts.svelte.ts';
 export type MappingLiteral2Clauses = Map<number, SvelteSet<number>>;
 
 export type Algorithm = 'backtracking' | 'dpll' | 'cdcl';

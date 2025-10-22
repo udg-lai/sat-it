@@ -1,5 +1,5 @@
 import { getStepDelay } from '$lib/states/delay-ms.svelte.ts';
-import { logFatal, logWarning } from '$lib/stores/toasts.ts';
+import { logFatal, logWarning } from '$lib/stores/toasts.svelte.ts';
 import {
 	solverFinishedAutoMode,
 	solverStartedAutoMode,

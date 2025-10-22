@@ -1,4 +1,4 @@
-import { logFatal } from '$lib/stores/toasts.ts';
+import { logFatal } from '$lib/stores/toasts.svelte.ts';
 import { isTautology } from '$lib/algorithms/tautology.ts';
 import { isRight, makeLeft, makeRight, unwrapEither, type Either } from '$lib/types/either.ts';
 import { type ErrorMessage } from '$lib/types/types.ts';

@@ -1,4 +1,4 @@
-import { logFatal, logSAT, logUnSAT } from '$lib/stores/toasts.ts';
+import { logFatal, logSAT, logUnSAT } from '$lib/stores/toasts.svelte.ts';
 import type { BKT_FUN, BKT_INPUT } from './backtracking/bkt-domain.svelte.ts';
 import type { CDCL_FUN, CDCL_INPUT } from './cdcl/cdcl-domain.svelte.ts';
 import type { DPLL_FUN, DPLL_INPUT } from './dpll/dpll-domain.svelte.ts';
