@@ -23,7 +23,7 @@
 	let instanceClicked: string = $state('');
 	let activeInstanceName: string = $derived.by(() => {
 		if (activeInstance === undefined) return '';
-		else return activeInstance.name;
+		else return activeInstance.getInstanceName();
 	});
 	const instances = $derived(getInstances()) 
 
@@ -44,7 +44,7 @@
 		if (currentInstance === undefined) {
 			change = true;
 		} else {
-			const { name } = currentInstance;
+			const { name } = currentInstance.getInstance();
 			change = name !== instanceName;
 		}
 		if (change) {
@@ -57,7 +57,7 @@
 <div class="bookmark">
 	<div class="bookmark-preview">
 		{#if previewingInstance}
-			<ProblemSummaryComponent instance={previewingInstance} />
+			<ProblemSummaryComponent instance={previewingInstance.getInstance()} />
 		{/if}
 	</div>
 	<div class="bookmark-list">
@@ -70,9 +70,9 @@
 							class:selected={instance.active}
 							onmouseenter={() => (previewingInstance = instance)}
 							onmouseleave={() => (previewingInstance = getActiveInstance())}
-							onclick={() => onClick(instance.name)}
+							onclick={() => onClick(instance.getInstanceName())}
 						>
-							<p>{instance.name}</p>
+							<p>{instance.getInstanceName()}</p>
 						</button>
 
 						<button
@@ -80,7 +80,7 @@
 							class:removable={instance.removable && !instance.active}
 							class:invalid={!instance.removable || instance.active}
 							disabled={!instance.removable || instance.active}
-							onclick={() => deleteInstanceByName(instance.name)}
+							onclick={() => deleteInstanceByName(instance.getInstanceName())}
 						>
 							{#if instance.removable && !instance.active}
 								<TrashBinOutline />

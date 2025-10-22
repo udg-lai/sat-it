@@ -6,6 +6,7 @@
 	import ToolsComponent from '$lib/components/tools/ToolsComponent.svelte';
 	import { closeSettingsViewEventBus, openSettingsViewEventBus } from '$lib/events/events.ts';
 	import {
+	getInstances,
 		initializeInstancesStore,
 		setDefaultInstanceToSolve
 	} from '$lib/stores/instances.svelte.ts';
