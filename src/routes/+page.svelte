@@ -6,16 +6,15 @@
 	import ToolsComponent from '$lib/components/tools/ToolsComponent.svelte';
 	import { closeSettingsViewEventBus, openSettingsViewEventBus } from '$lib/events/events.ts';
 	import {
-	getInstances,
 		initializeInstancesStore,
 		setDefaultInstanceToSolve
 	} from '$lib/stores/instances.svelte.ts';
-	import { getToasts, logError, type Toast } from '$lib/stores/toasts.svelte.ts';
+	import { getToasts, logError } from '$lib/stores/toasts.svelte.ts';
 	import { disableContextMenu } from '$lib/utils.ts';
 	import { onMount } from 'svelte';
 
 	let renderSettings = $state(true);
-	const toasts: Toast[] = $derived(getToasts());
+	const toasts = $derived(getToasts())
 
 	onMount(() => {
 		initializeInstancesStore()

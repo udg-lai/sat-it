@@ -1,10 +1,10 @@
 import type { DimacsInstance } from '$lib/instances/dimacs-instance.interface.ts';
 import { changeInstanceEventBus } from '$lib/events/events.ts';
-import fetchInstances from '$lib/bootstrap.ts';
 import { logError, logFatal, logInfo, logWarning } from '$lib/stores/toasts.svelte.ts';
 import { updateProblemDomain } from '../states/problem.svelte.ts';
 import { modifyLiteralWidth } from '$lib/utils.ts';
 import { SvelteMap } from 'svelte/reactivity';
+import fetchInstances from '$lib/bootstrap.ts';
 
 interface InteractiveInstanceState {
 	removable: boolean,
@@ -72,8 +72,6 @@ export class InteractiveInstance {
 }
 
 let instances: SvelteMap<string, InteractiveInstance> = new SvelteMap();
-
-
 
 export async function initializeInstancesStore() {
 	try {
