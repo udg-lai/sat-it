@@ -5,7 +5,7 @@
 		getActiveInstance,
 		getInstances,
 		type InteractiveInstance
-	} from '$lib/stores/instances.svelte.ts';
+	} from '$lib/states/instances.svelte.ts';
 	import { logInfo } from '$lib/stores/toasts.svelte.ts';
 	import { Modal } from 'flowbite-svelte';
 	import {

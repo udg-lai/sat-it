@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { changeInstanceEventBus } from '$lib/events/events.ts';
-	import { getActiveInstance } from '$lib/stores/instances.svelte.ts';
+	import { getActiveInstance } from '$lib/states/instances.svelte.ts';
 	import { Modal } from 'flowbite-svelte';
 	import { ExclamationCircleOutline, RefreshOutline } from 'flowbite-svelte-icons';
 	import DynamicRender from '../../DynamicRender.svelte';
