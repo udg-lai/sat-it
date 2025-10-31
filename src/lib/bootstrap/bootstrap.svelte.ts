@@ -10,10 +10,14 @@ import satbkt from '$lib/instances/satbkt.ts';
 import type { DimacsInstance } from '$lib/instances/dimacs-instance.interface.ts';
 import { InteractiveInstance } from '$lib/entities/InteractiveInstance.svelte.ts';
 import type { SvelteMap } from 'svelte/reactivity';
-import { activateInstanceByName, addInstance, getInstancesMapping } from '$lib/states/instances.svelte.ts';
+import {
+	addInstance,
+	afterActivateInstance,
+	getInstancesMapping
+} from '$lib/states/instances.svelte.ts';
 import { logError, logFatal, logWarning } from '$lib/stores/toasts.svelte.ts';
 
-const instances: SvelteMap<string,InteractiveInstance> = $derived(getInstancesMapping());
+const instances: SvelteMap<string, InteractiveInstance> = $derived(getInstancesMapping());
 
 function timeout(ms: number): Promise<void> {
 	return new Promise<void>((resolve: () => void) => setTimeout(resolve, ms));
@@ -34,9 +38,9 @@ export async function initializeInstances() {
 		const fetchedInstances: DimacsInstance[] = await fetchInstances();
 		fetchedInstances.map((di) => {
 			addInstance(di);
-		})
-		console.log("The loading has finished");
-		console.log(instances.size)
+		});
+		console.log('The loading has finished');
+		console.log(instances.size);
 	} catch (error) {
 		const description = (error as Error)?.message;
 		logWarning('Could not load instances', `Error: ${description ?? error}`);
@@ -48,12 +52,13 @@ export function setDefaultInstanceToSolve(): void {
 	if (emptyInstanceSet()) {
 		logError('Can not set default instance from an empty set');
 	} else {
-		instances.forEach((instance) => instance.deactivate)
+		instances.forEach((instance) => instance.deactivate);
 		const fst = instances.entries().next().value?.[1];
-		if(fst === undefined) {
-			logFatal("There are no instances to set")
+		if (fst === undefined) {
+			logFatal('There are no instances to set');
 		}
-		activateInstanceByName(fst.getInstanceName())
+		fst.activate()
+		afterActivateInstance(fst.getInstance());
 	}
 }
 

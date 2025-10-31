@@ -36,7 +36,7 @@ import type { OccurrenceList } from '../types.ts';
 import type { CDCL_SolverMachine } from './cdcl-solver-machine.svelte.ts';
 import { resetInspectedVariable } from '$lib/states/inspectedVariable.svelte.ts';
 
-const problem: Problem = $derived(getProblemStore());
+//const problem: Problem = $derived(getProblemStore());
 
 // ** state inputs **
 
@@ -139,21 +139,21 @@ export type CDCL_INPUT =
 export type CDCL_DECIDE_FUN = () => number;
 
 export const decide: CDCL_DECIDE_FUN = () => {
-	const pool: VariablePool = problem.variables;
+	const pool: VariablePool = getProblemStore().variables;
 	return solverDecide(pool, 'cdcl');
 };
 
 export type CDCL_ALL_VARIABLES_ASSIGNED_FUN = () => boolean;
 
 export const allAssigned: CDCL_ALL_VARIABLES_ASSIGNED_FUN = () => {
-	const pool = problem.variables;
+	const pool = getProblemStore().variables;
 	return solverAllAssigned(pool);
 };
 
 export type CDCL_EMPTY_CLAUSE_FUN = () => boolean;
 
 export const emptyClauseDetection: CDCL_EMPTY_CLAUSE_FUN = () => {
-	const pool: ClausePool = problem.clauses;
+	const pool: ClausePool = getProblemStore().clauses;
 	return solverEmptyClauseDetection(pool);
 };
 
@@ -184,7 +184,7 @@ export const unstackClauseSet: CDCL_UNSTACK_OCCURRENCE_LIST_FUN = (
 export type CDCL_UNIT_CLAUSES_DETECTION_FUN = () => SvelteSet<number>;
 
 export const unitClauseDetection: CDCL_UNIT_CLAUSES_DETECTION_FUN = () => {
-	const pool: ClausePool = problem.clauses;
+	const pool: ClausePool = getProblemStore().clauses;
 	return solverUnitClauseDetection(pool);
 };
 
@@ -232,7 +232,7 @@ export const nextClause: CDCL_NEXT_CLAUSE_FUN = (clauses: SvelteSet<number>) => 
 export type CDCL_CONFLICT_DETECTION_FUN = (clauseTag: number) => boolean;
 
 export const unsatisfiedClause: CDCL_CONFLICT_DETECTION_FUN = (clauseTag: number) => {
-	const pool: ClausePool = problem.clauses;
+	const pool: ClausePool = getProblemStore().clauses;
 	const evaluation: ClauseEval = clauseEvaluation(pool, clauseTag);
 	return isUnSATClause(evaluation);
 };
@@ -250,7 +250,7 @@ export const thereAreJobPostponed: CDCL_CHECK_PENDING_OCCURRENCE_LISTS_FUN = (
 export type CDCL_UNIT_CLAUSE_FUN = (clauseTag: number) => boolean;
 
 export const unitClause: CDCL_UNIT_CLAUSE_FUN = (clauseTag: number) => {
-	const pool: ClausePool = problem.clauses;
+	const pool: ClausePool = getProblemStore().clauses;
 	const evaluation: ClauseEval = clauseEvaluation(pool, clauseTag);
 	return isUnitClause(evaluation);
 };
@@ -258,6 +258,7 @@ export const unitClause: CDCL_UNIT_CLAUSE_FUN = (clauseTag: number) => {
 export type CDCL_UNIT_PROPAGATION_FUN = (clauseTag: number) => number;
 
 export const unitPropagation: CDCL_UNIT_PROPAGATION_FUN = (clauseTag: number) => {
+	const problem: Problem = getProblemStore();
 	const variables: VariablePool = problem.variables;
 	const clauses: ClausePool = problem.clauses;
 	return solverUnitPropagation(variables, clauses, clauseTag, 'up');
@@ -266,7 +267,7 @@ export const unitPropagation: CDCL_UNIT_PROPAGATION_FUN = (clauseTag: number) =>
 export type CDCL_COMPLEMENTARY_OCCURRENCES_FUN = (literal: number) => SvelteSet<number>;
 
 export const complementaryOccurrences: CDCL_COMPLEMENTARY_OCCURRENCES_FUN = (literal: number) => {
-	const mapping: MappingLiteral2Clauses = problem.mapping;
+	const mapping: MappingLiteral2Clauses = getProblemStore().mapping;
 	return solverComplementaryOccurrences(mapping, literal);
 };
 
@@ -438,6 +439,7 @@ export const pushTrail: CDCL_PUSH_TRAIL_FUN = (trail: Trail) => {
 export type CDCL_PROPAGATE_CC_FUN = (clauseTag: number) => number;
 
 export const propagateCC: CDCL_PROPAGATE_CC_FUN = (clauseTag: number) => {
+	const problem: Problem = getProblemStore();
 	const variables: VariablePool = problem.variables;
 	const clauses: ClausePool = problem.clauses;
 	return solverUnitPropagation(variables, clauses, clauseTag, 'backjumping');

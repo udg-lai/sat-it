@@ -25,11 +25,11 @@
 		if (activeInstance === undefined) return '';
 		else return activeInstance.getInstanceName();
 	});
-	const instances = $derived(getInstances()) 
+	const instances = $derived(getInstances());
 
 	onMount(() => {
-			previewingInstance = getActiveInstance();
-			activeInstance = getActiveInstance();
+		previewingInstance = getActiveInstance();
+		activeInstance = getActiveInstance();
 	});
 
 	function onClick(instanceName: string) {

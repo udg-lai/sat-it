@@ -26,7 +26,7 @@ import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
 import type { OccurrenceList } from '../types.ts';
 import { isUnitClause, isUnSATClause, type ClauseEval } from '$lib/entities/Clause.svelte.ts';
 
-const problem: Problem = $derived(getProblemStore());
+//const problem: Problem = $derived(getProblemStore());
 // ** state inputs **
 
 export type DPLL_EMPTY_CLAUSE_INPUT = 'unit_clauses_detection_state' | 'unsat_state';
@@ -94,21 +94,21 @@ export type DPLL_INPUT =
 export type DPLL_DECIDE_FUN = () => number;
 
 export const decide: DPLL_DECIDE_FUN = () => {
-	const pool: VariablePool = problem.variables;
+	const pool: VariablePool = getProblemStore().variables;
 	return solverDecide(pool, 'dpll');
 };
 
 export type DPLL_ALL_VARIABLES_ASSIGNED_FUN = () => boolean;
 
 export const allAssigned: DPLL_ALL_VARIABLES_ASSIGNED_FUN = () => {
-	const pool = problem.variables;
+	const pool = getProblemStore().variables;
 	return solverAllAssigned(pool);
 };
 
 export type DPLL_EMPTY_CLAUSE_FUN = () => boolean;
 
 export const emptyClauseDetection: DPLL_EMPTY_CLAUSE_FUN = () => {
-	const pool: ClausePool = problem.clauses;
+	const pool: ClausePool = getProblemStore().clauses;
 	return solverEmptyClauseDetection(pool);
 };
 
@@ -139,7 +139,7 @@ export const unstackOccurrenceList: DPLL_UNSTACK_OCCURRENCE_LIST_FUN = (
 export type DPLL_UNIT_CLAUSES_DETECTION_FUN = () => SvelteSet<number>;
 
 export const unitClauseDetection: DPLL_UNIT_CLAUSES_DETECTION_FUN = () => {
-	const pool: ClausePool = problem.clauses;
+	const pool: ClausePool = getProblemStore().clauses;
 	return solverUnitClauseDetection(pool);
 };
 
@@ -185,7 +185,7 @@ export const nextClause: DPLL_NEXT_CLAUSE_FUN = (clauses: SvelteSet<number>) => 
 export type DPLL_CONFLICT_DETECTION_FUN = (clauseTag: number) => boolean;
 
 export const unsatisfiedClause: DPLL_CONFLICT_DETECTION_FUN = (clauseTag: number) => {
-	const pool: ClausePool = problem.clauses;
+	const pool: ClausePool = getProblemStore().clauses;
 	const evaluation: ClauseEval = clauseEvaluation(pool, clauseTag);
 	return isUnSATClause(evaluation);
 };
@@ -203,7 +203,7 @@ export const thereAreJobPostponed: DPLL_CHECK_PENDING_OCCURRENCE_LISTS_FUN = (
 export type DPLL_UNIT_CLAUSE_FUN = (clauseTag: number) => boolean;
 
 export const unitClause: DPLL_UNIT_CLAUSE_FUN = (clauseTag: number) => {
-	const pool: ClausePool = problem.clauses;
+	const pool: ClausePool = getProblemStore().clauses;
 	const evaluation: ClauseEval = clauseEvaluation(pool, clauseTag);
 	return isUnitClause(evaluation);
 };
@@ -211,6 +211,7 @@ export const unitClause: DPLL_UNIT_CLAUSE_FUN = (clauseTag: number) => {
 export type DPLL_UNIT_PROPAGATION_FUN = (clauseTag: number) => number;
 
 export const unitPropagation: DPLL_UNIT_PROPAGATION_FUN = (clauseTag: number) => {
+	const problem: Problem = getProblemStore();
 	const variables: VariablePool = problem.variables;
 	const clauses: ClausePool = problem.clauses;
 	return solverUnitPropagation(variables, clauses, clauseTag, 'up');
@@ -219,7 +220,7 @@ export const unitPropagation: DPLL_UNIT_PROPAGATION_FUN = (clauseTag: number) =>
 export type DPLL_COMPLEMENTARY_OCCURRENCES_FUN = (literal: number) => SvelteSet<number>;
 
 export const complementaryOccurrences: DPLL_COMPLEMENTARY_OCCURRENCES_FUN = (literal: number) => {
-	const mapping: MappingLiteral2Clauses = problem.mapping;
+	const mapping: MappingLiteral2Clauses = getProblemStore().mapping;
 	return solverComplementaryOccurrences(mapping, literal);
 };
 
@@ -232,7 +233,7 @@ export const nonDecisionMade: DPLL_CHECK_NON_DECISION_MADE_FUN = () => {
 export type DPLL_BACKTRACKING_FUN = () => number;
 
 export const backtracking: DPLL_BACKTRACKING_FUN = () => {
-	const pool: VariablePool = problem.variables;
+	const pool: VariablePool = getProblemStore().variables;
 	return solverBacktracking(pool);
 };
 

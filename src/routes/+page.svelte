@@ -10,7 +10,7 @@
 	import { onMount } from 'svelte';
 
 	let renderSettings = $state(true);
-	const toasts = $derived(getToasts())
+	const toasts = $derived(getToasts());
 
 	onMount(() => {
 		const unsubscribeOpenSettings = openSettingsViewEventBus.subscribe(
@@ -19,7 +19,7 @@
 		const unsubscribeCloseSettings = closeSettingsViewEventBus.subscribe(
 			() => (renderSettings = false)
 		);
-		
+
 		return () => {
 			unsubscribeOpenSettings();
 			unsubscribeCloseSettings();

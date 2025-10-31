@@ -1,4 +1,4 @@
 export interface InteractiveInstanceState {
-	removable: boolean,
-	active: boolean
+	removable: boolean;
+	active: boolean;
 }

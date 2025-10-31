@@ -33,7 +33,7 @@ export function addInstance(instance: DimacsInstance): void {
 
 export function activateInstanceByName(name: string): void {
 	// pre: that instance should exist in the store
-	instances.forEach((instance) => instance.deactivate())
+	instances.forEach((instance) => instance.deactivate());
 	const instance: InteractiveInstance | undefined = instances.get(name);
 	if (instance !== undefined) {
 		instance.active = true;
@@ -43,10 +43,10 @@ export function activateInstanceByName(name: string): void {
 	}
 }
 
-export function getActiveInstance(): InteractiveInstance | undefined{
+export function getActiveInstance(): InteractiveInstance | undefined {
 	let activeInstance: InteractiveInstance | undefined = undefined;
-	for (const [key, instance] of instances.entries()) {
-		if(instance.getActive()) {
+	for (const [ , instance] of instances.entries()) {
+		if (instance.getActive()) {
 			activeInstance = instance;
 			break;
 		}
@@ -57,27 +57,27 @@ export function getActiveInstance(): InteractiveInstance | undefined{
 export function deleteInstanceByName(name: string): void {
 	// pre: no active or not removable instance can be deleted
 
-	const to_delete: InteractiveInstance | undefined = instances.get(name)
-	if(!to_delete) {
-		logFatal("Not deleted", `instance ${name} was not found`)
+	const to_delete: InteractiveInstance | undefined = instances.get(name);
+	if (!to_delete) {
+		logFatal('Not deleted', `instance ${name} was not found`);
 	}
-	if(to_delete.canBeDeleted()) {
-		instances.delete(to_delete.getInstance().name)
+	if (to_delete.canBeDeleted()) {
+		instances.delete(to_delete.getInstance().name);
 	}
 
 	logInfo('Instance deleted', `Instance ${name} has been deleted`);
 }
 
-function afterActivateInstance(instance: DimacsInstance): void {
+export function afterActivateInstance(instance: DimacsInstance): void {
 	modifyLiteralWidth(instance.summary.varCount);
 	updateProblemDomain(instance);
 	changeInstanceEventBus.emit(instance.name);
 }
 
-export const getInstancesMapping = () :SvelteMap<string,InteractiveInstance> => {
+export const getInstancesMapping = (): SvelteMap<string, InteractiveInstance> => {
 	return instances;
-}
+};
 
-export const getInstances = () :InteractiveInstance[] => {
+export const getInstances = (): InteractiveInstance[] => {
 	return [...instances.values()];
-}
+};

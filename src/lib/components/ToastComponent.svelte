@@ -17,7 +17,7 @@
 
 	function selfClose(): void {
 		if (toast.id) {
-			dismissToast(toast.id)
+			dismissToast(toast.id);
 		}
 	}
 
