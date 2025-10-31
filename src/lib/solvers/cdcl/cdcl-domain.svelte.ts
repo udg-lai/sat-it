@@ -23,11 +23,9 @@ import {
 	updateClausesToCheck
 } from '$lib/states/conflict-detection-state.svelte.ts';
 import {
-	addClauseToClausePool,
 	getClausePool,
 	getProblemStore,
-	type MappingLiteral2Clauses,
-	type Problem
+	type MappingLiteral2Clauses
 } from '$lib/states/problem.svelte.ts';
 import { getLatestTrail, stackTrail } from '$lib/states/trails.svelte.ts';
 import { logFatal, logInfo } from '$lib/states/toasts.svelte.ts';
@@ -35,6 +33,7 @@ import { SvelteSet } from 'svelte/reactivity';
 import type { OccurrenceList } from '../types.ts';
 import type { CDCL_SolverMachine } from './cdcl-solver-machine.svelte.ts';
 import { resetInspectedVariable } from '$lib/states/inspectedVariable.svelte.ts';
+import type Problem from '$lib/entities/Problem.svelte.ts';
 
 const problem: Problem = $derived(getProblemStore());
 
@@ -394,7 +393,7 @@ export const learnConflictClause: CDCL_LEARN_CONFLICT_CLAUSE_FUN = (
 	lemma.setAsLearntClause();
 
 	//The lemma is stored inside the pool
-	addClauseToClausePool(lemma);
+	getProblemStore().addClauseToClausePool(lemma);
 
 	// Saves the learnt clause in the trail
 	trail.learnClause(lemma);

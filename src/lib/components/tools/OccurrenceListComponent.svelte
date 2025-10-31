@@ -7,11 +7,12 @@
 		isUnSATClause
 	} from '$lib/entities/Clause.svelte.ts';
 	import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
+	import type Problem from '$lib/entities/Problem.svelte.ts';
 	import {
 		getCheckingIndex,
 		getClausesToCheck
 	} from '$lib/states/conflict-detection-state.svelte.ts';
-	import { getProblemStore, type Problem } from '$lib/states/problem.svelte.ts';
+	import { getProblemStore } from '$lib/states/problem.svelte.ts';
 	import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 	import ClauseComponent from '../ClauseComponent.svelte';
 	import HeadTailComponent from '../HeadTailComponent.svelte';

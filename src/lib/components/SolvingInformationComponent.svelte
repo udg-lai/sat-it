@@ -1,8 +1,9 @@
 <script lang="ts">
-	import { getProblemStore, type Problem } from '$lib/states/problem.svelte.ts';
+	import { getProblemStore } from '$lib/states/problem.svelte.ts';
 	import { onMount } from 'svelte';
 	import StatisticsComponent from './StatisticsComponent.svelte';
 	import { changeInstanceEventBus } from '$lib/events/events.ts';
+	import type Problem from '$lib/entities/Problem.svelte.ts';
 
 	let activeInstance: string = $state('');
 	const problem: Problem = $derived(getProblemStore());

@@ -1,7 +1,6 @@
 import {
 	getProblemStore,
-	type MappingLiteral2Clauses,
-	type Problem
+	type MappingLiteral2Clauses
 } from '$lib/states/problem.svelte.ts';
 import {
 	clauseEvaluation,
@@ -25,6 +24,7 @@ import type { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
 import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
 import type { OccurrenceList } from '../types.ts';
 import { isUnitClause, isUnSATClause, type ClauseEval } from '$lib/entities/Clause.svelte.ts';
+import type Problem from '$lib/entities/Problem.svelte.ts';
 
 const problem: Problem = $derived(getProblemStore());
 // ** state inputs **

@@ -2,7 +2,7 @@
 	import type { SolverMachine } from '$lib/solvers/SolverMachine.svelte.ts';
 	import type { StateFun, StateInput } from '$lib/solvers/StateMachine.svelte.ts';
 	import { getBaselinePolarity } from '$lib/states/parameters.svelte.ts';
-	import { getProblemStore, type Problem } from '$lib/states/problem.svelte.ts';
+	import { getProblemStore } from '$lib/states/problem.svelte.ts';
 	import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 	import { fromJust, isJust, type Maybe } from '$lib/types/maybe.ts';
 	import AutoModeComponent from './AutoModeComponent.svelte';
@@ -12,6 +12,7 @@
 	import AutomaticSolvingComponent from './AutomaticSolvingComponent.svelte';
 	import GeneralPurposeDebuggerComponent from './GeneralPurposeDebuggerComponent.svelte';
 	import StepComponent from './buttons/StepComponent.svelte';
+	import type Problem from '$lib/entities/Problem.svelte.ts';
 
 	const problem: Problem = $derived(getProblemStore());
 
