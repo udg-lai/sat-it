@@ -14,7 +14,7 @@ const newInstanceState: InteractiveInstanceState = {
 	active: false
 };
 
-export function addInstance(instance: DimacsInstance): void {
+export function addInstance(instance: DimacsInstance, notify: boolean = false): void {
 	const found = instances.has(instance.name);
 	if (found) {
 		const title = 'Duplicated instance';
@@ -22,7 +22,9 @@ export function addInstance(instance: DimacsInstance): void {
 		logWarning(title, description);
 	} else {
 		instances.set(instance.name, new InteractiveInstance(instance, newInstanceState));
-		logInfo('Instance added', `Instance ${instance.name}`);
+		if(notify) {
+			logInfo('Instance added', `Instance ${instance.name}`);
+		}	
 	}
 }
 

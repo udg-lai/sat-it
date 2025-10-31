@@ -24,5 +24,6 @@
 {#if loadedBootstrap}
 	{@render children()}
 {:else}
+	<!--HERE A LOADING PAGE SHOULD BE CREATED TODO-->
 	<p>Loading instances...</p>
 {/if}
