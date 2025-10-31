@@ -26,7 +26,6 @@ import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
 import type { OccurrenceList } from '../types.ts';
 import { isUnitClause, isUnSATClause, type ClauseEval } from '$lib/entities/Clause.svelte.ts';
 
-//const problem: Problem = $derived(getProblemStore());
 // ** state inputs **
 
 export type DPLL_EMPTY_CLAUSE_INPUT = 'unit_clauses_detection_state' | 'unsat_state';

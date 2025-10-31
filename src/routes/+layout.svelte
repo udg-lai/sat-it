@@ -13,7 +13,6 @@
 	onMount(() => {
 		initializeInstances()
 			.then(() => {
-				console.log('Hola');
 				setDefaultInstanceToSolve();
 				loadedBootstrap = true;
 			})
