@@ -22,9 +22,9 @@ export function addInstance(instance: DimacsInstance, notify: boolean = false): 
 		logWarning(title, description);
 	} else {
 		instances.set(instance.name, new InteractiveInstance(instance, newInstanceState));
-		if(notify) {
+		if (notify) {
 			logInfo('Instance added', `Instance ${instance.name}`);
-		}	
+		}
 	}
 }
 
