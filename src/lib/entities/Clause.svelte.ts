@@ -1,5 +1,5 @@
 import logicResolution from '$lib/algorithms/resolution.ts';
-import { logFatal } from '$lib/stores/toasts.svelte.ts';
+import { logFatal } from '$lib/states/toasts.svelte.ts';
 import type { Comparable } from '../interfaces/Comparable.ts';
 import type { Claim } from '../parsers/dimacs.ts';
 import { arraysEqual } from '../types/array.ts';

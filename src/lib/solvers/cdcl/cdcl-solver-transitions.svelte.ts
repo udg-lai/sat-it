@@ -4,7 +4,7 @@ import {
 	incrementCheckingIndex
 } from '$lib/states/conflict-detection-state.svelte.ts';
 import { increaseNoConflicts } from '$lib/states/statistics.svelte.ts';
-import { logFatal } from '$lib/stores/toasts.svelte.ts';
+import { logFatal } from '$lib/states/toasts.svelte.ts';
 import { getLatestTrail, updateLastTrailEnding } from '$lib/states/trails.svelte.ts';
 import { conflictDetectionEventBus, toggleTrailViewEventBus } from '$lib/events/events.ts';
 import { SvelteSet } from 'svelte/reactivity';

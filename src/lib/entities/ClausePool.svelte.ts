@@ -1,4 +1,4 @@
-import { logFatal } from '$lib/stores/toasts.svelte.ts';
+import { logFatal } from '$lib/states/toasts.svelte.ts';
 import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 import {
 	makeSat,

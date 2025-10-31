@@ -9,7 +9,7 @@
 	import { getInspectedVariable } from '$lib/states/inspectedVariable.svelte.ts';
 	import { getProblemStore, type Problem } from '$lib/states/problem.svelte.ts';
 	import type Clause from '$lib/entities/Clause.svelte.ts';
-	import { logFatal } from '$lib/stores/toasts.svelte.ts';
+	import { logFatal } from '$lib/states/toasts.svelte.ts';
 	import { isBackjumpingReason } from '$lib/entities/VariableAssignment.ts';
 
 	interface Props {

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { dismissToast, type Toast as NotificationToast } from '$lib/stores/toasts.svelte.ts';
+	import { dismissToast, type Toast as NotificationToast } from '$lib/states/toasts.svelte.ts';
 	import {
 		CheckOutline,
 		CloseCircleOutline,
@@ -17,7 +17,7 @@
 
 	function selfClose(): void {
 		if (toast.id) {
-			dismissToast(toast.id)
+			dismissToast(toast.id);
 		}
 	}
 

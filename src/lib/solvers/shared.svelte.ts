@@ -16,7 +16,7 @@ import {
 	updateClausesLeft
 } from '$lib/states/statistics.svelte.ts';
 import { getLatestTrail, getTrails, stackTrail } from '$lib/states/trails.svelte.ts';
-import { logBreakpoint, logFatal } from '$lib/stores/toasts.svelte.ts';
+import { logBreakpoint, logFatal } from '$lib/states/toasts.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import { isUnSAT } from '../interfaces/IClausePool.ts';
 import type { TruthAssignment } from '../interfaces/TruthAssignment.ts';

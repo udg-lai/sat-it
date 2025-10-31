@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { closeSettingsViewEventBus } from '$lib/events/events.ts';
 	import { fly } from 'svelte/transition';
-	import { getActiveView, setActiveView } from '../../stores/settings.svelte.ts';
+	import { getActiveView, setActiveView } from '../../states/settings.svelte.ts';
 	import BookmarkInstances from './BookmarkInstances.svelte';
 	import EngineComponent from './engine/EngineComponent.svelte';
 	import LegendComponent from './legend/LegendComponent.svelte';

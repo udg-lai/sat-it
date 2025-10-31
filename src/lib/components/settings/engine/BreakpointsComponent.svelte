@@ -8,7 +8,7 @@
 		removeBreakpoint
 	} from '$lib/states/breakpoints.svelte.ts';
 	import { getProblemStore, getVariablePool, type Problem } from '$lib/states/problem.svelte.ts';
-	import { logInfo } from '$lib/stores/toasts.svelte.ts';
+	import { logInfo } from '$lib/states/toasts.svelte.ts';
 	import { BugOutline } from 'flowbite-svelte-icons';
 	import BreakpointPrinter from './BreakpointPrinterComponent.svelte';
 	import './style.css';

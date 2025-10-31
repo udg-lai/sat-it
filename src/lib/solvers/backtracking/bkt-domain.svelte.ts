@@ -3,7 +3,7 @@ import {
 	updateClausesToCheck
 } from '$lib/states/conflict-detection-state.svelte.ts';
 import { getProblemStore, type MappingLiteral2Clauses } from '$lib/states/problem.svelte.ts';
-import { logFatal } from '$lib/stores/toasts.svelte.ts';
+import { logFatal } from '$lib/states/toasts.svelte.ts';
 import {
 	allAssigned as solverAllAssigned,
 	backtracking as solverBacktracking,

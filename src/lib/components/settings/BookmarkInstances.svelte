@@ -6,7 +6,7 @@
 		getInstances,
 		type InteractiveInstance
 	} from '$lib/stores/instances.svelte.ts';
-	import { logInfo } from '$lib/stores/toasts.svelte.ts';
+	import { logInfo } from '$lib/states/toasts.svelte.ts';
 	import { Modal } from 'flowbite-svelte';
 	import {
 		DatabaseOutline,
@@ -25,11 +25,11 @@
 		if (activeInstance === undefined) return '';
 		else return activeInstance.getInstanceName();
 	});
-	const instances = $derived(getInstances()) 
+	const instances = $derived(getInstances());
 
 	onMount(() => {
-			previewingInstance = getActiveInstance();
-			activeInstance = getActiveInstance();
+		previewingInstance = getActiveInstance();
+		activeInstance = getActiveInstance();
 	});
 
 	function onClick(instanceName: string) {

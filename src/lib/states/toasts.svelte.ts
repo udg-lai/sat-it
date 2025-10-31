@@ -20,7 +20,7 @@ let toasts: Toast[] = $state([]);
 
 export const dismissToast = (id: number) => {
 	//toasts.update((all) => all.filter((t) => t.id !== id));
-	toasts = toasts.filter((t) => t.id !== id)
+	toasts = toasts.filter((t) => t.id !== id);
 };
 
 const addToast = (toast: Toast) => {
@@ -41,7 +41,7 @@ const addToast = (toast: Toast) => {
 	// Push the toast to the top of the list of toasts
 	const t = { ...defaults, ...toast };
 	//toasts.update((all) => [t, ...all]);
-	toasts = [t, ...toasts]
+	toasts = [t, ...toasts];
 
 	// If toast is dismissible, dismiss it after "timeout" amount of time.
 	if (t.dismissible && t.timeout) setTimeout(() => dismissToast(id), t.timeout);
@@ -119,5 +119,5 @@ const formatText = (text?: string): string => {
 };
 
 export const getToasts = (): Toast[] => {
-	return toasts
-}
+	return toasts;
+};

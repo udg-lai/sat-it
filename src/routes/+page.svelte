@@ -9,12 +9,12 @@
 		initializeInstancesStore,
 		setDefaultInstanceToSolve
 	} from '$lib/stores/instances.svelte.ts';
-	import { getToasts, logError } from '$lib/stores/toasts.svelte.ts';
+	import { getToasts, logError } from '$lib/states/toasts.svelte.ts';
 	import { disableContextMenu } from '$lib/utils.ts';
 	import { onMount } from 'svelte';
 
 	let renderSettings = $state(true);
-	const toasts = $derived(getToasts())
+	const toasts = $derived(getToasts());
 
 	onMount(() => {
 		initializeInstancesStore()

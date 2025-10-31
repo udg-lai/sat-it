@@ -2,7 +2,7 @@
 	import type { DimacsInstance } from '$lib/instances/dimacs-instance.interface.ts';
 	import parser, { type Summary } from '$lib/parsers/dimacs.ts';
 	import { addInstance } from '$lib/stores/instances.svelte.ts';
-	import { logError, logInfo } from '$lib/stores/toasts.svelte.ts';
+	import { logError, logInfo } from '$lib/states/toasts.svelte.ts';
 	import { BottomNav, BottomNavItem, Tooltip } from 'flowbite-svelte';
 	import {
 		AdjustmentsVerticalOutline,
@@ -11,7 +11,7 @@
 		ExclamationCircleOutline,
 		PlusOutline
 	} from 'flowbite-svelte-icons';
-	import { getActiveView, type ActiveView } from '../../stores/settings.svelte.ts';
+	import { getActiveView, type ActiveView } from '../../states/settings.svelte.ts';
 
 	export type OptionEmit = 'bookmark' | 'engine' | 'info' | 'close';
 
