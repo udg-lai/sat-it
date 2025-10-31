@@ -12,14 +12,13 @@
 
 	onMount(() => {
 		initializeInstances()
-		.then(() => {
-			console.log("Hola")
-			setDefaultInstanceToSolve();
-			loadedBootstrap = true;
-		})
-		.catch(() => console.error("There was an error during the loading process"));
-	})
-
+			.then(() => {
+				console.log('Hola');
+				setDefaultInstanceToSolve();
+				loadedBootstrap = true;
+			})
+			.catch(() => console.error('There was an error during the loading process'));
+	});
 </script>
 
 {#if loadedBootstrap}

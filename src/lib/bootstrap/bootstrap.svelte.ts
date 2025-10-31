@@ -57,7 +57,7 @@ export function setDefaultInstanceToSolve(): void {
 		if (fst === undefined) {
 			logFatal('There are no instances to set');
 		}
-		fst.activate()
+		fst.activate();
 		afterActivateInstance(fst.getInstance());
 	}
 }

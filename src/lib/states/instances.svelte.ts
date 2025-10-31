@@ -7,12 +7,7 @@ import { SvelteMap } from 'svelte/reactivity';
 import type { InteractiveInstanceState } from '$lib/interfaces/InteractiveInstanceState.ts';
 import { InteractiveInstance } from '$lib/entities/InteractiveInstance.svelte.ts';
 
-let instances: SvelteMap<string, InteractiveInstance> = new SvelteMap();
-
-const defaultInstanceState: InteractiveInstanceState = {
-	removable: false,
-	active: false
-};
+const instances: SvelteMap<string, InteractiveInstance> = new SvelteMap();
 
 const newInstanceState: InteractiveInstanceState = {
 	removable: true,
@@ -45,7 +40,7 @@ export function activateInstanceByName(name: string): void {
 
 export function getActiveInstance(): InteractiveInstance | undefined {
 	let activeInstance: InteractiveInstance | undefined = undefined;
-	for (const [ , instance] of instances.entries()) {
+	for (const [, instance] of instances.entries()) {
 		if (instance.getActive()) {
 			activeInstance = instance;
 			break;
