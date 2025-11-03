@@ -39,8 +39,6 @@ export async function initializeInstances() {
 		fetchedInstances.map((di) => {
 			addInstance(di);
 		});
-		console.log('The loading has finished');
-		console.log(instances.size);
 	} catch (error) {
 		const description = (error as Error)?.message;
 		logWarning('Could not load instances', `Error: ${description ?? error}`);
