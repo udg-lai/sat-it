@@ -20,7 +20,7 @@
 
 	const confirmUpdate = () => {
 		resetModal = false;
-		getProblemStore().updateAlgorithm(currentAlgorithm)
+		getProblemStore().updateAlgorithm(currentAlgorithm);
 		//updateAlgorithm(currentAlgorithm);
 		changeAlgorithmEventBus.emit();
 	};

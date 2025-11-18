@@ -159,7 +159,7 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 				conflictAnalysis.conflictClause.copy(),
 				[...conflictAnalysis.decisionLevelVariables]
 			);
-			getProblemStore().updateProblemFromTrail(conflictAnalysis.trail)
+			getProblemStore().updateProblemFromTrail(conflictAnalysis.trail);
 			//updateProblemFromTrail(conflictAnalysis.trail);
 			setInspectedVariable(conflictAnalysis.trail.pickLastAssignment().getVariable().getInt());
 		}

@@ -2,7 +2,7 @@ import { SvelteSet } from 'svelte/reactivity';
 import Problem from '$lib/entities/Problem.svelte.ts';
 export type MappingLiteral2Clauses = Map<number, SvelteSet<number>>;
 
-let problem: Problem = $state(new Problem())
+const problem: Problem = $state(new Problem());
 
 export const getProblemStore = () => problem;
 

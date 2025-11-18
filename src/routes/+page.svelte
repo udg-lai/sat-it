@@ -14,11 +14,16 @@
 	import { onMount } from 'svelte';
 
 	let renderSettings = $state(true);
+	let mounted = $state(false); // This variables is to know if problem has been created and set.
+
 	const toasts = $derived(getToasts());
 
 	onMount(() => {
 		initializeInstancesStore()
-			.then(setDefaultInstanceToSolve)
+			.then(() => {
+				setDefaultInstanceToSolve();
+				mounted = true;
+			})
 			.catch(() =>
 				logError(`Preloaded instances`, `Could not fetch preloaded instances correctly`)
 			);
@@ -44,21 +49,23 @@
 </script>
 
 <svelte:body oncontextmenu={disableContextMenu} />
-<main class="chakra-petch-medium">
-	{#if toasts}
-		<div class="toasts">
-			{#each toasts as toast (toast.id)}
-				<ToastComponent {toast} />
-			{/each}
-		</div>
+{#if mounted}
+	<main class="chakra-petch-medium">
+		{#if toasts}
+			<div class="toasts">
+				{#each toasts as toast (toast.id)}
+					<ToastComponent {toast} />
+				{/each}
+			</div>
+		{/if}
+		<ToolsComponent />
+		<AppComponent />
+	</main>
+	{#if renderSettings}
+		<settings>
+			<SettingsComponent />
+		</settings>
 	{/if}
-	<ToolsComponent />
-	<AppComponent />
-</main>
-{#if renderSettings}
-	<settings>
-		<SettingsComponent />
-	</settings>
 {/if}
 
 <style>

@@ -1,29 +1,20 @@
 <script lang="ts">
 	import { getProblemStore } from '$lib/states/problem.svelte.ts';
-	import { onMount } from 'svelte';
 	import StatisticsComponent from './StatisticsComponent.svelte';
-	import { changeInstanceEventBus } from '$lib/events/events.ts';
 	import type Problem from '$lib/entities/Problem.svelte.ts';
+	import { getActiveInstance, InteractiveInstance } from '$lib/stores/instances.svelte.ts';
 
-	let activeInstance: string = $state('');
 	const problem: Problem = $derived(getProblemStore());
-
-	const updateActiveInstance = (name: string) => {
-		activeInstance = name;
-	};
-
-	onMount(() => {
-		const unsubscribe = changeInstanceEventBus.subscribe(updateActiveInstance);
-
-		return () => {
-			unsubscribe();
-		};
+	const instanceName: string = $derived.by(() => {
+		const instance: InteractiveInstance | undefined = getActiveInstance();
+		if (instance == undefined) return '';
+		else return instance.getInstanceName();
 	});
 </script>
 
 <solving-info>
 	<div class="selected-configuration">
-		<span>{activeInstance} - {problem.algorithm}</span>
+		<span>{instanceName} - {problem.algorithm}</span>
 	</div>
 	<StatisticsComponent />
 </solving-info>

@@ -1,7 +1,4 @@
-import {
-	getProblemStore,
-	type MappingLiteral2Clauses
-} from '$lib/states/problem.svelte.ts';
+import { getProblemStore, type MappingLiteral2Clauses } from '$lib/states/problem.svelte.ts';
 import {
 	clauseEvaluation,
 	allAssigned as solverAllAssigned,

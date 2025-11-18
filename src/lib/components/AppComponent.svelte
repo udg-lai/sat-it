@@ -63,7 +63,7 @@
 			logFatal('Reloading snapshot', 'Unexpected empty array of trails');
 		} else {
 			const latest: Trail = snapshot[snapshotSize - 1];
-			getProblemStore().updateProblemFromTrail(latest)
+			getProblemStore().updateProblemFromTrail(latest);
 			//updateProblemFromTrail(latest);
 		}
 		updateStatistics(statistics);

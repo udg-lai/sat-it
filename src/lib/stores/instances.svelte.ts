@@ -81,8 +81,6 @@ export async function initializeInstancesStore() {
 		fetchedInstances.map((di) => {
 			instances.set(di.name, new InteractiveInstance(di, defaultInstanceState));
 		});
-		console.log('The loading has finished');
-		console.log(instances.size);
 	} catch (error) {
 		const description = (error as Error)?.message;
 		logWarning('Could not load instances', `Error: ${description ?? error}`);
