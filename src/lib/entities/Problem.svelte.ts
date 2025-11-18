@@ -79,8 +79,6 @@ export default class Problem {
 		this._addClauseToMapping(lemma, lemma.getTag() as number, this.mapping);
 	}
 
-
-
 	private _literalToClauses(): MappingLiteral2Clauses {
 		const mapping: Map<number, SvelteSet<number>> = new Map();
 
