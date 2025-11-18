@@ -3,7 +3,7 @@
 		activateInstanceByName,
 		deleteInstanceByName,
 		getActiveInstance,
-		getInstances,
+		getInstances
 	} from '$lib/states/instances.svelte.ts';
 	import { Modal } from 'flowbite-svelte';
 	import {
