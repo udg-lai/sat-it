@@ -4,9 +4,7 @@
 		deleteInstanceByName,
 		getActiveInstance,
 		getInstances,
-		type InteractiveInstance
-	} from '$lib/stores/instances.svelte.ts';
-	import { logInfo } from '$lib/states/toasts.svelte.ts';
+	} from '$lib/states/instances.svelte.ts';
 	import { Modal } from 'flowbite-svelte';
 	import {
 		DatabaseOutline,
@@ -16,6 +14,8 @@
 	} from 'flowbite-svelte-icons';
 	import { onMount } from 'svelte';
 	import ProblemSummaryComponent from './ProblemSummaryComponent.svelte';
+	import type { InteractiveInstance } from '$lib/entities/InteractiveInstance.svelte.ts';
+	import { logInfo } from '$lib/states/toasts.svelte.ts';
 
 	let activeInstance: InteractiveInstance | undefined = $state(undefined);
 	let previewingInstance: InteractiveInstance | undefined = $state(undefined);

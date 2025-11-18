@@ -5,11 +5,7 @@
 	import ToastComponent from '$lib/components/ToastComponent.svelte';
 	import ToolsComponent from '$lib/components/tools/ToolsComponent.svelte';
 	import { closeSettingsViewEventBus, openSettingsViewEventBus } from '$lib/events/events.ts';
-	import {
-		initializeInstancesStore,
-		setDefaultInstanceToSolve
-	} from '$lib/stores/instances.svelte.ts';
-	import { getToasts, logError } from '$lib/states/toasts.svelte.ts';
+	import { getToasts } from '$lib/states/toasts.svelte.ts';
 	import { disableContextMenu } from '$lib/utils.ts';
 	import { onMount } from 'svelte';
 
@@ -17,12 +13,6 @@
 	const toasts = $derived(getToasts());
 
 	onMount(() => {
-		initializeInstancesStore()
-			.then(setDefaultInstanceToSolve)
-			.catch(() =>
-				logError(`Preloaded instances`, `Could not fetch preloaded instances correctly`)
-			);
-
 		const unsubscribeOpenSettings = openSettingsViewEventBus.subscribe(
 			() => (renderSettings = true)
 		);

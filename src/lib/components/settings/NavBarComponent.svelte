@@ -1,8 +1,6 @@
 <script lang="ts">
 	import type { DimacsInstance } from '$lib/instances/dimacs-instance.interface.ts';
 	import parser, { type Summary } from '$lib/parsers/dimacs.ts';
-	import { addInstance } from '$lib/stores/instances.svelte.ts';
-	import { logError, logInfo } from '$lib/states/toasts.svelte.ts';
 	import { BottomNav, BottomNavItem, Tooltip } from 'flowbite-svelte';
 	import {
 		AdjustmentsVerticalOutline,
@@ -12,6 +10,8 @@
 		PlusOutline
 	} from 'flowbite-svelte-icons';
 	import { getActiveView, type ActiveView } from '../../states/settings.svelte.ts';
+	import { logError, logInfo } from '$lib/states/toasts.svelte.ts';
+	import { addInstance } from '$lib/states/instances.svelte.ts';
 
 	export type OptionEmit = 'bookmark' | 'engine' | 'info' | 'close';
 
@@ -65,7 +65,7 @@
 				summary
 			};
 			notifySimplifiedCNF(summary);
-			addInstance(instance);
+			addInstance(instance, true);
 		} catch (error) {
 			const title = `Instance ${name} contains an error`;
 			const description = (error as Error).message;
