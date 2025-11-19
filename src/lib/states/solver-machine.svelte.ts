@@ -7,8 +7,8 @@ import { makeDPLLSolver } from '$lib/solvers/dpll/dpll-solver-machine.svelte.ts'
 import { SolverMachine } from '$lib/solvers/SolverMachine.svelte.ts';
 import type { StateFun, StateInput } from '$lib/solvers/StateMachine.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
-import { getProblemStore, type Algorithm } from './problem.svelte.ts';
-
+import { getProblemStore } from './problem.svelte.ts';
+import { type Algorithm } from '$lib/types/algorithm.ts';
 let solverMachine: SolverMachine<StateFun, StateInput> = $state(new CDCL_SolverMachine());
 
 export const setSolverStateMachine = () => {

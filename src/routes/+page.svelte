@@ -10,6 +10,7 @@
 	import { onMount } from 'svelte';
 
 	let renderSettings = $state(true);
+
 	const toasts = $derived(getToasts());
 
 	onMount(() => {

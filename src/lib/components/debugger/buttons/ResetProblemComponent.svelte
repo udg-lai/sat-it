@@ -31,7 +31,7 @@
 			<button
 				class="btn btn-modal mr-4"
 				onclick={() => {
-					changeInstanceEventBus.emit(getActiveInstance()?.name as string);
+					changeInstanceEventBus.emit(getActiveInstance()?.getInstanceName() as string);
 					resetModal = false;
 				}}>Yes, I'm sure</button
 			>

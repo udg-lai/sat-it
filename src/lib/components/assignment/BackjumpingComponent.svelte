@@ -7,10 +7,11 @@
 	import './style.css';
 	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
 	import { getInspectedVariable } from '$lib/states/inspectedVariable.svelte.ts';
-	import { getProblemStore, type Problem } from '$lib/states/problem.svelte.ts';
+	import { getProblemStore } from '$lib/states/problem.svelte.ts';
 	import type Clause from '$lib/entities/Clause.svelte.ts';
 	import { logFatal } from '$lib/states/toasts.svelte.ts';
 	import { isBackjumpingReason } from '$lib/entities/VariableAssignment.ts';
+	import type Problem from '$lib/entities/Problem.svelte.ts';
 
 	interface Props {
 		assignment: VariableAssignment;

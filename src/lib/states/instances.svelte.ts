@@ -1,11 +1,11 @@
 import type { DimacsInstance } from '$lib/instances/dimacs-instance.interface.ts';
 import { changeInstanceEventBus } from '$lib/events/events.ts';
 import { logError, logFatal, logInfo, logWarning } from '$lib/states/toasts.svelte.ts';
-import { updateProblemDomain } from './problem.svelte.ts';
 import { modifyLiteralWidth } from '$lib/utils.ts';
 import { SvelteMap } from 'svelte/reactivity';
 import type { InteractiveInstanceState } from '$lib/interfaces/InteractiveInstanceState.ts';
 import { InteractiveInstance } from '$lib/entities/InteractiveInstance.svelte.ts';
+import { getProblemStore } from './problem.svelte.ts';
 
 const instances: SvelteMap<string, InteractiveInstance> = new SvelteMap();
 
@@ -67,7 +67,7 @@ export function deleteInstanceByName(name: string): void {
 
 export function afterActivateInstance(instance: DimacsInstance): void {
 	modifyLiteralWidth(instance.summary.varCount);
-	updateProblemDomain(instance);
+	getProblemStore().updateProblemDomain(instance);
 	changeInstanceEventBus.emit(instance.name);
 }
 
