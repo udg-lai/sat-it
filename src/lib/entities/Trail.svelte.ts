@@ -1,6 +1,6 @@
 import { getProblemStore } from '$lib/states/problem.svelte.ts';
 import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
-import { logFatal } from '$lib/stores/toasts.ts';
+import { logFatal } from '$lib/states/toasts.svelte.ts';
 import { error } from '$lib/utils.ts';
 import { makeLeft, makeRight, type Either } from '../types/either.ts';
 import type Clause from './Clause.svelte.ts';

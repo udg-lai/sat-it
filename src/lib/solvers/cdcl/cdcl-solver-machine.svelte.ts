@@ -2,7 +2,7 @@ import {
 	cleanClausesToCheck,
 	updateClausesToCheck
 } from '$lib/states/conflict-detection-state.svelte.ts';
-import { logFatal } from '$lib/stores/toasts.ts';
+import { logFatal } from '$lib/states/toasts.svelte.ts';
 import { SolverMachine } from '../SolverMachine.svelte.ts';
 import type { CDCL_FUN, CDCL_INPUT } from './cdcl-domain.svelte.ts';
 import {
@@ -23,7 +23,7 @@ import type { Trail } from '$lib/entities/Trail.svelte.ts';
 import type Clause from '$lib/entities/Clause.svelte.ts';
 import { assertiveness } from '$lib/algorithms/assertive.ts';
 import { setInspectedVariable } from '$lib/states/inspectedVariable.svelte.ts';
-import { updateProblemFromTrail } from '$lib/states/problem.svelte.ts';
+import { getProblemStore } from '$lib/states/problem.svelte.ts';
 
 export const makeCDCLSolver = (): CDCL_SolverMachine => {
 	return new CDCL_SolverMachine();
@@ -159,7 +159,8 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 				conflictAnalysis.conflictClause.copy(),
 				[...conflictAnalysis.decisionLevelVariables]
 			);
-			updateProblemFromTrail(conflictAnalysis.trail);
+			getProblemStore().updateProblemFromTrail(conflictAnalysis.trail);
+			//updateProblemFromTrail(conflictAnalysis.trail);
 			setInspectedVariable(conflictAnalysis.trail.pickLastAssignment().getVariable().getInt());
 		}
 	}

@@ -1,6 +1,7 @@
 <script lang="ts">
+	import type Problem from '$lib/entities/Problem.svelte.ts';
 	import type { Trail } from '$lib/entities/Trail.svelte.ts';
-	import { getProblemStore, type Problem } from '$lib/states/problem.svelte.ts';
+	import { getProblemStore } from '$lib/states/problem.svelte.ts';
 	import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 	import {
 		getClausesLeft,

@@ -1,4 +1,4 @@
-import { logFatal } from '$lib/stores/toasts.ts';
+import { logFatal } from '$lib/states/toasts.svelte.ts';
 import type { Comparable } from '../interfaces/Comparable.ts';
 import type Variable from './Variable.svelte.ts';
 import type { VariablePool } from './VariablePool.svelte.ts';

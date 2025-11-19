@@ -3,10 +3,8 @@
 		activateInstanceByName,
 		deleteInstanceByName,
 		getActiveInstance,
-		instanceStore,
-		type InteractiveInstance
-	} from '$lib/stores/instances.store.ts';
-	import { logInfo } from '$lib/stores/toasts.ts';
+		getInstances
+	} from '$lib/states/instances.svelte.ts';
 	import { Modal } from 'flowbite-svelte';
 	import {
 		DatabaseOutline,
@@ -16,6 +14,8 @@
 	} from 'flowbite-svelte-icons';
 	import { onMount } from 'svelte';
 	import ProblemSummaryComponent from './ProblemSummaryComponent.svelte';
+	import type { InteractiveInstance } from '$lib/entities/InteractiveInstance.svelte.ts';
+	import { logInfo } from '$lib/states/toasts.svelte.ts';
 
 	let activeInstance: InteractiveInstance | undefined = $state(undefined);
 	let previewingInstance: InteractiveInstance | undefined = $state(undefined);
@@ -23,17 +23,13 @@
 	let instanceClicked: string = $state('');
 	let activeInstanceName: string = $derived.by(() => {
 		if (activeInstance === undefined) return '';
-		else return activeInstance.name;
+		else return activeInstance.getInstanceName();
 	});
+	const instances = $derived(getInstances());
 
 	onMount(() => {
-		const unsubscribe = instanceStore.subscribe(() => {
-			previewingInstance = getActiveInstance();
-			activeInstance = getActiveInstance();
-		});
-		return () => {
-			unsubscribe();
-		};
+		previewingInstance = getActiveInstance();
+		activeInstance = getActiveInstance();
 	});
 
 	function onClick(instanceName: string) {
@@ -48,7 +44,7 @@
 		if (currentInstance === undefined) {
 			change = true;
 		} else {
-			const { name } = currentInstance;
+			const { name } = currentInstance.getInstance();
 			change = name !== instanceName;
 		}
 		if (change) {
@@ -61,22 +57,22 @@
 <div class="bookmark">
 	<div class="bookmark-preview">
 		{#if previewingInstance}
-			<ProblemSummaryComponent instance={previewingInstance} />
+			<ProblemSummaryComponent instance={previewingInstance.getInstance()} />
 		{/if}
 	</div>
 	<div class="bookmark-list">
-		{#if $instanceStore}
+		{#if instances}
 			<ul class="items scrollable">
-				{#each $instanceStore as instance}
+				{#each instances as instance}
 					<li>
 						<button
 							class="item"
 							class:selected={instance.active}
 							onmouseenter={() => (previewingInstance = instance)}
 							onmouseleave={() => (previewingInstance = getActiveInstance())}
-							onclick={() => onClick(instance.name)}
+							onclick={() => onClick(instance.getInstanceName())}
 						>
-							<p>{instance.name}</p>
+							<p>{instance.getInstanceName()}</p>
 						</button>
 
 						<button
@@ -84,7 +80,7 @@
 							class:removable={instance.removable && !instance.active}
 							class:invalid={!instance.removable || instance.active}
 							disabled={!instance.removable || instance.active}
-							onclick={() => deleteInstanceByName(instance.name)}
+							onclick={() => deleteInstanceByName(instance.getInstanceName())}
 						>
 							{#if instance.removable && !instance.active}
 								<TrashBinOutline />

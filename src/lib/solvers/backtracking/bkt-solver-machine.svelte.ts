@@ -2,7 +2,7 @@ import {
 	cleanClausesToCheck,
 	updateClausesToCheck
 } from '$lib/states/conflict-detection-state.svelte.ts';
-import { logFatal } from '$lib/stores/toasts.ts';
+import { logFatal } from '$lib/states/toasts.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import { SolverMachine } from '../SolverMachine.svelte.ts';
 import type { BKT_FUN, BKT_INPUT } from './bkt-domain.svelte.ts';

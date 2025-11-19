@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { dismissToast, type Toast as NotificationToast } from '$lib/stores/toasts.ts';
+	import { dismissToast, type Toast as NotificationToast } from '$lib/states/toasts.svelte.ts';
 	import {
 		CheckOutline,
 		CloseCircleOutline,

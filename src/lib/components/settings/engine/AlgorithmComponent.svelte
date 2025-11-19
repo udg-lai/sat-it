@@ -1,9 +1,10 @@
 <script lang="ts">
 	import DynamicRender from '$lib/components/DynamicRender.svelte';
 	import { changeAlgorithmEventBus } from '$lib/events/events.ts';
-	import { getProblemStore, updateAlgorithm, type Algorithm } from '$lib/states/problem.svelte.ts';
+	import { getProblemStore } from '$lib/states/problem.svelte.ts';
 	import { Modal } from 'flowbite-svelte';
 	import { CodePullRequestOutline, ExclamationCircleOutline } from 'flowbite-svelte-icons';
+	import { type Algorithm } from '$lib/types/algorithm.ts';
 
 	interface Props {
 		iconClass: { size: string };
@@ -19,7 +20,8 @@
 
 	const confirmUpdate = () => {
 		resetModal = false;
-		updateAlgorithm(currentAlgorithm);
+		getProblemStore().updateAlgorithm(currentAlgorithm);
+		//updateAlgorithm(currentAlgorithm);
 		changeAlgorithmEventBus.emit();
 	};
 

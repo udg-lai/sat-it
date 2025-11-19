@@ -1,4 +1,4 @@
-import { logError } from '$lib/stores/toasts.ts';
+import { logError } from '$lib/states/toasts.svelte.ts';
 
 export class Queue<T> {
 	private items: T[] = $state([]);

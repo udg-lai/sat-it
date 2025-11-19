@@ -18,7 +18,7 @@
 	import type { SolverMachine } from '$lib/solvers/SolverMachine.svelte.ts';
 	import type { StateFun, StateInput } from '$lib/solvers/StateMachine.svelte.ts';
 	import { clearBreakpoints } from '$lib/states/breakpoints.svelte.ts';
-	import { updateProblemFromTrail } from '$lib/states/problem.svelte.ts';
+	import { getProblemStore } from '$lib/states/problem.svelte.ts';
 	import {
 		getSolverMachine,
 		setSolverStateMachine,
@@ -31,13 +31,10 @@
 		updateStatistics
 	} from '$lib/states/statistics.svelte.ts';
 	import { getTrails, updateTrails } from '$lib/states/trails.svelte.ts';
-	import { logFatal } from '$lib/stores/toasts.ts';
+	import { logFatal } from '$lib/states/toasts.svelte.ts';
 	import { onMount } from 'svelte';
-	import { editorViewEventStore, type EditorViewEvent } from '../stores/debugger.svelte.ts';
 	import DebuggerComponent from './debugger/DebuggerComponent.svelte';
 	import SolvingInformationComponent from './SolvingInformationComponent.svelte';
-
-	let expandPropagations: boolean = $state(true);
 
 	let trails: Trail[] = $derived(getTrails());
 
@@ -66,15 +63,11 @@
 			logFatal('Reloading snapshot', 'Unexpected empty array of trails');
 		} else {
 			const latest: Trail = snapshot[snapshotSize - 1];
-			updateProblemFromTrail(latest);
+			getProblemStore().updateProblemFromTrail(latest);
+			//updateProblemFromTrail(latest);
 		}
 		updateStatistics(statistics);
 		updateSolverMachine(activeState, record);
-	}
-
-	function togglePropagations(e: EditorViewEvent) {
-		if (e === undefined) return;
-		expandPropagations = !expandPropagations;
 	}
 
 	function reset(): void {
@@ -92,7 +85,7 @@
 
 	function algorithmicUndoSave(a: AlgorithmicUndoEvent): void {
 		const latestTrail: Trail = algorithmicUndo(a.objectiveAssignment, a.trailIndex);
-		updateProblemFromTrail(latestTrail);
+		getProblemStore().updateProblemFromTrail(latestTrail);
 		updateSolverMachine(DECIDE_STATE_ID, undefined);
 		record(trails, solverMachine.getActiveStateId(), getStatistics(), solverMachine.getRecord());
 	}
@@ -104,7 +97,6 @@
 	}
 
 	onMount(() => {
-		const unsubscribeToggleEditor = editorViewEventStore.subscribe(togglePropagations);
 		const unsubscribeActionEvent = userActionEventBus.subscribe(onActionEvent);
 		const unsubscribeStateMachineEvent = stateMachineEventBus.subscribe(stateMachineEvent);
 		const unsubscribeChangeInstanceEvent = changeInstanceEventBus.subscribe(fullyReset);
@@ -114,7 +106,6 @@
 			stateMachineLifeCycleEventBus.subscribe(lifeCycleController);
 
 		return () => {
-			unsubscribeToggleEditor();
 			unsubscribeActionEvent();
 			unsubscribeChangeInstanceEvent();
 			unsubscribeStateMachineEvent();

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { changeInstanceEventBus } from '$lib/events/events.ts';
-	import { getActiveInstance } from '$lib/stores/instances.store.ts';
+	import { getActiveInstance } from '$lib/states/instances.svelte.ts';
 	import { Modal } from 'flowbite-svelte';
 	import { ExclamationCircleOutline, RefreshOutline } from 'flowbite-svelte-icons';
 	import DynamicRender from '../../DynamicRender.svelte';
@@ -31,7 +31,7 @@
 			<button
 				class="btn btn-modal mr-4"
 				onclick={() => {
-					changeInstanceEventBus.emit(getActiveInstance()?.name as string);
+					changeInstanceEventBus.emit(getActiveInstance()?.getInstanceName() as string);
 					resetModal = false;
 				}}>Yes, I'm sure</button
 			>

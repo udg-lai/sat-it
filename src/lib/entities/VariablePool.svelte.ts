@@ -1,4 +1,4 @@
-import { logFatal } from '$lib/stores/toasts.ts';
+import { logFatal } from '$lib/states/toasts.svelte.ts';
 import { makeJust, makeNothing, type Maybe } from '../types/maybe.ts';
 import Variable, { type Assignment } from './Variable.svelte.ts';
 

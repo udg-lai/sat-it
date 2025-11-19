@@ -5,23 +5,15 @@
 	import ToastComponent from '$lib/components/ToastComponent.svelte';
 	import ToolsComponent from '$lib/components/tools/ToolsComponent.svelte';
 	import { closeSettingsViewEventBus, openSettingsViewEventBus } from '$lib/events/events.ts';
-	import {
-		initializeInstancesStore,
-		setDefaultInstanceToSolve
-	} from '$lib/stores/instances.store.ts';
-	import { logError, toasts } from '$lib/stores/toasts.ts';
+	import { getToasts } from '$lib/states/toasts.svelte.ts';
 	import { disableContextMenu } from '$lib/utils.ts';
 	import { onMount } from 'svelte';
 
 	let renderSettings = $state(true);
 
-	onMount(() => {
-		initializeInstancesStore()
-			.then(setDefaultInstanceToSolve)
-			.catch(() =>
-				logError(`Preloaded instances`, `Could not fetch preloaded instances correctly`)
-			);
+	const toasts = $derived(getToasts());
 
+	onMount(() => {
 		const unsubscribeOpenSettings = openSettingsViewEventBus.subscribe(
 			() => (renderSettings = true)
 		);
@@ -44,9 +36,9 @@
 
 <svelte:body oncontextmenu={disableContextMenu} />
 <main class="chakra-petch-medium">
-	{#if $toasts}
+	{#if toasts}
 		<div class="toasts">
-			{#each $toasts as toast (toast.id)}
+			{#each toasts as toast (toast.id)}
 				<ToastComponent {toast} />
 			{/each}
 		</div>
