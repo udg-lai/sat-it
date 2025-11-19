@@ -68,3 +68,6 @@ export const stateMachineLifeCycleEventBus = createEventBus<StateMachineLifeCycl
 
 // event bus dedicated to toggle the trail view
 export const toggleTrailViewEventBus = createEventBus<void>();
+
+// event bus to know when trails can be updated to show.
+export const updateTrailsEventBus = createEventBus<void>();

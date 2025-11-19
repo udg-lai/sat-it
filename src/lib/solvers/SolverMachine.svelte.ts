@@ -4,6 +4,7 @@ import {
 	solverFinishedAutoMode,
 	solverStartedAutoMode,
 	stateMachineLifeCycleEventBus,
+	updateTrailsEventBus,
 	type StateMachineEvent
 } from '$lib/events/events.ts';
 import { tick } from 'svelte';
@@ -132,6 +133,7 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 			await tick();
 			await new Promise((r) => times.push(setTimeout(r, getStepDelay())));
 		}
+		updateTrailsEventBus.emit()
 		times.forEach(clearTimeout);
 		this._postStepByStep();
 	}

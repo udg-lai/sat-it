@@ -8,6 +8,7 @@
 		changeInstanceEventBus,
 		stateMachineEventBus,
 		stateMachineLifeCycleEventBus,
+		updateTrailsEventBus,
 		userActionEventBus,
 		type ActionEvent,
 		type AlgorithmicUndoEvent,
@@ -36,7 +37,7 @@
 	import DebuggerComponent from './debugger/DebuggerComponent.svelte';
 	import SolvingInformationComponent from './SolvingInformationComponent.svelte';
 
-	let trails: Trail[] = $derived(getTrails());
+	let trails: Trail[] = $state(getTrails());
 
 	let solverMachine: SolverMachine<StateFun, StateInput> = $derived(getSolverMachine());
 
@@ -64,7 +65,6 @@
 		} else {
 			const latest: Trail = snapshot[snapshotSize - 1];
 			getProblemStore().updateProblemFromTrail(latest);
-			//updateProblemFromTrail(latest);
 		}
 		updateStatistics(statistics);
 		updateSolverMachine(activeState, record);
@@ -96,22 +96,23 @@
 		}
 	}
 
+	function updateTrailsList(): void {
+		trails = [...getTrails()]
+	}
+
+
 	onMount(() => {
-		const unsubscribeActionEvent = userActionEventBus.subscribe(onActionEvent);
-		const unsubscribeStateMachineEvent = stateMachineEventBus.subscribe(stateMachineEvent);
-		const unsubscribeChangeInstanceEvent = changeInstanceEventBus.subscribe(fullyReset);
-		const unsubscribeChangeAlgorithmEvent = changeAlgorithmEventBus.subscribe(reset);
-		const unsubscribeAlgorithmicUndoEvent = algorithmicUndoEventBus.subscribe(algorithmicUndoSave);
-		const unsubscribeStateMachineLifeCycleEventBus =
-			stateMachineLifeCycleEventBus.subscribe(lifeCycleController);
+		const subscriptions: (() => void)[] = [];
+		subscriptions.push(userActionEventBus.subscribe(onActionEvent));
+		subscriptions.push(stateMachineEventBus.subscribe(stateMachineEvent));
+		subscriptions.push(changeInstanceEventBus.subscribe(fullyReset));
+		subscriptions.push(changeAlgorithmEventBus.subscribe(reset));
+		subscriptions.push(algorithmicUndoEventBus.subscribe(algorithmicUndoSave));
+		subscriptions.push(stateMachineLifeCycleEventBus.subscribe(lifeCycleController));
+		subscriptions.push(updateTrailsEventBus.subscribe(updateTrailsList))
 
 		return () => {
-			unsubscribeActionEvent();
-			unsubscribeChangeInstanceEvent();
-			unsubscribeStateMachineEvent();
-			unsubscribeChangeAlgorithmEvent();
-			unsubscribeAlgorithmicUndoEvent();
-			unsubscribeStateMachineLifeCycleEventBus();
+			subscriptions.forEach(f => f());
 		};
 	});
 </script>
