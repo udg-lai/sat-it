@@ -2,7 +2,8 @@
 	import { getProblemStore } from '$lib/states/problem.svelte.ts';
 	import StatisticsComponent from './StatisticsComponent.svelte';
 	import type Problem from '$lib/entities/Problem.svelte.ts';
-	import { getActiveInstance, InteractiveInstance } from '$lib/stores/instances.svelte.ts';
+	import type { InteractiveInstance } from '$lib/entities/InteractiveInstance.svelte.ts';
+	import { getActiveInstance } from '$lib/states/instances.svelte.ts';
 
 	const problem: Problem = $derived(getProblemStore());
 	const instanceName: string = $derived.by(() => {

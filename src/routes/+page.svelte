@@ -5,29 +5,15 @@
 	import ToastComponent from '$lib/components/ToastComponent.svelte';
 	import ToolsComponent from '$lib/components/tools/ToolsComponent.svelte';
 	import { closeSettingsViewEventBus, openSettingsViewEventBus } from '$lib/events/events.ts';
-	import {
-		initializeInstancesStore,
-		setDefaultInstanceToSolve
-	} from '$lib/stores/instances.svelte.ts';
-	import { getToasts, logError } from '$lib/states/toasts.svelte.ts';
+	import { getToasts } from '$lib/states/toasts.svelte.ts';
 	import { disableContextMenu } from '$lib/utils.ts';
 	import { onMount } from 'svelte';
 
 	let renderSettings = $state(true);
-	let mounted = $state(false); // This variables is to know if problem has been created and set.
 
 	const toasts = $derived(getToasts());
 
 	onMount(() => {
-		initializeInstancesStore()
-			.then(() => {
-				setDefaultInstanceToSolve();
-				mounted = true;
-			})
-			.catch(() =>
-				logError(`Preloaded instances`, `Could not fetch preloaded instances correctly`)
-			);
-
 		const unsubscribeOpenSettings = openSettingsViewEventBus.subscribe(
 			() => (renderSettings = true)
 		);
@@ -49,23 +35,21 @@
 </script>
 
 <svelte:body oncontextmenu={disableContextMenu} />
-{#if mounted}
-	<main class="chakra-petch-medium">
-		{#if toasts}
-			<div class="toasts">
-				{#each toasts as toast (toast.id)}
-					<ToastComponent {toast} />
-				{/each}
-			</div>
-		{/if}
-		<ToolsComponent />
-		<AppComponent />
-	</main>
-	{#if renderSettings}
-		<settings>
-			<SettingsComponent />
-		</settings>
+<main class="chakra-petch-medium">
+	{#if toasts}
+		<div class="toasts">
+			{#each toasts as toast (toast.id)}
+				<ToastComponent {toast} />
+			{/each}
+		</div>
 	{/if}
+	<ToolsComponent />
+	<AppComponent />
+</main>
+{#if renderSettings}
+	<settings>
+		<SettingsComponent />
+	</settings>
 {/if}
 
 <style>
