@@ -97,9 +97,8 @@
 	}
 
 	function updateTrailsList(): void {
-		trails = [...getTrails()]
+		trails = [...getTrails()];
 	}
-
 
 	onMount(() => {
 		const subscriptions: (() => void)[] = [];
@@ -109,10 +108,10 @@
 		subscriptions.push(changeAlgorithmEventBus.subscribe(reset));
 		subscriptions.push(algorithmicUndoEventBus.subscribe(algorithmicUndoSave));
 		subscriptions.push(stateMachineLifeCycleEventBus.subscribe(lifeCycleController));
-		subscriptions.push(updateTrailsEventBus.subscribe(updateTrailsList))
+		subscriptions.push(updateTrailsEventBus.subscribe(updateTrailsList));
 
 		return () => {
-			subscriptions.forEach(f => f());
+			subscriptions.forEach((f) => f());
 		};
 	});
 </script>

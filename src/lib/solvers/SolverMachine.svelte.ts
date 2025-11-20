@@ -133,7 +133,7 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 			await tick();
 			await new Promise((r) => times.push(setTimeout(r, getStepDelay())));
 		}
-		updateTrailsEventBus.emit()
+		updateTrailsEventBus.emit();
 		times.forEach(clearTimeout);
 		this._postStepByStep();
 	}
