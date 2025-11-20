@@ -36,6 +36,7 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 	private runningOnAuto: boolean = $state(false);
 	private forcedStop: boolean = $state(false);
 	private solverId: KnownSolver = $state('bkt');
+	private stops: boolean = $state(false);
 
 	constructor(stateMachine: StateMachine<F, I>, solverId: KnownSolver) {
 		this.stateMachine = stateMachine;
@@ -102,6 +103,14 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 		return this.solverId;
 	}
 
+	enableStops(): void {
+		this.stops = true;
+	}
+
+	disableStops(): void {
+		this.stops = false;
+	}
+
 	async transition(input: StateMachineEvent): Promise<void> {
 		if (input === 'step') {
 			stateMachineLifeCycleEventBus.emit('begin-step');
@@ -130,10 +139,16 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 		const times: number[] = [];
 		while (continueCond() && !this.forcedStop) {
 			this.step();
-			await tick();
-			await new Promise((r) => times.push(setTimeout(r, getStepDelay())));
+			if( this.stops) {
+				await tick();
+				updateTrailsEventBus.emit();
+				await new Promise((r) => times.push(setTimeout(r, getStepDelay())));
+			}
 		}
-		updateTrailsEventBus.emit();
+		if(!this.stops) {
+			updateTrailsEventBus.emit();
+			await tick()
+		}
 		times.forEach(clearTimeout);
 		this._postStepByStep();
 	}

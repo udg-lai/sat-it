@@ -1,6 +1,6 @@
 <script lang="ts">
 	import DynamicRender from '$lib/components/DynamicRender.svelte';
-	import { stateMachineEventBus } from '$lib/events/events.ts';
+	import { stateMachineEventBus, updateTrailsEventBus } from '$lib/events/events.ts';
 	import { CodeMergeOutline } from 'flowbite-svelte-icons';
 	import '../style.css';
 
@@ -17,6 +17,7 @@
 	class:invalidOption={finished || onConflictDetection}
 	onclick={() => {
 		stateMachineEventBus.emit('step');
+		updateTrailsEventBus.emit();
 	}}
 	title="Backtrack"
 	disabled={finished || onConflictDetection}

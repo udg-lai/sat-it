@@ -8,6 +8,7 @@
 	import { updateAssignment } from '$lib/states/assignment.svelte.ts';
 	import { ArrowRightOutline } from 'flowbite-svelte-icons';
 	import '../style.css';
+	import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 
 	interface Props {
 		finished?: boolean;
@@ -22,6 +23,7 @@
 	class:invalidOption={finished || backtrackingState}
 	title="Solve trail"
 	onclick={() => {
+		getSolverMachine().disableStops();
 		updateAssignment('automated');
 		stateMachineEventBus.emit('solve_trail');
 		userActionEventBus.emit('record');
