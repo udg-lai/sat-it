@@ -6,8 +6,9 @@
 		userActionEventBus
 	} from '$lib/events/events.ts';
 	import { updateAssignment } from '$lib/states/assignment.svelte.ts';
+	import SolveIcon from './SolveIcon.svelte';
+	import '../style.css';
 	import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
-	import { FaceExplodeOutline } from 'flowbite-svelte-icons';
 
 	interface Props {
 		finished?: boolean;
@@ -20,15 +21,15 @@
 <button
 	class="btn general-btn"
 	class:invalidOption={finished || backtrackingState}
-	title="Get Last Trail"
+	title="Solve"
 	onclick={() => {
-		getSolverMachine().disableStops();
+		getSolverMachine().enableStops();
 		updateAssignment('automated');
-		stateMachineEventBus.emit('solve_all');
+		stateMachineEventBus.emit('automatic_steps');
 		userActionEventBus.emit('record');
 		toggleTrailExpandEventBus.emit(true);
 	}}
 	disabled={finished || backtrackingState}
 >
-	<DynamicRender component={FaceExplodeOutline} props={{ size: 'md' }} />
+	<DynamicRender component={SolveIcon} props={{ size: 'md' }} />
 </button>

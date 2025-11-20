@@ -9,6 +9,7 @@ import {
 } from '$lib/events/events.ts';
 import { tick } from 'svelte';
 import type { StateFun, StateInput, StateMachine } from './StateMachine.svelte.ts';
+import { dropTrailsFromXToY, getTrails } from '$lib/states/trails.svelte.ts';
 
 export type KnownSolver = 'bkt' | 'dpll' | 'cdcl';
 
@@ -122,8 +123,10 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 			await this.solveCDStepByStep();
 		} else if (input === 'solve_trail') {
 			await this.solveTrailStepByStep();
-		} else if (input === 'solve_all') {
+		} else if (input === 'automatic_steps') {
 			await this.solveAllStepByStep();
+		} else if (input === 'solve_all') {
+			await this.solveAllComplete();
 		} else {
 			logFatal('Non expected input in Solver State Machine');
 		}
@@ -144,10 +147,6 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 				updateTrailsEventBus.emit();
 				await new Promise((r) => times.push(setTimeout(r, getStepDelay())));
 			}
-		}
-		if (!this.stops) {
-			updateTrailsEventBus.emit();
-			await tick();
 		}
 		times.forEach(clearTimeout);
 		this._postStepByStep();
@@ -175,6 +174,14 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 
 	protected async solveAllStepByStep(): Promise<void> {
 		this.stepByStep(() => !this.completed());
+	}
+
+	protected async solveAllComplete(): Promise<void> {
+		const first_nTrails = getTrails().length - 1;
+		await this.stepByStep(() => !this.completed());
+		const final_nTrails = getTrails().length - 1;
+		dropTrailsFromXToY(first_nTrails, final_nTrails);
+		updateTrailsEventBus.emit();
 	}
 
 	protected async solveTrailStepByStep(): Promise<void> {

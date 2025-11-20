@@ -27,6 +27,17 @@ export const keepTrailsFromBeginningToX = (x: number): void => {
 	trails = trails.slice(0, x + 1);
 };
 
+export const dropTrailsFromXToY = (x: number, y: number): void => {
+	if (x < 0 || x > y) {
+		logFatal('Keep trail error', `The x value is not valid: ${x}`);
+	} else if (y < 0 || y >= trails.length) {
+		logFatal('Keep trail error', `The y value is not valid: ${y}`);
+	}
+	const head = trails.slice(0, x + 1);
+	const tail = trails.slice(y);
+	trails = [...head, ...tail];
+};
+
 export const getTrails = () => trails;
 
 export const updateTrails = (snapshot: Trail[]): void => {
