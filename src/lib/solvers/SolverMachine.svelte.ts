@@ -139,15 +139,15 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 		const times: number[] = [];
 		while (continueCond() && !this.forcedStop) {
 			this.step();
-			if( this.stops) {
+			if (this.stops) {
 				await tick();
 				updateTrailsEventBus.emit();
 				await new Promise((r) => times.push(setTimeout(r, getStepDelay())));
 			}
 		}
-		if(!this.stops) {
+		if (!this.stops) {
 			updateTrailsEventBus.emit();
-			await tick()
+			await tick();
 		}
 		times.forEach(clearTimeout);
 		this._postStepByStep();
