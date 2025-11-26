@@ -130,7 +130,7 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 		}
 	}
 
-	protected abstract step(): void
+	protected abstract step(): void;
 
 	private _step(): void {
 		this.step();
@@ -145,7 +145,7 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 		const times: number[] = [];
 		while (continueCond() && !this.forcedStop) {
 			this._step();
-			if (this.stops) {				
+			if (this.stops) {
 				await tick();
 				await new Promise((r) => times.push(setTimeout(r, getStepDelay())));
 			}

@@ -38,7 +38,6 @@
 	import DebuggerComponent from './debugger/DebuggerComponent.svelte';
 	import SolvingInformationComponent from './SolvingInformationComponent.svelte';
 
-
 	let trails: Trail[] = $state([]);
 
 	let solverMachine: SolverMachine<StateFun, StateInput> = $derived(getSolverMachine());
@@ -100,7 +99,6 @@
 		}
 	}
 
-	
 	onMount(() => {
 		const subscriptions: (() => void)[] = [];
 		subscriptions.push(userActionEventBus.subscribe(onActionEvent));
@@ -109,8 +107,10 @@
 		subscriptions.push(changeAlgorithmEventBus.subscribe(reset));
 		subscriptions.push(algorithmicUndoEventBus.subscribe(algorithmicUndoSave));
 		subscriptions.push(stateMachineLifeCycleEventBus.subscribe(lifeCycleController));
-		subscriptions.push(updateTrailsEventBus.subscribe(t => (trails = [...t])));
-		subscriptions.push(solverFinishedAutoMode.subscribe(() => updateTrailsEventBus.emit(getTrails())))
+		subscriptions.push(updateTrailsEventBus.subscribe((t) => (trails = [...t])));
+		subscriptions.push(
+			solverFinishedAutoMode.subscribe(() => updateTrailsEventBus.emit(getTrails()))
+		);
 
 		return () => {
 			subscriptions.forEach((f) => f());

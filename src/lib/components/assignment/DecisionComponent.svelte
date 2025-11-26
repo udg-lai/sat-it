@@ -6,7 +6,7 @@
 	import { Dropdown, DropdownItem } from 'flowbite-svelte';
 	import HeadTailComponent from '../HeadTailComponent.svelte';
 	import './style.css';
-	
+
 	interface Props {
 		assignment: VariableAssignment;
 		isLast?: boolean;
