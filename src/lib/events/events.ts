@@ -1,3 +1,4 @@
+import type { Trail } from '$lib/entities/Trail.svelte.ts';
 import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
 import type { LiteralBreakpoint } from '$lib/states/breakpoints.svelte.ts';
 import { createEventBus } from './createEventBus.ts';
@@ -70,4 +71,4 @@ export const stateMachineLifeCycleEventBus = createEventBus<StateMachineLifeCycl
 export const toggleTrailViewEventBus = createEventBus<void>();
 
 // event bus to know when trails can be updated to show.
-export const updateTrailsEventBus = createEventBus<void>();
+export const updateTrailsEventBus = createEventBus<Trail[]>();

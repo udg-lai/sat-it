@@ -9,6 +9,7 @@ import {
 } from '$lib/events/events.ts';
 import { tick } from 'svelte';
 import type { StateFun, StateInput, StateMachine } from './StateMachine.svelte.ts';
+import { getTrails } from '$lib/states/trails.svelte.ts';
 
 export type KnownSolver = 'bkt' | 'dpll' | 'cdcl';
 
@@ -114,7 +115,7 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 	async transition(input: StateMachineEvent): Promise<void> {
 		if (input === 'step') {
 			stateMachineLifeCycleEventBus.emit('begin-step');
-			this.step();
+			this._step();
 			stateMachineLifeCycleEventBus.emit('finish-step');
 		} else if (input === 'nextVariable') {
 			await this.solveToNextVariableStepByStep();
@@ -129,7 +130,12 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 		}
 	}
 
-	protected abstract step(): void;
+	protected abstract step(): void
+
+	private _step(): void {
+		this.step();
+		updateTrailsEventBus.emit(getTrails());
+	}
 
 	protected async stepByStep(continueCond: () => boolean): Promise<void> {
 		if (!this.assertPreAuto()) {
@@ -138,16 +144,11 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 		this._preStepByStep();
 		const times: number[] = [];
 		while (continueCond() && !this.forcedStop) {
-			this.step();
-			if (this.stops) {
+			this._step();
+			if (this.stops) {				
 				await tick();
-				updateTrailsEventBus.emit();
 				await new Promise((r) => times.push(setTimeout(r, getStepDelay())));
 			}
-		}
-		if (!this.stops) {
-			updateTrailsEventBus.emit();
-			await tick();
 		}
 		times.forEach(clearTimeout);
 		this._postStepByStep();

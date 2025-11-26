@@ -31,7 +31,7 @@ export const getTrails = () => trails;
 
 export const updateTrails = (snapshot: Trail[]): void => {
 	trails = snapshot.map((trail) => trail.copy());
-	updateTrailsEventBus.emit();
+	updateTrailsEventBus.emit(getTrails());
 };
 
 export const updateLastTrailEnding = (clauseTag: number): void => {

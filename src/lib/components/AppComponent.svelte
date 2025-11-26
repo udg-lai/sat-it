@@ -6,6 +6,7 @@
 		algorithmicUndoEventBus,
 		changeAlgorithmEventBus,
 		changeInstanceEventBus,
+		solverFinishedAutoMode,
 		stateMachineEventBus,
 		stateMachineLifeCycleEventBus,
 		updateTrailsEventBus,
@@ -37,7 +38,8 @@
 	import DebuggerComponent from './debugger/DebuggerComponent.svelte';
 	import SolvingInformationComponent from './SolvingInformationComponent.svelte';
 
-	let trails: Trail[] = $state(getTrails());
+
+	let trails: Trail[] = $state([]);
 
 	let solverMachine: SolverMachine<StateFun, StateInput> = $derived(getSolverMachine());
 
@@ -59,11 +61,13 @@
 
 	function reloadFromSnapshot({ snapshot, activeState, statistics, record }: Snapshot): void {
 		updateTrails([...snapshot]);
+
 		const snapshotSize = snapshot.length;
 		if (snapshotSize <= 0) {
 			logFatal('Reloading snapshot', 'Unexpected empty array of trails');
 		} else {
 			const latest: Trail = snapshot[snapshotSize - 1];
+
 			getProblemStore().updateProblemFromTrail(latest);
 		}
 		updateStatistics(statistics);
@@ -96,10 +100,7 @@
 		}
 	}
 
-	function updateTrailsList(): void {
-		trails = [...getTrails()];
-	}
-
+	
 	onMount(() => {
 		const subscriptions: (() => void)[] = [];
 		subscriptions.push(userActionEventBus.subscribe(onActionEvent));
@@ -108,7 +109,8 @@
 		subscriptions.push(changeAlgorithmEventBus.subscribe(reset));
 		subscriptions.push(algorithmicUndoEventBus.subscribe(algorithmicUndoSave));
 		subscriptions.push(stateMachineLifeCycleEventBus.subscribe(lifeCycleController));
-		subscriptions.push(updateTrailsEventBus.subscribe(updateTrailsList));
+		subscriptions.push(updateTrailsEventBus.subscribe(t => (trails = [...t])));
+		subscriptions.push(solverFinishedAutoMode.subscribe(() => updateTrailsEventBus.emit(getTrails())))
 
 		return () => {
 			subscriptions.forEach((f) => f());
