@@ -61,7 +61,6 @@ export const algorithmicUndoEventBus = createEventBus<AlgorithmicUndoEvent>();
 export type StateMachineLifeCycleEvent =
 	| 'begin-step'
 	| 'begin-step-by-step'
-	| 'finish-one-step-by-step'
 	| 'finish-step'
 	| 'finish-step-by-step';
 
@@ -73,3 +72,6 @@ export const toggleTrailViewEventBus = createEventBus<void>();
 
 // event bus to know when trails can be updated to show.
 export const updateTrailsEventBus = createEventBus<Trail[]>();
+
+// event bus to change the delay of the application.
+export const emitChangeStepDelay = createEventBus<number>();

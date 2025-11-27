@@ -4,7 +4,6 @@
 	import { updateAssignment } from '$lib/states/assignment.svelte.ts';
 	import SolveIcon from './SolveIcon.svelte';
 	import '../style.css';
-	import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 
 	interface Props {
 		finished?: boolean;
@@ -19,7 +18,6 @@
 	class:invalidOption={finished || backtrackingState}
 	title="Solve"
 	onclick={() => {
-		getSolverMachine().enableStops();
 		updateAssignment('automated');
 		stateMachineEventBus.emit('solve_all');
 		toggleTrailExpandEventBus.emit(true);

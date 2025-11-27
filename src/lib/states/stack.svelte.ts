@@ -23,7 +23,7 @@ export function getSnapshot(): Snapshot {
 }
 
 export function resetStack() {
-	stack = stack.slice(0,1);
+	stack = stack.slice(0, 1);
 	stackPointer = 0;
 }
 
@@ -41,7 +41,7 @@ export function record(
 	};
 	stack = stack.slice(0, stackPointer + 1);
 	stack = [...stack, snapshot];
-	
+
 	stackPointer = stack.length - 1;
 }
 
