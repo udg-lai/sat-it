@@ -60,15 +60,15 @@
 	async function stateMachineEvent(s: StateMachineEvent) {
 		//First of all the previous delay is saved in case there is a need to update it
 		let previousDelay: number | undefined = undefined;
-		if(s !== 'solve_all' && s !== 'step'){
+		if (s !== 'solve_all' && s !== 'step') {
 			previousDelay = getStepDelay();
 			updateOnStep = false;
 			solverMachine.disableStops();
 		}
 		await solverMachine.transition(s);
-		if(s !== 'solve_all' && s !== 'step'){
+		if (s !== 'solve_all' && s !== 'step') {
 			if (previousDelay === undefined) {
-				logFatal("This is not possible");
+				logFatal('This is not possible');
 			}
 			updateOnStep = true;
 			solverMachine.updateStopTimeout(previousDelay);
@@ -110,10 +110,14 @@
 	}
 
 	function lifeCycleController(l: StateMachineLifeCycleEvent): void {
-		if (l === 'finish-step' && (!solverMachine.isInAutoMode() || solverMachine.isInAutoMode() && updateOnStep) || l === 'finish-step-by-step') {
+		if (
+			(l === 'finish-step' &&
+				(!solverMachine.isInAutoMode() || (solverMachine.isInAutoMode() && updateOnStep))) ||
+			l === 'finish-step-by-step'
+		) {
 			updateTrailsEventBus.emit(getTrails());
 		}
-		if (l === 'finish-step' && !solverMachine.isInAutoMode() || l === 'finish-step-by-step') {
+		if ((l === 'finish-step' && !solverMachine.isInAutoMode()) || l === 'finish-step-by-step') {
 			userActionEventBus.emit('record');
 		}
 	}
@@ -132,10 +136,12 @@
 		subscriptions.push(algorithmicUndoEventBus.subscribe(algorithmicUndoSave));
 		// Control what is rendered and what is saved depending on the life cycle of the state machine.
 		subscriptions.push(stateMachineLifeCycleEventBus.subscribe(lifeCycleController));
-		// update our trails to render them when asked to. 
+		// update our trails to render them when asked to.
 		subscriptions.push(updateTrailsEventBus.subscribe((t) => (trails = [...t])));
 		//update machine delay
-		subscriptions.push(emitChangeStepDelay.subscribe((time) => (solverMachine.updateStopTimeout(time))))
+		subscriptions.push(
+			emitChangeStepDelay.subscribe((time) => solverMachine.updateStopTimeout(time))
+		);
 
 		return () => {
 			subscriptions.forEach((f) => f());
