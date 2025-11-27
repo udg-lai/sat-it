@@ -77,6 +77,7 @@
 
 	function reloadFromSnapshot({ snapshot, activeState, statistics, record }: Snapshot): void {
 		updateTrails([...snapshot]);
+		updateTrailsEventBus.emit(getTrails());
 
 		const snapshotSize = snapshot.length;
 		if (snapshotSize <= 0) {
