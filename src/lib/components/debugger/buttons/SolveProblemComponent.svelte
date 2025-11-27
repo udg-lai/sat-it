@@ -1,10 +1,6 @@
 <script lang="ts">
 	import DynamicRender from '$lib/components/DynamicRender.svelte';
-	import {
-		stateMachineEventBus,
-		toggleTrailExpandEventBus,
-		userActionEventBus
-	} from '$lib/events/events.ts';
+	import { stateMachineEventBus, toggleTrailExpandEventBus } from '$lib/events/events.ts';
 	import { updateAssignment } from '$lib/states/assignment.svelte.ts';
 	import SolveIcon from './SolveIcon.svelte';
 	import '../style.css';
@@ -26,7 +22,6 @@
 		getSolverMachine().enableStops();
 		updateAssignment('automated');
 		stateMachineEventBus.emit('solve_all');
-		userActionEventBus.emit('record');
 		toggleTrailExpandEventBus.emit(true);
 	}}
 	disabled={finished || backtrackingState}

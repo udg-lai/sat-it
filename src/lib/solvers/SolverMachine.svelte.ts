@@ -4,12 +4,10 @@ import {
 	solverFinishedAutoMode,
 	solverStartedAutoMode,
 	stateMachineLifeCycleEventBus,
-	updateTrailsEventBus,
-	type StateMachineEvent
+	type StateMachineEvent,
 } from '$lib/events/events.ts';
 import { tick } from 'svelte';
 import type { StateFun, StateInput, StateMachine } from './StateMachine.svelte.ts';
-import { getTrails } from '$lib/states/trails.svelte.ts';
 
 export type KnownSolver = 'bkt' | 'dpll' | 'cdcl';
 
@@ -112,6 +110,10 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 		this.stops = false;
 	}
 
+	stopsOn(): boolean {
+		return this.stops;
+	}
+
 	async transition(input: StateMachineEvent): Promise<void> {
 		if (input === 'step') {
 			stateMachineLifeCycleEventBus.emit('begin-step');
@@ -134,7 +136,6 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 
 	private _step(): void {
 		this.step();
-		updateTrailsEventBus.emit(getTrails());
 	}
 
 	protected async stepByStep(continueCond: () => boolean): Promise<void> {
@@ -144,8 +145,9 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 		this._preStepByStep();
 		const times: number[] = [];
 		while (continueCond() && !this.forcedStop) {
-			this._step();
+			this.step();
 			if (this.stops) {
+				stateMachineLifeCycleEventBus.emit('finish-one-step-by-step');
 				await tick();
 				await new Promise((r) => times.push(setTimeout(r, getStepDelay())));
 			}
@@ -163,6 +165,7 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 	private _postStepByStep(): void {
 		this.setFlagsPostAuto();
 		this.notifyFinishRunningOnAuto();
+		//With this, from the app component, we will know that the trails can be updated
 		stateMachineLifeCycleEventBus.emit('finish-step-by-step');
 	}
 

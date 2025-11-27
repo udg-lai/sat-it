@@ -23,7 +23,7 @@ export function getSnapshot(): Snapshot {
 }
 
 export function resetStack() {
-	stack = stack.slice(0, 1);
+	stack = stack.slice(0,1);
 	stackPointer = 0;
 }
 
@@ -39,8 +39,13 @@ export function record(
 		statistics,
 		record
 	};
+	console.log("Stack length:" + stack.length)
+	console.log(stack.slice(0,1)[0].snapshot[0].getAssignments())
+	if(stack.length > 1)
+		console.log(stack[1].snapshot[0].getAssignments());
 	stack = stack.slice(0, stackPointer + 1);
 	stack = [...stack, snapshot];
+	
 	stackPointer = stack.length - 1;
 }
 

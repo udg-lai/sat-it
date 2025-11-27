@@ -61,6 +61,7 @@ export const algorithmicUndoEventBus = createEventBus<AlgorithmicUndoEvent>();
 export type StateMachineLifeCycleEvent =
 	| 'begin-step'
 	| 'begin-step-by-step'
+	| 'finish-one-step-by-step'
 	| 'finish-step'
 	| 'finish-step-by-step';
 

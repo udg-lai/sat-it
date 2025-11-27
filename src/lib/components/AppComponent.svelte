@@ -66,7 +66,6 @@
 			logFatal('Reloading snapshot', 'Unexpected empty array of trails');
 		} else {
 			const latest: Trail = snapshot[snapshotSize - 1];
-
 			getProblemStore().updateProblemFromTrail(latest);
 		}
 		updateStatistics(statistics);
@@ -94,6 +93,9 @@
 	}
 
 	function lifeCycleController(l: StateMachineLifeCycleEvent): void {
+		if (l === 'finish-step' || l === 'finish-one-step-by-step') {
+			updateTrailsEventBus.emit(getTrails());
+		}
 		if (l === 'finish-step' || l === 'finish-step-by-step') {
 			userActionEventBus.emit('record');
 		}
