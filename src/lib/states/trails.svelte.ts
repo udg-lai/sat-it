@@ -1,11 +1,9 @@
 import type Clause from '$lib/entities/Clause.svelte.ts';
-import type { Trail } from '$lib/entities/Trail.svelte.ts';
-import { updateTrailsEventBus } from '$lib/events/events.ts';
+import { Trail } from '$lib/entities/Trail.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
 import { getClausePool } from './problem.svelte.ts';
-import { getSnapshot } from './stack.svelte.ts';
 
-let trails: Trail[] = $state(getSnapshot().snapshot);
+let trails: Trail[] = $state([new Trail()]);
 
 export const getLatestTrail = (): Trail | undefined => trails[trails.length - 1];
 
@@ -42,7 +40,6 @@ export const getTrails = () => trails;
 
 export const updateTrails = (snapshot: Trail[]): void => {
 	trails = snapshot.map((trail) => trail.copy());
-	updateTrailsEventBus.emit();
 };
 
 export const updateLastTrailEnding = (clauseTag: number): void => {

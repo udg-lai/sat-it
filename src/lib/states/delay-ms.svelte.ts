@@ -1,3 +1,5 @@
+import { emitChangeStepDelay } from '$lib/events/events.ts';
+
 export const MAX_DELAY_MS: number = $state(1000);
 export const MIN_DELAY_MS: number = $state(100);
 
@@ -7,4 +9,5 @@ export const getStepDelay = () => stepDelay;
 
 export const setStepDelay = (delay: number) => {
 	stepDelay = Math.min(Math.max(delay, MIN_DELAY_MS), MAX_DELAY_MS);
+	emitChangeStepDelay.emit(stepDelay);
 };

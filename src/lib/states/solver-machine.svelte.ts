@@ -9,7 +9,10 @@ import type { StateFun, StateInput } from '$lib/solvers/StateMachine.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
 import { getProblemStore } from './problem.svelte.ts';
 import { type Algorithm } from '$lib/types/algorithm.ts';
-let solverMachine: SolverMachine<StateFun, StateInput> = $state(new CDCL_SolverMachine());
+import { getStepDelay } from './delay-ms.svelte.ts';
+let solverMachine: SolverMachine<StateFun, StateInput> = $state(
+	new CDCL_SolverMachine(getStepDelay())
+);
 
 export const setSolverStateMachine = () => {
 	if (solverMachine) {

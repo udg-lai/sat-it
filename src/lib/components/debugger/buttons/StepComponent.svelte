@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { stateMachineEventBus, updateTrailsEventBus } from '$lib/events/events.ts';
+	import { stateMachineEventBus } from '$lib/events/events.ts';
 	import { CaretRightOutline } from 'flowbite-svelte-icons';
 	import DynamicRender from '../../DynamicRender.svelte';
 	import '../style.css';
@@ -19,7 +19,6 @@
 	class="btn general-btn {myClass}"
 	onclick={() => {
 		stateMachineEventBus.emit('step');
-		updateTrailsEventBus.emit();
 	}}
 	title="Step"
 >

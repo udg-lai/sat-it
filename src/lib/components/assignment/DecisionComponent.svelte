@@ -6,7 +6,6 @@
 	import { Dropdown, DropdownItem } from 'flowbite-svelte';
 	import HeadTailComponent from '../HeadTailComponent.svelte';
 	import './style.css';
-	import { updateTrailsEventBus } from '$lib/events/events.ts';
 
 	interface Props {
 		assignment: VariableAssignment;
@@ -48,7 +47,6 @@
 
 	const emitRevert = (): void => {
 		emitRevertUpToX?.();
-		updateTrailsEventBus.emit();
 		isOpen = !isOpen;
 	};
 </script>

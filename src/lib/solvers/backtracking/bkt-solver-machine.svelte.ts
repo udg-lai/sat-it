@@ -16,17 +16,18 @@ import {
 import { BKT_StateMachine, makeBKTStateMachine } from './bkt-state-machine.svelte.ts';
 import { bkt_stateName2StateId } from './bkt-states.svelte.ts';
 import type { OccurrenceList } from '../types.ts';
+import { getStepDelay } from '$lib/states/delay-ms.svelte.ts';
 
 export const makeBKTSolver = (): BKT_SolverMachine => {
-	return new BKT_SolverMachine();
+	return new BKT_SolverMachine(getStepDelay());
 };
 
 export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 	occurrenceList: OccurrenceList | undefined = $state(undefined);
 
-	constructor() {
+	constructor(stopTimeMS: number) {
 		const stateMachine: BKT_StateMachine = makeBKTStateMachine();
-		super(stateMachine, 'bkt');
+		super(stateMachine, 'bkt', stopTimeMS);
 		this.occurrenceList = undefined;
 	}
 
