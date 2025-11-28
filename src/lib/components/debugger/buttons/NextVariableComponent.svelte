@@ -11,10 +11,6 @@
 	}
 </script>
 
-<button
-	class="btn general-btn"
-	title="Next variable"
-	onclick={goToNextVariable}
->
+<button class="btn general-btn" title="Next variable" onclick={goToNextVariable}>
 	<DynamicRender component={ForwardOutline} props={{ size: 'md' }} />
 </button>

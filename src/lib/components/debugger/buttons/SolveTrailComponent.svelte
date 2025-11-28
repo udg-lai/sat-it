@@ -13,7 +13,7 @@
 
 	let { finished = false, backtrackingState = false }: Props = $props();
 
-	function completeTrail():void {
+	function completeTrail(): void {
 		getSolverMachine().disableStops();
 		updateAssignment('automated');
 		stateMachineEventBus.emit('solve_trail');

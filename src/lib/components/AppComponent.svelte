@@ -108,16 +108,16 @@
 		const updateAll = () => {
 			updateTrailsEventBus.emit(getTrails());
 			userActionEventBus.emit('record');
-		}
+		};
 
 		// If it is a finish-step-by-step then all action should be performed
 		if (l === 'finish-step-by-step') {
-			updateAll()
+			updateAll();
 		} else if (l === 'finish-step') {
 			// Also, all actions should be performed if a single step has been finished and the solver machine is not in auto mode
 			if (!solverMachine.isInAutoMode()) {
-				updateAll()
-			} else if (updateOnStep){
+				updateAll();
+			} else if (updateOnStep) {
 				// Lastly, only trails should be updated if the updateOnStep is activated.
 				updateTrailsEventBus.emit(getTrails());
 			}

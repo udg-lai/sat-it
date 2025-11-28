@@ -12,10 +12,6 @@
 	}
 </script>
 
-<button
-	class="btn general-btn"
-	title="Finish CD"
-	onclick={finishConflictDetection}
->
+<button class="btn general-btn" title="Finish CD" onclick={finishConflictDetection}>
 	<DynamicRender component={ChevronDoubleRightOutline} props={{ size: 'md' }} />
 </button>
