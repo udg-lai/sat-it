@@ -74,4 +74,4 @@ export const toggleTrailViewEventBus = createEventBus<void>();
 export const updateTrailsEventBus = createEventBus<Trail[]>();
 
 // event bus to change the delay of the application.
-export const emitChangeStepDelay = createEventBus<number>();
+export const changeStepDelayEventBus = createEventBus<number>();

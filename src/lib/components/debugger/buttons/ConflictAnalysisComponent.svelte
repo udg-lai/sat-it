@@ -4,16 +4,18 @@
 	import { ForwardOutline } from 'flowbite-svelte-icons';
 	import '../style.css';
 	import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
+
+	function finishConflictAnalysis(): void {
+		getSolverMachine().disableStops();
+		toggleTrailExpandEventBus.emit(true);
+		stateMachineEventBus.emit('finishCA');
+	}
 </script>
 
 <button
 	class="btn general-btn conflict-btn"
 	title="Finish Conflict Analysis"
-	onclick={() => {
-		getSolverMachine().disableStops();
-		toggleTrailExpandEventBus.emit(true);
-		stateMachineEventBus.emit('finishCA');
-	}}
+	onclick={finishConflictAnalysis}
 >
 	<DynamicRender component={ForwardOutline} props={{ size: 'md' }} />
 </button>

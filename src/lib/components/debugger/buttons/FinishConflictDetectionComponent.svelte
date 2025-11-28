@@ -4,16 +4,18 @@
 	import { ChevronDoubleRightOutline } from 'flowbite-svelte-icons';
 	import '../style.css';
 	import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
+
+	function finishConflictDetection(): void {
+		getSolverMachine().disableStops();
+		toggleTrailExpandEventBus.emit(true);
+		stateMachineEventBus.emit('finishCD');
+	}
 </script>
 
 <button
 	class="btn general-btn"
 	title="Finish CD"
-	onclick={() => {
-		getSolverMachine().disableStops();
-		toggleTrailExpandEventBus.emit(true);
-		stateMachineEventBus.emit('finishCD');
-	}}
+	onclick={finishConflictDetection}
 >
 	<DynamicRender component={ChevronDoubleRightOutline} props={{ size: 'md' }} />
 </button>

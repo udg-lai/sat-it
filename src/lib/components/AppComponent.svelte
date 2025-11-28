@@ -6,7 +6,7 @@
 		algorithmicUndoEventBus,
 		changeAlgorithmEventBus,
 		changeInstanceEventBus,
-		emitChangeStepDelay,
+		changeStepDelayEventBus,
 		stateMachineEventBus,
 		stateMachineLifeCycleEventBus,
 		updateTrailsEventBus,
@@ -58,26 +58,20 @@
 	}
 
 	async function stateMachineEvent(s: StateMachineEvent) {
-		//First of all the previous delay is saved in case there is a need to update it
-		let previousDelay: number | undefined = undefined;
 		if (s !== 'solve_all' && s !== 'step') {
-			previousDelay = getStepDelay();
 			updateOnStep = false;
 			solverMachine.disableStops();
 		}
 		await solverMachine.transition(s);
 		if (s !== 'solve_all' && s !== 'step') {
-			if (previousDelay === undefined) {
-				logFatal('This is not possible');
-			}
 			updateOnStep = true;
-			solverMachine.updateStopTimeout(previousDelay);
+			solverMachine.updateStopTimeout(getStepDelay());
 		}
 	}
 
 	function reloadFromSnapshot({ snapshot, activeState, statistics, record }: Snapshot): void {
 		updateTrails([...snapshot]);
-		updateTrailsEventBus.emit(getTrails());
+		updateTrailsEventBus.emit([...getTrails()]);
 
 		const snapshotSize = snapshot.length;
 		if (snapshotSize <= 0) {
@@ -111,15 +105,22 @@
 	}
 
 	function lifeCycleController(l: StateMachineLifeCycleEvent): void {
-		if (
-			(l === 'finish-step' &&
-				(!solverMachine.isInAutoMode() || (solverMachine.isInAutoMode() && updateOnStep))) ||
-			l === 'finish-step-by-step'
-		) {
+		const updateAll = () => {
 			updateTrailsEventBus.emit(getTrails());
-		}
-		if ((l === 'finish-step' && !solverMachine.isInAutoMode()) || l === 'finish-step-by-step') {
 			userActionEventBus.emit('record');
+		}
+
+		// If it is a finish-step-by-step then all action should be performed
+		if (l === 'finish-step-by-step') {
+			updateAll()
+		} else if (l === 'finish-step') {
+			// Also, all actions should be performed if a single step has been finished and the solver machine is not in auto mode
+			if (!solverMachine.isInAutoMode()) {
+				updateAll()
+			} else if (updateOnStep){
+				// Lastly, only trails should be updated if the updateOnStep is activated.
+				updateTrailsEventBus.emit(getTrails());
+			}
 		}
 	}
 
@@ -131,7 +132,7 @@
 		subscriptions.push(stateMachineEventBus.subscribe(stateMachineEvent));
 		// reset the machine + breakpoints when an instance is changed.
 		subscriptions.push(changeInstanceEventBus.subscribe(fullyReset));
-		// rest the machine when the algorithm is changed.
+		// reset the machine when the algorithm is changed.
 		subscriptions.push(changeAlgorithmEventBus.subscribe(reset));
 		// update the problem when an undo is performed.
 		subscriptions.push(algorithmicUndoEventBus.subscribe(algorithmicUndoSave));
@@ -139,9 +140,9 @@
 		subscriptions.push(stateMachineLifeCycleEventBus.subscribe(lifeCycleController));
 		// update our trails to render them when asked to.
 		subscriptions.push(updateTrailsEventBus.subscribe((t) => (trails = [...t])));
-		//update machine delay
+		// update machine delay
 		subscriptions.push(
-			emitChangeStepDelay.subscribe((time) => solverMachine.updateStopTimeout(time))
+			changeStepDelayEventBus.subscribe((time) => solverMachine.updateStopTimeout(time))
 		);
 
 		return () => {
