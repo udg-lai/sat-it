@@ -24,9 +24,10 @@ import type Clause from '$lib/entities/Clause.svelte.ts';
 import { assertiveness } from '$lib/algorithms/assertive.ts';
 import { setInspectedVariable } from '$lib/states/inspectedVariable.svelte.ts';
 import { getProblemStore } from '$lib/states/problem.svelte.ts';
+import { getStepDelay } from '$lib/states/delay-ms.svelte.ts';
 
 export const makeCDCLSolver = (): CDCL_SolverMachine => {
-	return new CDCL_SolverMachine();
+	return new CDCL_SolverMachine(getStepDelay());
 };
 
 export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
@@ -35,9 +36,9 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 	// This variable contains all the information for the machine to find the firstUIP.
 	conflictAnalysis: ConflictAnalysis | undefined = $state(undefined);
 
-	constructor() {
+	constructor(stopTimeMS: number) {
 		const stateMachine: CDCL_StateMachine = makeCDCLStateMachine();
-		super(stateMachine, 'cdcl');
+		super(stateMachine, 'cdcl', stopTimeMS);
 		this.pendingOccurrenceLists = new Queue<OccurrenceList>();
 	}
 

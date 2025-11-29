@@ -1,4 +1,3 @@
-import { getStepDelay } from '$lib/states/delay-ms.svelte.ts';
 import { logFatal, logWarning } from '$lib/states/toasts.svelte.ts';
 import {
 	solverFinishedAutoMode,
@@ -26,6 +25,8 @@ export interface SolverStateInterface<F extends StateFun, I extends StateInput> 
 	onConflictDetection: () => boolean;
 	identify: () => KnownSolver;
 	getStateMachine: () => StateMachine<F, I>;
+	updateStopTimeout: (ms: number) => void;
+	disableStops(): void;
 }
 
 export abstract class SolverMachine<F extends StateFun, I extends StateInput>
@@ -35,17 +36,27 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 	private runningOnAuto: boolean = $state(false);
 	private forcedStop: boolean = $state(false);
 	private solverId: KnownSolver = $state('bkt');
+	private stopTimeoutMS: number = 0;
 
-	constructor(stateMachine: StateMachine<F, I>, solverId: KnownSolver) {
+	constructor(stateMachine: StateMachine<F, I>, solverId: KnownSolver, stopTimeoutMS: number = 0) {
 		this.stateMachine = stateMachine;
 		this.runningOnAuto = false;
 		this.forcedStop = false;
 		this.solverId = solverId;
+		this.stopTimeoutMS = stopTimeoutMS;
 	}
 
 	abstract getRecord(): Record<string, unknown>;
 
 	abstract updateFromRecord(record: Record<string, unknown> | undefined): void;
+
+	updateStopTimeout(ms: number): void {
+		this.stopTimeoutMS = Math.max(0, ms);
+	}
+
+	disableStops(): void {
+		this.updateStopTimeout(0);
+	}
 
 	isInAutoMode(): boolean {
 		return this.runningOnAuto;
@@ -103,9 +114,7 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 
 	async transition(input: StateMachineEvent): Promise<void> {
 		if (input === 'step') {
-			stateMachineLifeCycleEventBus.emit('begin-step');
-			this.step();
-			stateMachineLifeCycleEventBus.emit('finish-step');
+			this._step();
 		} else if (input === 'nextVariable') {
 			await this.solveToNextVariableStepByStep();
 		} else if (input === 'finishCD') {
@@ -121,6 +130,12 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 
 	protected abstract step(): void;
 
+	private _step(): void {
+		stateMachineLifeCycleEventBus.emit('begin-step');
+		this.step();
+		stateMachineLifeCycleEventBus.emit('finish-step');
+	}
+
 	protected async stepByStep(continueCond: () => boolean): Promise<void> {
 		if (!this.assertPreAuto()) {
 			return;
@@ -128,9 +143,11 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 		this._preStepByStep();
 		const times: number[] = [];
 		while (continueCond() && !this.forcedStop) {
-			this.step();
-			await tick();
-			await new Promise((r) => times.push(setTimeout(r, getStepDelay())));
+			this._step();
+			if (this.stopTimeoutMS > 0) {
+				await tick();
+				await new Promise((r) => times.push(setTimeout(r, this.stopTimeoutMS)));
+			}
 		}
 		times.forEach(clearTimeout);
 		this._postStepByStep();

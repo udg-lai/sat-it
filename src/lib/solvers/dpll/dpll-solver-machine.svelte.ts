@@ -16,17 +16,18 @@ import {
 } from './dpll-solver-transitions.svelte.ts';
 import { DPLL_StateMachine, makeDPLLMachine } from './dpll-state-machine.svelte.ts';
 import { dpll_stateName2StateId } from './dpll-states.svelte.ts';
+import { getStepDelay } from '$lib/states/delay-ms.svelte.ts';
 
 export const makeDPLLSolver = (): DPLL_SolverMachine => {
-	return new DPLL_SolverMachine();
+	return new DPLL_SolverMachine(getStepDelay());
 };
 
 export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 	pendingOccurrenceLists: Queue<OccurrenceList> = $state(new Queue<OccurrenceList>());
 
-	constructor() {
+	constructor(stopTimeMS: number) {
 		const stateMachine: DPLL_StateMachine = makeDPLLMachine();
-		super(stateMachine, 'dpll');
+		super(stateMachine, 'dpll', stopTimeMS);
 		this.pendingOccurrenceLists = new Queue<OccurrenceList>();
 	}
 
