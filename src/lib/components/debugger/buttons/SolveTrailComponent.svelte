@@ -12,18 +12,20 @@
 	}
 
 	let { finished = false, backtrackingState = false }: Props = $props();
+
+	function completeTrail(): void {
+		getSolverMachine().disableStops();
+		updateAssignment('automated');
+		stateMachineEventBus.emit('solve_trail');
+		toggleTrailExpandEventBus.emit(true);
+	}
 </script>
 
 <button
 	class="btn general-btn"
 	class:invalidOption={finished || backtrackingState}
 	title="Solve trail"
-	onclick={() => {
-		getSolverMachine().disableStops();
-		updateAssignment('automated');
-		stateMachineEventBus.emit('solve_trail');
-		toggleTrailExpandEventBus.emit(true);
-	}}
+	onclick={completeTrail}
 	disabled={finished || backtrackingState}
 >
 	<DynamicRender component={ArrowRightOutline} props={{ size: 'md' }} />

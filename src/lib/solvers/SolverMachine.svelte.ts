@@ -3,6 +3,7 @@ import {
 	solverFinishedAutoMode,
 	solverStartedAutoMode,
 	stateMachineLifeCycleEventBus,
+	updateTrailsEventBus,
 	type StateMachineEvent
 } from '$lib/events/events.ts';
 import { tick } from 'svelte';

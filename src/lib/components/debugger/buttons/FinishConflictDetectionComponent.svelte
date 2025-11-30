@@ -2,23 +2,19 @@
 	import DynamicRender from '$lib/components/DynamicRender.svelte';
 	import {
 		stateMachineEventBus,
-		toggleTrailExpandEventBus,
-		updateTrailsEventBus
+		toggleTrailExpandEventBus
 	} from '$lib/events/events.ts';
 	import { ChevronDoubleRightOutline } from 'flowbite-svelte-icons';
 	import '../style.css';
 	import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
-</script>
 
-<button
-	class="btn general-btn"
-	title="Finish CD"
-	onclick={() => {
+	function finishConflictDetection(): void {
 		getSolverMachine().disableStops();
 		toggleTrailExpandEventBus.emit(true);
 		stateMachineEventBus.emit('finishCD');
-		updateTrailsEventBus.emit();
-	}}
->
+	}
+</script>
+
+<button class="btn general-btn" title="Finish CD" onclick={finishConflictDetection}>
 	<DynamicRender component={ChevronDoubleRightOutline} props={{ size: 'md' }} />
 </button>
