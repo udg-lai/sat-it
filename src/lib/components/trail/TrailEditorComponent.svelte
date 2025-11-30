@@ -15,7 +15,6 @@
 	import { onMount } from 'svelte';
 	import ComposedTrailComponent from './ComposedTrailComponent.svelte';
 	import StatusIndicator from './StatusIndicator.svelte';
-	import { getNoConflicts } from '$lib/states/statistics.svelte.ts';
 
 	interface Props {
 		trails: Trail[];
@@ -210,11 +209,7 @@
 	<editor-leaf use:listenContentHeight>
 		<editor-indexes class="direction container-padding">
 			{#each trails as trail, index (index)}
-				{#if trails.length === index + 1 && index !== getNoConflicts()}
-					{@render finalSnippet(trail, index)}
-				{:else}
-					{@render enumerateSnippet(trail, index)}
-				{/if}
+				{@render enumerateSnippet(trail, index)}
 			{/each}
 		</editor-indexes>
 
@@ -256,14 +251,6 @@
 	<div class="item {alignItem(index, trail)}" style="--height: {trail.getHeight()}px;">
 		<div class="enumerate">
 			<span class:opacity={index + 1 < trails.length}>{index + 1}.</span>
-		</div>
-	</div>
-{/snippet}
-
-{#snippet finalSnippet(trail: Trail, index: number)}
-	<div class="item {alignItem(index, trail)}" style="--height: {trail.getHeight()}px;">
-		<div class="enumerate">
-			<span class:opacity={index + 1 < trails.length}>F.</span>
 		</div>
 	</div>
 {/snippet}

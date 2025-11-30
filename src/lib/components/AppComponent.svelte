@@ -63,7 +63,6 @@
 			solverMachine.disableStops();
 		}
 		await solverMachine.transition(s);
-
 		if (s !== 'automatic_steps' && s !== 'step') {
 			updateOnStep = true;
 			solverMachine.updateStopTimeout(getStepDelay());
