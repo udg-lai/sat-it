@@ -1,6 +1,5 @@
 import Problem from '$lib/entities/Problem.svelte.ts';
 
-
 const problem: Problem = $state(new Problem());
 
 export const getProblemStore = () => problem;

@@ -26,7 +26,7 @@ import {
 	getClausePool,
 	getMapping,
 	getProblemStore,
-	getVariablePool,
+	getVariablePool
 } from '$lib/states/problem.svelte.ts';
 import { getLatestTrail, stackTrail } from '$lib/states/trails.svelte.ts';
 import { logFatal, logInfo } from '$lib/states/toasts.svelte.ts';
@@ -34,7 +34,6 @@ import { SvelteSet } from 'svelte/reactivity';
 import type { OccurrenceList } from '../types.ts';
 import type { CDCL_SolverMachine } from './cdcl-solver-machine.svelte.ts';
 import { resetInspectedVariable } from '$lib/states/inspectedVariable.svelte.ts';
-import type Problem from '$lib/entities/Problem.svelte.ts';
 import type { OccurrencesList } from '$lib/entities/Problem.svelte.ts';
 
 // ** state inputs **
@@ -257,7 +256,6 @@ export const unitClause: CDCL_UNIT_CLAUSE_FUN = (clauseTag: number) => {
 export type CDCL_UNIT_PROPAGATION_FUN = (clauseTag: number) => number;
 
 export const unitPropagation: CDCL_UNIT_PROPAGATION_FUN = (clauseTag: number) => {
-	const problem: Problem = getProblemStore();
 	const variables: VariablePool = getVariablePool();
 	const clauses: ClausePool = getClausePool();
 	return solverUnitPropagation(variables, clauses, clauseTag, 'up');
@@ -439,7 +437,6 @@ export const pushTrail: CDCL_PUSH_TRAIL_FUN = (trail: Trail) => {
 export type CDCL_PROPAGATE_CC_FUN = (clauseTag: number) => number;
 
 export const propagateCC: CDCL_PROPAGATE_CC_FUN = (clauseTag: number) => {
-	const problem: Problem = getProblemStore();
 	const variables: VariablePool = getVariablePool();
 	const clauses: ClausePool = getClausePool();
 	return solverUnitPropagation(variables, clauses, clauseTag, 'backjumping');
