@@ -7,7 +7,7 @@ import VariableAssignment from '$lib/entities/VariableAssignment.ts';
 import type { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
 import { getAssignment, type AssignmentEvent } from '$lib/states/assignment.svelte.ts';
 import { isBreakpoint } from '$lib/states/breakpoints.svelte.ts';
-import { getProblemStore, type MappingLiteral2Clauses } from '$lib/states/problem.svelte.ts';
+import { getProblemStore, getVariablePool } from '$lib/states/problem.svelte.ts';
 import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 import {
 	increaseNoConflicts,
@@ -21,6 +21,7 @@ import { SvelteSet } from 'svelte/reactivity';
 import { isUnSAT } from '../interfaces/IClausePool.ts';
 import type { TruthAssignment } from '../interfaces/TruthAssignment.ts';
 import { fromJust, isJust } from '../types/maybe.ts';
+import type { OccurrencesList } from '$lib/entities/Problem.svelte.ts';
 
 export const emptyClauseDetection = (pool: ClausePool): boolean => {
 	const evaluation = pool.eval();
@@ -116,7 +117,7 @@ const obtainTrail = (): Trail => {
 };
 
 export const complementaryOccurrences = (
-	mapping: MappingLiteral2Clauses,
+	mapping: OccurrencesList,
 	literal: number
 ): SvelteSet<number> => {
 	const mappingReturn: SvelteSet<number> | undefined = mapping.get(-literal);
@@ -138,7 +139,7 @@ export const nonDecisionMade = (): boolean => {
 };
 
 const doAssignment = (truthAssignment: TruthAssignment): void => {
-	const { variables } = getProblemStore();
+	const variables: VariablePool = getVariablePool();
 	variables.assign(truthAssignment.variable, truthAssignment.polarity);
 	handleBreakpoints(truthAssignment);
 	updateClausesLeft(getTrails().length);

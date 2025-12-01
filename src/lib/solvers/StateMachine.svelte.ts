@@ -155,9 +155,9 @@ export abstract class StateMachine<F extends StateFun, I extends StateInput>
 	private notifyFinalState(): void {
 		const stateId = this.getActiveState().id;
 		if (stateId === this.sat) {
-			logSAT('Problem satisfied, model found.');
+			logSAT('Model found.');
 		} else if (stateId === this.unsat) {
-			logUnSAT('Problem unsatisfied, no model found.');
+			logUnSAT('The formula has no model.');
 		}
 	}
 }

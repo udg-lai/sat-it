@@ -1,4 +1,3 @@
-import type { MappingLiteral2Clauses } from '$lib/states/problem.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import ClausePool from './ClausePool.svelte.ts';
 import { VariablePool } from './VariablePool.svelte.ts';
@@ -10,18 +9,21 @@ import type Variable from './Variable.svelte.ts';
 import { getTrails } from '$lib/states/trails.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
 
+
+export type OccurrencesList = Map<number, SvelteSet<number>>;
+
 export default class Problem {
-	variables: VariablePool = $state(new VariablePool(0));
-	clauses: ClausePool = $state(new ClausePool());
-	mapping: MappingLiteral2Clauses = $state(new Map<number, SvelteSet<number>>());
-	algorithm: Algorithm = $state('cdcl');
+	private variables: VariablePool = $state(new VariablePool(0));
+	private clauses: ClausePool = $state(new ClausePool());
+	private occurrencesList: OccurrencesList = $state(new Map<number, SvelteSet<number>>());
+	private algorithm: Algorithm = $state('cdcl');
 
 	getClausePool(): ClausePool {
 		return this.clauses;
 	}
 
-	getMapping(): MappingLiteral2Clauses {
-		return this.mapping;
+	getOccurrencesList(): OccurrencesList {
+		return this.occurrencesList;
 	}
 
 	getVariablePool(): VariablePool {
@@ -33,7 +35,7 @@ export default class Problem {
 
 		this.variables = new VariablePool(varCount);
 		this.clauses = ClausePool.buildFrom(claims, this.variables);
-		this.mapping = this._literalToClauses();
+		this.occurrencesList = this._makeOccurrencesList();
 	}
 
 	updateAlgorithm(algorithm: Algorithm): void {
@@ -61,13 +63,13 @@ export default class Problem {
 		});
 
 		//Reset the mapping
-		this.mapping = this._literalToClauses();
+		this.occurrencesList = this._makeOccurrencesList();
 	}
 
 	resetProblem() {
 		this.variables.reset();
 		this.clauses.clearLearnt();
-		this.mapping = this._literalToClauses();
+		this.occurrencesList = this._makeOccurrencesList();
 	}
 
 	addClauseToClausePool(lemma: Clause) {
@@ -76,10 +78,10 @@ export default class Problem {
 		if (lemma.getTag() === undefined)
 			logFatal('Saving lemma', 'Lemma clause was not giving a tag at adding it into the pool');
 
-		this._addClauseToMapping(lemma, lemma.getTag() as number, this.mapping);
+		this._addClauseToMapping(lemma, lemma.getTag() as number, this.occurrencesList);
 	}
 
-	private _literalToClauses(): MappingLiteral2Clauses {
+	private _makeOccurrencesList(): OccurrencesList {
 		const mapping: Map<number, SvelteSet<number>> = new Map();
 
 		this.clauses.getClauses().forEach((clause, clauseTag) => {
@@ -92,7 +94,7 @@ export default class Problem {
 	private _addClauseToMapping = (
 		clause: Clause,
 		clauseTag: number,
-		mapping: MappingLiteral2Clauses
+		mapping: OccurrencesList
 	) => {
 		clause.getLiterals().forEach((literal) => {
 			const literalId = literal.toInt();
