@@ -9,7 +9,6 @@ import type Variable from './Variable.svelte.ts';
 import { getTrails } from '$lib/states/trails.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
 
-
 export type OccurrencesList = Map<number, SvelteSet<number>>;
 
 export default class Problem {
@@ -91,11 +90,7 @@ export default class Problem {
 		return mapping;
 	}
 
-	private _addClauseToMapping = (
-		clause: Clause,
-		clauseTag: number,
-		mapping: OccurrencesList
-	) => {
+	private _addClauseToMapping = (clause: Clause, clauseTag: number, mapping: OccurrencesList) => {
 		clause.getLiterals().forEach((literal) => {
 			const literalId = literal.toInt();
 			if (mapping.has(literalId)) {
