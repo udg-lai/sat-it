@@ -6,7 +6,7 @@ export const getProblemStore = () => problem;
 
 export const getClausePool = () => getProblemStore().getClausePool();
 
-export const getMapping = () => getProblemStore().getOccurencesTable();
+export const getMapping = () => getProblemStore().getOccurrencesTable();
 
 export const getVariablePool = () => getProblemStore().getVariablePool();
 
