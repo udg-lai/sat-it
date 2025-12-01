@@ -9,20 +9,21 @@ import type Variable from './Variable.svelte.ts';
 import { getTrails } from '$lib/states/trails.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
 
-export type OccurrencesList = Map<number, SvelteSet<number>>;
+export type OccurrenceTable = Map<number, SvelteSet<number>>;
+export type WatchTable = Map<number, SvelteSet<number>>;
 
 export default class Problem {
 	private variables: VariablePool = $state(new VariablePool(0));
 	private clauses: ClausePool = $state(new ClausePool());
-	private occurrencesList: OccurrencesList = $state(new Map<number, SvelteSet<number>>());
-	private algorithm: Algorithm = $state('cdcl');
+	private occurrencesTable: OccurrenceTable = $state(new Map<number, SvelteSet<number>>());
+	private watchTable: OccurrenceTable = $state(new Map<number, SvelteSet<number>>());
 
 	getClausePool(): ClausePool {
 		return this.clauses;
 	}
 
-	getOccurrencesList(): OccurrencesList {
-		return this.occurrencesList;
+	getOccurrencesTable(): OccurrenceTable {
+		return this.occurrencesTable;
 	}
 
 	getVariablePool(): VariablePool {
@@ -34,7 +35,7 @@ export default class Problem {
 
 		this.variables = new VariablePool(varCount);
 		this.clauses = ClausePool.buildFrom(claims, this.variables);
-		this.occurrencesList = this._makeOccurrencesList();
+		this.occurrencesTable = this._makeOccurrencesList();
 	}
 
 	updateAlgorithm(algorithm: Algorithm): void {
@@ -62,13 +63,13 @@ export default class Problem {
 		});
 
 		//Reset the mapping
-		this.occurrencesList = this._makeOccurrencesList();
+		this.occurrencesTable = this._makeOccurrencesList();
 	}
 
 	resetProblem() {
 		this.variables.reset();
 		this.clauses.clearLearnt();
-		this.occurrencesList = this._makeOccurrencesList();
+		this.occurrencesTable = this._makeOccurrencesList();
 	}
 
 	addClauseToClausePool(lemma: Clause) {
@@ -77,10 +78,10 @@ export default class Problem {
 		if (lemma.getTag() === undefined)
 			logFatal('Saving lemma', 'Lemma clause was not giving a tag at adding it into the pool');
 
-		this._addClauseToMapping(lemma, lemma.getTag() as number, this.occurrencesList);
+		this._addClauseToMapping(lemma, lemma.getTag() as number, this.occurrencesTable);
 	}
 
-	private _makeOccurrencesList(): OccurrencesList {
+	private _makeOccurrencesList(): OccurrenceTable {
 		const mapping: Map<number, SvelteSet<number>> = new Map();
 
 		this.clauses.getClauses().forEach((clause, clauseTag) => {
@@ -90,7 +91,7 @@ export default class Problem {
 		return mapping;
 	}
 
-	private _addClauseToMapping = (clause: Clause, clauseTag: number, mapping: OccurrencesList) => {
+	private _addClauseToMapping = (clause: Clause, clauseTag: number, mapping: OccurrenceTable) => {
 		clause.getLiterals().forEach((literal) => {
 			const literalId = literal.toInt();
 			if (mapping.has(literalId)) {

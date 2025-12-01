@@ -1,6 +1,6 @@
 import { isUnSATClause, type ClauseEval } from '$lib/entities/Clause.svelte.ts';
 import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
-import type { OccurrencesList } from '$lib/entities/Problem.svelte.ts';
+import type { OccurrenceTable } from '$lib/entities/Problem.svelte.ts';
 import type { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
 import {
 	allAssigned as solverAllAssigned,
@@ -79,7 +79,7 @@ export const decide: BKT_DECIDE_FUN = () => {
 export type BKT_COMPLEMENTARY_OCCURRENCES_FUN = (literal: number) => SvelteSet<number>;
 
 export const complementaryOccurrences: BKT_COMPLEMENTARY_OCCURRENCES_FUN = (literal: number) => {
-	const mapping: OccurrencesList = getMapping();
+	const mapping: OccurrenceTable = getMapping();
 	return solverComplementaryOccurrences(mapping, literal);
 };
 
