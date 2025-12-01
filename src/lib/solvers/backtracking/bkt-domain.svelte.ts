@@ -16,7 +16,7 @@ import {
 	cleanClausesToCheck,
 	updateClausesToCheck
 } from '$lib/states/conflict-detection-state.svelte.ts';
-import { getClausePool, getProblemStore, getVariablePool } from '$lib/states/problem.svelte.ts';
+import { getClausePool, getMapping, getVariablePool } from '$lib/states/problem.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import type { BKT_SolverMachine } from './bkt-solver-machine.svelte.ts';
@@ -79,7 +79,7 @@ export const decide: BKT_DECIDE_FUN = () => {
 export type BKT_COMPLEMENTARY_OCCURRENCES_FUN = (literal: number) => SvelteSet<number>;
 
 export const complementaryOccurrences: BKT_COMPLEMENTARY_OCCURRENCES_FUN = (literal: number) => {
-	const mapping: OccurrencesList = getProblemStore().getOccurrencesList();
+	const mapping: OccurrencesList = getMapping();
 	return solverComplementaryOccurrences(mapping, literal);
 };
 
