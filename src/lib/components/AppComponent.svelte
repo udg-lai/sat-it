@@ -20,11 +20,11 @@
 	import type { SolverMachine } from '$lib/solvers/SolverMachine.svelte.ts';
 	import type { StateFun, StateInput } from '$lib/solvers/StateMachine.svelte.ts';
 	import { clearBreakpoints } from '$lib/states/breakpoints.svelte.ts';
-	import { getProblemStore } from '$lib/states/problem.svelte.ts';
+	import { getProblemStore, resetProblem } from '$lib/states/problem.svelte.ts';
 	import {
 		getSolverMachine,
-		setSolverStateMachine,
-		updateSolverMachine
+		updateSolverMachine,
+		resetSolverMachine
 	} from '$lib/states/solver-machine.svelte.ts';
 	import { record, redo, resetStack, undo, type Snapshot } from '$lib/states/stack.svelte.ts';
 	import {
@@ -85,7 +85,8 @@
 	}
 
 	function reset(): void {
-		setSolverStateMachine();
+		resetSolverMachine();
+		resetProblem();
 		resetStack();
 		resetStatistics();
 		const first = undo();

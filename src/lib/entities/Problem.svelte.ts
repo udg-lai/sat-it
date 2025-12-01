@@ -1,7 +1,6 @@
 import { SvelteSet } from 'svelte/reactivity';
 import ClausePool from './ClausePool.svelte.ts';
 import { VariablePool } from './VariablePool.svelte.ts';
-import { type Algorithm } from '$lib/types/algorithm.ts';
 import type { DimacsInstance } from '$lib/instances/dimacs-instance.interface.ts';
 import type Clause from './Clause.svelte.ts';
 import type { Trail } from './Trail.svelte.ts';
@@ -37,9 +36,8 @@ export default class Problem {
 		this.occurrencesList = this._makeOccurrencesList();
 	}
 
-	updateAlgorithm(algorithm: Algorithm): void {
+	reset(): void {
 		this.variables.reset();
-		this.algorithm = algorithm;
 	}
 
 	updateProblemFromTrail(trail: Trail) {

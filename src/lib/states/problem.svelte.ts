@@ -9,3 +9,5 @@ export const getClausePool = () => getProblemStore().getClausePool();
 export const getMapping = () => getProblemStore().getOccurrencesList();
 
 export const getVariablePool = () => getProblemStore().getVariablePool();
+
+export const resetProblem = () => getProblemStore().reset();

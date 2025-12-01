@@ -1,31 +1,38 @@
 <script lang="ts">
+	import { getConfiguredAlgorithm, setConfiguredAlgorithm } from './state.svelte.ts';
 	import DynamicRender from '$lib/components/DynamicRender.svelte';
 	import { changeAlgorithmEventBus } from '$lib/events/events.ts';
-	import { getProblemStore } from '$lib/states/problem.svelte.ts';
 	import { Modal } from 'flowbite-svelte';
 	import { CodePullRequestOutline, ExclamationCircleOutline } from 'flowbite-svelte-icons';
 	import { type Algorithm } from '$lib/types/algorithm.ts';
+
 
 	interface Props {
 		iconClass: { size: string };
 	}
 
 	let { iconClass }: Props = $props();
+
+	let algorithmSelected: Algorithm = $state(getConfiguredAlgorithm());
+
 	const elementClass: string =
 		'rounded-lg bg-[var(--main-bg-color)] border border-[var(--border-color)] p-2';
 
-	let currentAlgorithm: Algorithm = $state(getProblemStore().algorithm);
 	const availableAlgorithms: Algorithm[] = ['backtracking', 'dpll', 'cdcl'];
-	const showCDCL: boolean = $derived(currentAlgorithm === 'cdcl');
+	const showCDCL: boolean = $derived(getConfiguredAlgorithm() === 'cdcl');
 
-	const confirmUpdate = () => {
-		resetModal = false;
-		getProblemStore().updateAlgorithm(currentAlgorithm);
-		//updateAlgorithm(currentAlgorithm);
-		changeAlgorithmEventBus.emit();
+	let openModal: boolean = $state(false);
+
+	const cancelChange = () => {
+		openModal = false;
+		algorithmSelected = getConfiguredAlgorithm();
 	};
 
-	let resetModal: boolean = $state(false);
+	const acceptChange = (algorithmSelected: Algorithm) => {
+		openModal = false;
+		setConfiguredAlgorithm(algorithmSelected);
+		changeAlgorithmEventBus.emit();
+	};
 </script>
 
 <div class="heading-class">
@@ -39,11 +46,11 @@
 			<select
 				id="algorithm"
 				class="flex-1 rounded-lg border-[var(--border-color)] text-right outline-none focus:outline-none focus:ring-0"
-				onchange={() => (resetModal = true)}
-				bind:value={currentAlgorithm}
+				onchange={() => (openModal = true)}
+				bind:value={algorithmSelected}
 			>
 				{#each availableAlgorithms as algorithm}
-					<option value={algorithm} selected={algorithm === currentAlgorithm}>
+					<option value={algorithm} selected={algorithm === algorithmSelected}>
 						{algorithm}
 					</option>
 				{/each}
@@ -58,19 +65,18 @@
 	</algorithm>
 </div>
 
-<Modal bind:open={resetModal} size="xs" class="modal-style" dismissable={false}>
+<Modal bind:open={openModal} size="xs" class="modal-style" dismissable={false}>
 	<div class="text-center">
 		<ExclamationCircleOutline class="mx-auto mb-4 h-12 w-12 text-red-600" />
 		<h3 class="mb-5 text-lg font-normal text-gray-600">
 			By changing the algorithm, all the assignments made will be erased. Are you sure?
 		</h3>
-		<button class="btn mr-4" onclick={confirmUpdate}>Yes, I'm sure</button>
+		<button
+			class="btn mr-4"
+			onclick={ () => acceptChange(algorithmSelected) }>Yes, I'm sure</button>
 		<button
 			class="btn"
-			onclick={() => {
-				resetModal = false;
-				currentAlgorithm = getProblemStore().algorithm;
-			}}
+			onclick={ cancelChange }
 		>
 			<span>No, cancel</span>
 		</button>
