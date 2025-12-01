@@ -6,7 +6,6 @@
 	import { CodePullRequestOutline, ExclamationCircleOutline } from 'flowbite-svelte-icons';
 	import { type Algorithm } from '$lib/types/algorithm.ts';
 
-
 	interface Props {
 		iconClass: { size: string };
 	}
@@ -71,13 +70,8 @@
 		<h3 class="mb-5 text-lg font-normal text-gray-600">
 			By changing the algorithm, all the assignments made will be erased. Are you sure?
 		</h3>
-		<button
-			class="btn mr-4"
-			onclick={ () => acceptChange(algorithmSelected) }>Yes, I'm sure</button>
-		<button
-			class="btn"
-			onclick={ cancelChange }
-		>
+		<button class="btn mr-4" onclick={() => acceptChange(algorithmSelected)}>Yes, I'm sure</button>
+		<button class="btn" onclick={cancelChange}>
 			<span>No, cancel</span>
 		</button>
 	</div>

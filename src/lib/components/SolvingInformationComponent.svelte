@@ -5,7 +5,6 @@
 
 	import { getConfiguredAlgorithm } from '$lib/components/settings/engine/state.svelte.ts';
 
-
 	const algorithm: string = $derived(getConfiguredAlgorithm());
 
 	const instanceName: string = $derived.by(() => {
