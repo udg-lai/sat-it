@@ -1,4 +1,4 @@
-import { getClausePool, getMapping, getProblemStore, getVariablePool, type OccurrenceList } from '$lib/states/problem.svelte.ts';
+import { getClausePool, getMapping, getVariablePool, type OccurrenceList } from '$lib/states/problem.svelte.ts';
 import {
 	clauseEvaluation,
 	allAssigned as solverAllAssigned,
