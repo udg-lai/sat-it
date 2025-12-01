@@ -7,7 +7,7 @@ import VariableAssignment from '$lib/entities/VariableAssignment.ts';
 import type { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
 import { getAssignment, type AssignmentEvent } from '$lib/states/assignment.svelte.ts';
 import { isBreakpoint } from '$lib/states/breakpoints.svelte.ts';
-import { getProblemStore, getVariablePool } from '$lib/states/problem.svelte.ts';
+import { getVariablePool } from '$lib/states/problem.svelte.ts';
 import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 import {
 	increaseNoConflicts,
