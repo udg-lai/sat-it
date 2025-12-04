@@ -6,7 +6,7 @@
 	} from '$lib/events/events.ts';
 	import { updateAssignment } from '$lib/states/assignment.svelte.ts';
 	import '../style.css';
-	import automaticSteps from '$lib/icons/Automatic Steps.svg'
+	import automaticSteps from '$lib/icons/Automatic Steps.svg';
 	import ImageRender from '$lib/components/tools/ImageRender.svelte';
 
 	interface Props {

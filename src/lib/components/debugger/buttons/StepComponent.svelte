@@ -2,7 +2,7 @@
 	import { stateMachineEventBus } from '$lib/events/events.ts';
 	import ImageRender from '$lib/components/tools/ImageRender.svelte';
 	import '../style.css';
-	
+
 	interface Props {
 		myClass?: string;
 		icon: string;
@@ -18,6 +18,6 @@
 		stateMachineEventBus.emit('step');
 	}}
 	title="Step"
->	
-	<ImageRender icon={icon} alt={alt} />
+>
+	<ImageRender {icon} {alt} />
 </button>

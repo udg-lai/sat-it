@@ -2,7 +2,7 @@
 	import { stateMachineEventBus } from '$lib/events/events.ts';
 	import '../style.css';
 	import ImageRender from '$lib/components/tools/ImageRender.svelte';
-	import backtracking from '$lib/icons/Backtracking.svg'
+	import backtracking from '$lib/icons/Backtracking.svg';
 
 	interface Props {
 		finished?: boolean;

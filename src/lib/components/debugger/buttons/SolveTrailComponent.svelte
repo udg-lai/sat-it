@@ -3,7 +3,7 @@
 	import { updateAssignment } from '$lib/states/assignment.svelte.ts';
 	import '../style.css';
 	import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
-	import finishTrail from '$lib/icons/Finish Trail.svg'
+	import finishTrail from '$lib/icons/Finish Trail.svg';
 	import ImageRender from '$lib/components/tools/ImageRender.svelte';
 
 	interface Props {

@@ -1,15 +1,15 @@
 <script lang="ts">
-    interface Props {
-        icon: string;
-        alt: string;
-    }
-    let {icon, alt}: Props = $props();
+	interface Props {
+		icon: string;
+		alt: string;
+	}
+	let { icon, alt }: Props = $props();
 </script>
 
-<img src={icon} alt={alt} class=image_class>
+<img src={icon} {alt} class="image_class" />
 
 <style>
-    .image_class {
-        padding: 6px;
-    }
+	.image_class {
+		padding: 6px;
+	}
 </style>

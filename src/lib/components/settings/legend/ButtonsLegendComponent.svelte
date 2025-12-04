@@ -2,28 +2,31 @@
 	import './style.css';
 	import DescriptionComponent from './DescriptionComponent.svelte';
 	import {
-		ArrowRightOutline,
-		CaretRightOutline,
-		ChevronDoubleRightOutline,
 		ChevronLeftOutline,
 		ChevronRightOutline,
-		CodeMergeOutline,
-		ForwardOutline,
 		RefreshOutline,
-		ReplyOutline,
-		StopOutline
+		ReplyOutline
 	} from 'flowbite-svelte-icons';
-	import SolveIcon from '$lib/components/debugger/buttons/SolveIcon.svelte';
+	import solve from '$lib/icons/Solve.svg';
+	import decision from '$lib/icons/Decision.svg';
+	import automaticSteps from '$lib/icons/Automatic Steps.svg';
+	import backtracking from '$lib/icons/Backtracking.svg';
+	import emptyClause from '$lib/icons/Empty Clause.svg';
+	import finishTrail from '$lib/icons/Finish Trail.svg';
+	import inspectAllClauses from '$lib/icons/Inspect All Clauses.svg';
+	import inspectNextClause from '$lib/icons/Inspect Next Clause.svg';
+	import pauseAuto from '$lib/icons/Pause Auto.svg';
+	import resolution from '$lib/icons/Resolution.svg';
+	import up1 from '$lib/icons/UP1.svg';
+	import upn from '$lib/icons/UPn.svg';
+
+	import ImageDescriptionComponent from './ImageDescriptionComponent.svelte';
 
 	const reverseProps = {
 		class: 'transform -scale-x-100',
 		size: 'lg'
 	};
 	const regularProps = {
-		size: 'lg'
-	};
-	const conflictProps = {
-		color: 'var(--conflict-color)',
 		size: 'lg'
 	};
 </script>
@@ -33,45 +36,65 @@
 </div>
 <div class="body-class">
 	<division>Algorithmic buttons</division>
-	<DescriptionComponent
-		component={CaretRightOutline}
-		componentProps={regularProps}
-		description={'Single step button'}
+	<ImageDescriptionComponent
+		icon={emptyClause}
+		alt={'Empty clause button'}
+		description={'Check if there exists the empty clause in the Formula.'}
 	/>
-	<DescriptionComponent
-		component={ArrowRightOutline}
-		componentProps={regularProps}
+	<ImageDescriptionComponent
+		icon={decision}
+		alt={'Decision button'}
+		description={'Decide a literal.'}
+	/>
+	<ImageDescriptionComponent
+		icon={finishTrail}
+		alt={'Finish trail button'}
 		description={'Complete a trail until reaching a final state or a conflict.'}
 	/>
-	<DescriptionComponent
-		component={SolveIcon}
-		componentProps={regularProps}
+	<ImageDescriptionComponent
+		icon={solve}
+		alt="Solve Problem"
 		description={'Solve the problem until reaching a final state.'}
 	/>
-	<DescriptionComponent
-		component={ForwardOutline}
-		componentProps={regularProps}
-		description={'When an occurrence list is being examined, automatically check its clauses left'}
+	<ImageDescriptionComponent
+		icon={inspectNextClause}
+		alt={'Inspect next clause button'}
+		description={'Check the following clause of the occurrence list.'}
 	/>
-	<DescriptionComponent
-		component={ChevronDoubleRightOutline}
-		componentProps={regularProps}
-		description={'When an occurrence list is being examined, automatically check all the occurrence lists left to be checked.'}
+	<ImageDescriptionComponent
+		icon={inspectAllClauses}
+		alt={'Inspect all clause button'}
+		description={'Check all the clauses from the occurrence list.'}
 	/>
-	<DescriptionComponent
-		component={CodeMergeOutline}
-		componentProps={conflictProps}
-		description={'When a conflict has been detected in a non-conflict analysis algorithm, it does a backtracking.'}
+	<ImageDescriptionComponent
+		icon={up1}
+		alt={'UP one literal'}
+		description={'Check clauses in the occurrence list until finding a unit clause or a conflict.'}
 	/>
-	<DescriptionComponent
-		component={ForwardOutline}
-		componentProps={conflictProps}
-		description={'When in conflict analysis, automatically finishes it.'}
+	<ImageDescriptionComponent
+		icon={upn}
+		alt={'UP all literal'}
+		description={'Check all the clauses from the occurrence list doing all possible unit propagations.'}
 	/>
-	<DescriptionComponent
-		component={StopOutline}
-		componentProps={regularProps}
-		description={'When in automatic solving, stop the process.'}
+	<ImageDescriptionComponent
+		icon={resolution}
+		alt={'Resolution button'}
+		description={'Do one resolution step.'}
+	/>
+	<ImageDescriptionComponent
+		icon={backtracking}
+		alt={'Conflict button'}
+		description={'Automatically finish conflict analysis'}
+	/>
+	<ImageDescriptionComponent
+		icon={automaticSteps}
+		alt={'Begin automatic solving'}
+		description={'Begin automatic solving mode'}
+	/>
+	<ImageDescriptionComponent
+		icon={pauseAuto}
+		alt={'Stop automatic solving'}
+		description={'Stop automatic solving mode'}
 	/>
 
 	<division class="pt-1">Non-algorithmic buttons</division>

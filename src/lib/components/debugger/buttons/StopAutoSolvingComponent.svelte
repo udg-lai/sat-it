@@ -4,7 +4,7 @@
 	import type { StateFun, StateInput } from '$lib/solvers/StateMachine.svelte.ts';
 	import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 	import '../style.css';
-	import stop from '$lib/icons/Pause Auto.svg'
+	import stop from '$lib/icons/Pause Auto.svg';
 
 	let solverMachine: SolverMachine<StateFun, StateInput> = $derived(getSolverMachine());
 </script>

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { stateMachineEventBus, toggleTrailExpandEventBus } from '$lib/events/events.ts';
 	import { updateAssignment } from '$lib/states/assignment.svelte.ts';
-	import solve from '$lib/icons/Solve.svg'
+	import solve from '$lib/icons/Solve.svg';
 	import ImageRender from '$lib/components/tools/ImageRender.svelte';
 	import '../style.css';
 

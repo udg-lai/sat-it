@@ -1,6 +1,6 @@
 <script lang="ts">
 	import ImageRender from '$lib/components/tools/ImageRender.svelte';
-	import backtracking from '$lib/icons/Backtracking.svg'
+	import backtracking from '$lib/icons/Backtracking.svg';
 	import { stateMachineEventBus, toggleTrailExpandEventBus } from '$lib/events/events.ts';
 	import '../style.css';
 	import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
