@@ -27,6 +27,7 @@ export interface SolverStateInterface<F extends StateFun, I extends StateInput> 
 	getStateMachine: () => StateMachine<F, I>;
 	updateStopTimeout: (ms: number) => void;
 	disableStops(): void;
+	stop(): void;
 }
 
 export abstract class SolverMachine<F extends StateFun, I extends StateInput>
@@ -103,6 +104,12 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 	}
 
 	abstract onConflictDetection(): boolean;
+
+	stop(): void {
+		if (this.isInAutoMode()) {
+			this.stopAutoMode();
+		}
+	}
 
 	stopAutoMode(): void {
 		this.forcedStop = true;

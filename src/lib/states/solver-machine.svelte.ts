@@ -7,18 +7,19 @@ import { makeDPLLSolver } from '$lib/solvers/dpll/dpll-solver-machine.svelte.ts'
 import { SolverMachine } from '$lib/solvers/SolverMachine.svelte.ts';
 import type { StateFun, StateInput } from '$lib/solvers/StateMachine.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
-import { getProblemStore } from './problem.svelte.ts';
 import { type Algorithm } from '$lib/types/algorithm.ts';
 import { getStepDelay } from './delay-ms.svelte.ts';
+import { getConfiguredAlgorithm } from '$lib/components/settings/engine/state.svelte.ts';
+
 let solverMachine: SolverMachine<StateFun, StateInput> = $state(
 	new CDCL_SolverMachine(getStepDelay())
 );
 
-export const setSolverStateMachine = () => {
-	if (solverMachine) {
-		solverMachine.stopAutoMode();
-	}
-	const algorithm: Algorithm = getProblemStore().algorithm;
+export const resetSolverMachine = () => {
+	if (solverMachine) solverMachine.stop();
+
+	const algorithm: Algorithm = getConfiguredAlgorithm();
+
 	if (algorithm === 'backtracking') {
 		solverMachine = makeBKTSolver();
 	} else if (algorithm === 'dpll') {
@@ -34,7 +35,7 @@ export const updateSolverMachine = (
 	stateId: number,
 	record: Record<string, unknown> | undefined
 ): void => {
-	solverMachine.stopAutoMode();
+	solverMachine.stop();
 	solverMachine.updateActiveStateId(stateId);
 	solverMachine.updateFromRecord(record);
 };

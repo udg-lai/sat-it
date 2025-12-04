@@ -1,11 +1,12 @@
 <script lang="ts">
-	import { getProblemStore } from '$lib/states/problem.svelte.ts';
 	import StatisticsComponent from './StatisticsComponent.svelte';
-	import type Problem from '$lib/entities/Problem.svelte.ts';
 	import type { InteractiveInstance } from '$lib/entities/InteractiveInstance.svelte.ts';
 	import { getActiveInstance } from '$lib/states/instances.svelte.ts';
 
-	const problem: Problem = $derived(getProblemStore());
+	import { getConfiguredAlgorithm } from '$lib/components/settings/engine/state.svelte.ts';
+
+	const algorithm: string = $derived(getConfiguredAlgorithm());
+
 	const instanceName: string = $derived.by(() => {
 		const instance: InteractiveInstance | undefined = getActiveInstance();
 		if (instance == undefined) return '';
@@ -15,7 +16,7 @@
 
 <solving-info>
 	<div class="selected-configuration">
-		<span>{instanceName} - {problem.algorithm}</span>
+		<span>{instanceName} - {algorithm}</span>
 	</div>
 	<StatisticsComponent />
 </solving-info>
