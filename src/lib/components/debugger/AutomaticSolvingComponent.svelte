@@ -14,9 +14,9 @@
 <general-debugger>
 	<SolveTrailComponent {finished} {backtrackingState} />
 
-	<SolveAutomaticComponent {finished} {backtrackingState} />
-
 	<SolveProblemComponent {finished} {backtrackingState} />
+
+	<SolveAutomaticComponent {finished} {backtrackingState} />
 </general-debugger>
 
 <style>

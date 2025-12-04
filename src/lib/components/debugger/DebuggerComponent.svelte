@@ -2,7 +2,6 @@
 	import type { SolverMachine } from '$lib/solvers/SolverMachine.svelte.ts';
 	import type { StateFun, StateInput } from '$lib/solvers/StateMachine.svelte.ts';
 	import { getBaselinePolarity } from '$lib/states/parameters.svelte.ts';
-	import { getProblemStore } from '$lib/states/problem.svelte.ts';
 	import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 	import { fromJust, isJust, type Maybe } from '$lib/types/maybe.ts';
 	import AutoModeComponent from './AutoModeComponent.svelte';
@@ -12,14 +11,19 @@
 	import AutomaticSolvingComponent from './AutomaticSolvingComponent.svelte';
 	import GeneralPurposeDebuggerComponent from './GeneralPurposeDebuggerComponent.svelte';
 	import StepComponent from './buttons/StepComponent.svelte';
-	import type Problem from '$lib/entities/Problem.svelte.ts';
-	import step from '$lib/icons/Decision.svg';
+	import inspectClause from '$lib/icons/Inspect Next Clause.svg';
 	import emptyClause from '$lib/icons/Empty Clause.svg';
+	import type { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
+	import { getVariablePool } from '$lib/states/problem.svelte.ts';
+	import { getConfiguredAlgorithm } from '../settings/engine/state.svelte.ts';
+	import type { Algorithm } from '$lib/types/algorithm.ts';
+	import UnitPropagationDebuggerComponent from './UnitPropagationDebuggerComponent.svelte';
 
-	const problem: Problem = $derived(getProblemStore());
+	const variables: VariablePool = $derived(getVariablePool());
+	const currentAlgorithm: Algorithm = $derived(getConfiguredAlgorithm());
 
 	let defaultNextVariable: number | undefined = $derived.by(() => {
-		const nextVariable: Maybe<number> = problem.variables.nextVariableToAssign();
+		const nextVariable: Maybe<number> = variables.nextVariableToAssign();
 		return isJust(nextVariable) ? fromJust(nextVariable) : undefined;
 	});
 
@@ -38,16 +42,19 @@
 			<AutoModeComponent />
 		{:else if enablePreprocess}
 			<init-step>
-				<StepComponent icon={emptyClause} alt="Check empty clause" />
+				<StepComponent icon={emptyClause} alt="Check Empty Clause" />
 			</init-step>
 		{:else}
 			{#if onPreConflictDetection}
 				<preConf-step>
-					<StepComponent icon={step} alt="Step" />
+					<StepComponent icon={inspectClause} alt="Inspect Next Clause" />
 				</preConf-step>
 			{:else if onConflictDetection}
 				<ConflictDetectionDebugger />
-			{:else if onConflict && problem.algorithm === 'cdcl'}
+				{#if currentAlgorithm !== 'backtracking'}
+					<UnitPropagationDebuggerComponent />
+				{/if}
+			{:else if onConflict && currentAlgorithm === 'cdcl'}
 				<ConflictAnalysisDebugger />
 			{:else if !finished}
 				<DecisionDebugger

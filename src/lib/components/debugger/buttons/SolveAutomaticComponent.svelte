@@ -27,7 +27,7 @@
 <button
 	class="btn general-btn"
 	class:invalidOption={finished || backtrackingState}
-	title="Solve"
+	title="Automatic solving"
 	onclick={solveAutomatic}
 	disabled={finished || backtrackingState}
 >

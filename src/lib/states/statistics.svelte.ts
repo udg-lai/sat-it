@@ -1,4 +1,4 @@
-import { getProblemStore } from './problem.svelte.ts';
+import { getClausePool } from './problem.svelte.ts';
 
 export interface ClauseCountEntry {
 	[key: number]: number;
@@ -41,7 +41,7 @@ export const decreaseNoUnitPropagations = (): void => {
 };
 
 export const updateClausesLeft = (nTrail: number): void => {
-	const nClauses: number = getProblemStore().clauses.leftToSatisfy();
+	const nClauses: number = getClausePool().leftToSatisfy();
 	clausesLeft[nTrail] = nClauses;
 };
 

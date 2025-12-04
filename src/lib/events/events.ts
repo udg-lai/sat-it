@@ -25,6 +25,7 @@ export type StateMachineEvent =
 	| 'automatic_steps'
 	| 'solve_all'
 	| 'nextVariable'
+	| 'up1'
 	| 'finishCD'
 	| 'finishCA';
 

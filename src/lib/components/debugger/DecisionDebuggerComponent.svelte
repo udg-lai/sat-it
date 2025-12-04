@@ -2,12 +2,12 @@
 	import DynamicRender from '$lib/components/DynamicRender.svelte';
 	import { stateMachineEventBus } from '$lib/events/events.ts';
 	import { updateAssignment } from '$lib/states/assignment.svelte.ts';
-	import { getProblemStore } from '$lib/states/problem.svelte.ts';
+	import { getVariablePool } from '$lib/states/problem.svelte.ts';
 	import { logInfo, logWarning } from '$lib/states/toasts.svelte.ts';
 	import { CaretRightOutline } from 'flowbite-svelte-icons';
 	import './style.css';
 	import BacktrackingComponent from './buttons/BacktrackingComponent.svelte';
-	import type Problem from '$lib/entities/Problem.svelte.ts';
+	import type { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
 
 	const assignmentProps = {
 		size: 'md'
@@ -25,7 +25,7 @@
 	let inputLiteral: number | undefined = $state(undefined);
 
 	// -----Code related to checking manual decisions-----
-	const { variables }: Problem = $derived(getProblemStore());
+	const variables: VariablePool = $derived(getVariablePool());
 
 	let max: number = $derived(variables.size());
 	let min: number = $derived(max * -1);
