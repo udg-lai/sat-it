@@ -1,7 +1,8 @@
 <script lang="ts">
-	import DynamicRender from '$lib/components/DynamicRender.svelte';
-	import { ChevronLeftOutline, ChevronRightOutline } from 'flowbite-svelte-icons';
 	import '../style.css';
+	import ImageRender from '$lib/components/tools/ImageRender.svelte';
+	import expand from '$lib/icons/Expand.svg';
+	import collapse from '$lib/icons/Collapse.svg';
 
 	interface Props {
 		expanded?: boolean;
@@ -21,8 +22,5 @@
 </script>
 
 <button class="btn general-btn" title={textCollapse} onclick={checkIfFunction}>
-	<DynamicRender
-		component={expanded ? ChevronLeftOutline : ChevronRightOutline}
-		props={{ size: 'md' }}
-	/>
+	<ImageRender icon={expanded ? collapse : expand} alt={expanded ? 'Collapse' : 'Expand'} />
 </button>

@@ -58,12 +58,12 @@
 	}
 
 	async function stateMachineEvent(s: StateMachineEvent) {
-		if (s !== 'solve_all' && s !== 'step') {
+		if (s !== 'automatic_steps' && s !== 'step') {
 			updateOnStep = false;
 			solverMachine.disableStops();
 		}
 		await solverMachine.transition(s);
-		if (s !== 'solve_all' && s !== 'step') {
+		if (s !== 'automatic_steps' && s !== 'step') {
 			updateOnStep = true;
 			solverMachine.updateStopTimeout(getStepDelay());
 		}

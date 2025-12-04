@@ -1,8 +1,8 @@
 <script lang="ts">
-	import DynamicRender from '$lib/components/DynamicRender.svelte';
 	import { stateMachineEventBus } from '$lib/events/events.ts';
-	import { CodeMergeOutline } from 'flowbite-svelte-icons';
 	import '../style.css';
+	import ImageRender from '$lib/components/tools/ImageRender.svelte';
+	import backtracking from '$lib/icons/Backtracking.svg';
 
 	interface Props {
 		finished?: boolean;
@@ -21,7 +21,7 @@
 	title="Backtrack"
 	disabled={finished || onConflictDetection}
 >
-	<DynamicRender component={CodeMergeOutline} props={{ size: 'md' }} />
+	<ImageRender icon={backtracking} alt="Resolve Conflict" />
 </button>
 
 <style>

@@ -17,6 +17,8 @@ import {
 import { DPLL_StateMachine, makeDPLLMachine } from './dpll-state-machine.svelte.ts';
 import { dpll_stateName2StateId } from './dpll-states.svelte.ts';
 import { getStepDelay } from '$lib/states/delay-ms.svelte.ts';
+import { getNoUnitPropagations } from '$lib/states/statistics.svelte.ts';
+import type { StateMachineEvent } from '$lib/events/events.ts';
 
 export const makeDPLLSolver = (): DPLL_SolverMachine => {
 	return new DPLL_SolverMachine(getStepDelay());
@@ -94,6 +96,12 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 		}
 	}
 
+	async transition(input: StateMachineEvent): Promise<void> {
+		if (input === 'up1') {
+			await this.unitPropagate();
+		} else super.transition(input);
+	}
+
 	step(): void {
 		const activeId: number = this.stateMachine.getActiveId();
 
@@ -126,6 +134,13 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 
 	protected async solveCDStepByStep(): Promise<void> {
 		this.stepByStep(() => !this.pendingOccurrenceLists.isEmpty());
+	}
+
+	protected async unitPropagate(): Promise<void> {
+		const previousUPs: number = getNoUnitPropagations();
+		this.stepByStep(
+			() => previousUPs >= getNoUnitPropagations() && !this.pendingOccurrenceLists.isEmpty()
+		);
 	}
 
 	onConflictDetection(): boolean {

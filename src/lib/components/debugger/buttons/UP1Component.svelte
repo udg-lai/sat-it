@@ -3,15 +3,15 @@
 	import '../style.css';
 	import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 	import ImageRender from '$lib/components/tools/ImageRender.svelte';
-	import upn from '$lib/icons/UPn.svg';
+	import up1 from '$lib/icons/UP1.svg';
 
 	function finishConflictDetection(): void {
 		getSolverMachine().disableStops();
 		toggleTrailExpandEventBus.emit(true);
-		stateMachineEventBus.emit('finishCD');
+		stateMachineEventBus.emit('up1');
 	}
 </script>
 
-<button class="btn general-btn" title="Finish CD" onclick={finishConflictDetection}>
-	<ImageRender icon={upn} alt="Finish UPs" />
+<button class="btn general-btn" title="One Unit Propagation" onclick={finishConflictDetection}>
+	<ImageRender icon={up1} alt="up1" />
 </button>

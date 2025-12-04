@@ -1,8 +1,8 @@
 <script lang="ts">
-	import DynamicRender from '$lib/components/DynamicRender.svelte';
 	import { stateMachineEventBus, toggleTrailExpandEventBus } from '$lib/events/events.ts';
 	import { updateAssignment } from '$lib/states/assignment.svelte.ts';
-	import SolveIcon from './SolveIcon.svelte';
+	import solve from '$lib/icons/Solve.svg';
+	import ImageRender from '$lib/components/tools/ImageRender.svelte';
 	import '../style.css';
 
 	interface Props {
@@ -26,5 +26,5 @@
 	onclick={solveProblem}
 	disabled={finished || backtrackingState}
 >
-	<DynamicRender component={SolveIcon} props={{ size: 'md' }} />
+	<ImageRender icon={solve} alt="Solve" />
 </button>

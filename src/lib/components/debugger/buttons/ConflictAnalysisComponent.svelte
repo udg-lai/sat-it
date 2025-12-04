@@ -1,7 +1,7 @@
 <script lang="ts">
-	import DynamicRender from '$lib/components/DynamicRender.svelte';
+	import ImageRender from '$lib/components/tools/ImageRender.svelte';
+	import backtracking from '$lib/icons/Backtracking.svg';
 	import { stateMachineEventBus, toggleTrailExpandEventBus } from '$lib/events/events.ts';
-	import { ForwardOutline } from 'flowbite-svelte-icons';
 	import '../style.css';
 	import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 
@@ -17,5 +17,5 @@
 	title="Finish Conflict Analysis"
 	onclick={finishConflictAnalysis}
 >
-	<DynamicRender component={ForwardOutline} props={{ size: 'md' }} />
+	<ImageRender icon={backtracking} alt="Resolve Conflict" />
 </button>
