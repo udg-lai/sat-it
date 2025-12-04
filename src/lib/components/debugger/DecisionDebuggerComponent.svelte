@@ -1,17 +1,13 @@
 <script lang="ts">
-	import DynamicRender from '$lib/components/DynamicRender.svelte';
 	import { stateMachineEventBus } from '$lib/events/events.ts';
 	import { updateAssignment } from '$lib/states/assignment.svelte.ts';
 	import { getVariablePool } from '$lib/states/problem.svelte.ts';
 	import { logInfo, logWarning } from '$lib/states/toasts.svelte.ts';
-	import { CaretRightOutline } from 'flowbite-svelte-icons';
 	import './style.css';
 	import BacktrackingComponent from './buttons/BacktrackingComponent.svelte';
 	import type { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
-
-	const assignmentProps = {
-		size: 'md'
-	};
+	import ImageRender from '../tools/ImageRender.svelte';
+	import decision from '$lib/icons/Decision.svg';
 
 	interface Props {
 		onConflict: boolean;
@@ -117,7 +113,7 @@
 				title="Decide"
 				disabled={finished || onConflictDetection}
 			>
-				<DynamicRender component={CaretRightOutline} props={assignmentProps} />
+				<ImageRender icon={decision} alt={'Decision'} />
 			</button>
 		{:else}
 			<BacktrackingComponent {finished} {onConflictDetection} />

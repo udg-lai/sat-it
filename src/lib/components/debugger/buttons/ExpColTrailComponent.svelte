@@ -1,8 +1,8 @@
 <script lang="ts">
 	import '../style.css';
 	import ImageRender from '$lib/components/tools/ImageRender.svelte';
-	import expand from '$lib/icons/Expand.svg'
-	import collapse from '$lib/icons/Collapse.svg'
+	import expand from '$lib/icons/Expand.svg';
+	import collapse from '$lib/icons/Collapse.svg';
 
 	interface Props {
 		expanded?: boolean;
@@ -22,8 +22,5 @@
 </script>
 
 <button class="btn general-btn" title={textCollapse} onclick={checkIfFunction}>
-	<ImageRender
-		icon={expanded ? collapse : expand}
-		alt={expanded ? 'Collapse' : 'Expand'}
-	/>
+	<ImageRender icon={expanded ? collapse : expand} alt={expanded ? 'Collapse' : 'Expand'} />
 </button>

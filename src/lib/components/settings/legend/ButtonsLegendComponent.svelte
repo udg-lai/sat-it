@@ -1,12 +1,7 @@
 <script lang="ts">
 	import './style.css';
 	import DescriptionComponent from './DescriptionComponent.svelte';
-	import {
-		ChevronLeftOutline,
-		ChevronRightOutline,
-		RefreshOutline,
-		ReplyOutline
-	} from 'flowbite-svelte-icons';
+	import { RefreshOutline, ReplyOutline } from 'flowbite-svelte-icons';
 	import solve from '$lib/icons/Solve.svg';
 	import decision from '$lib/icons/Decision.svg';
 	import automaticSteps from '$lib/icons/Automatic Steps.svg';
@@ -19,6 +14,8 @@
 	import resolution from '$lib/icons/Resolution.svg';
 	import up1 from '$lib/icons/UP1.svg';
 	import upn from '$lib/icons/UPn.svg';
+	import expand from '$lib/icons/Expand.svg';
+	import collapse from '$lib/icons/Collapse.svg';
 
 	import ImageDescriptionComponent from './ImageDescriptionComponent.svelte';
 
@@ -113,14 +110,14 @@
 		componentProps={reverseProps}
 		description={'Redo the undone state.'}
 	/>
-	<DescriptionComponent
-		component={ChevronRightOutline}
-		componentProps={regularProps}
+	<ImageDescriptionComponent
+		icon={expand}
+		alt={'Stop automatic solving'}
 		description={'Expand the decision levels of all trails.'}
 	/>
-	<DescriptionComponent
-		component={ChevronLeftOutline}
-		componentProps={regularProps}
+	<ImageDescriptionComponent
+		icon={collapse}
+		alt={'Stop automatic solving'}
 		description={'Collapse the decision levels of all trails.'}
 	/>
 </div>
