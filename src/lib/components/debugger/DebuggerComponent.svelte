@@ -13,6 +13,8 @@
 	import GeneralPurposeDebuggerComponent from './GeneralPurposeDebuggerComponent.svelte';
 	import StepComponent from './buttons/StepComponent.svelte';
 	import type Problem from '$lib/entities/Problem.svelte.ts';
+	import step from '$lib/icons/Decision.svg';
+	import emptyClause from '$lib/icons/Empty Clause.svg'
 
 	const problem: Problem = $derived(getProblemStore());
 
@@ -36,12 +38,12 @@
 			<AutoModeComponent />
 		{:else if enablePreprocess}
 			<init-step>
-				<StepComponent />
+				<StepComponent icon={emptyClause} alt="Check empty clause" />
 			</init-step>
 		{:else}
 			{#if onPreConflictDetection}
 				<preConf-step>
-					<StepComponent />
+					<StepComponent icon={step} alt="Step"/>
 				</preConf-step>
 			{:else if onConflictDetection}
 				<ConflictDetectionDebugger />

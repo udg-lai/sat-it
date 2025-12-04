@@ -1,10 +1,10 @@
 <script lang="ts">
-	import DynamicRender from '$lib/components/DynamicRender.svelte';
 	import { stateMachineEventBus, toggleTrailExpandEventBus } from '$lib/events/events.ts';
 	import { updateAssignment } from '$lib/states/assignment.svelte.ts';
-	import { ArrowRightOutline } from 'flowbite-svelte-icons';
 	import '../style.css';
 	import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
+	import finishTrail from '$lib/icons/Finish Trail.svg'
+	import ImageRender from '$lib/components/tools/ImageRender.svelte';
 
 	interface Props {
 		finished?: boolean;
@@ -24,9 +24,9 @@
 <button
 	class="btn general-btn"
 	class:invalidOption={finished || backtrackingState}
-	title="Solve trail"
+	title="Finish trail"
 	onclick={completeTrail}
 	disabled={finished || backtrackingState}
 >
-	<DynamicRender component={ArrowRightOutline} props={{ size: 'md' }} />
+	<ImageRender icon={finishTrail} alt="Finish Trail" />
 </button>

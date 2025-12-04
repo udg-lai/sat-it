@@ -2,10 +2,11 @@
 	import StepComponent from './buttons/StepComponent.svelte';
 	import NextVariableComponent from './buttons/NextVariableComponent.svelte';
 	import FinishConflictDetectionComponent from './buttons/FinishConflictDetectionComponent.svelte';
+	import inspectClause from '$lib/icons/Inspect Next Clause.svg'
 </script>
 
 <conflict-detection-debugger>
-	<StepComponent />
+	<StepComponent icon={inspectClause} alt='Inspect next clause'/>
 
 	<NextVariableComponent />
 

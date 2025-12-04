@@ -1,13 +1,13 @@
 <script lang="ts">
-	import DynamicRender from '$lib/components/DynamicRender.svelte';
 	import {
 		stateMachineEventBus,
 		toggleTrailExpandEventBus,
 		userActionEventBus
 	} from '$lib/events/events.ts';
 	import { updateAssignment } from '$lib/states/assignment.svelte.ts';
-	import SolveIcon from './SolveIcon.svelte';
 	import '../style.css';
+	import automaticSteps from '$lib/icons/Automatic Steps.svg'
+	import ImageRender from '$lib/components/tools/ImageRender.svelte';
 
 	interface Props {
 		finished?: boolean;
@@ -31,5 +31,5 @@
 	onclick={solveAutomatic}
 	disabled={finished || backtrackingState}
 >
-	<DynamicRender component={SolveIcon} props={{ size: 'md' }} />
+	<ImageRender icon={automaticSteps} alt="Automatic steps" />
 </button>
