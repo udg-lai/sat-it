@@ -7,6 +7,7 @@ import type { Trail } from './Trail.svelte.ts';
 import type Variable from './Variable.svelte.ts';
 import { getTrails } from '$lib/states/trails.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
+import type Literal from './Literal.svelte.ts';
 
 export type OccurrenceList = SvelteSet<number>;
 export type OccurrenceTable = Map<number, OccurrenceList>;
@@ -38,7 +39,7 @@ export default class Problem {
 		const { varCount, claims } = summary;
 		this.variables = new VariablePool(varCount);
 		this.clauses = ClausePool.buildFrom(claims, this.variables);
-		this.occurrencesTable = this._makeOccurrencesList();
+		this.occurrencesTable = this._makeOccurrenceTable();
 	}
 
 	reset(): void {
@@ -65,13 +66,13 @@ export default class Problem {
 		});
 
 		//Reset the mapping
-		this.occurrencesTable = this._makeOccurrencesList();
+		this.occurrencesTable = this._makeOccurrenceTable();
 	}
 
 	resetProblem() {
 		this.variables.reset();
 		this.clauses.clearLearnt();
-		this.occurrencesTable = this._makeOccurrencesList();
+		this.occurrencesTable = this._makeOccurrenceTable();
 	}
 
 	addClauseToClausePool(lemma: Clause) {
@@ -80,28 +81,32 @@ export default class Problem {
 		if (lemma.getTag() === undefined)
 			logFatal('Saving lemma', 'Lemma clause was not giving a tag at adding it into the pool');
 
-		this._addClauseToMapping(lemma, lemma.getTag() as number, this.occurrencesTable);
+		this.updateOccurrenceTable(lemma, lemma.getTag() as number, this.occurrencesTable);
 	}
 
-	private _makeOccurrencesList(): OccurrenceTable {
-		const mapping: Map<number, SvelteSet<number>> = new Map();
+	private _makeOccurrenceTable(): OccurrenceTable {
+		const occurrenceTable: Map<number, SvelteSet<number>> = new Map();
 
 		this.clauses.getClauses().forEach((clause, clauseTag) => {
-			this._addClauseToMapping(clause, clauseTag, mapping);
+			this.updateOccurrenceTable(clause, clauseTag, occurrenceTable);
 		});
 
-		return mapping;
+		return occurrenceTable;
 	}
 
-	private _addClauseToMapping = (clause: Clause, clauseTag: number, mapping: OccurrenceTable) => {
-		clause.getLiterals().forEach((literal) => {
-			const literalId = literal.toInt();
-			if (mapping.has(literalId)) {
-				const s = mapping.get(literalId);
+	private updateOccurrenceTable = (
+		clause: Clause,
+		clauseTag: number,
+		occurrenceTable: OccurrenceTable
+	) => {
+		clause.getLiterals().forEach((literal: Literal) => {
+			const literalId: number = literal.toInt();
+			if (occurrenceTable.has(literalId)) {
+				const s = occurrenceTable.get(literalId);
 				s?.add(clauseTag);
 			} else {
 				const s = new SvelteSet([clauseTag]);
-				mapping.set(literalId, s);
+				occurrenceTable.set(literalId, s);
 			}
 		});
 	};

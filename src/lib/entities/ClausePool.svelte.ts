@@ -21,11 +21,11 @@ export interface IClausePool {
 
 class ClausePool implements IClausePool {
 	private clauses: SvelteMap<number, Clause> = new SvelteMap();
-	private learnt: SvelteSet<number> = new SvelteSet();
+	private learnedClauses: SvelteSet<number> = new SvelteSet();
 
 	constructor(clauses: Clause[] = []) {
 		this.clauses = new SvelteMap();
-		this.learnt = new SvelteSet();
+		this.learnedClauses = new SvelteSet();
 		for (const clause of clauses) {
 			this._addClause(clause);
 		}
@@ -106,22 +106,23 @@ class ClausePool implements IClausePool {
 	}
 
 	getLearnt(): Clause[] {
-		return [...this.learnt.values()].map((tag) => this.clauses.get(tag) as Clause);
+		return [...this.learnedClauses.values()].map((tag) => this.clauses.get(tag) as Clause);
 	}
 
 	clearLearnt(): void {
-		for (const tag of this.learnt) {
+		for (const tag of this.learnedClauses) {
 			this.clauses.delete(tag);
 		}
-		this.learnt.clear();
+		this.learnedClauses.clear();
 	}
 
 	private _addClause(clause: Clause): void {
-		const tag: number = this.clauses.size;
+		const tag: number = this.size();
 		clause.setTag(tag);
 		this.clauses.set(tag, clause);
-		if (clause.learnt()) {
-			this.learnt.add(tag);
+		// Quick access to the learned clauses
+		if (clause.hasBeenLearned()) {
+			this.learnedClauses.add(tag);
 		}
 	}
 
