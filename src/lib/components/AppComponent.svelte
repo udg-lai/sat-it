@@ -26,7 +26,8 @@
 	import { getProblemStore, syncProblemWithInstance } from '$lib/states/problem.svelte.ts';
 	import {
 		getSolverMachine,
-		resetSolverMachine,
+		stopSolverMachine,
+		syncSolverMachineWithConfig,
 		updateSolverMachine
 	} from '$lib/states/solver-machine.svelte.ts';
 	import { record, redo, resetStack, undo, type Snapshot } from '$lib/states/stack.svelte.ts';
@@ -95,18 +96,18 @@
 	}
 
 	function onAlgorithmChanged(): void {
-		resetSolverMachine();
+		stopSolverMachine();
+		syncSolverMachineWithConfig();
 		reset();
 	}
 
 	function onInstanceChanged(instanceName: string): void {
-		// Sync the problem with the new instances, meaning we create
+		// Sync the problem with the new instance, meaning we create
 		// a new set of variables and clauses from the instance.
 		const instance: DimacsInstance = getInstance(instanceName);
 		syncProblemWithInstance(instance);
 		// We can not keep the breakpoints when the instance is changed
 		clearBreakpoints();
-		onAlgorithmChanged();
 		modifyLiteralWidth(instance.summary.varCount);
 		reset();
 	}
