@@ -8,14 +8,20 @@ import type Variable from './Variable.svelte.ts';
 import { getTrails } from '$lib/states/trails.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
 
-export type OccurrenceTable = Map<number, SvelteSet<number>>;
-export type WatchTable = Map<number, SvelteSet<number>>;
+export type OccurrenceList = SvelteSet<number>;
+export type OccurrenceTable = Map<number, OccurrenceList>;
+export type WatchTable = Map<number, OccurrenceList>;
 
 export default class Problem {
 	private variables: VariablePool = $state(new VariablePool(0));
 	private clauses: ClausePool = $state(new ClausePool());
-	private occurrencesTable: OccurrenceTable = $state(new Map<number, SvelteSet<number>>());
-	private watchTable: OccurrenceTable = $state(new Map<number, SvelteSet<number>>());
+	private occurrencesTable: OccurrenceTable = $state(new Map<number, OccurrenceList>());
+	private watchTable: OccurrenceTable = $state(new Map<number, OccurrenceList>());
+
+	constructor(instance: DimacsInstance | undefined = undefined) {
+		if (instance !== undefined)
+			this.syncWithDimacsInstance(instance);
+	}
 
 	getClausePool(): ClausePool {
 		return this.clauses;
@@ -29,9 +35,8 @@ export default class Problem {
 		return this.variables;
 	}
 
-	updateProblemDomain(instance: DimacsInstance): void {
-		const { varCount, claims } = instance.summary;
-
+	syncWithDimacsInstance({ summary }: DimacsInstance): void {
+		const { varCount, claims } = summary;
 		this.variables = new VariablePool(varCount);
 		this.clauses = ClausePool.buildFrom(claims, this.variables);
 		this.occurrencesTable = this._makeOccurrencesList();
@@ -41,7 +46,7 @@ export default class Problem {
 		this.variables.reset();
 	}
 
-	updateProblemFromTrail(trail: Trail) {
+	syncWithTrail(trail: Trail) {
 		//Reset the variables
 		this.variables.reset();
 		trail.forEach((assignment) => {

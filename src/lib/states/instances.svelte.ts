@@ -14,6 +14,14 @@ const newInstanceState: InteractiveInstanceState = {
 	active: false
 };
 
+export function getInstance(name: string): DimacsInstance {
+	const instance: InteractiveInstance | undefined = instances.get(name);
+	if (!instance) {
+		logFatal('Instance not found', `Instance ${name} was not found`);
+	}
+	return instance.getInstance();
+}
+
 export function addInstance(instance: DimacsInstance, notify: boolean = false): void {
 	const found = instances.has(instance.name);
 	if (found) {
@@ -67,7 +75,7 @@ export function deleteInstanceByName(name: string): void {
 
 export function afterActivateInstance(instance: DimacsInstance): void {
 	modifyLiteralWidth(instance.summary.varCount);
-	getProblemStore().updateProblemDomain(instance);
+	getProblemStore().syncWithDimacsInstance(instance);
 	changeInstanceEventBus.emit(instance.name);
 }
 
