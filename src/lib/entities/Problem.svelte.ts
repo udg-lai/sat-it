@@ -19,8 +19,7 @@ export default class Problem {
 	private watchTable: OccurrenceTable = $state(new Map<number, OccurrenceList>());
 
 	constructor(instance: DimacsInstance | undefined = undefined) {
-		if (instance !== undefined)
-			this.syncWithDimacsInstance(instance);
+		if (instance !== undefined) this.syncWithDimacsInstance(instance);
 	}
 
 	getClausePool(): ClausePool {

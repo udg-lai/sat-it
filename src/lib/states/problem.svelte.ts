@@ -13,5 +13,5 @@ export const getVariablePool = () => getProblemStore().getVariablePool();
 export const resetProblem = () => getProblemStore().reset();
 
 export const syncProblemWithInstance = (instance: DimacsInstance) => {
-    getProblemStore().syncWithDimacsInstance(instance);
-}
+	getProblemStore().syncWithDimacsInstance(instance);
+};
