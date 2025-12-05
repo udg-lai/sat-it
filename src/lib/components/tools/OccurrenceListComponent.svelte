@@ -25,7 +25,7 @@
 
 	let clauses: Clause[] = $derived.by(() => {
 		const target: number[] = getClausesToCheck();
-		const cPool: ClausePool = problem.clauses;
+		const cPool: ClausePool = problem.getClausePool();
 		return target.map((id) => cPool.get(id));
 	});
 
