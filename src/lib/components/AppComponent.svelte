@@ -16,15 +16,19 @@
 		type StateMachineEvent,
 		type StateMachineLifeCycleEvent
 	} from '$lib/events/events.ts';
+	import type { DimacsInstance } from '$lib/instances/dimacs-instance.interface.ts';
 	import { DECIDE_STATE_ID } from '$lib/solvers/reserved.ts';
 	import type { SolverMachine } from '$lib/solvers/SolverMachine.svelte.ts';
 	import type { StateFun, StateInput } from '$lib/solvers/StateMachine.svelte.ts';
 	import { clearBreakpoints } from '$lib/states/breakpoints.svelte.ts';
-	import { getProblemStore, resetProblem } from '$lib/states/problem.svelte.ts';
+	import { getStepDelay } from '$lib/states/delay-ms.svelte.ts';
+	import { getInstance } from '$lib/states/instances.svelte.ts';
+	import { getProblemStore, syncProblemWithInstance } from '$lib/states/problem.svelte.ts';
 	import {
 		getSolverMachine,
-		updateSolverMachine,
-		resetSolverMachine
+		stopSolverMachine,
+		syncSolverMachineWithConfig,
+		updateSolverMachine
 	} from '$lib/states/solver-machine.svelte.ts';
 	import { record, redo, resetStack, undo, type Snapshot } from '$lib/states/stack.svelte.ts';
 	import {
@@ -32,12 +36,12 @@
 		resetStatistics,
 		updateStatistics
 	} from '$lib/states/statistics.svelte.ts';
-	import { getTrails, updateTrails } from '$lib/states/trails.svelte.ts';
 	import { logFatal } from '$lib/states/toasts.svelte.ts';
+	import { getTrails, updateTrails } from '$lib/states/trails.svelte.ts';
+	import { modifyLiteralWidth } from '$lib/utils.ts';
 	import { onMount } from 'svelte';
 	import DebuggerComponent from './debugger/DebuggerComponent.svelte';
 	import SolvingInformationComponent from './SolvingInformationComponent.svelte';
-	import { getStepDelay } from '$lib/states/delay-ms.svelte.ts';
 
 	let trails: Trail[] = $state([]);
 
@@ -78,29 +82,39 @@
 			logFatal('Reloading snapshot', 'Unexpected empty array of trails');
 		} else {
 			const latest: Trail = snapshot[snapshotSize - 1];
-			getProblemStore().updateProblemFromTrail(latest);
+			getProblemStore().syncWithTrail(latest);
 		}
 		updateStatistics(statistics);
 		updateSolverMachine(activeState, record);
 	}
 
-	function reset(): void {
-		resetSolverMachine();
-		resetProblem();
-		resetStack();
+	function reset() {
+		// Reset the problem, statistics, stack and reload from an initial empty snapshot.
 		resetStatistics();
-		const first = undo();
-		reloadFromSnapshot(first);
+		resetStack();
+		reloadFromSnapshot(undo());
 	}
 
-	function fullyReset(): void {
+	function onAlgorithmChanged(): void {
+		stopSolverMachine();
+		syncSolverMachineWithConfig();
+		reset();
+	}
+
+	function onInstanceChanged(instanceName: string): void {
+		// Sync the problem with the new instance, meaning we create
+		// a new set of variables and clauses from the instance.
+		const instance: DimacsInstance = getInstance(instanceName);
+		syncProblemWithInstance(instance);
+		// We can not keep the breakpoints when the instance is changed
 		clearBreakpoints();
+		modifyLiteralWidth(instance.summary.varCount);
 		reset();
 	}
 
 	function algorithmicUndoSave(a: AlgorithmicUndoEvent): void {
 		const latestTrail: Trail = algorithmicUndo(a.objectiveAssignment, a.trailIndex);
-		getProblemStore().updateProblemFromTrail(latestTrail);
+		getProblemStore().syncWithTrail(latestTrail);
 		updateSolverMachine(DECIDE_STATE_ID, undefined);
 		record(trails, solverMachine.getActiveStateId(), getStatistics(), solverMachine.getRecord());
 	}
@@ -132,9 +146,9 @@
 		// transition the state machine event.
 		subscriptions.push(stateMachineEventBus.subscribe(stateMachineEvent));
 		// reset the machine + breakpoints when an instance is changed.
-		subscriptions.push(changeInstanceEventBus.subscribe(fullyReset));
+		subscriptions.push(changeInstanceEventBus.subscribe(onInstanceChanged));
 		// reset the machine when the algorithm is changed.
-		subscriptions.push(changeAlgorithmEventBus.subscribe(reset));
+		subscriptions.push(changeAlgorithmEventBus.subscribe(onAlgorithmChanged));
 		// update the problem when an undo is performed.
 		subscriptions.push(algorithmicUndoEventBus.subscribe(algorithmicUndoSave));
 		// Control what is rendered and what is saved depending on the life cycle of the state machine.

@@ -1,9 +1,19 @@
+import { assertiveness } from '$lib/algorithms/assertive.ts';
+import type Clause from '$lib/entities/Clause.svelte.ts';
+import { Queue } from '$lib/entities/Queue.svelte.ts';
+import type { Trail } from '$lib/entities/Trail.svelte.ts';
+import { type StateMachineEvent } from '$lib/events/events.ts';
 import {
 	cleanClausesToCheck,
 	updateClausesToCheck
 } from '$lib/states/conflict-detection-state.svelte.ts';
+import { getStepDelay } from '$lib/states/delay-ms.svelte.ts';
+import { setInspectedVariable } from '$lib/states/inspectedVariable.svelte.ts';
+import { syncProblemWithTrail } from '$lib/states/problem.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
+import { SvelteSet } from 'svelte/reactivity';
 import { SolverMachine } from '../SolverMachine.svelte.ts';
+import type { ConflictAnalysis, OccurrenceList } from '../types.ts';
 import type { CDCL_FUN, CDCL_INPUT } from './cdcl-domain.svelte.ts';
 import {
 	analyzeClause,
@@ -15,16 +25,6 @@ import {
 } from './cdcl-solver-transitions.svelte.ts';
 import { CDCL_StateMachine, makeCDCLStateMachine } from './cdcl-state-machine.svelte.ts';
 import { cdcl_stateName2StateId } from './cdcl-states.svelte.ts';
-import { type StateMachineEvent } from '$lib/events/events.ts';
-import { SvelteSet } from 'svelte/reactivity';
-import type { ConflictAnalysis, OccurrenceList } from '../types.ts';
-import { Queue } from '$lib/entities/Queue.svelte.ts';
-import type { Trail } from '$lib/entities/Trail.svelte.ts';
-import type Clause from '$lib/entities/Clause.svelte.ts';
-import { assertiveness } from '$lib/algorithms/assertive.ts';
-import { setInspectedVariable } from '$lib/states/inspectedVariable.svelte.ts';
-import { getProblemStore } from '$lib/states/problem.svelte.ts';
-import { getStepDelay } from '$lib/states/delay-ms.svelte.ts';
 
 export const makeCDCLSolver = (): CDCL_SolverMachine => {
 	return new CDCL_SolverMachine(getStepDelay());
@@ -160,8 +160,7 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 				conflictAnalysis.conflictClause.copy(),
 				[...conflictAnalysis.decisionLevelVariables]
 			);
-			getProblemStore().updateProblemFromTrail(conflictAnalysis.trail);
-			//updateProblemFromTrail(conflictAnalysis.trail);
+			syncProblemWithTrail(conflictAnalysis.trail);
 			setInspectedVariable(conflictAnalysis.trail.pickLastAssignment().getVariable().getInt());
 		}
 	}

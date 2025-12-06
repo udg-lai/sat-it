@@ -13,19 +13,19 @@ type ClauseOptions = {
 };
 
 class Clause implements Comparable<Clause> {
-	private _literals: Literal[] = [];
-	private _comments: string[] = $state([]);
-	private _tag: number | undefined;
-	private _learnt: boolean = false;
+	private literals: Literal[] = [];
+	private comments: string[] = $state([]);
+	private tag: number | undefined;
+	private learned: boolean = false;
 
 	constructor(
 		literals: Literal[],
 		{ comments = [], tag = undefined, learnt = false }: ClauseOptions = {}
 	) {
-		this._literals = literals;
-		this._comments = comments;
-		this._tag = tag;
-		this._learnt = learnt;
+		this.literals = literals;
+		this.comments = comments;
+		this.tag = tag;
+		this.learned = learnt;
 	}
 
 	static buildFrom(claim: Claim, variables: VariablePool): Clause {
@@ -40,31 +40,35 @@ class Clause implements Comparable<Clause> {
 	}
 
 	addLiteral(lit: Literal) {
-		this._literals.push(lit);
+		this.literals.push(lit);
 	}
 
 	getTag(): number | undefined {
-		return this._tag;
+		return this.tag;
 	}
 
 	setTag(tag: number): void {
-		this._tag = tag;
+		this.tag = tag;
 	}
 
-	learnt(): boolean {
-		return this._learnt;
+	hasBeenLearned(): boolean {
+		return this.learned;
 	}
 
-	setAsLearntClause(): void {
-		this._learnt = true;
+	setAsHasBeenLearned(): void {
+		this.learned = true;
+	}
+
+	isTemporal(): boolean {
+		return this.tag === undefined;
 	}
 
 	findUnassignedLiteral(): number {
 		let i = 0;
 		let literal = undefined;
-		while (i < this._literals.length && !literal) {
-			if (!this._literals[i].isAssigned()) {
-				literal = this._literals[i].toInt();
+		while (i < this.literals.length && !literal) {
+			if (!this.literals[i].isAssigned()) {
+				literal = this.literals[i].toInt();
 			} else {
 				i++;
 			}
@@ -80,8 +84,8 @@ class Clause implements Comparable<Clause> {
 		const unassignedLiterals: number[] = [];
 
 		let i = 0;
-		while (i < this._literals.length && !satisfied) {
-			const lit: Literal = this._literals[i];
+		while (i < this.literals.length && !satisfied) {
+			const lit: Literal = this.literals[i];
 			if (lit.isTrue()) satisfied = true;
 			else {
 				if (!lit.isAssigned()) unassignedLiterals.push(lit.toInt());
@@ -100,10 +104,10 @@ class Clause implements Comparable<Clause> {
 	isUnit(): boolean {
 		let nNotAssigned = 0;
 		let i = 0;
-		const len = this._literals.length;
+		const len = this.literals.length;
 		let satisfied = false;
 		while (i < len && nNotAssigned < 2 && !satisfied) {
-			const lit: Literal = this._literals[i];
+			const lit: Literal = this.literals[i];
 			if (!lit.isAssigned()) {
 				nNotAssigned += 1;
 			} else {
@@ -117,11 +121,11 @@ class Clause implements Comparable<Clause> {
 
 	// This function will check if the clause has 1 literal (not if it is assigned)
 	isSingleLiteralClause(): boolean {
-		return this._literals.length === 1;
+		return this.literals.length === 1;
 	}
 
 	containsVariable(variableId: number): boolean {
-		const found = this._literals.find((lit) => {
+		const found = this.literals.find((lit) => {
 			const id = lit.toInt();
 			return Math.abs(id) === variableId;
 		});
@@ -129,7 +133,7 @@ class Clause implements Comparable<Clause> {
 	}
 
 	getLiterals(): Literal[] {
-		return [...this._literals];
+		return [...this.literals];
 	}
 
 	resolution(other: Clause): Clause {
@@ -137,47 +141,47 @@ class Clause implements Comparable<Clause> {
 	}
 
 	equals(other: Clause): boolean {
-		const c1 = this._literals.map((l) => l.toInt());
-		const c2 = other._literals.map((l) => l.toInt());
+		const c1 = this.literals.map((l) => l.toInt());
+		const c2 = other.literals.map((l) => l.toInt());
 		return arraysEqual(c1.sort(), c2.sort());
 	}
 
 	nLiterals(): number {
-		return this._literals.length;
+		return this.literals.length;
 	}
 
 	getComments(): string[] {
-		return this._comments;
+		return this.comments;
 	}
 
 	copy(): Clause {
-		return new Clause(this._literals, {
-			comments: [...this._comments],
-			tag: this._tag,
-			learnt: this._learnt
+		return new Clause(this.literals, {
+			comments: [...this.comments],
+			tag: this.tag,
+			learnt: this.learned
 		});
 	}
 
 	isEmpty(): boolean {
-		return this._literals.length === 0;
+		return this.literals.length === 0;
 	}
 
 	[Symbol.iterator]() {
-		return this._literals.values();
+		return this.literals.values();
 	}
 
 	map<T>(
 		callback: (literal: Literal, index: number, array: Literal[]) => T,
 		thisArg?: unknown
 	): T[] {
-		return this._literals.map(callback, thisArg);
+		return this.literals.map(callback, thisArg);
 	}
 
 	forEach(
 		callback: (literal: Literal, index: number, array: Literal[]) => void,
 		thisArg?: unknown
 	): void {
-		this._literals.forEach(callback, thisArg);
+		this.literals.forEach(callback, thisArg);
 	}
 }
 

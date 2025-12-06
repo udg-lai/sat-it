@@ -1,10 +1,13 @@
 <script lang="ts">
+	import type { InteractiveInstance } from '$lib/entities/InteractiveInstance.svelte.ts';
 	import {
 		activateInstanceByName,
 		deleteInstanceByName,
 		getActiveInstance,
-		getInstances
+		getInstances,
+		getInteractiveInstance
 	} from '$lib/states/instances.svelte.ts';
+	import { logInfo } from '$lib/states/toasts.svelte.ts';
 	import { Modal } from 'flowbite-svelte';
 	import {
 		DatabaseOutline,
@@ -12,44 +15,45 @@
 		LockOutline,
 		TrashBinOutline
 	} from 'flowbite-svelte-icons';
-	import { onMount } from 'svelte';
 	import ProblemSummaryComponent from './ProblemSummaryComponent.svelte';
-	import type { InteractiveInstance } from '$lib/entities/InteractiveInstance.svelte.ts';
-	import { logInfo } from '$lib/states/toasts.svelte.ts';
 
-	let activeInstance: InteractiveInstance | undefined = $state(undefined);
-	let previewingInstance: InteractiveInstance | undefined = $state(undefined);
+	let activeInstance: InteractiveInstance = $derived(getActiveInstance());
+	let previewingInstance: InteractiveInstance = $state(getActiveInstance());
+	let instanceSelected: string = $state('');
 	let openModal: boolean = $state(false);
-	let instanceClicked: string = $state('');
 	let activeInstanceName: string = $derived.by(() => {
 		if (activeInstance === undefined) return '';
 		else return activeInstance.getInstanceName();
 	});
-	const instances = $derived(getInstances());
 
-	onMount(() => {
-		previewingInstance = getActiveInstance();
-		activeInstance = getActiveInstance();
-	});
+	const instances: InteractiveInstance[] = $derived(getInstances());
 
-	function onClick(instanceName: string) {
+	function instanceClicked(instanceName: string) {
 		if (activeInstanceName === instanceName) return;
 		openModal = true;
-		instanceClicked = instanceName;
+		instanceSelected = instanceName;
+		previewingInstance = getInteractiveInstance(instanceName);
 	}
 
-	function onActivateInstance(instanceName: string): void {
-		const currentInstance = getActiveInstance();
-		let change = false;
-		if (currentInstance === undefined) {
-			change = true;
-		} else {
-			const { name } = currentInstance.getInstance();
-			change = name !== instanceName;
-		}
-		if (change) {
-			activateInstanceByName(instanceName);
-			logInfo('New active instance', `Instance ${instanceName} has been activated`);
+	function onAcceptUpdateInstance(instanceName: string): void {
+		activateInstanceByName(instanceName);
+		logInfo('New active instance', `Instance ${instanceName} has been activated`);
+		openModal = false;
+		previewingInstance = getActiveInstance();
+	}
+
+	function onCancelUpdateInstance(): void {
+		openModal = false;
+		previewingInstance = getActiveInstance();
+	}
+
+	function decidingToChange(): boolean {
+		return openModal;
+	}
+
+	function onMouseLeaveAnInstance(): void {
+		if (!decidingToChange()) {
+			previewingInstance = getActiveInstance();
 		}
 	}
 </script>
@@ -69,8 +73,8 @@
 							class="item"
 							class:selected={instance.active}
 							onmouseenter={() => (previewingInstance = instance)}
-							onmouseleave={() => (previewingInstance = getActiveInstance())}
-							onclick={() => onClick(instance.getInstanceName())}
+							onmouseleave={onMouseLeaveAnInstance}
+							onclick={() => instanceClicked(instance.getInstanceName())}
 						>
 							<p>{instance.getInstanceName()}</p>
 						</button>
@@ -101,23 +105,17 @@
 	<div class="text-center">
 		<ExclamationCircleOutline class="mx-auto mb-4 h-12 w-12 text-red-600" />
 		<h3 class="mb-5 text-lg font-normal text-gray-600">
-			By changing the problem, all the assignments made will be erased. Are you sure?
+			All the assignments made will be erased. Are you sure?
 		</h3>
 		<button
 			class="btn btn-modal mr-4"
 			onclick={() => {
-				onActivateInstance(instanceClicked);
-				openModal = false;
+				onAcceptUpdateInstance(instanceSelected);
 			}}
 		>
 			<span>Yes, change</span>
 		</button>
-		<button
-			class="btn"
-			onclick={() => {
-				openModal = false;
-			}}
-		>
+		<button class="btn" onclick={onCancelUpdateInstance}>
 			<span>No, cancel</span>
 		</button>
 	</div>

@@ -1,4 +1,4 @@
-import { getProblemStore } from '$lib/states/problem.svelte.ts';
+import { getVariablePool } from '$lib/states/problem.svelte.ts';
 import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
 import { error } from '$lib/utils.ts';
@@ -136,8 +136,8 @@ export class Trail {
 	}
 
 	updateConflictAnalysisCtx(ctx: ConflictAnalysisContext | undefined = undefined): void {
-		const ca: Either<ConflictAnalysisContext, undefined> =
-			ctx === undefined ? makeRight(undefined) : makeLeft(ctx);
+		const ca: Either<ConflictAnalysisContext, () => never> =
+			ctx === undefined ? makeRight(error) : makeLeft(ctx);
 		this.conflictAnalysisCtx = [ca, ...this.conflictAnalysisCtx];
 	}
 
@@ -192,7 +192,7 @@ export class Trail {
 			dl === 0 ? this.getMarkOfDecisionLevel(1) : this.getMarkOfDecisionLevel(dl + 1);
 		while (this.assignments.length > targetIndex) {
 			const last: VariableAssignment = this.pop() as VariableAssignment;
-			getProblemStore().variables.unassign(last.getVariable().getInt());
+			getVariablePool().unassign(last.getVariable().getInt());
 		}
 
 		// Set the new decision level parameters
@@ -200,7 +200,7 @@ export class Trail {
 		this.decisionLevel = dl;
 	}
 
-	getUPContext(): Either<UPContext, never>[] {
+	getUPContext(): Either<UPContext, () => never>[] {
 		return this.upContext;
 	}
 

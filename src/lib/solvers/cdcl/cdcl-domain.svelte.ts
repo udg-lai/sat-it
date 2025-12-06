@@ -390,7 +390,7 @@ export const learnConflictClause: CDCL_LEARN_CONFLICT_CLAUSE_FUN = (
 	lemma: Clause
 ) => {
 	//Set the lemma as learnt. This will be the clause that will be added to the pool.
-	lemma.setAsLearntClause();
+	lemma.setAsHasBeenLearned();
 
 	//The lemma is stored inside the pool
 	getProblemStore().addClauseToClausePool(lemma);
