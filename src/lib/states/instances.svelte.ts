@@ -91,6 +91,6 @@ export const getInstances = (): InteractiveInstance[] => {
 	return [...instances.values()];
 };
 
-export const thereIsInstances = (): boolean => {
+export const thereAreInstances = (): boolean => {
 	return instances.size > 0;
 };
