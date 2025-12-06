@@ -136,8 +136,8 @@ export class Trail {
 	}
 
 	updateConflictAnalysisCtx(ctx: ConflictAnalysisContext | undefined = undefined): void {
-		const ca: Either<ConflictAnalysisContext, undefined> =
-			ctx === undefined ? makeRight(undefined) : makeLeft(ctx);
+		const ca: Either<ConflictAnalysisContext, () => never> =
+			ctx === undefined ? makeRight(error) : makeLeft(ctx);
 		this.conflictAnalysisCtx = [ca, ...this.conflictAnalysisCtx];
 	}
 
@@ -200,7 +200,7 @@ export class Trail {
 		this.decisionLevel = dl;
 	}
 
-	getUPContext(): Either<UPContext, never>[] {
+	getUPContext(): Either<UPContext, () => never>[] {
 		return this.upContext;
 	}
 
