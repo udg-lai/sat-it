@@ -20,6 +20,24 @@ export default class WatchTable {
 		this.table = this.makeWatchTable(clauses);
 	}
 
+	deleteWatch(lit: Lit, watch: Watch): void {
+		if (!this.table.has(lit)) {
+			logFatal(
+				'Deleting watch',
+				`Literal ${lit.toString()} not found in watch table when deleting watch`
+			);
+		}
+		const ws: Watch[] = this.table.get(lit)?.filter((w) => w.cRef !== watch.cRef) ?? [];
+		this.table.set(lit, ws);
+	}
+
+	addWatch(lit: Lit, watch: Watch): void {
+		if (!this.table.has(lit)) {
+			this.table.set(lit, []);
+		}
+		this.table.get(lit)?.push(watch);
+	}
+
 	private makeWatchTable(clauses: Clause[]): SvelteMap<Lit, Watch[]> {
 		const table: SvelteMap<Lit, Watch[]> = new SvelteMap();
 
