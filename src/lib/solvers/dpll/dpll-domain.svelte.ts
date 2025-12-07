@@ -1,5 +1,4 @@
-import { getClausePool, getMapping, getVariablePool } from '$lib/states/problem.svelte.ts';
-import type { OccurrencesList } from '$lib/entities/Problem.svelte.ts';
+import { getClausePool, getOccurrencesTableMapping as getOccurrenceTable, getVariablePool } from '$lib/states/problem.svelte.ts';
 import {
 	clauseEvaluation,
 	allAssigned as solverAllAssigned,
@@ -215,7 +214,7 @@ export const unitPropagation: DPLL_UNIT_PROPAGATION_FUN = (clauseTag: number) =>
 export type DPLL_COMPLEMENTARY_OCCURRENCES_FUN = (literal: number) => SvelteSet<number>;
 
 export const complementaryOccurrences: DPLL_COMPLEMENTARY_OCCURRENCES_FUN = (literal: number) => {
-	const mapping: OccurrencesList = getMapping();
+	const mapping: OccurrencesList = getOccurrenceTable();
 	return solverComplementaryOccurrences(mapping, literal);
 };
 

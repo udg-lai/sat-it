@@ -24,7 +24,7 @@ import {
 } from '$lib/states/conflict-detection-state.svelte.ts';
 import {
 	getClausePool,
-	getMapping,
+	getOccurrencesTableMapping,
 	getProblemStore,
 	getVariablePool
 } from '$lib/states/problem.svelte.ts';
@@ -34,7 +34,7 @@ import { SvelteSet } from 'svelte/reactivity';
 import type { OccurrenceList } from '../types.ts';
 import type { CDCL_SolverMachine } from './cdcl-solver-machine.svelte.ts';
 import { resetInspectedVariable } from '$lib/states/inspectedVariable.svelte.ts';
-import type { OccurrenceTable } from '$lib/entities/Problem.svelte.ts';
+import type { ClauseTag, Lit } from '$lib/types/types.ts';
 
 // ** state inputs **
 
@@ -264,7 +264,7 @@ export const unitPropagation: CDCL_UNIT_PROPAGATION_FUN = (clauseTag: number) =>
 export type CDCL_COMPLEMENTARY_OCCURRENCES_FUN = (literal: number) => SvelteSet<number>;
 
 export const complementaryOccurrences: CDCL_COMPLEMENTARY_OCCURRENCES_FUN = (literal: number) => {
-	const mapping: OccurrenceTable = getMapping();
+	const mapping: Map<Lit, Set<ClauseTag>> = getOccurrencesTableMapping();
 	return solverComplementaryOccurrences(mapping, literal);
 };
 
@@ -305,7 +305,7 @@ export const buildConflictAnalysis: CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN =
 		latestTrail.getDecisionLevel()
 	);
 	const variablesLastDecisionLevel: number[] = assignmentsLastDecisionLevel.map((assignment) => {
-		return assignment.getVariable().getInt();
+		return assignment.getVariable().toInt();
 	});
 
 	// Thirdly the conflict clause is retrieved
@@ -350,7 +350,7 @@ export const variableInCC: CDCL_VARIABLE_IN_CC_FUN = (
 	conflictClause: Clause,
 	assignment: VariableAssignment
 ) => {
-	return conflictClause.containsVariable(assignment.getVariable().getInt());
+	return conflictClause.containsVariable(assignment.getVariable().toInt());
 };
 
 export type CDCL_RESOLUTION_UPDATE_CC_FUN = (
@@ -380,7 +380,7 @@ export type CDCL_DELETE_LAST_ASSIGNMENT_FUN = (trail: Trail) => void;
 export const deleteLastAssignment: CDCL_DELETE_LAST_ASSIGNMENT_FUN = (trail: Trail) => {
 	const assignment: VariableAssignment = trail.pop() as VariableAssignment;
 	const pool: VariablePool = getVariablePool();
-	pool.unassign(assignment.getVariable().getInt());
+	pool.unassign(assignment.getVariable().toInt());
 };
 
 export type CDCL_LEARN_CONFLICT_CLAUSE_FUN = (trail: Trail, conflictClause: Clause) => number;
@@ -390,10 +390,10 @@ export const learnConflictClause: CDCL_LEARN_CONFLICT_CLAUSE_FUN = (
 	lemma: Clause
 ) => {
 	//Set the lemma as learnt. This will be the clause that will be added to the pool.
-	lemma.setAsHasBeenLearned();
+	lemma.setAsLearned();
 
 	//The lemma is stored inside the pool
-	getProblemStore().addClauseToClausePool(lemma);
+	getProblemStore().addClause(lemma);
 
 	// Saves the learnt clause in the trail
 	trail.learnClause(lemma);
@@ -412,7 +412,7 @@ export const secondHighestDL: CDCL_SECOND_HIGHEST_DL_FUN = (
 	conflictClause: Clause
 ) => {
 	const clauseVariables: number[] = conflictClause.getLiterals().map((literal) => {
-		return literal.getVariable().getInt();
+		return literal.getVariable().toInt();
 	});
 	const decisionLevels = clauseVariables
 		.map((variable) => trail.getVariableDecisionLevel(variable))

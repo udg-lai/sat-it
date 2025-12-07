@@ -55,7 +55,7 @@ class Clause implements Comparable<Clause> {
 		return this.learned;
 	}
 
-	setAsHasBeenLearned(): void {
+	setAsLearned(): void {
 		this.learned = true;
 	}
 

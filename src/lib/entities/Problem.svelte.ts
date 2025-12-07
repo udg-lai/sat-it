@@ -1,23 +1,26 @@
-import { SvelteSet } from 'svelte/reactivity';
-import ClausePool from './ClausePool.svelte.ts';
-import { VariablePool } from './VariablePool.svelte.ts';
 import type { DimacsInstance } from '$lib/instances/dimacs-instance.interface.ts';
+import { logError, logFatal } from '$lib/states/toasts.svelte.ts';
+import type { ClauseTag, Lit } from '$lib/types/types.ts';
 import type Clause from './Clause.svelte.ts';
+import ClausePool from './ClausePool.svelte.ts';
+import type Literal from './Literal.svelte.ts';
+import OccurrenceTable from './OccurrenceTable.svete.ts';
 import type { Trail } from './Trail.svelte.ts';
 import type Variable from './Variable.svelte.ts';
-import { getTrails } from '$lib/states/trails.svelte.ts';
-import { logFatal } from '$lib/states/toasts.svelte.ts';
-import type Literal from './Literal.svelte.ts';
+import { VariablePool } from './VariablePool.svelte.ts';
 
-export type OccurrenceList = SvelteSet<number>;
-export type OccurrenceTable = Map<number, OccurrenceList>;
-export type WatchTable = Map<number, OccurrenceList>;
+
+export interface Watch {
+	clauseTag: ClauseTag;
+	literalPos: number;
+}
+export type WatchTable = Map<Lit, Watch[]>;
 
 export default class Problem {
 	private variables: VariablePool = $state(new VariablePool(0));
 	private clauses: ClausePool = $state(new ClausePool());
-	private occurrencesTable: OccurrenceTable = $state(new Map<number, OccurrenceList>());
-	private watchTable: OccurrenceTable = $state(new Map<number, OccurrenceList>());
+	private occurrencesTable: OccurrenceTable = $state(new OccurrenceTable());
+	private watchTable: WatchTable = $state(new Map<Lit, Watch[]>());
 
 	constructor(instance: DimacsInstance | undefined = undefined) {
 		if (instance !== undefined) this.syncWithDimacsInstance(instance);
@@ -27,8 +30,8 @@ export default class Problem {
 		return this.clauses;
 	}
 
-	getOccurrencesTable(): OccurrenceTable {
-		return this.occurrencesTable;
+	getOccurrencesTableMapping(): Map<Lit, Set<ClauseTag>> {
+		return this.occurrencesTable.getTable();
 	}
 
 	getVariablePool(): VariablePool {
@@ -39,75 +42,79 @@ export default class Problem {
 		const { varCount, claims } = summary;
 		this.variables = new VariablePool(varCount);
 		this.clauses = ClausePool.buildFrom(claims, this.variables);
-		this.occurrencesTable = this._makeOccurrenceTable();
-	}
-
-	reset(): void {
-		this.variables.reset();
+		this.occurrencesTable = new OccurrenceTable(this.clauses.getClauses());
+		this.watchTable = this.makeWatchTable();
 	}
 
 	syncWithTrail(trail: Trail) {
-		//Reset the variables
-		this.variables.reset();
-		trail.forEach((assignment) => {
+		// The assignment is the empty set at first
+		this.variables.wipe();
+
+		// Then, we assign the variables as in the trail
+		// this is possible because the assignments in the trail are a copy of the variables in the pool
+		for (const assignment of trail)
+		{
 			const variable: Variable = assignment.getVariable();
-			this.variables.assign(variable.getInt(), variable.getAssignment());
-		});
+			this.variables.assign(variable.toInt(), variable.getAssignment());
+		}
+	}
 
-		//Now we need to relearn the clauses
-		this.clauses.clearLearnt();
+	forgetLearnedClauses() {
+		const removedClauses: Clause[] = this.clauses.pruneLearnedClauses();
+		this.occurrencesTable.multipleRemoveOccurrences(removedClauses);
+	}
 
-		//The learnt clauses from the trails are added to the clause pool
-		getTrails().forEach((trail) => {
-			const learntClause = trail.getLearntClause();
-			if (learntClause !== undefined) {
-				this.clauses.addClause(learntClause);
+	learnClauses(clauses: Clause[]) {
+		for (const clause of clauses) {
+			if (!clause.hasBeenLearned())
+				logError('Learning clause', 'Clause to be learned was not marked as learned');
+			this.clauses.addClause(clause);
+			this.occurrencesTable.addOccurrences(clause);
+		}
+	}
+
+	addClause(clause: Clause) {
+		this.clauses.addClause(clause);
+		this.occurrencesTable.addOccurrences(clause);
+	}
+
+	private makeWatchTable(): WatchTable {
+		// The clause allocator (i.e., ClausePool) must have already assigned tags to all clauses
+		const watchTable: WatchTable = new Map();
+
+		for (const clause of this.clauses.getClauses()) {
+
+			// If the clause is unit, skip it
+			if (clause.isUnit()) continue;
+
+			// Otherwise, get the first two literals to watch
+			const literals: Literal[] = clause.getLiterals().slice(0, 2);
+
+			const clauseTag = clause.getTag();
+			if (clauseTag === undefined)
+				logFatal('Making watch table', 'Clause without tag found when making watch table');
+
+			// Watch the first two literals in the clause
+			for (let i = 0; i < literals.length; i++) {
+				const literalId: number = literals[i].toInt();
+				const watch: Watch = {
+					clauseTag: clauseTag,
+					literalPos: i
+				};
+				if (watchTable.has(literalId)) {
+					const watches = watchTable.get(literalId);
+					watches?.push(watch);
+				} else {
+					const watches: Watch[] = [watch];
+					watchTable.set(literalId, watches);
+				}
 			}
-		});
-
-		//Reset the mapping
-		this.occurrencesTable = this._makeOccurrenceTable();
+		}
+		return watchTable;
 	}
 
-	resetProblem() {
-		this.variables.reset();
-		this.clauses.clearLearnt();
-		this.occurrencesTable = this._makeOccurrenceTable();
+	private updateWatchTable(): void {
+		// This function should be called when the current assignment is modified
+		// or the clause pool is modified because some learned clauses are removed.
 	}
-
-	addClauseToClausePool(lemma: Clause) {
-		this.clauses.addClause(lemma);
-
-		if (lemma.getTag() === undefined)
-			logFatal('Saving lemma', 'Lemma clause was not giving a tag at adding it into the pool');
-
-		this.updateOccurrenceTable(lemma, lemma.getTag() as number, this.occurrencesTable);
-	}
-
-	private _makeOccurrenceTable(): OccurrenceTable {
-		const occurrenceTable: Map<number, SvelteSet<number>> = new Map();
-
-		this.clauses.getClauses().forEach((clause, clauseTag) => {
-			this.updateOccurrenceTable(clause, clauseTag, occurrenceTable);
-		});
-
-		return occurrenceTable;
-	}
-
-	private updateOccurrenceTable = (
-		clause: Clause,
-		clauseTag: number,
-		occurrenceTable: OccurrenceTable
-	) => {
-		clause.getLiterals().forEach((literal: Literal) => {
-			const literalId: number = literal.toInt();
-			if (occurrenceTable.has(literalId)) {
-				const s = occurrenceTable.get(literalId);
-				s?.add(clauseTag);
-			} else {
-				const s = new SvelteSet([clauseTag]);
-				occurrenceTable.set(literalId, s);
-			}
-		});
-	};
 }

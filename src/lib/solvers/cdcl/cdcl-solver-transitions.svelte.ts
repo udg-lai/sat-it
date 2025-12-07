@@ -165,7 +165,7 @@ export const conflictAnalysis = (solver: CDCL_SolverMachine): void => {
 	deleteLastAssignmentTransition(stateMachine, conflictAnalysis);
 	const isAsserting: boolean = assertingClauseTransition(stateMachine, solver);
 	if (!isAsserting) {
-		setInspectedVariable(conflictAnalysis.trail.pickLastAssignment().getVariable().getInt());
+		setInspectedVariable(conflictAnalysis.trail.pickLastAssignment().getVariable().toInt());
 		return;
 	}
 	const clauseTag: number = learnConflictClauseTransition(stateMachine, conflictAnalysis);

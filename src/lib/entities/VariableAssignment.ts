@@ -155,14 +155,14 @@ export default class VariableAssignment {
 	toInt(): number {
 		const assignment = this.variable.getAssignment();
 		if (assignment) {
-			return this.variable.getInt();
+			return this.variable.toInt();
 		} else {
-			return this.variable.getInt() * -1;
+			return this.variable.toInt() * -1;
 		}
 	}
 
 	variableId(): number {
-		return this.variable.getInt();
+		return this.variable.toInt();
 	}
 
 	toTeX(): string {
@@ -173,7 +173,7 @@ export default class VariableAssignment {
 			);
 		}
 		const truthValue: boolean = this.variable.getAssignment() as boolean;
-		const variableId = this.variable.getInt();
+		const variableId = this.variable.toInt();
 		let text: string;
 		if (truthValue) {
 			text = variableId.toString();

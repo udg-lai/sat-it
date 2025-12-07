@@ -9,7 +9,7 @@ import {
 } from '$lib/states/conflict-detection-state.svelte.ts';
 import { getStepDelay } from '$lib/states/delay-ms.svelte.ts';
 import { setInspectedVariable } from '$lib/states/inspectedVariable.svelte.ts';
-import { syncProblemWithTrail } from '$lib/states/problem.svelte.ts';
+import { forgetLearnedClauses, learnClauses, syncProblemWithTrail } from '$lib/states/problem.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import { SolverMachine } from '../SolverMachine.svelte.ts';
@@ -25,6 +25,7 @@ import {
 } from './cdcl-solver-transitions.svelte.ts';
 import { CDCL_StateMachine, makeCDCLStateMachine } from './cdcl-state-machine.svelte.ts';
 import { cdcl_stateName2StateId } from './cdcl-states.svelte.ts';
+import { wrapLearnedClauses } from '$lib/states/trails.svelte.ts';
 
 export const makeCDCLSolver = (): CDCL_SolverMachine => {
 	return new CDCL_SolverMachine(getStepDelay());
@@ -160,8 +161,15 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 				conflictAnalysis.conflictClause.copy(),
 				[...conflictAnalysis.decisionLevelVariables]
 			);
+			// Forcing the problem to forget about the learned clauses
+			forgetLearnedClauses();
+			// Learning only those clauses that are currently in the trails
+			learnClauses(wrapLearnedClauses());
+			// Now we need to sync the problem with the trail.
+			// Meaning that the variables need to be assigned as in the trail.
+			// And the occurrences table needs to be rebuilt.
 			syncProblemWithTrail(conflictAnalysis.trail);
-			setInspectedVariable(conflictAnalysis.trail.pickLastAssignment().getVariable().getInt());
+			setInspectedVariable(conflictAnalysis.trail.pickLastAssignment().getVariable().toInt());
 		}
 	}
 

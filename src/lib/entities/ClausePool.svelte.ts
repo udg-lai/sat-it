@@ -7,7 +7,7 @@ import {
 	type AssignmentEval
 } from '../interfaces/IClausePool.ts';
 import type { Claim } from '../parsers/dimacs.ts';
-import Clause, { type ClauseEval, isSatClause, isUnSATClause } from './Clause.svelte.ts';
+import Clause, { isSatClause, isUnSATClause, type ClauseEval } from './Clause.svelte.ts';
 import type { VariablePool } from './VariablePool.svelte.ts';
 
 export interface IClausePool {
@@ -109,11 +109,16 @@ class ClausePool implements IClausePool {
 		return [...this.learnedClauses.values()].map((tag) => this.clauses.get(tag) as Clause);
 	}
 
-	clearLearnt(): void {
+	pruneLearnedClauses(): Clause[] {
+		// This functions removes all learned clauses from the pool
+		// and returns the removed clauses
+		const removedClauses: Clause[] = [];
 		for (const tag of this.learnedClauses) {
+			removedClauses.push(this.clauses.get(tag) as Clause);
 			this.clauses.delete(tag);
 		}
 		this.learnedClauses.clear();
+		return removedClauses;
 	}
 
 	private _addClause(clause: Clause): void {

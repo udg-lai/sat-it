@@ -12,7 +12,7 @@ export default class Variable implements Comparable<Variable> {
 		this.assignment = assignment;
 	}
 
-	getInt(): number {
+	toInt(): number {
 		return this.id;
 	}
 

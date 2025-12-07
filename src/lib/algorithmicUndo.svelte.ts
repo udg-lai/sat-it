@@ -1,18 +1,14 @@
 import type { Trail } from '$lib/entities/Trail.svelte.ts';
 import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
-import { getLatestTrail, keepTrailsFromBeginningToX } from '$lib/states/trails.svelte.ts';
+import { getLatestTrail, shrinkTrails } from '$lib/states/trails.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
 
 export const algorithmicUndo = (
 	objectiveAssignment: VariableAssignment,
 	trailIndex: number
 ): Trail => {
-	//First of all we have to slice the trail until the trailIndexValue.
-	if (trailIndex < 0) {
-		logFatal('Algorithmic Undo Error', `The value "trailIndex" is too low: ${trailIndex}`);
-	}
-	keepTrailsFromBeginningToX(trailIndex);
-
+	// First of all we have to slice the trail until the trailIndexValue.
+	shrinkTrails(trailIndex);
 	const latestTrail: Trail | undefined = getLatestTrail();
 	if (latestTrail === undefined) {
 		logFatal(

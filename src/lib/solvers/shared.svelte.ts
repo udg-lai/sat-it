@@ -21,7 +21,7 @@ import { SvelteSet } from 'svelte/reactivity';
 import { isUnSAT } from '../interfaces/IClausePool.ts';
 import type { TruthAssignment } from '../interfaces/TruthAssignment.ts';
 import { fromJust, isJust } from '../types/maybe.ts';
-import type { OccurrenceTable } from '$lib/entities/Problem.svelte.ts';
+import type { ClauseTag, Lit } from '$lib/types/types.ts';
 
 export const emptyClauseDetection = (pool: ClausePool): boolean => {
 	const evaluation = pool.eval();
@@ -117,10 +117,10 @@ const obtainTrail = (): Trail => {
 };
 
 export const complementaryOccurrences = (
-	mapping: OccurrenceTable,
+	mapping: Map<Lit, Set<ClauseTag>>,
 	literal: number
 ): SvelteSet<number> => {
-	const mappingReturn: SvelteSet<number> | undefined = mapping.get(-literal);
+	const mappingReturn: Set<ClauseTag> | undefined = mapping.get(-literal);
 	const complementaryOccurrences: SvelteSet<number> = new SvelteSet<number>();
 	if (mappingReturn !== undefined) {
 		for (const clause of mappingReturn) {
@@ -174,25 +174,25 @@ export const backtracking = (pool: VariablePool): number => {
 	const polarity: boolean = !lastVariable.getAssignment();
 
 	const assignment = {
-		variable: lastVariable.getInt(),
+		variable: lastVariable.toInt(),
 		polarity
 	};
 
 	doAssignment(assignment);
 
-	const variable = pool.getVariableCopy(lastVariable.getInt());
+	const variable = pool.getVariableCopy(lastVariable.toInt());
 	newTrail.push(VariableAssignment.newBacktrackingAssignment(variable));
 	newTrail.setFollowUpIndex();
 
 	increaseNoConflicts();
 	stackTrail(newTrail);
-	return polarity ? lastVariable.getInt() : -lastVariable.getInt();
+	return polarity ? lastVariable.toInt() : -lastVariable.toInt();
 };
 
 const disposeUntilDecision = (trail: Trail, variables: VariablePool): VariableAssignment => {
 	let last = trail.pop();
 	while (last && !last.isD()) {
-		variables.unassign(last.getVariable().getInt());
+		variables.unassign(last.getVariable().toInt());
 		last = trail.pop();
 	}
 	if (!last) {

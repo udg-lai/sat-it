@@ -27,7 +27,7 @@ export class Trail {
 	private conflictAnalysisCtx: Either<ConflictAnalysisContext, () => never>[] = $state([]); // this is just for representing the conflict analysis view
 	private upContext: Either<UPContext, () => never>[] = $derived.by(() => this._upContext());
 	private fullView: boolean = $state(false); // UI state for knowing whenever for that trail it was required to show more information
-	private learntClause: Clause | undefined = $state(undefined);
+	private clauseLearned: Clause | undefined = $state(undefined);
 	private conflictiveClause: Clause | undefined = $state(undefined);
 	private state: TrailState = $state('running');
 	private trailHeight: number = $derived.by(() => this._computeHeight());
@@ -40,7 +40,7 @@ export class Trail {
 		newTrail.decisionLevelBookmark = [...this.decisionLevelBookmark];
 		newTrail.followUPIndex = this.followUPIndex;
 		newTrail.decisionLevel = this.decisionLevel;
-		newTrail.learntClause = this.learntClause;
+		newTrail.clauseLearned = this.clauseLearned;
 		newTrail.conflictiveClause = this.conflictiveClause;
 		newTrail.conflictAnalysisCtx = [...this.conflictAnalysisCtx];
 		newTrail.state = this.state;
@@ -102,7 +102,7 @@ export class Trail {
 	}
 
 	getVariableDecisionLevel(variable: number): number {
-		const index = this.assignments.findIndex((a) => a.getVariable().getInt() === variable);
+		const index = this.assignments.findIndex((a) => a.getVariable().toInt() === variable);
 		if (index === -1) {
 			logFatal(`Variable ${variable} not found in trail`);
 		}
@@ -160,12 +160,19 @@ export class Trail {
 		return returnValue;
 	}
 
-	getLearntClause(): Clause | undefined {
-		return this.learntClause;
+	getClauseLearned(): Clause {
+		// Calling this function when no clause was learned is an error
+		if (!this.hasClauseLearned())
+			logFatal('Getting learned clause', 'No clause was learned in this trail');
+		return this.clauseLearned as Clause;
+	}
+
+	hasClauseLearned(): boolean {
+		return this.clauseLearned !== undefined;
 	}
 
 	learnClause(lemma: Clause): void {
-		this.learntClause = lemma;
+		this.clauseLearned = lemma;
 	}
 
 	getFollowUpIndex(): number {
@@ -192,7 +199,7 @@ export class Trail {
 			dl === 0 ? this.getMarkOfDecisionLevel(1) : this.getMarkOfDecisionLevel(dl + 1);
 		while (this.assignments.length > targetIndex) {
 			const last: VariableAssignment = this.pop() as VariableAssignment;
-			getVariablePool().unassign(last.getVariable().getInt());
+			getVariablePool().unassign(last.getVariable().toInt());
 		}
 
 		// Set the new decision level parameters
@@ -323,7 +330,7 @@ export class Trail {
 	private _clean(): void {
 		this.conflictiveClause = undefined;
 		this.conflictAnalysisCtx = [];
-		this.learntClause = undefined;
+		this.clauseLearned = undefined;
 		this.conflictiveClause = undefined;
 		this.state = 'running';
 	}

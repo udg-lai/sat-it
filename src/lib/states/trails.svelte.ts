@@ -18,14 +18,32 @@ export const unstackTrail = (): void => {
 	trails = trails.slice(0, length - 1);
 };
 
-export const keepTrailsFromBeginningToX = (x: number): void => {
-	if (x < 0) {
-		logFatal('Keep trail error', `The value x is too low: ${x}`);
+export const shrinkTrails = (n: number): void => {
+	// This function reduces the trails array to the n trails (inclusive)
+	if (n < 0) {
+		logFatal('Shrink Trails Error', `Shrink size should be non-negative: ${n}`);
 	}
-	trails = trails.slice(0, x + 1);
+	trails = trails.slice(0, n + 1);
 };
 
 export const getTrails = () => trails;
+
+export const wrapLearnedClauses = (): Clause[] => {
+	// This function goes through the trails and collects all learned clauses
+	const clauses: Clause[] = [];
+	for (const trail of trails) {
+		if (trail.hasClauseLearned()) {
+			const clause: Clause = trail.getClauseLearned();
+			if (!clause.hasBeenLearned()) {
+				logFatal(
+					'Wrap Learned Clauses Error',
+					'Clause in trail marked as learned but clause itself is not marked as learned'
+				);
+			}
+		}
+	}
+	return clauses;
+}
 
 export const updateTrails = (snapshot: Trail[]): void => {
 	trails = snapshot.map((trail) => trail.copy());

@@ -9,7 +9,7 @@ export interface IVariablePool {
 	unassign(variableId: number): void;
 	getVariable(variable: number): void;
 	getVariableCopy(variable: number): Variable;
-	reset(): void;
+	wipe(): void;
 	allAssigned(): boolean;
 	size(): number;
 	includes(variableId: number): boolean;
@@ -27,7 +27,7 @@ export class VariablePool implements IVariablePool {
 		this.nvPointer = 0;
 	}
 
-	reset(): void {
+	wipe(): void {
 		this.variables.forEach((variable) => variable.assign(undefined));
 		this.nvPointer = 0;
 	}
@@ -73,7 +73,7 @@ export class VariablePool implements IVariablePool {
 	private _assignedTruthValue(): Set<number> {
 		const assigned: number[] = this.variables
 			.filter((v) => v.hasTruthValue())
-			.map((v) => v.getInt());
+			.map((v) => v.toInt());
 		return new Set([...assigned]);
 	}
 
@@ -110,7 +110,7 @@ export class VariablePool implements IVariablePool {
 				this.nvPointer++;
 			}
 		}
-		return nextFound ? makeJust(this.variables[this.nvPointer].getInt()) : makeNothing();
+		return nextFound ? makeJust(this.variables[this.nvPointer].toInt()) : makeNothing();
 	}
 
 	private checkIndex(variableId: number): number {

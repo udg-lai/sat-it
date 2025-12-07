@@ -42,7 +42,7 @@ export default class Literal implements Comparable<Literal> {
 	}
 
 	toTeX(): string {
-		const variable = this.variable.getInt();
+		const variable = this.variable.toInt();
 		return this.polarity == 'Negative' ? `\\overline{${variable}}` : `${variable}`;
 	}
 
@@ -51,7 +51,7 @@ export default class Literal implements Comparable<Literal> {
 	}
 
 	toInt(): number {
-		return this.variable.getInt() * (this.polarity === 'Negative' ? -1 : 1);
+		return this.variable.toInt() * (this.polarity === 'Negative' ? -1 : 1);
 	}
 
 	private evaluate(): boolean {
