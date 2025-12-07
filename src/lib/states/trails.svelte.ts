@@ -40,10 +40,11 @@ export const wrapLearnedClauses = (): Clause[] => {
 					'Clause in trail marked as learned but clause itself is not marked as learned'
 				);
 			}
+			clauses.push(clause);
 		}
 	}
 	return clauses;
-}
+};
 
 export const updateTrails = (snapshot: Trail[]): void => {
 	trails = snapshot.map((trail) => trail.copy());

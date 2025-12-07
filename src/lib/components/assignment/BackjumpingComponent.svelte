@@ -1,17 +1,16 @@
 <script lang="ts">
 	import { onChrome } from '$lib/app.svelte.ts';
 	import MathTexComponent from '$lib/components/MathTexComponent.svelte';
+	import type Clause from '$lib/entities/Clause.svelte.ts';
+	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
+	import { isBackJumpingReason, type Reason } from '$lib/entities/VariableAssignment.ts';
+	import { getInspectedVariable } from '$lib/states/inspectedVariable.svelte.ts';
+	import { getClausePool } from '$lib/states/problem.svelte.ts';
+	import { logFatal } from '$lib/states/toasts.svelte.ts';
 	import { Popover } from 'flowbite-svelte';
 	import { nanoid } from 'nanoid';
 	import HeadTailComponent from '../HeadTailComponent.svelte';
 	import './style.css';
-	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
-	import { getInspectedVariable } from '$lib/states/inspectedVariable.svelte.ts';
-	import { getProblemStore } from '$lib/states/problem.svelte.ts';
-	import type Clause from '$lib/entities/Clause.svelte.ts';
-	import { logFatal } from '$lib/states/toasts.svelte.ts';
-	import { isBackjumpingReason } from '$lib/entities/VariableAssignment.ts';
-	import type Problem from '$lib/entities/Problem.svelte.ts';
 
 	interface Props {
 		assignment: VariableAssignment;
@@ -33,21 +32,20 @@
 	const inspectedVariable: number = $derived(getInspectedVariable());
 	let inspecting: boolean = $derived(assignment.variableId() === inspectedVariable && isLast);
 
-	const problem: Problem = $derived(getProblemStore());
 	const propagatedClause: Clause = $derived.by(() => {
 		if (assignment.isBJ()) {
-			const reason = assignment.getReason();
-			if (isBackjumpingReason(reason)) {
-				return problem.clauses.get(reason.clauseTag);
+			const reason: Reason = assignment.getReason();
+			if (isBackJumpingReason(reason)) {
+				return getClausePool().get(reason.cRef);
 			} else {
-				logFatal('Reason error', 'The reason is not a backjumping');
+				logFatal('Reason error', 'The reason is not a back-jumping');
 			}
 		} else {
-			logFatal('Reason error', 'The variable assignment is not a backjumping');
+			logFatal('Reason error', 'The variable assignment is not a back-jumping');
 		}
 	});
 
-	const conflictiveClauseTag: number | undefined = $derived(propagatedClause.getTag());
+	const conflictiveClauseTag: number | undefined = $derived(propagatedClause.getCRef());
 
 	const conflictClauseString: string = $derived(
 		propagatedClause

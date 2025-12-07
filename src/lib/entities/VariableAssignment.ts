@@ -14,15 +14,15 @@ export type Decision = Automated | Manual;
 
 export type UnitPropagation = {
 	type: 'propagated';
-	clauseTag: number;
+	cRef: number;
 };
 
-export type Backjumping = {
+export type BackJumping = {
 	type: 'backjumping';
-	clauseTag: number;
+	cRef: number;
 };
 
-export type Propagation = UnitPropagation | Backjumping;
+export type Propagation = UnitPropagation | BackJumping;
 
 export type Backtracking = {
 	type: 'backtracking';
@@ -46,7 +46,7 @@ export const isUnitPropagationReason = (r: Reason): r is UnitPropagation => {
 	return r.type === 'propagated';
 };
 
-export const isBackjumpingReason = (r: Reason): r is Backjumping => {
+export const isBackJumpingReason = (r: Reason): r is BackJumping => {
 	return r.type === 'backjumping';
 };
 
@@ -74,14 +74,14 @@ export const makeManualReason = (): Manual => {
 export const makeUnitPropagationReason = (clauseTag: number): UnitPropagation => {
 	return {
 		type: 'propagated',
-		clauseTag
+		cRef: clauseTag
 	};
 };
 
-export const makeBackjumpingResason = (clauseTag: number): Backjumping => {
+export const makeBackjumpingResason = (clauseTag: number): BackJumping => {
 	return {
 		type: 'backjumping',
-		clauseTag
+		cRef: clauseTag
 	};
 };
 
@@ -137,7 +137,7 @@ export default class VariableAssignment {
 	}
 
 	isBJ(): boolean {
-		return isBackjumpingReason(this.reason);
+		return isBackJumpingReason(this.reason);
 	}
 
 	isK(): boolean {

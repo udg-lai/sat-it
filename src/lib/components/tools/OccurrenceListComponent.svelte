@@ -52,7 +52,7 @@
 			{#if clauses.length !== 0}
 				{#each clauses[0] as lit, i (i)}
 					<MathTexComponent equation={lit.toTeX()} />
-					{#if i < clauses[0].nLiterals() - 1}
+					{#if i < clauses[0].size() - 1}
 						<MathTexComponent equation={'\\lor'} fontSize={'1rem'} />
 					{/if}
 				{/each}
@@ -68,7 +68,7 @@
 		<div class="enumerate-clause">
 			<div class="enumerate">
 				<span>
-					{clause.getTag()}.
+					{clause.getCRef()}.
 				</span>
 			</div>
 			<HeadTailComponent inspecting={checkingIndex === index && !onPreConflictState}>

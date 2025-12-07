@@ -21,7 +21,8 @@ import { SvelteSet } from 'svelte/reactivity';
 import { isUnSAT } from '../interfaces/IClausePool.ts';
 import type { TruthAssignment } from '../interfaces/TruthAssignment.ts';
 import { fromJust, isJust } from '../types/maybe.ts';
-import type { ClauseTag, Lit } from '$lib/types/types.ts';
+import type { ClauseRef, Lit } from '$lib/types/types.ts';
+import Literal from '$lib/entities/Literal.svelte.ts';
 
 export const emptyClauseDetection = (pool: ClausePool): boolean => {
 	const evaluation = pool.eval();
@@ -117,10 +118,11 @@ const obtainTrail = (): Trail => {
 };
 
 export const complementaryOccurrences = (
-	mapping: Map<Lit, Set<ClauseTag>>,
+	mapping: Map<Lit, Set<ClauseRef>>,
 	literal: number
 ): SvelteSet<number> => {
-	const mappingReturn: Set<ClauseTag> | undefined = mapping.get(-literal);
+	const comp: number = Literal.complementary(literal);
+	const mappingReturn: Set<ClauseRef> | undefined = mapping.get(comp);
 	const complementaryOccurrences: SvelteSet<number> = new SvelteSet<number>();
 	if (mappingReturn !== undefined) {
 		for (const clause of mappingReturn) {

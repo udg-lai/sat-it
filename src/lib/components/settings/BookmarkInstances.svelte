@@ -21,10 +21,7 @@
 	let previewingInstance: InteractiveInstance = $state(getActiveInstance());
 	let instanceSelected: string = $state('');
 	let openModal: boolean = $state(false);
-	let activeInstanceName: string = $derived.by(() => {
-		if (activeInstance === undefined) return '';
-		else return activeInstance.getInstanceName();
-	});
+	let activeInstanceName: string = $derived(activeInstance.getInstanceName());
 
 	const instances: InteractiveInstance[] = $derived(getInstances());
 

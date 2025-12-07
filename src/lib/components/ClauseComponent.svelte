@@ -14,7 +14,7 @@
 <clause class={classStyle ?? ''}>
 	{#each clause as lit, i (i)}
 		<LiteralComponent literal={lit} />
-		{#if i < clause.nLiterals() - 1}
+		{#if i < clause.size() - 1}
 			<MathTexComponent equation={'\\lor'} fontSize={'1rem'} />
 		{/if}
 	{/each}

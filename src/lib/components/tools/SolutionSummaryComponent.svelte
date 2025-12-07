@@ -85,7 +85,7 @@
 
 {#snippet renderClause(clause: Clause)}
 	<div class="tagged-clause">
-		<span class="enumerate">{clause.getTag()}.</span>
+		<span class="enumerate">{clause.getCRef()}.</span>
 		<ClauseComponent {clause} />
 	</div>
 {/snippet}

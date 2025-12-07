@@ -34,7 +34,7 @@ import { SvelteSet } from 'svelte/reactivity';
 import type { OccurrenceList } from '../types.ts';
 import type { CDCL_SolverMachine } from './cdcl-solver-machine.svelte.ts';
 import { resetInspectedVariable } from '$lib/states/inspectedVariable.svelte.ts';
-import type { ClauseTag, Lit } from '$lib/types/types.ts';
+import type { ClauseRef, Lit } from '$lib/types/types.ts';
 
 // ** state inputs **
 
@@ -264,7 +264,7 @@ export const unitPropagation: CDCL_UNIT_PROPAGATION_FUN = (clauseTag: number) =>
 export type CDCL_COMPLEMENTARY_OCCURRENCES_FUN = (literal: number) => SvelteSet<number>;
 
 export const complementaryOccurrences: CDCL_COMPLEMENTARY_OCCURRENCES_FUN = (literal: number) => {
-	const mapping: Map<Lit, Set<ClauseTag>> = getOccurrencesTableMapping();
+	const mapping: Map<Lit, Set<ClauseRef>> = getOccurrencesTableMapping();
 	return solverComplementaryOccurrences(mapping, literal);
 };
 
@@ -309,7 +309,7 @@ export const buildConflictAnalysis: CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN =
 	});
 
 	// Thirdly the conflict clause is retrieved
-	const ccId: number | undefined = latestTrail.getConflictiveClause()?.getTag();
+	const ccId: number | undefined = latestTrail.getConflictiveClause()?.getCRef();
 	if (ccId === undefined) {
 		logFatal(
 			'Conflict analysis',
@@ -368,7 +368,7 @@ export const resolutionUpdateCC: CDCL_RESOLUTION_UPDATE_CC_FUN = (
 	if (!isPropagationReason(reason)) {
 		logFatal('CDCL', 'The reason is not a propagation reason');
 	}
-	const reasonClauseTag: number = reason.clauseTag;
+	const reasonClauseTag: number = reason.cRef;
 	const reasonClause: Clause = getClausePool().get(reasonClauseTag);
 	const resolvent: Clause = conflictClause.resolution(reasonClause);
 	solver.updateConflictClause(resolvent);
@@ -398,11 +398,11 @@ export const learnConflictClause: CDCL_LEARN_CONFLICT_CLAUSE_FUN = (
 	// Saves the learnt clause in the trail
 	trail.learnClause(lemma);
 
-	logInfo('New clause learnt', `Clause ${lemma.getTag()} learnt`);
+	logInfo('New clause learnt', `Clause ${lemma.getCRef()} learnt`);
 
 	resetInspectedVariable();
 
-	return lemma.getTag() as number;
+	return lemma.getCRef() as number;
 };
 
 export type CDCL_SECOND_HIGHEST_DL_FUN = (trail: Trail, conflictClause: Clause) => number;

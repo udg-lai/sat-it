@@ -1,6 +1,5 @@
 import { isUnSATClause, type ClauseEval } from '$lib/entities/Clause.svelte.ts';
 import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
-import type { OccurrenceTable } from '$lib/entities/Problem.svelte.ts';
 import type { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
 import {
 	allAssigned as solverAllAssigned,
@@ -16,10 +15,15 @@ import {
 	cleanClausesToCheck,
 	updateClausesToCheck
 } from '$lib/states/conflict-detection-state.svelte.ts';
-import { getClausePool, getOccurrencesTableMapping, getVariablePool } from '$lib/states/problem.svelte.ts';
+import {
+	getClausePool,
+	getOccurrencesTableMapping,
+	getVariablePool
+} from '$lib/states/problem.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import type { BKT_SolverMachine } from './bkt-solver-machine.svelte.ts';
+import type { ClauseRef, Lit } from '$lib/types/types.ts';
 
 // **state inputs **
 
@@ -79,7 +83,7 @@ export const decide: BKT_DECIDE_FUN = () => {
 export type BKT_COMPLEMENTARY_OCCURRENCES_FUN = (literal: number) => SvelteSet<number>;
 
 export const complementaryOccurrences: BKT_COMPLEMENTARY_OCCURRENCES_FUN = (literal: number) => {
-	const mapping: OccurrenceTable = getOccurrencesTableMapping();
+	const mapping: Map<Lit, Set<ClauseRef>> = getOccurrencesTableMapping();
 	return solverComplementaryOccurrences(mapping, literal);
 };
 

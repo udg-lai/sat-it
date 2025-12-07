@@ -4,14 +4,13 @@
 	import type Clause from '$lib/entities/Clause.svelte.ts';
 	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
 	import { isUnitPropagationReason } from '$lib/entities/VariableAssignment.ts';
-	import { getProblemStore } from '$lib/states/problem.svelte.ts';
+	import { getInspectedVariable } from '$lib/states/inspectedVariable.svelte.ts';
+	import { getClausePool } from '$lib/states/problem.svelte.ts';
 	import { logFatal } from '$lib/states/toasts.svelte.ts';
 	import { Popover } from 'flowbite-svelte';
 	import { nanoid } from 'nanoid';
 	import HeadTailComponent from './../HeadTailComponent.svelte';
 	import './style.css';
-	import { getInspectedVariable } from '$lib/states/inspectedVariable.svelte.ts';
-	import type Problem from '$lib/entities/Problem.svelte.ts';
 
 	interface Props {
 		assignment: VariableAssignment;
@@ -33,12 +32,11 @@
 	let inspectedVariable: number = $derived(getInspectedVariable());
 	let inspecting: boolean = $derived(assignment.variableId() === inspectedVariable && isLast);
 
-	const problem: Problem = $derived(getProblemStore());
 	const propagatedClause: Clause = $derived.by(() => {
 		if (assignment.isUP()) {
 			const reason = assignment.getReason();
 			if (isUnitPropagationReason(reason)) {
-				return problem.clauses.get(reason.clauseTag);
+				return getClausePool().get(reason.cRef);
 			} else {
 				logFatal('Reason error', 'The reason is not a unit propagation');
 			}
@@ -47,7 +45,7 @@
 		}
 	});
 
-	const conflictiveClauseTag: number | undefined = $derived(propagatedClause.getTag());
+	const conflictiveClauseTag: number | undefined = $derived(propagatedClause.getCRef());
 
 	const conflictClauseString: string = $derived(
 		propagatedClause

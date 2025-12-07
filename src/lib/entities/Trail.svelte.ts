@@ -318,7 +318,7 @@ export class Trail {
 			if (a.isUP() || a.isBJ()) {
 				const reason = a.getReason() as UnitPropagation;
 				return makeLeft({
-					clauseTag: reason.clauseTag,
+					clauseTag: reason.cRef,
 					literal: a.toInt()
 				});
 			} else {

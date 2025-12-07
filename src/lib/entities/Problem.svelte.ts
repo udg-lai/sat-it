@@ -30,7 +30,7 @@ export default class Problem {
 		return this.clauses;
 	}
 
-	getOccurrencesTableMapping(): Map<Lit, Set<ClauseTag>> {
+	getOccurrencesTableMapping(): Map<Lit, Set<ClauseRef>> {
 		return this.occurrencesTable.getTable();
 	}
 

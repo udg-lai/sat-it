@@ -8,24 +8,24 @@ import type { VariablePool } from './VariablePool.svelte.ts';
 
 type ClauseOptions = {
 	comments?: string[];
-	tag?: number;
-	learnt?: boolean;
+	cr?: number;
+	learned?: boolean;
 };
 
 class Clause implements Comparable<Clause> {
 	private literals: Literal[] = [];
 	private comments: string[] = $state([]);
-	private tag: number | undefined;
+	private cr: number | undefined;
 	private learned: boolean = false;
 
 	constructor(
 		literals: Literal[],
-		{ comments = [], tag = undefined, learnt = false }: ClauseOptions = {}
+		{ comments = [], cr = undefined, learned = false }: ClauseOptions = {}
 	) {
 		this.literals = literals;
 		this.comments = comments;
-		this.tag = tag;
-		this.learned = learnt;
+		this.cr = cr;
+		this.learned = learned;
 	}
 
 	static buildFrom(claim: Claim, variables: VariablePool): Clause {
@@ -34,8 +34,8 @@ class Clause implements Comparable<Clause> {
 		const tag: number | undefined = claim.id;
 		return new Clause(literals, {
 			comments,
-			tag,
-			learnt: false
+			cr: tag,
+			learned: false
 		});
 	}
 
@@ -43,12 +43,12 @@ class Clause implements Comparable<Clause> {
 		this.literals.push(lit);
 	}
 
-	getTag(): number | undefined {
-		return this.tag;
+	getCRef(): number | undefined {
+		return this.cr;
 	}
 
-	setTag(tag: number): void {
-		this.tag = tag;
+	setCRef(cr: number): void {
+		this.cr = cr;
 	}
 
 	hasBeenLearned(): boolean {
@@ -60,7 +60,7 @@ class Clause implements Comparable<Clause> {
 	}
 
 	isTemporal(): boolean {
-		return this.tag === undefined;
+		return this.cr === undefined;
 	}
 
 	findUnassignedLiteral(): number {
@@ -146,7 +146,7 @@ class Clause implements Comparable<Clause> {
 		return arraysEqual(c1.sort(), c2.sort());
 	}
 
-	nLiterals(): number {
+	size(): number {
 		return this.literals.length;
 	}
 
@@ -157,8 +157,8 @@ class Clause implements Comparable<Clause> {
 	copy(): Clause {
 		return new Clause(this.literals, {
 			comments: [...this.comments],
-			tag: this.tag,
-			learnt: this.learned
+			cr: this.cr,
+			learned: this.learned
 		});
 	}
 

@@ -6,4 +6,4 @@ export type Message = ErrorMessage | WarningMessage | InfoMessage;
 
 export type Lit = number;
 
-export type ClauseTag = number;
+export type ClauseRef = number;

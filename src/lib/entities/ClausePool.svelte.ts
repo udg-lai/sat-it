@@ -55,7 +55,7 @@ class ClausePool implements IClausePool {
 		}
 		let state: AssignmentEval;
 		if (conflict !== undefined) {
-			state = makeUnSAT(conflict.getTag() as number); // all clauses in variable pool has its own tag
+			state = makeUnSAT(conflict.getCRef() as number); // all clauses in variable pool has its own tag
 		} else if (nSatisfied === i) {
 			state = makeSat();
 		} else {
@@ -75,7 +75,7 @@ class ClausePool implements IClausePool {
 	getUnitClauses(): SvelteSet<number> {
 		const S = new SvelteSet<number>();
 		for (const c of this.getClauses()) {
-			if (c.isUnit()) S.add(c.getTag() as number);
+			if (c.isUnit()) S.add(c.getCRef() as number);
 		}
 		return S;
 	}
@@ -83,7 +83,7 @@ class ClausePool implements IClausePool {
 	getSingleLiteralClauses(): SvelteSet<number> {
 		const S = new SvelteSet<number>();
 		for (const c of this.getClauses()) {
-			if (c.isSingleLiteralClause()) S.add(c.getTag() as number);
+			if (c.isSingleLiteralClause()) S.add(c.getCRef() as number);
 		}
 		return S;
 	}
@@ -123,7 +123,7 @@ class ClausePool implements IClausePool {
 
 	private _addClause(clause: Clause): void {
 		const tag: number = this.size();
-		clause.setTag(tag);
+		clause.setCRef(tag);
 		this.clauses.set(tag, clause);
 		// Quick access to the learned clauses
 		if (clause.hasBeenLearned()) {

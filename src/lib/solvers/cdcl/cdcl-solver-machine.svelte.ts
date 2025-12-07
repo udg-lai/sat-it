@@ -9,7 +9,11 @@ import {
 } from '$lib/states/conflict-detection-state.svelte.ts';
 import { getStepDelay } from '$lib/states/delay-ms.svelte.ts';
 import { setInspectedVariable } from '$lib/states/inspectedVariable.svelte.ts';
-import { forgetLearnedClauses, learnClauses, syncProblemWithTrail } from '$lib/states/problem.svelte.ts';
+import {
+	forgetLearnedClauses,
+	learnClauses,
+	syncProblemWithTrail
+} from '$lib/states/problem.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import { SolverMachine } from '../SolverMachine.svelte.ts';

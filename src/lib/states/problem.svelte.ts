@@ -23,8 +23,8 @@ export const syncProblemWithTrail = (trail: Trail) => {
 
 export const forgetLearnedClauses = (): void => {
 	getProblemStore().forgetLearnedClauses();
-}
+};
 
 export const learnClauses = (clauses: Clause[]): void => {
 	getProblemStore().learnClauses(clauses);
-}
+};

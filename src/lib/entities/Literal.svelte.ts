@@ -20,6 +20,10 @@ export default class Literal implements Comparable<Literal> {
 		return new Literal(variables.getVariable(variable), polarity);
 	}
 
+	static complementary(literal: number): number {
+		return -1 * literal;
+	}
+
 	getVariable() {
 		return this.variable;
 	}
