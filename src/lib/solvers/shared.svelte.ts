@@ -1,6 +1,7 @@
 import type Clause from '$lib/entities/Clause.svelte.ts';
 import type { ClauseEval } from '$lib/entities/Clause.svelte.ts';
 import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
+import Literal from '$lib/entities/Literal.svelte.ts';
 import { Trail } from '$lib/entities/Trail.svelte.ts';
 import type Variable from '$lib/entities/Variable.svelte.ts';
 import VariableAssignment from '$lib/entities/VariableAssignment.ts';
@@ -15,14 +16,13 @@ import {
 	increaseNoUnitPropagations,
 	updateClausesLeft
 } from '$lib/states/statistics.svelte.ts';
-import { getLatestTrail, getTrails, stackTrail } from '$lib/states/trails.svelte.ts';
 import { logBreakpoint, logFatal } from '$lib/states/toasts.svelte.ts';
-import { SvelteSet } from 'svelte/reactivity';
-import { isUnSAT } from '../interfaces/IClausePool.ts';
-import type { TruthAssignment } from '../interfaces/TruthAssignment.ts';
-import { fromJust, isJust } from '../types/maybe.ts';
+import { getLatestTrail, getTrails, stackTrail } from '$lib/states/trails.svelte.ts';
 import type { CRef, Lit } from '$lib/types/types.ts';
-import Literal from '$lib/entities/Literal.svelte.ts';
+import { SvelteSet } from 'svelte/reactivity';
+import type { Assignment } from '../interfaces/Assignment.ts';
+import { isUnSAT } from '../interfaces/IClausePool.ts';
+import { fromJust, isJust } from '../types/maybe.ts';
 
 export const emptyClauseDetection = (pool: ClausePool): boolean => {
 	const evaluation = pool.eval();
@@ -55,14 +55,14 @@ export const decide = (pool: VariablePool, algorithm: string): number => {
 		variableId = assignmentEvent.variable;
 	}
 
-	const truthAssignment: TruthAssignment = {
+	const truthAssignment: Assignment = {
 		variable: variableId,
 		polarity: assignmentEvent.polarity
 	};
 
 	doAssignment(truthAssignment);
 
-	const variable = pool.getVariableCopy(variableId);
+	const variable: Variable = pool.getVariable(variableId).copy();
 	if (manualAssignment) {
 		trail.push(VariableAssignment.newManualAssignment(variable));
 	} else {
@@ -83,33 +83,36 @@ export const clauseEvaluation = (pool: ClausePool, clauseTag: number): ClauseEva
 export const unitPropagation = (
 	variables: VariablePool,
 	clauses: ClausePool,
-	clauseTag: number,
+	cRef: CRef,
 	assignmentReason: 'up' | 'backjumping'
-): number => {
+): Lit => {
 	const trail: Trail = obtainTrail();
-	const clause: Clause = clauses.get(clauseTag);
-	const literalToPropagate: number = clause.findUnassignedLiteral();
+	const clause: Clause = clauses.get(cRef);
 
-	const polarity: boolean = literalToPropagate > 0;
-	const variableId: number = Math.abs(literalToPropagate);
+	if (!clause.isUnit()) {
+		logFatal('Unit Propagation', `Clause ${cRef} is not unit when performing unit propagation`);
+	}
 
-	const truthAssignment: TruthAssignment = {
-		variable: variableId,
-		polarity
+	const propagate: Literal = clause.fstUnassignedLiteral();
+	const lit: Lit = propagate.toInt();
+
+	const truthAssignment: Assignment = {
+		variable: Literal.var(lit),
+		polarity: lit > 0
 	};
 
 	doAssignment(truthAssignment);
 
-	const variable: Variable = variables.getVariableCopy(variableId);
+	const variable: Variable = variables.getVariable(Literal.var(lit)).copy();
 	if (assignmentReason === 'up') {
-		trail.push(VariableAssignment.newUnitPropagationAssignment(variable, clauseTag));
+		trail.push(VariableAssignment.newUnitPropagationAssignment(variable, cRef));
 	} else {
-		trail.push(VariableAssignment.newBackjumpingAssignment(variable, clauseTag));
+		trail.push(VariableAssignment.newBackjumpingAssignment(variable, cRef));
 	}
 
 	increaseNoUnitPropagations();
 
-	return literalToPropagate;
+	return lit;
 };
 
 const obtainTrail = (): Trail => {
@@ -140,17 +143,17 @@ export const nonDecisionMade = (): boolean => {
 	return trail.getDecisionLevel() === 0;
 };
 
-const doAssignment = (truthAssignment: TruthAssignment): void => {
+const doAssignment = (assignment: Assignment): void => {
 	const variables: VariablePool = getVariablePool();
-	variables.assign(truthAssignment.variable, truthAssignment.polarity);
-	handleBreakpoints(truthAssignment);
+	variables.assign(assignment.variable, assignment.polarity);
+	handleBreakpoints(assignment);
 	updateClausesLeft(getTrails().length);
 };
 
-const handleBreakpoints = (truthAssignment: TruthAssignment): void => {
+const handleBreakpoints = (assignment: Assignment): void => {
 	const solverMachine = getSolverMachine();
 	const runningInAutoMode: boolean = solverMachine.isInAutoMode();
-	const { variable, polarity } = truthAssignment;
+	const { variable, polarity } = assignment;
 	const literal: number = polarity ? variable : variable * -1;
 	const isBP: boolean = isBreakpoint(literal);
 	if (isBP) {
@@ -161,7 +164,7 @@ const handleBreakpoints = (truthAssignment: TruthAssignment): void => {
 	}
 };
 
-export const backtracking = (pool: VariablePool): number => {
+export const backtracking = (pool: VariablePool): Lit => {
 	const latestTrail = getLatestTrail();
 	if (latestTrail === undefined) {
 		logFatal('Backtracking', 'No trail found');
@@ -170,25 +173,42 @@ export const backtracking = (pool: VariablePool): number => {
 	}
 
 	const newTrail: Trail = latestTrail.partialCopy();
-	const lastVariableAssignment: VariableAssignment = disposeUntilDecision(newTrail, pool);
+	const lastAssignment: VariableAssignment = disposeUntilDecision(newTrail, pool);
 
-	const lastVariable: Variable = lastVariableAssignment.getVariable();
-	const polarity: boolean = !lastVariable.getAssignment();
+	const varAssignment: Variable = lastAssignment.getVariable().copy();
+
+	if (!varAssignment.hasTruthValue()) {
+		logFatal(
+			'Backtracking Assignment',
+			`Variable ${varAssignment.toInt()} has no assigned value before backtracking`
+		);
+	}
+
+	varAssignment.negate();
 
 	const assignment = {
-		variable: lastVariable.toInt(),
-		polarity
+		variable: varAssignment.toInt(),
+		polarity: varAssignment.getAssignment()
 	};
 
 	doAssignment(assignment);
 
-	const variable = pool.getVariableCopy(lastVariable.toInt());
+	const variable: Variable = pool.getVariable(varAssignment.toInt());
+
+	if (!variable.hasTruthValue()) {
+		logFatal(
+			'Backtracking Assignment',
+			`Variable ${variable.toInt()} has no assigned value after backtracking`
+		);
+	}
+
 	newTrail.push(VariableAssignment.newBacktrackingAssignment(variable));
 	newTrail.setFollowUpIndex();
 
 	increaseNoConflicts();
 	stackTrail(newTrail);
-	return polarity ? lastVariable.toInt() : -lastVariable.toInt();
+
+	return variable.toLit();
 };
 
 const disposeUntilDecision = (trail: Trail, variables: VariablePool): VariableAssignment => {

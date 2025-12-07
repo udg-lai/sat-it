@@ -208,12 +208,12 @@ export const unitClause: DPLL_UNIT_CLAUSE_FUN = (clauseTag: number) => {
 	return isUnitClause(evaluation);
 };
 
-export type DPLL_UNIT_PROPAGATION_FUN = (clauseTag: number) => number;
+export type DPLL_UNIT_PROPAGATION_FUN = (cRef: CRef) => number;
 
-export const unitPropagation: DPLL_UNIT_PROPAGATION_FUN = (clauseTag: number) => {
+export const unitPropagation: DPLL_UNIT_PROPAGATION_FUN = (cRef: CRef) => {
 	const variables: VariablePool = getVariablePool();
 	const clauses: ClausePool = getClausePool();
-	return solverUnitPropagation(variables, clauses, clauseTag, 'up');
+	return solverUnitPropagation(variables, clauses, cRef, 'up');
 };
 
 export type DPLL_COMPLEMENTARY_OCCURRENCES_FUN = (literal: number) => SvelteSet<number>;

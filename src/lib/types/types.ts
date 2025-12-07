@@ -4,6 +4,8 @@ export type InfoMessage = string;
 
 export type Message = ErrorMessage | WarningMessage | InfoMessage;
 
+export type Var = number;
+
 export type Lit = number;
 
 export type CRef = number;

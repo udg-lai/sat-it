@@ -8,7 +8,6 @@ export interface IVariablePool {
 	assign(variableId: number, assignment: Assignment): void;
 	unassign(variableId: number): void;
 	getVariable(variable: number): void;
-	getVariableCopy(variable: number): Variable;
 	wipe(): void;
 	allAssigned(): boolean;
 	size(): number;
@@ -52,10 +51,6 @@ export class VariablePool implements IVariablePool {
 	getVariable(variable: number): Variable {
 		const idx = this.checkIndex(variable);
 		return this.variables[idx];
-	}
-
-	getVariableCopy(variable: number): Variable {
-		return this.getVariable(variable).copy();
 	}
 
 	includes(varId: number): boolean {

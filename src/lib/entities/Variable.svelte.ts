@@ -1,3 +1,4 @@
+import type { Lit, Var } from '$lib/types/types.ts';
 import type { Comparable } from '../interfaces/Comparable.ts';
 
 export type Assignment = boolean | undefined;
@@ -12,8 +13,13 @@ export default class Variable implements Comparable<Variable> {
 		this.assignment = assignment;
 	}
 
-	toInt(): number {
+	toInt(): Var {
 		return this.id;
+	}
+
+	toLit(): Lit {
+		if (!this.hasTruthValue()) throw 'ERROR: variable has no truth value assigned';
+		return this.assignment ? this.id : -1 * this.id;
 	}
 
 	hasTruthValue(): boolean {
@@ -41,8 +47,7 @@ export default class Variable implements Comparable<Variable> {
 	}
 
 	copy(): Variable {
-		const newVariable = new Variable(this.id, this.assignment);
-		return newVariable;
+		return new Variable(this.id, this.assignment);
 	}
 
 	equals(other: Variable): boolean {

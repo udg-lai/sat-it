@@ -63,18 +63,18 @@ class Clause implements Comparable<Clause> {
 		return this.cr === undefined;
 	}
 
-	findUnassignedLiteral(): number {
+	fstUnassignedLiteral(): Literal {
 		let i = 0;
-		let literal = undefined;
+		let literal: Literal | undefined = undefined;
 		while (i < this.literals.length && !literal) {
 			if (!this.literals[i].isAssigned()) {
-				literal = this.literals[i].toInt();
+				literal = this.literals[i];
 			} else {
 				i++;
 			}
 		}
 		if (!literal) {
-			throw logFatal('Non unassigned literal was found');
+			throw logFatal('First unassigned literal', 'No unassigned literal found in clause');
 		}
 		return literal;
 	}

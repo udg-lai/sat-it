@@ -1,4 +1,5 @@
 import { logFatal } from '$lib/states/toasts.svelte.ts';
+import type { Lit, Var } from '$lib/types/types.ts';
 import type { Comparable } from '../interfaces/Comparable.ts';
 import type Variable from './Variable.svelte.ts';
 import type { VariablePool } from './VariablePool.svelte.ts';
@@ -20,15 +21,19 @@ export default class Literal implements Comparable<Literal> {
 		return new Literal(variables.getVariable(variable), polarity);
 	}
 
-	static complementary(literal: number): number {
+	static complementary(literal: number): Lit {
 		return -1 * literal;
 	}
 
-	getVariable() {
+	static var(literal: Lit): Var {
+		return Math.abs(literal);
+	}
+
+	getVariable(): Variable {
 		return this.variable;
 	}
 
-	getPolarity() {
+	getPolarity(): Polarity {
 		return this.polarity;
 	}
 
