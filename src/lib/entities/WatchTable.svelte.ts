@@ -27,6 +27,7 @@ export default class WatchTable {
 				`Literal ${lit.toString()} not found in watch table when deleting watch`
 			);
 		}
+		// This process is expensive, I can improve it later (for now it's very declarative)
 		const ws: Watch[] = this.table.get(lit)?.filter((w) => w.cRef !== watch.cRef) ?? [];
 		this.table.set(lit, ws);
 	}
