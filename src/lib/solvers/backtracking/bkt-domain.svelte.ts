@@ -23,7 +23,7 @@ import {
 import { logFatal } from '$lib/states/toasts.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import type { BKT_SolverMachine } from './bkt-solver-machine.svelte.ts';
-import type { ClauseRef, Lit } from '$lib/types/types.ts';
+import type { CRef, Lit } from '$lib/types/types.ts';
 
 // **state inputs **
 
@@ -83,7 +83,7 @@ export const decide: BKT_DECIDE_FUN = () => {
 export type BKT_COMPLEMENTARY_OCCURRENCES_FUN = (literal: number) => SvelteSet<number>;
 
 export const complementaryOccurrences: BKT_COMPLEMENTARY_OCCURRENCES_FUN = (literal: number) => {
-	const mapping: Map<Lit, Set<ClauseRef>> = getOccurrencesTableMapping();
+	const mapping: Map<Lit, Set<CRef>> = getOccurrencesTableMapping();
 	return solverComplementaryOccurrences(mapping, literal);
 };
 

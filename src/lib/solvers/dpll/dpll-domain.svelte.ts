@@ -25,7 +25,7 @@ import type { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
 import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
 import type { OccurrenceList } from '../types.ts';
 import { isUnitClause, isUnSATClause, type ClauseEval } from '$lib/entities/Clause.svelte.ts';
-import type { ClauseRef, Lit } from '$lib/types/types.ts';
+import type { CRef, Lit } from '$lib/types/types.ts';
 
 // ** state inputs **
 
@@ -219,7 +219,7 @@ export const unitPropagation: DPLL_UNIT_PROPAGATION_FUN = (clauseTag: number) =>
 export type DPLL_COMPLEMENTARY_OCCURRENCES_FUN = (literal: number) => SvelteSet<number>;
 
 export const complementaryOccurrences: DPLL_COMPLEMENTARY_OCCURRENCES_FUN = (literal: number) => {
-	const mapping: Map<Lit, Set<ClauseRef>> = getOccurrencesTableMapping();
+	const mapping: Map<Lit, Set<CRef>> = getOccurrencesTableMapping();
 	return solverComplementaryOccurrences(mapping, literal);
 };
 

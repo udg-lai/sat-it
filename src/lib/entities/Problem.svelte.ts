@@ -1,6 +1,6 @@
 import type { DimacsInstance } from '$lib/instances/dimacs-instance.interface.ts';
 import { logError } from '$lib/states/toasts.svelte.ts';
-import type { ClauseRef, Lit } from '$lib/types/types.ts';
+import type { CRef, Lit } from '$lib/types/types.ts';
 import type Clause from './Clause.svelte.ts';
 import ClausePool from './ClausePool.svelte.ts';
 import OccurrenceTable from './OccurrenceTable.svelte.ts';
@@ -23,7 +23,7 @@ export default class Problem {
 		return this.clauses;
 	}
 
-	getOccurrencesTableMapping(): Map<Lit, Set<ClauseRef>> {
+	getOccurrencesTableMapping(): Map<Lit, Set<CRef>> {
 		return this.occurrencesTable.getTable();
 	}
 

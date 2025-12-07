@@ -34,7 +34,7 @@ import { SvelteSet } from 'svelte/reactivity';
 import type { OccurrenceList } from '../types.ts';
 import type { CDCL_SolverMachine } from './cdcl-solver-machine.svelte.ts';
 import { resetInspectedVariable } from '$lib/states/inspectedVariable.svelte.ts';
-import type { ClauseRef, Lit } from '$lib/types/types.ts';
+import type { CRef, Lit } from '$lib/types/types.ts';
 
 // ** state inputs **
 
@@ -264,7 +264,7 @@ export const unitPropagation: CDCL_UNIT_PROPAGATION_FUN = (clauseTag: number) =>
 export type CDCL_COMPLEMENTARY_OCCURRENCES_FUN = (literal: number) => SvelteSet<number>;
 
 export const complementaryOccurrences: CDCL_COMPLEMENTARY_OCCURRENCES_FUN = (literal: number) => {
-	const mapping: Map<Lit, Set<ClauseRef>> = getOccurrencesTableMapping();
+	const mapping: Map<Lit, Set<CRef>> = getOccurrencesTableMapping();
 	return solverComplementaryOccurrences(mapping, literal);
 };
 

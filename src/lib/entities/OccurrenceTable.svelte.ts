@@ -1,10 +1,10 @@
 import { logFatal } from '$lib/states/toasts.svelte.ts';
 import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 import type Clause from './Clause.svelte.ts';
-import type { ClauseRef, Lit } from '$lib/types/types.ts';
+import type { CRef, Lit } from '$lib/types/types.ts';
 
 export default class OccurrenceTable {
-	private table: SvelteMap<Lit, SvelteSet<ClauseRef>> = new SvelteMap();
+	private table: SvelteMap<Lit, SvelteSet<CRef>> = new SvelteMap();
 
 	constructor(clauses: Clause[] = []) {
 		this.multipleAddOccurrences(clauses);
@@ -13,11 +13,11 @@ export default class OccurrenceTable {
 	addOccurrences(clause: Clause): void {
 		if (clause.getCRef() === undefined)
 			logFatal('Adding occurrences', 'Clause must have a tag for occurrences to be added');
-		const tag: ClauseRef = clause.getCRef() as ClauseRef;
+		const tag: CRef = clause.getCRef() as CRef;
 		for (const literal of clause.getLiterals()) {
 			const litId: Lit = literal.toInt();
 			if (!this.table.has(litId)) {
-				this.table.set(litId, new SvelteSet<ClauseRef>());
+				this.table.set(litId, new SvelteSet<CRef>());
 			}
 			this.table.get(litId)?.add(tag);
 		}
@@ -30,7 +30,7 @@ export default class OccurrenceTable {
 	}
 
 	removeOccurrences(clause: Clause): void {
-		const tag: ClauseRef = clause.getCRef() as ClauseRef;
+		const tag: CRef = clause.getCRef() as CRef;
 		for (const literal of clause.getLiterals()) {
 			const litId: Lit = literal.toInt();
 			this.table.get(litId)?.delete(tag);
@@ -49,7 +49,7 @@ export default class OccurrenceTable {
 		}
 	}
 
-	getTable(): SvelteMap<Lit, SvelteSet<ClauseRef>> {
+	getTable(): SvelteMap<Lit, SvelteSet<CRef>> {
 		return this.table;
 	}
 }

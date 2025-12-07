@@ -1,11 +1,11 @@
 import { logFatal } from '$lib/states/toasts.svelte.ts';
 import { SvelteMap } from 'svelte/reactivity';
 import type Clause from './Clause.svelte.ts';
-import type { ClauseRef, Lit } from '$lib/types/types.ts';
+import type { CRef, Lit } from '$lib/types/types.ts';
 import type Literal from './Literal.svelte.ts';
 
 export interface Watch {
-	cRef: ClauseRef;
+	cRef: CRef;
 	blocker: Literal; // The literal that is currently satisfying the clause
 }
 
