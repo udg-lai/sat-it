@@ -7,7 +7,6 @@
 	import BacktrackingComponent from './buttons/BacktrackingComponent.svelte';
 	import type { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
 	import ImageRender from '../tools/ImageRender.svelte';
-	import decision from '$lib/icons/Decision.svg';
 
 	interface Props {
 		onConflict: boolean;
@@ -99,6 +98,8 @@
 			inputLiteral = undefined;
 		}
 	};
+
+	let decisionIcon = './icons/Decision.svg';
 </script>
 
 <decision-debugger>
@@ -113,7 +114,7 @@
 				title="Decide"
 				disabled={finished || onConflictDetection}
 			>
-				<ImageRender icon={decision} alt={'Decision'} />
+				<ImageRender icon={decisionIcon} alt={'Decision'} />
 			</button>
 		{:else}
 			<BacktrackingComponent {finished} {onConflictDetection} />

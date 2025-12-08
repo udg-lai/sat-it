@@ -1,9 +1,11 @@
 <script lang="ts">
 	import ImageRender from '$lib/components/tools/ImageRender.svelte';
-	import backtracking from '$lib/icons/Backtracking.svg';
+	
 	import { stateMachineEventBus, toggleTrailExpandEventBus } from '$lib/events/events.ts';
 	import '../style.css';
 	import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
+
+	let backtrackingIcon = '/icons/Backtracking.svg';
 
 	function finishConflictAnalysis(): void {
 		getSolverMachine().disableStops();
@@ -17,5 +19,5 @@
 	title="Finish Conflict Analysis"
 	onclick={finishConflictAnalysis}
 >
-	<ImageRender icon={backtracking} alt="Resolve Conflict" />
+	<ImageRender icon={backtrackingIcon} alt="Resolve Conflict" />
 </button>

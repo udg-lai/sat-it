@@ -11,8 +11,6 @@
 	import AutomaticSolvingComponent from './AutomaticSolvingComponent.svelte';
 	import GeneralPurposeDebuggerComponent from './GeneralPurposeDebuggerComponent.svelte';
 	import StepComponent from './buttons/StepComponent.svelte';
-	import inspectClause from '$lib/icons/Inspect Next Clause.svg';
-	import emptyClause from '$lib/icons/Empty Clause.svg';
 	import type { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
 	import { getVariablePool } from '$lib/states/problem.svelte.ts';
 	import { getConfiguredAlgorithm } from '../settings/engine/state.svelte.ts';
@@ -34,6 +32,9 @@
 	let onConflict = $derived(solverMachine.onConflictState());
 	let finished = $derived(solverMachine.completed());
 	let inAutoMode = $derived(solverMachine.isInAutoMode());
+
+	let inspectClauseIcon = '/icons/Inspect Next Clause.svg';
+	let emptyClauseIcon = '/icons/Empty Clause.svg';
 </script>
 
 <debugger>
@@ -42,12 +43,12 @@
 			<AutoModeComponent />
 		{:else if enablePreprocess}
 			<init-step>
-				<StepComponent icon={emptyClause} alt="Check Empty Clause" />
+				<StepComponent icon={emptyClauseIcon} alt="Check Empty Clause" />
 			</init-step>
 		{:else}
 			{#if onPreConflictDetection}
 				<preConf-step>
-					<StepComponent icon={inspectClause} alt="Inspect Next Clause" />
+					<StepComponent icon={inspectClauseIcon} alt="Inspect Next Clause" />
 				</preConf-step>
 			{:else if onConflictDetection}
 				<ConflictDetectionDebugger />

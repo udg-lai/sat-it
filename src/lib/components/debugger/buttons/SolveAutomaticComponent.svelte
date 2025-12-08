@@ -6,7 +6,6 @@
 	} from '$lib/events/events.ts';
 	import { updateAssignment } from '$lib/states/assignment.svelte.ts';
 	import '../style.css';
-	import automaticSteps from '$lib/icons/Automatic Steps.svg';
 	import ImageRender from '$lib/components/tools/ImageRender.svelte';
 
 	interface Props {
@@ -16,6 +15,8 @@
 
 	let { finished = false, backtrackingState = false }: Props = $props();
 
+	let automaticStepsIcon = '/icons/Automatic Steps.svg';
+	
 	function solveAutomatic() {
 		updateAssignment('automated');
 		stateMachineEventBus.emit('automatic_steps');
@@ -31,5 +32,5 @@
 	onclick={solveAutomatic}
 	disabled={finished || backtrackingState}
 >
-	<ImageRender icon={automaticSteps} alt="Automatic steps" />
+	<ImageRender icon={automaticStepsIcon} alt="Automatic steps" />
 </button>

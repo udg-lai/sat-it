@@ -1,11 +1,12 @@
 <script lang="ts">
 	import StepComponent from './buttons/StepComponent.svelte';
 	import NextVariableComponent from './buttons/NextVariableComponent.svelte';
-	import inspectClause from '$lib/icons/Inspect Next Clause.svg';
+	
+	let inspectClauseIcon = '/icons/Inspect Next Clause.svg';
 </script>
 
 <conflict-detection-debugger>
-	<StepComponent icon={inspectClause} alt="Inspect next clause" />
+	<StepComponent icon={inspectClauseIcon} alt="Inspect next clause" />
 
 	<NextVariableComponent />
 </conflict-detection-debugger>

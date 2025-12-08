@@ -2,21 +2,6 @@
 	import './style.css';
 	import DescriptionComponent from './DescriptionComponent.svelte';
 	import { RefreshOutline, ReplyOutline } from 'flowbite-svelte-icons';
-	import solve from '$lib/icons/Solve.svg';
-	import decision from '$lib/icons/Decision.svg';
-	import automaticSteps from '$lib/icons/Automatic Steps.svg';
-	import backtracking from '$lib/icons/Backtracking.svg';
-	import emptyClause from '$lib/icons/Empty Clause.svg';
-	import finishTrail from '$lib/icons/Finish Trail.svg';
-	import inspectAllClauses from '$lib/icons/Inspect All Clauses.svg';
-	import inspectNextClause from '$lib/icons/Inspect Next Clause.svg';
-	import pauseAuto from '$lib/icons/Pause Auto.svg';
-	import resolution from '$lib/icons/Resolution.svg';
-	import up1 from '$lib/icons/UP1.svg';
-	import upn from '$lib/icons/UPn.svg';
-	import expand from '$lib/icons/Expand.svg';
-	import collapse from '$lib/icons/Collapse.svg';
-
 	import ImageDescriptionComponent from './ImageDescriptionComponent.svelte';
 
 	const reverseProps = {
@@ -26,6 +11,20 @@
 	const regularProps = {
 		size: 'lg'
 	};
+	let decision = '/icons/Decision.svg';
+	let automaticSteps = '/icons/Automatic Steps.svg';
+	let backtracking = '/icons/Backtracking.svg';
+	let emptyClause = '/icons/Empty Clause.svg';
+	let finishTrail = '/icons/Finish Trail.svg';
+	let inspectAllClauses = '/icons/Inspect All Clauses.svg';
+	let inspectNextClause = '/icons/Inspect Next Clause.svg';
+	let pauseAuto = '/icons/Pause Auto.svg';
+	let resolution = '/icons/Resolution.svg';
+	let up1 = '/icons/UP1.svg';
+	let upn = '/icons/UPn.svg';
+	let expand = '/icons/Expand.svg';
+	let collapse = '/icons/Collapse.svg';
+	let solve = '/icons/Solve.svg';
 </script>
 
 <div class="heading-class">

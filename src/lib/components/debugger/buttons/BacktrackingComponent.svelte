@@ -2,7 +2,6 @@
 	import { stateMachineEventBus } from '$lib/events/events.ts';
 	import '../style.css';
 	import ImageRender from '$lib/components/tools/ImageRender.svelte';
-	import backtracking from '$lib/icons/Backtracking.svg';
 
 	interface Props {
 		finished?: boolean;
@@ -10,6 +9,7 @@
 	}
 
 	let { finished = false, onConflictDetection = false }: Props = $props();
+	let backtrackingIcon = '/icons/Backtracking.svg';
 </script>
 
 <button
@@ -21,7 +21,7 @@
 	title="Backtrack"
 	disabled={finished || onConflictDetection}
 >
-	<ImageRender icon={backtracking} alt="Resolve Conflict" />
+	<ImageRender icon={backtrackingIcon} alt="Resolve Conflict" />
 </button>
 
 <style>

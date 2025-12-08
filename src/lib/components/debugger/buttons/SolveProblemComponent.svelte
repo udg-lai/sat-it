@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { stateMachineEventBus, toggleTrailExpandEventBus } from '$lib/events/events.ts';
 	import { updateAssignment } from '$lib/states/assignment.svelte.ts';
-	import solve from '$lib/icons/Solve.svg';
 	import ImageRender from '$lib/components/tools/ImageRender.svelte';
 	import '../style.css';
 
@@ -12,6 +11,8 @@
 
 	let { finished = false, backtrackingState = false }: Props = $props();
 
+	let solveIcon = '/icons/Solve.svg';
+	
 	function solveProblem(): void {
 		updateAssignment('automated');
 		stateMachineEventBus.emit('solve_all');
@@ -26,5 +27,5 @@
 	onclick={solveProblem}
 	disabled={finished || backtrackingState}
 >
-	<ImageRender icon={solve} alt="Solve" />
+	<ImageRender icon={solveIcon} alt="Solve" />
 </button>

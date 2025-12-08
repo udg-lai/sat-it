@@ -3,7 +3,6 @@
 	import { updateAssignment } from '$lib/states/assignment.svelte.ts';
 	import '../style.css';
 	import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
-	import finishTrail from '$lib/icons/Finish Trail.svg';
 	import ImageRender from '$lib/components/tools/ImageRender.svelte';
 
 	interface Props {
@@ -12,6 +11,8 @@
 	}
 
 	let { finished = false, backtrackingState = false }: Props = $props();
+
+	let finishTrailIcon = '/icons/Finish Trail.svg';
 
 	function completeTrail(): void {
 		getSolverMachine().disableStops();
@@ -28,5 +29,5 @@
 	onclick={completeTrail}
 	disabled={finished || backtrackingState}
 >
-	<ImageRender icon={finishTrail} alt="Finish Trail" />
+	<ImageRender icon={finishTrailIcon} alt="Finish Trail" />
 </button>

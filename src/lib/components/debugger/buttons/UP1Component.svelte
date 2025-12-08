@@ -3,7 +3,8 @@
 	import '../style.css';
 	import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 	import ImageRender from '$lib/components/tools/ImageRender.svelte';
-	import up1 from '$lib/icons/UP1.svg';
+	
+	let up1Icon = '/icons/UP1.svg';
 
 	function finishConflictDetection(): void {
 		getSolverMachine().disableStops();
@@ -13,5 +14,5 @@
 </script>
 
 <button class="btn general-btn" title="One Unit Propagation" onclick={finishConflictDetection}>
-	<ImageRender icon={up1} alt="up1" />
+	<ImageRender icon={up1Icon} alt="up1" />
 </button>
