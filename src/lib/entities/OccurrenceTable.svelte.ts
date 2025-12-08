@@ -36,7 +36,7 @@ export default class OccurrenceTable {
 			this.table.get(litId)?.delete(tag);
 			if (this.table.get(litId)?.size === 0) {
 				logFatal(
-					`ERROR: OccurrenceTable inconsistency detected`,
+					`Occurrence table`,
 					`Literal ${litId} has no more occurrences after removing clause ${tag}.`
 				);
 			}
