@@ -30,7 +30,7 @@ export const emptyClauseDetection = (pool: ClausePool): boolean => {
 
 export const unitClauseDetection = (pool: ClausePool): Set<CRef> => {
 	const units: Clause[] = pool.getUnitClauses();
-	return new Set(units.map(c => c.getCRef()));
+	return new Set(units.map((c) => c.getCRef()));
 };
 
 export const allAssigned = (pool: VariablePool): boolean => {

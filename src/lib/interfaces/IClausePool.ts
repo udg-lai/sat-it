@@ -1,4 +1,4 @@
-import type { CRef } from "$lib/types/types.ts";
+import type { CRef } from '$lib/types/types.ts';
 
 type UnSAT = {
 	type: 'UnSAT';

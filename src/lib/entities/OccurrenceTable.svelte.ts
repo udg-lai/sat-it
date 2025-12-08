@@ -11,10 +11,7 @@ export default class OccurrenceTable {
 
 	addOccurrences(clause: Clause): void {
 		if (clause.isTemporal()) {
-			logFatal(
-				`Occurrence table`,
-				`Cannot add occurrences for temporal clause without CRef.`
-			);
+			logFatal(`Occurrence table`, `Cannot add occurrences for temporal clause without CRef.`);
 		}
 		const cRef: CRef = clause.getCRef();
 		for (const literal of clause.getLiterals()) {
