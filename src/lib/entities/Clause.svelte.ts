@@ -74,7 +74,7 @@ class Clause implements Comparable<Clause> {
 			}
 		}
 		if (!literal) {
-			throw logFatal('First unassigned literal', 'No unassigned literal found in clause');
+			logFatal('First unassigned literal', 'No unassigned literal found in clause');
 		}
 		return literal;
 	}

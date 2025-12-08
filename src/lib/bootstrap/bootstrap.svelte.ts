@@ -12,7 +12,7 @@ import {
 	activateInstanceByName,
 	addInstance,
 	getInstances,
-	thereAreInstances as thereAreInstances
+	thereAreInstances
 } from '$lib/states/instances.svelte.ts';
 import { logError, logWarning } from '$lib/states/toasts.svelte.ts';
 

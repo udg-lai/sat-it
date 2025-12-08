@@ -1,3 +1,4 @@
+import { logFatal } from '$lib/states/toasts.svelte.ts';
 import type { Lit, Var } from '$lib/types/types.ts';
 import type { Comparable } from '../interfaces/Comparable.ts';
 
@@ -18,7 +19,8 @@ export default class Variable implements Comparable<Variable> {
 	}
 
 	toLit(): Lit {
-		if (!this.hasTruthValue()) throw 'ERROR: variable has no truth value assigned';
+		if (!this.hasTruthValue())
+			logFatal('Variable to literal representation', 'variable has no truth value assigned');
 		return this.assignment ? this.id : -1 * this.id;
 	}
 

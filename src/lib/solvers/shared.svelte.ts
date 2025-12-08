@@ -107,7 +107,7 @@ export const unitPropagation = (
 	if (assignmentReason === 'up') {
 		trail.push(VariableAssignment.newUnitPropagationAssignment(variable, cRef));
 	} else {
-		trail.push(VariableAssignment.newBackjumpingAssignment(variable, cRef));
+		trail.push(VariableAssignment.newBackJumpingAssignment(variable, cRef));
 	}
 
 	increaseNoUnitPropagations();

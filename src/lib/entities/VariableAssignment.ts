@@ -78,7 +78,7 @@ export const makeUnitPropagationReason = (clauseTag: number): UnitPropagation =>
 	};
 };
 
-export const makeBackjumpingResason = (clauseTag: number): BackJumping => {
+export const makeBackJumpingReason = (clauseTag: number): BackJumping => {
 	return {
 		type: 'backjumping',
 		cRef: clauseTag
@@ -112,8 +112,8 @@ export default class VariableAssignment {
 		return new VariableAssignment(variable, makeUnitPropagationReason(clauseTag));
 	}
 
-	static newBackjumpingAssignment(variable: Variable, clauseTag: number) {
-		return new VariableAssignment(variable, makeBackjumpingResason(clauseTag));
+	static newBackJumpingAssignment(variable: Variable, clauseTag: number) {
+		return new VariableAssignment(variable, makeBackJumpingReason(clauseTag));
 	}
 
 	static newBacktrackingAssignment(variable: Variable) {
