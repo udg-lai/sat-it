@@ -175,25 +175,24 @@ export const backtracking = (pool: VariablePool): Lit => {
 	const newTrail: Trail = latestTrail.partialCopy();
 	const lastAssignment: VariableAssignment = disposeUntilDecision(newTrail, pool);
 
-	const varAssignment: Variable = lastAssignment.getVariable().copy();
+	let variable: Variable = lastAssignment.getVariable().copy();
 
-	if (!varAssignment.hasTruthValue()) {
+	if (!variable.hasTruthValue()) {
 		logFatal(
 			'Backtracking Assignment',
-			`Variable ${varAssignment.toInt()} has no assigned value before backtracking`
+			`Variable ${variable.toInt()} has no assigned value before backtracking`
 		);
 	}
 
-	varAssignment.negate();
-
+	variable.negate();
 	const assignment = {
-		variable: varAssignment.toInt(),
-		polarity: varAssignment.getAssignment()
+		variable: variable.toInt(),
+		polarity: variable.getAssignment()
 	};
 
 	doAssignment(assignment);
 
-	const variable: Variable = pool.getVariable(varAssignment.toInt());
+	variable = pool.getVariable(variable.toInt()).copy();
 
 	if (!variable.hasTruthValue()) {
 		logFatal(
