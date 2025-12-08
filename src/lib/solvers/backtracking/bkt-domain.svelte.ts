@@ -21,9 +21,8 @@ import {
 	getVariablePool
 } from '$lib/states/problem.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
-import { SvelteSet } from 'svelte/reactivity';
-import type { BKT_SolverMachine } from './bkt-solver-machine.svelte.ts';
 import type { CRef, Lit } from '$lib/types/types.ts';
+import type { BKT_SolverMachine } from './bkt-solver-machine.svelte.ts';
 
 // **state inputs **
 
@@ -80,30 +79,31 @@ export const decide: BKT_DECIDE_FUN = () => {
 	return solverDecide(pool, 'backtracking');
 };
 
-export type BKT_COMPLEMENTARY_OCCURRENCES_FUN = (literal: number) => SvelteSet<number>;
+export type BKT_COMPLEMENTARY_OCCURRENCES_FUN = (assignment: Lit) => Set<CRef>;
 
-export const complementaryOccurrences: BKT_COMPLEMENTARY_OCCURRENCES_FUN = (literal: number) => {
+export const complementaryOccurrences: BKT_COMPLEMENTARY_OCCURRENCES_FUN = (assignment: Lit) => {
 	const mapping: Map<Lit, Set<CRef>> = getOccurrencesTableMapping();
-	return solverComplementaryOccurrences(mapping, literal);
+	return solverComplementaryOccurrences(mapping, assignment);
 };
 
 export type BKT_QUEUE_OCCURRENCE_LIST_FUN = (
-	literal: number,
-	clauses: SvelteSet<number>,
+	complementary: Lit,
+	clauses: Set<CRef>,
 	solverStateMachine: BKT_SolverMachine
 ) => void;
 
 export const queueOccurrenceList: BKT_QUEUE_OCCURRENCE_LIST_FUN = (
-	literal: number,
-	clauses: SvelteSet<number>,
+	complementary: Lit,
+	clauses: Set<CRef>,
 	solverStateMachine: BKT_SolverMachine
 ) => {
-	solverStateMachine.setOccurrenceList({ clauses, literal });
+	solverStateMachine.setOccurrenceList({
+		literal: complementary,
+		clauses: clauses
+	});
 };
 
-export type BKT_PICK_PENDING_CLAUSE_SET_FUN = (
-	solverStateMachine: BKT_SolverMachine
-) => SvelteSet<number>;
+export type BKT_PICK_PENDING_CLAUSE_SET_FUN = (solverStateMachine: BKT_SolverMachine) => Set<CRef>;
 
 export const pickPendingOccurrenceList: BKT_PICK_PENDING_CLAUSE_SET_FUN = (
 	solverStateMachine: BKT_SolverMachine
@@ -113,41 +113,37 @@ export const pickPendingOccurrenceList: BKT_PICK_PENDING_CLAUSE_SET_FUN = (
 	return clauses;
 };
 
-export type BKT_ALL_CLAUSES_CHECKED_FUN = (pendingSet: SvelteSet<number>) => boolean;
+export type BKT_ALL_CLAUSES_CHECKED_FUN = (pendingSet: Set<CRef>) => boolean;
 
-export const allClausesChecked: BKT_ALL_CLAUSES_CHECKED_FUN = (pendingSet: SvelteSet<number>) => {
+export const allClausesChecked: BKT_ALL_CLAUSES_CHECKED_FUN = (pendingSet: Set<CRef>) => {
 	return pendingSet.size === 0;
 };
 
-export type BKT_NEXT_CLAUSE_FUN = (pendingSet: SvelteSet<number>) => number;
+export type BKT_NEXT_CLAUSE_FUN = (pendingSet: Set<CRef>) => CRef;
 
-export const nextClause: BKT_NEXT_CLAUSE_FUN = (pendingSet: SvelteSet<number>) => {
-	if (pendingSet.size === 0) {
-		logFatal('A non empty set was expected');
+export const nextClause: BKT_NEXT_CLAUSE_FUN = (pendingSet: Set<CRef>) => {
+	const next: CRef | undefined = pendingSet.values().next().value;
+	if (next === undefined) {
+		logFatal('No more clauses', 'Trying to get next clause when there is none left');
 	}
-	const clausesIterator = pendingSet.values().next();
-	const clauseTag = clausesIterator.value;
-	return clauseTag as number;
+	return next as CRef;
 };
 
-export type BKT_CONFLICT_DETECTION_FUN = (clauseTag: number) => boolean;
+export type BKT_CONFLICT_DETECTION_FUN = (cRef: CRef) => boolean;
 
-export const unsatisfiedClause: BKT_CONFLICT_DETECTION_FUN = (clauseTag: number) => {
+export const unsatisfiedClause: BKT_CONFLICT_DETECTION_FUN = (cRef: CRef) => {
 	const pool: ClausePool = getClausePool();
-	const evaluation: ClauseEval = solverClauseEvaluation(pool, clauseTag);
+	const evaluation: ClauseEval = solverClauseEvaluation(pool, cRef);
 	return isUnSATClause(evaluation);
 };
 
-export type BKT_DELETE_CLAUSE_FUN = (pending: SvelteSet<number>, clauseTag: number) => void;
+export type BKT_DELETE_CLAUSE_FUN = (pending: Set<CRef>, cRef: CRef) => void;
 
-export const deleteClause: BKT_DELETE_CLAUSE_FUN = (
-	pending: SvelteSet<number>,
-	clauseTag: number
-) => {
-	if (!pending.has(clauseTag)) {
-		logFatal('Clause not found', `Clause - ${clauseTag} not found`);
+export const deleteClause: BKT_DELETE_CLAUSE_FUN = (pending: Set<CRef>, cRef: CRef) => {
+	if (!pending.has(cRef)) {
+		logFatal('Clause not found', `Clause - ${cRef} not found`);
 	}
-	pending.delete(clauseTag);
+	pending.delete(cRef);
 };
 
 export type BKT_EMPTY_PENDING_OCCURRENCE_LIST_FUN = (solverStateMachine: BKT_SolverMachine) => void;

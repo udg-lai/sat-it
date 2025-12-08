@@ -30,7 +30,6 @@ import {
 } from '$lib/states/problem.svelte.ts';
 import { getLatestTrail, stackTrail } from '$lib/states/trails.svelte.ts';
 import { logFatal, logInfo } from '$lib/states/toasts.svelte.ts';
-import { SvelteSet } from 'svelte/reactivity';
 import type { OccurrenceList } from '../types.ts';
 import type { CDCL_SolverMachine } from './cdcl-solver-machine.svelte.ts';
 import { resetInspectedVariable } from '$lib/states/inspectedVariable.svelte.ts';
@@ -138,7 +137,8 @@ export type CDCL_DECIDE_FUN = () => number;
 
 export const decide: CDCL_DECIDE_FUN = () => {
 	const pool: VariablePool = getVariablePool();
-	return solverDecide(pool, 'cdcl');
+	const decision: Lit = solverDecide(pool, 'cdcl');
+	return decision;
 };
 
 export type CDCL_ALL_VARIABLES_ASSIGNED_FUN = () => boolean;
@@ -156,14 +156,14 @@ export const emptyClauseDetection: CDCL_EMPTY_CLAUSE_FUN = () => {
 };
 
 export type CDCL_QUEUE_OCCURRENCE_LIST_FUN = (
-	literal: number,
-	clauses: SvelteSet<number>,
+	literal: Lit,
+	clauses: Set<CRef>,
 	solverStateMachine: CDCL_SolverMachine
 ) => number;
 
 export const queueClauseSet: CDCL_QUEUE_OCCURRENCE_LIST_FUN = (
-	literal: number,
-	clauses: SvelteSet<number>,
+	literal: Lit,
+	clauses: Set<CRef>,
 	solverStateMachine: CDCL_SolverMachine
 ) => {
 	const occurrenceList: OccurrenceList = { clauses, literal };
@@ -179,28 +179,23 @@ export const unstackClauseSet: CDCL_UNSTACK_OCCURRENCE_LIST_FUN = (
 	return solverStateMachine.resolvePostponed();
 };
 
-export type CDCL_UNIT_CLAUSES_DETECTION_FUN = () => SvelteSet<number>;
+export type CDCL_UNIT_CLAUSES_DETECTION_FUN = () => Set<number>;
 
 export const unitClauseDetection: CDCL_UNIT_CLAUSES_DETECTION_FUN = () => {
 	const pool: ClausePool = getClausePool();
 	return solverUnitClauseDetection(pool);
 };
 
-export type CDCL_DELETE_CLAUSE_FUN = (clauses: SvelteSet<number>, clauseTag: number) => void;
+export type CDCL_DELETE_CLAUSE_FUN = (clauses: Set<number>, clauseTag: number) => void;
 
-export const deleteClause: CDCL_DELETE_CLAUSE_FUN = (
-	clauses: SvelteSet<number>,
-	clauseTag: number
-) => {
+export const deleteClause: CDCL_DELETE_CLAUSE_FUN = (clauses: Set<number>, clauseTag: number) => {
 	if (!clauses.has(clauseTag)) {
 		logFatal('Clause not found', `Clause - ${clauseTag} not found`);
 	}
 	clauses.delete(clauseTag);
 };
 
-export type CDCL_PICK_CLAUSE_SET_FUN = (
-	solverStateMachine: CDCL_SolverMachine
-) => SvelteSet<number>;
+export type CDCL_PICK_CLAUSE_SET_FUN = (solverStateMachine: CDCL_SolverMachine) => Set<number>;
 
 export const pickPendingClauseSet: CDCL_PICK_CLAUSE_SET_FUN = (
 	solverStateMachine: CDCL_SolverMachine
@@ -210,15 +205,15 @@ export const pickPendingClauseSet: CDCL_PICK_CLAUSE_SET_FUN = (
 	return clauses;
 };
 
-export type CDCL_ALL_CLAUSES_CHECKED_FUN = (clauses: SvelteSet<number>) => boolean;
+export type CDCL_ALL_CLAUSES_CHECKED_FUN = (clauses: Set<number>) => boolean;
 
-export const allClausesChecked: CDCL_ALL_CLAUSES_CHECKED_FUN = (clauses: SvelteSet<number>) => {
+export const allClausesChecked: CDCL_ALL_CLAUSES_CHECKED_FUN = (clauses: Set<number>) => {
 	return clauses.size === 0;
 };
 
-export type CDCL_NEXT_CLAUSE_FUN = (clauses: SvelteSet<number>) => number;
+export type CDCL_NEXT_CLAUSE_FUN = (clauses: Set<number>) => number;
 
-export const nextClause: CDCL_NEXT_CLAUSE_FUN = (clauses: SvelteSet<number>) => {
+export const nextClause: CDCL_NEXT_CLAUSE_FUN = (clauses: Set<number>) => {
 	if (clauses.size === 0) {
 		logFatal('A non empty set was expected');
 	}
@@ -261,11 +256,11 @@ export const unitPropagation: CDCL_UNIT_PROPAGATION_FUN = (clauseTag: number) =>
 	return solverUnitPropagation(variables, clauses, clauseTag, 'up');
 };
 
-export type CDCL_COMPLEMENTARY_OCCURRENCES_FUN = (literal: number) => SvelteSet<number>;
+export type CDCL_COMPLEMENTARY_OCCURRENCES_FUN = (assignment: Lit) => Set<CRef>;
 
-export const complementaryOccurrences: CDCL_COMPLEMENTARY_OCCURRENCES_FUN = (literal: number) => {
+export const complementaryOccurrences: CDCL_COMPLEMENTARY_OCCURRENCES_FUN = (assignment: Lit) => {
 	const mapping: Map<Lit, Set<CRef>> = getOccurrencesTableMapping();
-	return solverComplementaryOccurrences(mapping, literal);
+	return solverComplementaryOccurrences(mapping, assignment);
 };
 
 export type CDCL_CHECK_NON_DECISION_MADE_FUN = () => boolean;
@@ -434,12 +429,12 @@ export const pushTrail: CDCL_PUSH_TRAIL_FUN = (trail: Trail) => {
 	stackTrail(trail);
 };
 
-export type CDCL_PROPAGATE_CC_FUN = (clauseTag: number) => number;
+export type CDCL_PROPAGATE_CC_FUN = (cRef: CRef) => Lit;
 
-export const propagateCC: CDCL_PROPAGATE_CC_FUN = (clauseTag: number) => {
+export const propagateCC: CDCL_PROPAGATE_CC_FUN = (cRef: CRef) => {
 	const variables: VariablePool = getVariablePool();
 	const clauses: ClausePool = getClausePool();
-	return solverUnitPropagation(variables, clauses, clauseTag, 'backjumping');
+	return solverUnitPropagation(variables, clauses, cRef, 'backjumping');
 };
 
 export type CDCL_FUN =

@@ -98,19 +98,22 @@ export const unitPropagation = (
 	const propagate: Literal = clause.fstUnassignedLiteral();
 	const lit: Lit = propagate.toInt();
 
-	const truthAssignment: Assignment = {
+	const assignment: Assignment = {
 		variable: Literal.var(lit),
 		polarity: lit > 0
 	};
 
-	doAssignment(truthAssignment);
+	doAssignment(assignment);
 
-	const variable: Variable = variables.getVariable(Literal.var(lit)).copy();
-	if (assignmentReason === 'up') {
-		trail.push(VariableAssignment.newUnitPropagationAssignment(variable, cRef));
-	} else {
-		trail.push(VariableAssignment.newBackJumpingAssignment(variable, cRef));
-	}
+	const varId: Var = Literal.var(lit);
+	const variable: Variable = variables.getVariable(varId).copy();
+
+	const tAssignment: VariableAssignment =
+		assignmentReason === 'up'
+			? VariableAssignment.newUnitPropagationAssignment(variable, cRef)
+			: VariableAssignment.newBackJumpingAssignment(variable, cRef);
+
+	trail.push(tAssignment);
 
 	increaseNoUnitPropagations();
 
@@ -124,17 +127,11 @@ const obtainTrail = (): Trail => {
 
 export const complementaryOccurrences = (
 	mapping: Map<Lit, Set<CRef>>,
-	literal: number
-): SvelteSet<number> => {
-	const comp: number = Literal.complementary(literal);
-	const mappingReturn: Set<CRef> | undefined = mapping.get(comp);
-	const complementaryOccurrences: SvelteSet<number> = new SvelteSet<number>();
-	if (mappingReturn !== undefined) {
-		for (const clause of mappingReturn) {
-			complementaryOccurrences.add(clause);
-		}
-	}
-	return complementaryOccurrences;
+	assignment: Lit
+): Set<CRef> => {
+	const complementary: Lit = Literal.complementary(assignment);
+	const occurrences: Set<CRef> = mapping.get(complementary) ?? new Set<CRef>();
+	return occurrences;
 };
 
 export const nonDecisionMade = (): boolean => {

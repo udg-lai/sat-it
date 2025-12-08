@@ -83,7 +83,7 @@ class ClausePool implements IClausePool {
 	getSingleLiteralClauses(): SvelteSet<number> {
 		const S = new SvelteSet<number>();
 		for (const c of this.getClauses()) {
-			if (c.isSingleLiteralClause()) S.add(c.getCRef() as number);
+			if (c.size() === 1) S.add(c.getCRef() as number);
 		}
 		return S;
 	}

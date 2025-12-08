@@ -1,14 +1,14 @@
 import type Clause from '$lib/entities/Clause.svelte.ts';
 import type { Trail } from '$lib/entities/Trail.svelte.ts';
-import type { SvelteSet } from 'svelte/reactivity';
+import type { CRef, Lit, Var } from '$lib/types/types.ts';
 
 export type OccurrenceList = {
-	clauses: SvelteSet<number>;
-	literal: number;
+	clauses: Set<CRef>;
+	literal: Lit;
 };
 
 export type ConflictAnalysis = {
 	trail: Trail;
 	conflictClause: Clause;
-	decisionLevelVariables: number[];
+	decisionLevelVariables: Var[];
 };

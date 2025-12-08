@@ -1,5 +1,14 @@
+import { conflictDetectionEventBus, toggleTrailViewEventBus } from '$lib/events/events.ts';
+import {
+	cleanClausesToCheck,
+	getCheckedClause,
+	incrementCheckingIndex
+} from '$lib/states/conflict-detection-state.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
+import { updateLastTrailEnding } from '$lib/states/trails.svelte.ts';
+import type { CRef, Lit } from '$lib/types/types.ts';
 import type { NonFinalState } from '../StateMachine.svelte.ts';
+import type { OccurrenceList } from '../types.ts';
 import type {
 	BKT_ALL_CLAUSES_CHECKED_FUN,
 	BKT_ALL_CLAUSES_CHECKED_INPUT,
@@ -23,22 +32,13 @@ import type {
 	BKT_EMPTY_PENDING_OCCURRENCE_LIST_INPUT,
 	BKT_NEXT_CLAUSE_FUN,
 	BKT_NEXT_CLAUSE_INPUT,
-	BKT_PICK_PENDING_CLAUSE_SET_FUN,
 	BKT_PENDING_OCCURRENCE_LIST_INPUT,
+	BKT_PICK_PENDING_CLAUSE_SET_FUN,
 	BKT_QUEUE_OCCURRENCE_LIST_FUN,
 	BKT_QUEUE_OCCURRENCE_LIST_INPUT
 } from './bkt-domain.svelte.ts';
 import type { BKT_SolverMachine } from './bkt-solver-machine.svelte.ts';
 import type { BKT_StateMachine } from './bkt-state-machine.svelte.ts';
-import { updateLastTrailEnding } from '$lib/states/trails.svelte.ts';
-import {
-	cleanClausesToCheck,
-	getCheckedClause,
-	incrementCheckingIndex
-} from '$lib/states/conflict-detection-state.svelte.ts';
-import { SvelteSet } from 'svelte/reactivity';
-import { conflictDetectionEventBus, toggleTrailViewEventBus } from '$lib/events/events.ts';
-import type { OccurrenceList } from '../types.ts';
 
 /* exported transitions */
 
@@ -51,16 +51,16 @@ export const initialTransition = (solver: BKT_SolverMachine): void => {
 
 export const preConflictDetection = (solver: BKT_SolverMachine): void => {
 	const stateMachine: BKT_StateMachine = solver.getStateMachine();
-	const { clauses: pendingClauses }: OccurrenceList = solver.consultOccurrenceList();
-	conflictDetectionBlock(stateMachine, pendingClauses);
+	const { clauses }: OccurrenceList = solver.consultOccurrenceList();
+	conflictDetectionBlock(stateMachine, clauses);
 };
 
 export const analyzeClause = (solver: BKT_SolverMachine): void => {
 	const stateMachine: BKT_StateMachine = solver.getStateMachine();
 	const pendingOccurrenceList: OccurrenceList = solver.consultOccurrenceList();
-	const pendingClauses: SvelteSet<number> = pendingOccurrenceList.clauses;
-	const clauseTag: number = getCheckedClause();
-	deleteClauseTransition(stateMachine, pendingClauses, clauseTag);
+	const pendingClauses: Set<number> = pendingOccurrenceList.clauses;
+	const cRef: number = getCheckedClause();
+	deleteClauseTransition(stateMachine, pendingClauses, cRef);
 	conflictDetectionBlock(stateMachine, pendingClauses);
 };
 
@@ -83,31 +83,28 @@ export const backtracking = (solver: BKT_SolverMachine): void => {
 const afterAssignmentBlock = (
 	solver: BKT_SolverMachine,
 	stateMachine: BKT_StateMachine,
-	assignedLiteral: number
+	assignment: Lit
 ): void => {
-	const complementaryClauses: SvelteSet<number> = complementaryOccurrencesTransition(
+	const complementaryClauses: Set<CRef> = complementaryOccurrencesTransition(
 		stateMachine,
-		assignedLiteral
+		assignment
 	);
-	queueOccurrenceListTransition(stateMachine, solver, -assignedLiteral, complementaryClauses);
+	queueOccurrenceListTransition(stateMachine, solver, -assignment, complementaryClauses);
 	pickPendingOccurrenceListTransition(stateMachine, solver);
 	if (!solver.isInAutoMode()) conflictDetectionEventBus.emit();
 };
 
-const conflictDetectionBlock = (
-	stateMachine: BKT_StateMachine,
-	pendingClauses: SvelteSet<number>
-) => {
+const conflictDetectionBlock = (stateMachine: BKT_StateMachine, pendingClauses: Set<CRef>) => {
 	const allChecked: boolean = allClausesCheckedTransition(stateMachine, pendingClauses);
 	if (allChecked) {
 		cleanClausesToCheck();
 		allVariablesAssignedTransition(stateMachine);
 		return;
 	}
-	const clauseTag: number = nextClauseTransition(stateMachine, pendingClauses);
-	const conflict: boolean = conflictDetectionTransition(stateMachine, clauseTag);
+	const cRef: number = nextClauseTransition(stateMachine, pendingClauses);
+	const conflict: boolean = conflictDetectionTransition(stateMachine, cRef);
 	if (conflict) {
-		updateLastTrailEnding(clauseTag);
+		updateLastTrailEnding(cRef);
 		toggleTrailViewEventBus.emit();
 		return;
 	}
@@ -148,10 +145,7 @@ const allVariablesAssignedTransition = (stateMachine: BKT_StateMachine): void =>
 	else stateMachine.transition('decide_state');
 };
 
-const nextClauseTransition = (
-	stateMachine: BKT_StateMachine,
-	pendingSet: SvelteSet<number>
-): number => {
+const nextClauseTransition = (stateMachine: BKT_StateMachine, pendingSet: Set<number>): number => {
 	const nextClauseState = stateMachine.getActiveState() as NonFinalState<
 		BKT_NEXT_CLAUSE_FUN,
 		BKT_NEXT_CLAUSE_INPUT
@@ -159,15 +153,12 @@ const nextClauseTransition = (
 	if (nextClauseState.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Next Clause state');
 	}
-	const clauseTag: number = nextClauseState.run(pendingSet);
+	const cRef: number = nextClauseState.run(pendingSet);
 	stateMachine.transition('conflict_detection_state');
-	return clauseTag;
+	return cRef;
 };
 
-const conflictDetectionTransition = (
-	stateMachine: BKT_StateMachine,
-	clauseTag: number
-): boolean => {
+const conflictDetectionTransition = (stateMachine: BKT_StateMachine, cRef: number): boolean => {
 	const conflictDetectionState = stateMachine.getActiveState() as NonFinalState<
 		BKT_CONFLICT_DETECTION_FUN,
 		BKT_CONFLICT_DETECTION_INPUT
@@ -175,7 +166,7 @@ const conflictDetectionTransition = (
 	if (conflictDetectionState.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Conflict Detection state');
 	}
-	const result: boolean = conflictDetectionState.run(clauseTag);
+	const result: boolean = conflictDetectionState.run(cRef);
 	if (result) stateMachine.transition('empty_pending_occurrence_list_state');
 	else stateMachine.transition('delete_clause_state');
 	return result;
@@ -212,8 +203,8 @@ const decisionLevelTransition = (stateMachine: BKT_StateMachine): boolean => {
 
 const deleteClauseTransition = (
 	stateMachine: BKT_StateMachine,
-	pendingSet: SvelteSet<number>,
-	clauseTag: number
+	pendingSet: Set<number>,
+	cRef: number
 ): void => {
 	const deleteClauseState = stateMachine.getActiveState() as NonFinalState<
 		BKT_DELETE_CLAUSE_FUN,
@@ -222,14 +213,14 @@ const deleteClauseTransition = (
 	if (deleteClauseState.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Delete Clause state');
 	}
-	deleteClauseState.run(pendingSet, clauseTag);
+	deleteClauseState.run(pendingSet, cRef);
 	stateMachine.transition('all_clauses_checked_state');
 	incrementCheckingIndex();
 };
 
 const allClausesCheckedTransition = (
 	stateMachine: BKT_StateMachine,
-	pendingSet: SvelteSet<number>
+	pendingSet: Set<number>
 ): boolean => {
 	const allClausesCheckedState = stateMachine.getActiveState() as NonFinalState<
 		BKT_ALL_CLAUSES_CHECKED_FUN,
@@ -273,7 +264,7 @@ const backtrackingTransition = (stateMachine: BKT_StateMachine): number => {
 const complementaryOccurrencesTransition = (
 	stateMachine: BKT_StateMachine,
 	literalToPropagate: number
-): SvelteSet<number> => {
+): Set<number> => {
 	const complementaryOccurrencesState = stateMachine.getActiveState() as NonFinalState<
 		BKT_COMPLEMENTARY_OCCURRENCES_FUN,
 		BKT_COMPLEMENTARY_OCCURRENCES_INPUT
@@ -284,7 +275,7 @@ const complementaryOccurrencesTransition = (
 			'There should be a function in the Complementary Occurrences state'
 		);
 	}
-	const clauses: SvelteSet<number> = complementaryOccurrencesState.run(literalToPropagate);
+	const clauses: Set<number> = complementaryOccurrencesState.run(literalToPropagate);
 	stateMachine.transition('queue_occurrence_list_state');
 	return clauses;
 };
@@ -292,8 +283,8 @@ const complementaryOccurrencesTransition = (
 const queueOccurrenceListTransition = (
 	stateMachine: BKT_StateMachine,
 	solver: BKT_SolverMachine,
-	variable: number,
-	clauseSet: SvelteSet<number>
+	complementary: Lit,
+	clauses: Set<CRef>
 ): void => {
 	const queueClauseSetState = stateMachine.getActiveState() as NonFinalState<
 		BKT_QUEUE_OCCURRENCE_LIST_FUN,
@@ -302,14 +293,14 @@ const queueOccurrenceListTransition = (
 	if (queueClauseSetState.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Queue Clause Set state');
 	}
-	queueClauseSetState.run(variable, clauseSet, solver);
+	queueClauseSetState.run(complementary, clauses, solver);
 	stateMachine.transition('pick_pending_occurrence_list_state');
 };
 
 const pickPendingOccurrenceListTransition = (
 	stateMachine: BKT_StateMachine,
 	solver: BKT_SolverMachine
-): SvelteSet<number> => {
+): Set<number> => {
 	const pickPendingOccurrenceListState = stateMachine.getActiveState() as NonFinalState<
 		BKT_PICK_PENDING_CLAUSE_SET_FUN,
 		BKT_PENDING_OCCURRENCE_LIST_INPUT
@@ -317,7 +308,7 @@ const pickPendingOccurrenceListTransition = (
 	if (pickPendingOccurrenceListState.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Peek Pending Set state');
 	}
-	const result: SvelteSet<number> = pickPendingOccurrenceListState.run(solver);
+	const result: Set<number> = pickPendingOccurrenceListState.run(solver);
 	stateMachine.transition('all_clauses_checked_state');
 	return result;
 };
