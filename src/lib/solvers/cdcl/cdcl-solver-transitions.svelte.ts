@@ -248,8 +248,8 @@ const ecTransition = (stateMachine: CDCL_StateMachine): void => {
 	if (ecState.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Empty Clause state');
 	} else {
-		const result: boolean = ecState.run();
-		if (result) {
+		const emptyClause: boolean = ecState.run();
+		if (emptyClause) {
 			stateMachine.transition('unsat_state');
 		} else {
 			stateMachine.transition('unit_clauses_detection_state');
@@ -257,7 +257,7 @@ const ecTransition = (stateMachine: CDCL_StateMachine): void => {
 	}
 };
 
-const ucdTransition = (stateMachine: CDCL_StateMachine): Set<number> => {
+const ucdTransition = (stateMachine: CDCL_StateMachine): Set<CRef> => {
 	const ucdState = stateMachine.getActiveState() as NonFinalState<
 		CDCL_UNIT_CLAUSES_DETECTION_FUN,
 		CDCL_UNIT_CLAUSES_DETECTION_INPUT
@@ -268,9 +268,9 @@ const ucdTransition = (stateMachine: CDCL_StateMachine): Set<number> => {
 			'There should be a function in the Unit Clause Detection state'
 		);
 	}
-	const result: Set<number> = ucdState.run();
+	const units: Set<CRef> = ucdState.run();
 	stateMachine.transition('queue_occurrence_list_state');
-	return result;
+	return units;
 };
 
 const allVariablesAssignedTransition = (stateMachine: CDCL_StateMachine): void => {

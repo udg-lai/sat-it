@@ -27,7 +27,7 @@ export class Trail {
 	private conflictAnalysisCtx: Either<ConflictAnalysisContext, () => never>[] = $state([]); // this is just for representing the conflict analysis view
 	private upContext: Either<UPContext, () => never>[] = $derived.by(() => this._upContext());
 	private fullView: boolean = $state(false); // UI state for knowing whenever for that trail it was required to show more information
-	private clauseLearned: Clause | undefined = $state(undefined);
+	private lemmaAttached: Clause | undefined = $state(undefined);
 	private conflictiveClause: Clause | undefined = $state(undefined);
 	private state: TrailState = $state('running');
 	private trailHeight: number = $derived.by(() => this._computeHeight());
@@ -40,7 +40,7 @@ export class Trail {
 		newTrail.decisionLevelBookmark = [...this.decisionLevelBookmark];
 		newTrail.followUPIndex = this.followUPIndex;
 		newTrail.decisionLevel = this.decisionLevel;
-		newTrail.clauseLearned = this.clauseLearned;
+		newTrail.lemmaAttached = this.lemmaAttached;
 		newTrail.conflictiveClause = this.conflictiveClause;
 		newTrail.conflictAnalysisCtx = [...this.conflictAnalysisCtx];
 		newTrail.state = this.state;
@@ -162,17 +162,17 @@ export class Trail {
 
 	getClauseLearned(): Clause {
 		// Calling this function when no clause was learned is an error
-		if (!this.hasClauseLearned())
+		if (!this.hasLemmaAttached())
 			logFatal('Getting learned clause', 'No clause was learned in this trail');
-		return this.clauseLearned as Clause;
+		return this.lemmaAttached as Clause;
 	}
 
-	hasClauseLearned(): boolean {
-		return this.clauseLearned !== undefined;
+	hasLemmaAttached(): boolean {
+		return this.lemmaAttached !== undefined;
 	}
 
-	learnClause(lemma: Clause): void {
-		this.clauseLearned = lemma;
+	attachLemma(lemma: Clause): void {
+		this.lemmaAttached = lemma;
 	}
 
 	getFollowUpIndex(): number {
@@ -330,7 +330,7 @@ export class Trail {
 	private _clean(): void {
 		this.conflictiveClause = undefined;
 		this.conflictAnalysisCtx = [];
-		this.clauseLearned = undefined;
+		this.lemmaAttached = undefined;
 		this.conflictiveClause = undefined;
 		this.state = 'running';
 	}

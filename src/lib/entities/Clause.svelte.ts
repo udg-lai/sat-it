@@ -1,5 +1,6 @@
 import logicResolution from '$lib/algorithms/resolution.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
+import type { CRef } from '$lib/types/types.ts';
 import type { Comparable } from '../interfaces/Comparable.ts';
 import type { Claim } from '../parsers/dimacs.ts';
 import { arraysEqual } from '../types/array.ts';
@@ -43,8 +44,12 @@ class Clause implements Comparable<Clause> {
 		this.literals.push(lit);
 	}
 
-	getCRef(): number | undefined {
-		return this.cr;
+	getCRef(): CRef {
+		// cRef can be undefined for temporal clauses, check if it is a temporal clause before using this method
+		if (this.isTemporal()) {
+			logFatal('Get CRef', 'Cannot get CRef of a temporal clause');
+		}
+		return this.cr as CRef;
 	}
 
 	setCRef(cr: number): void {

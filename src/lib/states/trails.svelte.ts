@@ -32,7 +32,7 @@ export const wrapLearnedClauses = (): Clause[] => {
 	// This function goes through the trails and collects all learned clauses
 	const clauses: Clause[] = [];
 	for (const trail of trails) {
-		if (trail.hasClauseLearned()) {
+		if (trail.hasLemmaAttached()) {
 			const clause: Clause = trail.getClauseLearned();
 			if (!clause.hasBeenLearned()) {
 				logFatal(

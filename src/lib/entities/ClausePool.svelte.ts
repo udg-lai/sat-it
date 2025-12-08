@@ -9,12 +9,13 @@ import {
 import type { Claim } from '../parsers/dimacs.ts';
 import Clause, { isSatClause, isUnSATClause, type ClauseEval } from './Clause.svelte.ts';
 import type { VariablePool } from './VariablePool.svelte.ts';
+import type { CRef } from '$lib/types/types.ts';
 
 export interface IClausePool {
 	eval(): AssignmentEval;
-	addClause(clause: Clause): void;
+	addClause(clause: Clause): CRef;
 	get(clause: number): Clause;
-	getUnitClauses(): SvelteSet<number>;
+	getUnitClauses(): Clause[];
 	getClauses(): Clause[];
 	size(): number;
 }
@@ -55,7 +56,7 @@ class ClausePool implements IClausePool {
 		}
 		let state: AssignmentEval;
 		if (conflict !== undefined) {
-			state = makeUnSAT(conflict.getCRef() as number); // all clauses in variable pool has its own tag
+			state = makeUnSAT(conflict.getCRef());
 		} else if (nSatisfied === i) {
 			state = makeSat();
 		} else {
@@ -64,26 +65,22 @@ class ClausePool implements IClausePool {
 		return state;
 	}
 
-	addClause(clause: Clause): void {
-		this._addClause(clause);
+	addClause(clause: Clause): CRef {
+		return this._addClause(clause);
 	}
 
 	get(tag: number): Clause {
 		return this._get(tag);
 	}
 
-	getUnitClauses(): SvelteSet<number> {
-		const S = new SvelteSet<number>();
-		for (const c of this.getClauses()) {
-			if (c.isUnit()) S.add(c.getCRef() as number);
-		}
-		return S;
+	getUnitClauses(): Clause[] {
+		return this.getClauses().filter((c: Clause) => c.isUnit());
 	}
 
 	getSingleLiteralClauses(): SvelteSet<number> {
 		const S = new SvelteSet<number>();
 		for (const c of this.getClauses()) {
-			if (c.size() === 1) S.add(c.getCRef() as number);
+			if (c.size() === 1) S.add(c.getCRef());
 		}
 		return S;
 	}
@@ -105,8 +102,15 @@ class ClausePool implements IClausePool {
 		return this.clauses.size;
 	}
 
-	getLearnt(): Clause[] {
-		return [...this.learnedClauses.values()].map((tag) => this.clauses.get(tag) as Clause);
+	getClausesLearned(): Clause[] {
+		const learned: Clause[] = [];
+		for (const cRef of this.learnedClauses) {
+			if (!this.clauses.has(cRef)) {
+				logFatal('ClausePool', `Learned clause with cRef ${cRef} not found in clauses map`);
+			}
+			learned.push(this.clauses.get(cRef) as Clause);
+		}
+		return learned;
 	}
 
 	pruneLearnedClauses(): Clause[] {
@@ -121,21 +125,23 @@ class ClausePool implements IClausePool {
 		return removedClauses;
 	}
 
-	private _addClause(clause: Clause): void {
-		const tag: number = this.size();
-		clause.setCRef(tag);
-		this.clauses.set(tag, clause);
+	private _addClause(clause: Clause): CRef {
+		// The clause pool allocator provides a new CRef to the clause
+		const cRef: CRef = this.size();
+		clause.setCRef(cRef);
+		this.clauses.set(cRef, clause);
 		// Quick access to the learned clauses
 		if (clause.hasBeenLearned()) {
-			this.learnedClauses.add(tag);
+			this.learnedClauses.add(cRef);
 		}
+		return cRef;
 	}
 
-	private _get(tag: number): Clause {
-		if (!this.clauses.has(tag)) {
-			logFatal('ClausePool', `Accessing to an unknown clause by tag ${tag}`);
+	private _get(cRef: CRef): Clause {
+		if (!this.clauses.has(cRef)) {
+			logFatal('ClausePool', `Accessing to an unknown clause by cRef ${cRef}`);
 		} else {
-			return this.clauses.get(tag) as Clause;
+			return this.clauses.get(cRef) as Clause;
 		}
 	}
 }

@@ -11,6 +11,7 @@
 	import { nanoid } from 'nanoid';
 	import HeadTailComponent from '../HeadTailComponent.svelte';
 	import './style.css';
+	import type { CRef } from '$lib/types/types.ts';
 
 	interface Props {
 		assignment: VariableAssignment;
@@ -32,7 +33,7 @@
 	const inspectedVariable: number = $derived(getInspectedVariable());
 	let inspecting: boolean = $derived(assignment.variableId() === inspectedVariable && isLast);
 
-	const propagatedClause: Clause = $derived.by(() => {
+	const reasonClause: Clause = $derived.by(() => {
 		if (assignment.isBJ()) {
 			const reason: Reason = assignment.getReason();
 			if (isBackJumpingReason(reason)) {
@@ -45,10 +46,10 @@
 		}
 	});
 
-	const conflictiveClauseTag: number | undefined = $derived(propagatedClause.getCRef());
+	const reasonClauseCRef: CRef = $derived(reasonClause.getCRef());
 
-	const conflictClauseString: string = $derived(
-		propagatedClause
+	const reasonClauseTeX: string = $derived(
+		reasonClause
 			.map((literal) => {
 				return literal.toTeX();
 			})
@@ -70,9 +71,9 @@
 
 		<Popover triggeredBy={'#' + buttonId} class="app-popover" trigger="click" placement="bottom">
 			<div class="popover-content">
-				<span class="clause-id">{conflictiveClauseTag}.</span>
+				<span class="clause-id">{reasonClauseCRef}.</span>
 				{#if showUPInfo}
-					<MathTexComponent equation={conflictClauseString} fontSize="var(--popover-font-size)" />
+					<MathTexComponent equation={reasonClauseTeX} fontSize="var(--popover-font-size)" />
 				{/if}
 			</div>
 		</Popover>

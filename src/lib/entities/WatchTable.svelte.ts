@@ -50,10 +50,10 @@ export default class WatchTable {
 			// Otherwise, get the first two literals to watch
 			const literals: Literal[] = clause.getLiterals();
 
-			const cRef = clause.getCRef();
-			if (cRef === undefined)
+			if (clause.isTemporal())
 				logFatal('Making watch table', 'Clause without tag found when making watch table');
 
+			const cRef = clause.getCRef();
 			// Watch the first two literals in the clause
 			for (let i = 0; i < 2; i++) {
 				const literal: Literal = literals[i];

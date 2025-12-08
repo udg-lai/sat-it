@@ -65,8 +65,9 @@ export default class Problem {
 		}
 	}
 
-	addClause(clause: Clause) {
-		this.clauses.addClause(clause);
+	addClause(clause: Clause): CRef {
+		const cRef: CRef = this.clauses.addClause(clause);
 		this.occurrencesTable.addOccurrences(clause);
+		return cRef;
 	}
 }

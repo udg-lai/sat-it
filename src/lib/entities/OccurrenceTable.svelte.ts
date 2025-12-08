@@ -1,25 +1,28 @@
 import { logFatal } from '$lib/states/toasts.svelte.ts';
-import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 import type Clause from './Clause.svelte.ts';
 import type { CRef, Lit } from '$lib/types/types.ts';
 
 export default class OccurrenceTable {
-	private table: SvelteMap<Lit, SvelteSet<CRef>> = new SvelteMap();
+	private table: Map<Lit, Set<CRef>> = new Map();
 
 	constructor(clauses: Clause[] = []) {
 		this.multipleAddOccurrences(clauses);
 	}
 
 	addOccurrences(clause: Clause): void {
-		if (clause.getCRef() === undefined)
-			logFatal('Adding occurrences', 'Clause must have a tag for occurrences to be added');
-		const tag: CRef = clause.getCRef() as CRef;
+		if (clause.isTemporal()) {
+			logFatal(
+				`Occurrence table`,
+				`Cannot add occurrences for temporal clause without CRef.`
+			);
+		}
+		const cRef: CRef = clause.getCRef();
 		for (const literal of clause.getLiterals()) {
-			const litId: Lit = literal.toInt();
-			if (!this.table.has(litId)) {
-				this.table.set(litId, new SvelteSet<CRef>());
+			const lit: Lit = literal.toInt();
+			if (!this.table.has(lit)) {
+				this.table.set(lit, new Set<CRef>());
 			}
-			this.table.get(litId)?.add(tag);
+			this.table.get(lit)?.add(cRef);
 		}
 	}
 
@@ -30,14 +33,14 @@ export default class OccurrenceTable {
 	}
 
 	removeOccurrences(clause: Clause): void {
-		const tag: CRef = clause.getCRef() as CRef;
+		const cRef: CRef = clause.getCRef();
 		for (const literal of clause.getLiterals()) {
-			const litId: Lit = literal.toInt();
-			this.table.get(litId)?.delete(tag);
-			if (this.table.get(litId)?.size === 0) {
+			const lit: Lit = literal.toInt();
+			this.table.get(lit)?.delete(cRef);
+			if (this.table.get(lit)?.size === 0) {
 				logFatal(
 					`Occurrence table`,
-					`Literal ${litId} has no more occurrences after removing clause ${tag}.`
+					`Literal ${lit} has no more occurrences after removing clause ${cRef}.`
 				);
 			}
 		}
@@ -49,7 +52,7 @@ export default class OccurrenceTable {
 		}
 	}
 
-	getTable(): SvelteMap<Lit, SvelteSet<CRef>> {
+	getTable(): Map<Lit, Set<CRef>> {
 		return this.table;
 	}
 }

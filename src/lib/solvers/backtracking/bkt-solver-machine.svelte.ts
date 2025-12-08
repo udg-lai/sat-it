@@ -35,8 +35,8 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 		this.occurrenceList = undefined;
 	}
 
-	setOccurrenceList(conflict: OccurrenceList): void {
-		this.occurrenceList = conflict;
+	setOccurrenceList(occurrenceList: OccurrenceList): void {
+		this.occurrenceList = occurrenceList;
 	}
 
 	visitClause(clauseTag: number): void {

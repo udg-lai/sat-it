@@ -1,7 +1,8 @@
 import type Clause from '$lib/entities/Clause.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
+import type { Var } from '$lib/types/types.ts';
 
-export const assertiveness = (clause: Clause, variables: number[]): boolean => {
+export const assertiveness = (clause: Clause, variables: Var[]): boolean => {
 	if (clause.isEmpty()) {
 		logFatal('Assertiveness check failed', 'Empty clause not allowed in assertiveness check');
 	}

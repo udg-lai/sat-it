@@ -151,8 +151,8 @@ export const allAssigned: CDCL_ALL_VARIABLES_ASSIGNED_FUN = () => {
 export type CDCL_EMPTY_CLAUSE_FUN = () => boolean;
 
 export const emptyClauseDetection: CDCL_EMPTY_CLAUSE_FUN = () => {
-	const pool: ClausePool = getClausePool();
-	return solverEmptyClauseDetection(pool);
+	const emptyClause: boolean = solverEmptyClauseDetection(getClausePool());
+	return emptyClause;
 };
 
 export type CDCL_QUEUE_OCCURRENCE_LIST_FUN = (
@@ -186,13 +186,13 @@ export const unitClauseDetection: CDCL_UNIT_CLAUSES_DETECTION_FUN = () => {
 	return solverUnitClauseDetection(pool);
 };
 
-export type CDCL_DELETE_CLAUSE_FUN = (clauses: Set<number>, clauseTag: number) => void;
+export type CDCL_DELETE_CLAUSE_FUN = (clauses: Set<number>, cRef: number) => void;
 
-export const deleteClause: CDCL_DELETE_CLAUSE_FUN = (clauses: Set<number>, clauseTag: number) => {
-	if (!clauses.has(clauseTag)) {
-		logFatal('Clause not found', `Clause - ${clauseTag} not found`);
+export const deleteClause: CDCL_DELETE_CLAUSE_FUN = (clauses: Set<number>, cRef: number) => {
+	if (!clauses.has(cRef)) {
+		logFatal('Clause not found', `Clause - ${cRef} not found`);
 	}
-	clauses.delete(clauseTag);
+	clauses.delete(cRef);
 };
 
 export type CDCL_PICK_CLAUSE_SET_FUN = (solverStateMachine: CDCL_SolverMachine) => Set<number>;
@@ -218,15 +218,15 @@ export const nextClause: CDCL_NEXT_CLAUSE_FUN = (clauses: Set<number>) => {
 		logFatal('A non empty set was expected');
 	}
 	const clausesIterator = clauses.values().next();
-	const clauseTag = clausesIterator.value;
-	return clauseTag as number;
+	const cRef = clausesIterator.value;
+	return cRef as number;
 };
 
-export type CDCL_CONFLICT_DETECTION_FUN = (clauseTag: number) => boolean;
+export type CDCL_CONFLICT_DETECTION_FUN = (cRef: number) => boolean;
 
-export const unsatisfiedClause: CDCL_CONFLICT_DETECTION_FUN = (clauseTag: number) => {
+export const unsatisfiedClause: CDCL_CONFLICT_DETECTION_FUN = (cRef: number) => {
 	const pool: ClausePool = getClausePool();
-	const evaluation: ClauseEval = clauseEvaluation(pool, clauseTag);
+	const evaluation: ClauseEval = clauseEvaluation(pool, cRef);
 	return isUnSATClause(evaluation);
 };
 
@@ -240,20 +240,20 @@ export const thereAreJobPostponed: CDCL_CHECK_PENDING_OCCURRENCE_LISTS_FUN = (
 	return solverStateMachine.thereArePostponed();
 };
 
-export type CDCL_UNIT_CLAUSE_FUN = (clauseTag: number) => boolean;
+export type CDCL_UNIT_CLAUSE_FUN = (cRef: number) => boolean;
 
-export const unitClause: CDCL_UNIT_CLAUSE_FUN = (clauseTag: number) => {
+export const unitClause: CDCL_UNIT_CLAUSE_FUN = (cRef: number) => {
 	const pool: ClausePool = getClausePool();
-	const evaluation: ClauseEval = clauseEvaluation(pool, clauseTag);
+	const evaluation: ClauseEval = clauseEvaluation(pool, cRef);
 	return isUnitClause(evaluation);
 };
 
-export type CDCL_UNIT_PROPAGATION_FUN = (clauseTag: number) => number;
+export type CDCL_UNIT_PROPAGATION_FUN = (cRef: CRef) => number;
 
-export const unitPropagation: CDCL_UNIT_PROPAGATION_FUN = (clauseTag: number) => {
+export const unitPropagation: CDCL_UNIT_PROPAGATION_FUN = (cRef: CRef) => {
 	const variables: VariablePool = getVariablePool();
 	const clauses: ClausePool = getClausePool();
-	return solverUnitPropagation(variables, clauses, clauseTag, 'up');
+	return solverUnitPropagation(variables, clauses, cRef, 'up');
 };
 
 export type CDCL_COMPLEMENTARY_OCCURRENCES_FUN = (assignment: Lit) => Set<CRef>;
@@ -304,8 +304,8 @@ export const buildConflictAnalysis: CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN =
 	});
 
 	// Thirdly the conflict clause is retrieved
-	const ccId: number | undefined = latestTrail.getConflictiveClause()?.getCRef();
-	if (ccId === undefined) {
+	const cRef: CRef | undefined = latestTrail.getConflictiveClause()?.getCRef();
+	if (cRef === undefined) {
 		logFatal(
 			'Conflict analysis',
 			'It is not possible to do the CA if no conflicts have been found'
@@ -313,7 +313,7 @@ export const buildConflictAnalysis: CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN =
 	}
 
 	const pool: ClausePool = getClausePool();
-	const conflictiveClause: Clause = pool.get(ccId).copy();
+	const conflictiveClause: Clause = pool.get(cRef).copy();
 
 	//Lastly, generate the conflict analysis structure
 	solver.setConflictAnalysis(
@@ -388,16 +388,16 @@ export const learnConflictClause: CDCL_LEARN_CONFLICT_CLAUSE_FUN = (
 	lemma.setAsLearned();
 
 	//The lemma is stored inside the pool
-	getProblemStore().addClause(lemma);
+	const cRef: CRef = getProblemStore().addClause(lemma);
 
 	// Saves the learnt clause in the trail
-	trail.learnClause(lemma);
+	trail.attachLemma(lemma);
 
-	logInfo('New clause learnt', `Clause ${lemma.getCRef()} learnt`);
+	logInfo('New clause learned', `Clause ${cRef} added to the clause pool`);
 
 	resetInspectedVariable();
 
-	return lemma.getCRef() as number;
+	return cRef;
 };
 
 export type CDCL_SECOND_HIGHEST_DL_FUN = (trail: Trail, conflictClause: Clause) => number;

@@ -19,7 +19,6 @@ import {
 import { logBreakpoint, logFatal } from '$lib/states/toasts.svelte.ts';
 import { getLatestTrail, getTrails, stackTrail } from '$lib/states/trails.svelte.ts';
 import type { CRef, Lit, Var } from '$lib/types/types.ts';
-import { SvelteSet } from 'svelte/reactivity';
 import type { Assignment } from '../interfaces/Assignment.ts';
 import { isUnSAT } from '../interfaces/IClausePool.ts';
 import { fromJust, isJust, type Maybe } from '../types/maybe.ts';
@@ -29,9 +28,9 @@ export const emptyClauseDetection = (pool: ClausePool): boolean => {
 	return isUnSAT(evaluation);
 };
 
-export const unitClauseDetection = (pool: ClausePool): SvelteSet<number> => {
-	const unitClauses: SvelteSet<number> = pool.getUnitClauses();
-	return unitClauses;
+export const unitClauseDetection = (pool: ClausePool): Set<CRef> => {
+	const units: Clause[] = pool.getUnitClauses();
+	return new Set(units.map(c => c.getCRef()));
 };
 
 export const allAssigned = (pool: VariablePool): boolean => {

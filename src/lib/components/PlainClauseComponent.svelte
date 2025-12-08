@@ -24,14 +24,14 @@
 <clause
 	class:satisfied-background={state === 'satisfied'}
 	class:unsatisfied-background={state === 'unsatisfied'}
-	class:temporal-background={state === undefined && clause.getCRef() === undefined}
-	class:lemma-background={state === undefined && clause.getCRef() !== undefined}
+	class:temporal-background={state === undefined && clause.isTemporal()}
+	class:lemma-background={state === undefined && !clause.isTemporal()}
 >
 	{#each literals as lit, i (i)}
 		<PlainLiteralComponent
 			literal={lit}
 			{state}
-			learned={state === undefined && clause.getCRef() !== undefined}
+			learned={state === undefined && !clause.isTemporal()}
 		/>
 	{/each}
 </clause>
