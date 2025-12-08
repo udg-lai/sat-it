@@ -6,7 +6,11 @@
 </script>
 
 <conflict-analysis-debugger>
-	<ResolutionComponent myClass={'conflict-btn'} icon={resolutionIcon} alt="Resolve following clause" />
+	<ResolutionComponent
+		myClass={'conflict-btn'}
+		icon={resolutionIcon}
+		alt="Resolve following clause"
+	/>
 
 	<ConflictAnalysisComponent />
 </conflict-analysis-debugger>
