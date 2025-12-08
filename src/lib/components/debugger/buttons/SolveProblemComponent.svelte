@@ -12,7 +12,7 @@
 	let { finished = false, backtrackingState = false }: Props = $props();
 
 	let solveIcon = '/icons/Solve.svg';
-	
+
 	function solveProblem(): void {
 		updateAssignment('automated');
 		stateMachineEventBus.emit('solve_all');

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import ConflictAnalysisComponent from './buttons/ConflictAnalysisComponent.svelte';
 	import StepComponent from './buttons/StepComponent.svelte';
-	
+
 	let resolutionIcon = '/icons/Resolution.svg';
 </script>
 

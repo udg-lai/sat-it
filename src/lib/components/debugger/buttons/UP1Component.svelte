@@ -3,7 +3,7 @@
 	import '../style.css';
 	import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 	import ImageRender from '$lib/components/tools/ImageRender.svelte';
-	
+
 	let up1Icon = '/icons/UP1.svg';
 
 	function finishConflictDetection(): void {

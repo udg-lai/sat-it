@@ -16,7 +16,7 @@
 	let { finished = false, backtrackingState = false }: Props = $props();
 
 	let automaticStepsIcon = '/icons/Automatic Steps.svg';
-	
+
 	function solveAutomatic() {
 		updateAssignment('automated');
 		stateMachineEventBus.emit('automatic_steps');

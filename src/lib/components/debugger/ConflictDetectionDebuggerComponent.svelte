@@ -1,7 +1,7 @@
 <script lang="ts">
 	import StepComponent from './buttons/StepComponent.svelte';
 	import NextVariableComponent from './buttons/NextVariableComponent.svelte';
-	
+
 	let inspectClauseIcon = '/icons/Inspect Next Clause.svg';
 </script>
 
