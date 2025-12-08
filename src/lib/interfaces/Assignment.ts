@@ -1,4 +1,6 @@
+import type { Var } from '$lib/types/types.ts';
+
 export interface Assignment {
-	variable: number;
+	variable: Var;
 	polarity: boolean | undefined;
 }

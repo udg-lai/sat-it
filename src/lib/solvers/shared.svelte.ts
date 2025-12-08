@@ -18,11 +18,11 @@ import {
 } from '$lib/states/statistics.svelte.ts';
 import { logBreakpoint, logFatal } from '$lib/states/toasts.svelte.ts';
 import { getLatestTrail, getTrails, stackTrail } from '$lib/states/trails.svelte.ts';
-import type { CRef, Lit } from '$lib/types/types.ts';
+import type { CRef, Lit, Var } from '$lib/types/types.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import type { Assignment } from '../interfaces/Assignment.ts';
 import { isUnSAT } from '../interfaces/IClausePool.ts';
-import { fromJust, isJust } from '../types/maybe.ts';
+import { fromJust, isJust, type Maybe } from '../types/maybe.ts';
 
 export const emptyClauseDetection = (pool: ClausePool): boolean => {
 	const evaluation = pool.eval();
@@ -38,40 +38,42 @@ export const allAssigned = (pool: VariablePool): boolean => {
 	return pool.allAssigned();
 };
 
-export const decide = (pool: VariablePool, algorithm: string): number => {
+export const decide = (pool: VariablePool, algorithm: string): Lit => {
 	const trail: Trail = obtainTrail();
 	const assignmentEvent: AssignmentEvent = getAssignment();
 	let manualAssignment: boolean = false;
 
-	let variableId: number;
+	let varId: Var;
 	if (assignmentEvent.type === 'automated') {
-		const nextVariable = pool.nextVariableToAssign();
+		const nextVariable: Maybe<Var> = pool.nextVariableToAssign();
 		if (!isJust(nextVariable)) {
-			logFatal('Decision Node', 'No variable to decide');
+			logFatal('Decision', 'No variable to decide');
 		}
-		variableId = fromJust(nextVariable);
+		varId = fromJust(nextVariable);
 	} else {
 		manualAssignment = true;
-		variableId = assignmentEvent.variable;
+		varId = assignmentEvent.variable;
 	}
 
-	const truthAssignment: Assignment = {
-		variable: variableId,
+	const assignment: Assignment = {
+		variable: varId,
 		polarity: assignmentEvent.polarity
 	};
 
-	doAssignment(truthAssignment);
+	doAssignment(assignment);
 
-	const variable: Variable = pool.getVariable(variableId).copy();
-	if (manualAssignment) {
-		trail.push(VariableAssignment.newManualAssignment(variable));
-	} else {
-		trail.push(VariableAssignment.newAutomatedAssignment(variable, algorithm));
-	}
+	// This variable should contain the updated assignment done in `doAssignment`
+	const variable: Variable = pool.getVariable(varId).copy();
+
+	const tAssignment: VariableAssignment = manualAssignment
+		? VariableAssignment.newManualAssignment(variable)
+		: VariableAssignment.newAutomatedAssignment(variable, algorithm);
+
+	trail.push(tAssignment);
 
 	increaseNoDecisions();
 
-	return assignmentEvent.polarity ? variableId : -variableId;
+	return variable.toLit();
 };
 
 export const clauseEvaluation = (pool: ClausePool, clauseTag: number): ClauseEval => {
