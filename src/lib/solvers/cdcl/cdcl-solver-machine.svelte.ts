@@ -25,7 +25,6 @@ import { assertiveness } from '$lib/algorithms/assertive.ts';
 import { setInspectedVariable } from '$lib/states/inspectedVariable.svelte.ts';
 import { getProblemStore } from '$lib/states/problem.svelte.ts';
 import { getStepDelay } from '$lib/states/delay-ms.svelte.ts';
-import { getLastTrailSize } from '$lib/states/trail-size.svelte.ts';
 import { getNoUnitPropagations } from '$lib/states/statistics.svelte.ts';
 
 export const makeCDCLSolver = (): CDCL_SolverMachine => {
@@ -177,7 +176,6 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 
 	step(): void {
 		const activeId: number = this.stateMachine.getActiveId();
-		console.log(getLastTrailSize());
 
 		//The initial state
 		if (activeId === cdcl_stateName2StateId.empty_clause_state) {
