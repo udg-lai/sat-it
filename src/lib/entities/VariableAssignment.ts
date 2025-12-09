@@ -1,4 +1,5 @@
 import { logFatal } from '$lib/states/toasts.svelte.ts';
+import type { Lit, Var } from '$lib/types/types.ts';
 import type Variable from './Variable.svelte.ts';
 
 export type Automated = {
@@ -152,7 +153,13 @@ export default class VariableAssignment {
 		this.variable.unassign();
 	}
 
-	toInt(): number {
+	toLit(): Lit {
+		if (!this.variable.hasTruthValue()) {
+			logFatal(
+				'Evaluating a variable assignment with not assigned value',
+				'The evaluation is given by its variable which is not yet assigned'
+			);
+		}
 		const assignment = this.variable.getAssignment();
 		if (assignment) {
 			return this.variable.toInt();
@@ -161,7 +168,7 @@ export default class VariableAssignment {
 		}
 	}
 
-	variableId(): number {
+	toVar(): Var {
 		return this.variable.toInt();
 	}
 

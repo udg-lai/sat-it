@@ -34,6 +34,7 @@ import type { OccurrenceList } from '../types.ts';
 import type { CDCL_SolverMachine } from './cdcl-solver-machine.svelte.ts';
 import { resetInspectedVariable } from '$lib/states/inspectedVariable.svelte.ts';
 import type { CRef, Lit } from '$lib/types/types.ts';
+import Literal from '$lib/entities/Literal.svelte.ts';
 
 // ** state inputs **
 
@@ -81,9 +82,9 @@ export type CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_INPUT = 'asserting_clause_sta
 
 export type CDCL_ASSERTING_CLAUSE_INPUT = 'learn_cc_state' | 'pick_last_assignment_state';
 
-export type CDCL_PICK_LAST_ASSIGNMENT_INPUT = 'variable_in_cc_state';
+export type CDCL_PICK_LAST_ASSIGNMENT_INPUT = 'complementary_in_ccc_state_state';
 
-export type CDCL_VARIABLE_IN_CC_INPUT =
+export type CDCL_COMPLEMENTARY_IN_CCC_INPUT =
 	| 'resolution_update_cc_state'
 	| 'delete_last_assignment_state';
 
@@ -122,7 +123,7 @@ export type CDCL_INPUT =
 	| CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_INPUT
 	| CDCL_ASSERTING_CLAUSE_INPUT
 	| CDCL_PICK_LAST_ASSIGNMENT_INPUT
-	| CDCL_VARIABLE_IN_CC_INPUT
+	| CDCL_COMPLEMENTARY_IN_CCC_INPUT
 	| CDCL_RESOLUTION_UPDATE_CC_INPUT
 	| CDCL_DELETE_LAST_ASSIGNMENT_INPUT
 	| CDCL_LEARN_CONFLICT_CLAUSE_INPUT
@@ -288,23 +289,23 @@ export const buildConflictAnalysis: CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN =
 	solver: CDCL_SolverMachine
 ) => {
 	// Firstly the last trail is achieved
-	const latestTrail: Trail | undefined = getLatestTrail();
-	if (latestTrail === undefined) {
+	const assignment: Trail | undefined = getLatestTrail();
+	if (assignment === undefined) {
 		logFatal('Conflict analysis', 'There is no last trail to work with');
+	} else if (assignment.isEmpty()) {
+		logFatal('Conflict analysis', 'The last trail is empty');
 	} else {
-		latestTrail.setState('conflict');
+		assignment.setState('conflict');
 	}
 
 	// Then the variables from the last decision level are retrieved.
-	const assignmentsLastDecisionLevel: VariableAssignment[] = latestTrail.getAssignmentsAt(
-		latestTrail.getDecisionLevel()
+	const ldlAssignments: VariableAssignment[] = assignment.getAssignmentsAtLevel(
+		assignment.getDecisionLevel()
 	);
-	const variablesLastDecisionLevel: number[] = assignmentsLastDecisionLevel.map((assignment) => {
-		return assignment.getVariable().toInt();
-	});
+	const ldlLiterals: Lit[] = ldlAssignments.map((assignment) => assignment.toLit());
 
 	// Thirdly the conflict clause is retrieved
-	const cRef: CRef | undefined = latestTrail.getConflictiveClause()?.getCRef();
+	const cRef: CRef | undefined = assignment.getConflictiveClause()?.getCRef();
 	if (cRef === undefined) {
 		logFatal(
 			'Conflict analysis',
@@ -315,12 +316,10 @@ export const buildConflictAnalysis: CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN =
 	const pool: ClausePool = getClausePool();
 	const conflictiveClause: Clause = pool.get(cRef).copy();
 
-	//Lastly, generate the conflict analysis structure
-	solver.setConflictAnalysis(
-		latestTrail.partialCopy(),
-		conflictiveClause,
-		variablesLastDecisionLevel
-	);
+	// Lastly, generate the conflict analysis structure
+	const assignmentCopy: Trail = assignment.copy();
+	assignmentCopy.cleanConflict();
+	solver.setConflictAnalysis(assignmentCopy, conflictiveClause, ldlLiterals);
 };
 
 export type CDCL_ASSERTING_CLAUSE_FUN = (solver: CDCL_SolverMachine) => boolean;
@@ -331,21 +330,22 @@ export const assertingClause: CDCL_ASSERTING_CLAUSE_FUN = (solver: CDCL_SolverMa
 
 export type CDCL_PICK_LAST_ASSIGNMENT_FUN = (trail: Trail) => VariableAssignment;
 
-export const pickLastAssignment = (trail: Trail) => {
+export const pickLastAssignment: CDCL_PICK_LAST_ASSIGNMENT_FUN = (trail: Trail) => {
 	const lastAssignment: VariableAssignment = trail.pickLastAssignment();
 	return lastAssignment;
 };
 
-export type CDCL_VARIABLE_IN_CC_FUN = (
+export type CDCL_COMPLEMENTARY_IN_CCC_FUN = (
 	conflictClause: Clause,
 	assignment: VariableAssignment
 ) => boolean;
 
-export const variableInCC: CDCL_VARIABLE_IN_CC_FUN = (
-	conflictClause: Clause,
+export const complementaryOccursInCCC: CDCL_COMPLEMENTARY_IN_CCC_FUN = (
+	ccc: Clause,
 	assignment: VariableAssignment
 ) => {
-	return conflictClause.containsVariable(assignment.getVariable().toInt());
+	const complementary: Lit = Literal.complementary(assignment.toLit());
+	return ccc.containsLiteral(complementary);
 };
 
 export type CDCL_RESOLUTION_UPDATE_CC_FUN = (
@@ -356,16 +356,15 @@ export type CDCL_RESOLUTION_UPDATE_CC_FUN = (
 
 export const resolutionUpdateCC: CDCL_RESOLUTION_UPDATE_CC_FUN = (
 	solver: CDCL_SolverMachine,
-	conflictClause: Clause,
+	cc: Clause,
 	assignment: VariableAssignment
 ) => {
 	const reason: Reason = assignment.getReason();
 	if (!isPropagationReason(reason)) {
-		logFatal('CDCL', 'The reason is not a propagation reason');
+		logFatal('resolutionUpdateCC', 'The reason is not a propagation reason');
 	}
-	const reasonClauseTag: number = reason.cRef;
-	const reasonClause: Clause = getClausePool().get(reasonClauseTag);
-	const resolvent: Clause = conflictClause.resolution(reasonClause);
+	const reasonClause: Clause = getClausePool().get(reason.cRef);
+	const resolvent: Clause = cc.resolution(reasonClause);
 	solver.updateConflictClause(resolvent);
 	return resolvent;
 };
@@ -457,7 +456,7 @@ export type CDCL_FUN =
 	| CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN
 	| CDCL_ASSERTING_CLAUSE_FUN
 	| CDCL_PICK_LAST_ASSIGNMENT_FUN
-	| CDCL_VARIABLE_IN_CC_FUN
+	| CDCL_COMPLEMENTARY_IN_CCC_FUN
 	| CDCL_RESOLUTION_UPDATE_CC_FUN
 	| CDCL_DELETE_LAST_ASSIGNMENT_FUN
 	| CDCL_LEARN_CONFLICT_CLAUSE_FUN

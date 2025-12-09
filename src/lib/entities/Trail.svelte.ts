@@ -21,14 +21,14 @@ export interface ConflictAnalysisContext {
 
 export class Trail {
 	private assignments: VariableAssignment[] = $state([]);
-	private decisionLevelBookmark: number[] = $state([-1]);
+	private dlBookmark: number[] = $state([-1]);
 	private followUPIndex: number = 0;
-	private decisionLevel: number = 0;
+	private dl: number = 0;
 	private conflictAnalysisCtx: Either<ConflictAnalysisContext, () => never>[] = $state([]); // this is just for representing the conflict analysis view
 	private upContext: Either<UPContext, () => never>[] = $derived.by(() => this._upContext());
 	private fullView: boolean = $state(false); // UI state for knowing whenever for that trail it was required to show more information
 	private lemmaAttached: Clause | undefined = $state(undefined);
-	private conflictiveClause: Clause | undefined = $state(undefined);
+	private ccAttached: Clause | undefined = $state(undefined);
 	private state: TrailState = $state('running');
 	private trailHeight: number = $derived.by(() => this._computeHeight());
 	private readonly defaultTrailHeight: number = 56;
@@ -37,14 +37,18 @@ export class Trail {
 	copy(): Trail {
 		const newTrail = new Trail();
 		newTrail.assignments = this.assignments.map((assignment) => assignment.copy());
-		newTrail.decisionLevelBookmark = [...this.decisionLevelBookmark];
+		newTrail.dlBookmark = [...this.dlBookmark];
 		newTrail.followUPIndex = this.followUPIndex;
-		newTrail.decisionLevel = this.decisionLevel;
+		newTrail.dl = this.dl;
 		newTrail.lemmaAttached = this.lemmaAttached;
-		newTrail.conflictiveClause = this.conflictiveClause;
+		newTrail.ccAttached = this.ccAttached;
 		newTrail.conflictAnalysisCtx = [...this.conflictAnalysisCtx];
 		newTrail.state = this.state;
 		return newTrail;
+	}
+
+	isEmpty(): boolean {
+		return this.assignments.length === 0;
 	}
 
 	setState(state: TrailState): void {
@@ -55,18 +59,15 @@ export class Trail {
 		return this.state;
 	}
 
-	//This partial copy is needed as we don't want to have the same "conflictiveClause" and "learnedClause" as this function is meant for creating the new "latestTrail"
-	partialCopy(): Trail {
-		const newTrail = new Trail();
-		newTrail.assignments = this.assignments.map((assignment) => assignment.copy());
-		newTrail.decisionLevelBookmark = [...this.decisionLevelBookmark];
-		newTrail.followUPIndex = this.followUPIndex;
-		newTrail.decisionLevel = this.decisionLevel;
-		return newTrail;
+	cleanConflict(): void {
+		this.ccAttached = undefined;
+		this.conflictAnalysisCtx = [];
+		this.lemmaAttached = undefined;
+		this.state = 'running';
 	}
 
 	getDecisionLevel(): number {
-		return this.decisionLevel;
+		return this.dl;
 	}
 
 	getAssignments(): VariableAssignment[] {
@@ -82,18 +83,18 @@ export class Trail {
 	}
 
 	getDecisions(): VariableAssignment[] {
-		return this.getDecisionLevelMarks().map((mark) => this.assignments[mark]);
+		return this.getDLMarks().map((mark) => this.assignments[mark]);
 	}
 
 	getInitialPropagations(): VariableAssignment[] {
-		return this.getPropagationsAt(0);
+		return this.getPropagationsAtLevel(0);
 	}
 
-	getPropagationsAt(level: number): VariableAssignment[] {
+	getPropagationsAtLevel(level: number): VariableAssignment[] {
 		return this._propagationsAt(level);
 	}
 
-	getAssignmentsAt(level: number): VariableAssignment[] {
+	getAssignmentsAtLevel(level: number): VariableAssignment[] {
 		if (level === 0) {
 			return this._propagationsAt(0);
 		} else {
@@ -107,8 +108,8 @@ export class Trail {
 			logFatal(`Variable ${variable} not found in trail`);
 		}
 
-		for (let level = this.decisionLevelBookmark.length - 1; level >= 0; level--) {
-			if (index >= this.decisionLevelBookmark[level]) {
+		for (let level = this.dlBookmark.length - 1; level >= 0; level--) {
+			if (index >= this.dlBookmark[level]) {
 				return level;
 			}
 		}
@@ -116,19 +117,15 @@ export class Trail {
 	}
 
 	setConflictiveClause(clause: Clause): void {
-		this.conflictiveClause = clause;
+		this.ccAttached = clause;
 	}
 
 	hasConflictiveClause(): boolean {
-		return this.conflictiveClause !== undefined;
+		return this.ccAttached !== undefined;
 	}
 
 	getConflictiveClause(): Clause | undefined {
-		return this.conflictiveClause;
-	}
-
-	clean(): void {
-		this._clean();
+		return this.ccAttached;
 	}
 
 	getConflictAnalysisCtx(): Either<ConflictAnalysisContext, () => never>[] {
@@ -142,22 +139,25 @@ export class Trail {
 	}
 
 	hasPropagations(level: number): boolean {
-		return this.getPropagationsAt(level).length > 0;
+		return this.getPropagationsAtLevel(level).length > 0;
 	}
 
-	push(assignment: VariableAssignment) {
+	push(assignment: VariableAssignment): void {
 		this.assignments.push(assignment);
 		if (assignment.isD()) {
 			this.registerNewDecisionLevel();
 		}
 	}
 
-	pop(): VariableAssignment | undefined {
-		const returnValue = this.assignments.pop();
-		if (returnValue?.isD()) {
-			this.deleteCurrentDecisionLevel();
+	pop(): VariableAssignment {
+		if (this.isEmpty()) {
+			logFatal('Trail underflow', 'Trying to pop from an empty trail');
 		}
-		return returnValue;
+		const assignment = this.assignments.pop() as VariableAssignment;
+		if (assignment.isD()) {
+			this.shrinkOneDL();
+		}
+		return assignment;
 	}
 
 	getClauseLearned(): Clause {
@@ -190,7 +190,7 @@ export class Trail {
 
 	backjump(dl: number): void {
 		// Security check
-		if (dl < 0 || dl > this.decisionLevel) {
+		if (dl < 0 || dl > this.dl) {
 			logFatal('Decision level error', 'The entered decision level is not valid');
 		}
 
@@ -203,8 +203,8 @@ export class Trail {
 		}
 
 		// Set the new decision level parameters
-		this.decisionLevelBookmark = this.decisionLevelBookmark.slice(0, dl + 1);
-		this.decisionLevel = dl;
+		this.dlBookmark = this.dlBookmark.slice(0, dl + 1);
+		this.dl = dl;
 	}
 
 	getUPContext(): Either<UPContext, () => never>[] {
@@ -253,7 +253,7 @@ export class Trail {
 		} else {
 			const startMark = this.getMarkOfDecisionLevel(level);
 			let endMark;
-			if (this.decisionLevelExists(level + 1)) {
+			if (this.dlExists(level + 1)) {
 				endMark = this.getMarkOfDecisionLevel(level + 1);
 			} else {
 				endMark = this.assignments.length;
@@ -265,7 +265,7 @@ export class Trail {
 	private _assignmentsAt(level: number): VariableAssignment[] {
 		const startMark = this.getMarkOfDecisionLevel(level);
 		let endMark;
-		if (this.decisionLevelExists(level + 1)) {
+		if (this.dlExists(level + 1)) {
 			endMark = this.getMarkOfDecisionLevel(level + 1);
 		} else {
 			endMark = this.assignments.length;
@@ -274,42 +274,42 @@ export class Trail {
 	}
 
 	private registerNewDecisionLevel(): void {
-		const nextDecisionLevel = this.decisionLevel + 1;
-		if (this.decisionLevelExists(nextDecisionLevel)) {
+		const nextDecisionLevel = this.dl + 1;
+		if (this.dlExists(nextDecisionLevel)) {
 			logFatal(`Trying to save an existing decision level ${nextDecisionLevel}`);
 		}
-		this.decisionLevel = nextDecisionLevel;
+		this.dl = nextDecisionLevel;
 		const decisionMark = this.assignments.length - 1;
-		this.decisionLevelBookmark.push(decisionMark);
+		this.dlBookmark.push(decisionMark);
 	}
 
-	private deleteCurrentDecisionLevel(): void {
-		if (!this.decisionLevelExists(this.decisionLevel)) {
+	private shrinkOneDL(): void {
+		if (!this.dlExists(this.dl)) {
 			logFatal(`Trying to delete current decision level but was not saved`);
 		}
-		this.decisionLevelBookmark = this.decisionLevelBookmark.slice(0, -1);
-		this.decisionLevel = this.decisionLevel - 1;
+		this.dlBookmark = this.dlBookmark.slice(0, -1);
+		this.dl = this.dl - 1;
 	}
 
-	private decisionLevelExists(level: number): boolean {
-		const levels = this.getDecisionLevelMarks();
+	private dlExists(level: number): boolean {
+		const levels = this.getDLMarks();
 		return level > 0 && level <= levels.length;
 	}
 
 	private getMarkOfDecisionLevel(level: number): number {
-		if (!this.decisionLevelExists(level)) {
+		if (!this.dlExists(level)) {
 			logFatal(`Level ${level} does not exist`);
 		}
-		const levels = this.getDecisionLevelMarks();
+		const levels = this.getDLMarks();
 		return levels[level - 1];
 	}
 
-	private getDecisionLevelMarks(): number[] {
-		return this.decisionLevelBookmark.slice(1);
+	private getDLMarks(): number[] {
+		return this.dlBookmark.slice(1);
 	}
 
 	private hasDecisions(): boolean {
-		const levels = this.getDecisionLevelMarks();
+		const levels = this.getDLMarks();
 		return levels.length > 0;
 	}
 
@@ -319,20 +319,12 @@ export class Trail {
 				const reason = a.getReason() as UnitPropagation;
 				return makeLeft({
 					clauseTag: reason.cRef,
-					literal: a.toInt()
+					literal: a.toLit()
 				});
 			} else {
 				return makeRight(error);
 			}
 		});
-	}
-
-	private _clean(): void {
-		this.conflictiveClause = undefined;
-		this.conflictAnalysisCtx = [];
-		this.lemmaAttached = undefined;
-		this.conflictiveClause = undefined;
-		this.state = 'running';
 	}
 
 	private _makeConflictAnalysisCtx(): Either<ConflictAnalysisContext, () => never>[] {
@@ -364,7 +356,7 @@ export class Trail {
 		if (this.fullView) {
 			const solver = getSolverMachine();
 			if (solver.identify() === 'bkt') {
-				if (this.conflictiveClause !== undefined) {
+				if (this.ccAttached !== undefined) {
 					height += this.canvasHeight; // Extra height for conflictive clause
 				}
 			} else {

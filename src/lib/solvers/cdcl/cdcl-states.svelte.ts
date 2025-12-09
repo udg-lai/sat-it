@@ -63,9 +63,9 @@ import {
 	pickLastAssignment,
 	type CDCL_PICK_LAST_ASSIGNMENT_FUN,
 	type CDCL_PICK_LAST_ASSIGNMENT_INPUT,
-	type CDCL_VARIABLE_IN_CC_FUN,
-	type CDCL_VARIABLE_IN_CC_INPUT,
-	variableInCC,
+	type CDCL_COMPLEMENTARY_IN_CCC_FUN,
+	type CDCL_COMPLEMENTARY_IN_CCC_INPUT,
+	complementaryOccursInCCC,
 	type CDCL_DELETE_LAST_ASSIGNMENT_FUN,
 	type CDCL_DELETE_LAST_ASSIGNMENT_INPUT,
 	deleteLastAssignment,
@@ -113,7 +113,7 @@ export const cdcl_stateName2StateId = {
 	build_conflict_analysis_state: 17,
 	asserting_clause_state: 18,
 	pick_last_assignment_state: 19,
-	variable_in_cc_state: 20,
+	complementary_in_ccc_state_state: 20,
 	resolution_update_cc_state: 21,
 	delete_last_assignment_state: 22,
 	learn_cc_state: 23,
@@ -368,16 +368,19 @@ const pick_last_assignment_state: NonFinalState<
 	run: pickLastAssignment,
 	description: `Picks the last assignment from the trail`,
 	transitions: new Map<CDCL_PICK_LAST_ASSIGNMENT_INPUT, number>().set(
-		'variable_in_cc_state',
-		cdcl_stateName2StateId['variable_in_cc_state']
+		'complementary_in_ccc_state_state',
+		cdcl_stateName2StateId['complementary_in_ccc_state_state']
 	)
 };
 
-const variable_in_cc_state: NonFinalState<CDCL_VARIABLE_IN_CC_FUN, CDCL_VARIABLE_IN_CC_INPUT> = {
-	id: cdcl_stateName2StateId['variable_in_cc_state'],
-	run: variableInCC,
+const complementary_in_ccc_state_state: NonFinalState<
+	CDCL_COMPLEMENTARY_IN_CCC_FUN,
+	CDCL_COMPLEMENTARY_IN_CCC_INPUT
+> = {
+	id: cdcl_stateName2StateId['complementary_in_ccc_state_state'],
+	run: complementaryOccursInCCC,
 	description: `Picks the last assignment from the trail`,
-	transitions: new Map<CDCL_VARIABLE_IN_CC_INPUT, number>()
+	transitions: new Map<CDCL_COMPLEMENTARY_IN_CCC_INPUT, number>()
 		.set('resolution_update_cc_state', cdcl_stateName2StateId['resolution_update_cc_state'])
 		.set('delete_last_assignment_state', cdcl_stateName2StateId['delete_last_assignment_state'])
 };
@@ -489,7 +492,7 @@ states.set(empty_clause_set_state.id, empty_clause_set_state);
 states.set(build_conflict_analysis_state.id, build_conflict_analysis_state);
 states.set(asserting_clause_state.id, asserting_clause_state);
 states.set(pick_last_assignment_state.id, pick_last_assignment_state);
-states.set(variable_in_cc_state.id, variable_in_cc_state);
+states.set(complementary_in_ccc_state_state.id, complementary_in_ccc_state_state);
 states.set(resolution_update_cc_state.id, resolution_update_cc_state);
 states.set(delete_last_assignment_state.id, delete_last_assignment_state);
 states.set(learn_cc_state.id, learn_cc_state);

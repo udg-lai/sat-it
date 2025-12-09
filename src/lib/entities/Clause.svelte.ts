@@ -1,6 +1,6 @@
 import logicResolution from '$lib/algorithms/resolution.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
-import type { CRef } from '$lib/types/types.ts';
+import type { CRef, Lit } from '$lib/types/types.ts';
 import type { Comparable } from '../interfaces/Comparable.ts';
 import type { Claim } from '../parsers/dimacs.ts';
 import { arraysEqual } from '../types/array.ts';
@@ -124,12 +124,15 @@ class Clause implements Comparable<Clause> {
 		return unit;
 	}
 
-	containsVariable(variableId: number): boolean {
-		const found = this.literals.find((lit) => {
-			const id = lit.toInt();
-			return Math.abs(id) === variableId;
-		});
-		return found !== undefined;
+	containsLiteral(literal: Lit): boolean {
+		let found = false;
+		for (const lit of this.literals) {
+			if (lit.toInt() === literal) {
+				found = true;
+				break;
+			}
+		}
+		return found;
 	}
 
 	getLiterals(): Literal[] {

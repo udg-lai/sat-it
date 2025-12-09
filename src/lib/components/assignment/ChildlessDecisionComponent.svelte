@@ -17,7 +17,7 @@
 	let { assignment, isLast = false, fromPreviousTrail = false, emitRevertUpToX }: Props = $props();
 
 	const inspectedVariable: number = $derived(getInspectedVariable());
-	let inspecting: boolean = $derived(assignment.variableId() === inspectedVariable && isLast);
+	let inspecting: boolean = $derived(assignment.toVar() === inspectedVariable && isLast);
 
 	let chrome: boolean = $derived(onChrome());
 	let isOpen: boolean = $state(false);

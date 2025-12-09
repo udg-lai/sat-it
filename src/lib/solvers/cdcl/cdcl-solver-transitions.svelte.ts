@@ -4,7 +4,7 @@ import {
 	incrementCheckingIndex
 } from '$lib/states/conflict-detection-state.svelte.ts';
 import { increaseNoConflicts } from '$lib/states/statistics.svelte.ts';
-import { logFatal } from '$lib/states/toasts.svelte.ts';
+import { logError, logFatal } from '$lib/states/toasts.svelte.ts';
 import { getLatestTrail, updateLastTrailEnding } from '$lib/states/trails.svelte.ts';
 import { conflictDetectionEventBus, toggleTrailViewEventBus } from '$lib/events/events.ts';
 import { type NonFinalState } from '../StateMachine.svelte.ts';
@@ -61,8 +61,8 @@ import type {
 	CDCL_UNIT_PROPAGATION_INPUT,
 	CDCL_UNSTACK_OCCURRENCE_LIST_FUN,
 	CDCL_UNSTACK_OCCURRENCE_LIST_INPUT,
-	CDCL_VARIABLE_IN_CC_FUN,
-	CDCL_VARIABLE_IN_CC_INPUT,
+	CDCL_COMPLEMENTARY_IN_CCC_FUN,
+	CDCL_COMPLEMENTARY_IN_CCC_INPUT,
 	CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN,
 	CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_INPUT
 } from './cdcl-domain.svelte.ts';
@@ -74,6 +74,7 @@ import type { Trail } from '$lib/entities/Trail.svelte.ts';
 import type Clause from '$lib/entities/Clause.svelte.ts';
 import { setInspectedVariable } from '$lib/states/inspectedVariable.svelte.ts';
 import type { CRef, Lit } from '$lib/types/types.ts';
+import { isUnitPropagationReason } from '$lib/entities/VariableAssignment.ts';
 
 /* exported transitions */
 
@@ -125,22 +126,22 @@ export const preConflictAnalysis = (solver: CDCL_SolverMachine) => {
 
 export const conflictAnalysis = (solver: CDCL_SolverMachine): void => {
 	const stateMachine: CDCL_StateMachine = solver.getStateMachine();
-	const conflictAnalysis: ConflictAnalysis | undefined = solver.consultConflictAnalysis();
+	const conflictAnalysis: ConflictAnalysis = solver.consultConflictAnalysis();
 
-	if (!conflictAnalysis) {
-		logFatal('CDCL solver', 'Conflict data can not be undefined');
-	}
-
+	// Last assignment must be an UP
 	const lastAssignment: VariableAssignment = pickLastAssignmentTransition(
 		stateMachine,
 		conflictAnalysis
 	);
 
-	const variableAppear: boolean = variableInCCTransition(
-		stateMachine,
-		conflictAnalysis,
-		lastAssignment
-	);
+	if (!isUnitPropagationReason(lastAssignment.getReason())) {
+		logError(
+			'CDCL Conflict Analysis',
+			'The last assignment in the conflict analysis should be a unit propagation'
+		);
+	}
+
+	const variableAppear: boolean = complementaryInCCTransition(solver, lastAssignment);
 	const latestTrail: Trail | undefined = getLatestTrail();
 	if (latestTrail === undefined) logFatal('CDCL solver', 'Latest trail should not be undefined');
 
@@ -153,7 +154,7 @@ export const conflictAnalysis = (solver: CDCL_SolverMachine): void => {
 		);
 		latestTrail.updateConflictAnalysisCtx({
 			clause: resolvent,
-			literal: lastAssignment.toInt()
+			literal: lastAssignment.toLit()
 		});
 	} else {
 		latestTrail.updateConflictAnalysisCtx();
@@ -568,26 +569,28 @@ const pickLastAssignmentTransition = (
 		logFatal('Function call error', 'There should be a function in the Pick Last Assignment state');
 	}
 	const assignment: VariableAssignment = pickLastAssignmentState.run(trail);
-	stateMachine.transition('variable_in_cc_state');
+	stateMachine.transition('complementary_in_ccc_state_state');
 	return assignment;
 };
 
-const variableInCCTransition = (
-	stateMachine: CDCL_StateMachine,
-	{ conflictClause }: ConflictAnalysis,
+const complementaryInCCTransition = (
+	cdclSolver: CDCL_SolverMachine,
 	lastAssignment: VariableAssignment
 ) => {
-	const variableInCCState = stateMachine.getActiveState() as NonFinalState<
-		CDCL_VARIABLE_IN_CC_FUN,
-		CDCL_VARIABLE_IN_CC_INPUT
+	const complementaryInCCState = cdclSolver.getActiveState() as NonFinalState<
+		CDCL_COMPLEMENTARY_IN_CCC_FUN,
+		CDCL_COMPLEMENTARY_IN_CCC_INPUT
 	>;
-	if (variableInCCState.run === undefined) {
-		logFatal('Function call error', 'There should be a function in the Variable In CC state');
+	if (complementaryInCCState.run === undefined) {
+		logFatal('Complementary In CC', 'No function defined in the Complementary In CC state');
 	}
-	const variableAppears: boolean = variableInCCState.run(conflictClause, lastAssignment);
-	if (variableAppears) stateMachine.transition('resolution_update_cc_state');
-	else stateMachine.transition('delete_last_assignment_state');
-	return variableAppears;
+
+	const { conflictClause } = cdclSolver.consultConflictAnalysis();
+
+	const complementaryExists: boolean = complementaryInCCState.run(conflictClause, lastAssignment);
+	if (complementaryExists) cdclSolver.transition('resolution_update_cc_state');
+	else cdclSolver.transition('delete_last_assignment_state');
+	return complementaryExists;
 };
 
 const resolutionUpdateCCTransition = (

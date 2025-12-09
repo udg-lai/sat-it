@@ -16,7 +16,7 @@
 	let { assignment, isLast = false, fromPreviousTrail = false, eventClick }: Props = $props();
 
 	const inspectedVariable: number = $derived(getInspectedVariable());
-	let inspecting: boolean = $derived(assignment.variableId() === inspectedVariable && isLast);
+	let inspecting: boolean = $derived(assignment.toVar() === inspectedVariable && isLast);
 
 	function onClick() {
 		eventClick?.();

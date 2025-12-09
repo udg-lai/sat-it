@@ -60,7 +60,7 @@
 </script>
 
 <trail class="trail" use:listenContentWidth>
-	{#each initialPropagations as assignment (assignment.variableId())}
+	{#each initialPropagations as assignment (assignment.toVar())}
 		{#if assignment.isK()}
 			<BacktrackingComponent
 				{assignment}
@@ -89,7 +89,7 @@
 	{#each decisions as { level, assignment } (level)}
 		<DecisionLevelComponent
 			decision={assignment}
-			propagations={trail.getPropagationsAt(level)}
+			propagations={trail.getPropagationsAtLevel(level)}
 			{expanded}
 			{isLast}
 			{trail}

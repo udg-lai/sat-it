@@ -6,14 +6,16 @@ import {
 	type StateMachineEvent
 } from '$lib/events/events.ts';
 import { tick } from 'svelte';
-import type { StateFun, StateInput, StateMachine } from './StateMachine.svelte.ts';
+import type { State, StateFun, StateInput, StateMachine } from './StateMachine.svelte.ts';
 
 export type KnownSolver = 'bkt' | 'dpll' | 'cdcl';
 
 export interface SolverStateInterface<F extends StateFun, I extends StateInput> {
-	transition: (input: StateMachineEvent) => Promise<void>;
+	transitionByEvent: (input: StateMachineEvent) => Promise<void>;
+	transition: (input: I) => void;
 	getActiveStateId: () => number;
 	updateActiveStateId: (id: number) => void;
+	getActiveState: () => State<F, I>;
 	updateFromRecord: (record: Record<string, unknown>) => void;
 	isInAutoMode: () => boolean;
 	stopAutoMode: () => void;
@@ -75,6 +77,10 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 		this.stateMachine.setActiveId(id);
 	}
 
+	getActiveState(): State<F, I> {
+		return this.stateMachine.getActiveState();
+	}
+
 	completed(): boolean {
 		return this.stateMachine.onFinalState();
 	}
@@ -119,7 +125,11 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 		return this.solverId;
 	}
 
-	async transition(input: StateMachineEvent): Promise<void> {
+	transition(input: I): void {
+		this.stateMachine.transition(input);
+	}
+
+	async transitionByEvent(input: StateMachineEvent): Promise<void> {
 		if (input === 'step') {
 			this._step();
 		} else if (input === 'nextVariable') {

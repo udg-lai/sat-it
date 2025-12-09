@@ -31,7 +31,7 @@
 	let buttonId: string = 'btn-' + nanoid();
 
 	let inspectedVariable: number = $derived(getInspectedVariable());
-	let inspecting: boolean = $derived(assignment.variableId() === inspectedVariable && isLast);
+	let inspecting: boolean = $derived(assignment.toVar() === inspectedVariable && isLast);
 
 	const reasonClause: Clause = $derived.by(() => {
 		if (assignment.isUP()) {

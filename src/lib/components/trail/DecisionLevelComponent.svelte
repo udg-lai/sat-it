@@ -47,7 +47,7 @@
 		{emitRevertUpToX}
 	/>
 	{#if expanded}
-		{#each propagations as assignment (assignment.variableId())}
+		{#each propagations as assignment (assignment.toVar())}
 			{#if assignment.isK()}
 				<BacktrackingComponent
 					{assignment}

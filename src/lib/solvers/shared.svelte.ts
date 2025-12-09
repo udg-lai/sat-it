@@ -170,7 +170,8 @@ export const backtracking = (pool: VariablePool): Lit => {
 		latestTrail.setState('conflict');
 	}
 
-	const newTrail: Trail = latestTrail.partialCopy();
+	const newTrail: Trail = latestTrail.copy();
+	newTrail.cleanConflict();
 	const lastAssignment: VariableAssignment = disposeUntilDecision(newTrail, pool);
 
 	let variable: Variable = lastAssignment.getVariable().copy();

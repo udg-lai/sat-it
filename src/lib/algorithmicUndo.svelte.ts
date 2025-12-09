@@ -31,7 +31,7 @@ export const algorithmicUndo = (
 	} while (latestAssignment !== objectiveAssignment && latestAssignment !== undefined);
 
 	//This extra step is to clear the conflictive clause of the trail in case there was one
-	latestTrail.clean();
+	latestTrail.cleanConflict();
 
 	//The last thing to do in the app component is to move the state machine to the "decide step" and save a snapshot
 	return latestTrail;

@@ -30,6 +30,7 @@ import {
 import { CDCL_StateMachine, makeCDCLStateMachine } from './cdcl-state-machine.svelte.ts';
 import { cdcl_stateName2StateId } from './cdcl-states.svelte.ts';
 import { wrapLearnedClauses } from '$lib/states/trails.svelte.ts';
+import type { Lit } from '$lib/types/types.ts';
 
 export const makeCDCLSolver = (): CDCL_SolverMachine => {
 	return new CDCL_SolverMachine(getStepDelay());
@@ -83,26 +84,30 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 
 	// ** functions related to conflict analysis **
 
-	setConflictAnalysis(
-		trail: Trail,
-		conflictClause: Clause,
-		decisionLevelVariables: number[]
-	): void {
-		this.conflictAnalysis = { trail, conflictClause, decisionLevelVariables };
+	setConflictAnalysis(trail: Trail, conflictClause: Clause, decisionLevelVariables: Lit[]): void {
+		this.conflictAnalysis = { trail, conflictClause, ldlAssignments: decisionLevelVariables };
 	}
 
-	updateConflictClause(conflictClause: Clause): void {
+	updateConflictClause(ccc: Clause): void {
+		// This method updates the current Conflict Clause in the Conflict Analysis structure.
 		if (!this.conflictAnalysis) {
 			logFatal(
 				'Not possible to update the Conflict Clause',
 				'There is no Conflict Clause to update as there is no Conflict Analysis structure built'
 			);
 		}
-		this.conflictAnalysis.conflictClause = conflictClause;
+		this.conflictAnalysis.conflictClause = ccc;
 	}
 
-	consultConflictAnalysis(): ConflictAnalysis | undefined {
-		return this.conflictAnalysis;
+	inConflictAnalysis(): boolean {
+		return this.conflictAnalysis !== undefined;
+	}
+
+	consultConflictAnalysis(): ConflictAnalysis {
+		if (!this.inConflictAnalysis()) {
+			logFatal('Conflict Analysis exception', 'The conflict analysis can not be undefined');
+		}
+		return this.conflictAnalysis as ConflictAnalysis;
 	}
 
 	getConflictAnalysis(): ConflictAnalysis | undefined {
@@ -112,7 +117,7 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 			return {
 				trail: this.conflictAnalysis.trail.copy(),
 				conflictClause: this.conflictAnalysis.conflictClause.copy(),
-				decisionLevelVariables: [...this.conflictAnalysis.decisionLevelVariables]
+				ldlAssignments: [...this.conflictAnalysis.ldlAssignments]
 			} as ConflictAnalysis;
 		}
 	}
@@ -121,7 +126,7 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 		if (this.conflictAnalysis === undefined) {
 			logFatal('Assertive exception', 'The conflict analysis can not be undefined');
 		}
-		const { conflictClause, decisionLevelVariables } = this.conflictAnalysis;
+		const { conflictClause, ldlAssignments: decisionLevelVariables } = this.conflictAnalysis;
 		return assertiveness(conflictClause, decisionLevelVariables);
 	}
 
@@ -163,7 +168,7 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 			this.setConflictAnalysis(
 				conflictAnalysis.trail.copy(),
 				conflictAnalysis.conflictClause.copy(),
-				[...conflictAnalysis.decisionLevelVariables]
+				[...conflictAnalysis.ldlAssignments]
 			);
 			// Forcing the problem to forget about the learned clauses
 			forgetLearnedClauses();
@@ -177,10 +182,10 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 		}
 	}
 
-	async transition(input: StateMachineEvent): Promise<void> {
+	async transitionByEvent(input: StateMachineEvent): Promise<void> {
 		if (input === 'finishCA') {
 			await this.solveCAStepByStep();
-		} else super.transition(input);
+		} else super.transitionByEvent(input);
 	}
 
 	step(): void {
