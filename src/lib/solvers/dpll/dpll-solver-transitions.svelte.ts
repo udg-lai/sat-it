@@ -1,6 +1,16 @@
+import Literal from '$lib/entities/Literal.svelte.ts';
+import { conflictDetectionEventBus, toggleTrailViewEventBus } from '$lib/events/events.ts';
+import {
+	cleanClausesToCheck,
+	getCheckedClause,
+	incrementCheckingIndex
+} from '$lib/states/conflict-detection-state.svelte.ts';
+import { getClausePool } from '$lib/states/problem.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
-import { updateLastTrailEnding } from '$lib/states/trails.svelte.ts';
+import { getLatestTrail } from '$lib/states/trails.svelte.ts';
+import type { CRef, Lit } from '$lib/types/types.ts';
 import { type NonFinalState } from '../StateMachine.svelte.ts';
+import type { OccurrenceList } from '../types.ts';
 import type {
 	DPLL_ALL_CLAUSES_CHECKED_FUN,
 	DPLL_ALL_CLAUSES_CHECKED_INPUT,
@@ -36,20 +46,11 @@ import type {
 	DPLL_UNIT_CLAUSES_DETECTION_INPUT,
 	DPLL_UNIT_PROPAGATION_FUN,
 	DPLL_UNIT_PROPAGATION_INPUT,
-	DPLL_UNSTACK_OCCURRENCE_LIST_FUN,
-	DPLL_UNSTACK_CLAUSE_SET_INPUT
+	DPLL_UNSTACK_CLAUSE_SET_INPUT,
+	DPLL_UNSTACK_OCCURRENCE_LIST_FUN
 } from './dpll-domain.svelte.ts';
 import type { DPLL_SolverMachine } from './dpll-solver-machine.svelte.ts';
 import type { DPLL_StateMachine } from './dpll-state-machine.svelte.ts';
-import {
-	cleanClausesToCheck,
-	getCheckedClause,
-	incrementCheckingIndex
-} from '$lib/states/conflict-detection-state.svelte.ts';
-import { conflictDetectionEventBus, toggleTrailViewEventBus } from '$lib/events/events.ts';
-import type { OccurrenceList } from '../types.ts';
-import type { CRef, Lit } from '$lib/types/types.ts';
-import Literal from '$lib/entities/Literal.svelte.ts';
 
 /* exported transitions */
 
@@ -146,16 +147,17 @@ const conflictDetectionBlock = (
 		pickClauseSetTransition(stateMachine, solver);
 		return;
 	}
-	const clauseTag: number = nextClauseTransition(stateMachine, clauseSet);
-	const conflict: boolean = conflictDetectionTransition(stateMachine, clauseTag);
-	if (conflict) {
-		updateLastTrailEnding(clauseTag);
+	const nextCRef: CRef = nextClauseTransition(stateMachine, clauseSet);
+	const isConflictive: boolean = conflictDetectionTransition(stateMachine, nextCRef);
+	if (isConflictive) {
+		// Attach the conflictive clause to the last trail
+		getLatestTrail().attachConflictiveClause(getClausePool().at(nextCRef));
 		toggleTrailViewEventBus.emit();
 		return;
 	}
-	const unitClause: boolean = unitClauseTransition(stateMachine, clauseTag);
+	const unitClause: boolean = unitClauseTransition(stateMachine, nextCRef);
 	if (!unitClause) return;
-	const assignedLiteral: number = unitPropagationTransition(stateMachine, clauseTag);
+	const assignedLiteral: number = unitPropagationTransition(stateMachine, nextCRef);
 	const complementaryClauses: Set<number> = complementaryOccurrencesTransition(
 		stateMachine,
 		assignedLiteral

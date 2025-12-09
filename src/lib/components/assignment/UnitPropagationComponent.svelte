@@ -37,7 +37,7 @@
 		if (assignment.isUP()) {
 			const reason = assignment.getReason();
 			if (isUnitPropagationReason(reason)) {
-				return getClausePool().get(reason.cRef);
+				return getClausePool().at(reason.cRef);
 			} else {
 				logFatal('Reason error', 'The reason is not a unit propagation');
 			}

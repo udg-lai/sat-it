@@ -6,7 +6,7 @@ import type Literal from './Literal.svelte.ts';
 
 export interface Watch {
 	cRef: CRef;
-	blocker: Literal; // The literal that is currently satisfying the clause
+	blocker: Literal; // One of the two watched literals
 }
 
 export default class WatchTable {

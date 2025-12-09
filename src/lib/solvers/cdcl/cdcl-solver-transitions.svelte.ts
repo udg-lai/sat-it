@@ -1,13 +1,21 @@
+import type Clause from '$lib/entities/Clause.svelte.ts';
+import type { Trail } from '$lib/entities/Trail.svelte.ts';
+import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
+import { isUnitPropagationReason } from '$lib/entities/VariableAssignment.ts';
+import { conflictDetectionEventBus, toggleTrailViewEventBus } from '$lib/events/events.ts';
 import {
 	cleanClausesToCheck,
 	getCheckedClause,
 	incrementCheckingIndex
 } from '$lib/states/conflict-detection-state.svelte.ts';
+import { setInspectedVariable } from '$lib/states/inspectedVariable.svelte.ts';
+import { getClausePool } from '$lib/states/problem.svelte.ts';
 import { increaseNoConflicts } from '$lib/states/statistics.svelte.ts';
 import { logError, logFatal } from '$lib/states/toasts.svelte.ts';
-import { getLatestTrail, updateLastTrailEnding } from '$lib/states/trails.svelte.ts';
-import { conflictDetectionEventBus, toggleTrailViewEventBus } from '$lib/events/events.ts';
+import { getLatestTrail } from '$lib/states/trails.svelte.ts';
+import type { CRef, Lit } from '$lib/types/types.ts';
 import { type NonFinalState } from '../StateMachine.svelte.ts';
+import type { ConflictAnalysis, OccurrenceList } from '../types.ts';
 import type {
 	CDCL_ALL_CLAUSES_CHECKED_FUN,
 	CDCL_ALL_CLAUSES_CHECKED_INPUT,
@@ -17,10 +25,14 @@ import type {
 	CDCL_ASSERTING_CLAUSE_INPUT,
 	CDCL_BACKJUMPING_FUN,
 	CDCL_BACKJUMPING_INPUT,
+	CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN,
+	CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_INPUT,
 	CDCL_CHECK_NON_DECISION_MADE_FUN,
 	CDCL_CHECK_NON_DECISION_MADE_INPUT,
 	CDCL_CHECK_PENDING_OCCURRENCE_LISTS_FUN,
 	CDCL_CHECK_PENDING_OCCURRENCE_LISTS_INPUT,
+	CDCL_COMPLEMENTARY_IN_CCC_FUN,
+	CDCL_COMPLEMENTARY_IN_CCC_INPUT,
 	CDCL_COMPLEMENTARY_OCCURRENCES_FUN,
 	CDCL_COMPLEMENTARY_OCCURRENCES_INPUT,
 	CDCL_CONFLICT_DETECTION_FUN,
@@ -60,21 +72,10 @@ import type {
 	CDCL_UNIT_PROPAGATION_FUN,
 	CDCL_UNIT_PROPAGATION_INPUT,
 	CDCL_UNSTACK_OCCURRENCE_LIST_FUN,
-	CDCL_UNSTACK_OCCURRENCE_LIST_INPUT,
-	CDCL_COMPLEMENTARY_IN_CCC_FUN,
-	CDCL_COMPLEMENTARY_IN_CCC_INPUT,
-	CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN,
-	CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_INPUT
+	CDCL_UNSTACK_OCCURRENCE_LIST_INPUT
 } from './cdcl-domain.svelte.ts';
 import type { CDCL_SolverMachine } from './cdcl-solver-machine.svelte.ts';
 import type { CDCL_StateMachine } from './cdcl-state-machine.svelte.ts';
-import type { ConflictAnalysis, OccurrenceList } from '../types.ts';
-import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
-import type { Trail } from '$lib/entities/Trail.svelte.ts';
-import type Clause from '$lib/entities/Clause.svelte.ts';
-import { setInspectedVariable } from '$lib/states/inspectedVariable.svelte.ts';
-import type { CRef, Lit } from '$lib/types/types.ts';
-import { isUnitPropagationReason } from '$lib/entities/VariableAssignment.ts';
 
 /* exported transitions */
 
@@ -216,16 +217,16 @@ const conflictDetectionBlock = (
 		pickClauseSetTransition(stateMachine, solver);
 		return;
 	}
-	const cRef: number = nextClauseTransition(stateMachine, clauseSet);
-	const conflict: boolean = conflictDetectionTransition(stateMachine, cRef);
-	if (conflict) {
-		updateLastTrailEnding(cRef);
+	const nextCRef: CRef = nextClauseTransition(stateMachine, clauseSet);
+	const isConflictive: boolean = conflictDetectionTransition(stateMachine, nextCRef);
+	if (isConflictive) {
+		getLatestTrail().attachConflictiveClause(getClausePool().at(nextCRef));
 		toggleTrailViewEventBus.emit();
 		return;
 	}
-	const unitClause: boolean = unitClauseTransition(stateMachine, cRef);
+	const unitClause: boolean = unitClauseTransition(stateMachine, nextCRef);
 	if (!unitClause) return;
-	const assignedLit: Lit = unitPropagationTransition(stateMachine, cRef);
+	const assignedLit: Lit = unitPropagationTransition(stateMachine, nextCRef);
 	const complementaryClauses: Set<CRef> = complementaryOccurrencesTransition(
 		stateMachine,
 		assignedLit

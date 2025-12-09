@@ -43,8 +43,8 @@ export default class Problem {
 		// The assignment is the empty set at first
 		this.variables.wipe();
 
-		// Then, we assign the variables as in the trail
-		// this is possible because the assignments in the trail are a copy of the variables in the pool
+		// The assignments in the trail are snapshots of
+		// variables at the time they were assigned.
 		for (const assignment of trail) {
 			const variable: Variable = assignment.getVariable();
 			this.variables.assign(variable.toInt(), variable.getAssignment());
@@ -58,7 +58,7 @@ export default class Problem {
 
 	learnClauses(clauses: Clause[]) {
 		for (const clause of clauses) {
-			if (!clause.hasBeenLearned())
+			if (!clause.isLemma())
 				logError('Learning clause', 'Clause to be learned was not marked as learned');
 			this.clauses.addClause(clause);
 			this.occurrencesTable.addOccurrences(clause);

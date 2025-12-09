@@ -1,29 +1,27 @@
 import type Clause from '$lib/entities/Clause.svelte.ts';
 import { Trail } from '$lib/entities/Trail.svelte.ts';
-import { logFatal } from '$lib/states/toasts.svelte.ts';
-import { getClausePool } from './problem.svelte.ts';
+import { logFatal, logWarning } from '$lib/states/toasts.svelte.ts';
 
+// This is an invariant, at least one trail must always exist
 let trails: Trail[] = $state([new Trail()]);
 
-export const getLatestTrail = (): Trail | undefined => trails[trails.length - 1];
+export const getLatestTrail = (): Trail => {
+	if (trails.length === 0) {
+		logFatal('Get Latest Trail Error', 'No trails available to get the latest trail');
+	}
+	return trails[trails.length - 1];
+};
 
 export const stackTrail = (trail: Trail): void => {
 	trails = [...trails, trail];
-	for (let i = 0; i < trails.length; i++) {
-		trails.at(i)?.setView(false);
-	}
-};
-
-export const unstackTrail = (): void => {
-	trails = trails.slice(0, length - 1);
 };
 
 export const shrinkTrails = (n: number): void => {
-	// This function reduces the trails array to the n trails (inclusive)
-	if (n < 0) {
-		logFatal('Shrink Trails Error', `Shrink size should be non-negative: ${n}`);
+	// Shrink the trail to n elements
+	if (n <= 1) {
+		logWarning('Shrink Trails Error', `Cannot shrink trails to less than 1 trail`);
 	}
-	trails = trails.slice(0, n + 1);
+	trails = trails.slice(0, Math.max(n, 1));
 };
 
 export const getTrails = () => trails;
@@ -33,8 +31,8 @@ export const wrapLearnedClauses = (): Clause[] => {
 	const clauses: Clause[] = [];
 	for (const trail of trails) {
 		if (trail.hasLemmaAttached()) {
-			const clause: Clause = trail.getClauseLearned();
-			if (!clause.hasBeenLearned()) {
+			const clause: Clause = trail.getAttachedLemma();
+			if (!clause.isLemma()) {
 				logFatal(
 					'Wrap Learned Clauses Error',
 					'Clause in trail marked as learned but clause itself is not marked as learned'
@@ -47,10 +45,8 @@ export const wrapLearnedClauses = (): Clause[] => {
 };
 
 export const updateTrails = (snapshot: Trail[]): void => {
+	if (snapshot.length === 0) {
+		logFatal('Update Trails Error', 'Cannot update trails to an empty snapshot');
+	}
 	trails = snapshot.map((trail) => trail.copy());
-};
-
-export const updateLastTrailEnding = (clauseTag: number): void => {
-	const clause: Clause = getClausePool().get(clauseTag);
-	trails[trails.length - 1].setConflictiveClause(clause);
 };

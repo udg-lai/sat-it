@@ -8,7 +8,7 @@ export const algorithmicUndo = (
 	trailIndex: number
 ): Trail => {
 	// First of all we have to slice the trail until the trailIndexValue.
-	shrinkTrails(trailIndex);
+	shrinkTrails(trailIndex + 1);
 	const latestTrail: Trail | undefined = getLatestTrail();
 	if (latestTrail === undefined) {
 		logFatal(

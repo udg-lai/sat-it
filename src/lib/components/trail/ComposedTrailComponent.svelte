@@ -61,7 +61,7 @@
 	}
 
 	function getClause(clauseTag: number): Clause {
-		return clausePool.get(clauseTag);
+		return clausePool.at(clauseTag);
 	}
 </script>
 

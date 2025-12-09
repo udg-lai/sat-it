@@ -14,7 +14,7 @@ import type { CRef } from '$lib/types/types.ts';
 export interface IClausePool {
 	eval(): AssignmentEval;
 	addClause(clause: Clause): CRef;
-	get(clause: number): Clause;
+	at(clause: number): Clause;
 	getUnitClauses(): Clause[];
 	getClauses(): Clause[];
 	size(): number;
@@ -69,8 +69,8 @@ class ClausePool implements IClausePool {
 		return this._addClause(clause);
 	}
 
-	get(tag: number): Clause {
-		return this._get(tag);
+	at(cRef: CRef): Clause {
+		return this._at(cRef);
 	}
 
 	getUnitClauses(): Clause[] {
@@ -131,13 +131,13 @@ class ClausePool implements IClausePool {
 		clause.setCRef(cRef);
 		this.clauses.set(cRef, clause);
 		// Quick access to the learned clauses
-		if (clause.hasBeenLearned()) {
+		if (clause.isLemma()) {
 			this.learnedClauses.add(cRef);
 		}
 		return cRef;
 	}
 
-	private _get(cRef: CRef): Clause {
+	private _at(cRef: CRef): Clause {
 		if (!this.clauses.has(cRef)) {
 			logFatal('ClausePool', `Accessing to an unknown clause by cRef ${cRef}`);
 		} else {

@@ -1,19 +1,18 @@
-import type { SvelteSet } from 'svelte/reactivity';
-import { getClausePool, getOccurrencesTableMapping } from './problem.svelte.ts';
-import { resetInspectedVariable, setInspectedVariable } from './inspectedVariable.svelte.ts';
 import type { CRef, Lit } from '$lib/types/types.ts';
+import { resetInspectedVariable, setInspectedVariable } from './inspectedVariable.svelte.ts';
+import { getClausePool, getOccurrencesTableMapping } from './problem.svelte.ts';
 
 let clausesToCheck: number[] = $state([]);
 let checkingIndex: number = $state(0);
 
-export function updateClausesToCheck(occurrenceList: Set<CRef>, literal: Lit) {
+export function updateClausesToCheck(occurrenceList: Set<CRef>, literal: Lit): void {
 	if (occurrenceList.size === 0) {
 		clausesToCheck = [];
 		checkingIndex = 0;
 	} else {
 		const clauses: Set<CRef> =
 			literal !== 0
-				? (getOccurrencesTableMapping().get(literal) as SvelteSet<number>)
+				? (getOccurrencesTableMapping().get(literal) as Set<CRef>)
 				: getClausePool().getSingleLiteralClauses();
 		clausesToCheck = [...clauses];
 		checkingIndex = clausesToCheck.length - occurrenceList.size;

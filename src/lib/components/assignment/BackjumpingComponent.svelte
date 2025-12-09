@@ -37,7 +37,7 @@
 		if (assignment.isBJ()) {
 			const reason: Reason = assignment.getReason();
 			if (isBackJumpingReason(reason)) {
-				return getClausePool().get(reason.cRef);
+				return getClausePool().at(reason.cRef);
 			} else {
 				logFatal('Reason error', 'The reason is not a back-jumping');
 			}

@@ -152,8 +152,8 @@ export const allAssigned: CDCL_ALL_VARIABLES_ASSIGNED_FUN = () => {
 export type CDCL_EMPTY_CLAUSE_FUN = () => boolean;
 
 export const emptyClauseDetection: CDCL_EMPTY_CLAUSE_FUN = () => {
-	const emptyClause: boolean = solverEmptyClauseDetection(getClausePool());
-	return emptyClause;
+	const hasConflict: boolean = solverEmptyClauseDetection(getClausePool());
+	return hasConflict;
 };
 
 export type CDCL_QUEUE_OCCURRENCE_LIST_FUN = (
@@ -314,7 +314,7 @@ export const buildConflictAnalysis: CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN =
 	}
 
 	const pool: ClausePool = getClausePool();
-	const conflictiveClause: Clause = pool.get(cRef).copy();
+	const conflictiveClause: Clause = pool.at(cRef).copy();
 
 	// Lastly, generate the conflict analysis structure
 	const assignmentCopy: Trail = assignment.copy();
@@ -364,7 +364,7 @@ export const resolutionUpdateCC: CDCL_RESOLUTION_UPDATE_CC_FUN = (
 	if (!isPropagationReason(reason)) {
 		logFatal('resolutionUpdateCC', 'The reason is not a propagation reason');
 	}
-	const reasonClause: Clause = getClausePool().get(reason.cRef);
+	const reasonClause: Clause = getClausePool().at(reason.cRef);
 	const resolvent: Clause = cc.resolution(reasonClause);
 	solver.updateConflictClause(resolvent);
 	return resolvent;
@@ -385,7 +385,7 @@ export const learnConflictClause: CDCL_LEARN_CONFLICT_CLAUSE_FUN = (
 	lemma: Clause
 ) => {
 	//Set the lemma as learnt. This will be the clause that will be added to the pool.
-	lemma.setAsLearned();
+	lemma.setAsLemma();
 
 	//The lemma is stored inside the pool
 	const cRef: CRef = getProblemStore().addClause(lemma);

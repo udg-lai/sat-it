@@ -38,7 +38,7 @@ export const allAssigned = (pool: VariablePool): boolean => {
 };
 
 export const decide = (pool: VariablePool, algorithm: string): Lit => {
-	const trail: Trail = obtainTrail();
+	const trail: Trail = getLatestTrail();
 	const assignmentEvent: AssignmentEvent = getAssignment();
 	let manualAssignment: boolean = false;
 
@@ -76,7 +76,7 @@ export const decide = (pool: VariablePool, algorithm: string): Lit => {
 };
 
 export const clauseEvaluation = (pool: ClausePool, clauseTag: number): ClauseEval => {
-	const clause = pool.get(clauseTag);
+	const clause = pool.at(clauseTag);
 	const evaluation: ClauseEval = clause.eval();
 	return evaluation;
 };
@@ -87,8 +87,8 @@ export const unitPropagation = (
 	cRef: CRef,
 	assignmentReason: 'up' | 'backjumping'
 ): Lit => {
-	const trail: Trail = obtainTrail();
-	const clause: Clause = clauses.get(cRef);
+	const trail: Trail = getLatestTrail();
+	const clause: Clause = clauses.at(cRef);
 
 	if (!clause.isUnit()) {
 		logFatal('Unit Propagation', `Clause ${cRef} is not unit when performing unit propagation`);
@@ -117,11 +117,6 @@ export const unitPropagation = (
 	increaseNoUnitPropagations();
 
 	return lit;
-};
-
-const obtainTrail = (): Trail => {
-	const trail: Trail = getLatestTrail() ?? new Trail();
-	return trail;
 };
 
 export const complementaryOccurrences = (

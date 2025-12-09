@@ -27,8 +27,8 @@ export class Trail {
 	private conflictAnalysisCtx: Either<ConflictAnalysisContext, () => never>[] = $state([]); // this is just for representing the conflict analysis view
 	private upContext: Either<UPContext, () => never>[] = $derived.by(() => this._upContext());
 	private fullView: boolean = $state(false); // UI state for knowing whenever for that trail it was required to show more information
-	private lemmaAttached: Clause | undefined = $state(undefined);
-	private ccAttached: Clause | undefined = $state(undefined);
+	private lemma: Clause | undefined = $state(undefined);
+	private conflictiveClause: Clause | undefined = $state(undefined);
 	private state: TrailState = $state('running');
 	private trailHeight: number = $derived.by(() => this._computeHeight());
 	private readonly defaultTrailHeight: number = 56;
@@ -40,8 +40,8 @@ export class Trail {
 		newTrail.dlBookmark = [...this.dlBookmark];
 		newTrail.followUPIndex = this.followUPIndex;
 		newTrail.dl = this.dl;
-		newTrail.lemmaAttached = this.lemmaAttached;
-		newTrail.ccAttached = this.ccAttached;
+		newTrail.lemma = this.lemma;
+		newTrail.conflictiveClause = this.conflictiveClause;
 		newTrail.conflictAnalysisCtx = [...this.conflictAnalysisCtx];
 		newTrail.state = this.state;
 		return newTrail;
@@ -60,9 +60,9 @@ export class Trail {
 	}
 
 	cleanConflict(): void {
-		this.ccAttached = undefined;
+		this.conflictiveClause = undefined;
 		this.conflictAnalysisCtx = [];
-		this.lemmaAttached = undefined;
+		this.lemma = undefined;
 		this.state = 'running';
 	}
 
@@ -116,16 +116,16 @@ export class Trail {
 		logFatal(`Unable to determine decision level for variable ${variable}`);
 	}
 
-	setConflictiveClause(clause: Clause): void {
-		this.ccAttached = clause;
+	attachConflictiveClause(clause: Clause): void {
+		this.conflictiveClause = clause;
 	}
 
 	hasConflictiveClause(): boolean {
-		return this.ccAttached !== undefined;
+		return this.conflictiveClause !== undefined;
 	}
 
 	getConflictiveClause(): Clause | undefined {
-		return this.ccAttached;
+		return this.conflictiveClause;
 	}
 
 	getConflictAnalysisCtx(): Either<ConflictAnalysisContext, () => never>[] {
@@ -160,19 +160,22 @@ export class Trail {
 		return assignment;
 	}
 
-	getClauseLearned(): Clause {
+	getAttachedLemma(): Clause {
 		// Calling this function when no clause was learned is an error
 		if (!this.hasLemmaAttached())
 			logFatal('Getting learned clause', 'No clause was learned in this trail');
-		return this.lemmaAttached as Clause;
+		return this.lemma as Clause;
 	}
 
 	hasLemmaAttached(): boolean {
-		return this.lemmaAttached !== undefined;
+		return this.lemma !== undefined;
 	}
 
-	attachLemma(lemma: Clause): void {
-		this.lemmaAttached = lemma;
+	attachLemma(clause: Clause): void {
+		if (!clause.isLemma()) {
+			logFatal('Attaching learned clause', 'Clause to be attached is not marked as learned');
+		}
+		this.lemma = clause;
 	}
 
 	getFollowUpIndex(): number {
@@ -356,7 +359,7 @@ export class Trail {
 		if (this.fullView) {
 			const solver = getSolverMachine();
 			if (solver.identify() === 'bkt') {
-				if (this.ccAttached !== undefined) {
+				if (this.conflictiveClause !== undefined) {
 					height += this.canvasHeight; // Extra height for conflictive clause
 				}
 			} else {

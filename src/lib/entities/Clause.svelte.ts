@@ -57,11 +57,11 @@ class Clause implements Comparable<Clause> {
 		this.cr = cr;
 	}
 
-	hasBeenLearned(): boolean {
+	isLemma(): boolean {
 		return this.learned;
 	}
 
-	setAsLearned(): void {
+	setAsLemma(): void {
 		this.learned = true;
 	}
 
