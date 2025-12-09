@@ -1,4 +1,4 @@
-import { assertiveness } from '$lib/algorithms/assertive.ts';
+import { assertiveAlgorithm } from '$lib/algorithms/assertive.ts';
 import type Clause from '$lib/entities/Clause.svelte.ts';
 import { Queue } from '$lib/entities/Queue.svelte.ts';
 import type { Trail } from '$lib/entities/Trail.svelte.ts';
@@ -14,7 +14,7 @@ import {
 	learnClauses,
 	syncProblemWithTrail
 } from '$lib/states/problem.svelte.ts';
-import { logFatal } from '$lib/states/toasts.svelte.ts';
+import { logError, logFatal } from '$lib/states/toasts.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import { SolverMachine } from '../SolverMachine.svelte.ts';
 import type { ConflictAnalysis, OccurrenceList } from '../types.ts';
@@ -110,24 +110,16 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 		return this.conflictAnalysis as ConflictAnalysis;
 	}
 
-	getConflictAnalysis(): ConflictAnalysis | undefined {
-		if (this.conflictAnalysis === undefined) {
-			return undefined;
-		} else {
-			return {
-				trail: this.conflictAnalysis.trail.copy(),
-				conflictClause: this.conflictAnalysis.conflictClause.copy(),
-				ldlAssignments: [...this.conflictAnalysis.ldlAssignments]
-			} as ConflictAnalysis;
+	getConflictAnalysis(): ConflictAnalysis {
+		if (!this.inConflictAnalysis()) {
+			logError('Conflict Analysis exception', 'The conflict analysis can not be undefined');
 		}
-	}
-
-	isAssertive() {
-		if (this.conflictAnalysis === undefined) {
-			logFatal('Assertive exception', 'The conflict analysis can not be undefined');
-		}
-		const { conflictClause, ldlAssignments: decisionLevelVariables } = this.conflictAnalysis;
-		return assertiveness(conflictClause, decisionLevelVariables);
+		const { trail, conflictClause, ldlAssignments } = this.conflictAnalysis as ConflictAnalysis;
+		return {
+			trail: trail.copy(),
+			conflictClause: conflictClause.copy(),
+			ldlAssignments: [...ldlAssignments]
+		} as ConflictAnalysis;
 	}
 
 	// ** general functions **
@@ -227,7 +219,11 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 	}
 
 	protected async solveCAStepByStep(): Promise<void> {
-		this.stepByStep(() => !this.isAssertive());
+		const ccIsAssertive = () => {
+			const { conflictClause, ldlAssignments } = this.getConflictAnalysis();
+			return assertiveAlgorithm(conflictClause, ldlAssignments);
+		};
+		this.stepByStep(() => !ccIsAssertive());
 	}
 
 	onConflictDetection(): boolean {

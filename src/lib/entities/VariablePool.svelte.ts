@@ -1,4 +1,5 @@
 import { logFatal } from '$lib/states/toasts.svelte.ts';
+import type { Var } from '$lib/types/types.ts';
 import { makeJust, makeNothing, type Maybe } from '../types/maybe.ts';
 import Variable, { type Assignment } from './Variable.svelte.ts';
 
@@ -40,8 +41,8 @@ export class VariablePool implements IVariablePool {
 		return this.nvPointer === this.capacity;
 	}
 
-	unassign(variableId: number): void {
-		this._assign(variableId, undefined);
+	unassign(varId: Var): void {
+		this._assign(varId, undefined);
 	}
 
 	assign(variableId: number, assignment: Assignment): void {
@@ -72,8 +73,8 @@ export class VariablePool implements IVariablePool {
 		return new Set([...assigned]);
 	}
 
-	private _assign(variableId: number, assignment: Assignment): void {
-		const varIndex: number = this.checkIndex(variableId);
+	private _assign(varId: Var, assignment: Assignment): void {
+		const varIndex: number = this.checkIndex(varId);
 		const variable: Variable = this.variables[varIndex];
 		const pAssignment: Assignment = variable.getAssignment();
 		if (pAssignment !== undefined) {

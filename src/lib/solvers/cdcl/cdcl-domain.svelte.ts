@@ -4,6 +4,7 @@ import Clause, {
 	type ClauseEval
 } from '$lib/entities/Clause.svelte.ts';
 import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
+import Literal from '$lib/entities/Literal.svelte.ts';
 import type { Trail } from '$lib/entities/Trail.svelte.ts';
 import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
 import { isPropagationReason, type Reason } from '$lib/entities/VariableAssignment.ts';
@@ -22,19 +23,18 @@ import {
 	cleanClausesToCheck,
 	updateClausesToCheck
 } from '$lib/states/conflict-detection-state.svelte.ts';
+import { resetInspectedVariable } from '$lib/states/inspectedVariable.svelte.ts';
 import {
 	getClausePool,
 	getOccurrencesTableMapping,
 	getProblemStore,
 	getVariablePool
 } from '$lib/states/problem.svelte.ts';
-import { getLatestTrail, stackTrail } from '$lib/states/trails.svelte.ts';
 import { logFatal, logInfo } from '$lib/states/toasts.svelte.ts';
+import { getLatestTrail, stackTrail } from '$lib/states/trails.svelte.ts';
+import type { CRef, Lit } from '$lib/types/types.ts';
 import type { OccurrenceList } from '../types.ts';
 import type { CDCL_SolverMachine } from './cdcl-solver-machine.svelte.ts';
-import { resetInspectedVariable } from '$lib/states/inspectedVariable.svelte.ts';
-import type { CRef, Lit } from '$lib/types/types.ts';
-import Literal from '$lib/entities/Literal.svelte.ts';
 
 // ** state inputs **
 
@@ -325,7 +325,8 @@ export const buildConflictAnalysis: CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN =
 export type CDCL_ASSERTING_CLAUSE_FUN = (solver: CDCL_SolverMachine) => boolean;
 
 export const assertingClause: CDCL_ASSERTING_CLAUSE_FUN = (solver: CDCL_SolverMachine) => {
-	return solver.isAssertive();
+	const { conflictClause, ldlAssignments } = solver.getConflictAnalysis();
+	return conflictClause.isAssertive(ldlAssignments);
 };
 
 export type CDCL_PICK_LAST_ASSIGNMENT_FUN = (trail: Trail) => VariableAssignment;
@@ -372,9 +373,9 @@ export const resolutionUpdateCC: CDCL_RESOLUTION_UPDATE_CC_FUN = (
 export type CDCL_DELETE_LAST_ASSIGNMENT_FUN = (trail: Trail) => void;
 
 export const deleteLastAssignment: CDCL_DELETE_LAST_ASSIGNMENT_FUN = (trail: Trail) => {
-	const assignment: VariableAssignment = trail.pop() as VariableAssignment;
+	const assignment: VariableAssignment = trail.pop();
 	const pool: VariablePool = getVariablePool();
-	pool.unassign(assignment.getVariable().toInt());
+	pool.unassign(assignment.toVar());
 };
 
 export type CDCL_LEARN_CONFLICT_CLAUSE_FUN = (trail: Trail, conflictClause: Clause) => number;

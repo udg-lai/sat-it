@@ -1,3 +1,4 @@
+import { assertiveAlgorithm } from '$lib/algorithms/assertive.ts';
 import logicResolution from '$lib/algorithms/resolution.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
 import type { CRef, Lit } from '$lib/types/types.ts';
@@ -66,6 +67,10 @@ class Clause implements Comparable<Clause> {
 
 	isTemporal(): boolean {
 		return this.cr === undefined;
+	}
+
+	isAssertive(literals: Lit[]): boolean {
+		return assertiveAlgorithm(this, literals);
 	}
 
 	fstUnassignedLiteral(): Literal {
