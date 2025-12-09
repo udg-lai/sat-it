@@ -2,15 +2,12 @@
 	import { changeInstanceEventBus } from '$lib/events/events.ts';
 	import { getActiveInstance } from '$lib/states/instances.svelte.ts';
 	import { Modal } from 'flowbite-svelte';
-	import { ExclamationCircleOutline, RefreshOutline } from 'flowbite-svelte-icons';
-	import DynamicRender from '../../DynamicRender.svelte';
+	import { ExclamationCircleOutline } from 'flowbite-svelte-icons';
 	import '../style.css';
-
-	const resetProps = {
-		size: 'md'
-	};
+	import ImageRender from '$lib/components/tools/ImageRender.svelte';
 
 	let resetModal: boolean = $state(false);
+	let resetIcon = '/icons/Reset.svg';
 </script>
 
 <button
@@ -20,8 +17,7 @@
 		resetModal = true;
 	}}
 >
-	<DynamicRender component={RefreshOutline} props={resetProps} />
-
+	<ImageRender icon={resetIcon} alt="Reset Problem icon" />
 	<Modal bind:open={resetModal} size="xs" class="modal-style" dismissable={false}>
 		<div class="text-center">
 			<ExclamationCircleOutline class="mx-auto mb-4 h-12 w-12 text-red-600" />

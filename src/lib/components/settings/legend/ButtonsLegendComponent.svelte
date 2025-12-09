@@ -1,16 +1,7 @@
 <script lang="ts">
 	import './style.css';
-	import DescriptionComponent from './DescriptionComponent.svelte';
-	import { RefreshOutline, ReplyOutline } from 'flowbite-svelte-icons';
 	import ImageDescriptionComponent from './ImageDescriptionComponent.svelte';
 
-	const reverseProps = {
-		class: 'transform -scale-x-100',
-		size: 'lg'
-	};
-	const regularProps = {
-		size: 'lg'
-	};
 	let decision = '/icons/Decision.svg';
 	let automaticSteps = '/icons/Automatic Steps.svg';
 	let backtracking = '/icons/Backtracking.svg';
@@ -25,6 +16,9 @@
 	let expand = '/icons/Expand.svg';
 	let collapse = '/icons/Collapse.svg';
 	let solve = '/icons/Solve.svg';
+	let reset = '/icons/Reset.svg';
+	let userUndo = '/icons/User Undo.svg';
+	let userRedo = '/icons/User Redo.svg';
 </script>
 
 <div class="heading-class">
@@ -94,19 +88,19 @@
 	/>
 
 	<division class="pt-1">Non-algorithmic buttons</division>
-	<DescriptionComponent
-		component={RefreshOutline}
-		componentProps={regularProps}
+	<ImageDescriptionComponent
+		icon={reset}
+		alt={'Reset problem'}
 		description={'Reset the solving process of the current problem.'}
 	/>
-	<DescriptionComponent
-		component={ReplyOutline}
-		componentProps={regularProps}
+	<ImageDescriptionComponent
+		icon={userUndo}
+		alt={'Undo user action'}
 		description={'Undo until the latest press button.'}
 	/>
-	<DescriptionComponent
-		component={ReplyOutline}
-		componentProps={reverseProps}
+	<ImageDescriptionComponent
+		icon={userRedo}
+		alt={'Redo user action'}
 		description={'Redo the undone state.'}
 	/>
 	<ImageDescriptionComponent
