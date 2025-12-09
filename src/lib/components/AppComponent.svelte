@@ -101,6 +101,7 @@
 	function algorithmicUndoSave(a: AlgorithmicUndoEvent): void {
 		const latestTrail: Trail = algorithmicUndo(a.objectiveAssignment, a.trailIndex);
 		getProblemStore().updateProblemFromTrail(latestTrail);
+		updateTrailsEventBus.emit(getTrails());
 		updateSolverMachine(DECIDE_STATE_ID, undefined);
 		record(trails, solverMachine.getActiveStateId(), getStatistics(), solverMachine.getRecord());
 	}
