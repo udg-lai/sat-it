@@ -7,8 +7,8 @@ import type { Lit } from '$lib/types/types.ts';
 // (including unit propagations and the decided variable).
 // A clause is assertive iff it contains exactly one complementary literal \in literals.
 export const assertiveAlgorithm = (clause: Clause, literals: Lit[]): boolean => {
-	if (clause.isEmpty()) {
-		logFatal('Assertiveness check failed', 'Empty clause not allowed in assertiveness check');
+	if (literals.length === 0) {
+		logFatal('Assertive Algorithm', 'The set of literals cannot be empty when checking assertiveness');
 	}
 	let matches = 0;
 	let i = 0;
