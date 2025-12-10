@@ -25,7 +25,7 @@
 	import { getActiveInstance, getInstance } from '$lib/states/instances.svelte.ts';
 	import { getProblemStore, syncProblemWithInstance } from '$lib/states/problem.svelte.ts';
 	import {
-	activateSolverMachine,
+		activateSolverMachine,
 		getSolverMachine,
 		stopSolverMachine,
 		updateSolverMachine
@@ -141,9 +141,8 @@
 		}
 	}
 
-
 	function init() {
-		onInstanceChanged(getActiveInstance().getInstanceName())
+		onInstanceChanged(getActiveInstance().getInstanceName());
 		onAlgorithmChanged(getConfiguredAlgorithm());
 	}
 

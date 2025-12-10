@@ -1,4 +1,3 @@
-import { getConfiguredAlgorithm } from '$lib/components/settings/engine/state.svelte.ts';
 import { makeBKTSolver } from '$lib/solvers/backtracking/bkt-solver-machine.svelte.ts';
 import { makeCDCLSolver } from '$lib/solvers/cdcl/cdcl-solver-machine.svelte.ts';
 import { makeDPLLSolver } from '$lib/solvers/dpll/dpll-solver-machine.svelte.ts';
@@ -24,7 +23,7 @@ export const activateSolverMachine = (algorithm: Algorithm): void => {
 	} else {
 		logFatal('No SolverStateMachine was created');
 	}
-}
+};
 
 export const updateSolverMachine = (
 	stateId: number,
