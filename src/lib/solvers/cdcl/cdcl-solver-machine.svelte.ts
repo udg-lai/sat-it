@@ -125,7 +125,7 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 	getRecord(): Record<string, unknown> {
 		return {
 			queue: this.getQueue(),
-			conflictAnalysis: this.getConflictAnalysis()
+			conflictAnalysis: this.inConflictAnalysis() ? this.getConflictAnalysis() : undefined
 		};
 	}
 
