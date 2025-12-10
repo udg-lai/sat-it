@@ -9,7 +9,7 @@ import { logFatal } from '$lib/states/toasts.svelte.ts';
 import { getLatestTrail } from '$lib/states/trails.svelte.ts';
 import type { CRef, Lit } from '$lib/types/types.ts';
 import type { NonFinalState } from '../StateMachine.svelte.ts';
-import type { OccurrenceList } from '../types.ts';
+import type { Occurrences } from '../types.ts';
 import type {
 	BKT_ALL_CLAUSES_CHECKED_FUN,
 	BKT_ALL_CLAUSES_CHECKED_INPUT,
@@ -52,14 +52,14 @@ export const initialTransition = (solver: BKT_SolverMachine): void => {
 
 export const preConflictDetection = (solver: BKT_SolverMachine): void => {
 	const stateMachine: BKT_StateMachine = solver.getStateMachine();
-	const { clauses }: OccurrenceList = solver.consultOccurrenceList();
+	const { occ: clauses }: Occurrences = solver.consultOccurrenceList();
 	conflictDetectionBlock(stateMachine, clauses);
 };
 
 export const analyzeClause = (solver: BKT_SolverMachine): void => {
 	const stateMachine: BKT_StateMachine = solver.getStateMachine();
-	const pendingOccurrenceList: OccurrenceList = solver.consultOccurrenceList();
-	const pendingClauses: Set<number> = pendingOccurrenceList.clauses;
+	const pendingOccurrenceList: Occurrences = solver.consultOccurrenceList();
+	const pendingClauses: Set<number> = pendingOccurrenceList.occ;
 	const cRef: number = getCheckedClause();
 	deleteClauseTransition(stateMachine, pendingClauses, cRef);
 	conflictDetectionBlock(stateMachine, pendingClauses);

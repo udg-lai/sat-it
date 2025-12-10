@@ -5,7 +5,7 @@ import {
 } from '$lib/states/conflict-detection-state.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import { SolverMachine } from '../SolverMachine.svelte.ts';
-import type { OccurrenceList } from '../types.ts';
+import type { Occurrences } from '../types.ts';
 import type { DPLL_FUN, DPLL_INPUT } from './dpll-domain.svelte.ts';
 import {
 	analyzeClause,
@@ -25,24 +25,24 @@ export const makeDPLLSolver = (): DPLL_SolverMachine => {
 };
 
 export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
-	pendingOccurrenceLists: Queue<OccurrenceList> = $state(new Queue<OccurrenceList>());
+	pendingOccurrenceLists: Queue<Occurrences> = $state(new Queue<Occurrences>());
 
 	constructor(stopTimeMS: number) {
 		const stateMachine: DPLL_StateMachine = makeDPLLMachine();
 		super(stateMachine, 'dpll', stopTimeMS);
-		this.pendingOccurrenceLists = new Queue<OccurrenceList>();
+		this.pendingOccurrenceLists = new Queue<Occurrences>();
 	}
 
-	postpone(pendingItem: OccurrenceList): void {
+	postpone(pendingItem: Occurrences): void {
 		this.pendingOccurrenceLists.enqueue(pendingItem);
 	}
 
-	resolvePostponed(): OccurrenceList | undefined {
+	resolvePostponed(): Occurrences | undefined {
 		return this.pendingOccurrenceLists.dequeue();
 	}
 
-	consultPostponed(): OccurrenceList {
-		return this.pendingOccurrenceLists.pick();
+	consultPostponed(): Occurrences {
+		return this.pendingOccurrenceLists.element();
 	}
 
 	thereArePostponed(): boolean {
@@ -53,12 +53,12 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 		return this.pendingOccurrenceLists.size();
 	}
 
-	getQueue(): Queue<OccurrenceList> {
-		const returnQueue: Queue<OccurrenceList> = new Queue();
+	getQueue(): Queue<Occurrences> {
+		const returnQueue: Queue<Occurrences> = new Queue();
 		for (const originalItem of this.pendingOccurrenceLists.toArray()) {
-			const copiedSet = new SvelteSet<number>(originalItem.clauses);
-			const copiedItem: OccurrenceList = {
-				clauses: copiedSet,
+			const copiedSet = new SvelteSet<number>(originalItem.occ);
+			const copiedItem: Occurrences = {
+				occ: copiedSet,
 				literal: originalItem.literal
 			};
 			returnQueue.enqueue(copiedItem);
@@ -78,18 +78,18 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 			cleanClausesToCheck();
 			return;
 		}
-		const recordedPendingOccurrenceLists = record['queue'] as Queue<OccurrenceList>;
+		const recordedPendingOccurrenceLists = record['queue'] as Queue<Occurrences>;
 		this.pendingOccurrenceLists.clear();
 		for (const pendingConflict of recordedPendingOccurrenceLists.toArray()) {
-			const copiedSet = new SvelteSet<number>(pendingConflict.clauses);
-			const copiedItem: OccurrenceList = {
-				clauses: copiedSet,
+			const copiedSet = new SvelteSet<number>(pendingConflict.occ);
+			const copiedItem: Occurrences = {
+				occ: copiedSet,
 				literal: pendingConflict.literal
 			};
 			this.pendingOccurrenceLists.enqueue(copiedItem);
 		}
 		if (!this.pendingOccurrenceLists.isEmpty()) {
-			const { clauses, literal }: OccurrenceList = this.pendingOccurrenceLists.pick();
+			const { occ: clauses, literal }: Occurrences = this.pendingOccurrenceLists.element();
 			updateClausesToCheck(clauses, literal);
 		} else {
 			cleanClausesToCheck();
@@ -128,7 +128,7 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 	}
 
 	protected async solveToNextVariableStepByStep(): Promise<void> {
-		const postponedClauses: Set<number> = this.consultPostponed().clauses;
+		const postponedClauses: Set<number> = this.consultPostponed().occ;
 		this.stepByStep(() => postponedClauses.size !== 0);
 	}
 

@@ -33,7 +33,7 @@ import {
 import { logFatal, logInfo } from '$lib/states/toasts.svelte.ts';
 import { getLatestTrail, stackTrail } from '$lib/states/trails.svelte.ts';
 import type { CRef, Lit } from '$lib/types/types.ts';
-import type { OccurrenceList } from '../types.ts';
+import type { Occurrences } from '../types.ts';
 import type { CDCL_SolverMachine } from './cdcl-solver-machine.svelte.ts';
 
 // ** state inputs **
@@ -167,8 +167,8 @@ export const queueClauseSet: CDCL_QUEUE_OCCURRENCE_LIST_FUN = (
 	clauses: Set<CRef>,
 	solverStateMachine: CDCL_SolverMachine
 ) => {
-	const occurrenceList: OccurrenceList = { clauses, literal };
-	solverStateMachine.postpone(occurrenceList);
+	const occurrenceList: Occurrences = { occ: clauses, literal };
+	solverStateMachine.enqueueOccurrences(occurrenceList);
 	return solverStateMachine.leftToPostpone();
 };
 
@@ -177,7 +177,7 @@ export type CDCL_UNSTACK_OCCURRENCE_LIST_FUN = (solverStateMachine: CDCL_SolverM
 export const unstackClauseSet: CDCL_UNSTACK_OCCURRENCE_LIST_FUN = (
 	solverStateMachine: CDCL_SolverMachine
 ) => {
-	return solverStateMachine.resolvePostponed();
+	return solverStateMachine.dequeueOccurrences();
 };
 
 export type CDCL_UNIT_CLAUSES_DETECTION_FUN = () => Set<number>;
@@ -201,7 +201,7 @@ export type CDCL_PICK_CLAUSE_SET_FUN = (solverStateMachine: CDCL_SolverMachine) 
 export const pickPendingClauseSet: CDCL_PICK_CLAUSE_SET_FUN = (
 	solverStateMachine: CDCL_SolverMachine
 ) => {
-	const { clauses, literal }: OccurrenceList = solverStateMachine.consultPostponed();
+	const { occ: clauses, literal }: Occurrences = solverStateMachine.nextOccurrences();
 	updateClausesToCheck(clauses, literal);
 	return clauses;
 };
@@ -238,7 +238,7 @@ export type CDCL_CHECK_PENDING_OCCURRENCE_LISTS_FUN = (
 export const thereAreJobPostponed: CDCL_CHECK_PENDING_OCCURRENCE_LISTS_FUN = (
 	solverStateMachine: CDCL_SolverMachine
 ) => {
-	return solverStateMachine.thereArePostponed();
+	return !solverStateMachine.occurrenceQueueEmpty();
 };
 
 export type CDCL_UNIT_CLAUSE_FUN = (cRef: number) => boolean;
@@ -276,7 +276,7 @@ export const emptyClauseSet: CDCL_EMPTY_OCCURRENCE_LISTS_FUN = (
 	solverStateMachine: CDCL_SolverMachine
 ) => {
 	while (solverStateMachine.leftToPostpone() > 0) {
-		solverStateMachine.resolvePostponed();
+		solverStateMachine.dequeueOccurrences();
 	}
 	cleanClausesToCheck();
 };

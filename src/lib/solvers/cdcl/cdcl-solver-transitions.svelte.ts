@@ -14,7 +14,7 @@ import { logError, logFatal } from '$lib/states/toasts.svelte.ts';
 import { getLatestTrail } from '$lib/states/trails.svelte.ts';
 import type { CRef, Lit } from '$lib/types/types.ts';
 import { type NonFinalState } from '../StateMachine.svelte.ts';
-import type { ConflictAnalysis, OccurrenceList } from '../types.ts';
+import type { ConflictAnalysis, Occurrences } from '../types.ts';
 import type {
 	CDCL_ALL_CLAUSES_CHECKED_FUN,
 	CDCL_ALL_CLAUSES_CHECKED_INPUT,
@@ -87,15 +87,15 @@ export const initialTransition = (solver: CDCL_SolverMachine): void => {
 
 export const preConflictDetection = (solver: CDCL_SolverMachine): void => {
 	const stateMachine: CDCL_StateMachine = solver.getStateMachine();
-	const pendingConflict: OccurrenceList = solver.consultPostponed();
-	const clauseSet: Set<number> = pendingConflict.clauses;
+	const pendingConflict: Occurrences = solver.nextOccurrences();
+	const clauseSet: Set<number> = pendingConflict.occ;
 	conflictDetectionBlock(solver, stateMachine, clauseSet);
 };
 
 export const analyzeClause = (solver: CDCL_SolverMachine): void => {
 	const stateMachine: CDCL_StateMachine = solver.getStateMachine();
-	const pendingConflict: OccurrenceList = solver.consultPostponed();
-	const clauseSet: Set<number> = pendingConflict.clauses;
+	const pendingConflict: Occurrences = solver.nextOccurrences();
+	const clauseSet: Set<number> = pendingConflict.occ;
 	const cRef: number | undefined = getCheckedClause();
 	if (cRef === undefined) {
 		logFatal('Unexpected undefined in inspectedClause');
@@ -201,7 +201,7 @@ const afterComplementaryBlock = (
 const conflictDetectionBlock = (
 	solver: CDCL_SolverMachine,
 	stateMachine: CDCL_StateMachine,
-	clauseSet: Set<number>
+	clauseSet: Set<CRef>
 ): void => {
 	const allClausesChecked = allClausesCheckedTransition(stateMachine, clauseSet);
 	if (allClausesChecked) {

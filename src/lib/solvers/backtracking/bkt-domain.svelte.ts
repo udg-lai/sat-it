@@ -10,7 +10,7 @@ import {
 	emptyClauseDetection as solverEmptyClauseDetection,
 	nonDecisionMade as solverNonDecisionMade
 } from '$lib/solvers/shared.svelte.ts';
-import type { OccurrenceList } from '$lib/solvers/types.ts';
+import type { Occurrences } from '$lib/solvers/types.ts';
 import {
 	cleanClausesToCheck,
 	updateClausesToCheck
@@ -99,7 +99,7 @@ export const queueOccurrenceList: BKT_QUEUE_OCCURRENCE_LIST_FUN = (
 ) => {
 	solverStateMachine.setOccurrenceList({
 		literal: complementary,
-		clauses: clauses
+		occ: clauses
 	});
 };
 
@@ -108,7 +108,7 @@ export type BKT_PICK_PENDING_CLAUSE_SET_FUN = (solverStateMachine: BKT_SolverMac
 export const pickPendingOccurrenceList: BKT_PICK_PENDING_CLAUSE_SET_FUN = (
 	solverStateMachine: BKT_SolverMachine
 ) => {
-	const { clauses, literal }: OccurrenceList = solverStateMachine.consultOccurrenceList();
+	const { occ: clauses, literal }: Occurrences = solverStateMachine.consultOccurrenceList();
 	updateClausesToCheck(clauses, literal);
 	return clauses;
 };

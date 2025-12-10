@@ -64,6 +64,8 @@
 	}
 
 	async function stateMachineEvent(s: StateMachineEvent) {
+		console.log('State machine event:', s);
+
 		if (s !== 'automatic_steps' && s !== 'step') {
 			updateOnStep = false;
 			solverMachine.disableStops();

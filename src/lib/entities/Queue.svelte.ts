@@ -20,7 +20,7 @@ export class Queue<T> {
 		return head;
 	}
 
-	pick(): T {
+	element(): T {
 		if (this.isEmpty()) {
 			logError('Can not pick first element of an empty queue');
 		}

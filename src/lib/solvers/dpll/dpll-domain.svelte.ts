@@ -22,7 +22,7 @@ import {
 import { logFatal } from '$lib/states/toasts.svelte.ts';
 import type { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
 import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
-import type { OccurrenceList } from '../types.ts';
+import type { Occurrences } from '../types.ts';
 import { isUnitClause, isUnSATClause, type ClauseEval } from '$lib/entities/Clause.svelte.ts';
 import type { CRef, Lit } from '$lib/types/types.ts';
 
@@ -122,7 +122,7 @@ export const queueOccurrenceList: DPLL_QUEUE_OCCURRENCE_LIST_FUN = (
 	clauses: Set<number>,
 	solverStateMachine: DPLL_SolverMachine
 ) => {
-	const occurrenceList: OccurrenceList = { clauses, literal };
+	const occurrenceList: Occurrences = { occ: clauses, literal };
 	solverStateMachine.postpone(occurrenceList);
 	return solverStateMachine.leftToPostpone();
 };
@@ -154,7 +154,7 @@ export const deleteClause: DPLL_DELETE_CLAUSE_FUN = (clauses: Set<number>, cRef:
 export type DPLL_PICK_CLAUSE_SET_FUN = (solverStateMachine: DPLL_SolverMachine) => Set<CRef>;
 
 export const pickClauseSet: DPLL_PICK_CLAUSE_SET_FUN = (solverStateMachine: DPLL_SolverMachine) => {
-	const { clauses, literal }: OccurrenceList = solverStateMachine.consultPostponed();
+	const { occ: clauses, literal }: Occurrences = solverStateMachine.consultPostponed();
 	updateClausesToCheck(clauses, literal);
 	return clauses;
 };

@@ -10,7 +10,7 @@ import { logFatal } from '$lib/states/toasts.svelte.ts';
 import { getLatestTrail } from '$lib/states/trails.svelte.ts';
 import type { CRef, Lit } from '$lib/types/types.ts';
 import { type NonFinalState } from '../StateMachine.svelte.ts';
-import type { OccurrenceList } from '../types.ts';
+import type { Occurrences } from '../types.ts';
 import type {
 	DPLL_ALL_CLAUSES_CHECKED_FUN,
 	DPLL_ALL_CLAUSES_CHECKED_INPUT,
@@ -64,15 +64,15 @@ export const initialTransition = (solver: DPLL_SolverMachine): void => {
 
 export const preConflictDetection = (solver: DPLL_SolverMachine): void => {
 	const stateMachine: DPLL_StateMachine = solver.getStateMachine();
-	const pendingConflict: OccurrenceList = solver.consultPostponed();
-	const clauseSet: Set<number> = pendingConflict.clauses;
+	const pendingConflict: Occurrences = solver.consultPostponed();
+	const clauseSet: Set<number> = pendingConflict.occ;
 	conflictDetectionBlock(solver, stateMachine, clauseSet);
 };
 
 export const analyzeClause = (solver: DPLL_SolverMachine): void => {
 	const stateMachine: DPLL_StateMachine = solver.getStateMachine();
-	const pendingConflict: OccurrenceList = solver.consultPostponed();
-	const clauseSet: Set<number> = pendingConflict.clauses;
+	const pendingConflict: Occurrences = solver.consultPostponed();
+	const clauseSet: Set<number> = pendingConflict.occ;
 	const clauseTag: number | undefined = getCheckedClause();
 	if (clauseTag === undefined) {
 		logFatal('Unexpected undefined in inspectedClause');
