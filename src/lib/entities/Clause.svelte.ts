@@ -191,6 +191,10 @@ class Clause implements Comparable<Clause> {
 	): void {
 		this.literals.forEach(callback, thisArg);
 	}
+
+	toString(): string {
+		return '{' + this.literals.map((lit: Literal) => lit.toString()).join(', ') + '}';
+	}
 }
 
 export interface SATClause {

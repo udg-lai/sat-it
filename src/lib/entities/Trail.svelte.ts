@@ -78,7 +78,10 @@ export class Trail {
 		return this.assignments.slice(this.followUPIndex);
 	}
 
-	pickLastAssignment(): VariableAssignment {
+	last(): VariableAssignment {
+		if (this.isEmpty()) {
+			logFatal('Trail underflow', 'Trying to get the last assignment from an empty trail');
+		}
 		return this.assignments[this.assignments.length - 1];
 	}
 
@@ -158,6 +161,10 @@ export class Trail {
 			this.shrinkOneDL();
 		}
 		return assignment;
+	}
+
+	size(): number {
+		return this.assignments.length;
 	}
 
 	getAttachedLemma(): Clause {

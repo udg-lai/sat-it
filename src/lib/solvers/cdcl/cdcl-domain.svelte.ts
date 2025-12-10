@@ -332,7 +332,7 @@ export const assertingClause: CDCL_ASSERTING_CLAUSE_FUN = (solver: CDCL_SolverMa
 export type CDCL_PICK_LAST_ASSIGNMENT_FUN = (trail: Trail) => VariableAssignment;
 
 export const pickLastAssignment: CDCL_PICK_LAST_ASSIGNMENT_FUN = (trail: Trail) => {
-	const lastAssignment: VariableAssignment = trail.pickLastAssignment();
+	const lastAssignment: VariableAssignment = trail.last();
 	return lastAssignment;
 };
 

@@ -1,7 +1,6 @@
 import type Clause from '$lib/entities/Clause.svelte.ts';
 import type { Trail } from '$lib/entities/Trail.svelte.ts';
 import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
-import { isUnitPropagationReason } from '$lib/entities/VariableAssignment.ts';
 import { conflictDetectionEventBus, toggleTrailViewEventBus } from '$lib/events/events.ts';
 import {
 	cleanClausesToCheck,
@@ -125,31 +124,30 @@ export const preConflictAnalysis = (solver: CDCL_SolverMachine) => {
 	conflictAnalysis(solver);
 };
 
-export const conflictAnalysis = (solver: CDCL_SolverMachine): void => {
-	const stateMachine: CDCL_StateMachine = solver.getStateMachine();
-	const conflictAnalysis: ConflictAnalysis = solver.consultConflictAnalysis();
+export const conflictAnalysis = (cdclSolver: CDCL_SolverMachine): void => {
+	const stateMachine: CDCL_StateMachine = cdclSolver.getStateMachine();
+	const conflictAnalysis: ConflictAnalysis = cdclSolver.consultConflictAnalysis();
 
-	// Last assignment must be an UP
 	const lastAssignment: VariableAssignment = pickLastAssignmentTransition(
 		stateMachine,
 		conflictAnalysis
 	);
 
-	if (!isUnitPropagationReason(lastAssignment.getReason())) {
+	if (!lastAssignment.wasPropagated()) {
 		logError(
 			'CDCL Conflict Analysis',
 			'The last assignment in the conflict analysis should be a unit propagation'
 		);
 	}
 
-	const variableAppear: boolean = complementaryInCCTransition(solver, lastAssignment);
+	const complementaryAppear: boolean = complementaryInCCTransition(cdclSolver, lastAssignment);
 	const latestTrail: Trail | undefined = getLatestTrail();
 	if (latestTrail === undefined) logFatal('CDCL solver', 'Latest trail should not be undefined');
 
-	if (variableAppear) {
+	if (complementaryAppear) {
 		const resolvent: Clause = resolutionUpdateCCTransition(
 			stateMachine,
-			solver,
+			cdclSolver,
 			conflictAnalysis,
 			lastAssignment
 		);
@@ -162,12 +160,12 @@ export const conflictAnalysis = (solver: CDCL_SolverMachine): void => {
 	}
 
 	deleteLastAssignmentTransition(stateMachine, conflictAnalysis);
-	const isAsserting: boolean = assertingClauseTransition(stateMachine, solver);
+	const isAsserting: boolean = assertingClauseTransition(stateMachine, cdclSolver);
 	if (!isAsserting) {
-		setInspectedVariable(conflictAnalysis.trail.pickLastAssignment().getVariable().toInt());
+		setInspectedVariable(conflictAnalysis.trail.last().getVariable().toInt());
 		return;
 	}
-	const cRef: CRef = learnConflictClauseTransition(stateMachine, conflictAnalysis);
+	const cRef: CRef = learnConflictClauseTransition(cdclSolver);
 	const secondHighestDL: number = getSecondHighestDLTransition(stateMachine, conflictAnalysis);
 	backjumpingTransition(stateMachine, conflictAnalysis, secondHighestDL);
 	pushTrailTransition(stateMachine, conflictAnalysis);
@@ -179,7 +177,7 @@ export const conflictAnalysis = (solver: CDCL_SolverMachine): void => {
 		stateMachine,
 		propagated
 	);
-	afterComplementaryBlock(solver, stateMachine, propagated, complementaryClauses);
+	afterComplementaryBlock(cdclSolver, stateMachine, propagated, complementaryClauses);
 };
 
 /* General non-exported transitions */
@@ -627,11 +625,8 @@ const deleteLastAssignmentTransition = (
 	stateMachine.transition('asserting_clause_state');
 };
 
-const learnConflictClauseTransition = (
-	stateMachine: CDCL_StateMachine,
-	conflictAnalysis: ConflictAnalysis
-): number => {
-	const learnConflictClauseState = stateMachine.getActiveState() as NonFinalState<
+const learnConflictClauseTransition = (cdclSolver: CDCL_SolverMachine): CRef => {
+	const learnConflictClauseState = cdclSolver.getStateMachine().getActiveState() as NonFinalState<
 		CDCL_LEARN_CONFLICT_CLAUSE_FUN,
 		CDCL_LEARN_CONFLICT_CLAUSE_INPUT
 	>;
@@ -639,10 +634,10 @@ const learnConflictClauseTransition = (
 		logFatal('Function call error', 'There should be a function in the Variable In CC state');
 	}
 	const cRef: number = learnConflictClauseState.run(
-		conflictAnalysis.trail,
-		conflictAnalysis.conflictClause
+		cdclSolver.consultConflictAnalysis().trail,
+		cdclSolver.consultConflictAnalysis().conflictClause
 	);
-	stateMachine.transition('second_highest_dl_state');
+	cdclSolver.getStateMachine().transition('second_highest_dl_state');
 	return cRef;
 };
 

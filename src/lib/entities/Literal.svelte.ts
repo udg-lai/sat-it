@@ -74,4 +74,8 @@ export default class Literal implements Comparable<Literal> {
 		if (this.polarity === 'Negative') truthValue = !truthValue;
 		return truthValue;
 	}
+
+	toString(): string {
+		return this.toInt().toString();
+	}
 }

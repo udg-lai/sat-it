@@ -145,6 +145,10 @@ export default class VariableAssignment {
 		return isBacktrackingReason(this.reason);
 	}
 
+	wasPropagated(): boolean {
+		return isPropagationReason(this.reason);
+	}
+
 	getReason(): Reason {
 		return this.reason;
 	}

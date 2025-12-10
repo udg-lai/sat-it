@@ -84,8 +84,8 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 
 	// ** functions related to conflict analysis **
 
-	setConflictAnalysis(trail: Trail, conflictClause: Clause, decisionLevelVariables: Lit[]): void {
-		this.conflictAnalysis = { trail, conflictClause, ldlAssignments: decisionLevelVariables };
+	setConflictAnalysis(trail: Trail, conflictClause: Clause, ldlAssignments: Lit[]): void {
+		this.conflictAnalysis = { trail, conflictClause, ldlAssignments };
 	}
 
 	updateConflictClause(ccc: Clause): void {
@@ -168,7 +168,7 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 			// Meaning that the variables need to be assigned as in the trail.
 			// And the occurrences table needs to be rebuilt.
 			syncProblemWithTrail(conflictAnalysis.trail);
-			setInspectedVariable(conflictAnalysis.trail.pickLastAssignment().getVariable().toInt());
+			setInspectedVariable(conflictAnalysis.trail.last().toVar());
 		}
 	}
 
