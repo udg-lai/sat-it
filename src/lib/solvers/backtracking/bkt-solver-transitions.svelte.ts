@@ -6,7 +6,7 @@ import {
 } from '$lib/states/conflict-detection-state.svelte.ts';
 import { getClausePool } from '$lib/states/problem.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
-import { getLatestTrail, updateLastTrailEnding } from '$lib/states/trails.svelte.ts';
+import { getLatestTrail } from '$lib/states/trails.svelte.ts';
 import type { CRef, Lit } from '$lib/types/types.ts';
 import type { NonFinalState } from '../StateMachine.svelte.ts';
 import type { OccurrenceList } from '../types.ts';
