@@ -22,12 +22,12 @@
 	import type { StateFun, StateInput } from '$lib/solvers/StateMachine.svelte.ts';
 	import { clearBreakpoints } from '$lib/states/breakpoints.svelte.ts';
 	import { getStepDelay } from '$lib/states/delay-ms.svelte.ts';
-	import { getInstance } from '$lib/states/instances.svelte.ts';
+	import { getActiveInstance, getInstance } from '$lib/states/instances.svelte.ts';
 	import { getProblemStore, syncProblemWithInstance } from '$lib/states/problem.svelte.ts';
 	import {
+	activateSolverMachine,
 		getSolverMachine,
 		stopSolverMachine,
-		syncSolverMachineWithConfig,
 		updateSolverMachine
 	} from '$lib/states/solver-machine.svelte.ts';
 	import { record, redo, resetStack, undo, type Snapshot } from '$lib/states/stack.svelte.ts';
@@ -42,6 +42,8 @@
 	import { onMount } from 'svelte';
 	import DebuggerComponent from './debugger/DebuggerComponent.svelte';
 	import SolvingInformationComponent from './SolvingInformationComponent.svelte';
+	import type { Algorithm } from '$lib/types/algorithm.ts';
+	import { getConfiguredAlgorithm } from './settings/engine/state.svelte.ts';
 
 	let trails: Trail[] = $state([]);
 
@@ -95,9 +97,9 @@
 		reloadFromSnapshot(undo());
 	}
 
-	function onAlgorithmChanged(): void {
+	function onAlgorithmChanged(algorithm: Algorithm): void {
 		stopSolverMachine();
-		syncSolverMachineWithConfig();
+		activateSolverMachine(algorithm);
 		reset();
 	}
 
@@ -138,6 +140,14 @@
 			}
 		}
 	}
+
+
+	function init() {
+		onInstanceChanged(getActiveInstance().getInstanceName())
+		onAlgorithmChanged(getConfiguredAlgorithm());
+	}
+
+	init();
 
 	onMount(() => {
 		const subscriptions: (() => void)[] = [];

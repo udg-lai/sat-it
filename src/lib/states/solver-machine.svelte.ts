@@ -14,9 +14,7 @@ export const stopSolverMachine = () => {
 	solverMachine.stop();
 };
 
-export const syncSolverMachineWithConfig = () => {
-	const algorithm: Algorithm = getConfiguredAlgorithm();
-
+export const activateSolverMachine = (algorithm: Algorithm): void => {
 	if (algorithm === 'backtracking') {
 		solverMachine = makeBKTSolver();
 	} else if (algorithm === 'dpll') {
@@ -26,7 +24,7 @@ export const syncSolverMachineWithConfig = () => {
 	} else {
 		logFatal('No SolverStateMachine was created');
 	}
-};
+}
 
 export const updateSolverMachine = (
 	stateId: number,

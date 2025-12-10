@@ -1,6 +1,7 @@
 import type { Trail } from '$lib/entities/Trail.svelte.ts';
 import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
 import type { LiteralBreakpoint } from '$lib/states/breakpoints.svelte.ts';
+import type { Algorithm } from '$lib/types/algorithm.ts';
 import { createEventBus } from './createEventBus.ts';
 
 // observable of instance changes
@@ -30,7 +31,7 @@ export type StateMachineEvent =
 export const stateMachineEventBus = createEventBus<StateMachineEvent>();
 
 // observable of algorithm changes
-export const changeAlgorithmEventBus = createEventBus<void>();
+export const changeAlgorithmEventBus = createEventBus<Algorithm>();
 
 // event bus for breakpoints
 export const breakpointEvent = createEventBus<LiteralBreakpoint>();
