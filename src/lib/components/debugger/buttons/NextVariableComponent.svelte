@@ -1,9 +1,11 @@
 <script lang="ts">
-	import DynamicRender from '$lib/components/DynamicRender.svelte';
 	import { stateMachineEventBus, toggleTrailExpandEventBus } from '$lib/events/events.ts';
-	import { ForwardOutline } from 'flowbite-svelte-icons';
 	import '../style.css';
 	import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
+	import ImageRender from '$lib/components/tools/ImageRender.svelte';
+
+	let nextClauseIcon = '/icons/Inspect All Clauses.svg';
+
 	function goToNextVariable(): void {
 		getSolverMachine().disableStops();
 		toggleTrailExpandEventBus.emit(true);
@@ -11,6 +13,6 @@
 	}
 </script>
 
-<button class="btn general-btn" title="Next variable" onclick={goToNextVariable}>
-	<DynamicRender component={ForwardOutline} props={{ size: 'md' }} />
+<button class="btn general-btn" title="Inspect all clauses" onclick={goToNextVariable}>
+	<ImageRender icon={nextClauseIcon} alt="Inspect all clauses" />
 </button>

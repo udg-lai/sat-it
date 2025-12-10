@@ -1,8 +1,7 @@
 <script lang="ts">
-	import DynamicRender from '$lib/components/DynamicRender.svelte';
 	import { userActionEventBus } from '$lib/events/events.ts';
-	import { ReplyOutline } from 'flowbite-svelte-icons';
 	import '../style.css';
+	import ImageRender from '$lib/components/tools/ImageRender.svelte';
 
 	interface Props {
 		btnRedoActive?: boolean;
@@ -10,10 +9,7 @@
 
 	let { btnRedoActive = true }: Props = $props();
 
-	const reverseProps = {
-		class: 'transform -scale-x-100',
-		size: 'md'
-	};
+	let redoIcon = '/icons/User Redo.svg';
 </script>
 
 <button
@@ -23,5 +19,5 @@
 	onclick={() => userActionEventBus.emit('redo')}
 	disabled={!btnRedoActive}
 >
-	<DynamicRender component={ReplyOutline} props={reverseProps} />
+	<ImageRender icon={redoIcon} alt="User redo icon" />
 </button>

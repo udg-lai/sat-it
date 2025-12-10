@@ -1,18 +1,15 @@
 <script lang="ts">
 	import { stateMachineEventBus } from '$lib/events/events.ts';
-	import { CaretRightOutline } from 'flowbite-svelte-icons';
-	import DynamicRender from '../../DynamicRender.svelte';
+	import ImageRender from '$lib/components/tools/ImageRender.svelte';
 	import '../style.css';
 
 	interface Props {
 		myClass?: string;
+		icon: string;
+		alt: string;
 	}
 
-	let { myClass = '' }: Props = $props();
-
-	const assignmentProps = {
-		size: 'md'
-	};
+	let { myClass = '', icon, alt }: Props = $props();
 </script>
 
 <button
@@ -22,5 +19,5 @@
 	}}
 	title="Step"
 >
-	<DynamicRender component={CaretRightOutline} props={assignmentProps} />
+	<ImageRender {icon} {alt} />
 </button>

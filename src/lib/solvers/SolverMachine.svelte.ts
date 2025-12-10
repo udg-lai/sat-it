@@ -128,7 +128,7 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 			await this.solveCDStepByStep();
 		} else if (input === 'solve_trail') {
 			await this.solveTrailStepByStep();
-		} else if (input === 'solve_all') {
+		} else if (input === 'automatic_steps' || input === 'solve_all') {
 			await this.solveAllStepByStep();
 		} else {
 			logFatal('Non expected input in Solver State Machine');

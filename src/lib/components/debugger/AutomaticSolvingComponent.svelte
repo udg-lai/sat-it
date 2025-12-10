@@ -1,5 +1,6 @@
 <script lang="ts">
 	import SolveTrailComponent from './buttons/SolveTrailComponent.svelte';
+	import SolveAutomaticComponent from './buttons/SolveAutomaticComponent.svelte';
 	import SolveProblemComponent from './buttons/SolveProblemComponent.svelte';
 
 	interface Props {
@@ -14,6 +15,8 @@
 	<SolveTrailComponent {finished} {backtrackingState} />
 
 	<SolveProblemComponent {finished} {backtrackingState} />
+
+	<SolveAutomaticComponent {finished} {backtrackingState} />
 </general-debugger>
 
 <style>

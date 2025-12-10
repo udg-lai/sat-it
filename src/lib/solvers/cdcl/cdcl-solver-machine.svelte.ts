@@ -25,6 +25,7 @@ import { assertiveness } from '$lib/algorithms/assertive.ts';
 import { setInspectedVariable } from '$lib/states/inspectedVariable.svelte.ts';
 import { getProblemStore } from '$lib/states/problem.svelte.ts';
 import { getStepDelay } from '$lib/states/delay-ms.svelte.ts';
+import { getNoUnitPropagations } from '$lib/states/statistics.svelte.ts';
 
 export const makeCDCLSolver = (): CDCL_SolverMachine => {
 	return new CDCL_SolverMachine(getStepDelay());
@@ -161,7 +162,6 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 				[...conflictAnalysis.decisionLevelVariables]
 			);
 			getProblemStore().updateProblemFromTrail(conflictAnalysis.trail);
-			//updateProblemFromTrail(conflictAnalysis.trail);
 			setInspectedVariable(conflictAnalysis.trail.pickLastAssignment().getVariable().getInt());
 		}
 	}
@@ -169,6 +169,8 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 	async transition(input: StateMachineEvent): Promise<void> {
 		if (input === 'finishCA') {
 			await this.solveCAStepByStep();
+		} else if (input === 'up1') {
+			await this.unitPropagate();
 		} else super.transition(input);
 	}
 
@@ -212,6 +214,13 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 
 	protected async solveCAStepByStep(): Promise<void> {
 		this.stepByStep(() => !this.isAssertive());
+	}
+
+	protected async unitPropagate(): Promise<void> {
+		const previousUPs: number = getNoUnitPropagations();
+		this.stepByStep(
+			() => previousUPs >= getNoUnitPropagations() && !this.pendingOccurrenceLists.isEmpty()
+		);
 	}
 
 	onConflictDetection(): boolean {
