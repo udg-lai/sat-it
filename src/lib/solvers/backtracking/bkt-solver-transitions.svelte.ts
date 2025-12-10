@@ -4,8 +4,9 @@ import {
 	getCheckedClause,
 	incrementCheckingIndex
 } from '$lib/states/conflict-detection-state.svelte.ts';
+import { getClausePool } from '$lib/states/problem.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
-import { updateLastTrailEnding } from '$lib/states/trails.svelte.ts';
+import { getLatestTrail, updateLastTrailEnding } from '$lib/states/trails.svelte.ts';
 import type { CRef, Lit } from '$lib/types/types.ts';
 import type { NonFinalState } from '../StateMachine.svelte.ts';
 import type { OccurrenceList } from '../types.ts';
@@ -101,10 +102,10 @@ const conflictDetectionBlock = (stateMachine: BKT_StateMachine, pendingClauses: 
 		allVariablesAssignedTransition(stateMachine);
 		return;
 	}
-	const cRef: number = nextClauseTransition(stateMachine, pendingClauses);
-	const conflict: boolean = conflictDetectionTransition(stateMachine, cRef);
-	if (conflict) {
-		updateLastTrailEnding(cRef);
+	const nextCRef: CRef = nextClauseTransition(stateMachine, pendingClauses);
+	const isConflictive: boolean = conflictDetectionTransition(stateMachine, nextCRef);
+	if (isConflictive) {
+		getLatestTrail().attachConflictiveClause(getClausePool().at(nextCRef));
 		toggleTrailViewEventBus.emit();
 		return;
 	}
