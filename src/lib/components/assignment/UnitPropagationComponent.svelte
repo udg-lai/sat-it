@@ -7,11 +7,11 @@
 	import { getInspectedVariable } from '$lib/states/inspectedVariable.svelte.ts';
 	import { getClausePool } from '$lib/states/problem.svelte.ts';
 	import { logFatal } from '$lib/states/toasts.svelte.ts';
+	import type { CRef } from '$lib/types/types.ts';
 	import { Popover } from 'flowbite-svelte';
 	import { nanoid } from 'nanoid';
 	import HeadTailComponent from './../HeadTailComponent.svelte';
 	import './style.css';
-	import type { CRef } from '$lib/types/types.ts';
 
 	interface Props {
 		assignment: VariableAssignment;

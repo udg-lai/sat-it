@@ -1,14 +1,14 @@
 <script lang="ts">
-	import DynamicRender from '$lib/components/DynamicRender.svelte';
 	import { userActionEventBus } from '$lib/events/events.ts';
-	import { ReplyOutline } from 'flowbite-svelte-icons';
 	import '../style.css';
+	import ImageRender from '$lib/components/tools/ImageRender.svelte';
 
 	interface Props {
 		btnUndoActive?: boolean;
 	}
 
 	let { btnUndoActive = true }: Props = $props();
+	let undoIcon = '/icons/User Undo.svg';
 </script>
 
 <button
@@ -18,5 +18,5 @@
 	disabled={!btnUndoActive}
 	onclick={() => userActionEventBus.emit('undo')}
 >
-	<DynamicRender component={ReplyOutline} props={{ size: 'md' }} />
+	<ImageRender icon={undoIcon} alt="User undo icon" />
 </button>

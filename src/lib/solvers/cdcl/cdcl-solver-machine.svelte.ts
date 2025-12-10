@@ -14,7 +14,10 @@ import {
 	learnClauses,
 	syncProblemWithTrail
 } from '$lib/states/problem.svelte.ts';
+import { getNoUnitPropagations } from '$lib/states/statistics.svelte.ts';
 import { logError, logFatal } from '$lib/states/toasts.svelte.ts';
+import { wrapLearnedClauses } from '$lib/states/trails.svelte.ts';
+import type { Lit } from '$lib/types/types.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import { SolverMachine } from '../SolverMachine.svelte.ts';
 import type { ConflictAnalysis, OccurrenceList } from '../types.ts';
@@ -29,8 +32,6 @@ import {
 } from './cdcl-solver-transitions.svelte.ts';
 import { CDCL_StateMachine, makeCDCLStateMachine } from './cdcl-state-machine.svelte.ts';
 import { cdcl_stateName2StateId } from './cdcl-states.svelte.ts';
-import { wrapLearnedClauses } from '$lib/states/trails.svelte.ts';
-import type { Lit } from '$lib/types/types.ts';
 
 export const makeCDCLSolver = (): CDCL_SolverMachine => {
 	return new CDCL_SolverMachine(getStepDelay());
@@ -172,10 +173,14 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 		}
 	}
 
-	async transitionByEvent(input: StateMachineEvent): Promise<void> {
-		if (input === 'finishCA') {
+	async transitionByEvent(event: StateMachineEvent): Promise<void> {
+		if (event === 'finishCA') {
 			await this.solveCAStepByStep();
-		} else super.transitionByEvent(input);
+		} else if (event === 'up1') {
+			await this.unitPropagate();
+		} else {
+			await super.transitionByEvent(event);
+		}
 	}
 
 	step(): void {
@@ -222,6 +227,13 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 			return assertiveAlgorithm(conflictClause, ldlAssignments);
 		};
 		this.stepByStep(() => !ccIsAssertive());
+	}
+
+	protected async unitPropagate(): Promise<void> {
+		const previousUPs: number = getNoUnitPropagations();
+		this.stepByStep(
+			() => previousUPs >= getNoUnitPropagations() && !this.pendingOccurrenceLists.isEmpty()
+		);
 	}
 
 	onConflictDetection(): boolean {

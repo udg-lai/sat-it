@@ -64,12 +64,12 @@
 	}
 
 	async function stateMachineEvent(s: StateMachineEvent) {
-		if (s !== 'solve_all' && s !== 'step') {
+		if (s !== 'automatic_steps' && s !== 'step') {
 			updateOnStep = false;
 			solverMachine.disableStops();
 		}
 		await solverMachine.transitionByEvent(s);
-		if (s !== 'solve_all' && s !== 'step') {
+		if (s !== 'automatic_steps' && s !== 'step') {
 			updateOnStep = true;
 			solverMachine.updateStopTimeout(getStepDelay());
 		}
@@ -117,6 +117,7 @@
 	function algorithmicUndoSave(a: AlgorithmicUndoEvent): void {
 		const latestTrail: Trail = algorithmicUndo(a.objectiveAssignment, a.trailIndex);
 		getProblemStore().syncWithTrail(latestTrail);
+		updateTrailsEventBus.emit(getTrails());
 		updateSolverMachine(DECIDE_STATE_ID, undefined);
 		record(trails, solverMachine.getActiveStateId(), getStatistics(), solverMachine.getRecord());
 	}

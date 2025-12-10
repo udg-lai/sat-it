@@ -1,7 +1,6 @@
 <script lang="ts">
-	import type Problem from '$lib/entities/Problem.svelte.ts';
 	import type { Trail } from '$lib/entities/Trail.svelte.ts';
-	import { getProblemStore } from '$lib/states/problem.svelte.ts';
+	import { getClausePool } from '$lib/states/problem.svelte.ts';
 	import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 	import {
 		getClausesLeft,
@@ -12,7 +11,6 @@
 	} from '$lib/states/statistics.svelte.ts';
 	import { getLatestTrail, getTrails } from '$lib/states/trails.svelte.ts';
 
-	const problem: Problem = $derived(getProblemStore());
 	const decisions: number = $derived(getNoDecisions());
 	const conflicts: number = $derived(getNoConflicts());
 	const unitPropagations: number = $derived(getNoUnitPropagations());
@@ -22,7 +20,7 @@
 			return latestTrail.getDecisionLevel();
 		} else return 0;
 	});
-	const clausesLeft: number = $derived(problem.clauses.leftToSatisfy());
+	const clausesLeft: number = $derived(getClausePool().leftToSatisfy());
 	const minimumClausesLeft: number | undefined = $derived.by(() => {
 		const collection: ClauseCountEntry = getClausesLeft();
 		let minimum: number | undefined = undefined;

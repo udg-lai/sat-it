@@ -23,8 +23,10 @@ export const userActionEventBus = createEventBus<ActionEvent>();
 export type StateMachineEvent =
 	| 'step'
 	| 'solve_trail'
+	| 'automatic_steps'
 	| 'solve_all'
 	| 'nextVariable'
+	| 'up1'
 	| 'finishCD'
 	| 'finishCA';
 
