@@ -12,7 +12,6 @@ import { SolverMachine } from '../SolverMachine.svelte.ts';
 import type { ConflictAnalysis } from '../types.ts';
 import type { CDCL_FUN, CDCL_INPUT } from './cdcl-domain.svelte.ts';
 import {
-	analyzeClause,
 	conflictAnalysis,
 	decide,
 	initialTransition,
@@ -47,7 +46,7 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 		return this.occurrencesQueue.dequeue();
 	}
 
-	nextOccurrences(): OccurrenceList {
+	pickOccurrences(): OccurrenceList {
 		return this.occurrencesQueue.element();
 	}
 
@@ -142,12 +141,8 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 			initialTransition(this);
 		}
 		//Waiting to enter or not the clause analysis
-		else if (activeId === cdcl_stateName2StateId.all_clauses_checked_state) {
+		else if (activeId === cdcl_stateName2StateId.traversed_occurrences_state) {
 			preConflictDetection(this);
-		}
-		//Waiting to analyze the next clause of the clauses to revise
-		else if (activeId === cdcl_stateName2StateId.delete_clause_state) {
-			analyzeClause(this);
 		}
 		//Waiting to decide a variables
 		else if (activeId === cdcl_stateName2StateId.decide_state) {
@@ -164,7 +159,7 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 	}
 
 	protected async solveToNextVariableStepByStep(): Promise<void> {
-		const occurrenceList: OccurrenceList = this.nextOccurrences();
+		const occurrenceList: OccurrenceList = this.pickOccurrences();
 		this.stepByStep(() => !occurrenceList.traversed());
 	}
 
@@ -182,9 +177,7 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 
 	protected async unitPropagate(): Promise<void> {
 		const previousUPs: number = getNoUnitPropagations(); // This is monotonically increasing
-		this.stepByStep(
-			() => previousUPs == getNoUnitPropagations() && !this.occurrenceQueueEmpty()
-		);
+		this.stepByStep(() => previousUPs == getNoUnitPropagations() && !this.occurrenceQueueEmpty());
 	}
 
 	onConflictDetection(): boolean {

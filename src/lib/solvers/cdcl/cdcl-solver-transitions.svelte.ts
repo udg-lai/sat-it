@@ -11,13 +11,13 @@ import { getClausePool } from '$lib/states/problem.svelte.ts';
 import { increaseNoConflicts } from '$lib/states/statistics.svelte.ts';
 import { logError, logFatal } from '$lib/states/toasts.svelte.ts';
 import { getLatestTrail } from '$lib/states/trails.svelte.ts';
-import { makeJust } from '$lib/types/maybe.ts';
+import { makeJust, makeNothing } from '$lib/types/maybe.ts';
 import type { CRef, Lit } from '$lib/types/types.ts';
 import { type NonFinalState } from '../StateMachine.svelte.ts';
 import type { ConflictAnalysis } from '../types.ts';
 import type {
 	CDCL_ALL_CLAUSES_CHECKED_INPUT,
-	CDCL_ALL_OCCURRENCES_CHECKED_FUN,
+	CDCL_TRAVERSED_OCCURRENCE_LIST_FUN,
 	CDCL_ALL_VARIABLES_ASSIGNED_FUN,
 	CDCL_ALL_VARIABLES_ASSIGNED_INPUT,
 	CDCL_ASSERTING_CLAUSE_FUN,
@@ -53,7 +53,7 @@ import type {
 	CDCL_NEXT_OCCURRENCE_INPUT,
 	CDCL_PICK_LAST_ASSIGNMENT_FUN,
 	CDCL_PICK_LAST_ASSIGNMENT_INPUT,
-	CDCL_PICK_CLAUSE_SET_FUN as CDCL_PICK_OCCURRENCE_LIST_FUN,
+	CDCL_PICK_OCCURRENCE_LIST_FUN as CDCL_PICK_OCCURRENCE_LIST_FUN,
 	CDCL_PICK_CLAUSE_SET_INPUT as CDCL_PICK_OCCURRENCE_LIST_INPUT,
 	CDCL_PROPAGATE_CC_FUN,
 	CDCL_PROPAGATE_CC_INPUT,
@@ -80,31 +80,22 @@ import type { CDCL_StateMachine } from './cdcl-state-machine.svelte.ts';
 export const initialTransition = (solver: CDCL_SolverMachine): void => {
 	ecTransition(solver.getStateMachine());
 	if (solver.onFinalState()) return;
-	const unitClauses: Set<number> = ucdTransition(solver.getStateMachine());
-	afterComplementaryBlock(solver, solver.getStateMachine(), 0, unitClauses);
+	const unitClauses: Set<CRef> = ucdTransition(solver.getStateMachine());
+	const occurrenceList: OccurrenceList = new OccurrenceList(makeNothing(), [...unitClauses]);
+	afterComplementaryBlock(solver, occurrenceList);
 };
 
 export const preConflictDetection = (solver: CDCL_SolverMachine): void => {
 	conflictDetectionBlock(solver);
 };
 
-export const analyzeClause = (solver: CDCL_SolverMachine): void => {
-	const stateMachine: CDCL_StateMachine = solver.getStateMachine();
-	const pendingConflict: OccurrenceList = solver.nextOccurrences();
-	const clauseSet: Set<number> = pendingConflict.occ;
-	const cRef: number | undefined = getCheckedClause();
-	if (cRef === undefined) {
-		logFatal('Unexpected undefined in inspectedClause');
-	}
-	deleteClauseTransition(stateMachine, clauseSet, cRef);
-	conflictDetectionBlock(solver, stateMachine, clauseSet);
-};
-
 export const decide = (solver: CDCL_SolverMachine): void => {
-	const stateMachine: CDCL_StateMachine = solver.getStateMachine();
-	const assignment: Lit = decideTransition(stateMachine);
-	const occurrenceList: Set<CRef> = complementaryOccurrencesDetectionTransition(stateMachine, assignment);
-	afterComplementaryBlock(solver, stateMachine, assignment, occurrenceList);
+	const assignment: Lit = decideTransition(solver);
+	const occurrenceList: OccurrenceList = complementaryOccurrencesDetectionTransition(
+		solver,
+		assignment
+	);
+	afterComplementaryBlock(solver, occurrenceList);
 };
 
 export const preConflictAnalysis = (solver: CDCL_SolverMachine) => {
@@ -169,13 +160,10 @@ export const conflictAnalysis = (solver: CDCL_SolverMachine): void => {
 
 	(getLatestTrail() as Trail).setFollowUpIndex();
 
-	const complementaryClauses: Set<CRef> = complementaryOccurrencesDetectionTransition(
+	const occurrenceList: OccurrenceList = complementaryOccurrencesDetectionTransition(
 		solver,
 		propagated
 	);
-
-	const complementary: Lit = Literal.complementary(propagated);
-	const occurrenceList = new OccurrenceList(makeJust(complementary), [...complementaryClauses]);
 
 	afterComplementaryBlock(solver, occurrenceList);
 };
@@ -197,8 +185,8 @@ const afterComplementaryBlock = (
 };
 
 const conflictDetectionBlock = (solver: CDCL_SolverMachine): void => {
-	const allOccChecked = allOccurrencesCheckedTransition(solver);
-	if (allOccChecked) {
+	const traversedOccurrenceList = traversedOccurrenceListTransition(solver);
+	if (traversedOccurrenceList) {
 		dequeueOccurrenceListTransition(solver);
 		const pendingOcc: boolean = checkPendingOccurrenceListsTransition(solver);
 		if (pendingOcc) {
@@ -213,17 +201,14 @@ const conflictDetectionBlock = (solver: CDCL_SolverMachine): void => {
 		if (isConflictive) {
 			getLatestTrail().attachConflictiveClause(getClausePool().at(cRef));
 			toggleTrailViewEventBus.emit();
-		}
-		else {
+		} else {
 			const unitClause: boolean = unitClauseTransition(solver, cRef);
 			if (unitClause) {
 				const propagated: Lit = unitPropagationTransition(solver, cRef);
-				const occComplementary: Set<CRef> = complementaryOccurrencesDetectionTransition(
+				const occurrenceList: OccurrenceList = complementaryOccurrencesDetectionTransition(
 					solver,
 					propagated
 				);
-				const complementary: Lit = Literal.complementary(propagated);
-				const occurrenceList = new OccurrenceList(makeJust(complementary), [...occComplementary]);
 				queueOccurrenceListTransition(solver, occurrenceList);
 			}
 		}
@@ -283,15 +268,13 @@ const allVariablesAssignedTransition = (solver: CDCL_SolverMachine): void => {
 		);
 	}
 	const allAssigned: boolean = allVariablesAssignedState.run();
-	if (allAssigned)
-		solver.transition('sat_state');
-	else
-		solver.transition('decide_state');
+	if (allAssigned) solver.transition('sat_state');
+	else solver.transition('decide_state');
 };
 
 const queueOccurrenceListTransition = (
 	solver: CDCL_SolverMachine,
-	occurrenceList: OccurrenceList,
+	occurrenceList: OccurrenceList
 ): void => {
 	const state = solver.getActiveState() as NonFinalState<
 		CDCL_QUEUE_OCCURRENCE_LIST_FUN,
@@ -309,12 +292,11 @@ const queueOccurrenceListTransition = (
 	if (enqueuedSize > 1) {
 		// This means, we came from UP and complementary occurrence detection
 		solver.transition('all_clauses_checked_state');
-	}
-	else if (enqueuedSize === 1) {
+	} else if (enqueuedSize === 1) {
 		// This means we came from initial UPs or decide transitions
 		solver.transition('check_pending_occurrence_lists_state');
 	} else {
-		logFatal("CDCL Solver Transition Error", "Occurrences Queue shouldn't be empty here");
+		logFatal('CDCL Solver Transition Error', "Occurrences Queue shouldn't be empty here");
 	}
 };
 
@@ -330,13 +312,13 @@ const checkPendingOccurrenceListsTransition = (solver: CDCL_SolverMachine): bool
 		);
 	}
 	const pendingOcc: boolean = state.run(solver);
-	if (pendingOcc)
-		solver.transition('pick_clause_set_state');
+	if (pendingOcc) solver.transition('pick_clause_set_state');
 	else solver.transition('all_variables_assigned_state');
 	return pendingOcc;
 };
 
-const pickOccurrenceListTransition = (solver: CDCL_SolverMachine): Set<CRef> => {
+const pickOccurrenceListTransition = (solver: CDCL_SolverMachine): OccurrenceList => {
+	// This method just updates the occurrences lits view with the first occurrence list in the queue.
 	const state = solver.getActiveState() as NonFinalState<
 		CDCL_PICK_OCCURRENCE_LIST_FUN,
 		CDCL_PICK_OCCURRENCE_LIST_INPUT
@@ -344,26 +326,24 @@ const pickOccurrenceListTransition = (solver: CDCL_SolverMachine): Set<CRef> => 
 	if (state.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Peek Clause Set state');
 	}
-	const occ: Set<CRef> = state.run(solver);
+	const occurrenceList: OccurrenceList = state.run(solver);
 	solver.transition('all_clauses_checked_state');
-	return occ;
+	return occurrenceList;
 };
 
-const allOccurrencesCheckedTransition = (solver: CDCL_SolverMachine): boolean => {
+const traversedOccurrenceListTransition = (solver: CDCL_SolverMachine): boolean => {
 	const allOccurrencesCheckedState = solver.getActiveState() as NonFinalState<
-		CDCL_ALL_OCCURRENCES_CHECKED_FUN,
+		CDCL_TRAVERSED_OCCURRENCE_LIST_FUN,
 		CDCL_ALL_CLAUSES_CHECKED_INPUT
 	>;
 	if (allOccurrencesCheckedState.run === undefined) {
 		logFatal('Function call error', 'A function that validates all occurrences checked is needed');
 	}
-	const { occ } = solver.nextOccurrences();
-	const allChecked: boolean = allOccurrencesCheckedState.run(occ);
-	if (allChecked)
-		solver.transition('dequeue_occurrence_list_state');
-	else
-		solver.transition('next_occurrence_state');
-	return allChecked;
+	const occurrenceList: OccurrenceList = solver.pickOccurrences();
+	const traversed: boolean = allOccurrencesCheckedState.run(occurrenceList);
+	if (traversed) solver.transition('dequeue_occurrence_list_state');
+	else solver.transition('next_occurrence_state');
+	return traversed;
 };
 
 const nextOccurrenceTransition = (solver: CDCL_SolverMachine): number => {
@@ -375,8 +355,8 @@ const nextOccurrenceTransition = (solver: CDCL_SolverMachine): number => {
 	if (state.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Next Clause state');
 	}
-	const { occ }: Occurrences = solver.nextOccurrences();
-	const cRef: number = state.run(occ);
+	// Returns the next clause to be checked from the occurrence list at the head of the queue
+	const cRef: number = state.run(solver.pickOccurrences());
 	solver.transition('conflict_detection_state');
 	return cRef;
 };
@@ -390,10 +370,8 @@ const conflictDetectionTransition = (solver: CDCL_SolverMachine, cRef: CRef): bo
 		logFatal('Function call error', 'There should be a function in the Conflict Detection state');
 	}
 	const falsified: boolean = conflictDetectionState.run(cRef);
-	if (falsified)
-		solver.transition('empty_occurrence_lists_state');
-	else
-		solver.transition('unit_clause_state');
+	if (falsified) solver.transition('empty_occurrence_lists_state');
+	else solver.transition('unit_clause_state');
 	return falsified;
 };
 
@@ -423,28 +401,9 @@ const unitClauseTransition = (solver: CDCL_SolverMachine, cRef: CRef): boolean =
 		);
 	}
 	const isUnit: boolean = unitClauseState.run(cRef);
-	if (isUnit)
-		solver.transition('unit_propagation_state');
-	else
-		solver.transition('all_clauses_checked_state');
+	if (isUnit) solver.transition('unit_propagation_state');
+	else solver.transition('all_clauses_checked_state');
 	return isUnit;
-};
-
-const deleteClauseTransition = (
-	stateMachine: CDCL_StateMachine,
-	clauseSet: Set<number>,
-	cRef: number
-): void => {
-	const deleteClauseState = stateMachine.getActiveState() as NonFinalState<
-		CDCL_DELETE_CLAUSE_FUN,
-		CDCL_DELETE_CLAUSE_INPUT
-	>;
-	if (deleteClauseState.run === undefined) {
-		logFatal('Function call error', 'There should be a function in the Delete Clause state');
-	}
-	deleteClauseState.run(clauseSet, cRef);
-	stateMachine.transition('all_clauses_checked_state');
-	incrementCheckingIndex();
 };
 
 const dequeueOccurrenceListTransition = (solver: CDCL_SolverMachine): void => {
@@ -480,7 +439,7 @@ const unitPropagationTransition = (solver: CDCL_SolverMachine, cRef: CRef): Lit 
 const complementaryOccurrencesDetectionTransition = (
 	solver: CDCL_SolverMachine,
 	assignment: Lit
-): Set<CRef> => {
+): OccurrenceList => {
 	const complementaryOccurrencesState = solver.getActiveState() as NonFinalState<
 		CDCL_COMPLEMENTARY_OCCURRENCES_FUN,
 		CDCL_COMPLEMENTARY_OCCURRENCES_INPUT
@@ -493,19 +452,17 @@ const complementaryOccurrencesDetectionTransition = (
 	}
 	const clauses: Set<CRef> = complementaryOccurrencesState.run(assignment);
 	solver.transition('queue_occurrence_list_state');
-	return clauses;
+	const complementary: Lit = Literal.complementary(assignment);
+	return new OccurrenceList(makeJust(complementary), [...clauses]);
 };
 
-const decideTransition = (stateMachine: CDCL_StateMachine): number => {
-	const decideState = stateMachine.getActiveState() as NonFinalState<
-		CDCL_DECIDE_FUN,
-		CDCL_DECIDE_INPUT
-	>;
+const decideTransition = (solver: CDCL_SolverMachine): number => {
+	const decideState = solver.getActiveState() as NonFinalState<CDCL_DECIDE_FUN, CDCL_DECIDE_INPUT>;
 	if (decideState.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Decide state');
 	}
 	const decision: Lit = decideState.run();
-	stateMachine.transition('complementary_occurrences_state');
+	solver.transition('complementary_occurrences_state');
 	return decision;
 };
 

@@ -1,7 +1,4 @@
-import {
-	cleanClausesToCheck,
-	updateOccurrenceList
-} from '$lib/states/occurrence-list.svelte.ts';
+import { cleanClausesToCheck, updateOccurrenceList } from '$lib/states/occurrence-list.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import { SolverMachine } from '../SolverMachine.svelte.ts';

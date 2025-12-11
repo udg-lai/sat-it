@@ -11,10 +11,7 @@ import {
 	nonDecisionMade as solverNonDecisionMade
 } from '$lib/solvers/shared.svelte.ts';
 import type { Occurrences } from '$lib/solvers/types.ts';
-import {
-	cleanClausesToCheck,
-	updateOccurrenceList
-} from '$lib/states/occurrence-list.svelte.ts';
+import { cleanClausesToCheck, updateOccurrenceList } from '$lib/states/occurrence-list.svelte.ts';
 import {
 	getClausePool,
 	getOccurrencesTableMapping,
@@ -32,7 +29,9 @@ export type BKT_DECIDE_INPUT = 'complementary_occurrences_state';
 export type BKT_COMPLEMENTARY_OCCURRENCES_INPUT = 'queue_occurrence_list_state';
 export type BKT_QUEUE_OCCURRENCE_LIST_INPUT = 'pick_pending_occurrence_list_state';
 export type BKT_PENDING_OCCURRENCE_LIST_INPUT = 'all_clauses_checked_state';
-export type BKT_ALL_CLAUSES_CHECKED_INPUT = 'next_occurrence_state' | 'all_variables_assigned_state';
+export type BKT_ALL_CLAUSES_CHECKED_INPUT =
+	| 'next_occurrence_state'
+	| 'all_variables_assigned_state';
 export type BKT_NEXT_CLAUSE_INPUT = 'conflict_detection_state';
 export type BKT_CONFLICT_DETECTION_INPUT =
 	| 'delete_clause_state'

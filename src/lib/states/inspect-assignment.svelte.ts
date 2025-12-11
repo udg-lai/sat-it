@@ -9,6 +9,6 @@ export const focusOnAssignment = (lit: Lit): void => {
 
 export const wipeFocusAssignment = (): void => {
 	focusedAssignment = makeNothing();
-}
+};
 
 export const getFocusedAssignment = (): Maybe<Lit> => focusedAssignment;

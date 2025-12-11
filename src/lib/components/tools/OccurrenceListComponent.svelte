@@ -8,10 +8,7 @@
 	} from '$lib/entities/Clause.svelte.ts';
 	import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
 	import type Problem from '$lib/entities/Problem.svelte.ts';
-	import {
-		getCheckingIndex,
-		getOccurrenceList
-	} from '$lib/states/occurrence-list.svelte.ts';
+	import { getCheckingIndex, getOccurrenceList } from '$lib/states/occurrence-list.svelte.ts';
 	import { getClausePool, getProblemStore } from '$lib/states/problem.svelte.ts';
 	import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 	import type { CRef } from '$lib/types/types.ts';

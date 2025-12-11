@@ -15,10 +15,7 @@ import {
 	decide as solverDecide
 } from '$lib/solvers/shared.svelte.ts';
 import type { DPLL_SolverMachine } from './dpll-solver-machine.svelte.ts';
-import {
-	cleanClausesToCheck,
-	updateOccurrenceList
-} from '$lib/states/occurrence-list.svelte.ts';
+import { cleanClausesToCheck, updateOccurrenceList } from '$lib/states/occurrence-list.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
 import type { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
 import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
