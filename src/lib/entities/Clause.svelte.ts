@@ -111,6 +111,10 @@ class Clause implements Comparable<Clause> {
 		return state;
 	}
 
+	falsified(): boolean {
+		return this.isEmpty() || this.eval().type === 'UnSAT';
+	}
+
 	isUnit(): boolean {
 		let nNotAssigned = 0;
 		let i = 0;

@@ -13,7 +13,6 @@ import { getLatestTrail } from '$lib/states/trails.svelte.ts';
 import { makeJust, makeNothing } from '$lib/types/maybe.ts';
 import type { CRef, Lit } from '$lib/types/types.ts';
 import { type NonFinalState } from '../StateMachine.svelte.ts';
-import type { ConflictAnalysis } from '../types.ts';
 import type {
 	CDCL_ALL_CLAUSES_CHECKED_INPUT,
 	CDCL_TRAVERSED_OCCURRENCE_LIST_FUN,
@@ -74,6 +73,8 @@ import type {
 import type { CDCL_SolverMachine } from './cdcl-solver-machine.svelte.ts';
 import type { CDCL_StateMachine } from './cdcl-state-machine.svelte.ts';
 import { getOccurrenceListQueue } from '$lib/states/queue-occurrence-lists.svelte.ts';
+import { getConflictAnalysis } from '$lib/states/conflict-anlysis.svelte.ts';
+import type { ConflictAnalysis } from '$lib/entities/ConflictAnalysis.svelte.ts';
 
 /* exported transitions */
 
@@ -108,15 +109,15 @@ export const preConflictAnalysis = (solver: CDCL_SolverMachine) => {
 	if (asserting) {
 		logFatal('It is impossible that the conflictive clause is asserting');
 	}
-	conflictAnalysis(solver);
+	conflictAnalysisBlock(solver);
 };
 
-export const conflictAnalysis = (solver: CDCL_SolverMachine): void => {
-	const stateMachine: CDCL_StateMachine = solver.getStateMachine();
-	const conflictAnalysis: ConflictAnalysis = solver.consultConflictAnalysis();
+export const conflictAnalysisBlock = (solver: CDCL_SolverMachine): void => {
+	const conflictAnalysis: ConflictAnalysis = getConflictAnalysis();
+	const cc: Clause = conflictAnalysis.getClause();
 
 	const lastAssignment: VariableAssignment = pickLastAssignmentTransition(
-		stateMachine,
+		solver.getStateMachine(),
 		conflictAnalysis
 	);
 
@@ -127,17 +128,12 @@ export const conflictAnalysis = (solver: CDCL_SolverMachine): void => {
 		);
 	}
 
-	const complementaryAppear: boolean = complementaryInCCTransition(solver, lastAssignment);
+	const complementaryAppear: boolean = complementaryInCCTransition(solver, lastAssignment, cc);
 	const latestTrail: Trail | undefined = getLatestTrail();
 	if (latestTrail === undefined) logFatal('CDCL solver', 'Latest trail should not be undefined');
 
 	if (complementaryAppear) {
-		const resolvent: Clause = resolutionUpdateCCTransition(
-			stateMachine,
-			solver,
-			conflictAnalysis,
-			lastAssignment
-		);
+		const resolvent: Clause = resolutionUpdateCCTransition(solver, lastAssignment, cc);
 		latestTrail.updateConflictAnalysisCtx({
 			clause: resolvent,
 			literal: lastAssignment.toLit()
@@ -538,10 +534,11 @@ const pickLastAssignmentTransition = (
 };
 
 const complementaryInCCTransition = (
-	cdclSolver: CDCL_SolverMachine,
-	lastAssignment: VariableAssignment
+	solver: CDCL_SolverMachine,
+	lastAssignment: VariableAssignment,
+	cc: Clause
 ) => {
-	const complementaryInCCState = cdclSolver.getActiveState() as NonFinalState<
+	const complementaryInCCState = solver.getActiveState() as NonFinalState<
 		CDCL_COMPLEMENTARY_IN_CCC_FUN,
 		CDCL_COMPLEMENTARY_IN_CCC_INPUT
 	>;
@@ -549,29 +546,26 @@ const complementaryInCCTransition = (
 		logFatal('Complementary In CC', 'No function defined in the Complementary In CC state');
 	}
 
-	const { conflictClause } = cdclSolver.consultConflictAnalysis();
-
-	const complementaryExists: boolean = complementaryInCCState.run(conflictClause, lastAssignment);
-	if (complementaryExists) cdclSolver.transition('resolution_update_cc_state');
-	else cdclSolver.transition('delete_last_assignment_state');
+	const complementaryExists: boolean = complementaryInCCState.run(cc, lastAssignment);
+	if (complementaryExists) solver.transition('resolution_update_cc_state');
+	else solver.transition('delete_last_assignment_state');
 	return complementaryExists;
 };
 
 const resolutionUpdateCCTransition = (
-	stateMachine: CDCL_StateMachine,
 	solver: CDCL_SolverMachine,
-	{ conflictClause }: ConflictAnalysis,
-	lastAssignment: VariableAssignment
+	lastAssignment: VariableAssignment,
+	cc: Clause,
 ): Clause => {
-	const resolutionUpdateCCState = stateMachine.getActiveState() as NonFinalState<
+	const resolutionUpdateCCState = solver.getActiveState() as NonFinalState<
 		CDCL_RESOLUTION_UPDATE_CC_FUN,
 		CDCL_RESOLUTION_UPDATE_CC_INPUT
 	>;
 	if (resolutionUpdateCCState.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Variable In CC state');
 	}
-	const resolvent: Clause = resolutionUpdateCCState.run(solver, conflictClause, lastAssignment);
-	stateMachine.transition('delete_last_assignment_state');
+	const resolvent: Clause = resolutionUpdateCCState.run(solver, cc, lastAssignment);
+	solver.transition('delete_last_assignment_state');
 	return resolvent;
 };
 
