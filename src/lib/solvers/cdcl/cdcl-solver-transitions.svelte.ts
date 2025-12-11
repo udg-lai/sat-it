@@ -28,17 +28,12 @@ import type {
 	CDCL_CHECK_NON_DECISION_MADE_INPUT,
 	CDCL_CHECK_PENDING_OCCURRENCE_LISTS_FUN,
 	CDCL_CHECK_PENDING_OCCURRENCE_LISTS_INPUT,
-	CDCL_COMPLEMENTARY_IN_CCC_FUN,
-	CDCL_COMPLEMENTARY_IN_CCC_INPUT,
 	CDCL_COMPLEMENTARY_OCCURRENCES_FUN,
 	CDCL_COMPLEMENTARY_OCCURRENCES_INPUT,
 	CDCL_CONFLICT_DETECTION_FUN,
 	CDCL_CONFLICT_DETECTION_INPUT,
 	CDCL_DECIDE_FUN,
 	CDCL_DECIDE_INPUT,
-	CDCL_DELETE_CLAUSE_FUN,
-	CDCL_DELETE_LAST_ASSIGNMENT_FUN,
-	CDCL_DELETE_LAST_ASSIGNMENT_INPUT,
 	CDCL_UNSTACK_OCCURRENCE_LIST_FUN as CDCL_DEQUEUE_OCCURRENCE_LIST_FUN,
 	CDCL_UNSTACK_OCCURRENCE_LIST_INPUT as CDCL_DEQUEUE_OCCURRENCE_LIST_INPUT,
 	CDCL_EMPTY_CLAUSE_FUN,
@@ -49,8 +44,8 @@ import type {
 	CDCL_LEARN_CONFLICT_CLAUSE_INPUT,
 	CDCL_NEXT_OCCURRENCE_FUN,
 	CDCL_NEXT_OCCURRENCE_INPUT,
-	CDCL_PICK_LAST_ASSIGNMENT_FUN,
-	CDCL_PICK_LAST_ASSIGNMENT_INPUT,
+	CDCL_VIRTUAL_RESOLUTION_FUN,
+	CDCL_VIRTUAL_RESOLUTION_INPUT,
 	CDCL_PICK_OCCURRENCE_LIST_FUN as CDCL_PICK_OCCURRENCE_LIST_FUN,
 	CDCL_PICK_CLAUSE_SET_INPUT as CDCL_PICK_OCCURRENCE_LIST_INPUT,
 	CDCL_PROPAGATE_CC_FUN,
@@ -59,8 +54,6 @@ import type {
 	CDCL_PUSH_TRAIL_INPUT,
 	CDCL_QUEUE_OCCURRENCE_LIST_FUN,
 	CDCL_QUEUE_OCCURRENCE_LIST_INPUT,
-	CDCL_RESOLUTION_UPDATE_CC_FUN,
-	CDCL_RESOLUTION_UPDATE_CC_INPUT,
 	CDCL_SECOND_HIGHEST_DL_FUN,
 	CDCL_SECOND_HIGHEST_DL_INPUT,
 	CDCL_UNIT_CLAUSE_FUN,
@@ -116,7 +109,7 @@ export const conflictAnalysisBlock = (solver: CDCL_SolverMachine): void => {
 	const conflictAnalysis: ConflictAnalysis = getConflictAnalysis();
 	const cc: Clause = conflictAnalysis.getClause();
 
-	const lastAssignment: VariableAssignment = pickLastAssignmentTransition(
+	const lastAssignment: VariableAssignment = VirtualResolutionTransition(
 		solver.getStateMachine(),
 		conflictAnalysis
 	);
@@ -517,18 +510,18 @@ const assertingClauseTransition = (
 	return isAsserting;
 };
 
-const pickLastAssignmentTransition = (
+const VirtualResolutionTransition = (
 	stateMachine: CDCL_StateMachine,
 	{ trail }: ConflictAnalysis
 ) => {
-	const pickLastAssignmentState = stateMachine.getActiveState() as NonFinalState<
-		CDCL_PICK_LAST_ASSIGNMENT_FUN,
-		CDCL_PICK_LAST_ASSIGNMENT_INPUT
+	const virtualResolutionState = stateMachine.getActiveState() as NonFinalState<
+		CDCL_VIRTUAL_RESOLUTION_FUN,
+		CDCL_VIRTUAL_RESOLUTION_INPUT
 	>;
-	if (pickLastAssignmentState.run === undefined) {
+	if (virtualResolutionState.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Pick Last Assignment state');
 	}
-	const assignment: VariableAssignment = pickLastAssignmentState.run(trail);
+	const assignment: VariableAssignment = virtualResolutionState.run(trail);
 	stateMachine.transition('complementary_in_ccc_state_state');
 	return assignment;
 };
@@ -555,7 +548,7 @@ const complementaryInCCTransition = (
 const resolutionUpdateCCTransition = (
 	solver: CDCL_SolverMachine,
 	lastAssignment: VariableAssignment,
-	cc: Clause,
+	cc: Clause
 ): Clause => {
 	const resolutionUpdateCCState = solver.getActiveState() as NonFinalState<
 		CDCL_RESOLUTION_UPDATE_CC_FUN,

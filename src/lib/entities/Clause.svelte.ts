@@ -133,7 +133,7 @@ class Clause implements Comparable<Clause> {
 		return unit;
 	}
 
-	containsLiteral(literal: Lit): boolean {
+	contains(literal: Lit): boolean {
 		let found = false;
 		for (const lit of this.literals) {
 			if (lit.toInt() === literal) {

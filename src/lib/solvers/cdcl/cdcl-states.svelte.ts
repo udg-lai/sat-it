@@ -57,15 +57,9 @@ import {
 	type CDCL_ASSERTING_CLAUSE_FUN,
 	type CDCL_ASSERTING_CLAUSE_INPUT,
 	assertingClause,
-	pickLastAssignment,
-	type CDCL_PICK_LAST_ASSIGNMENT_FUN,
-	type CDCL_PICK_LAST_ASSIGNMENT_INPUT,
-	type CDCL_COMPLEMENTARY_IN_CCC_FUN,
-	type CDCL_COMPLEMENTARY_IN_CCC_INPUT,
-	complementaryOccursInCCC,
-	type CDCL_DELETE_LAST_ASSIGNMENT_FUN,
-	type CDCL_DELETE_LAST_ASSIGNMENT_INPUT,
-	deleteLastAssignment,
+	virtualResolution,
+	type CDCL_VIRTUAL_RESOLUTION_FUN,
+	type CDCL_VIRTUAL_RESOLUTION_INPUT,
 	type CDCL_LEARN_CONFLICT_CLAUSE_FUN,
 	type CDCL_LEARN_CONFLICT_CLAUSE_INPUT,
 	type CDCL_SECOND_HIGHEST_DL_FUN,
@@ -78,9 +72,6 @@ import {
 	type CDCL_PUSH_TRAIL_INPUT,
 	pushTrail,
 	learnConflictClause,
-	resolutionUpdateCC,
-	type CDCL_RESOLUTION_UPDATE_CC_FUN,
-	type CDCL_RESOLUTION_UPDATE_CC_INPUT,
 	type CDCL_PROPAGATE_CC_FUN,
 	type CDCL_PROPAGATE_CC_INPUT,
 	propagateCC
@@ -108,10 +99,7 @@ export const cdcl_stateName2StateId = {
 	empty_clause_set_state: 16,
 	build_conflict_analysis_state: 17,
 	asserting_clause_state: 18,
-	pick_last_assignment_state: 19,
-	complementary_in_ccc_state_state: 20,
-	resolution_update_cc_state: 21,
-	delete_last_assignment_state: 22,
+	virtual_resolution_state: 19,
 	learn_cc_state: 23,
 	second_highest_dl_state: 24,
 	undo_trail_to_shdl_state: 25,
@@ -346,17 +334,17 @@ const asserting_clause_state: NonFinalState<
 	description: `Checks if the conflict clause is an Asserting Clause`,
 	transitions: new Map<CDCL_ASSERTING_CLAUSE_INPUT, number>()
 		.set('learn_cc_state', cdcl_stateName2StateId['learn_cc_state'])
-		.set('pick_last_assignment_state', cdcl_stateName2StateId['pick_last_assignment_state'])
+		.set('virtual_resolution_state', cdcl_stateName2StateId['virtual_resolution_state'])
 };
 
 const pick_last_assignment_state: NonFinalState<
-	CDCL_PICK_LAST_ASSIGNMENT_FUN,
-	CDCL_PICK_LAST_ASSIGNMENT_INPUT
+	CDCL_VIRTUAL_RESOLUTION_FUN,
+	CDCL_VIRTUAL_RESOLUTION_INPUT
 > = {
-	id: cdcl_stateName2StateId['pick_last_assignment_state'],
-	run: pickLastAssignment,
+	id: cdcl_stateName2StateId['virtual_resolution_state'],
+	run: virtualResolution,
 	description: `Picks the last assignment from the trail`,
-	transitions: new Map<CDCL_PICK_LAST_ASSIGNMENT_INPUT, number>().set(
+	transitions: new Map<CDCL_VIRTUAL_RESOLUTION_INPUT, number>().set(
 		'complementary_in_ccc_state_state',
 		cdcl_stateName2StateId['complementary_in_ccc_state_state']
 	)

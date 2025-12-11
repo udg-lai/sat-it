@@ -21,13 +21,11 @@ export const makeCDCLSolver = (): CDCL_SolverMachine => {
 };
 
 export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
-
 	constructor(stopTimeMS: number) {
 		const stateMachine: CDCL_StateMachine = makeCDCLStateMachine();
 		super(stateMachine, 'cdcl', stopTimeMS);
 	}
 	// ** functions related to conflict analysis **
-
 
 	getRecord(): Record<string, unknown> {
 		return undefined as unknown as Record<string, unknown>;
@@ -69,7 +67,7 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 			preConflictAnalysis(this);
 		}
 		//Waiting to backtrack an assignment
-		else if (activeId === cdcl_stateName2StateId.pick_last_assignment_state) {
+		else if (activeId === cdcl_stateName2StateId.virtual_resolution_state) {
 			// conflictAnalysis(this);
 		}
 	}

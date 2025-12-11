@@ -5,11 +5,9 @@ import Clause, {
 } from '$lib/entities/Clause.svelte.ts';
 import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
 import { ConflictAnalysis } from '$lib/entities/ConflictAnalysis.svelte.ts';
-import Literal from '$lib/entities/Literal.svelte.ts';
 import OccurrenceList from '$lib/entities/OccurrenceList.svelte.ts';
 import type { Trail } from '$lib/entities/Trail.svelte.ts';
 import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
-import { isPropagationReason, type Reason } from '$lib/entities/VariableAssignment.ts';
 import type { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
 import {
 	clauseEvaluation,
@@ -29,7 +27,10 @@ import {
 	getProblemStore,
 	getVariablePool
 } from '$lib/states/problem.svelte.ts';
-import { getOccurrenceListQueue, wipeOccurrenceListQueue } from '$lib/states/queue-occurrence-lists.svelte.ts';
+import {
+	getOccurrenceListQueue,
+	wipeOccurrenceListQueue
+} from '$lib/states/queue-occurrence-lists.svelte.ts';
 import { logFatal, logInfo } from '$lib/states/toasts.svelte.ts';
 import { getLatestTrail, stackTrail } from '$lib/states/trails.svelte.ts';
 import type { CRef, Lit } from '$lib/types/types.ts';
@@ -79,17 +80,9 @@ export type CDCL_EMPTY_OCCURRENCE_LISTS_INPUT = 'decision_level_state';
 
 export type CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_INPUT = 'asserting_clause_state';
 
-export type CDCL_ASSERTING_CLAUSE_INPUT = 'learn_cc_state' | 'pick_last_assignment_state';
+export type CDCL_ASSERTING_CLAUSE_INPUT = 'learn_cc_state' | 'virtual_resolution_state';
 
-export type CDCL_PICK_LAST_ASSIGNMENT_INPUT = 'complementary_in_ccc_state_state';
-
-export type CDCL_COMPLEMENTARY_IN_CCC_INPUT =
-	| 'resolution_update_cc_state'
-	| 'delete_last_assignment_state';
-
-export type CDCL_RESOLUTION_UPDATE_CC_INPUT = 'delete_last_assignment_state';
-
-export type CDCL_DELETE_LAST_ASSIGNMENT_INPUT = 'asserting_clause_state';
+export type CDCL_VIRTUAL_RESOLUTION_INPUT = 'asserting_clause_state';
 
 export type CDCL_LEARN_CONFLICT_CLAUSE_INPUT = 'second_highest_dl_state';
 
@@ -120,10 +113,7 @@ export type CDCL_INPUT =
 	| CDCL_EMPTY_OCCURRENCE_LISTS_INPUT
 	| CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_INPUT
 	| CDCL_ASSERTING_CLAUSE_INPUT
-	| CDCL_PICK_LAST_ASSIGNMENT_INPUT
-	| CDCL_COMPLEMENTARY_IN_CCC_INPUT
-	| CDCL_RESOLUTION_UPDATE_CC_INPUT
-	| CDCL_DELETE_LAST_ASSIGNMENT_INPUT
+	| CDCL_VIRTUAL_RESOLUTION_INPUT
 	| CDCL_LEARN_CONFLICT_CLAUSE_INPUT
 	| CDCL_SECOND_HIGHEST_DL_INPUT
 	| CDCL_BACKJUMPING_INPUT
@@ -154,9 +144,7 @@ export const emptyClauseDetection: CDCL_EMPTY_CLAUSE_FUN = () => {
 	return hasConflict;
 };
 
-export type CDCL_QUEUE_OCCURRENCE_LIST_FUN = (
-	occurrenceList: OccurrenceList
-) => void;
+export type CDCL_QUEUE_OCCURRENCE_LIST_FUN = (occurrenceList: OccurrenceList) => void;
 
 export const queueOccurrenceList: CDCL_QUEUE_OCCURRENCE_LIST_FUN = (
 	occurrenceList: OccurrenceList
@@ -166,8 +154,7 @@ export const queueOccurrenceList: CDCL_QUEUE_OCCURRENCE_LIST_FUN = (
 
 export type CDCL_UNSTACK_OCCURRENCE_LIST_FUN = (solverStateMachine: CDCL_SolverMachine) => void;
 
-export const dequeueOccurrenceList: CDCL_UNSTACK_OCCURRENCE_LIST_FUN = (
-) => {
+export const dequeueOccurrenceList: CDCL_UNSTACK_OCCURRENCE_LIST_FUN = () => {
 	getOccurrenceListQueue().dequeue();
 };
 
@@ -176,15 +163,6 @@ export type CDCL_UNIT_CLAUSES_DETECTION_FUN = () => Set<number>;
 export const unitClauseDetection: CDCL_UNIT_CLAUSES_DETECTION_FUN = () => {
 	const pool: ClausePool = getClausePool();
 	return solverUnitClauseDetection(pool);
-};
-
-export type CDCL_DELETE_CLAUSE_FUN = (clauses: Set<number>, cRef: number) => void;
-
-export const deleteClause: CDCL_DELETE_CLAUSE_FUN = (clauses: Set<number>, cRef: number) => {
-	if (!clauses.has(cRef)) {
-		logFatal('Clause not found', `Clause - ${cRef} not found`);
-	}
-	clauses.delete(cRef);
 };
 
 export type CDCL_PICK_OCCURRENCE_LIST_FUN = () => OccurrenceList;
@@ -280,10 +258,8 @@ export const buildConflictAnalysis: CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN =
 	}
 
 	// Then the variables from the last decision level are retrieved.
-	const ldlAssignments: VariableAssignment[] = trail.getAssignmentsAtLevel(
-		trail.getDecisionLevel()
-	);
-	const ldlLiterals: Lit[] = ldlAssignments.map((assignment) => assignment.toLit());
+	const propagations: VariableAssignment[] = trail.getPropagationsAtLevel(trail.getDecisionLevel());
+	const lastDecision: VariableAssignment = trail.lastDecision();
 
 	// Thirdly the conflict clause is retrieved
 	const cRef: CRef | undefined = trail.getConflictiveClause()?.getCRef();
@@ -298,7 +274,8 @@ export const buildConflictAnalysis: CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN =
 	const conflictiveClause: Clause = pool.at(cRef).copy();
 	const conflictAnalysis: ConflictAnalysis = new ConflictAnalysis(
 		conflictiveClause,
-		ldlLiterals
+		lastDecision,
+		propagations
 	);
 	setConflictAnalysis(conflictAnalysis);
 };
@@ -310,53 +287,10 @@ export const assertingClause: CDCL_ASSERTING_CLAUSE_FUN = () => {
 	return getConflictAnalysis().finished();
 };
 
-export type CDCL_PICK_LAST_ASSIGNMENT_FUN = (trail: Trail) => VariableAssignment;
+export type CDCL_VIRTUAL_RESOLUTION_FUN = () => void;
 
-export const pickLastAssignment: CDCL_PICK_LAST_ASSIGNMENT_FUN = (trail: Trail) => {
-	const lastAssignment: VariableAssignment = trail.last();
-	return lastAssignment;
-};
-
-export type CDCL_COMPLEMENTARY_IN_CCC_FUN = (
-	conflictClause: Clause,
-	assignment: VariableAssignment
-) => boolean;
-
-export const complementaryOccursInCCC: CDCL_COMPLEMENTARY_IN_CCC_FUN = (
-	ccc: Clause,
-	assignment: VariableAssignment
-) => {
-	const complementary: Lit = Literal.complementary(assignment.toLit());
-	return ccc.containsLiteral(complementary);
-};
-
-export type CDCL_RESOLUTION_UPDATE_CC_FUN = (
-	solver: CDCL_SolverMachine,
-	conflictClause: Clause,
-	assignment: VariableAssignment
-) => Clause;
-
-export const resolutionUpdateCC: CDCL_RESOLUTION_UPDATE_CC_FUN = (
-	solver: CDCL_SolverMachine,
-	cc: Clause,
-	assignment: VariableAssignment
-) => {
-	const r: Reason = assignment.getReason();
-	if (!isPropagationReason(r)) {
-		logFatal('resolutionUpdateCC', 'The reason is not a propagation reason');
-	}
-	const reason: Clause = getClausePool().at(r.cRef);
-	const resolvent: Clause = cc.resolution(reason);
-	getConflictAnalysis().update(resolvent);
-	return resolvent;
-};
-
-export type CDCL_DELETE_LAST_ASSIGNMENT_FUN = (trail: Trail) => void;
-
-export const deleteLastAssignment: CDCL_DELETE_LAST_ASSIGNMENT_FUN = (trail: Trail) => {
-	const assignment: VariableAssignment = trail.pop();
-	const pool: VariablePool = getVariablePool();
-	pool.unassign(assignment.toVar());
+export const virtualResolution: CDCL_VIRTUAL_RESOLUTION_FUN = () => {
+	getConflictAnalysis().virtualResolution();
 };
 
 export type CDCL_LEARN_CONFLICT_CLAUSE_FUN = (trail: Trail, conflictClause: Clause) => number;
@@ -424,7 +358,6 @@ export type CDCL_FUN =
 	| CDCL_ALL_VARIABLES_ASSIGNED_FUN
 	| CDCL_QUEUE_OCCURRENCE_LIST_FUN
 	| CDCL_UNSTACK_OCCURRENCE_LIST_FUN
-	| CDCL_DELETE_CLAUSE_FUN
 	| CDCL_CONFLICT_DETECTION_FUN
 	| CDCL_UNIT_CLAUSE_FUN
 	| CDCL_UNIT_PROPAGATION_FUN
@@ -435,10 +368,7 @@ export type CDCL_FUN =
 	| CDCL_EMPTY_OCCURRENCE_LISTS_FUN
 	| CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN
 	| CDCL_ASSERTING_CLAUSE_FUN
-	| CDCL_PICK_LAST_ASSIGNMENT_FUN
-	| CDCL_COMPLEMENTARY_IN_CCC_FUN
-	| CDCL_RESOLUTION_UPDATE_CC_FUN
-	| CDCL_DELETE_LAST_ASSIGNMENT_FUN
+	| CDCL_VIRTUAL_RESOLUTION_FUN
 	| CDCL_LEARN_CONFLICT_CLAUSE_FUN
 	| CDCL_SECOND_HIGHEST_DL_FUN
 	| CDCL_BACKJUMPING_FUN

@@ -18,7 +18,7 @@ export const assertiveAlgorithm = (clause: Clause, literals: Lit[]): boolean => 
 	while (i < literals.length && matches < 2) {
 		const lit: Lit = literals[i];
 		const complementary: Lit = Literal.complementary(lit);
-		if (clause.containsLiteral(complementary)) matches += 1;
+		if (clause.contains(complementary)) matches += 1;
 		i += 1;
 	}
 	return matches === 1;

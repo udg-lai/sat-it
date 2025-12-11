@@ -78,11 +78,22 @@ export class Trail {
 		return this.assignments.slice(this.followUPIndex);
 	}
 
-	last(): VariableAssignment {
+	lastAssignment(): VariableAssignment {
 		if (this.isEmpty()) {
 			logFatal('Trail underflow', 'Trying to get the last assignment from an empty trail');
 		}
 		return this.assignments[this.assignments.length - 1];
+	}
+
+	lastDecision(): VariableAssignment {
+		if (this.isEmpty() || this.getDLMarks().length <= 1) {
+			logFatal(
+				'Trail underflow',
+				'Trying to get the last decision from an empty trail or trail with no decisions'
+			);
+		}
+		const lastDLIndex = this.getDLMarks()[this.getDLMarks().length - 1];
+		return this.assignments[lastDLIndex];
 	}
 
 	getDecisions(): VariableAssignment[] {
