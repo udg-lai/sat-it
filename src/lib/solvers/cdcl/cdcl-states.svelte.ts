@@ -6,7 +6,7 @@ import {
 	nextOccurrence,
 	queueOccurrenceList,
 	unitClauseDetection,
-	unstackClauseSet,
+	dequeueOccurrenceList,
 	type CDCL_ALL_VARIABLES_ASSIGNED_FUN,
 	type CDCL_ALL_VARIABLES_ASSIGNED_INPUT,
 	type CDCL_CONFLICT_DETECTION_FUN,
@@ -32,7 +32,7 @@ import {
 	unsatisfiedClause,
 	type CDCL_CHECK_PENDING_OCCURRENCE_LISTS_INPUT,
 	type CDCL_CHECK_PENDING_OCCURRENCE_LISTS_FUN,
-	thereAreJobPostponed,
+	pendingOccurrenceList,
 	type CDCL_UNIT_CLAUSE_FUN,
 	type CDCL_UNIT_CLAUSE_INPUT,
 	type CDCL_UNIT_PROPAGATION_FUN,
@@ -180,7 +180,7 @@ const check_pending_occurrence_lists_state: NonFinalState<
 > = {
 	id: cdcl_stateName2StateId['check_pending_occurrence_lists_state'],
 	description: 'True if there are occurrence lists postponed, false otherwise',
-	run: thereAreJobPostponed,
+	run: pendingOccurrenceList,
 	transitions: new Map<CDCL_CHECK_PENDING_OCCURRENCE_LISTS_INPUT, number>()
 		.set('pick_clause_set_state', cdcl_stateName2StateId['pick_clause_set_state'])
 		.set('all_variables_assigned_state', cdcl_stateName2StateId['all_variables_assigned_state'])
@@ -289,7 +289,7 @@ const dequeue_occurrence_list_state: NonFinalState<
 	CDCL_UNSTACK_OCCURRENCE_LIST_INPUT
 > = {
 	id: cdcl_stateName2StateId['dequeue_occurrence_list_state'],
-	run: unstackClauseSet,
+	run: dequeueOccurrenceList,
 	description: 'Unstack the set of clause',
 	transitions: new Map<CDCL_UNSTACK_OCCURRENCE_LIST_INPUT, number>().set(
 		'check_pending_occurrence_lists_state',

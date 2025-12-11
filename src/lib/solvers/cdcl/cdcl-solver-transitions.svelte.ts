@@ -4,7 +4,6 @@ import OccurrenceList from '$lib/entities/OccurrenceList.svelte.ts';
 import type { Trail } from '$lib/entities/Trail.svelte.ts';
 import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
 import { conflictDetectionEventBus, toggleTrailViewEventBus } from '$lib/events/events.ts';
-import { updateAssignment } from '$lib/states/assignment.svelte.ts';
 import { focusOnAssignment } from '$lib/states/inspect-assignment.svelte.ts';
 import { updateOccurrenceList } from '$lib/states/occurrence-list.svelte.ts';
 import { getClausePool } from '$lib/states/problem.svelte.ts';
@@ -74,6 +73,7 @@ import type {
 } from './cdcl-domain.svelte.ts';
 import type { CDCL_SolverMachine } from './cdcl-solver-machine.svelte.ts';
 import type { CDCL_StateMachine } from './cdcl-state-machine.svelte.ts';
+import { getOccurrenceListQueue } from '$lib/states/queue-occurrence-lists.svelte.ts';
 
 /* exported transitions */
 
@@ -286,13 +286,13 @@ const queueOccurrenceListTransition = (
 			'There should be a function in the Queue Occurrence List state'
 		);
 	}
-	state.run(solver, occurrenceList);
+	state.run(occurrenceList);
 	// NOTE: This transition is being used in two places in the cdcl solver diagram.
-	const enqueuedSize = solver.occurrencesQueueSize();
-	if (enqueuedSize > 1) {
+	const queueSize = getOccurrenceListQueue().size();
+	if (queueSize > 1) {
 		// This means, we came from UP and complementary occurrence detection
 		solver.transition('all_clauses_checked_state');
-	} else if (enqueuedSize === 1) {
+	} else if (queueSize === 1) {
 		// This means we came from initial UPs or decide transitions
 		solver.transition('check_pending_occurrence_lists_state');
 	} else {
@@ -311,7 +311,7 @@ const checkPendingOccurrenceListsTransition = (solver: CDCL_SolverMachine): bool
 			'Function to check if there are pending occurrence lists is missing'
 		);
 	}
-	const pendingOcc: boolean = state.run(solver);
+	const pendingOcc: boolean = state.run();
 	if (pendingOcc) solver.transition('pick_clause_set_state');
 	else solver.transition('all_variables_assigned_state');
 	return pendingOcc;
@@ -324,9 +324,9 @@ const pickOccurrenceListTransition = (solver: CDCL_SolverMachine): OccurrenceLis
 		CDCL_PICK_OCCURRENCE_LIST_INPUT
 	>;
 	if (state.run === undefined) {
-		logFatal('Function call error', 'There should be a function in the Peek Clause Set state');
+		logFatal('Function call error', 'No function defined for picking the occurrence list');
 	}
-	const occurrenceList: OccurrenceList = state.run(solver);
+	const occurrenceList: OccurrenceList = state.run();
 	solver.transition('all_clauses_checked_state');
 	return occurrenceList;
 };
@@ -339,7 +339,7 @@ const traversedOccurrenceListTransition = (solver: CDCL_SolverMachine): boolean 
 	if (allOccurrencesCheckedState.run === undefined) {
 		logFatal('Function call error', 'A function that validates all occurrences checked is needed');
 	}
-	const occurrenceList: OccurrenceList = solver.pickOccurrences();
+	const occurrenceList: OccurrenceList = getOccurrenceListQueue().element();
 	const traversed: boolean = allOccurrencesCheckedState.run(occurrenceList);
 	if (traversed) solver.transition('dequeue_occurrence_list_state');
 	else solver.transition('next_occurrence_state');
@@ -356,7 +356,7 @@ const nextOccurrenceTransition = (solver: CDCL_SolverMachine): number => {
 		logFatal('Function call error', 'There should be a function in the Next Clause state');
 	}
 	// Returns the next clause to be checked from the occurrence list at the head of the queue
-	const cRef: number = state.run(solver.pickOccurrences());
+	const cRef: number = state.run(getOccurrenceListQueue().element());
 	solver.transition('conflict_detection_state');
 	return cRef;
 };

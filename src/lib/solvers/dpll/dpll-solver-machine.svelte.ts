@@ -1,8 +1,7 @@
 import { Queue } from '$lib/entities/Queue.svelte.ts';
-import { cleanClausesToCheck, updateOccurrenceList } from '$lib/states/occurrence-list.svelte.ts';
+import { updateOccurrenceList } from '$lib/states/occurrence-list.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import { SolverMachine } from '../SolverMachine.svelte.ts';
-import type { Occurrences } from '../types.ts';
 import type { DPLL_FUN, DPLL_INPUT } from './dpll-domain.svelte.ts';
 import {
 	analyzeClause,

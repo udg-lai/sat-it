@@ -10,8 +10,6 @@ import {
 	emptyClauseDetection as solverEmptyClauseDetection,
 	nonDecisionMade as solverNonDecisionMade
 } from '$lib/solvers/shared.svelte.ts';
-import type { Occurrences } from '$lib/solvers/types.ts';
-import { cleanClausesToCheck, updateOccurrenceList } from '$lib/states/occurrence-list.svelte.ts';
 import {
 	getClausePool,
 	getOccurrencesTableMapping,

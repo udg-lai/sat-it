@@ -5,6 +5,7 @@ import { Queue } from '$lib/entities/Queue.svelte.ts';
 import type { Trail } from '$lib/entities/Trail.svelte.ts';
 import { type StateMachineEvent } from '$lib/events/events.ts';
 import { getStepDelay } from '$lib/states/delay-ms.svelte.ts';
+import { getOccurrenceListQueue } from '$lib/states/queue-occurrence-lists.svelte.ts';
 import { getNoUnitPropagations } from '$lib/states/statistics.svelte.ts';
 import { logError, logFatal } from '$lib/states/toasts.svelte.ts';
 import type { Lit } from '$lib/types/types.ts';
@@ -26,42 +27,13 @@ export const makeCDCLSolver = (): CDCL_SolverMachine => {
 };
 
 export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
-	// Queue that will contain all those Set of clauses that need to be checked.
-	occurrencesQueue: Queue<OccurrenceList> = $state(new Queue<OccurrenceList>());
 	// This variable contains all the information for the machine to find the firstUIP.
 	conflictAnalysis: ConflictAnalysis | undefined = $state(undefined);
 
 	constructor(stopTimeMS: number) {
 		const stateMachine: CDCL_StateMachine = makeCDCLStateMachine();
 		super(stateMachine, 'cdcl', stopTimeMS);
-		this.occurrencesQueue = new Queue<OccurrenceList>();
 	}
-
-	// ** functions related to pendingConflicts **
-	enqueueOccurrences(occurrences: OccurrenceList): void {
-		this.occurrencesQueue.enqueue(occurrences);
-	}
-
-	dequeueOccurrences(): OccurrenceList | undefined {
-		return this.occurrencesQueue.dequeue();
-	}
-
-	pickOccurrences(): OccurrenceList {
-		return this.occurrencesQueue.element();
-	}
-
-	occurrenceQueueEmpty(): boolean {
-		return this.occurrencesQueue.isEmpty();
-	}
-
-	occurrencesQueueSize(): number {
-		return this.occurrencesQueue.size();
-	}
-
-	isOccurrencesQueueEmpty(): boolean {
-		return this.occurrencesQueue.isEmpty();
-	}
-
 	// ** functions related to conflict analysis **
 
 	setConflictAnalysis(trail: Trail, conflictClause: Clause, ldlAssignments: Lit[]): void {
@@ -110,15 +82,7 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 	}
 
 	private occurrenceQueueCopy(): Queue<OccurrenceList> {
-		const queue: Queue<OccurrenceList> = this.occurrencesQueue.copy();
-		const newQueue: Queue<OccurrenceList> = new Queue<OccurrenceList>();
-
-		while (!queue.isEmpty()) {
-			const occurrenceList = queue.dequeue() as OccurrenceList;
-			newQueue.enqueue(occurrenceList.copy());
-		}
-
-		return newQueue;
+		return null as unknown as Queue<OccurrenceList>;
 	}
 
 	updateFromRecord(record: Record<string, unknown> | undefined): void {}
@@ -159,12 +123,13 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 	}
 
 	protected async solveToNextVariableStepByStep(): Promise<void> {
-		const occurrenceList: OccurrenceList = this.pickOccurrences();
-		this.stepByStep(() => !occurrenceList.traversed());
+		const occurrences: OccurrenceList = getOccurrenceListQueue().element();
+		this.stepByStep(() => !occurrences.traversed());
 	}
 
 	protected async solveCDStepByStep(): Promise<void> {
-		this.stepByStep(() => !this.occurrencesQueue.isEmpty());
+		const queueOccurrences: Queue<OccurrenceList> = getOccurrenceListQueue();
+		this.stepByStep(() => !queueOccurrences.isEmpty());
 	}
 
 	protected async solveCAStepByStep(): Promise<void> {
@@ -176,11 +141,13 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 	}
 
 	protected async unitPropagate(): Promise<void> {
+		const queueOccurrences: Queue<OccurrenceList> = getOccurrenceListQueue();
 		const previousUPs: number = getNoUnitPropagations(); // This is monotonically increasing
-		this.stepByStep(() => previousUPs == getNoUnitPropagations() && !this.occurrenceQueueEmpty());
+		this.stepByStep(() => previousUPs == getNoUnitPropagations() && !queueOccurrences.isEmpty());
 	}
 
 	onConflictDetection(): boolean {
-		return !this.occurrencesQueue.isEmpty() && !this.stateMachine.onConflictState();
+		const queueOccurrences: Queue<OccurrenceList> = getOccurrenceListQueue();
+		return !queueOccurrences.isEmpty() && !this.stateMachine.onConflictState();
 	}
 }
