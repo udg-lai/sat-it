@@ -3,11 +3,11 @@
 
 	interface Props {
 		children: Snippet;
-		inspecting: boolean;
+		display: boolean;
 		padding?: string;
 	}
 
-	let { inspecting, children, padding = '0.25rem' }: Props = $props();
+	let { display: inspecting, children, padding = '0.25rem' }: Props = $props();
 
 	let color = $derived(inspecting ? 'var(--inspecting-color)' : 'transparent');
 </script>

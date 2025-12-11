@@ -2,7 +2,7 @@
 	import MathTexComponent from '$lib/components/MathTexComponent.svelte';
 	import { onChrome } from '$lib/app.svelte.ts';
 	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
-	import { getInspectedVariable } from '$lib/states/inspectedVariable.svelte.ts';
+	import { getInspectedVariable } from '$lib/states/inspect-assignment.svelte.ts';
 	import HeadTailComponent from '../HeadTailComponent.svelte';
 	import './style.css';
 
@@ -25,7 +25,7 @@
 	let chrome: boolean = $derived(onChrome());
 </script>
 
-<HeadTailComponent {inspecting}>
+<HeadTailComponent display={inspecting}>
 	<backtracking class:previous-assignment={fromPreviousTrail}>
 		<button
 			class="literal-style backtracking {chrome ? 'pad-chrome' : 'pad-others'}"

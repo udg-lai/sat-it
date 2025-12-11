@@ -1,8 +1,8 @@
 import { Queue } from '$lib/entities/Queue.svelte.ts';
 import {
 	cleanClausesToCheck,
-	updateClausesToCheck
-} from '$lib/states/conflict-detection-state.svelte.ts';
+	updateOccurrenceList
+} from '$lib/states/occurrence-list.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import { SolverMachine } from '../SolverMachine.svelte.ts';
 import type { Occurrences } from '../types.ts';
@@ -90,16 +90,19 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 		}
 		if (!this.pendingOccurrenceLists.isEmpty()) {
 			const { occ: clauses, literal }: Occurrences = this.pendingOccurrenceLists.element();
-			updateClausesToCheck(clauses, literal);
+			updateOccurrenceList(clauses, literal);
 		} else {
 			cleanClausesToCheck();
 		}
 	}
 
-	async transition(input: StateMachineEvent): Promise<void> {
+	async transitionByEvent(input: StateMachineEvent): Promise<void> {
 		if (input === 'up1') {
 			await this.unitPropagate();
-		} else super.transition(input);
+		}
+		else {
+			super.transitionByEvent(input);
+		}
 	}
 
 	step(): void {

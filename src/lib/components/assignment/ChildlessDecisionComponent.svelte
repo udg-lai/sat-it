@@ -2,7 +2,7 @@
 	import { onChrome } from '$lib/app.svelte.ts';
 	import MathTexComponent from '$lib/components/MathTexComponent.svelte';
 	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
-	import { getInspectedVariable } from '$lib/states/inspectedVariable.svelte.ts';
+	import { getInspectedVariable } from '$lib/states/inspect-assignment.svelte.ts';
 	import { Dropdown, DropdownItem } from 'flowbite-svelte';
 	import HeadTailComponent from './../HeadTailComponent.svelte';
 	import './style.css';
@@ -28,7 +28,7 @@
 	};
 </script>
 
-<HeadTailComponent {inspecting}>
+<HeadTailComponent display={inspecting}>
 	<childless-decision class:current-trail={!fromPreviousTrail}>
 		<button
 			class="literal-style decision level-expanded childless {chrome ? 'pad-chrome' : 'pad-others'}"

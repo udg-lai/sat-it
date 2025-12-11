@@ -42,4 +42,10 @@ export class Queue<T> {
 	toArray(): T[] {
 		return [...this.items];
 	}
+
+	copy(): Queue<T> {
+		const newQueue = new Queue<T>();
+		newQueue.items = [...this.items];
+		return newQueue;
+	}
 }

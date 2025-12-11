@@ -1,26 +1,15 @@
 import { assertiveAlgorithm } from '$lib/algorithms/assertive.ts';
 import type Clause from '$lib/entities/Clause.svelte.ts';
+import type OccurrenceList from '$lib/entities/OccurrenceList.svelte.ts';
 import { Queue } from '$lib/entities/Queue.svelte.ts';
 import type { Trail } from '$lib/entities/Trail.svelte.ts';
 import { type StateMachineEvent } from '$lib/events/events.ts';
-import {
-	cleanClausesToCheck,
-	updateClausesToCheck
-} from '$lib/states/conflict-detection-state.svelte.ts';
 import { getStepDelay } from '$lib/states/delay-ms.svelte.ts';
-import { setInspectedVariable } from '$lib/states/inspectedVariable.svelte.ts';
-import {
-	forgetLearnedClauses,
-	learnClauses,
-	syncProblemWithTrail
-} from '$lib/states/problem.svelte.ts';
 import { getNoUnitPropagations } from '$lib/states/statistics.svelte.ts';
 import { logError, logFatal } from '$lib/states/toasts.svelte.ts';
-import { wrapLearnedClauses } from '$lib/states/trails.svelte.ts';
 import type { Lit } from '$lib/types/types.ts';
-import { SvelteSet } from 'svelte/reactivity';
 import { SolverMachine } from '../SolverMachine.svelte.ts';
-import type { ConflictAnalysis, Occurrences } from '../types.ts';
+import type { ConflictAnalysis } from '../types.ts';
 import type { CDCL_FUN, CDCL_INPUT } from './cdcl-domain.svelte.ts';
 import {
 	analyzeClause,
@@ -39,26 +28,26 @@ export const makeCDCLSolver = (): CDCL_SolverMachine => {
 
 export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 	// Queue that will contain all those Set of clauses that need to be checked.
-	occurrencesQueue: Queue<Occurrences> = $state(new Queue<Occurrences>());
+	occurrencesQueue: Queue<OccurrenceList> = $state(new Queue<OccurrenceList>());
 	// This variable contains all the information for the machine to find the firstUIP.
 	conflictAnalysis: ConflictAnalysis | undefined = $state(undefined);
 
 	constructor(stopTimeMS: number) {
 		const stateMachine: CDCL_StateMachine = makeCDCLStateMachine();
 		super(stateMachine, 'cdcl', stopTimeMS);
-		this.occurrencesQueue = new Queue<Occurrences>();
+		this.occurrencesQueue = new Queue<OccurrenceList>();
 	}
 
 	// ** functions related to pendingConflicts **
-	enqueueOccurrences(occurrences: Occurrences): void {
+	enqueueOccurrences(occurrences: OccurrenceList): void {
 		this.occurrencesQueue.enqueue(occurrences);
 	}
 
-	dequeueOccurrences(): Occurrences | undefined {
+	dequeueOccurrences(): OccurrenceList | undefined {
 		return this.occurrencesQueue.dequeue();
 	}
 
-	nextOccurrences(): Occurrences {
+	nextOccurrences(): OccurrenceList {
 		return this.occurrencesQueue.element();
 	}
 
@@ -66,21 +55,12 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 		return this.occurrencesQueue.isEmpty();
 	}
 
-	leftToPostpone(): number {
+	occurrencesQueueSize(): number {
 		return this.occurrencesQueue.size();
 	}
 
-	getQueue(): Queue<Occurrences> {
-		const returnQueue: Queue<Occurrences> = new Queue();
-		for (const originalItem of this.occurrencesQueue.toArray()) {
-			const copiedSet = new SvelteSet<number>(originalItem.occ);
-			const copiedItem: Occurrences = {
-				occ: copiedSet,
-				literal: originalItem.literal
-			};
-			returnQueue.enqueue(copiedItem);
-		}
-		return returnQueue;
+	isOccurrencesQueueEmpty(): boolean {
+		return this.occurrencesQueue.isEmpty();
 	}
 
 	// ** functions related to conflict analysis **
@@ -125,53 +105,24 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 
 	getRecord(): Record<string, unknown> {
 		return {
-			queue: this.getQueue(),
+			queue: this.occurrenceQueueCopy(),
 			conflictAnalysis: this.inConflictAnalysis() ? this.getConflictAnalysis() : undefined
 		};
 	}
 
-	updateFromRecord(record: Record<string, unknown> | undefined): void {
-		if (record === undefined) {
-			this.occurrencesQueue = new Queue();
-			cleanClausesToCheck();
-			return;
+	private occurrenceQueueCopy(): Queue<OccurrenceList> {
+		const queue: Queue<OccurrenceList> = this.occurrencesQueue.copy();
+		const newQueue: Queue<OccurrenceList> = new Queue<OccurrenceList>();
+
+		while (!queue.isEmpty()) {
+			const occurrenceList = queue.dequeue() as OccurrenceList;
+			newQueue.enqueue(occurrenceList.copy());
 		}
-		const recordedPendingConflicts = record['queue'] as Queue<Occurrences>;
-		this.occurrencesQueue.clear();
-		for (const pendingConflict of recordedPendingConflicts.toArray()) {
-			const copiedSet = new SvelteSet<number>(pendingConflict.occ);
-			const copiedItem: Occurrences = {
-				occ: copiedSet,
-				literal: pendingConflict.literal
-			};
-			this.occurrencesQueue.enqueue(copiedItem);
-		}
-		if (!this.occurrencesQueue.isEmpty()) {
-			const { occ: clauses, literal }: Occurrences = this.occurrencesQueue.element();
-			updateClausesToCheck(clauses, literal);
-		} else {
-			cleanClausesToCheck();
-		}
-		const conflictAnalysis = record['conflictAnalysis'] as ConflictAnalysis;
-		if (conflictAnalysis === undefined) {
-			this.conflictAnalysis = undefined;
-		} else {
-			this.setConflictAnalysis(
-				conflictAnalysis.trail.copy(),
-				conflictAnalysis.conflictClause.copy(),
-				[...conflictAnalysis.ldlAssignments]
-			);
-			// Forcing the problem to forget about the learned clauses
-			forgetLearnedClauses();
-			// Learning only those clauses that are currently in the trails
-			learnClauses(wrapLearnedClauses());
-			// Now we need to sync the problem with the trail.
-			// Meaning that the variables need to be assigned as in the trail.
-			// And the occurrences table needs to be rebuilt.
-			syncProblemWithTrail(conflictAnalysis.trail);
-			setInspectedVariable(conflictAnalysis.trail.last().toVar());
-		}
+
+		return newQueue;
 	}
+
+	updateFromRecord(record: Record<string, unknown> | undefined): void {}
 
 	async transitionByEvent(event: StateMachineEvent): Promise<void> {
 		if (event === 'finishCA') {
@@ -213,8 +164,8 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 	}
 
 	protected async solveToNextVariableStepByStep(): Promise<void> {
-		const postponedClauses: Set<number> = this.nextOccurrences().occ;
-		this.stepByStep(() => postponedClauses.size !== 0);
+		const occurrenceList: OccurrenceList = this.nextOccurrences();
+		this.stepByStep(() => !occurrenceList.traversed());
 	}
 
 	protected async solveCDStepByStep(): Promise<void> {
@@ -230,9 +181,9 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 	}
 
 	protected async unitPropagate(): Promise<void> {
-		const previousUPs: number = getNoUnitPropagations();
+		const previousUPs: number = getNoUnitPropagations(); // This is monotonically increasing
 		this.stepByStep(
-			() => previousUPs >= getNoUnitPropagations() && !this.occurrencesQueue.isEmpty()
+			() => previousUPs == getNoUnitPropagations() && !this.occurrenceQueueEmpty()
 		);
 	}
 

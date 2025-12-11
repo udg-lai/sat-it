@@ -17,8 +17,8 @@ import {
 import type { DPLL_SolverMachine } from './dpll-solver-machine.svelte.ts';
 import {
 	cleanClausesToCheck,
-	updateClausesToCheck
-} from '$lib/states/conflict-detection-state.svelte.ts';
+	updateOccurrenceList
+} from '$lib/states/occurrence-list.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
 import type { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
 import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
@@ -46,7 +46,7 @@ export type DPLL_UNSTACK_CLAUSE_SET_INPUT = 'check_pending_occurrence_lists_stat
 
 export type DPLL_DELETE_CLAUSE_INPUT = 'all_clauses_checked_state';
 
-export type DPLL_ALL_CLAUSES_CHECKED_INPUT = 'next_clause_state' | 'unstack_clause_set_state';
+export type DPLL_ALL_CLAUSES_CHECKED_INPUT = 'next_occurrence_state' | 'unstack_clause_set_state';
 
 export type DPLL_NEXT_CLAUSE_INPUT = 'conflict_detection_state';
 
@@ -155,7 +155,7 @@ export type DPLL_PICK_CLAUSE_SET_FUN = (solverStateMachine: DPLL_SolverMachine) 
 
 export const pickClauseSet: DPLL_PICK_CLAUSE_SET_FUN = (solverStateMachine: DPLL_SolverMachine) => {
 	const { occ: clauses, literal }: Occurrences = solverStateMachine.consultPostponed();
-	updateClausesToCheck(clauses, literal);
+	updateOccurrenceList(clauses, literal);
 	return clauses;
 };
 

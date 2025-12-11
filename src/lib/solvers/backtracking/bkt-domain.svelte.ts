@@ -13,8 +13,8 @@ import {
 import type { Occurrences } from '$lib/solvers/types.ts';
 import {
 	cleanClausesToCheck,
-	updateClausesToCheck
-} from '$lib/states/conflict-detection-state.svelte.ts';
+	updateOccurrenceList
+} from '$lib/states/occurrence-list.svelte.ts';
 import {
 	getClausePool,
 	getOccurrencesTableMapping,
@@ -32,7 +32,7 @@ export type BKT_DECIDE_INPUT = 'complementary_occurrences_state';
 export type BKT_COMPLEMENTARY_OCCURRENCES_INPUT = 'queue_occurrence_list_state';
 export type BKT_QUEUE_OCCURRENCE_LIST_INPUT = 'pick_pending_occurrence_list_state';
 export type BKT_PENDING_OCCURRENCE_LIST_INPUT = 'all_clauses_checked_state';
-export type BKT_ALL_CLAUSES_CHECKED_INPUT = 'next_clause_state' | 'all_variables_assigned_state';
+export type BKT_ALL_CLAUSES_CHECKED_INPUT = 'next_occurrence_state' | 'all_variables_assigned_state';
 export type BKT_NEXT_CLAUSE_INPUT = 'conflict_detection_state';
 export type BKT_CONFLICT_DETECTION_INPUT =
 	| 'delete_clause_state'
@@ -109,7 +109,7 @@ export const pickPendingOccurrenceList: BKT_PICK_PENDING_CLAUSE_SET_FUN = (
 	solverStateMachine: BKT_SolverMachine
 ) => {
 	const { occ: clauses, literal }: Occurrences = solverStateMachine.consultOccurrenceList();
-	updateClausesToCheck(clauses, literal);
+	updateOccurrenceList(clauses, literal);
 	return clauses;
 };
 

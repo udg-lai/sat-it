@@ -3,7 +3,7 @@ import {
 	cleanClausesToCheck,
 	getCheckedClause,
 	incrementCheckingIndex
-} from '$lib/states/conflict-detection-state.svelte.ts';
+} from '$lib/states/occurrence-list.svelte.ts';
 import { getClausePool } from '$lib/states/problem.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
 import { getLatestTrail } from '$lib/states/trails.svelte.ts';
@@ -232,7 +232,7 @@ const allClausesCheckedTransition = (
 	}
 	const result: boolean = allClausesCheckedState.run(pendingSet);
 	if (result) stateMachine.transition('all_variables_assigned_state');
-	else stateMachine.transition('next_clause_state');
+	else stateMachine.transition('next_occurrence_state');
 	return result;
 };
 

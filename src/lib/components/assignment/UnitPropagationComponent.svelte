@@ -4,7 +4,7 @@
 	import type Clause from '$lib/entities/Clause.svelte.ts';
 	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
 	import { isUnitPropagationReason } from '$lib/entities/VariableAssignment.ts';
-	import { getInspectedVariable } from '$lib/states/inspectedVariable.svelte.ts';
+	import { getInspectedVariable } from '$lib/states/inspect-assignment.svelte.ts';
 	import { getClausePool } from '$lib/states/problem.svelte.ts';
 	import { logFatal } from '$lib/states/toasts.svelte.ts';
 	import type { CRef } from '$lib/types/types.ts';
@@ -59,7 +59,7 @@
 	let chrome: boolean = $derived(onChrome());
 </script>
 
-<HeadTailComponent {inspecting}>
+<HeadTailComponent display={inspecting}>
 	<unit-propagation class:previous-assignment={fromPreviousTrail}>
 		<button
 			id={buttonId}

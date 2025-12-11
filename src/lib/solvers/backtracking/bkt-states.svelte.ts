@@ -60,7 +60,7 @@ export const bkt_stateName2StateId = {
 	queue_occurrence_list_state: 3,
 	pick_pending_clause_set_state: 4,
 	all_clauses_checked_state: 5,
-	next_clause_state: 6,
+	next_occurrence_state: 6,
 	conflict_detection_state: 7,
 	delete_clause_state: 8,
 	empty_pending_occurrence_list_state: 9,
@@ -158,12 +158,12 @@ const all_clauses_checked_state: NonFinalState<
 		'True if the postponed set of clauses still contain clauses to check, otherwise false',
 	run: allClausesChecked,
 	transitions: new Map<BKT_ALL_CLAUSES_CHECKED_INPUT, number>()
-		.set('next_clause_state', bkt_stateName2StateId['next_clause_state'])
+		.set('next_occurrence_state', bkt_stateName2StateId['next_occurrence_state'])
 		.set('all_variables_assigned_state', bkt_stateName2StateId['all_variables_assigned_state'])
 };
 
-const next_clause_state: NonFinalState<BKT_NEXT_CLAUSE_FUN, BKT_NEXT_CLAUSE_INPUT> = {
-	id: bkt_stateName2StateId['next_clause_state'],
+const next_occurrence_state: NonFinalState<BKT_NEXT_CLAUSE_FUN, BKT_NEXT_CLAUSE_INPUT> = {
+	id: bkt_stateName2StateId['next_occurrence_state'],
 	description: 'Returns the next clause to deal with',
 	run: nextClause,
 	transitions: new Map<BKT_NEXT_CLAUSE_INPUT, number>().set(
@@ -239,7 +239,7 @@ states.set(queue_occurrence_list_state.id, queue_occurrence_list_state);
 states.set(pick_pending_clause_set_state.id, pick_pending_clause_set_state);
 states.set(conflict_detection_state.id, conflict_detection_state);
 states.set(all_clauses_checked_state.id, all_clauses_checked_state);
-states.set(next_clause_state.id, next_clause_state);
+states.set(next_occurrence_state.id, next_occurrence_state);
 states.set(delete_clause_state.id, delete_clause_state);
 states.set(empty_pending_occurrence_list_state.id, empty_pending_occurrence_list_state);
 states.set(decision_level_state.id, decision_level_state);

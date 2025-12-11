@@ -1,7 +1,7 @@
 import {
 	cleanClausesToCheck,
-	updateClausesToCheck
-} from '$lib/states/conflict-detection-state.svelte.ts';
+	updateOccurrenceList
+} from '$lib/states/occurrence-list.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import { SolverMachine } from '../SolverMachine.svelte.ts';
@@ -94,7 +94,7 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 		this.setOccurrenceList(occurrenceListRecord);
 		if (this.onConflictDetection()) {
 			const { occ: clauses, literal }: Occurrences = occurrenceListRecord;
-			updateClausesToCheck(clauses, literal);
+			updateOccurrenceList(clauses, literal);
 		} else {
 			cleanClausesToCheck();
 		}

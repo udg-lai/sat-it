@@ -73,10 +73,10 @@ export const dpll_stateName2StateId = {
 	check_pending_occurrence_lists_state: 3,
 	pick_clause_set_state: 4,
 	all_variables_assigned_state: 5,
-	unstack_occurrence_list_state: 6,
+	dequeue_occurrence_list_state: 6,
 	clause_evaluation_state: 7,
 	all_clauses_checked_state: 8,
-	next_clause_state: 9,
+	next_occurrence_state: 9,
 	conflict_detection_state: 10,
 	unit_clause_state: 11,
 	delete_clause_state: 12,
@@ -174,12 +174,12 @@ const all_clauses_checked_state: NonFinalState<
 		'True if the postponed occurrence list still contain clauses to check, otherwise false',
 	run: allClausesChecked,
 	transitions: new Map<DPLL_ALL_CLAUSES_CHECKED_INPUT, number>()
-		.set('next_clause_state', dpll_stateName2StateId['next_clause_state'])
-		.set('unstack_clause_set_state', dpll_stateName2StateId['unstack_occurrence_list_state'])
+		.set('next_occurrence_state', dpll_stateName2StateId['next_occurrence_state'])
+		.set('unstack_clause_set_state', dpll_stateName2StateId['dequeue_occurrence_list_state'])
 };
 
-const next_clause_state: NonFinalState<DPLL_NEXT_CLAUSE_FUN, DPLL_NEXT_CLAUSE_INPUT> = {
-	id: dpll_stateName2StateId['next_clause_state'],
+const next_occurrence_state: NonFinalState<DPLL_NEXT_CLAUSE_FUN, DPLL_NEXT_CLAUSE_INPUT> = {
+	id: dpll_stateName2StateId['next_occurrence_state'],
 	description: 'Returns the next clause to deal with',
 	run: nextClause,
 	transitions: new Map<DPLL_NEXT_CLAUSE_INPUT, number>().set(
@@ -250,11 +250,11 @@ const queue_occurrence_list_state: NonFinalState<
 		.set('delete_clause_state', dpll_stateName2StateId['delete_clause_state'])
 };
 
-const unstack_occurrence_list_state: NonFinalState<
+const dequeue_occurrence_list_state: NonFinalState<
 	DPLL_UNSTACK_OCCURRENCE_LIST_FUN,
 	DPLL_UNSTACK_CLAUSE_SET_INPUT
 > = {
-	id: dpll_stateName2StateId['unstack_occurrence_list_state'],
+	id: dpll_stateName2StateId['dequeue_occurrence_list_state'],
 	run: unstackOccurrenceList,
 	description: 'Unstack the set of clause',
 	transitions: new Map<DPLL_UNSTACK_CLAUSE_SET_INPUT, number>().set(
@@ -320,8 +320,8 @@ states.set(queue_occurrence_list_state.id, queue_occurrence_list_state);
 states.set(pick_clause_set_state.id, pick_clause_set_state);
 states.set(all_variables_assigned_state.id, all_variables_assigned_state);
 states.set(decide_state.id, decide_state);
-states.set(unstack_occurrence_list_state.id, unstack_occurrence_list_state);
-states.set(next_clause_state.id, next_clause_state);
+states.set(dequeue_occurrence_list_state.id, dequeue_occurrence_list_state);
+states.set(next_occurrence_state.id, next_occurrence_state);
 states.set(all_clauses_checked_state.id, all_clauses_checked_state);
 states.set(conflict_detection_state.id, conflict_detection_state);
 states.set(delete_clause_state.id, delete_clause_state);

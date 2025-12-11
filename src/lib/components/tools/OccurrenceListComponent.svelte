@@ -10,10 +10,11 @@
 	import type Problem from '$lib/entities/Problem.svelte.ts';
 	import {
 		getCheckingIndex,
-		getClausesToCheck
-	} from '$lib/states/conflict-detection-state.svelte.ts';
-	import { getProblemStore } from '$lib/states/problem.svelte.ts';
+		getOccurrenceList
+	} from '$lib/states/occurrence-list.svelte.ts';
+	import { getClausePool, getProblemStore } from '$lib/states/problem.svelte.ts';
 	import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
+	import type { CRef } from '$lib/types/types.ts';
 	import ClauseComponent from '../ClauseComponent.svelte';
 	import HeadTailComponent from '../HeadTailComponent.svelte';
 	import MathTexComponent from '../MathTexComponent.svelte';
@@ -24,12 +25,17 @@
 	const onPreConflictState: boolean = $derived(solverMachine.onPreConflictState());
 
 	let clauses: Clause[] = $derived.by(() => {
-		const target: number[] = getClausesToCheck();
-		const cPool: ClausePool = problem.getClausePool();
-		return target.map((id) => cPool.at(id));
+		const cRefs: CRef[] = getOccurrenceList().getClauses();
+		return cRefs.map((cRef) => getClausePool().at(cRef));
 	});
 
-	let checkingIndex: number = $derived(getCheckingIndex());
+	type MaybeClause = Clause | undefined;
+
+	let toDisplay: MaybeClause[] = $derived.by(() => {
+		return [undefined].concat(clauses.map((clause) => clause as MaybeClause));
+	});
+
+	let focusCRef: CRef = $derived(getOccurrenceList().pointedCRef());
 
 	function isSat(clause: Clause): boolean {
 		return isSatClause(clause.eval());
@@ -47,7 +53,7 @@
 
 <div class="enumerate-clause">
 	<div class="enumerate"></div>
-	<HeadTailComponent inspecting={onPreConflictState}>
+	<HeadTailComponent display={onPreConflictState}>
 		<div class="static">
 			{#if clauses.length !== 0}
 				{#each clauses[0] as lit, i (i)}
@@ -71,12 +77,12 @@
 					{clause.getCRef()}.
 				</span>
 			</div>
-			<HeadTailComponent inspecting={checkingIndex === index && !onPreConflictState}>
+			<HeadTailComponent display={focusCRef === clause.getCRef() && !onPreConflictState}>
 				<div
 					class="clause-highlighter"
 					class:inspectedTrue={isSat(clause)}
 					class:inspectedFalse={isUnSat(clause)}
-					class:visited-clause={checkingIndex >= index && isPartial(clause) && !onPreConflictState}
+					class:visited-clause={focusCRef >= index && isPartial(clause) && !onPreConflictState}
 				>
 					<ClauseComponent {clause} />
 				</div>

@@ -9,3 +9,5 @@ export type Var = number;
 export type Lit = number;
 
 export type CRef = number;
+
+export type List<T> = T[];
