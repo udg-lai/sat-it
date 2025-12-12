@@ -13,17 +13,17 @@ describe('resolution algorithm', () => {
 		5: new Variable(6)
 	};
 	it('example01', () => {
-		const a = new Literal(variables[0], 'Positive');
-		const b = new Literal(variables[1], 'Negative');
-		const c = new Literal(variables[2], 'Negative');
+		const a = new Literal(variables[0], false);
+		const b = new Literal(variables[1], true);
+		const c = new Literal(variables[2], true);
 		const c1 = new Clause([a, b, c]);
 		// clause (c1):
 		//  [1, -2, -3]
 
-		const d = new Literal(variables[0], 'Positive');
-		const e = new Literal(variables[1], 'Negative');
-		const f = new Literal(variables[2], 'Negative');
-		const g = new Literal(variables[3], 'Positive');
+		const d = new Literal(variables[0], false);
+		const e = new Literal(variables[1], true);
+		const f = new Literal(variables[2], true);
+		const g = new Literal(variables[3], false);
 		const c2 = new Clause([d, e, f, g]);
 		// clause (2):
 		//  [1, -2, -3, 4]
@@ -35,17 +35,17 @@ describe('resolution algorithm', () => {
 		expect(cr.equals(cc)).toBe(true);
 	});
 	it('example02', () => {
-		const a = new Literal(variables[0], 'Positive');
-		const b = new Literal(variables[1], 'Negative');
-		const c = new Literal(variables[2], 'Negative');
+		const a = new Literal(variables[0], false);
+		const b = new Literal(variables[1], true);
+		const c = new Literal(variables[2], true);
 		const c1 = new Clause([a, b, c]);
 		// clause (c1):
 		//  [1, -2, -3]
 
-		const d = new Literal(variables[0], 'Positive');
-		const e = new Literal(variables[1], 'Negative');
-		const f = new Literal(variables[2], 'Positive');
-		const g = new Literal(variables[3], 'Positive');
+		const d = new Literal(variables[0], false);
+		const e = new Literal(variables[1], true);
+		const f = new Literal(variables[2], false);
+		const g = new Literal(variables[3], false);
 		const c2 = new Clause([d, e, f, g]);
 		// clause (2):
 		//  [1, -2, 3, 4]
@@ -57,17 +57,17 @@ describe('resolution algorithm', () => {
 		expect(cr.equals(cc)).toBe(true);
 	});
 	it('example03', () => {
-		const a = new Literal(variables[0], 'Positive');
-		const b = new Literal(variables[1], 'Negative');
-		const c = new Literal(variables[2], 'Negative');
+		const a = new Literal(variables[0], false);
+		const b = new Literal(variables[1], true);
+		const c = new Literal(variables[2], true);
 		const c1 = new Clause([a, b, c]);
 		// clause (c1):
 		//  [1, -2, -3]
 
-		const d = new Literal(variables[0], 'Positive');
-		const e = new Literal(variables[1], 'Negative');
-		const f = new Literal(variables[2], 'Positive');
-		const g = new Literal(variables[3], 'Positive');
+		const d = new Literal(variables[0], false);
+		const e = new Literal(variables[1], true);
+		const f = new Literal(variables[2], false);
+		const g = new Literal(variables[3], false);
 		const c2 = new Clause([d, e, f, g]);
 		// clause (2):
 		//  [1, -2, 3, 4]
