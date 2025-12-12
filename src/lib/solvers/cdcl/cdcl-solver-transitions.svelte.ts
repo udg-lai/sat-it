@@ -97,7 +97,7 @@ export const preConflictAnalysis = (solver: CDCL_SolverMachine) => {
 	emptyOccurrenceListsTransition(stateMachine, solver);
 	const onLevelZero: boolean = decisionLevelTransition(stateMachine);
 	if (onLevelZero) return;
-	buildConflictAnalysisTransition(stateMachine, solver);
+	buildConflictAnalysisTransition(solver);
 	const asserting: boolean = assertingClauseTransition(stateMachine, solver);
 	if (asserting) {
 		logFatal('It is impossible that the conflictive clause is asserting');
@@ -106,13 +106,7 @@ export const preConflictAnalysis = (solver: CDCL_SolverMachine) => {
 };
 
 export const conflictAnalysisBlock = (solver: CDCL_SolverMachine): void => {
-	const conflictAnalysis: ConflictAnalysis = getConflictAnalysis();
-	const cc: Clause = conflictAnalysis.getClause();
-
-	const lastAssignment: VariableAssignment = VirtualResolutionTransition(
-		solver.getStateMachine(),
-		conflictAnalysis
-	);
+	virtualResolutionTransition(solver);
 
 	if (!lastAssignment.wasPropagated()) {
 		logError(
@@ -475,11 +469,8 @@ const emptyOccurrenceListsTransition = (
 
 // ** cdcl transition **
 
-const buildConflictAnalysisTransition = (
-	stateMachine: CDCL_StateMachine,
-	solver: CDCL_SolverMachine
-) => {
-	const buildConflictAnalysisState = stateMachine.getActiveState() as NonFinalState<
+const buildConflictAnalysisTransition = (solver: CDCL_SolverMachine) => {
+	const buildConflictAnalysisState = solver.getActiveState() as NonFinalState<
 		CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN,
 		CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_INPUT
 	>;
@@ -489,108 +480,59 @@ const buildConflictAnalysisTransition = (
 			'There should be a function in the Build Conflict Analysis state'
 		);
 	}
-	buildConflictAnalysisState.run(solver);
-	stateMachine.transition('asserting_clause_state');
+	buildConflictAnalysisState.run();
+	solver.transition('asserting_clause_state');
 };
 
-const assertingClauseTransition = (
-	stateMachine: CDCL_StateMachine,
-	solver: CDCL_SolverMachine
-): boolean => {
-	const assertingClauseState = stateMachine.getActiveState() as NonFinalState<
+const assertingClauseTransition = (solver: CDCL_SolverMachine): boolean => {
+	const assertingClauseState = solver.getActiveState() as NonFinalState<
 		CDCL_ASSERTING_CLAUSE_FUN,
 		CDCL_ASSERTING_CLAUSE_INPUT
 	>;
 	if (assertingClauseState.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Asserting Clause state');
 	}
-	const isAsserting: boolean = assertingClauseState.run(solver);
-	if (isAsserting) stateMachine.transition('learn_cc_state');
-	else stateMachine.transition('pick_last_assignment_state');
+	const isAsserting: boolean = assertingClauseState.run();
+	if (isAsserting) solver.transition('learn_cc_state');
+	else solver.transition('virtual_resolution_state');
 	return isAsserting;
 };
 
-const VirtualResolutionTransition = (
-	stateMachine: CDCL_StateMachine,
-	{ trail }: ConflictAnalysis
-) => {
-	const virtualResolutionState = stateMachine.getActiveState() as NonFinalState<
+const virtualResolutionTransition = (solver: CDCL_SolverMachine) => {
+	const virtualResolutionState = solver.getActiveState() as NonFinalState<
 		CDCL_VIRTUAL_RESOLUTION_FUN,
 		CDCL_VIRTUAL_RESOLUTION_INPUT
 	>;
 	if (virtualResolutionState.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Pick Last Assignment state');
 	}
-	const assignment: VariableAssignment = virtualResolutionState.run(trail);
-	stateMachine.transition('complementary_in_ccc_state_state');
-	return assignment;
+	virtualResolutionState.run();
+	solver.transition('asserting_clause_state');
 };
 
-const complementaryInCCTransition = (
-	solver: CDCL_SolverMachine,
-	lastAssignment: VariableAssignment,
-	cc: Clause
-) => {
-	const complementaryInCCState = solver.getActiveState() as NonFinalState<
-		CDCL_COMPLEMENTARY_IN_CCC_FUN,
-		CDCL_COMPLEMENTARY_IN_CCC_INPUT
-	>;
-	if (complementaryInCCState.run === undefined) {
-		logFatal('Complementary In CC', 'No function defined in the Complementary In CC state');
-	}
 
-	const complementaryExists: boolean = complementaryInCCState.run(cc, lastAssignment);
-	if (complementaryExists) solver.transition('resolution_update_cc_state');
-	else solver.transition('delete_last_assignment_state');
-	return complementaryExists;
-};
-
-const resolutionUpdateCCTransition = (
-	solver: CDCL_SolverMachine,
-	lastAssignment: VariableAssignment,
-	cc: Clause
-): Clause => {
-	const resolutionUpdateCCState = solver.getActiveState() as NonFinalState<
-		CDCL_RESOLUTION_UPDATE_CC_FUN,
-		CDCL_RESOLUTION_UPDATE_CC_INPUT
-	>;
-	if (resolutionUpdateCCState.run === undefined) {
-		logFatal('Function call error', 'There should be a function in the Variable In CC state');
-	}
-	const resolvent: Clause = resolutionUpdateCCState.run(solver, cc, lastAssignment);
-	solver.transition('delete_last_assignment_state');
-	return resolvent;
-};
-
-const deleteLastAssignmentTransition = (
-	stateMachine: CDCL_StateMachine,
-	conflictAnalysis: ConflictAnalysis
-) => {
-	const deleteLastAssignmentState = stateMachine.getActiveState() as NonFinalState<
-		CDCL_DELETE_LAST_ASSIGNMENT_FUN,
-		CDCL_DELETE_LAST_ASSIGNMENT_INPUT
-	>;
-	if (deleteLastAssignmentState.run === undefined) {
-		logFatal('Function call error', 'There should be a function in the Variable In CC state');
-	}
-	deleteLastAssignmentState.run(conflictAnalysis.trail);
-	stateMachine.transition('asserting_clause_state');
-};
-
-const learnConflictClauseTransition = (cdclSolver: CDCL_SolverMachine): CRef => {
-	const learnConflictClauseState = cdclSolver.getStateMachine().getActiveState() as NonFinalState<
+const learnConflictClauseTransition = (solver: CDCL_SolverMachine): CRef => {
+	const learnConflictClauseState = solver.getActiveState() as NonFinalState<
 		CDCL_LEARN_CONFLICT_CLAUSE_FUN,
 		CDCL_LEARN_CONFLICT_CLAUSE_INPUT
 	>;
 	if (learnConflictClauseState.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Variable In CC state');
 	}
-	const cRef: number = learnConflictClauseState.run(
-		cdclSolver.consultConflictAnalysis().trail,
-		cdclSolver.consultConflictAnalysis().conflictClause
-	);
-	cdclSolver.getStateMachine().transition('second_highest_dl_state');
-	return cRef;
+
+	const conflictAnalysis: ConflictAnalysis = getConflictAnalysis();
+
+	if (!conflictAnalysis.resolventIsAssertive()) {
+		logFatal(
+			'CDCL Conflict Analysis',
+			'The conflict clause should be assertive before learning it'
+		);
+	}
+
+	const resolvent: Clause = conflictAnalysis.getClause();
+	learnConflictClauseState.run(resolvent);
+	solver.getStateMachine().transition('second_highest_dl_state');
+	return resolvent.getCRef();
 };
 
 const getSecondHighestDLTransition = (

@@ -244,11 +244,9 @@ export const emptyOccurrenceLists: CDCL_EMPTY_OCCURRENCE_LISTS_FUN = () => {
 
 // ** additional cdcl function **
 
-export type CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN = (solver: CDCL_SolverMachine) => void;
+export type CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN = () => void;
 
-export const buildConflictAnalysis: CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN = (
-	solver: CDCL_SolverMachine
-) => {
+export const buildConflictAnalysis: CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN = () => {
 	// Firstly the last trail is achieved
 	const trail: Trail = getLatestTrail();
 	if (trail.isEmpty()) {
@@ -293,10 +291,9 @@ export const virtualResolution: CDCL_VIRTUAL_RESOLUTION_FUN = () => {
 	getConflictAnalysis().virtualResolution();
 };
 
-export type CDCL_LEARN_CONFLICT_CLAUSE_FUN = (trail: Trail, conflictClause: Clause) => number;
+export type CDCL_LEARN_CONFLICT_CLAUSE_FUN = (lemma: Clause) => number;
 
 export const learnConflictClause: CDCL_LEARN_CONFLICT_CLAUSE_FUN = (
-	trail: Trail,
 	lemma: Clause
 ) => {
 	//Set the lemma as learnt. This will be the clause that will be added to the pool.
@@ -306,7 +303,7 @@ export const learnConflictClause: CDCL_LEARN_CONFLICT_CLAUSE_FUN = (
 	const cRef: CRef = getProblemStore().addClause(lemma);
 
 	// Saves the learnt clause in the trail
-	trail.attachLemma(lemma);
+	getLatestTrail().attachLemma(lemma);
 
 	logInfo('New clause learned', `Clause ${cRef} added to the clause pool`);
 
