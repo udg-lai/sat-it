@@ -1,4 +1,4 @@
-import { isUnSATClause, type ClauseEval } from '$lib/entities/Clause.svelte.ts';
+import { isUnsatisfiedEval, type ClauseEval } from '$lib/entities/Clause.svelte.ts';
 import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
 import type { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
 import {
@@ -8,7 +8,7 @@ import {
 	complementaryOccurrences as solverComplementaryOccurrences,
 	decide as solverDecide,
 	emptyClauseDetection as solverEmptyClauseDetection,
-	nonDecisionMade as solverNonDecisionMade
+	atLevelZero as solverNonDecisionMade
 } from '$lib/solvers/shared.svelte.ts';
 import {
 	getClausePool,
@@ -27,15 +27,13 @@ export type BKT_DECIDE_INPUT = 'complementary_occurrences_state';
 export type BKT_COMPLEMENTARY_OCCURRENCES_INPUT = 'queue_occurrence_list_state';
 export type BKT_QUEUE_OCCURRENCE_LIST_INPUT = 'pick_pending_occurrence_list_state';
 export type BKT_PENDING_OCCURRENCE_LIST_INPUT = 'all_clauses_checked_state';
-export type BKT_ALL_CLAUSES_CHECKED_INPUT =
-	| 'next_occurrence_state'
-	| 'all_variables_assigned_state';
-export type BKT_NEXT_CLAUSE_INPUT = 'conflict_detection_state';
+export type BKT_ALL_CLAUSES_CHECKED_INPUT = 'next_clause_state' | 'all_variables_assigned_state';
+export type BKT_NEXT_CLAUSE_INPUT = 'falsified_clause_state';
 export type BKT_CONFLICT_DETECTION_INPUT =
 	| 'delete_clause_state'
 	| 'empty_pending_occurrence_list_state';
 export type BKT_DELETE_CLAUSE_INPUT = 'all_clauses_checked_state';
-export type BKT_EMPTY_PENDING_OCCURRENCE_LIST_INPUT = 'decision_level_state';
+export type BKT_EMPTY_PENDING_OCCURRENCE_LIST_INPUT = 'at_level_zero_state';
 export type BKT_DECISION_LEVEL_INPUT = 'backtracking_state' | 'unsat_state';
 export type BKT_BACKTRACKING_INPUT = 'complementary_occurrences_state';
 
@@ -131,7 +129,7 @@ export type BKT_CONFLICT_DETECTION_FUN = (cRef: CRef) => boolean;
 export const unsatisfiedClause: BKT_CONFLICT_DETECTION_FUN = (cRef: CRef) => {
 	const pool: ClausePool = getClausePool();
 	const evaluation: ClauseEval = solverClauseEvaluation(pool, cRef);
-	return isUnSATClause(evaluation);
+	return isUnsatisfiedEval(evaluation);
 };
 
 export type BKT_DELETE_CLAUSE_FUN = (pending: Set<CRef>, cRef: CRef) => void;

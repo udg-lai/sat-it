@@ -10,7 +10,7 @@ import {
 	unitClauseDetection as solverUnitClauseDetection,
 	unitPropagation as solverUnitPropagation,
 	complementaryOccurrences as solverComplementaryOccurrences,
-	nonDecisionMade as solverNonDecisionMade,
+	atLevelZero as solverNonDecisionMade,
 	backtracking as solverBacktracking,
 	decide as solverDecide
 } from '$lib/solvers/shared.svelte.ts';
@@ -20,7 +20,7 @@ import { logFatal } from '$lib/states/toasts.svelte.ts';
 import type { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
 import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
 import type { Occurrences } from '../types.ts';
-import { isUnitClause, isUnSATClause, type ClauseEval } from '$lib/entities/Clause.svelte.ts';
+import { isUnitEval, isUnsatisfiedEval, type ClauseEval } from '$lib/entities/Clause.svelte.ts';
 import type { CRef, Lit } from '$lib/types/types.ts';
 
 // ** state inputs **
@@ -43,9 +43,9 @@ export type DPLL_UNSTACK_CLAUSE_SET_INPUT = 'check_pending_occurrence_lists_stat
 
 export type DPLL_DELETE_CLAUSE_INPUT = 'all_clauses_checked_state';
 
-export type DPLL_ALL_CLAUSES_CHECKED_INPUT = 'next_occurrence_state' | 'unstack_clause_set_state';
+export type DPLL_ALL_CLAUSES_CHECKED_INPUT = 'next_clause_state' | 'unstack_clause_set_state';
 
-export type DPLL_NEXT_CLAUSE_INPUT = 'conflict_detection_state';
+export type DPLL_NEXT_CLAUSE_INPUT = 'falsified_clause_state';
 
 export type DPLL_CONFLICT_DETECTION_INPUT = 'unit_clause_state' | 'empty_occurrence_lists_state';
 
@@ -63,7 +63,7 @@ export type DPLL_BACKTRACKING_INPUT = 'complementary_occurrences_state';
 
 export type DPLL_DECIDE_INPUT = 'complementary_occurrences_state';
 
-export type DPLL_EMPTY_OCCURRENCE_LISTS_INPUT = 'decision_level_state';
+export type DPLL_EMPTY_OCCURRENCE_LISTS_INPUT = 'at_level_zero_state';
 
 export type DPLL_INPUT =
 	| DPLL_EMPTY_CLAUSE_INPUT
@@ -178,7 +178,7 @@ export type DPLL_CONFLICT_DETECTION_FUN = (cRef: number) => boolean;
 export const unsatisfiedClause: DPLL_CONFLICT_DETECTION_FUN = (cRef: number) => {
 	const pool: ClausePool = getClausePool();
 	const evaluation: ClauseEval = clauseEvaluation(pool, cRef);
-	return isUnSATClause(evaluation);
+	return isUnsatisfiedEval(evaluation);
 };
 
 export type DPLL_CHECK_PENDING_OCCURRENCE_LISTS_FUN = (
@@ -196,7 +196,7 @@ export type DPLL_UNIT_CLAUSE_FUN = (cRef: CRef) => boolean;
 export const unitClause: DPLL_UNIT_CLAUSE_FUN = (cRef: CRef) => {
 	const pool: ClausePool = getClausePool();
 	const evaluation: ClauseEval = clauseEvaluation(pool, cRef);
-	return isUnitClause(evaluation);
+	return isUnitEval(evaluation);
 };
 
 export type DPLL_UNIT_PROPAGATION_FUN = (cRef: CRef) => Lit;

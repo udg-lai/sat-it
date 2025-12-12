@@ -7,7 +7,7 @@ import {
 	type AssignmentEval
 } from '../interfaces/IClausePool.ts';
 import type { Claim } from '../parsers/dimacs.ts';
-import Clause, { isSatClause, isUnSATClause, type ClauseEval } from './Clause.svelte.ts';
+import Clause, { isSatisfiedEval, isUnsatisfiedEval, type ClauseEval } from './Clause.svelte.ts';
 import type { VariablePool } from './VariablePool.svelte.ts';
 import type { CRef } from '$lib/types/types.ts';
 
@@ -46,13 +46,13 @@ class ClausePool implements IClausePool {
 		while (i < clauses.length && conflict === undefined) {
 			const clause: Clause = clauses[i];
 			const evaluation: ClauseEval = clause.eval();
-			const unSAT = isUnSATClause(evaluation);
-			if (!unSAT) {
-				const sat = isSatClause(evaluation);
+			const unSAT = isUnsatisfiedEval(evaluation);
+			if (unSAT) {
+				conflict = clause;
+			} else {
+				const sat = isSatisfiedEval(evaluation);
 				if (sat) nSatisfied++;
 				i++;
-			} else {
-				conflict = clause;
 			}
 		}
 		let state: AssignmentEval;
@@ -94,7 +94,7 @@ class ClausePool implements IClausePool {
 		let leftToSatisfy: number = 0;
 		this.clauses.forEach((clause) => {
 			const evaluation: ClauseEval = clause.eval();
-			if (!isSatClause(evaluation)) leftToSatisfy += 1;
+			if (!isSatisfiedEval(evaluation)) leftToSatisfy += 1;
 		});
 		return leftToSatisfy;
 	}

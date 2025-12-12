@@ -292,7 +292,7 @@ const allClausesCheckedTransition = (
 	}
 	const result: boolean = allClausesCheckedState.run(clauses);
 	if (result) stateMachine.transition('unstack_clause_set_state');
-	else stateMachine.transition('next_occurrence_state');
+	else stateMachine.transition('next_clause_state');
 	return result;
 };
 
@@ -305,7 +305,7 @@ const nextClauseTransition = (stateMachine: DPLL_StateMachine, clauseSet: Set<nu
 		logFatal('Function call error', 'There should be a function in the Next Clause state');
 	}
 	const clauseTag: number = nextClauseState.run(clauseSet);
-	stateMachine.transition('conflict_detection_state');
+	stateMachine.transition('falsified_clause_state');
 	return clauseTag;
 };
 
@@ -462,5 +462,5 @@ const emptyClauseSetTransition = (
 		logFatal('Function call error', 'There should be a function in the Empty Clause Set state');
 	}
 	emptyClauseSetState.run(solver);
-	stateMachine.transition('decision_level_state');
+	stateMachine.transition('at_level_zero_state');
 };

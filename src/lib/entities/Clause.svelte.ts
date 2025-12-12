@@ -8,13 +8,64 @@ import { arraysEqual } from '../types/array.ts';
 import Literal from './Literal.svelte.ts';
 import type { VariablePool } from './VariablePool.svelte.ts';
 
+export interface UNSATISFIED {
+	type: 'SAT';
+}
+
+export interface SATISFIED {
+	type: 'UnSAT';
+}
+
+export interface UNIT {
+	type: 'UNIT';
+	literal: number;
+}
+
+export interface UNRESOLVED {
+	type: 'UNRESOLVED';
+}
+
+export type ClauseEval = UNSATISFIED | SATISFIED | UNIT | UNRESOLVED;
+
+export const makeSatisfiedEval = (): UNSATISFIED => {
+	return { type: 'SAT' };
+};
+
+export const makeUnsatisfiedEval = (): SATISFIED => {
+	return { type: 'UnSAT' };
+};
+
+export const makeUnitEval = (literal: number): UNIT => {
+	return { type: 'UNIT', literal };
+};
+
+export const makeUnresolvedEval = (): UNRESOLVED => {
+	return { type: 'UNRESOLVED' };
+};
+
+export const isUnsatisfiedEval = (e: ClauseEval): e is SATISFIED => {
+	return e.type === 'UnSAT';
+};
+
+export const isSatisfiedEval = (e: ClauseEval): e is UNSATISFIED => {
+	return e.type === 'SAT';
+};
+
+export const isUnresolvedEval = (e: ClauseEval): e is UNRESOLVED => {
+	return e.type === 'UNRESOLVED';
+};
+
+export const isUnitEval = (e: ClauseEval): e is UNIT => {
+	return e.type === 'UNIT';
+};
+
 type ClauseOptions = {
 	comments?: string[];
 	cRef?: CRef;
 	learned?: boolean;
 };
 
-class Clause implements Comparable<Clause> {
+export default class Clause implements Comparable<Clause> {
 	private literals: Literal[] = [];
 	private comments: string[] = $state([]);
 	private cRef: number | undefined;
@@ -103,10 +154,10 @@ class Clause implements Comparable<Clause> {
 			}
 		}
 		let state: ClauseEval;
-		if (satisfied) state = makeSatClause();
-		else if (unassignedLiterals.length === 1) state = makeUnitClause(unassignedLiterals[0]);
-		else if (unassignedLiterals.length === 0) state = makeUnSATClause();
-		else state = makeUnresolvedClause();
+		if (satisfied) state = makeSatisfiedEval();
+		else if (unassignedLiterals.length === 1) state = makeUnitEval(unassignedLiterals[0]);
+		else if (unassignedLiterals.length === 0) state = makeUnsatisfiedEval();
+		else state = makeUnresolvedEval();
 
 		return state;
 	}
@@ -200,56 +251,3 @@ class Clause implements Comparable<Clause> {
 		return '{' + this.literals.map((lit: Literal) => lit.toString()).join(', ') + '}';
 	}
 }
-
-export interface SATClause {
-	type: 'SAT';
-}
-
-export interface UnSATClause {
-	type: 'UnSAT';
-}
-
-export interface UNITClause {
-	type: 'UNIT';
-	literal: number;
-}
-
-export interface UNRESOLVEDClause {
-	type: 'UNRESOLVED';
-}
-
-export type ClauseEval = SATClause | UnSATClause | UNITClause | UNRESOLVEDClause;
-
-export const makeSatClause = (): SATClause => {
-	return { type: 'SAT' };
-};
-
-export const makeUnSATClause = (): UnSATClause => {
-	return { type: 'UnSAT' };
-};
-
-export const makeUnitClause = (literal: number): UNITClause => {
-	return { type: 'UNIT', literal };
-};
-
-export const makeUnresolvedClause = (): UNRESOLVEDClause => {
-	return { type: 'UNRESOLVED' };
-};
-
-export const isUnSATClause = (e: ClauseEval): e is UnSATClause => {
-	return e.type === 'UnSAT';
-};
-
-export const isSatClause = (e: ClauseEval): e is SATClause => {
-	return e.type === 'SAT';
-};
-
-export const isUnresolvedClause = (e: ClauseEval): e is UNRESOLVEDClause => {
-	return e.type === 'UNRESOLVED';
-};
-
-export const isUnitClause = (e: ClauseEval): e is UNITClause => {
-	return e.type === 'UNIT';
-};
-
-export default Clause;

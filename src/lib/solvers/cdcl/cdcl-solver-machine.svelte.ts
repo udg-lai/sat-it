@@ -61,10 +61,8 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 		//Waiting to decide a variables
 		else if (activeId === cdcl_stateName2StateId.decide_state) {
 			decide(this);
-		}
-		//Waiting after founding a conflict
-		else if (activeId === cdcl_stateName2StateId.empty_clause_set_state) {
-			preConflictAnalysis(this);
+		} else if (activeId === cdcl_stateName2StateId.wipe_occurrence_queue_state) {
+			preConflictAnalysis();
 		}
 		//Waiting to backtrack an assignment
 		else if (activeId === cdcl_stateName2StateId.virtual_resolution_state) {

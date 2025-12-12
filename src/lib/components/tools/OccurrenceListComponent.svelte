@@ -1,10 +1,10 @@
 <script lang="ts">
 	import type Clause from '$lib/entities/Clause.svelte.ts';
 	import {
-		isSatClause,
-		isUnitClause,
-		isUnresolvedClause,
-		isUnSATClause
+		isSatisfiedEval,
+		isUnitEval,
+		isUnresolvedEval,
+		isUnsatisfiedEval
 	} from '$lib/entities/Clause.svelte.ts';
 	import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
 	import type Problem from '$lib/entities/Problem.svelte.ts';
@@ -35,16 +35,16 @@
 	let focusCRef: CRef = $derived(getOccurrenceList().pointedCRef());
 
 	function isSat(clause: Clause): boolean {
-		return isSatClause(clause.eval());
+		return isSatisfiedEval(clause.eval());
 	}
 
 	function isUnSat(clause: Clause): boolean {
-		return isUnSATClause(clause.eval());
+		return isUnsatisfiedEval(clause.eval());
 	}
 
 	function isPartial(clause: Clause): boolean {
 		const evaluation = clause.eval();
-		return isUnresolvedClause(evaluation) || isUnitClause(evaluation);
+		return isUnresolvedEval(evaluation) || isUnitEval(evaluation);
 	}
 </script>
 

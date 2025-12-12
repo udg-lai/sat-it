@@ -1,6 +1,6 @@
 import Clause, {
-	isUnitClause,
-	isUnSATClause,
+	isUnitEval,
+	isUnsatisfiedEval,
 	type ClauseEval
 } from '$lib/entities/Clause.svelte.ts';
 import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
@@ -15,12 +15,12 @@ import {
 	complementaryOccurrences as solverComplementaryOccurrences,
 	decide as solverDecide,
 	emptyClauseDetection as solverEmptyClauseDetection,
-	nonDecisionMade as solverNonDecisionMade,
+	atLevelZero,
 	unitClauseDetection as solverUnitClauseDetection,
 	unitPropagation as solverUnitPropagation
 } from '$lib/solvers/shared.svelte.ts';
 import { getConflictAnalysis, setConflictAnalysis } from '$lib/states/conflict-anlysis.svelte.ts';
-import { updateOccurrenceList } from '$lib/states/occurrence-list.svelte.ts';
+import { getOccurrenceList, updateOccurrenceList } from '$lib/states/occurrence-list.svelte.ts';
 import {
 	getClausePool,
 	getOccurrencesTableMapping,
@@ -29,6 +29,7 @@ import {
 } from '$lib/states/problem.svelte.ts';
 import {
 	getOccurrenceListQueue,
+	setOccurrenceListQueue,
 	wipeOccurrenceListQueue
 } from '$lib/states/queue-occurrence-lists.svelte.ts';
 import { logFatal, logInfo } from '$lib/states/toasts.svelte.ts';
@@ -42,23 +43,23 @@ export type CDCL_EMPTY_CLAUSE_INPUT = 'unit_clauses_detection_state' | 'unsat_st
 
 export type CDCL_UNIT_CLAUSES_DETECTION_INPUT = 'queue_occurrence_list_state';
 
-export type CDCL_PICK_CLAUSE_SET_INPUT = 'all_clauses_checked_state';
+export type CDCL_PICK_OCCURRENCE_LIST_INPUT = 'all_clauses_checked_state';
 
 export type CDCL_CHECK_PENDING_OCCURRENCE_LISTS_INPUT =
 	| 'all_variables_assigned_state'
-	| 'pick_clause_set_state';
+	| 'pick_occurrence_list_state';
 
 export type CDCL_QUEUE_OCCURRENCE_LIST_INPUT =
-	| 'check_pending_occurrence_lists_state'
+	| 'are_remaining_occurrences_state'
 	| 'all_clauses_checked_state';
 
-export type CDCL_UNSTACK_OCCURRENCE_LIST_INPUT = 'check_pending_occurrence_lists_state';
+export type CDCL_UNSTACK_OCCURRENCE_LIST_INPUT = 'are_remaining_occurrences_state';
 
-export type CDCL_ALL_CLAUSES_CHECKED_INPUT =
-	| 'next_occurrence_state'
+export type CDCL_TRAVERSED_OCCURRENCE_LIST_INPUT =
+	| 'next_clause_state'
 	| 'dequeue_occurrence_list_state';
 
-export type CDCL_NEXT_OCCURRENCE_INPUT = 'conflict_detection_state';
+export type CDCL_NEXT_OCCURRENCE_INPUT = 'falsified_clause_state';
 
 export type CDCL_CONFLICT_DETECTION_INPUT = 'unit_clause_state' | 'empty_occurrence_lists_state';
 
@@ -70,11 +71,11 @@ export type CDCL_UNIT_PROPAGATION_INPUT = 'complementary_occurrences_state';
 
 export type CDCL_COMPLEMENTARY_OCCURRENCES_INPUT = 'queue_occurrence_list_state';
 
-export type CDCL_CHECK_NON_DECISION_MADE_INPUT = 'build_conflict_analysis_state' | 'unsat_state';
+export type CDCL_AT_LEVEL_ZERO_INPUT = 'build_conflict_analysis_state' | 'unsat_state';
 
 export type CDCL_DECIDE_INPUT = 'complementary_occurrences_state';
 
-export type CDCL_EMPTY_OCCURRENCE_LISTS_INPUT = 'decision_level_state';
+export type CDCL_WIPE_OCCURRENCE_QUEUE_INPUT = 'at_level_zero_state';
 
 //New CDCL Inputs
 
@@ -97,20 +98,20 @@ export type CDCL_PROPAGATE_CC_INPUT = 'complementary_occurrences_state';
 export type CDCL_INPUT =
 	| CDCL_EMPTY_CLAUSE_INPUT
 	| CDCL_UNIT_CLAUSES_DETECTION_INPUT
-	| CDCL_PICK_CLAUSE_SET_INPUT
+	| CDCL_PICK_OCCURRENCE_LIST_INPUT
 	| CDCL_ALL_VARIABLES_ASSIGNED_INPUT
 	| CDCL_QUEUE_OCCURRENCE_LIST_INPUT
 	| CDCL_UNSTACK_OCCURRENCE_LIST_INPUT
-	| CDCL_ALL_CLAUSES_CHECKED_INPUT
+	| CDCL_TRAVERSED_OCCURRENCE_LIST_INPUT
 	| CDCL_NEXT_OCCURRENCE_INPUT
 	| CDCL_CONFLICT_DETECTION_INPUT
 	| CDCL_CHECK_PENDING_OCCURRENCE_LISTS_INPUT
 	| CDCL_UNIT_CLAUSE_INPUT
 	| CDCL_UNIT_PROPAGATION_INPUT
 	| CDCL_COMPLEMENTARY_OCCURRENCES_INPUT
-	| CDCL_CHECK_NON_DECISION_MADE_INPUT
+	| CDCL_AT_LEVEL_ZERO_INPUT
 	| CDCL_DECIDE_INPUT
-	| CDCL_EMPTY_OCCURRENCE_LISTS_INPUT
+	| CDCL_WIPE_OCCURRENCE_QUEUE_INPUT
 	| CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_INPUT
 	| CDCL_ASSERTING_CLAUSE_INPUT
 	| CDCL_VIRTUAL_RESOLUTION_INPUT
@@ -156,9 +157,10 @@ export type CDCL_UNSTACK_OCCURRENCE_LIST_FUN = (solverStateMachine: CDCL_SolverM
 
 export const dequeueOccurrenceList: CDCL_UNSTACK_OCCURRENCE_LIST_FUN = () => {
 	getOccurrenceListQueue().dequeue();
+	updateOccurrenceList(new OccurrenceList());
 };
 
-export type CDCL_UNIT_CLAUSES_DETECTION_FUN = () => Set<number>;
+export type CDCL_UNIT_CLAUSES_DETECTION_FUN = () => Set<CRef>;
 
 export const unitClauseDetection: CDCL_UNIT_CLAUSES_DETECTION_FUN = () => {
 	const pool: ClausePool = getClausePool();
@@ -181,9 +183,10 @@ export const traversedOccurrenceList: CDCL_TRAVERSED_OCCURRENCE_LIST_FUN = (
 	return occurrenceList.traversed();
 };
 
-export type CDCL_NEXT_OCCURRENCE_FUN = (occurrenceList: OccurrenceList) => CRef;
+export type CDCL_NEXT_OCCURRENCE_FUN = () => CRef;
 
-export const nextOccurrence: CDCL_NEXT_OCCURRENCE_FUN = (occurrenceList: OccurrenceList) => {
+export const nextClause: CDCL_NEXT_OCCURRENCE_FUN = () => {
+	const occurrenceList: OccurrenceList = getOccurrenceList();
 	if (occurrenceList.isEmpty()) {
 		logFatal('A non empty set was expected');
 	}
@@ -195,7 +198,7 @@ export type CDCL_CONFLICT_DETECTION_FUN = (cRef: number) => boolean;
 export const unsatisfiedClause: CDCL_CONFLICT_DETECTION_FUN = (cRef: number) => {
 	const pool: ClausePool = getClausePool();
 	const evaluation: ClauseEval = clauseEvaluation(pool, cRef);
-	return isUnSATClause(evaluation);
+	return isUnsatisfiedEval(evaluation);
 };
 
 export type CDCL_CHECK_PENDING_OCCURRENCE_LISTS_FUN = () => boolean;
@@ -209,7 +212,7 @@ export type CDCL_UNIT_CLAUSE_FUN = (cRef: CRef) => boolean;
 export const unitClause: CDCL_UNIT_CLAUSE_FUN = (cRef: CRef) => {
 	const pool: ClausePool = getClausePool();
 	const evaluation: ClauseEval = clauseEvaluation(pool, cRef);
-	return isUnitClause(evaluation);
+	return isUnitEval(evaluation);
 };
 
 export type CDCL_UNIT_PROPAGATION_FUN = (cRef: CRef) => number;
@@ -227,15 +230,15 @@ export const complementaryOccurrences: CDCL_COMPLEMENTARY_OCCURRENCES_FUN = (ass
 	return solverComplementaryOccurrences(mapping, assignment);
 };
 
-export type CDCL_CHECK_NON_DECISION_MADE_FUN = () => boolean;
+export type CDCL_AT_LEVEL_ZERO_FUN = () => boolean;
 
-export const nonDecisionMade: CDCL_CHECK_NON_DECISION_MADE_FUN = () => {
-	return solverNonDecisionMade();
+export const nonDecisionMade: CDCL_AT_LEVEL_ZERO_FUN = () => {
+	return atLevelZero();
 };
 
-export type CDCL_EMPTY_OCCURRENCE_LISTS_FUN = (solverStateMachine: CDCL_SolverMachine) => void;
+export type CDCL_WIPE_OCCURRENCE_QUEUE_FUN = () => void;
 
-export const emptyOccurrenceLists: CDCL_EMPTY_OCCURRENCE_LISTS_FUN = () => {
+export const wipeOccurrenceQueue: CDCL_WIPE_OCCURRENCE_QUEUE_FUN = () => {
 	// Drop all the occurrences lists inside the solver's queue
 	wipeOccurrenceListQueue();
 	// Updates the view with and empty occurrence list
@@ -293,9 +296,7 @@ export const virtualResolution: CDCL_VIRTUAL_RESOLUTION_FUN = () => {
 
 export type CDCL_LEARN_CONFLICT_CLAUSE_FUN = (lemma: Clause) => number;
 
-export const learnConflictClause: CDCL_LEARN_CONFLICT_CLAUSE_FUN = (
-	lemma: Clause
-) => {
+export const learnConflictClause: CDCL_LEARN_CONFLICT_CLAUSE_FUN = (lemma: Clause) => {
 	//Set the lemma as learnt. This will be the clause that will be added to the pool.
 	lemma.setAsLemma();
 
@@ -359,10 +360,10 @@ export type CDCL_FUN =
 	| CDCL_UNIT_CLAUSE_FUN
 	| CDCL_UNIT_PROPAGATION_FUN
 	| CDCL_COMPLEMENTARY_OCCURRENCES_FUN
-	| CDCL_CHECK_NON_DECISION_MADE_FUN
+	| CDCL_AT_LEVEL_ZERO_FUN
 	| CDCL_NEXT_OCCURRENCE_FUN
 	| CDCL_DECIDE_FUN
-	| CDCL_EMPTY_OCCURRENCE_LISTS_FUN
+	| CDCL_WIPE_OCCURRENCE_QUEUE_FUN
 	| CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN
 	| CDCL_ASSERTING_CLAUSE_FUN
 	| CDCL_VIRTUAL_RESOLUTION_FUN

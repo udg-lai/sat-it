@@ -76,13 +76,13 @@ export const dpll_stateName2StateId = {
 	dequeue_occurrence_list_state: 6,
 	clause_evaluation_state: 7,
 	all_clauses_checked_state: 8,
-	next_occurrence_state: 9,
-	conflict_detection_state: 10,
+	next_clause_state: 9,
+	falsified_clause_state: 10,
 	unit_clause_state: 11,
 	delete_clause_state: 12,
 	unit_propagation_state: 13,
 	complementary_occurrences_state: 14,
-	decision_level_state: 15,
+	at_level_zero_state: 15,
 	backtracking_state: BACKTRACKING_STATE_ID,
 	decide_state: DECIDE_STATE_ID,
 	empty_occurrence_lists_state: 16
@@ -174,25 +174,25 @@ const all_clauses_checked_state: NonFinalState<
 		'True if the postponed occurrence list still contain clauses to check, otherwise false',
 	run: allClausesChecked,
 	transitions: new Map<DPLL_ALL_CLAUSES_CHECKED_INPUT, number>()
-		.set('next_occurrence_state', dpll_stateName2StateId['next_occurrence_state'])
+		.set('next_clause_state', dpll_stateName2StateId['next_clause_state'])
 		.set('unstack_clause_set_state', dpll_stateName2StateId['dequeue_occurrence_list_state'])
 };
 
-const next_occurrence_state: NonFinalState<DPLL_NEXT_CLAUSE_FUN, DPLL_NEXT_CLAUSE_INPUT> = {
-	id: dpll_stateName2StateId['next_occurrence_state'],
+const next_clause_state: NonFinalState<DPLL_NEXT_CLAUSE_FUN, DPLL_NEXT_CLAUSE_INPUT> = {
+	id: dpll_stateName2StateId['next_clause_state'],
 	description: 'Returns the next clause to deal with',
 	run: nextClause,
 	transitions: new Map<DPLL_NEXT_CLAUSE_INPUT, number>().set(
-		'conflict_detection_state',
-		dpll_stateName2StateId['conflict_detection_state']
+		'falsified_clause_state',
+		dpll_stateName2StateId['falsified_clause_state']
 	)
 };
 
-const conflict_detection_state: NonFinalState<
+const falsified_clause_state: NonFinalState<
 	DPLL_CONFLICT_DETECTION_FUN,
 	DPLL_CONFLICT_DETECTION_INPUT
 > = {
-	id: dpll_stateName2StateId['conflict_detection_state'],
+	id: dpll_stateName2StateId['falsified_clause_state'],
 	run: unsatisfiedClause,
 	description: 'Check if current clause is unsatisfied',
 	transitions: new Map<DPLL_CONFLICT_DETECTION_INPUT, number>()
@@ -273,11 +273,11 @@ const delete_clause_state: NonFinalState<DPLL_DELETE_CLAUSE_FUN, DPLL_DELETE_CLA
 	)
 };
 
-const decision_level_state: NonFinalState<
+const at_level_zero_state: NonFinalState<
 	DPLL_CHECK_NON_DECISION_MADE_FUN,
 	DPLL_CHECK_NON_DECISION_MADE_INPUT
 > = {
-	id: dpll_stateName2StateId['decision_level_state'],
+	id: dpll_stateName2StateId['at_level_zero_state'],
 	run: nonDecisionMade,
 	description: `Check if decision level of the latest trail is === 0`,
 	transitions: new Map<DPLL_CHECK_NON_DECISION_MADE_INPUT, number>()
@@ -303,8 +303,8 @@ const empty_occurrence_lists_state: NonFinalState<
 	run: emptyOccurrenceLists,
 	description: `Empties the queue occurrence lists to check`,
 	transitions: new Map<DPLL_EMPTY_OCCURRENCE_LISTS_INPUT, number>().set(
-		'decision_level_state',
-		dpll_stateName2StateId['decision_level_state']
+		'at_level_zero_state',
+		dpll_stateName2StateId['at_level_zero_state']
 	)
 };
 
@@ -321,14 +321,14 @@ states.set(pick_clause_set_state.id, pick_clause_set_state);
 states.set(all_variables_assigned_state.id, all_variables_assigned_state);
 states.set(decide_state.id, decide_state);
 states.set(dequeue_occurrence_list_state.id, dequeue_occurrence_list_state);
-states.set(next_occurrence_state.id, next_occurrence_state);
+states.set(next_clause_state.id, next_clause_state);
 states.set(all_clauses_checked_state.id, all_clauses_checked_state);
-states.set(conflict_detection_state.id, conflict_detection_state);
+states.set(falsified_clause_state.id, falsified_clause_state);
 states.set(delete_clause_state.id, delete_clause_state);
 states.set(unit_clause_state.id, unit_clause_state);
 states.set(unit_propagation_state.id, unit_propagation_state);
 states.set(complementary_occurrences_state.id, complementary_occurrences_state);
-states.set(decision_level_state.id, decision_level_state);
+states.set(at_level_zero_state.id, at_level_zero_state);
 states.set(backtracking_state.id, backtracking_state);
 states.set(empty_occurrence_lists_state.id, empty_occurrence_lists_state);
 

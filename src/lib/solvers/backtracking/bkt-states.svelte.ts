@@ -60,11 +60,11 @@ export const bkt_stateName2StateId = {
 	queue_occurrence_list_state: 3,
 	pick_pending_clause_set_state: 4,
 	all_clauses_checked_state: 5,
-	next_occurrence_state: 6,
-	conflict_detection_state: 7,
+	next_clause_state: 6,
+	falsified_clause_state: 7,
 	delete_clause_state: 8,
 	empty_pending_occurrence_list_state: 9,
-	decision_level_state: 10
+	at_level_zero_state: 10
 };
 
 // ** define state nodes **
@@ -158,25 +158,25 @@ const all_clauses_checked_state: NonFinalState<
 		'True if the postponed set of clauses still contain clauses to check, otherwise false',
 	run: allClausesChecked,
 	transitions: new Map<BKT_ALL_CLAUSES_CHECKED_INPUT, number>()
-		.set('next_occurrence_state', bkt_stateName2StateId['next_occurrence_state'])
+		.set('next_clause_state', bkt_stateName2StateId['next_clause_state'])
 		.set('all_variables_assigned_state', bkt_stateName2StateId['all_variables_assigned_state'])
 };
 
-const next_occurrence_state: NonFinalState<BKT_NEXT_CLAUSE_FUN, BKT_NEXT_CLAUSE_INPUT> = {
-	id: bkt_stateName2StateId['next_occurrence_state'],
+const next_clause_state: NonFinalState<BKT_NEXT_CLAUSE_FUN, BKT_NEXT_CLAUSE_INPUT> = {
+	id: bkt_stateName2StateId['next_clause_state'],
 	description: 'Returns the next clause to deal with',
 	run: nextClause,
 	transitions: new Map<BKT_NEXT_CLAUSE_INPUT, number>().set(
-		'conflict_detection_state',
-		bkt_stateName2StateId['conflict_detection_state']
+		'falsified_clause_state',
+		bkt_stateName2StateId['falsified_clause_state']
 	)
 };
 
-const conflict_detection_state: NonFinalState<
+const falsified_clause_state: NonFinalState<
 	BKT_CONFLICT_DETECTION_FUN,
 	BKT_CONFLICT_DETECTION_INPUT
 > = {
-	id: bkt_stateName2StateId['conflict_detection_state'],
+	id: bkt_stateName2StateId['falsified_clause_state'],
 	run: unsatisfiedClause,
 	description: 'Check if current clause is unsatisfied',
 	transitions: new Map<BKT_CONFLICT_DETECTION_INPUT, number>()
@@ -205,13 +205,13 @@ const empty_pending_occurrence_list_state: NonFinalState<
 	run: emptyClauseSet,
 	description: `Empties the queue occurrence list to check`,
 	transitions: new Map<BKT_EMPTY_PENDING_OCCURRENCE_LIST_INPUT, number>().set(
-		'decision_level_state',
-		bkt_stateName2StateId['decision_level_state']
+		'at_level_zero_state',
+		bkt_stateName2StateId['at_level_zero_state']
 	)
 };
 
-const decision_level_state: NonFinalState<BKT_DECISION_LEVEL_FUN, BKT_DECISION_LEVEL_INPUT> = {
-	id: bkt_stateName2StateId['decision_level_state'],
+const at_level_zero_state: NonFinalState<BKT_DECISION_LEVEL_FUN, BKT_DECISION_LEVEL_INPUT> = {
+	id: bkt_stateName2StateId['at_level_zero_state'],
 	run: nonDecisionMade,
 	description: `Check if decision level of the latest trail is === 0`,
 	transitions: new Map<BKT_DECISION_LEVEL_INPUT, number>()
@@ -237,12 +237,12 @@ states.set(decide_state.id, decide_state);
 states.set(complementary_occurrences_state.id, complementary_occurrences_state);
 states.set(queue_occurrence_list_state.id, queue_occurrence_list_state);
 states.set(pick_pending_clause_set_state.id, pick_pending_clause_set_state);
-states.set(conflict_detection_state.id, conflict_detection_state);
+states.set(falsified_clause_state.id, falsified_clause_state);
 states.set(all_clauses_checked_state.id, all_clauses_checked_state);
-states.set(next_occurrence_state.id, next_occurrence_state);
+states.set(next_clause_state.id, next_clause_state);
 states.set(delete_clause_state.id, delete_clause_state);
 states.set(empty_pending_occurrence_list_state.id, empty_pending_occurrence_list_state);
-states.set(decision_level_state.id, decision_level_state);
+states.set(at_level_zero_state.id, at_level_zero_state);
 states.set(sat_state.id, sat_state);
 states.set(unsat_state.id, unsat_state);
 states.set(backtracking_state.id, backtracking_state);

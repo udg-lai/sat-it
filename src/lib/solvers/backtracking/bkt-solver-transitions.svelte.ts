@@ -155,7 +155,7 @@ const nextClauseTransition = (stateMachine: BKT_StateMachine, pendingSet: Set<nu
 		logFatal('Function call error', 'There should be a function in the Next Clause state');
 	}
 	const cRef: number = nextClauseState.run(pendingSet);
-	stateMachine.transition('conflict_detection_state');
+	stateMachine.transition('falsified_clause_state');
 	return cRef;
 };
 
@@ -185,7 +185,7 @@ const emptyPendingSetTransition = (
 		logFatal('Function call error', 'There should be a function in the Empty Clause Set state');
 	}
 	emptyClauseSetState.run(solver);
-	stateMachine.transition('decision_level_state');
+	stateMachine.transition('at_level_zero_state');
 };
 
 const decisionLevelTransition = (stateMachine: BKT_StateMachine): boolean => {
@@ -232,7 +232,7 @@ const allClausesCheckedTransition = (
 	}
 	const result: boolean = allClausesCheckedState.run(pendingSet);
 	if (result) stateMachine.transition('all_variables_assigned_state');
-	else stateMachine.transition('next_occurrence_state');
+	else stateMachine.transition('next_clause_state');
 	return result;
 };
 
