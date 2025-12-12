@@ -49,9 +49,13 @@ export class ConflictAnalysis {
 	// Conflict analysis finished when the clause has only one literal from the current decision level
 
 	finished(): boolean {
+		return this.pointer < 0 || this.resolventIsAssertive();
+	}
+
+	resolventIsAssertive(): boolean {
 		const literals: Lit[] = this.ldlPropagations.map((lit: VariableAssignment) => lit.toLit());
 		literals.push(this.decision.toLit());
-		return this.pointer < 0 || this.clause.isAssertive(literals);
+		return this.clause.isAssertive(literals);
 	}
 
 	getClause(): Clause {
@@ -71,6 +75,7 @@ export class ConflictAnalysis {
 		const propagation: VariableAssignment = this.ldlPropagations[this.pointer];
 		const complementary: Lit = Literal.complementary(propagation.toLit());
 
+		// Checks if the complementary of the propagated literal is in the clause being analyzed
 		if (this.clause.contains(complementary)) {
 			const r: Reason = propagation.getReason();
 			if (!isPropagationReason(r)) {
@@ -82,11 +87,9 @@ export class ConflictAnalysis {
 			const reason: Clause = getClausePool().at((r as Propagation).cRef);
 			const resolvent: Clause = this.clause.resolution(reason);
 			this.update(resolvent);
-			this.pointer -= 1;
-			return this.clause.copy();
-		} else {
-			return this.clause.copy();
 		}
+		this.pointer -= 1;
+		return this.clause.copy();
 	}
 
 	private update(resolvent: Clause): void {
