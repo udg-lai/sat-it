@@ -39,10 +39,10 @@
 			if (isBackJumpingReason(reason)) {
 				return getClausePool().at(reason.cRef);
 			} else {
-				logFatal('Reason error', 'The reason is not a back-jumping');
+				logFatal('Reason error', 'The reason is not a backjumping');
 			}
 		} else {
-			logFatal('Reason error', 'The variable assignment is not a back-jumping');
+			logFatal('Reason error', 'The variable assignment is not a backjumping');
 		}
 	});
 

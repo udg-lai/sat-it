@@ -10,23 +10,23 @@ import type { VariablePool } from './VariablePool.svelte.ts';
 
 type ClauseOptions = {
 	comments?: string[];
-	cr?: number;
+	cRef?: CRef;
 	learned?: boolean;
 };
 
 class Clause implements Comparable<Clause> {
 	private literals: Literal[] = [];
 	private comments: string[] = $state([]);
-	private cr: number | undefined;
+	private cRef: number | undefined;
 	private learned: boolean = false;
 
 	constructor(
 		literals: Literal[],
-		{ comments = [], cr = undefined, learned = false }: ClauseOptions = {}
+		{ comments = [], cRef = undefined, learned = false }: ClauseOptions = {}
 	) {
 		this.literals = literals;
 		this.comments = comments;
-		this.cr = cr;
+		this.cRef = cRef;
 		this.learned = learned;
 	}
 
@@ -36,7 +36,7 @@ class Clause implements Comparable<Clause> {
 		const tag: number | undefined = claim.id;
 		return new Clause(literals, {
 			comments,
-			cr: tag,
+			cRef: tag,
 			learned: false
 		});
 	}
@@ -50,11 +50,11 @@ class Clause implements Comparable<Clause> {
 		if (this.isTemporal()) {
 			logFatal('Get CRef', 'Cannot get CRef of a temporal clause');
 		}
-		return this.cr as CRef;
+		return this.cRef as CRef;
 	}
 
-	setCRef(cr: number): void {
-		this.cr = cr;
+	setCRef(cRef: CRef): void {
+		this.cRef = cRef;
 	}
 
 	isLemma(): boolean {
@@ -66,7 +66,7 @@ class Clause implements Comparable<Clause> {
 	}
 
 	isTemporal(): boolean {
-		return this.cr === undefined;
+		return this.cRef === undefined;
 	}
 
 	isAssertive(literals: Lit[]): boolean {
@@ -77,7 +77,7 @@ class Clause implements Comparable<Clause> {
 		let i = 0;
 		let literal: Literal | undefined = undefined;
 		while (i < this.literals.length && !literal) {
-			if (!this.literals[i].isAssigned()) {
+			if (!this.literals[i].hasTruthValue()) {
 				literal = this.literals[i];
 			} else {
 				i++;
@@ -98,7 +98,7 @@ class Clause implements Comparable<Clause> {
 			const lit: Literal = this.literals[i];
 			if (lit.isTrue()) satisfied = true;
 			else {
-				if (!lit.isAssigned()) unassignedLiterals.push(lit.toInt());
+				if (!lit.hasTruthValue()) unassignedLiterals.push(lit.toInt());
 				i++;
 			}
 		}
@@ -122,7 +122,7 @@ class Clause implements Comparable<Clause> {
 		let satisfied = false;
 		while (i < len && nNotAssigned < 2 && !satisfied) {
 			const lit: Literal = this.literals[i];
-			if (!lit.isAssigned()) {
+			if (!lit.hasTruthValue()) {
 				nNotAssigned += 1;
 			} else {
 				satisfied = lit.isTrue();
@@ -169,7 +169,7 @@ class Clause implements Comparable<Clause> {
 	copy(): Clause {
 		return new Clause(this.literals, {
 			comments: [...this.comments],
-			cr: this.cr,
+			cRef: this.cRef,
 			learned: this.learned
 		});
 	}

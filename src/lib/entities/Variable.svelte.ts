@@ -1,4 +1,4 @@
-import { logFatal } from '$lib/states/toasts.svelte.ts';
+import { logError, logFatal } from '$lib/states/toasts.svelte.ts';
 import type { Lit, Var } from '$lib/types/types.ts';
 import type { Comparable } from '../interfaces/Comparable.ts';
 
@@ -9,7 +9,7 @@ export default class Variable implements Comparable<Variable> {
 	private assignment: Assignment = $state(undefined);
 
 	constructor(id: number, assignment: Assignment = undefined) {
-		if (id < 0) throw 'ERROR: variable ID should be >= 0';
+		if (id <= 0) logError('Variable Initialization', 'Variable id cannot be negative or zero');
 		this.id = id;
 		this.assignment = assignment;
 	}

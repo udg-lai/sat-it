@@ -40,7 +40,7 @@
 
 	let summary: Either<Clause, string>[] = $derived.by(() => {
 		const poolSize: number = getClausePool().size();
-		const learntSize: number = getClausePool().getClausesLearned().length;
+		const learntSize: number = getClausePool().getLearnedClauses().length;
 
 		const originalClauses = clauses.slice(0, poolSize - learntSize);
 		const learnedClauses = clauses.slice(poolSize - learntSize);

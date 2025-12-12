@@ -1,5 +1,5 @@
 import { logFatal } from '$lib/states/toasts.svelte.ts';
-import type { Var } from '$lib/types/types.ts';
+import type { CRef, Var } from '$lib/types/types.ts';
 import { makeJust, makeNothing, type Maybe } from '../types/maybe.ts';
 import Variable, { type Assignment } from './Variable.svelte.ts';
 
@@ -32,7 +32,7 @@ export class VariablePool implements IVariablePool {
 		this.nvPointer = 0;
 	}
 
-	nextVariableToAssign(): Maybe<number> {
+	nextVariableToAssign(): Maybe<CRef> {
 		return this.getNextId();
 	}
 
@@ -45,8 +45,8 @@ export class VariablePool implements IVariablePool {
 		this._assign(varId, undefined);
 	}
 
-	assign(variableId: number, assignment: Assignment): void {
-		this._assign(variableId, assignment);
+	assign(varId: number, assignment: Assignment): void {
+		this._assign(varId, assignment);
 	}
 
 	getVariable(variable: number): Variable {

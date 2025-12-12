@@ -3,6 +3,7 @@ import type { ClauseEval } from '$lib/entities/Clause.svelte.ts';
 import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
 import Literal from '$lib/entities/Literal.svelte.ts';
 import { Trail } from '$lib/entities/Trail.svelte.ts';
+import type { Assignment } from '$lib/entities/Variable.svelte.ts';
 import type Variable from '$lib/entities/Variable.svelte.ts';
 import VariableAssignment from '$lib/entities/VariableAssignment.ts';
 import type { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
@@ -19,7 +20,7 @@ import {
 import { logBreakpoint, logFatal } from '$lib/states/toasts.svelte.ts';
 import { getLatestTrail, getTrails, stackTrail } from '$lib/states/trails.svelte.ts';
 import type { CRef, Lit, Var } from '$lib/types/types.ts';
-import type { Assignment } from '../interfaces/Assignment.ts';
+import { linear } from 'svelte/easing';
 import { isUnSAT } from '../interfaces/IClausePool.ts';
 import { fromJust, isJust, type Maybe } from '../types/maybe.ts';
 
@@ -54,12 +55,8 @@ export const decide = (pool: VariablePool, algorithm: string): Lit => {
 		varId = assignmentEvent.variable;
 	}
 
-	const assignment: Assignment = {
-		variable: varId,
-		polarity: assignmentEvent.polarity
-	};
-
-	doAssignment(assignment);
+	const truthValue: boolean = !assignmentEvent.polarity;
+	doAssignment(varId, truthValue);
 
 	// This variable should contain the updated assignment done in `doAssignment`
 	const variable: Variable = pool.getVariable(varId).copy();
@@ -95,28 +92,23 @@ export const unitPropagation = (
 	}
 
 	const propagate: Literal = clause.fstUnassignedLiteral();
-	const lit: Lit = propagate.toInt();
+	const varId: Var = Literal.var(propagate.toInt());
+	const truthValue: boolean = !Literal.hatted(propagate.toInt());
 
-	const assignment: Assignment = {
-		variable: Literal.var(lit),
-		polarity: lit > 0
-	};
+	doAssignment(varId, truthValue);
 
-	doAssignment(assignment);
-
-	const varId: Var = Literal.var(lit);
 	const variable: Variable = variables.getVariable(varId).copy();
 
-	const tAssignment: VariableAssignment =
+	const varAssignment: VariableAssignment =
 		assignmentReason === 'up'
 			? VariableAssignment.newUnitPropagationAssignment(variable, cRef)
 			: VariableAssignment.newBackJumpingAssignment(variable, cRef);
 
-	trail.push(tAssignment);
+	trail.push(varAssignment);
 
 	increaseNoUnitPropagations();
 
-	return lit;
+	return propagate.toInt();
 };
 
 export const complementaryOccurrences = (
@@ -136,21 +128,23 @@ export const nonDecisionMade = (): boolean => {
 	return trail.getDecisionLevel() === 0;
 };
 
-const doAssignment = (assignment: Assignment): void => {
-	const variables: VariablePool = getVariablePool();
-	variables.assign(assignment.variable, assignment.polarity);
-	handleBreakpoints(assignment);
+const doAssignment = (varId: Var, assignment: Assignment): void => {
+	getVariablePool().assign(varId, assignment);
+	if (assignment !== undefined) {
+		// i.e., assignment is either true or false
+		handleBreakpoints(Literal.toLit(varId, assignment));
+	}
 	updateClausesLeft(getTrails().length);
 };
 
-const handleBreakpoints = (assignment: Assignment): void => {
+const handleBreakpoints = (assignment: Lit): void => {
 	const solverMachine = getSolverMachine();
 	const runningInAutoMode: boolean = solverMachine.isInAutoMode();
-	const { variable, polarity } = assignment;
-	const literal: number = polarity ? variable : variable * -1;
-	const isBP: boolean = isBreakpoint(literal);
+	const isBP: boolean = isBreakpoint(assignment);
 	if (isBP) {
-		logBreakpoint('Breakpoint', `Variable ${variable} assigned to ${polarity}`);
+		const varId: Var = Literal.var(assignment);
+		const hatted: boolean = Literal.hatted(assignment);
+		logBreakpoint('Breakpoint', `Variable ${varId} assigned to ${!hatted}`);
 	}
 	if (runningInAutoMode && isBP) {
 		solverMachine.stopAutoMode();
@@ -179,12 +173,7 @@ export const backtracking = (pool: VariablePool): Lit => {
 	}
 
 	variable.negate();
-	const assignment = {
-		variable: variable.toInt(),
-		polarity: variable.getAssignment()
-	};
-
-	doAssignment(assignment);
+	doAssignment(variable.toInt(), variable.getAssignment());
 
 	variable = pool.getVariable(variable.toInt()).copy();
 

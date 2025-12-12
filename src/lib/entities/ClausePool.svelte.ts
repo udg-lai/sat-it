@@ -14,15 +14,16 @@ import type { CRef } from '$lib/types/types.ts';
 export interface IClausePool {
 	eval(): AssignmentEval;
 	addClause(clause: Clause): CRef;
-	at(clause: number): Clause;
-	getUnitClauses(): Clause[];
+	at(clause: CRef): Clause;
 	getClauses(): Clause[];
+	getUnitClauses(): Clause[];
+	getLearnedClauses(): Clause[];
 	size(): number;
 }
 
 class ClausePool implements IClausePool {
-	private clauses: SvelteMap<number, Clause> = new SvelteMap();
-	private learnedClauses: SvelteSet<number> = new SvelteSet();
+	private clauses: SvelteMap<CRef, Clause> = new SvelteMap();
+	private learnedClauses: SvelteSet<CRef> = new SvelteSet();
 
 	constructor(clauses: Clause[] = []) {
 		this.clauses = new SvelteMap();
@@ -102,7 +103,7 @@ class ClausePool implements IClausePool {
 		return this.clauses.size;
 	}
 
-	getClausesLearned(): Clause[] {
+	getLearnedClauses(): Clause[] {
 		const learned: Clause[] = [];
 		for (const cRef of this.learnedClauses) {
 			if (!this.clauses.has(cRef)) {

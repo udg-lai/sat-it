@@ -61,12 +61,13 @@ export class ConflictAnalysis {
 	virtualResolution(): Clause {
 		// If the complementary literal of the current assignment appears in `this.clause`, we perform a resolution step
 		// otherwise, the resulting clause is the same as `this.clause`
-		if (this.pointer < 0) {
+		if (this.finished()) {
 			logError(
 				'Conflict Analysis Error',
-				'No more literals to analyze in the last decision level propagations'
+				'Conflict analysis is already finished, no more resolution steps can be performed'
 			);
 		}
+
 		const propagation: VariableAssignment = this.ldlPropagations[this.pointer];
 		const complementary: Lit = Literal.complementary(propagation.toLit());
 
