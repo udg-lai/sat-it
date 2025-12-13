@@ -63,7 +63,7 @@ import {
 	type CDCL_LEARN_CONFLICT_CLAUSE_INPUT,
 	type CDCL_SECOND_HIGHEST_DL_FUN,
 	type CDCL_SECOND_HIGHEST_DL_INPUT,
-	secondHighestDL,
+	sndHighestDL,
 	type CDCL_BACKJUMPING_FUN,
 	type CDCL_BACKJUMPING_INPUT,
 	backjumping,
@@ -353,7 +353,7 @@ const second_highest_dl_state: NonFinalState<
 	CDCL_SECOND_HIGHEST_DL_INPUT
 > = {
 	id: cdcl_stateName2StateId['second_highest_dl_state'],
-	run: secondHighestDL,
+	run: sndHighestDL,
 	description: `Gets the second highest decision level`,
 	transitions: new Map<CDCL_SECOND_HIGHEST_DL_INPUT, number>().set(
 		'undo_backjumping_state',

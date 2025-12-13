@@ -284,7 +284,7 @@ export type CDCL_ASSERTING_CLAUSE_FUN = () => boolean;
 
 export const assertingClause: CDCL_ASSERTING_CLAUSE_FUN = () => {
 	// Checks if the clause of the conflict analysis is assertive
-	return getConflictAnalysis().finished();
+	return getConflictAnalysis().hasAssertiveClause();
 };
 
 export type CDCL_VIRTUAL_RESOLUTION_FUN = () => VirtualResolution;
@@ -310,27 +310,23 @@ export const learnConflictClause: CDCL_LEARN_CONFLICT_CLAUSE_FUN = (lemma: Claus
 	return cRef;
 };
 
-export type CDCL_SECOND_HIGHEST_DL_FUN = (trail: Trail, conflictClause: Clause) => number;
+export type CDCL_SECOND_HIGHEST_DL_FUN = (lemma: Clause) => number;
 
-export const secondHighestDL: CDCL_SECOND_HIGHEST_DL_FUN = (
-	trail: Trail,
-	conflictClause: Clause
-) => {
-	const clauseVariables: number[] = conflictClause.getLiterals().map((literal) => {
+export const sndHighestDL: CDCL_SECOND_HIGHEST_DL_FUN = (lemma: Clause) => {
+	const clauseVariables: number[] = lemma.getLiterals().map((literal) => {
 		return literal.getVariable().toInt();
 	});
-	const decisionLevels = clauseVariables
-		.map((variable) => trail.getVariableDecisionLevel(variable))
-		.filter((level, index, self) => self.indexOf(level) === index)
+	const dLevels = clauseVariables
+		.map((variable) => getLatestTrail().getVariableDL(variable))
 		.sort((a, b) => b - a);
 
-	return decisionLevels.length >= 2 ? decisionLevels[1] : decisionLevels[0] - 1;
+	return dLevels.length >= 2 ? dLevels[1] : dLevels[0] - 1;
 };
 
-export type CDCL_BACKJUMPING_FUN = (trail: Trail, decisionLevel: number) => void;
+export type CDCL_BACKJUMPING_FUN = (decisionLevel: number) => void;
 
 export const backjumping = (trail: Trail, decisionLevel: number) => {
-	trail.backjump(decisionLevel);
+	getLatestTrail().backjump(decisionLevel);
 };
 
 export type CDCL_PUSH_TRAIL_FUN = (trail: Trail) => void;

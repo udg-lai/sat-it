@@ -10,7 +10,10 @@ import { makeLeft, makeRight, type Either } from '$lib/types/either.ts';
 export interface Resolution {
 	conflictClause: Clause;
 	reason: Clause;
-	resolvent: Clause;
+	resolvent: {
+		clause: Clause;
+		asserting: boolean
+	}
 }
 
 export type VirtualResolution = Either<Clause, Resolution>;
@@ -58,17 +61,31 @@ export class ConflictAnalysis {
 	// Conflict analysis finished when the clause has only one literal from the current decision level
 
 	finished(): boolean {
-		return this.pointer < 0 || this.resolventIsAssertive();
+		return this.pointer < 0 || this.hasAssertiveClause();
 	}
 
-	resolventIsAssertive(): boolean {
+	hasAssertiveClause(): boolean {
+		return this._resolventIsAssertive(this.clause);
+	}
+
+	private _resolventIsAssertive(resolvent: Clause): boolean {
 		const literals: Lit[] = this.ldlPropagations.map((lit: VariableAssignment) => lit.toLit());
 		literals.push(this.decision.toLit());
-		return this.clause.isAssertive(literals);
+		return resolvent.isAssertive(literals);
 	}
 
 	getClause(): Clause {
 		return this.clause;
+	}
+
+	currentImplication(): VariableAssignment {
+		if (this.pointer < 0) {
+			logError(
+				'Conflict Analysis Error',
+				'No more implications left to consider in conflict analysis'
+			);
+		}
+		return this.ldlPropagations[this.pointer];
 	}
 
 	virtualResolution(): VirtualResolution {
@@ -81,7 +98,7 @@ export class ConflictAnalysis {
 			);
 		}
 
-		const propagation: VariableAssignment = this.ldlPropagations[this.pointer];
+		const propagation: VariableAssignment = this.currentImplication();
 		const complementary: Lit = Literal.complementary(propagation.toLit());
 
 		// Next literal to consider in the conflict analysis
@@ -103,7 +120,10 @@ export class ConflictAnalysis {
 			return makeRight({
 				conflictClause: this.clause.copy(),
 				reason: reason,
-				resolvent: resolvent
+				resolvent: {
+					clause: resolvent,
+					asserting: this._resolventIsAssertive(resolvent)
+				}
 			});
 		} else {
 			// No resolution is performed, the clause remains the same

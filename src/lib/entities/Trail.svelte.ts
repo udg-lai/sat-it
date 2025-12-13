@@ -1,7 +1,7 @@
 import { getVariablePool } from '$lib/states/problem.svelte.ts';
 import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
-import type { CRef, Lit, NeverFn } from '$lib/types/types.ts';
+import type { CRef, Lit, NeverFn, Var } from '$lib/types/types.ts';
 import { error } from '$lib/utils.ts';
 import { makeLeft, makeRight, type Either } from '../types/either.ts';
 import type Clause from './Clause.svelte.ts';
@@ -22,7 +22,7 @@ export interface ResolutionContext {
 
 export class Trail {
 	private assignments: VariableAssignment[] = $state([]);
-	private dlBookmark: number[] = $state([-1]);
+	private bookmarkDL: number[] = $state([-1]);
 	private followUPIndex: number = 0;
 	private dl: number = 0;
 	private resolutionCtx: Either<ResolutionContext, NeverFn>[] = $state([]); // this is just for representing the conflict analysis view
@@ -38,7 +38,7 @@ export class Trail {
 	copy(): Trail {
 		const newTrail = new Trail();
 		newTrail.assignments = this.assignments.map((assignment) => assignment.copy());
-		newTrail.dlBookmark = [...this.dlBookmark];
+		newTrail.bookmarkDL = [...this.bookmarkDL];
 		newTrail.followUPIndex = this.followUPIndex;
 		newTrail.dl = this.dl;
 		newTrail.lemma = this.lemma;
@@ -117,18 +117,17 @@ export class Trail {
 		}
 	}
 
-	getVariableDecisionLevel(variable: number): number {
-		const index = this.assignments.findIndex((a) => a.getVariable().toInt() === variable);
-		if (index === -1) {
-			logFatal(`Variable ${variable} not found in trail`);
+	getVariableDL(varId: Var): number {
+		const varIdx = this.assignments.findIndex((a) => a.getVariable().toInt() === varId);
+		if (varIdx === -1) {
+			logFatal(`Variable ${varId} not found in trail`);
 		}
-
-		for (let level = this.dlBookmark.length - 1; level >= 0; level--) {
-			if (index >= this.dlBookmark[level]) {
-				return level;
+		for (let dl = this.bookmarkDL.length - 1; dl >= 0; dl--) {
+			if (varIdx >= this.bookmarkDL[dl]) {
+				return dl;
 			}
 		}
-		logFatal(`Unable to determine decision level for variable ${variable}`);
+		logFatal(`Unable to determine decision level for variable ${varId}`);
 	}
 
 	attachConflictiveClause(clause: Clause): void {
@@ -225,7 +224,7 @@ export class Trail {
 		}
 
 		// Set the new decision level parameters
-		this.dlBookmark = this.dlBookmark.slice(0, dl + 1);
+		this.bookmarkDL = this.bookmarkDL.slice(0, dl + 1);
 		this.dl = dl;
 	}
 
@@ -302,14 +301,14 @@ export class Trail {
 		}
 		this.dl = nextDecisionLevel;
 		const decisionMark = this.assignments.length - 1;
-		this.dlBookmark.push(decisionMark);
+		this.bookmarkDL.push(decisionMark);
 	}
 
 	private shrinkOneDL(): void {
 		if (!this.dlExists(this.dl)) {
 			logFatal(`Trying to delete current decision level but was not saved`);
 		}
-		this.dlBookmark = this.dlBookmark.slice(0, -1);
+		this.bookmarkDL = this.bookmarkDL.slice(0, -1);
 		this.dl = this.dl - 1;
 	}
 
@@ -327,7 +326,7 @@ export class Trail {
 	}
 
 	private getDLMarks(): number[] {
-		return this.dlBookmark.slice(1);
+		return this.bookmarkDL.slice(1);
 	}
 
 	private hasDecisions(): boolean {
