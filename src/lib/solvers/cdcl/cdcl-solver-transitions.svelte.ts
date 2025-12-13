@@ -135,6 +135,7 @@ export const conflictAnalysisBlock = (): void => {
 	{
 		const cRef: CRef = learnConflictClauseTransition();
 		const sndHighestDL: number = getSecondHighestDLTransition();
+		backjumpingTransition(secondHighestDL);
 
 	}
 
@@ -540,37 +541,29 @@ const learnConflictClauseTransition = (): CRef => {
 };
 
 const getSecondHighestDLTransition = (cRef: CRef) => {
-	const getSecondHighestDLState = getSolverMachine().getActiveState() as NonFinalState<
+	const state = getSolverMachine().getActiveState() as NonFinalState<
 		CDCL_SECOND_HIGHEST_DL_FUN,
 		CDCL_SECOND_HIGHEST_DL_INPUT
 	>;
-	if (getSecondHighestDLState.run === undefined) {
+	if (state.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Variable In CC state');
 	}
 
-	const
-
-	const secondHighestDL: number = getSecondHighestDLState.run(
-		conflictAnalysis.trail,
-		conflictAnalysis.conflictClause
-	);
-	stateMachine.transition('undo_backjumping_state');
-	return secondHighestDL;
+	const clause: Clause = getClausePool().at(cRef);
+	const sndHighestDL: number = state.run(clause);
+	getSolverMachine().transition('undo_backjumping_state');
+	return sndHighestDL;
 };
 
-const backjumpingTransition = (
-	stateMachine: CDCL_StateMachine,
-	conflictAnalysis: ConflictAnalysis,
-	secondHighestDL: number
-) => {
-	const backjumpingState = stateMachine.getActiveState() as NonFinalState<
+const backjumpingTransition = (secondHighestDL: number) => {
+	const state = getSolverMachine().getActiveState() as NonFinalState<
 		CDCL_BACKJUMPING_FUN,
 		CDCL_BACKJUMPING_INPUT
 	>;
-	if (backjumpingState.run === undefined) {
+	if (state.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Variable In CC state');
 	}
-	backjumpingState.run(conflictAnalysis.trail, secondHighestDL);
+	state.run(conflictAnalysis.trail, secondHighestDL);
 	increaseNoConflicts();
 	stateMachine.transition('push_trail_state');
 };
