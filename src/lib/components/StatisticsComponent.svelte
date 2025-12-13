@@ -17,7 +17,7 @@
 	const decisionLevelCurrentTrail: number = $derived.by(() => {
 		const latestTrail: Trail | undefined = getLatestTrail();
 		if (latestTrail) {
-			return latestTrail.getDecisionLevel();
+			return latestTrail.getDL();
 		} else return 0;
 	});
 	const clausesLeft: number = $derived(getClausePool().leftToSatisfy());

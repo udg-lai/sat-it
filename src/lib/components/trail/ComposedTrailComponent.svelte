@@ -1,12 +1,12 @@
 <script lang="ts">
 	import type Clause from '$lib/entities/Clause.svelte.ts';
-	import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
-	import type { ConflictAnalysisContext, Trail, UPContext } from '$lib/entities/Trail.svelte.ts';
+	import type { ResolutionContext, Trail, UPContext } from '$lib/entities/Trail.svelte.ts';
 	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
 	import { getClausePool } from '$lib/states/problem.svelte.ts';
 	import { isLeft, makeLeft, makeRight, unwrapEither, type Either } from '$lib/types/either.ts';
+	import type { NeverFn } from '$lib/types/types.ts';
 	import { error } from '$lib/utils.ts';
-	import CanvasComponent, { type CanvasContext, type UPRelation } from './CanvasComponent.svelte';
+	import CanvasComponent, { type CanvasContext } from './CanvasComponent.svelte';
 	import TrailComponent from './TrailComponent.svelte';
 
 	interface Props {
@@ -21,28 +21,38 @@
 	let { trail, expanded, isLast = true, showUPView, showCAView, emitRevert }: Props = $props();
 
 	function computeUPs(): CanvasContext {
-		const upContext: Either<UPContext, undefined>[] = trail.getUPContext();
+		const upContext: Either<UPContext, NeverFn>[] = trail.getUPContext();
 		return upContext.map((c) => {
 			if (isLeft(c)) {
-				const { clauseTag, literal }: UPContext = unwrapEither(c);
-				const clause: Clause = getClause(clauseTag);
+				const { reasonCRef, propagated }: UPContext = unwrapEither(c);
+				const clause: Clause = getClausePool().at(reasonCRef);
 				return makeLeft({
 					clause,
-					literal
+					hidden: [propagated]
 				});
 			} else return makeRight(error);
 		});
 	}
 
-	let unitPropagations: Either<UPRelation, () => never>[] = $derived.by(computeUPs);
-
-	let conflictAnalysis: Either<ConflictAnalysisContext, () => never>[] = $derived.by(() => {
+	function computeResolutions(): CanvasContext {
 		if (!showCAView) return [];
 		else if (!trail.hasConflictiveClause()) return [];
-		else return trail.getConflictAnalysisCtx();
-	});
+		else {
+			const resolutionContext: Either<ResolutionContext, NeverFn>[] = trail.getResolutionContext();
+			return resolutionContext.map((c) => {
+				if (isLeft(c)) {
+					const { clause }: ResolutionContext = unwrapEither(c);
+					return makeLeft({
+						clause,
+						hidden: []
+					});
+				} else return makeRight(error);
+			});
+		}
+	}
 
-	let clausePool: ClausePool = $derived(getClausePool());
+	let unitPropagations: CanvasContext = $derived.by(computeUPs);
+	let resolutions: CanvasContext = $derived.by(computeResolutions);
 
 	let trailWidth = $state(0);
 
@@ -58,10 +68,6 @@
 				previewObserver.disconnect();
 			}
 		};
-	}
-
-	function getClause(clauseTag: number): Clause {
-		return clausePool.at(clauseTag);
 	}
 </script>
 
@@ -91,7 +97,7 @@
 		<div class="empty-slot"></div>
 	</div>
 	{#if showCAView}
-		<CanvasComponent context={conflictAnalysis} width={trailWidth} align={'start'} />
+		<CanvasComponent context={resolutions} width={trailWidth} align={'start'} />
 	{/if}
 </composed-trail>
 

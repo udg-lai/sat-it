@@ -6,18 +6,18 @@
 	interface Props {
 		clause: Clause;
 		reverse?: boolean;
-		hide?: number[];
+		hidden?: number[];
 		state?: 'unsatisfied' | 'satisfied' | undefined;
 	}
 
-	let { clause, reverse = false, hide = [], state }: Props = $props();
+	let { clause, reverse = false, hidden = [], state }: Props = $props();
 
-	const hideSet = new Set(hide);
+	const hiddenSet = new Set(hidden);
 
 	let literals: Literal[] = $derived.by(() => {
 		const lits = [...clause];
 		const reversed = reverse ? lits.reverse() : lits;
-		return reversed.filter((lit) => !hideSet.has(lit.toInt()));
+		return reversed.filter((lit) => !hiddenSet.has(lit.toInt()));
 	});
 </script>
 

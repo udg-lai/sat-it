@@ -1,6 +1,7 @@
 import { getVariablePool } from '$lib/states/problem.svelte.ts';
 import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
+import type { CRef, Lit, NeverFn } from '$lib/types/types.ts';
 import { error } from '$lib/utils.ts';
 import { makeLeft, makeRight, type Either } from '../types/either.ts';
 import type Clause from './Clause.svelte.ts';
@@ -9,14 +10,14 @@ import { type UnitPropagation } from './VariableAssignment.ts';
 
 export type TrailState = 'sat' | 'unsat' | 'conflict' | 'running';
 
+// Represents the propagated literal and the reason cRef
 export interface UPContext {
-	clauseTag: number;
-	literal: number;
+	reasonCRef: CRef;
+	propagated: Lit;
 }
 
-export interface ConflictAnalysisContext {
+export interface ResolutionContext {
 	clause: Clause;
-	literal: number;
 }
 
 export class Trail {
@@ -24,8 +25,8 @@ export class Trail {
 	private dlBookmark: number[] = $state([-1]);
 	private followUPIndex: number = 0;
 	private dl: number = 0;
-	private conflictAnalysisCtx: Either<ConflictAnalysisContext, () => never>[] = $state([]); // this is just for representing the conflict analysis view
-	private upContext: Either<UPContext, () => never>[] = $derived.by(() => this._upContext());
+	private resolutionCtx: Either<ResolutionContext, NeverFn>[] = $state([]); // this is just for representing the conflict analysis view
+	private upContext: Either<UPContext, NeverFn>[] = $derived.by(() => this._upContext());
 	private fullView: boolean = $state(false); // UI state for knowing whenever for that trail it was required to show more information
 	private lemma: Clause | undefined = $state(undefined);
 	private conflictiveClause: Clause | undefined = $state(undefined);
@@ -42,7 +43,7 @@ export class Trail {
 		newTrail.dl = this.dl;
 		newTrail.lemma = this.lemma;
 		newTrail.conflictiveClause = this.conflictiveClause;
-		newTrail.conflictAnalysisCtx = [...this.conflictAnalysisCtx];
+		newTrail.resolutionCtx = [...this.resolutionCtx];
 		newTrail.state = this.state;
 		return newTrail;
 	}
@@ -61,12 +62,12 @@ export class Trail {
 
 	cleanConflict(): void {
 		this.conflictiveClause = undefined;
-		this.conflictAnalysisCtx = [];
+		this.resolutionCtx = [];
 		this.lemma = undefined;
 		this.state = 'running';
 	}
 
-	getDecisionLevel(): number {
+	getDL(): number {
 		return this.dl;
 	}
 
@@ -142,14 +143,14 @@ export class Trail {
 		return this.conflictiveClause;
 	}
 
-	getConflictAnalysisCtx(): Either<ConflictAnalysisContext, () => never>[] {
-		return this._makeConflictAnalysisCtx();
+	getResolutionContext(): Either<ResolutionContext, NeverFn>[] {
+		return this._makeResolutionContext();
 	}
 
-	updateConflictAnalysisCtx(ctx: ConflictAnalysisContext | undefined = undefined): void {
-		const ca: Either<ConflictAnalysisContext, () => never> =
-			ctx === undefined ? makeRight(error) : makeLeft(ctx);
-		this.conflictAnalysisCtx = [ca, ...this.conflictAnalysisCtx];
+	updateResolutionContext(clause: Clause | undefined = undefined): void {
+		const ca: Either<ResolutionContext, NeverFn> =
+			clause === undefined ? makeRight(error) : makeLeft({ clause });
+		this.resolutionCtx = [ca, ...this.resolutionCtx];
 	}
 
 	hasPropagations(level: number): boolean {
@@ -228,7 +229,7 @@ export class Trail {
 		this.dl = dl;
 	}
 
-	getUPContext(): Either<UPContext, () => never>[] {
+	getUPContext(): Either<UPContext, NeverFn>[] {
 		return this.upContext;
 	}
 
@@ -334,13 +335,13 @@ export class Trail {
 		return levels.length > 0;
 	}
 
-	private _upContext(): Either<UPContext, () => never>[] {
+	private _upContext(): Either<UPContext, NeverFn>[] {
 		return this.assignments.map((a: VariableAssignment) => {
-			if (a.isUP() || a.isBJ()) {
+			if (a.wasPropagated()) {
 				const reason = a.getReason() as UnitPropagation;
 				return makeLeft({
-					clauseTag: reason.cRef,
-					literal: a.toLit()
+					reasonCRef: reason.cRef,
+					propagated: a.toLit()
 				});
 			} else {
 				return makeRight(error);
@@ -348,18 +349,18 @@ export class Trail {
 		});
 	}
 
-	private _makeConflictAnalysisCtx(): Either<ConflictAnalysisContext, () => never>[] {
+	private _makeResolutionContext(): Either<ResolutionContext, NeverFn>[] {
 		const nAssignments: number = this.assignments.length;
-		const gaps: number = Math.max(nAssignments - this.conflictAnalysisCtx.length, 0);
-		const ctx: Either<ConflictAnalysisContext, () => never>[] = [
-			...Array<Either<ConflictAnalysisContext, () => never>>(gaps).fill(makeRight(error)),
-			...this.conflictAnalysisCtx,
+		const gaps: number = Math.max(nAssignments - this.resolutionCtx.length, 0);
+		const ctx: Either<ResolutionContext, NeverFn>[] = [
+			...Array<Either<ResolutionContext, NeverFn>>(gaps).fill(makeRight(error)),
+			...this.resolutionCtx,
 			this._makeConflictAnalysisCtxTail()
 		];
 		return ctx;
 	}
 
-	private _makeConflictAnalysisCtxTail(): Either<ConflictAnalysisContext, () => never> {
+	private _makeConflictAnalysisCtxTail(): Either<ResolutionContext, NeverFn> {
 		if (this.getConflictiveClause() === undefined) {
 			logFatal(
 				'Trail',

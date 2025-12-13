@@ -11,3 +11,5 @@ export type Lit = number;
 export type CRef = number;
 
 export type List<T> = T[];
+
+export type NeverFn = () => never;

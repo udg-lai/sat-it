@@ -126,7 +126,7 @@ export const atLevelZero = (): boolean => {
 	if (trail === undefined) {
 		logFatal('Non Decision Made', 'There is no trail to check for non decisions');
 	}
-	return trail.getDecisionLevel() === 0;
+	return trail.getDL() === 0;
 };
 
 const doAssignment = (varId: Var, assignment: Assignment): void => {

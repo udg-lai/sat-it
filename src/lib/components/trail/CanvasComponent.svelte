@@ -1,14 +1,15 @@
 <script lang="ts">
 	import type Clause from '$lib/entities/Clause.svelte.ts';
 	import { isLeft, unwrapEither, type Either } from '$lib/types/either.ts';
+	import type { Lit, NeverFn } from '$lib/types/types.ts';
 	import PlainClauseComponent from '../PlainClauseComponent.svelte';
 
-	export interface UPRelation {
+	export interface PlainClauseProps {
 		clause: Clause;
-		literal: number;
+		hidden: Lit[];
 	}
 
-	export type CanvasContext = Either<UPRelation, () => never>[];
+	export type CanvasContext = Either<PlainClauseProps, NeverFn>[];
 
 	interface Props {
 		context: CanvasContext;
@@ -42,7 +43,7 @@
 				<PlainClauseComponent
 					{reverse}
 					clause={unwrapEither(ctx).clause}
-					hide={repeat ? [] : [unwrapEither(ctx).literal]}
+					hidden={unwrapEither(ctx).hidden}
 					state={!repeat ? 'satisfied' : index === context.length - 1 ? 'unsatisfied' : undefined}
 				/>
 			{:else}

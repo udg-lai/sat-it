@@ -1,10 +1,19 @@
 import { logError } from '$lib/states/toasts.svelte.ts';
 import type { Lit } from '$lib/types/types.ts';
-import type Clause from './Clause.svelte.ts';
+import Clause from './Clause.svelte.ts';
 import type VariableAssignment from './VariableAssignment.ts';
 import { isPropagationReason, type Propagation, type Reason } from './VariableAssignment.ts';
 import { getClausePool } from '$lib/states/problem.svelte.ts';
 import Literal from './Literal.svelte.ts';
+import { makeLeft, makeRight, type Either } from '$lib/types/either.ts';
+
+export interface Resolution {
+	conflictClause: Clause;
+	reason: Clause;
+	resolvent: Clause;
+}
+
+export type VirtualResolution = Either<Clause, Resolution>;
 
 export class ConflictAnalysis {
 	clause: Clause;
@@ -62,7 +71,7 @@ export class ConflictAnalysis {
 		return this.clause;
 	}
 
-	virtualResolution(): Clause {
+	virtualResolution(): VirtualResolution {
 		// If the complementary literal of the current assignment appears in `this.clause`, we perform a resolution step
 		// otherwise, the resulting clause is the same as `this.clause`
 		if (this.finished()) {
@@ -75,6 +84,9 @@ export class ConflictAnalysis {
 		const propagation: VariableAssignment = this.ldlPropagations[this.pointer];
 		const complementary: Lit = Literal.complementary(propagation.toLit());
 
+		// Next literal to consider in the conflict analysis
+		this.pointer -= 1;
+
 		// Checks if the complementary of the propagated literal is in the clause being analyzed
 		if (this.clause.contains(complementary)) {
 			const r: Reason = propagation.getReason();
@@ -86,13 +98,20 @@ export class ConflictAnalysis {
 			}
 			const reason: Clause = getClausePool().at((r as Propagation).cRef);
 			const resolvent: Clause = this.clause.resolution(reason);
-			this.update(resolvent);
+			this.updateConflictiveClause(resolvent);
+
+			return makeRight({
+				conflictClause: this.clause.copy(),
+				reason: reason,
+				resolvent: resolvent
+			});
+		} else {
+			// No resolution is performed, the clause remains the same
+			return makeLeft(this.clause.copy());
 		}
-		this.pointer -= 1;
-		return this.clause.copy();
 	}
 
-	private update(resolvent: Clause): void {
+	private updateConflictiveClause(resolvent: Clause): void {
 		if (!resolvent.falsified()) {
 			logError(
 				'Conflict Analysis Error',

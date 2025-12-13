@@ -4,7 +4,7 @@ import Clause, {
 	type ClauseEval
 } from '$lib/entities/Clause.svelte.ts';
 import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
-import { ConflictAnalysis } from '$lib/entities/ConflictAnalysis.svelte.ts';
+import { ConflictAnalysis, type VirtualResolution } from '$lib/entities/ConflictAnalysis.svelte.ts';
 import OccurrenceList from '$lib/entities/OccurrenceList.svelte.ts';
 import type { Trail } from '$lib/entities/Trail.svelte.ts';
 import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
@@ -252,15 +252,19 @@ export type CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN = () => void;
 export const buildConflictAnalysis: CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN = () => {
 	// Firstly the last trail is achieved
 	const trail: Trail = getLatestTrail();
-	if (trail.isEmpty()) {
-		logFatal('Conflict analysis', 'The last trail is empty');
-	} else {
-		trail.setState('conflict');
+	if (trail.getDL() < 1) {
+		logFatal(
+			'Build conflict analysis',
+			'Conflict analysis can only be done at decision levels higher than 0'
+		);
 	}
 
-	// Then the variables from the last decision level are retrieved.
-	const propagations: VariableAssignment[] = trail.getPropagationsAtLevel(trail.getDecisionLevel());
-	const lastDecision: VariableAssignment = trail.lastDecision();
+	// Change the state of the trail to conflict
+	trail.setState('conflict');
+
+	// Get last decision level and propagated literals.
+	const propagations: VariableAssignment[] = trail.getPropagationsAtLevel(trail.getDL());
+	const ld: VariableAssignment = trail.lastDecision();
 
 	// Thirdly the conflict clause is retrieved
 	const cRef: CRef | undefined = trail.getConflictiveClause()?.getCRef();
@@ -271,13 +275,8 @@ export const buildConflictAnalysis: CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN =
 		);
 	}
 
-	const pool: ClausePool = getClausePool();
-	const conflictiveClause: Clause = pool.at(cRef).copy();
-	const conflictAnalysis: ConflictAnalysis = new ConflictAnalysis(
-		conflictiveClause,
-		lastDecision,
-		propagations
-	);
+	const cc: Clause = getClausePool().at(cRef).copy();
+	const conflictAnalysis: ConflictAnalysis = new ConflictAnalysis(cc, ld, propagations);
 	setConflictAnalysis(conflictAnalysis);
 };
 
@@ -288,10 +287,10 @@ export const assertingClause: CDCL_ASSERTING_CLAUSE_FUN = () => {
 	return getConflictAnalysis().finished();
 };
 
-export type CDCL_VIRTUAL_RESOLUTION_FUN = () => void;
+export type CDCL_VIRTUAL_RESOLUTION_FUN = () => VirtualResolution;
 
 export const virtualResolution: CDCL_VIRTUAL_RESOLUTION_FUN = () => {
-	getConflictAnalysis().virtualResolution();
+	return getConflictAnalysis().virtualResolution();
 };
 
 export type CDCL_LEARN_CONFLICT_CLAUSE_FUN = (lemma: Clause) => number;
