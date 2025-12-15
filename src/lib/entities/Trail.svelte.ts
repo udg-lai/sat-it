@@ -23,7 +23,6 @@ export interface ResolutionContext {
 export class Trail {
 	private assignments: VariableAssignment[] = $state([]);
 	private bookmarkDL: number[] = $state([-1]);
-	private followUPIndex: number = 0;
 	private dl: number = 0;
 	private resolutionCtx: Either<ResolutionContext, NeverFn>[] = $state([]); // this is just for representing the conflict analysis view
 	private upContext: Either<UPContext, NeverFn>[] = $derived.by(() => this._upContext());
@@ -39,7 +38,6 @@ export class Trail {
 		const newTrail = new Trail();
 		newTrail.assignments = this.assignments.map((assignment) => assignment.copy());
 		newTrail.bookmarkDL = [...this.bookmarkDL];
-		newTrail.followUPIndex = this.followUPIndex;
 		newTrail.dl = this.dl;
 		newTrail.lemma = this.lemma;
 		newTrail.conflictiveClause = this.conflictiveClause;
@@ -196,40 +194,17 @@ export class Trail {
 		this.lemma = clause;
 	}
 
-	getFollowUpIndex(): number {
-		return this.followUPIndex;
-	}
-
-	setFollowUpIndex(): void {
-		this.followUPIndex = this.assignments.length - 1;
-	}
-
-	isAssignmentFromPreviousTrail(assignment: VariableAssignment): boolean {
-		const assignmentIndex: number = this.assignments.indexOf(assignment);
-		return assignmentIndex < this.followUPIndex;
-	}
-
-	backjump(dl: number): void {
-		// Security check
-		if (dl < 0 || dl > this.dl) {
-			logFatal('Decision level error', 'The entered decision level is not valid');
-		}
-
-		// As the propagations are not meant to be deleted, the DL+1 is obtained
-		const targetIndex =
-			dl === 0 ? this.getMarkOfDecisionLevel(1) : this.getMarkOfDecisionLevel(dl + 1);
-		while (this.assignments.length > targetIndex) {
-			const last: VariableAssignment = this.pop() as VariableAssignment;
-			getVariablePool().unassign(last.getVariable().toInt());
-		}
-
-		// Set the new decision level parameters
-		this.bookmarkDL = this.bookmarkDL.slice(0, dl + 1);
-		this.dl = dl;
-	}
-
 	getUPContext(): Either<UPContext, NeverFn>[] {
 		return this.upContext;
+	}
+
+	getMarkOfDecisionLevel(dl: number): number {
+		// Returns from the mapping of decision levels to index, where it occurs in the list of assignments
+		if (!this.dlExists(dl)) {
+			logFatal(`Level ${dl} does not exist`);
+		}
+		const levels = this.getDLMarks();
+		return levels[dl - 1];
 	}
 
 	toggleView(): void {
@@ -315,14 +290,6 @@ export class Trail {
 	private dlExists(level: number): boolean {
 		const levels = this.getDLMarks();
 		return level > 0 && level <= levels.length;
-	}
-
-	private getMarkOfDecisionLevel(level: number): number {
-		if (!this.dlExists(level)) {
-			logFatal(`Level ${level} does not exist`);
-		}
-		const levels = this.getDLMarks();
-		return levels[level - 1];
 	}
 
 	private getDLMarks(): number[] {

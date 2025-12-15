@@ -2,79 +2,76 @@ import type { FinalState, NonFinalState, State } from '../StateMachine.svelte.ts
 import { DECIDE_STATE_ID, SAT_STATE_ID, UNSAT_STATE_ID } from '../reserved.ts';
 import {
 	allAssigned,
-	emptyClauseDetection,
-	nextClause as nextClause,
-	queueOccurrenceList,
-	unitClauseDetection,
+	assertingClause,
+	backjumping,
+	buildConflictAnalysis,
+	complementaryOccurrences,
+	decide,
 	dequeueOccurrenceList,
+	emptyClauseDetection,
+	learnConflictClause,
+	nextClause,
+	nonDecisionMade,
+	pendingOccurrenceList,
+	pickPendingOccurrenceList,
+	pushTrail,
+	queueOccurrenceList,
+	sndHighestDL,
+	traversedOccurrenceList,
+	unitClause,
+	unitClauseDetection,
+	unitPropagation,
+	unsatisfiedClause,
+	virtualResolution,
+	wipeOccurrenceQueue,
 	type CDCL_ALL_VARIABLES_ASSIGNED_FUN,
 	type CDCL_ALL_VARIABLES_ASSIGNED_INPUT,
+	type CDCL_ASSERTING_CLAUSE_FUN,
+	type CDCL_ASSERTING_CLAUSE_INPUT,
+	type CDCL_AT_LEVEL_ZERO_FUN,
+	type CDCL_AT_LEVEL_ZERO_INPUT,
+	type CDCL_BACKJUMPING_FUN,
+	type CDCL_BACKJUMPING_INPUT,
+	type CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN,
+	type CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_INPUT,
+	type CDCL_CHECK_PENDING_OCCURRENCE_LISTS_FUN,
+	type CDCL_CHECK_PENDING_OCCURRENCE_LISTS_INPUT,
+	type CDCL_COMPLEMENTARY_OCCURRENCES_FUN,
+	type CDCL_COMPLEMENTARY_OCCURRENCES_INPUT,
 	type CDCL_CONFLICT_DETECTION_FUN,
+	type CDCL_CONFLICT_DETECTION_INPUT,
+	type CDCL_DECIDE_FUN,
+	type CDCL_DECIDE_INPUT,
 	type CDCL_EMPTY_CLAUSE_FUN,
 	type CDCL_EMPTY_CLAUSE_INPUT,
 	type CDCL_FUN,
 	type CDCL_INPUT,
-	type CDCL_PICK_OCCURRENCE_LIST_FUN,
-	type CDCL_PICK_OCCURRENCE_LIST_INPUT,
-	type CDCL_QUEUE_OCCURRENCE_LIST_FUN,
-	type CDCL_QUEUE_OCCURRENCE_LIST_INPUT,
-	type CDCL_UNIT_CLAUSES_DETECTION_FUN,
-	type CDCL_UNIT_CLAUSES_DETECTION_INPUT,
-	type CDCL_UNSTACK_OCCURRENCE_LIST_FUN,
-	type CDCL_UNSTACK_OCCURRENCE_LIST_INPUT,
-	pickPendingOccurrenceList,
-	type CDCL_TRAVERSED_OCCURRENCE_LIST_FUN,
-	traversedOccurrenceList,
-	type CDCL_NEXT_OCCURRENCE_FUN,
-	type CDCL_NEXT_OCCURRENCE_INPUT,
-	type CDCL_CONFLICT_DETECTION_INPUT,
-	unsatisfiedClause,
-	type CDCL_CHECK_PENDING_OCCURRENCE_LISTS_INPUT,
-	type CDCL_CHECK_PENDING_OCCURRENCE_LISTS_FUN,
-	pendingOccurrenceList,
-	type CDCL_UNIT_CLAUSE_FUN,
-	type CDCL_UNIT_CLAUSE_INPUT,
-	type CDCL_UNIT_PROPAGATION_FUN,
-	type CDCL_UNIT_PROPAGATION_INPUT,
-	unitPropagation,
-	type CDCL_COMPLEMENTARY_OCCURRENCES_INPUT,
-	type CDCL_COMPLEMENTARY_OCCURRENCES_FUN,
-	complementaryOccurrences,
-	nonDecisionMade,
-	type CDCL_AT_LEVEL_ZERO_FUN,
-	type CDCL_AT_LEVEL_ZERO_INPUT,
-	type CDCL_DECIDE_FUN,
-	type CDCL_DECIDE_INPUT,
-	decide,
-	unitClause,
-	type CDCL_WIPE_OCCURRENCE_QUEUE_FUN,
-	type CDCL_WIPE_OCCURRENCE_QUEUE_INPUT,
-	wipeOccurrenceQueue,
-	type CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_INPUT,
-	type CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN,
-	buildConflictAnalysis,
-	type CDCL_ASSERTING_CLAUSE_FUN,
-	type CDCL_ASSERTING_CLAUSE_INPUT,
-	assertingClause,
-	virtualResolution,
-	type CDCL_VIRTUAL_RESOLUTION_FUN,
-	type CDCL_VIRTUAL_RESOLUTION_INPUT,
 	type CDCL_LEARN_CONFLICT_CLAUSE_FUN,
 	type CDCL_LEARN_CONFLICT_CLAUSE_INPUT,
-	type CDCL_SECOND_HIGHEST_DL_FUN,
-	type CDCL_SECOND_HIGHEST_DL_INPUT,
-	sndHighestDL,
-	type CDCL_BACKJUMPING_FUN,
-	type CDCL_BACKJUMPING_INPUT,
-	backjumping,
+	type CDCL_NEXT_OCCURRENCE_FUN,
+	type CDCL_NEXT_OCCURRENCE_INPUT,
+	type CDCL_PICK_OCCURRENCE_LIST_FUN,
+	type CDCL_PICK_OCCURRENCE_LIST_INPUT,
 	type CDCL_PUSH_TRAIL_FUN,
 	type CDCL_PUSH_TRAIL_INPUT,
-	pushTrail,
-	learnConflictClause,
-	type CDCL_PROPAGATE_CC_FUN,
-	type CDCL_PROPAGATE_CC_INPUT,
-	propagateCC,
-	type CDCL_TRAVERSED_OCCURRENCE_LIST_INPUT
+	type CDCL_QUEUE_OCCURRENCE_LIST_FUN,
+	type CDCL_QUEUE_OCCURRENCE_LIST_INPUT,
+	type CDCL_SECOND_HIGHEST_DL_FUN,
+	type CDCL_SECOND_HIGHEST_DL_INPUT,
+	type CDCL_TRAVERSED_OCCURRENCE_LIST_FUN,
+	type CDCL_TRAVERSED_OCCURRENCE_LIST_INPUT,
+	type CDCL_UNIT_CLAUSE_FUN,
+	type CDCL_UNIT_CLAUSE_INPUT,
+	type CDCL_UNIT_CLAUSES_DETECTION_FUN,
+	type CDCL_UNIT_CLAUSES_DETECTION_INPUT,
+	type CDCL_UNIT_PROPAGATION_FUN,
+	type CDCL_UNIT_PROPAGATION_INPUT,
+	type CDCL_UNSTACK_OCCURRENCE_LIST_FUN,
+	type CDCL_UNSTACK_OCCURRENCE_LIST_INPUT,
+	type CDCL_VIRTUAL_RESOLUTION_FUN,
+	type CDCL_VIRTUAL_RESOLUTION_INPUT,
+	type CDCL_WIPE_OCCURRENCE_QUEUE_FUN,
+	type CDCL_WIPE_OCCURRENCE_QUEUE_INPUT
 } from './cdcl-domain.svelte.ts';
 
 export const cdcl_stateName2StateId = {
@@ -103,8 +100,7 @@ export const cdcl_stateName2StateId = {
 	learn_cc_state: 23,
 	second_highest_dl_state: 24,
 	undo_trail_to_shdl_state: 25,
-	push_trail_state: 26,
-	propagate_cc_state: 27
+	push_trail_state: 26
 };
 
 // *** define state nodes ***
@@ -139,7 +135,7 @@ const empty_clause_state: NonFinalState<CDCL_EMPTY_CLAUSE_FUN, CDCL_EMPTY_CLAUSE
 	description: 'Seeks for the empty clause in the clause pool',
 	transitions: new Map<CDCL_EMPTY_CLAUSE_INPUT, number>()
 		.set('unit_clauses_detection_state', cdcl_stateName2StateId['unit_clauses_detection_state'])
-		.set('unsat_state', cdcl_stateName2StateId['unsat_state'])
+		.set('at_level_zero_state', cdcl_stateName2StateId['at_level_zero_state'])
 };
 
 const decide_state: NonFinalState<CDCL_DECIDE_FUN, CDCL_DECIDE_INPUT> = {
@@ -310,6 +306,19 @@ const wipe_occurrence_queue_state: NonFinalState<
 
 // ** additional states from cdcl **
 
+const virtual_resolution_state: NonFinalState<
+	CDCL_VIRTUAL_RESOLUTION_FUN,
+	CDCL_VIRTUAL_RESOLUTION_INPUT
+> = {
+	id: cdcl_stateName2StateId['virtual_resolution_state'],
+	run: virtualResolution,
+	description: `A single resolution step`,
+	transitions: new Map<CDCL_VIRTUAL_RESOLUTION_INPUT, number>().set(
+		'asserting_clause_state',
+		cdcl_stateName2StateId['asserting_clause_state']
+	)
+};
+
 const build_conflict_analysis_state: NonFinalState<
 	CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN,
 	CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_INPUT
@@ -376,18 +385,8 @@ const push_trail_state: NonFinalState<CDCL_PUSH_TRAIL_FUN, CDCL_PUSH_TRAIL_INPUT
 	run: pushTrail,
 	description: `Pushes the trail that needs to be learned`,
 	transitions: new Map<CDCL_PUSH_TRAIL_INPUT, number>().set(
-		'propagate_cc_state',
-		cdcl_stateName2StateId['propagate_cc_state']
-	)
-};
-
-const propagate_cc_state: NonFinalState<CDCL_PROPAGATE_CC_FUN, CDCL_PROPAGATE_CC_INPUT> = {
-	id: cdcl_stateName2StateId['propagate_cc_state'],
-	run: propagateCC,
-	description: `Pushes the trail that needs to be learned`,
-	transitions: new Map<CDCL_PROPAGATE_CC_INPUT, number>().set(
-		'complementary_occurrences_state',
-		cdcl_stateName2StateId['complementary_occurrences_state']
+		'unit_propagation_state',
+		cdcl_stateName2StateId['unit_propagation_state']
 	)
 };
 
@@ -418,13 +417,13 @@ states.set(learn_cc_state.id, learn_cc_state);
 states.set(second_highest_dl_state.id, second_highest_dl_state);
 states.set(undo_trail_to_shdl_state.id, undo_trail_to_shdl_state);
 states.set(push_trail_state.id, push_trail_state);
-states.set(propagate_cc_state.id, propagate_cc_state);
+states.set(virtual_resolution_state.id, virtual_resolution_state);
 
 export const initial = empty_clause_state.id;
 
 export const preConflict = occurrence_list_traversed_state.id;
 
-export const conflict = pick_last_assignment_state.id;
+export const conflict = virtual_resolution_state.id;
 
 export const sat = sat_state.id;
 

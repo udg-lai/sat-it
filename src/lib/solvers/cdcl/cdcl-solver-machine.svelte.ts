@@ -52,15 +52,15 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 
 		//The initial state
 		if (activeId === cdcl_stateName2StateId.empty_clause_state) {
-			initialTransition(this);
+			initialTransition();
 		}
 		//Waiting to enter or not the clause analysis
 		else if (activeId === cdcl_stateName2StateId.traversed_occurrences_state) {
-			preConflictDetection(this);
+			preConflictDetection();
 		}
 		//Waiting to decide a variables
 		else if (activeId === cdcl_stateName2StateId.decide_state) {
-			decide(this);
+			decide();
 		} else if (activeId === cdcl_stateName2StateId.wipe_occurrence_queue_state) {
 			preConflictAnalysis();
 		}

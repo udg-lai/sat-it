@@ -1,3 +1,4 @@
+import { backjumping as backjumpingAlg } from '$lib/algorithms/backjumping.ts';
 import Clause, {
 	isUnitEval,
 	isUnsatisfiedEval,
@@ -10,12 +11,12 @@ import type { Trail } from '$lib/entities/Trail.svelte.ts';
 import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
 import type { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
 import {
+	atLevelZero,
 	clauseEvaluation,
 	allAssigned as solverAllAssigned,
 	complementaryOccurrences as solverComplementaryOccurrences,
 	decide as solverDecide,
 	emptyClauseDetection as solverEmptyClauseDetection,
-	atLevelZero,
 	unitClauseDetection as solverUnitClauseDetection,
 	unitPropagation as solverUnitPropagation
 } from '$lib/solvers/shared.svelte.ts';
@@ -29,17 +30,15 @@ import {
 } from '$lib/states/problem.svelte.ts';
 import {
 	getOccurrenceListQueue,
-	setOccurrenceListQueue,
 	wipeOccurrenceListQueue
 } from '$lib/states/queue-occurrence-lists.svelte.ts';
 import { logFatal, logInfo } from '$lib/states/toasts.svelte.ts';
 import { getLatestTrail, stackTrail } from '$lib/states/trails.svelte.ts';
-import type { CRef, Lit } from '$lib/types/types.ts';
-import type { CDCL_SolverMachine } from './cdcl-solver-machine.svelte.ts';
+import type { CRef, List, Lit } from '$lib/types/types.ts';
 
 // ** state inputs **
 
-export type CDCL_EMPTY_CLAUSE_INPUT = 'unit_clauses_detection_state' | 'unsat_state';
+export type CDCL_EMPTY_CLAUSE_INPUT = 'unit_clauses_detection_state' | 'at_level_zero_state';
 
 export type CDCL_UNIT_CLAUSES_DETECTION_INPUT = 'queue_occurrence_list_state';
 
@@ -91,7 +90,7 @@ export type CDCL_SECOND_HIGHEST_DL_INPUT = 'undo_backjumping_state';
 
 export type CDCL_BACKJUMPING_INPUT = 'push_trail_state';
 
-export type CDCL_PUSH_TRAIL_INPUT = 'propagate_cc_state';
+export type CDCL_PUSH_TRAIL_INPUT = 'unit_propagation_state';
 
 export type CDCL_PROPAGATE_CC_INPUT = 'complementary_occurrences_state';
 
@@ -153,7 +152,7 @@ export const queueOccurrenceList: CDCL_QUEUE_OCCURRENCE_LIST_FUN = (
 	getOccurrenceListQueue().enqueue(occurrenceList);
 };
 
-export type CDCL_UNSTACK_OCCURRENCE_LIST_FUN = (solverStateMachine: CDCL_SolverMachine) => void;
+export type CDCL_UNSTACK_OCCURRENCE_LIST_FUN = () => void;
 
 export const dequeueOccurrenceList: CDCL_UNSTACK_OCCURRENCE_LIST_FUN = () => {
 	getOccurrenceListQueue().dequeue();
@@ -316,17 +315,18 @@ export const sndHighestDL: CDCL_SECOND_HIGHEST_DL_FUN = (lemma: Clause) => {
 	const clauseVariables: number[] = lemma.getLiterals().map((literal) => {
 		return literal.getVariable().toInt();
 	});
-	const dLevels = clauseVariables
-		.map((variable) => getLatestTrail().getVariableDL(variable))
-		.sort((a, b) => b - a);
+	const dLevels = clauseVariables.map((variable) => getLatestTrail().getVariableDL(variable));
 
-	return dLevels.length >= 2 ? dLevels[1] : dLevels[0] - 1;
+	const uniqueDLs: Set<number> = new Set(dLevels);
+	const sorted: List<number> = [...uniqueDLs].sort((a, b) => b - a);
+
+	return sorted.length >= 2 ? sorted[1] : sorted[0] - 1;
 };
 
-export type CDCL_BACKJUMPING_FUN = (decisionLevel: number) => void;
+export type CDCL_BACKJUMPING_FUN = (trail: Trail, decisionLevel: number) => Trail;
 
-export const backjumping = (trail: Trail, decisionLevel: number) => {
-	getLatestTrail().backjump(decisionLevel);
+export const backjumping: CDCL_BACKJUMPING_FUN = (trail: Trail, dl: number) => {
+	return backjumpingAlg(getVariablePool(), trail, dl);
 };
 
 export type CDCL_PUSH_TRAIL_FUN = (trail: Trail) => void;

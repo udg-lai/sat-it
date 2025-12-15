@@ -12,8 +12,8 @@ export interface Resolution {
 	reason: Clause;
 	resolvent: {
 		clause: Clause;
-		asserting: boolean
-	}
+		asserting: boolean;
+	};
 }
 
 export type VirtualResolution = Either<Clause, Resolution>;

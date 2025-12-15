@@ -12,6 +12,10 @@ export const getLatestTrail = (): Trail => {
 	return trails[trails.length - 1];
 };
 
+export const nTrails = (): number => {
+	return trails.length;
+};
+
 export const stackTrail = (trail: Trail): void => {
 	trails = [...trails, trail];
 };

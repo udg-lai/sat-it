@@ -51,11 +51,11 @@ export const fromLeft = <T, U>(e: Either<T, U>): T => {
 		return e.left;
 	}
 	throw new Error('Tried to extract Left value from a Right Either');
-}
+};
 
 export const fromRight = <T, U>(e: Either<T, U>): U => {
 	if (isRight(e)) {
 		return e.right;
 	}
 	throw new Error('Tried to extract Right value from a Left Either');
-}
+};
