@@ -12,7 +12,7 @@
 		updateTrailsEventBus,
 		userActionEventBus,
 		type ActionEvent,
-		type AlgorithmicUndoEvent,
+		type UndoToDecisionEvent,
 		type StateMachineEvent,
 		type StateMachineLifeCycleEvent
 	} from '$lib/events/events.ts';
@@ -30,13 +30,12 @@
 		stopSolverMachine,
 		updateSolverMachine
 	} from '$lib/states/solver-machine.svelte.ts';
-	import { record, redo, resetStack, undo, type Snapshot } from '$lib/states/stack.svelte.ts';
 	import {
 		getStatistics,
 		resetStatistics,
 		updateStatistics
 	} from '$lib/states/statistics.svelte.ts';
-	import { logFatal } from '$lib/states/toasts.svelte.ts';
+	import { logError, logFatal } from '$lib/states/toasts.svelte.ts';
 	import { getTrails, updateTrails } from '$lib/states/trails.svelte.ts';
 	import { modifyLiteralWidth } from '$lib/utils.ts';
 	import { onMount } from 'svelte';
@@ -44,6 +43,8 @@
 	import SolvingInformationComponent from './SolvingInformationComponent.svelte';
 	import type { Algorithm } from '$lib/types/algorithm.ts';
 	import { getConfiguredAlgorithm } from './settings/engine/state.svelte.ts';
+	import type { Lit } from '$lib/types/types.ts';
+	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
 
 	let trails: Trail[] = $state([]);
 
@@ -77,20 +78,6 @@
 		}
 	}
 
-	function reloadFromSnapshot({ snapshot, activeState, statistics, record }: Snapshot): void {
-		updateTrails([...snapshot]);
-		updateTrailsEventBus.emit([...getTrails()]);
-
-		const snapshotSize = snapshot.length;
-		if (snapshotSize <= 0) {
-			logFatal('Reloading snapshot', 'Unexpected empty array of trails');
-		} else {
-			const latest: Trail = snapshot[snapshotSize - 1];
-			getProblemStore().syncWithTrail(latest);
-		}
-		updateStatistics(statistics);
-		updateSolverMachine(activeState, record);
-	}
 
 	function reset() {
 		// Reset the problem, statistics, stack and reload from an initial empty snapshot.
@@ -116,12 +103,20 @@
 		reset();
 	}
 
-	function algorithmicUndoSave(a: AlgorithmicUndoEvent): void {
-		const latestTrail: Trail = algorithmicUndo(a.objectiveAssignment, a.trailIndex);
-		getProblemStore().syncWithTrail(latestTrail);
-		updateTrailsEventBus.emit(getTrails());
-		updateSolverMachine(DECIDE_STATE_ID, undefined);
-		record(trails, solverMachine.getActiveStateId(), getStatistics(), solverMachine.getRecord());
+	function algorithmicUndoSave(event: UndoToDecisionEvent): void {
+		const varAssignment: VariableAssignment = event.decision;
+		if (!varAssignment.isD()) {
+			logError("Algorithm undo", "You can only undo to decisions")
+		}
+
+		const decision: Lit = event.decision.toLit();
+
+		// Wipe learnt clauses
+		getProblemStore().forgetLearnedClauses();
+
+		// Reset watches
+
+		// Execute each one of the decisions 
 	}
 
 	function lifeCycleController(l: StateMachineLifeCycleEvent): void {

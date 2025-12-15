@@ -53,13 +53,13 @@ export const solverFinishedAutoMode = createEventBus<void>();
 // event bus for opening the conflict detection view
 export const conflictDetectionEventBus = createEventBus<void>();
 
-export type AlgorithmicUndoEvent = {
-	objectiveAssignment: VariableAssignment;
+export type UndoToDecisionEvent = {
+	decision: VariableAssignment;
 	trailIndex: number;
 };
 
 // event bus for opening the conflict detection view
-export const algorithmicUndoEventBus = createEventBus<AlgorithmicUndoEvent>();
+export const algorithmicUndoEventBus = createEventBus<UndoToDecisionEvent>();
 
 export type StateMachineLifeCycleEvent =
 	| 'begin-step'

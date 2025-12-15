@@ -17,9 +17,6 @@ export const syncProblemWithInstance = (instance: DimacsInstance) => {
 	getProblemStore().syncWithDimacsInstance(instance);
 };
 
-export const syncProblemWithTrail = (trail: Trail) => {
-	getProblemStore().syncWithTrail(trail);
-};
 
 export const forgetLearnedClauses = (): void => {
 	getProblemStore().forgetLearnedClauses();

@@ -1,4 +1,4 @@
-import { logFatal } from '$lib/states/toasts.svelte.ts';
+import { logError, logFatal, logWarning } from '$lib/states/toasts.svelte.ts';
 import { SvelteMap } from 'svelte/reactivity';
 import type Clause from './Clause.svelte.ts';
 import type { CRef, Lit } from '$lib/types/types.ts';
@@ -37,6 +37,28 @@ export default class WatchTable {
 			this.table.set(lit, []);
 		}
 		this.table.get(lit)?.push(watch);
+	}
+
+	addWatches(clause: Clause): void {
+		if (clause.isTemporal()) logError("Add watches", "You can not create watches from a temporal clause");
+		if (clause.size() === 1) logWarning("Add watches", "No watches for unit clause")
+		else {
+			const literals: Literal[] = clause.getLiterals();
+			const cRef = clause.getCRef();
+			// Watch the first two literals in the clause
+			for (let i = 0; i < 2; i++) {
+				const literal: Literal = literals[i];
+				const watch: Watch = {
+					cRef: cRef,
+					blocker: literal
+				};
+				const litId: number = literal.toInt();
+				if (!this.table.has(litId)) {
+					this.table.set(litId, []);
+				}
+				this.table.get(litId)?.push(watch);
+			}
+		}
 	}
 
 	private makeWatchTable(clauses: Clause[]): SvelteMap<Lit, Watch[]> {

@@ -13,3 +13,7 @@ export type CRef = number;
 export type List<T> = T[];
 
 export type NeverFn = () => never;
+
+export const List = <T>(): List<T> => {
+    return []
+}

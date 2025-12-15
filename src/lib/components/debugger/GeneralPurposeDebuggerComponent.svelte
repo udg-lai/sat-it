@@ -1,7 +1,7 @@
 <script lang="ts">
 	import ResetProblem from './buttons/ResetProblemComponent.svelte';
 	import { userActionEventBus } from '$lib/events/events.ts';
-	import { getStackLength, getStackPointer } from '$lib/states/stack.svelte.ts';
+	import { getStackLength, getStackPointer } from '$lib/states/decisions.svelte.ts';
 	import {
 		getTrailsExpanded,
 		setTrailsExpanded

@@ -141,7 +141,7 @@
 
 	function emitRevert(assignment: VariableAssignment, index: number) {
 		algorithmicUndoEventBus.emit({
-			objectiveAssignment: assignment,
+			decision: assignment,
 			trailIndex: index
 		});
 	}

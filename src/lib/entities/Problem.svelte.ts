@@ -39,18 +39,6 @@ export default class Problem {
 		this.watchTable = new WatchTable(this.clauses.getClauses());
 	}
 
-	syncWithTrail(trail: Trail) {
-		// The assignment is the empty set at first
-		this.variables.wipe();
-
-		// The assignments in the trail are snapshots of
-		// variables at the time they were assigned.
-		for (const assignment of trail) {
-			const variable: Variable = assignment.getVariable();
-			this.variables.assign(variable.toInt(), variable.getAssignment());
-		}
-	}
-
 	forgetLearnedClauses() {
 		const removedClauses: Clause[] = this.clauses.pruneLearnedClauses();
 		this.occurrencesTable.multipleRemoveOccurrences(removedClauses);
