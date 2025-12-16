@@ -10,7 +10,9 @@
 	import { nanoid } from 'nanoid';
 	import HeadTailComponent from '../HeadTailComponent.svelte';
 	import './style.css';
-	import type { CRef } from '$lib/types/types.ts';
+	import type { CRef, Lit } from '$lib/types/types.ts';
+	import { getFocusedAssignment } from '$lib/states/focused-assignment.svelte.ts';
+	import { fromJust, isJust, type Maybe } from '$lib/types/maybe.ts';
 
 	interface Props {
 		assignment: VariableAssignment;
@@ -29,8 +31,15 @@
 	}: Props = $props();
 	let buttonId: string = 'btn-' + nanoid();
 
-	const inspectedVariable: number = $derived(getInspectedVariable());
-	let inspecting: boolean = $derived(assignment.toVar() === inspectedVariable && isLast);
+	const inspectedLiteral: Maybe<Lit> = $derived(getFocusedAssignment());
+	let inspecting: boolean = $derived.by(() => {
+		if (!isJust(inspectedLiteral)) {
+			return false;
+		} else {
+			const literal: Lit = fromJust(inspectedLiteral);
+			return assignment.toLit() === literal && isLast;
+		}
+	});
 
 	const reasonClause: Clause = $derived.by(() => {
 		if (assignment.isBJ()) {

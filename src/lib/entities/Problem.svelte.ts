@@ -4,8 +4,6 @@ import type { CRef, Lit } from '$lib/types/types.ts';
 import type Clause from './Clause.svelte.ts';
 import ClausePool from './ClausePool.svelte.ts';
 import OccurrenceTable from './OccurrenceTable.svelte.ts';
-import type { Trail } from './Trail.svelte.ts';
-import type Variable from './Variable.svelte.ts';
 import { VariablePool } from './VariablePool.svelte.ts';
 import WatchTable from './WatchTable.svelte.ts';
 

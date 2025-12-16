@@ -2,7 +2,7 @@ import { logFatal, logSAT, logUnSAT } from '$lib/states/toasts.svelte.ts';
 import type { BKT_FUN, BKT_INPUT } from './backtracking/bkt-domain.svelte.ts';
 import type { CDCL_FUN, CDCL_INPUT } from './cdcl/cdcl-domain.svelte.ts';
 import type { DPLL_FUN, DPLL_INPUT } from './dpll/dpll-domain.svelte.ts';
-import { SAT_STATE_ID, UNSAT_STATE_ID } from './reserved.ts';
+import { DECIDE_STATE_ID, SAT_STATE_ID, UNSAT_STATE_ID } from './reserved.ts';
 import { finalStateControl } from './shared.svelte.ts';
 
 export type StateFun = BKT_FUN | DPLL_FUN | CDCL_FUN | never;
@@ -84,6 +84,10 @@ export abstract class StateMachine<F extends StateFun, I extends StateInput>
 
 	onConflictState(): boolean {
 		return this.getActiveState().id === this.conflict;
+	}
+
+	onDecisionState(): boolean {
+		return this.getActiveState().id === DECIDE_STATE_ID;
 	}
 
 	onUnsatState(): boolean {

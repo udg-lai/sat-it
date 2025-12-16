@@ -15,5 +15,9 @@ export type List<T> = T[];
 export type NeverFn = () => never;
 
 export const List = <T>(): List<T> => {
-    return []
-}
+	return [];
+};
+
+export const Lit = (n: number): Lit => {
+	return n as Lit;
+};

@@ -6,17 +6,13 @@
 		isUnresolvedEval,
 		isUnsatisfiedEval
 	} from '$lib/entities/Clause.svelte.ts';
-	import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
-	import type Problem from '$lib/entities/Problem.svelte.ts';
-	import { getCheckingIndex, getOccurrenceList } from '$lib/states/occurrence-list.svelte.ts';
-	import { getClausePool, getProblemStore } from '$lib/states/problem.svelte.ts';
+	import { getOccurrenceList } from '$lib/states/occurrence-list.svelte.ts';
+	import { getClausePool } from '$lib/states/problem.svelte.ts';
 	import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 	import type { CRef } from '$lib/types/types.ts';
 	import ClauseComponent from '../ClauseComponent.svelte';
 	import HeadTailComponent from '../HeadTailComponent.svelte';
 	import MathTexComponent from '../MathTexComponent.svelte';
-
-	const problem: Problem = $derived(getProblemStore());
 
 	const solverMachine = $derived(getSolverMachine());
 	const onPreConflictState: boolean = $derived(solverMachine.onPreConflictState());
@@ -24,12 +20,6 @@
 	let clauses: Clause[] = $derived.by(() => {
 		const cRefs: CRef[] = getOccurrenceList().getClauses();
 		return cRefs.map((cRef) => getClausePool().at(cRef));
-	});
-
-	type MaybeClause = Clause | undefined;
-
-	let toDisplay: MaybeClause[] = $derived.by(() => {
-		return [undefined].concat(clauses.map((clause) => clause as MaybeClause));
 	});
 
 	let focusCRef: CRef = $derived(getOccurrenceList().pointedCRef());

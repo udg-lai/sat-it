@@ -2,6 +2,7 @@ import type { Trail } from '$lib/entities/Trail.svelte.ts';
 import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
 import type { LiteralBreakpoint } from '$lib/states/breakpoints.svelte.ts';
 import type { Algorithm } from '$lib/types/algorithm.ts';
+import type { Lit } from '$lib/types/types.ts';
 import { createEventBus } from './createEventBus.ts';
 
 // observable of instance changes
@@ -28,7 +29,8 @@ export type StateMachineEvent =
 	| 'nextVariable'
 	| 'up1'
 	| 'finishCD'
-	| 'finishCA';
+	| 'finishCA'
+	| 'nextDecision';
 
 export const stateMachineEventBus = createEventBus<StateMachineEvent>();
 
@@ -78,3 +80,9 @@ export const updateTrailsEventBus = createEventBus<Trail[]>();
 
 // event bus to change the delay of the application.
 export const changeStepDelayEventBus = createEventBus<number>();
+
+// event bus to notify about new decisions made by the algorithms.
+export const decisionMadeEventBus = createEventBus<Lit>();
+
+// event bus to notify about a new trail pushed
+export const newTrailPushed = createEventBus<void>();

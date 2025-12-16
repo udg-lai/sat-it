@@ -6,6 +6,7 @@
 	import UnitPropagationComponent from '../assignment/UnitPropagationComponent.svelte';
 	import DecisionLevelComponent from './DecisionLevelComponent.svelte';
 	import { setLastTrailSize } from '../../states/trail-size.svelte.ts';
+	import { differPos } from '$lib/states/trail-diff-start.svelte.ts';
 
 	interface DecisionLevel {
 		assignment: VariableAssignment;
@@ -14,6 +15,7 @@
 
 	interface Props {
 		trail: Trail;
+		trailIndex: number;
 		expanded: boolean;
 		isLast?: boolean;
 		emitRevert?: (assignment: VariableAssignment) => void;
@@ -23,6 +25,7 @@
 
 	let {
 		trail,
+		trailIndex,
 		expanded,
 		isLast = true,
 		emitRevert = () => {},
@@ -65,13 +68,13 @@
 			<BacktrackingComponent
 				{assignment}
 				{isLast}
-				fromPreviousTrail={trail.isAssignmentFromPreviousTrail(assignment)}
+				fromPreviousTrail={trail.getAssignmentIndex(assignment) < differPos(trailIndex)}
 			/>
 		{:else if assignment.isBJ()}
 			<BackjumpingComponent
 				{assignment}
 				{isLast}
-				fromPreviousTrail={trail.isAssignmentFromPreviousTrail(assignment)}
+				fromPreviousTrail={trail.getAssignmentIndex(assignment) < differPos(trailIndex)}
 				{detailsExpanded}
 				{showUPInfo}
 			/>
@@ -79,7 +82,7 @@
 			<UnitPropagationComponent
 				{assignment}
 				{isLast}
-				fromPreviousTrail={trail.isAssignmentFromPreviousTrail(assignment)}
+				fromPreviousTrail={trail.getAssignmentIndex(assignment) < differPos(trailIndex)}
 				{detailsExpanded}
 				{showUPInfo}
 			/>

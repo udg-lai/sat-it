@@ -3,24 +3,23 @@ import type { ClauseEval } from '$lib/entities/Clause.svelte.ts';
 import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
 import Literal from '$lib/entities/Literal.svelte.ts';
 import { Trail } from '$lib/entities/Trail.svelte.ts';
-import type { Assignment } from '$lib/entities/Variable.svelte.ts';
 import type Variable from '$lib/entities/Variable.svelte.ts';
+import type { Assignment } from '$lib/entities/Variable.svelte.ts';
 import VariableAssignment from '$lib/entities/VariableAssignment.ts';
 import type { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
+import { decisionMadeEventBus, newTrailPushed } from '$lib/events/events.ts';
 import { getAssignment, type AssignmentEvent } from '$lib/states/assignment.svelte.ts';
 import { isBreakpoint } from '$lib/states/breakpoints.svelte.ts';
 import { getVariablePool } from '$lib/states/problem.svelte.ts';
 import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 import {
 	increaseNoConflicts,
-	increaseNoDecisions,
 	increaseNoUnitPropagations,
 	updateClausesLeft
 } from '$lib/states/statistics.svelte.ts';
 import { logBreakpoint, logFatal } from '$lib/states/toasts.svelte.ts';
 import { getLatestTrail, getTrails, stackTrail } from '$lib/states/trails.svelte.ts';
 import type { CRef, Lit, Var } from '$lib/types/types.ts';
-import { linear } from 'svelte/easing';
 import { isUnSAT } from '../interfaces/IClausePool.ts';
 import { fromJust, isJust, type Maybe } from '../types/maybe.ts';
 
@@ -61,13 +60,14 @@ export const decide = (pool: VariablePool, algorithm: string): Lit => {
 	// This variable should contain the updated assignment done in `doAssignment`
 	const variable: Variable = pool.getVariable(varId).copy();
 
-	const tAssignment: VariableAssignment = manualAssignment
+	const varAssignment: VariableAssignment = manualAssignment
 		? VariableAssignment.newManualAssignment(variable)
 		: VariableAssignment.newAutomatedAssignment(variable, algorithm);
 
-	trail.push(tAssignment);
+	trail.push(varAssignment);
 
-	increaseNoDecisions();
+	//Once all is done, let's send the event that a decision has been done
+	decisionMadeEventBus.emit(variable.toLit());
 
 	return variable.toLit();
 };
@@ -130,12 +130,13 @@ export const atLevelZero = (): boolean => {
 };
 
 const doAssignment = (varId: Var, assignment: Assignment): void => {
+	// Notice that assignment \in { true, false, undefined }
 	getVariablePool().assign(varId, assignment);
+	updateClausesLeft(getTrails().length);
 	if (assignment !== undefined) {
 		// i.e., assignment is either true or false
 		handleBreakpoints(Literal.toLit(varId, assignment));
 	}
-	updateClausesLeft(getTrails().length);
 };
 
 const handleBreakpoints = (assignment: Lit): void => {
@@ -184,12 +185,13 @@ export const backtracking = (pool: VariablePool): Lit => {
 			`Variable ${variable.toInt()} has no assigned value after backtracking`
 		);
 	}
-
 	newTrail.push(VariableAssignment.newBacktrackingAssignment(variable));
-	newTrail.setFollowUpIndex();
 
 	increaseNoConflicts();
 	stackTrail(newTrail);
+
+	//Notify that a new trail has been pushed
+	newTrailPushed.emit();
 
 	return variable.toLit();
 };

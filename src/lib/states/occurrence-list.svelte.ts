@@ -1,7 +1,7 @@
 import OccurrenceList from '$lib/entities/OccurrenceList.svelte.ts';
 import { fromJust, isJust, type Maybe } from '$lib/types/maybe.ts';
 import type { Lit } from '$lib/types/types.ts';
-import { focusOnAssignment, wipeFocusAssignment } from './inspect-assignment.svelte.ts';
+import { focusOnAssignment, wipeFocusAssignment } from './focused-assignment.svelte.ts';
 
 let occurrenceList: OccurrenceList = $state(new OccurrenceList());
 

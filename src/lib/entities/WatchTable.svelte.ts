@@ -40,8 +40,9 @@ export default class WatchTable {
 	}
 
 	addWatches(clause: Clause): void {
-		if (clause.isTemporal()) logError("Add watches", "You can not create watches from a temporal clause");
-		if (clause.size() === 1) logWarning("Add watches", "No watches for unit clause")
+		if (clause.isTemporal())
+			logError('Add watches', 'You can not create watches from a temporal clause');
+		if (clause.size() === 1) logWarning('Add watches', 'No watches for unit clause');
 		else {
 			const literals: Literal[] = clause.getLiterals();
 			const cRef = clause.getCRef();

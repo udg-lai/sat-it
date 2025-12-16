@@ -25,13 +25,4 @@ export const activateSolverMachine = (algorithm: Algorithm): void => {
 	}
 };
 
-export const updateSolverMachine = (
-	stateId: number,
-	record: Record<string, unknown> | undefined
-): void => {
-	solverMachine.stop();
-	solverMachine.updateActiveStateId(stateId);
-	solverMachine.updateFromRecord(record);
-};
-
 export const getSolverMachine = () => solverMachine;

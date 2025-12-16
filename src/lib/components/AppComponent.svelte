@@ -1,50 +1,53 @@
 <script lang="ts">
-	import { algorithmicUndo } from '$lib/algorithmicUndo.svelte.ts';
 	import TrailEditor from '$lib/components/trail/TrailEditorComponent.svelte';
 	import type { Trail } from '$lib/entities/Trail.svelte.ts';
+	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
 	import {
 		algorithmicUndoEventBus,
 		changeAlgorithmEventBus,
 		changeInstanceEventBus,
 		changeStepDelayEventBus,
+		decisionMadeEventBus,
+		newTrailPushed,
 		stateMachineEventBus,
 		stateMachineLifeCycleEventBus,
 		updateTrailsEventBus,
 		userActionEventBus,
-		type ActionEvent,
-		type UndoToDecisionEvent,
 		type StateMachineEvent,
-		type StateMachineLifeCycleEvent
+		type StateMachineLifeCycleEvent,
+		type UndoToDecisionEvent
 	} from '$lib/events/events.ts';
 	import type { DimacsInstance } from '$lib/instances/dimacs-instance.interface.ts';
-	import { DECIDE_STATE_ID } from '$lib/solvers/reserved.ts';
 	import type { SolverMachine } from '$lib/solvers/SolverMachine.svelte.ts';
 	import type { StateFun, StateInput } from '$lib/solvers/StateMachine.svelte.ts';
+	import { updateAssignment } from '$lib/states/assignment.svelte.ts';
 	import { clearBreakpoints } from '$lib/states/breakpoints.svelte.ts';
+	import {
+		addNewTrailDecisionsList,
+		undo as keptDecision,
+		saveDecision,
+		wipeDecisions,
+		type SavedDecision
+	} from '$lib/states/decisions.svelte.ts';
 	import { getStepDelay } from '$lib/states/delay-ms.svelte.ts';
 	import { getActiveInstance, getInstance } from '$lib/states/instances.svelte.ts';
-	import { getProblemStore, syncProblemWithInstance } from '$lib/states/problem.svelte.ts';
+	import { syncProblemWithInstance } from '$lib/states/problem.svelte.ts';
 	import {
 		activateSolverMachine,
 		getSolverMachine,
-		stopSolverMachine,
-		updateSolverMachine
+		stopSolverMachine
 	} from '$lib/states/solver-machine.svelte.ts';
-	import {
-		getStatistics,
-		resetStatistics,
-		updateStatistics
-	} from '$lib/states/statistics.svelte.ts';
-	import { logError, logFatal } from '$lib/states/toasts.svelte.ts';
-	import { getTrails, updateTrails } from '$lib/states/trails.svelte.ts';
+	import { increaseNoDecisions, resetStatistics } from '$lib/states/statistics.svelte.ts';
+	import { logError } from '$lib/states/toasts.svelte.ts';
+	import { appendDifferTrailPos, wipeDifferTrailPos } from '$lib/states/trail-diff-start.svelte.ts';
+	import { getLatestTrail, getTrails } from '$lib/states/trails.svelte.ts';
+	import type { Algorithm } from '$lib/types/algorithm.ts';
+	import type { List, Lit, Var } from '$lib/types/types.ts';
 	import { modifyLiteralWidth } from '$lib/utils.ts';
 	import { onMount } from 'svelte';
 	import DebuggerComponent from './debugger/DebuggerComponent.svelte';
-	import SolvingInformationComponent from './SolvingInformationComponent.svelte';
-	import type { Algorithm } from '$lib/types/algorithm.ts';
 	import { getConfiguredAlgorithm } from './settings/engine/state.svelte.ts';
-	import type { Lit } from '$lib/types/types.ts';
-	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
+	import SolvingInformationComponent from './SolvingInformationComponent.svelte';
 
 	let trails: Trail[] = $state([]);
 
@@ -52,16 +55,11 @@
 
 	let updateOnStep = true;
 
-	function onActionEvent(a: ActionEvent) {
-		if (a === 'record') {
-			record(trails, solverMachine.getActiveStateId(), getStatistics(), solverMachine.getRecord());
-		} else if (a === 'undo') {
-			const snapshot: Snapshot = undo();
-			reloadFromSnapshot(snapshot);
-		} else if (a === 'redo') {
-			const snapshot: Snapshot = redo();
-			reloadFromSnapshot(snapshot);
-		}
+	function onDecision(decision: Lit) {
+		// The decision is saved in the list
+		saveDecision(decision);
+		// Then the statistics are updated
+		increaseNoDecisions();
 	}
 
 	async function stateMachineEvent(s: StateMachineEvent) {
@@ -78,18 +76,23 @@
 		}
 	}
 
-
 	function reset() {
 		// Reset the problem, statistics, stack and reload from an initial empty snapshot.
 		resetStatistics();
-		resetStack();
-		reloadFromSnapshot(undo());
+		wipeDecisions();
+		wipeDifferTrailPos();
+		syncProblemWithInstance(getActiveInstance().getInstance());
 	}
 
 	function onAlgorithmChanged(algorithm: Algorithm): void {
 		stopSolverMachine();
 		activateSolverMachine(algorithm);
 		reset();
+	}
+
+	function onTrailInsertion() {
+		addNewTrailDecisionsList();
+		appendDifferTrailPos(getLatestTrail().getAssignments().length);
 	}
 
 	function onInstanceChanged(instanceName: string): void {
@@ -106,17 +109,26 @@
 	function algorithmicUndoSave(event: UndoToDecisionEvent): void {
 		const varAssignment: VariableAssignment = event.decision;
 		if (!varAssignment.isD()) {
-			logError("Algorithm undo", "You can only undo to decisions")
+			logError('Algorithm undo', 'You can only undo to decisions');
 		}
-
+		// Get the decisions that will be kept
 		const decision: Lit = event.decision.toLit();
+		const trailIndex: number = event.trailIndex;
 
-		// Wipe learnt clauses
-		getProblemStore().forgetLearnedClauses();
+		const decisions: List<SavedDecision> = keptDecision(trailIndex, decision);
+		// As solver will automatically do the solving process again,
+		// let's reset the context.
+		reset();
 
-		// Reset watches
-
-		// Execute each one of the decisions 
+		getSolverMachine().transitionByEvent('nextDecision');
+		for (const d of decisions) {
+			//a "manual assignment will be performed"
+			const polarity: boolean = d.decision > 0;
+			const variable: Var = Math.abs(d.decision);
+			updateAssignment('manual', polarity, variable);
+			// Then decisions will be done until the following decision is found.
+			getSolverMachine().transitionByEvent('nextDecision');
+		}
 	}
 
 	function lifeCycleController(l: StateMachineLifeCycleEvent): void {
@@ -148,8 +160,6 @@
 
 	onMount(() => {
 		const subscriptions: (() => void)[] = [];
-		// record, undo and redo different states event
-		subscriptions.push(userActionEventBus.subscribe(onActionEvent));
 		// transition the state machine event.
 		subscriptions.push(stateMachineEventBus.subscribe(stateMachineEvent));
 		// reset the machine + breakpoints when an instance is changed.
@@ -166,6 +176,10 @@
 		subscriptions.push(
 			changeStepDelayEventBus.subscribe((time) => solverMachine.updateStopTimeout(time))
 		);
+		// record and statistics update done when a decision is made
+		subscriptions.push(decisionMadeEventBus.subscribe(onDecision));
+		// update the structures when a trail has been pushed.
+		subscriptions.push(newTrailPushed.subscribe(onTrailInsertion));
 
 		return () => {
 			subscriptions.forEach((f) => f());

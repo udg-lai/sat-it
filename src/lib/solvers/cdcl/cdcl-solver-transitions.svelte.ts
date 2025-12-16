@@ -4,9 +4,13 @@ import Literal from '$lib/entities/Literal.svelte.ts';
 import OccurrenceList from '$lib/entities/OccurrenceList.svelte.ts';
 import type { Trail } from '$lib/entities/Trail.svelte.ts';
 import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
-import { conflictDetectionEventBus, toggleTrailViewEventBus } from '$lib/events/events.ts';
+import {
+	conflictDetectionEventBus,
+	newTrailPushed,
+	toggleTrailViewEventBus
+} from '$lib/events/events.ts';
 import { getConflictAnalysis } from '$lib/states/conflict-anlysis.svelte.ts';
-import { focusOnAssignment } from '$lib/states/inspect-assignment.svelte.ts';
+import { focusOnAssignment } from '$lib/states/focused-assignment.svelte.ts';
 import { getOccurrenceList, updateOccurrenceList } from '$lib/states/occurrence-list.svelte.ts';
 import { getClausePool } from '$lib/states/problem.svelte.ts';
 import { getOccurrenceListQueue } from '$lib/states/queue-occurrence-lists.svelte.ts';
@@ -135,6 +139,10 @@ export const conflictAnalysisBlock = (): void => {
 		const sndHighestDL: number = getSecondHighestDLTransition(cRef);
 		const bjTrail: Trail = backjumpingTransition(getLatestTrail(), sndHighestDL);
 		pushTrailTransition(bjTrail);
+		//Notify that a new trail was pushed
+		newTrailPushed.emit();
+		// Also let's set the differ point of the newest trail:
+		appendDifferTrailPos(bjTrail.getAssignments().length - 1);
 		const propagated: Lit = unitPropagationTransition(cRef);
 		appendDifferTrailPos(getLatestTrail().size());
 

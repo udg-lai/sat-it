@@ -9,11 +9,8 @@ export const appendDifferTrailPos = (pos: number): void => {
 	differTrailPositions.push(pos);
 };
 
-export const wipeDifferTrailPos = (pos: number): void => {
-	const pos_ = Math.max(pos, 1);
-	if (pos_ > 1) {
-		differTrailPositions = differTrailPositions.slice(1, pos_);
-	}
+export const wipeDifferTrailPos = (): void => {
+	differTrailPositions = [0];
 };
 
 export const differPos = (trail: number): number => {

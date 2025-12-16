@@ -1,6 +1,5 @@
-import { getVariablePool } from '$lib/states/problem.svelte.ts';
 import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
-import { logFatal } from '$lib/states/toasts.svelte.ts';
+import { logError, logFatal } from '$lib/states/toasts.svelte.ts';
 import type { CRef, Lit, NeverFn, Var } from '$lib/types/types.ts';
 import { error } from '$lib/utils.ts';
 import { makeLeft, makeRight, type Either } from '../types/either.ts';
@@ -73,8 +72,8 @@ export class Trail {
 		return [...this.assignments];
 	}
 
-	getFollowUpAssignments(): VariableAssignment[] {
-		return this.assignments.slice(this.followUPIndex);
+	getFollowUpAssignments(trailStart: number): VariableAssignment[] {
+		return this.assignments.slice(trailStart);
 	}
 
 	lastAssignment(): VariableAssignment {
@@ -126,6 +125,14 @@ export class Trail {
 			}
 		}
 		logFatal(`Unable to determine decision level for variable ${varId}`);
+	}
+
+	getAssignmentIndex(variableAssignment: VariableAssignment): number {
+		const index = this.assignments.indexOf(variableAssignment);
+		if (index === -1) {
+			logError('Assignment index error', 'The variable assignment does not belong to the trail.');
+		}
+		return index;
 	}
 
 	attachConflictiveClause(clause: Clause): void {

@@ -16,10 +16,8 @@ export interface SolverStateInterface<F extends StateFun, I extends StateInput> 
 	getActiveStateId: () => number;
 	updateActiveStateId: (id: number) => void;
 	getActiveState: () => State<F, I>;
-	updateFromRecord: (record: Record<string, unknown>) => void;
 	isInAutoMode: () => boolean;
 	stopAutoMode: () => void;
-	completed: () => boolean;
 	onPreConflictState: () => boolean;
 	onConflictState: () => boolean;
 	onInitialState: () => boolean;
@@ -49,10 +47,6 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 		this.stopTimeoutMS = stopTimeoutMS;
 	}
 
-	abstract getRecord(): Record<string, unknown>;
-
-	abstract updateFromRecord(record: Record<string, unknown> | undefined): void;
-
 	updateStopTimeout(ms: number): void {
 		this.stopTimeoutMS = Math.max(0, ms);
 	}
@@ -81,16 +75,16 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 		return this.stateMachine.getActiveState();
 	}
 
-	completed(): boolean {
-		return this.stateMachine.onFinalState();
-	}
-
 	onPreConflictState(): boolean {
 		return this.stateMachine.onPreConflictState();
 	}
 
 	onConflictState(): boolean {
 		return this.stateMachine.onConflictState();
+	}
+
+	onDecisionState(): boolean {
+		return this.stateMachine.onDecisionState();
 	}
 
 	onUnsatState(): boolean {
@@ -190,12 +184,16 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 		solverFinishedAutoMode.emit();
 	}
 
+	protected async solveUntilDecision(): Promise<void> {
+		this.stepByStep(() => !this.onDecisionState() && !this.onFinalState());
+	}
+
 	protected async solveAllStepByStep(): Promise<void> {
-		this.stepByStep(() => !this.completed());
+		this.stepByStep(() => !this.onFinalState());
 	}
 
 	protected async solveTrailStepByStep(): Promise<void> {
-		this.stepByStep(() => !this.onConflictState() && !this.completed());
+		this.stepByStep(() => !this.onConflictState() && !this.onFinalState());
 	}
 
 	protected abstract solveToNextVariableStepByStep(): Promise<void>;

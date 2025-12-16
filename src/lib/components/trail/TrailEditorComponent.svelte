@@ -219,6 +219,7 @@
 					<div class="composed-trail-observer">
 						<ComposedTrailComponent
 							{trail}
+							trailIndex={index + 1}
 							expanded={expandedTrails}
 							isLast={trails.length === index + 1}
 							showUPView={showUPs && trail.view()}

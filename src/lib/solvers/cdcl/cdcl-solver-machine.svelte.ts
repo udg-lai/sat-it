@@ -27,16 +27,6 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 	}
 	// ** functions related to conflict analysis **
 
-	getRecord(): Record<string, unknown> {
-		return undefined as unknown as Record<string, unknown>;
-	}
-
-	private occurrenceQueueCopy(): Queue<OccurrenceList> {
-		return null as unknown as Queue<OccurrenceList>;
-	}
-
-	updateFromRecord(record: Record<string, unknown> | undefined): void {}
-
 	async transitionByEvent(event: StateMachineEvent): Promise<void> {
 		if (event === 'finishCA') {
 			await this.solveCAStepByStep();

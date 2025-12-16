@@ -30,7 +30,7 @@
 	let onPreConflictDetection = $derived(solverMachine.onPreConflictState());
 	let onConflictDetection = $derived(solverMachine.onConflictDetection());
 	let onConflict = $derived(solverMachine.onConflictState());
-	let finished = $derived(solverMachine.completed());
+	let finished = $derived(solverMachine.onFinalState());
 	let inAutoMode = $derived(solverMachine.isInAutoMode());
 
 	let inspectClauseIcon = '/icons/Inspect Next Clause.svg';

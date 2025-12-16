@@ -11,6 +11,7 @@
 
 	interface Props {
 		trail: Trail;
+		trailIndex: number;
 		expanded: boolean;
 		isLast?: boolean;
 		showUPView: boolean;
@@ -18,7 +19,15 @@
 		emitRevert?: (assignment: VariableAssignment) => void;
 	}
 
-	let { trail, expanded, isLast = true, showUPView, showCAView, emitRevert }: Props = $props();
+	let {
+		trail,
+		trailIndex,
+		expanded,
+		isLast = true,
+		showUPView,
+		showCAView,
+		emitRevert
+	}: Props = $props();
 
 	function computeUPs(): CanvasContext {
 		const upContext: Either<UPContext, NeverFn>[] = trail.getUPContext();
@@ -87,6 +96,7 @@
 		<div class:views-opened={showCAView || showUPView}>
 			<TrailComponent
 				{trail}
+				{trailIndex}
 				{expanded}
 				{isLast}
 				{emitRevert}
