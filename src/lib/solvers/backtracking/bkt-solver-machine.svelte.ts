@@ -1,4 +1,4 @@
-import { cleanClausesToCheck, updateOccurrenceList } from '$lib/states/occurrence-list.svelte.ts';
+import { updateOccurrenceList } from '$lib/states/occurrence-list.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import { SolverMachine } from '../SolverMachine.svelte.ts';
@@ -12,7 +12,6 @@ import {
 } from './bkt-solver-transitions.svelte.ts';
 import { BKT_StateMachine, makeBKTStateMachine } from './bkt-state-machine.svelte.ts';
 import { bkt_stateName2StateId } from './bkt-states.svelte.ts';
-import type { Occurrences } from '../types.ts';
 import { getStepDelay } from '$lib/states/delay-ms.svelte.ts';
 
 export const makeBKTSolver = (): BKT_SolverMachine => {
