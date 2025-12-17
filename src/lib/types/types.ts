@@ -1,3 +1,5 @@
+import type { Trail } from '$lib/entities/Trail.svelte.ts';
+
 export type ErrorMessage = string;
 export type WarningMessage = string;
 export type InfoMessage = string;
@@ -20,4 +22,13 @@ export const List = <T>(): List<T> => {
 
 export const Lit = (n: number): Lit => {
 	return n as Lit;
+};
+
+export type ComposedTrail = {
+	trail: Trail;
+	index: number;
+	expanded: boolean;
+	isLast: boolean;
+	showUPs: boolean;
+	showCA: boolean;
 };

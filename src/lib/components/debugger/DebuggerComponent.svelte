@@ -27,13 +27,11 @@
 
 	let solverMachine: SolverMachine<StateFun, StateInput> = $derived(getSolverMachine());
 	let enablePreprocess = $derived(solverMachine.onInitialState());
-	let onPreConflictDetection = $derived(solverMachine.onPreConflictState());
-	let onConflictDetection = $derived(solverMachine.onConflictDetection());
+	let onConflictDetection = $derived(solverMachine.onDetectingConflict());
 	let onConflict = $derived(solverMachine.onConflictState());
 	let finished = $derived(solverMachine.onFinalState());
 	let inAutoMode = $derived(solverMachine.isInAutoMode());
 
-	let inspectClauseIcon = '/icons/Inspect Next Clause.svg';
 	let emptyClauseIcon = '/icons/Empty Clause.svg';
 </script>
 
@@ -46,11 +44,7 @@
 				<StepComponent icon={emptyClauseIcon} alt="Check Empty Clause" />
 			</init-step>
 		{:else}
-			{#if onPreConflictDetection}
-				<preConf-step>
-					<StepComponent icon={inspectClauseIcon} alt="Inspect Next Clause" />
-				</preConf-step>
-			{:else if onConflictDetection}
+			{#if onConflictDetection}
 				<ConflictDetectionDebugger />
 				{#if currentAlgorithm !== 'backtracking'}
 					<UnitPropagationDebuggerComponent />

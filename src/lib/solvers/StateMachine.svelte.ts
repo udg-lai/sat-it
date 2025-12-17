@@ -1,13 +1,10 @@
 import { logFatal, logSAT, logUnSAT } from '$lib/states/toasts.svelte.ts';
-import type { BKT_FUN, BKT_INPUT } from './backtracking/bkt-domain.svelte.ts';
 import type { CDCL_FUN, CDCL_INPUT } from './cdcl/cdcl-domain.svelte.ts';
-import type { DPLL_FUN, DPLL_INPUT } from './dpll/dpll-domain.svelte.ts';
-import { DECIDE_STATE_ID, SAT_STATE_ID, UNSAT_STATE_ID } from './reserved.ts';
 import { finalStateControl } from './shared.svelte.ts';
 
-export type StateFun = BKT_FUN | DPLL_FUN | CDCL_FUN | never;
+export type StateFun = /*BKT_FUN | DPLL_FUN |*/ CDCL_FUN | never;
 
-export type StateInput = BKT_INPUT | DPLL_INPUT | CDCL_INPUT;
+export type StateInput = /*BKT_INPUT | DPLL_INPUT |*/ CDCL_INPUT;
 
 export interface FinalState<F extends StateFun> {
 	id: number;
@@ -47,26 +44,26 @@ export abstract class StateMachine<F extends StateFun, I extends StateInput>
 	private states: Map<number, State<F, I>>;
 	private active: number = $state(-1);
 	private initial: number = -1;
-	private preConflict: number = -1;
 	private conflict: number = -1;
 	private sat: number = -1;
 	private unsat: number = -1;
+	private decision: number = -1;
 
 	constructor(
 		states: Map<number, State<F, I>>,
 		initial: number,
-		preConflict: number,
 		conflict: number,
 		sat: number,
-		unsat: number
+		unsat: number,
+		decision: number
 	) {
 		this.states = states;
 		this.initial = initial;
 		this.active = initial;
-		this.preConflict = preConflict;
 		this.conflict = conflict;
 		this.sat = sat;
 		this.unsat = unsat;
+		this.decision = decision;
 	}
 
 	onFinalState(): boolean {
@@ -78,24 +75,20 @@ export abstract class StateMachine<F extends StateFun, I extends StateInput>
 		return this.getActiveState().id === this.initial;
 	}
 
-	onPreConflictState(): boolean {
-		return this.getActiveState().id === this.preConflict;
-	}
-
 	onConflictState(): boolean {
 		return this.getActiveState().id === this.conflict;
 	}
 
 	onDecisionState(): boolean {
-		return this.getActiveState().id === DECIDE_STATE_ID;
+		return this.getActiveState().id === this.decision;
 	}
 
 	onUnsatState(): boolean {
-		return this.getActiveState().id === UNSAT_STATE_ID;
+		return this.getActiveState().id === this.unsat;
 	}
 
 	onSatState(): boolean {
-		return this.getActiveState().id === SAT_STATE_ID;
+		return this.getActiveState().id === this.sat;
 	}
 
 	getActiveState(): State<F, I> {

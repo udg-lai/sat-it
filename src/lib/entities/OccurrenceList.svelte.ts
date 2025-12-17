@@ -44,6 +44,10 @@ export default class OccurrenceList {
 		return this.clauses[index];
 	}
 
+	getPointer(): number {
+		return this.pointer;
+	}
+
 	traversed(): boolean {
 		return this.pointer >= this.clauses.length - 1;
 	}

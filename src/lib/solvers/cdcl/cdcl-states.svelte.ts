@@ -421,10 +421,10 @@ states.set(virtual_resolution_state.id, virtual_resolution_state);
 
 export const initial = empty_clause_state.id;
 
-export const preConflict = occurrence_list_traversed_state.id;
-
 export const conflict = virtual_resolution_state.id;
 
 export const sat = sat_state.id;
 
 export const unsat = unsat_state.id;
+
+export const decision = decide_state.id;

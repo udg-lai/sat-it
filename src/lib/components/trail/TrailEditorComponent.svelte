@@ -218,12 +218,14 @@
 				{#each trails as trail, index (index)}
 					<div class="composed-trail-observer">
 						<ComposedTrailComponent
-							{trail}
-							trailIndex={index + 1}
-							expanded={expandedTrails}
-							isLast={trails.length === index + 1}
-							showUPView={showUPs && trail.view()}
-							showCAView={trail.view() && trail.hasConflictiveClause()}
+							trail={{
+								trail: trail,
+								index: index + 1,
+								expanded: expandedTrails,
+								isLast: trails.length === index + 1,
+								showUPs: showUPs && trail.view(),
+								showCA: trail.view() && trail.hasConflictiveClause()
+							}}
 							emitRevert={(assignment: VariableAssignment) => emitRevert(assignment, index)}
 						/>
 					</div>

@@ -9,8 +9,8 @@ import {
 	newTrailPushed,
 	toggleTrailViewEventBus
 } from '$lib/events/events.ts';
-import { getConflictAnalysis } from '$lib/states/conflict-anlysis.svelte.ts';
-import { focusOnAssignment } from '$lib/states/focused-assignment.svelte.ts';
+import { clearConflictAnalysis, getConflictAnalysis } from '$lib/states/conflict-anlysis.svelte.ts';
+import { focusOnAssignment, wipeFocusAssignment } from '$lib/states/focused-assignment.svelte.ts';
 import { getOccurrenceList, updateOccurrenceList } from '$lib/states/occurrence-list.svelte.ts';
 import { getClausePool } from '$lib/states/problem.svelte.ts';
 import { getOccurrenceListQueue } from '$lib/states/queue-occurrence-lists.svelte.ts';
@@ -116,8 +116,11 @@ export const preConflictAnalysis = () => {
 			'CDCL Conflict Analysis',
 			'The conflict clause should not be asserting (non-chronological backtracking)'
 		);
+	} else {
+		//In case there is something to apply resolution to, let's highlight it.
+		const nextUP: VariableAssignment = getConflictAnalysis().currentImplication();
+		focusOnAssignment(nextUP.toLit());
 	}
-	//conflictAnalysisBlock();
 };
 
 export const conflictAnalysisBlock = (): void => {
@@ -126,26 +129,28 @@ export const conflictAnalysisBlock = (): void => {
 	if (isLeft(virtualResolution)) {
 		// No job done by the resolution procedure, the clause remains the same
 		getLatestTrail().updateResolutionContext(undefined);
+	} else {
+		const { resolvent } = fromRight(virtualResolution);
+		getLatestTrail().updateResolutionContext(resolvent.clause);
 	}
-
-	const { resolvent } = fromRight(virtualResolution);
-	getLatestTrail().updateResolutionContext(resolvent.clause);
-
 	const asserting: boolean = assertingClauseInConflictAnalysis();
 
-	if (asserting && resolvent.asserting) {
+	if (asserting) {
+		//This needs to be cleared
+		wipeFocusAssignment();
 		// This is kinda stupid but (resolvent.asserting -> asserting)
 		const cRef: CRef = learnConflictClauseTransition();
 		const sndHighestDL: number = getSecondHighestDLTransition(cRef);
 		const bjTrail: Trail = backjumpingTransition(getLatestTrail(), sndHighestDL);
+		//Also let's clear the ca state
+		clearConflictAnalysis();
 		pushTrailTransition(bjTrail);
 		//Notify that a new trail was pushed
 		newTrailPushed.emit();
 		// Also let's set the differ point of the newest trail:
 		appendDifferTrailPos(bjTrail.getAssignments().length - 1);
-		const propagated: Lit = unitPropagationTransition(cRef);
+		const propagated: Lit = unitPropagationTransition(cRef, 'backjumping');
 		appendDifferTrailPos(getLatestTrail().size());
-
 		const occurrenceList: OccurrenceList = complementaryOccurrencesDetectionTransition(propagated);
 
 		afterComplementaryBlock(occurrenceList);
@@ -189,7 +194,7 @@ const conflictDetectionBlock = (): void => {
 		} else {
 			const unitClause: boolean = unitClauseTransition(cRef);
 			if (unitClause) {
-				const propagated: Lit = unitPropagationTransition(cRef);
+				const propagated: Lit = unitPropagationTransition(cRef, 'up');
 				const occurrenceList: OccurrenceList =
 					complementaryOccurrencesDetectionTransition(propagated);
 				queueOccurrenceListTransition(occurrenceList);
@@ -400,7 +405,7 @@ const dequeueOccurrenceListTransition = (): void => {
 	getSolverMachine().transition('are_remaining_occurrences_state');
 };
 
-const unitPropagationTransition = (cRef: CRef): Lit => {
+const unitPropagationTransition = (cRef: CRef, reason: 'up' | 'backjumping'): Lit => {
 	const unitPropagationState = getSolverMachine().getActiveState() as NonFinalState<
 		CDCL_UNIT_PROPAGATION_FUN,
 		CDCL_UNIT_PROPAGATION_INPUT
@@ -408,7 +413,7 @@ const unitPropagationTransition = (cRef: CRef): Lit => {
 	if (unitPropagationState.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Unit Propagation state');
 	}
-	const propagated: Lit = unitPropagationState.run(cRef);
+	const propagated: Lit = unitPropagationState.run(cRef, reason);
 	getSolverMachine().transition('complementary_occurrences_state');
 	return propagated;
 };
@@ -559,7 +564,7 @@ const backjumpingTransition = (trail: Trail, sndHighestDL: number): Trail => {
 	return bjTrail;
 };
 
-const pushTrailTransition = (trail: Trail) => {
+const pushTrailTransition = (trail: Trail): void => {
 	const pushTrailState = getSolverMachine().getActiveState() as NonFinalState<
 		CDCL_PUSH_TRAIL_FUN,
 		CDCL_PUSH_TRAIL_INPUT
@@ -568,4 +573,5 @@ const pushTrailTransition = (trail: Trail) => {
 		logFatal('Function call error', 'There should be a function in the Variable In CC state');
 	}
 	pushTrailState.run(trail);
+	getSolverMachine().transition('unit_propagation_state');
 };

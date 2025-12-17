@@ -17,5 +17,7 @@ export const backjumping = (variables: VariablePool, trail: Trail, dl: number): 
 		const last: VariableAssignment = bjTrail.pop() as VariableAssignment;
 		variables.unassign(last.getVariable().toInt());
 	}
+	// Lastly, let's erase the conflict of this trail
+	bjTrail.cleanConflict();
 	return bjTrail;
 };

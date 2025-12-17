@@ -1,36 +1,23 @@
 <script lang="ts">
 	import type Clause from '$lib/entities/Clause.svelte.ts';
-	import type { ResolutionContext, Trail, UPContext } from '$lib/entities/Trail.svelte.ts';
+	import type { ResolutionContext, UPContext } from '$lib/entities/Trail.svelte.ts';
 	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
 	import { getClausePool } from '$lib/states/problem.svelte.ts';
 	import { isLeft, makeLeft, makeRight, unwrapEither, type Either } from '$lib/types/either.ts';
-	import type { NeverFn } from '$lib/types/types.ts';
+	import type { ComposedTrail, NeverFn } from '$lib/types/types.ts';
 	import { error } from '$lib/utils.ts';
 	import CanvasComponent, { type CanvasContext } from './CanvasComponent.svelte';
 	import TrailComponent from './TrailComponent.svelte';
 
 	interface Props {
-		trail: Trail;
-		trailIndex: number;
-		expanded: boolean;
-		isLast?: boolean;
-		showUPView: boolean;
-		showCAView: boolean;
+		trail: ComposedTrail;
 		emitRevert?: (assignment: VariableAssignment) => void;
 	}
 
-	let {
-		trail,
-		trailIndex,
-		expanded,
-		isLast = true,
-		showUPView,
-		showCAView,
-		emitRevert
-	}: Props = $props();
+	let { trail, emitRevert }: Props = $props();
 
 	function computeUPs(): CanvasContext {
-		const upContext: Either<UPContext, NeverFn>[] = trail.getUPContext();
+		const upContext: Either<UPContext, NeverFn>[] = trail.trail.getUPContext();
 		return upContext.map((c) => {
 			if (isLeft(c)) {
 				const { reasonCRef, propagated }: UPContext = unwrapEither(c);
@@ -44,10 +31,11 @@
 	}
 
 	function computeResolutions(): CanvasContext {
-		if (!showCAView) return [];
-		else if (!trail.hasConflictiveClause()) return [];
+		if (!trail.showCA) return [];
+		else if (!trail.trail.hasConflictiveClause()) return [];
 		else {
-			const resolutionContext: Either<ResolutionContext, NeverFn>[] = trail.getResolutionContext();
+			const resolutionContext: Either<ResolutionContext, NeverFn>[] =
+				trail.trail.getResolutionContext();
 			return resolutionContext.map((c) => {
 				if (isLeft(c)) {
 					const { clause }: ResolutionContext = unwrapEither(c);
@@ -80,8 +68,8 @@
 	}
 </script>
 
-<composed-trail class="composed-trail" class:opened-views={showUPView || showCAView}>
-	{#if showUPView}
+<composed-trail class="composed-trail" class:opened-views={trail.showUPs || trail.showCA}>
+	{#if trail.showUPs}
 		<div class="up-view">
 			<CanvasComponent
 				context={unitPropagations}
@@ -93,20 +81,12 @@
 		</div>
 	{/if}
 	<div use:observeWidth class="fit-content width-observer">
-		<div class:views-opened={showCAView || showUPView}>
-			<TrailComponent
-				{trail}
-				{trailIndex}
-				{expanded}
-				{isLast}
-				{emitRevert}
-				detailsExpanded={showCAView || showUPView}
-				showUPInfo={!showUPView}
-			/>
+		<div class:views-opened={trail.showCA || trail.showUPs}>
+			<TrailComponent {trail} {emitRevert} />
 		</div>
 		<div class="empty-slot"></div>
 	</div>
-	{#if showCAView}
+	{#if trail.showCA}
 		<CanvasComponent context={resolutions} width={trailWidth} align={'start'} />
 	{/if}
 </composed-trail>

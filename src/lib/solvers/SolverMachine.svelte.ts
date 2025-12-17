@@ -18,11 +18,10 @@ export interface SolverStateInterface<F extends StateFun, I extends StateInput> 
 	getActiveState: () => State<F, I>;
 	isInAutoMode: () => boolean;
 	stopAutoMode: () => void;
-	onPreConflictState: () => boolean;
 	onConflictState: () => boolean;
 	onInitialState: () => boolean;
 	onFinalState: () => boolean;
-	onConflictDetection: () => boolean;
+	onDetectingConflict: () => boolean;
 	identify: () => KnownSolver;
 	getStateMachine: () => StateMachine<F, I>;
 	updateStopTimeout: (ms: number) => void;
@@ -75,9 +74,8 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 		return this.stateMachine.getActiveState();
 	}
 
-	onPreConflictState(): boolean {
-		return this.stateMachine.onPreConflictState();
-	}
+	// Every node in the UP + conflict detection block except the conflict state
+	abstract onDetectingConflict(): boolean;
 
 	onConflictState(): boolean {
 		return this.stateMachine.onConflictState();
@@ -102,8 +100,6 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 	onInitialState(): boolean {
 		return this.stateMachine.onInitialState();
 	}
-
-	abstract onConflictDetection(): boolean;
 
 	stop(): void {
 		if (this.isInAutoMode()) {

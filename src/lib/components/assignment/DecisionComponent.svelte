@@ -11,8 +11,8 @@
 
 	interface Props {
 		assignment: VariableAssignment;
-		isLast?: boolean;
-		expanded?: boolean;
+		isLast: boolean;
+		expanded: boolean;
 		emitToggle?: () => void;
 		fromPreviousTrail?: boolean;
 		emitRevertUpToX?: () => void;
@@ -20,8 +20,8 @@
 
 	let {
 		assignment,
-		isLast = false,
-		expanded = false,
+		isLast,
+		expanded,
 		emitToggle,
 		fromPreviousTrail = false,
 		emitRevertUpToX

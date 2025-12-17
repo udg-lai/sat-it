@@ -8,7 +8,8 @@ let occurrenceList: OccurrenceList = $state(new OccurrenceList());
 export function updateOccurrenceList(occurrences: OccurrenceList): void {
 	occurrenceList = occurrences;
 	const literal: Maybe<Lit> = occurrenceList.getLiteral();
-	if (isJust(literal)) focusOnAssignment(fromJust(literal));
+	//The value is * -1 as the trail contains the complementary of the literal whose clauses are being checked
+	if (isJust(literal)) focusOnAssignment(fromJust(literal) * -1);
 	else wipeFocusAssignment();
 }
 

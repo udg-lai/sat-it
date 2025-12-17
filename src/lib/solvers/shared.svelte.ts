@@ -54,7 +54,7 @@ export const decide = (pool: VariablePool, algorithm: string): Lit => {
 		varId = assignmentEvent.variable;
 	}
 
-	const truthValue: boolean = !assignmentEvent.polarity;
+	const truthValue: boolean = assignmentEvent.polarity;
 	doAssignment(varId, truthValue);
 
 	// This variable should contain the updated assignment done in `doAssignment`

@@ -88,7 +88,7 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 		}
 		const occurrenceListRecord: Occurrences = record['pending'] as Occurrences;
 		this.setOccurrenceList(occurrenceListRecord);
-		if (this.onConflictDetection()) {
+		if (this.onDetectingConflict()) {
 			const { occ: clauses, literal }: Occurrences = occurrenceListRecord;
 			updateOccurrenceList(clauses, literal);
 		} else {
@@ -112,14 +112,14 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 	}
 
 	protected async solveToNextVariableStepByStep(): Promise<void> {
-		this.stepByStep(() => this.onConflictDetection());
+		this.stepByStep(() => this.onDetectingConflict());
 	}
 
 	protected async solveCDStepByStep(): Promise<void> {
 		this.solveToNextVariableStepByStep();
 	}
 
-	onConflictDetection(): boolean {
+	onDetectingConflict(): boolean {
 		if (this.occurrenceList === undefined) {
 			return false;
 		} else {

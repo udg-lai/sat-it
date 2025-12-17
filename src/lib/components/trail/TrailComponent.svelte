@@ -1,12 +1,12 @@
 <script lang="ts">
-	import type { Trail } from '$lib/entities/Trail.svelte.ts';
 	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
+	import { differPos } from '$lib/states/trail-diff-start.svelte.ts';
+	import type { ComposedTrail } from '$lib/types/types.ts';
+	import { setLastTrailSize } from '../../states/trail-size.svelte.ts';
 	import BackjumpingComponent from '../assignment/BackjumpingComponent.svelte';
 	import BacktrackingComponent from '../assignment/BacktrackingComponent.svelte';
 	import UnitPropagationComponent from '../assignment/UnitPropagationComponent.svelte';
 	import DecisionLevelComponent from './DecisionLevelComponent.svelte';
-	import { setLastTrailSize } from '../../states/trail-size.svelte.ts';
-	import { differPos } from '$lib/states/trail-diff-start.svelte.ts';
 
 	interface DecisionLevel {
 		assignment: VariableAssignment;
@@ -14,29 +14,16 @@
 	}
 
 	interface Props {
-		trail: Trail;
-		trailIndex: number;
-		expanded: boolean;
-		isLast?: boolean;
+		trail: ComposedTrail;
 		emitRevert?: (assignment: VariableAssignment) => void;
-		detailsExpanded?: boolean;
-		showUPInfo?: boolean;
 	}
 
-	let {
-		trail,
-		trailIndex,
-		expanded,
-		isLast = true,
-		emitRevert = () => {},
-		detailsExpanded = false,
-		showUPInfo = false
-	}: Props = $props();
+	let { trail, emitRevert = () => {} }: Props = $props();
 
-	let initialPropagations: VariableAssignment[] = $derived(trail.getInitialPropagations());
+	let initialPropagations: VariableAssignment[] = $derived(trail.trail.getInitialPropagations());
 
 	let decisions: DecisionLevel[] = $derived(
-		trail.getDecisions().map((a, idx) => {
+		trail.trail.getDecisions().map((a, idx) => {
 			return {
 				assignment: a,
 				level: idx + 1
@@ -48,7 +35,7 @@
 		const widthObserver = new ResizeObserver((entries) => {
 			for (const entry of entries) {
 				const contentWidth: number = entry.contentRect.width;
-				if (isLast) {
+				if (trail.isLast) {
 					setLastTrailSize(contentWidth);
 				}
 			}
@@ -67,40 +54,36 @@
 		{#if assignment.isK()}
 			<BacktrackingComponent
 				{assignment}
-				{isLast}
-				fromPreviousTrail={trail.getAssignmentIndex(assignment) < differPos(trailIndex)}
+				isLast={trail.isLast}
+				fromPreviousTrail={trail.trail.indexOfAssignment(assignment) < differPos(trail.index)}
 			/>
 		{:else if assignment.isBJ()}
 			<BackjumpingComponent
 				{assignment}
-				{isLast}
-				fromPreviousTrail={trail.getAssignmentIndex(assignment) < differPos(trailIndex)}
-				{detailsExpanded}
-				{showUPInfo}
+				isLast={trail.isLast}
+				fromPreviousTrail={trail.trail.indexOfAssignment(assignment) < differPos(trail.index)}
+				detailsExpanded={trail.showCA || trail.showUPs}
+				showUPInfo={!trail.showUPs}
 			/>
 		{:else}
 			<UnitPropagationComponent
 				{assignment}
-				{isLast}
-				fromPreviousTrail={trail.getAssignmentIndex(assignment) < differPos(trailIndex)}
-				{detailsExpanded}
-				{showUPInfo}
+				isLast={trail.isLast}
+				fromPreviousTrail={trail.trail.indexOfAssignment(assignment) < differPos(trail.index)}
+				detailsExpanded={trail.showCA || trail.showUPs}
+				showUPInfo={!trail.showUPs}
 			/>
 		{/if}
 	{/each}
 
 	{#each decisions as { level, assignment } (level)}
 		<DecisionLevelComponent
-			decision={assignment}
-			propagations={trail.getPropagationsAtLevel(level)}
-			{expanded}
-			{isLast}
 			{trail}
+			decision={assignment}
+			propagations={trail.trail.getPropagationsAtLevel(level)}
 			emitRevertUpToX={() => {
 				emitRevert(assignment);
 			}}
-			{detailsExpanded}
-			{showUPInfo}
 		/>
 	{/each}
 </trail>

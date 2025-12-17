@@ -84,7 +84,7 @@ export class Trail {
 	}
 
 	lastDecision(): VariableAssignment {
-		if (this.isEmpty() || this.getDLMarks().length <= 1) {
+		if (this.isEmpty() || this.getDLMarks().length < 1) {
 			logFatal(
 				'Trail underflow',
 				'Trying to get the last decision from an empty trail or trail with no decisions'
@@ -127,8 +127,8 @@ export class Trail {
 		logFatal(`Unable to determine decision level for variable ${varId}`);
 	}
 
-	getAssignmentIndex(variableAssignment: VariableAssignment): number {
-		const index = this.assignments.indexOf(variableAssignment);
+	indexOfAssignment(varAssignment: VariableAssignment): number {
+		const index = this.assignments.indexOf(varAssignment);
 		if (index === -1) {
 			logError('Assignment index error', 'The variable assignment does not belong to the trail.');
 		}

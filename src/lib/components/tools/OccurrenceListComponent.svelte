@@ -15,14 +15,19 @@
 	import MathTexComponent from '../MathTexComponent.svelte';
 
 	const solverMachine = $derived(getSolverMachine());
-	const onPreConflictState: boolean = $derived(solverMachine.onPreConflictState());
 
 	let clauses: Clause[] = $derived.by(() => {
 		const cRefs: CRef[] = getOccurrenceList().getClauses();
 		return cRefs.map((cRef) => getClausePool().at(cRef));
 	});
 
-	let focusCRef: CRef = $derived(getOccurrenceList().pointedCRef());
+	let focusCRef: CRef | undefined = $derived.by(() => {
+		if (getOccurrenceList().getPointer() < 0) {
+			return undefined;
+		} else {
+			return getOccurrenceList().pointedCRef();
+		}
+	});
 
 	function isSat(clause: Clause): boolean {
 		return isSatisfiedEval(clause.eval());
@@ -40,7 +45,7 @@
 
 <div class="enumerate-clause">
 	<div class="enumerate"></div>
-	<HeadTailComponent display={onPreConflictState}>
+	<HeadTailComponent display={focusCRef === undefined}>
 		<div class="static">
 			{#if clauses.length !== 0}
 				{#each clauses[0] as lit, i (i)}
@@ -55,21 +60,24 @@
 		</div>
 	</HeadTailComponent>
 </div>
-
 <conflict-detection>
-	{#each clauses as clause, index (index)}
+	{#each clauses as clause, i (i)}
 		<div class="enumerate-clause">
 			<div class="enumerate">
 				<span>
 					{clause.getCRef()}.
 				</span>
 			</div>
-			<HeadTailComponent display={focusCRef === clause.getCRef() && !onPreConflictState}>
+			<HeadTailComponent
+				display={focusCRef === clause.getCRef() && solverMachine.onDetectingConflict()}
+			>
 				<div
 					class="clause-highlighter"
 					class:inspectedTrue={isSat(clause)}
 					class:inspectedFalse={isUnSat(clause)}
-					class:visited-clause={focusCRef >= index && isPartial(clause) && !onPreConflictState}
+					class:visited-clause={getOccurrenceList().getPointer() >= i &&
+						isPartial(clause) &&
+						solverMachine.onDetectingConflict()}
 				>
 					<ClauseComponent {clause} />
 				</div>

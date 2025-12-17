@@ -8,6 +8,7 @@ import { getNoUnitPropagations } from '$lib/states/statistics.svelte.ts';
 import { SolverMachine } from '../SolverMachine.svelte.ts';
 import type { CDCL_FUN, CDCL_INPUT } from './cdcl-domain.svelte.ts';
 import {
+	conflictAnalysisBlock,
 	decide,
 	initialTransition,
 	preConflictAnalysis,
@@ -39,7 +40,6 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 
 	step(): void {
 		const activeId: number = this.stateMachine.getActiveId();
-
 		//The initial state
 		if (activeId === cdcl_stateName2StateId.empty_clause_state) {
 			initialTransition();
@@ -56,7 +56,7 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 		}
 		//Waiting to backtrack an assignment
 		else if (activeId === cdcl_stateName2StateId.virtual_resolution_state) {
-			// conflictAnalysis(this);
+			conflictAnalysisBlock();
 		}
 	}
 
@@ -80,7 +80,7 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 		this.stepByStep(() => previousUPs == getNoUnitPropagations() && !queueOccurrences.isEmpty());
 	}
 
-	onConflictDetection(): boolean {
+	onDetectingConflict(): boolean {
 		const queueOccurrences: Queue<OccurrenceList> = getOccurrenceListQueue();
 		return !queueOccurrences.isEmpty() && !this.stateMachine.onConflictState();
 	}

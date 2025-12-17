@@ -214,12 +214,15 @@ export const unitClause: CDCL_UNIT_CLAUSE_FUN = (cRef: CRef) => {
 	return isUnitEval(evaluation);
 };
 
-export type CDCL_UNIT_PROPAGATION_FUN = (cRef: CRef) => number;
+export type CDCL_UNIT_PROPAGATION_FUN = (cRef: CRef, reason: 'up' | 'backjumping') => number;
 
-export const unitPropagation: CDCL_UNIT_PROPAGATION_FUN = (cRef: CRef) => {
+export const unitPropagation: CDCL_UNIT_PROPAGATION_FUN = (
+	cRef: CRef,
+	reason: 'up' | 'backjumping'
+) => {
 	const variables: VariablePool = getVariablePool();
 	const clauses: ClausePool = getClausePool();
-	return solverUnitPropagation(variables, clauses, cRef, 'up');
+	return solverUnitPropagation(variables, clauses, cRef, reason);
 };
 
 export type CDCL_COMPLEMENTARY_OCCURRENCES_FUN = (assignment: Lit) => Set<CRef>;
