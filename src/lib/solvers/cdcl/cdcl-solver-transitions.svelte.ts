@@ -9,7 +9,7 @@ import {
 	newTrailPushed,
 	toggleTrailViewEventBus
 } from '$lib/events/events.ts';
-import { clearConflictAnalysis, getConflictAnalysis } from '$lib/states/conflict-anlysis.svelte.ts';
+import { getConflictAnalysis } from '$lib/states/conflict-anlysis.svelte.ts';
 import { focusOnAssignment, wipeFocusAssignment } from '$lib/states/focused-assignment.svelte.ts';
 import { getOccurrenceList, updateOccurrenceList } from '$lib/states/occurrence-list.svelte.ts';
 import { getClausePool } from '$lib/states/problem.svelte.ts';
@@ -142,8 +142,6 @@ export const conflictAnalysisBlock = (): void => {
 		const cRef: CRef = learnConflictClauseTransition();
 		const sndHighestDL: number = getSecondHighestDLTransition(cRef);
 		const bjTrail: Trail = backjumpingTransition(getLatestTrail(), sndHighestDL);
-		//Also let's clear the ca state
-		clearConflictAnalysis();
 		pushTrailTransition(bjTrail);
 		//Notify that a new trail was pushed
 		newTrailPushed.emit();

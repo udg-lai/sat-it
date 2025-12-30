@@ -1,4 +1,4 @@
-import type { ConflictAnalysis } from '$lib/entities/ConflictAnalysis.svelte.ts';
+import { ConflictAnalysis } from '$lib/entities/ConflictAnalysis.svelte.ts';
 import { fromJust, isNothing, makeJust, makeNothing, type Maybe } from '$lib/types/maybe.ts';
 import { logError } from './toasts.svelte.ts';
 
@@ -6,10 +6,6 @@ let conflictAnalysis: Maybe<ConflictAnalysis> = $state(makeNothing());
 
 export const setConflictAnalysis = (ca: ConflictAnalysis): void => {
 	conflictAnalysis = makeJust(ca);
-};
-
-export const clearConflictAnalysis = (): void => {
-	conflictAnalysis = makeNothing();
 };
 
 export const getConflictAnalysis = (): ConflictAnalysis => {
