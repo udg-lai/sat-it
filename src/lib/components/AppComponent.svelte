@@ -11,7 +11,7 @@
 		newTrailPushed,
 		stateMachineEventBus,
 		stateMachineLifeCycleEventBus,
-		updateTrailsEventBus,
+		renderTrailsEventBus,
 		userActionEventBus,
 		type StateMachineEvent,
 		type StateMachineLifeCycleEvent,
@@ -40,7 +40,7 @@
 	import { increaseNoDecisions, resetStatistics } from '$lib/states/statistics.svelte.ts';
 	import { logError } from '$lib/states/toasts.svelte.ts';
 	import { appendDifferTrailPos, wipeDifferTrailPos } from '$lib/states/trail-diff-start.svelte.ts';
-	import { getLatestTrail, getTrails } from '$lib/states/trails.svelte.ts';
+	import { getLatestTrail, getTrails, wipeTrails } from '$lib/states/trails.svelte.ts';
 	import type { Algorithm } from '$lib/types/algorithm.ts';
 	import type { List, Lit, Var } from '$lib/types/types.ts';
 	import { modifyLiteralWidth } from '$lib/utils.ts';
@@ -63,8 +63,6 @@
 	}
 
 	async function stateMachineEvent(s: StateMachineEvent) {
-		console.log('State machine event:', s);
-
 		if (s !== 'automatic_steps' && s !== 'step') {
 			updateOnStep = false;
 			solverMachine.disableStops();
@@ -76,12 +74,18 @@
 		}
 	}
 
-	function reset() {
+	function reset(dimacsInstance: DimacsInstance | undefined = undefined): void {
 		// Reset the problem, statistics, stack and reload from an initial empty snapshot.
 		resetStatistics();
 		wipeDecisions();
 		wipeDifferTrailPos();
-		syncProblemWithInstance(getActiveInstance().getInstance());
+		// Sync the problem with the new instance, meaning we create
+		// a new set of variables and clauses from the instance.
+		syncProblemWithInstance(dimacsInstance ?? getActiveInstance().getInstance());
+
+		// Drop the current trails
+		wipeTrails()
+		renderTrailsEventBus.emit(getTrails());
 	}
 
 	function onAlgorithmChanged(algorithm: Algorithm): void {
@@ -96,14 +100,11 @@
 	}
 
 	function onInstanceChanged(instanceName: string): void {
-		// Sync the problem with the new instance, meaning we create
-		// a new set of variables and clauses from the instance.
 		const instance: DimacsInstance = getInstance(instanceName);
-		syncProblemWithInstance(instance);
 		// We can not keep the breakpoints when the instance is changed
 		clearBreakpoints();
 		modifyLiteralWidth(instance.summary.varCount);
-		reset();
+		reset(instance);
 	}
 
 	function algorithmicUndoSave(event: UndoToDecisionEvent): void {
@@ -133,7 +134,7 @@
 
 	function lifeCycleController(l: StateMachineLifeCycleEvent): void {
 		const updateAll = () => {
-			updateTrailsEventBus.emit(getTrails());
+			renderTrailsEventBus.emit(getTrails());
 			userActionEventBus.emit('record');
 		};
 
@@ -146,43 +147,46 @@
 				updateAll();
 			} else if (updateOnStep) {
 				// Lastly, only trails should be updated if the updateOnStep is activated.
-				updateTrailsEventBus.emit(getTrails());
+			// 	forceTrailsRenderEventBus.emit(getTrails());
 			}
 		}
+	}
+
+	function updateTrails(xs: Trail[]): void {
+		trails = [...xs];
 	}
 
 	function init() {
 		onInstanceChanged(getActiveInstance().getInstanceName());
 		onAlgorithmChanged(getConfiguredAlgorithm());
+		updateTrails(getTrails());
 	}
 
 	init();
 
 	onMount(() => {
-		const subscriptions: (() => void)[] = [];
+		const subs: (() => void)[] = [];
 		// transition the state machine event.
-		subscriptions.push(stateMachineEventBus.subscribe(stateMachineEvent));
+		subs.push(stateMachineEventBus.subscribe(stateMachineEvent));
 		// reset the machine + breakpoints when an instance is changed.
-		subscriptions.push(changeInstanceEventBus.subscribe(onInstanceChanged));
+		subs.push(changeInstanceEventBus.subscribe(onInstanceChanged));
 		// reset the machine when the algorithm is changed.
-		subscriptions.push(changeAlgorithmEventBus.subscribe(onAlgorithmChanged));
+		subs.push(changeAlgorithmEventBus.subscribe(onAlgorithmChanged));
 		// update the problem when an undo is performed.
-		subscriptions.push(algorithmicUndoEventBus.subscribe(algorithmicUndoSave));
+		subs.push(algorithmicUndoEventBus.subscribe(algorithmicUndoSave));
 		// Control what is rendered and what is saved depending on the life cycle of the state machine.
-		subscriptions.push(stateMachineLifeCycleEventBus.subscribe(lifeCycleController));
+		subs.push(stateMachineLifeCycleEventBus.subscribe(lifeCycleController));
 		// update our trails to render them when asked to.
-		subscriptions.push(updateTrailsEventBus.subscribe((t) => (trails = [...t])));
+		subs.push(renderTrailsEventBus.subscribe(updateTrails));
 		// update machine delay
-		subscriptions.push(
-			changeStepDelayEventBus.subscribe((time) => solverMachine.updateStopTimeout(time))
-		);
+		subs.push(changeStepDelayEventBus.subscribe((time) => solverMachine.updateStopTimeout(time)));
 		// record and statistics update done when a decision is made
-		subscriptions.push(decisionMadeEventBus.subscribe(onDecision));
+		subs.push(decisionMadeEventBus.subscribe(onDecision));
 		// update the structures when a trail has been pushed.
-		subscriptions.push(newTrailPushed.subscribe(onTrailInsertion));
+		subs.push(newTrailPushed.subscribe(onTrailInsertion));
 
 		return () => {
-			subscriptions.forEach((f) => f());
+			subs.forEach((f) => f());
 		};
 	});
 </script>

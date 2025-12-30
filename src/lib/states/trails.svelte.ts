@@ -30,6 +30,10 @@ export const shrinkTrails = (n: number): void => {
 
 export const getTrails = () => trails;
 
+export const wipeTrails = (): void => {
+	trails = [new Trail()];
+}
+
 export const wrapLearnedClauses = (): Clause[] => {
 	// This function goes through the trails and collects all learned clauses
 	const clauses: Clause[] = [];
@@ -46,11 +50,4 @@ export const wrapLearnedClauses = (): Clause[] => {
 		}
 	}
 	return clauses;
-};
-
-export const updateTrails = (snapshot: Trail[]): void => {
-	if (snapshot.length === 0) {
-		logFatal('Update Trails Error', 'Cannot update trails to an empty snapshot');
-	}
-	trails = snapshot.map((trail) => trail.copy());
 };
