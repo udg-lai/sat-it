@@ -17,7 +17,7 @@
 	const solverMachine = $derived(getSolverMachine());
 
 	let clauses: Clause[] = $derived.by(() => {
-		const cRefs: CRef[] = getOccurrenceList().getClauses();
+		const cRefs: CRef[] = getOccurrenceList().getCRefs();
 		return cRefs.map((cRef) => getClausePool().at(cRef));
 	});
 

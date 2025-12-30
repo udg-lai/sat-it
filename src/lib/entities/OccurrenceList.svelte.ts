@@ -8,40 +8,40 @@ import type { CRef, List, Lit } from '$lib/types/types.ts';
 // (i.e., no assignment triggered the visiting of the occurrences' complementary assignment)
 export default class OccurrenceList {
 	private literal: Maybe<Lit>;
-	private clauses: List<CRef>;
+	private cRefs: List<CRef>;
 	private pointer: number = $state(-1);
 
-	constructor(literal: Maybe<Lit> = makeNothing(), clauses: List<CRef> = []) {
+	constructor(literal: Maybe<Lit> = makeNothing(), cRefs: List<CRef> = []) {
 		this.literal = literal;
-		this.clauses = clauses;
+		this.cRefs = cRefs;
 		this.pointer = -1;
 	}
 
 	next(): CRef {
 		this.pointer += 1;
-		if (this.pointer >= this.clauses.length) {
+		if (this.pointer >= this.cRefs.length) {
 			logError('No more clauses to visit in this occurrence list.');
 		}
-		return this.clauses[this.pointer];
+		return this.cRefs[this.pointer];
 	}
 
 	getLiteral(): Maybe<Lit> {
 		return this.literal;
 	}
 
-	getClauses(): List<CRef> {
-		return this.clauses;
+	getCRefs(): List<CRef> {
+		return this.cRefs;
 	}
 
 	isEmpty(): boolean {
-		return this.clauses.length === 0;
+		return this.cRefs.length === 0;
 	}
 
 	at(index: number): CRef {
-		if (index < 0 || index >= this.clauses.length) {
+		if (index < 0 || index >= this.cRefs.length) {
 			logError('Index out of bounds in occurrence list.');
 		}
-		return this.clauses[index];
+		return this.cRefs[index];
 	}
 
 	getPointer(): number {
@@ -49,19 +49,19 @@ export default class OccurrenceList {
 	}
 
 	traversed(): boolean {
-		return this.pointer >= this.clauses.length - 1;
+		return this.pointer >= this.cRefs.length - 1;
 	}
 
 	pointedCRef(): CRef {
-		if (this.pointer < 0 || this.pointer >= this.clauses.length) {
+		if (this.pointer < 0 || this.pointer >= this.cRefs.length) {
 			logError('Pointer is out of bounds in occurrence list.');
 		}
-		return this.clauses[this.pointer];
+		return this.cRefs[this.pointer];
 	}
 
 	copy(): OccurrenceList {
 		const copiedLiteral: Maybe<Lit> = this.literal;
-		const copiedClauses: List<CRef> = [...this.clauses];
+		const copiedClauses: List<CRef> = [...this.cRefs];
 		const newOccurrenceList = new OccurrenceList(copiedLiteral, copiedClauses);
 		newOccurrenceList.pointer = this.pointer;
 		return newOccurrenceList;
