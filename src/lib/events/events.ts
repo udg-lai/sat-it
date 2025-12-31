@@ -76,7 +76,7 @@ export type StateMachineLifeCycleEvent =
 export const stateMachineLifeCycleEventBus = createEventBus<StateMachineLifeCycleEvent>();
 
 // event bus dedicated to toggle the trail view
-export const toggleTrailViewEventBus = createEventBus<void>();
+// export const toggleTrailViewEventBus = createEventBus<void>();
 
 // event that contains the trails to render (for performance and solver stages reasons)
 export const renderTrailsEventBus = createEventBus<Trail[]>();

@@ -5,7 +5,6 @@
 		algorithmicUndoEventBus,
 		solverStartedAutoMode,
 		toggleTrailExpandEventBus,
-		toggleTrailViewEventBus,
 		trailTrackingEventBus
 	} from '$lib/events/events.ts';
 	import type { SolverMachine } from '$lib/solvers/SolverMachine.svelte.ts';
@@ -115,16 +114,10 @@
 		};
 	}
 
-	function openTrailView(trailId: number) {
-		if (!trails.at(trailId)?.view()) {
-			toggleTrailView(trailId);
-		}
-	}
-
-	function toggleTrailView(trailId: number) {
-		const trail: Trail | undefined = trails.at(trailId);
+	function toggleTrailCtxView(trailID: number) {
+		const trail: Trail | undefined = trails.at(trailID);
 		if (trail === undefined) {
-			logFatal('Trail not found for ID: ' + trailId);
+			logFatal('Trail not found for ID: ' + trailID);
 		}
 		if (solver.identify() === 'bkt' && trail.getConflictiveClause() === undefined) {
 			// If the trail is running or is a model, we do not allow toggling the view
@@ -132,11 +125,11 @@
 		}
 
 		for (let i = 0; i < trails.length; i++) {
-			if (trailId != i) {
-				trails.at(i)?.setView(false);
+			if (trailID != i) {
+				trails.at(i)?.hideCtx();
 			}
 		}
-		trails.at(trailId)?.toggleView();
+		trails.at(trailID)?.toggleCtx();
 	}
 
 	function emitRevert(assignment: VariableAssignment, index: number) {
@@ -163,7 +156,7 @@
 
 	function makeStatusIconStyle(trail: Trail): string {
 		let classStyle = '';
-		if (trail.view()) {
+		if (trail.showingCtx()) {
 			if (showUPs && !trail.hasConflictiveClause()) {
 				classStyle = 'icon-bottom';
 			} else if (!showUPs && trail.hasConflictiveClause()) {
@@ -185,15 +178,11 @@
 		const unsubscribeRunningOnAuto = solverStartedAutoMode.subscribe(() =>
 			rearrangeTrailEditor(lastReference)
 		);
-		const unsubscribeToggleTrailView = toggleTrailViewEventBus.subscribe(() =>
-			openTrailView(trails.length - 1)
-		);
 
 		return () => {
 			unsubscribeTrailTracking();
 			unsubscribeExpandedTrails();
 			unsubscribeRunningOnAuto();
-			unsubscribeToggleTrailView();
 		};
 	});
 </script>
@@ -224,8 +213,8 @@
 								index: index + 1,
 								expanded: expandedTrails,
 								isLast: trails.length === index + 1,
-								showUPs: showUPs && trail.view(),
-								showCA: trail.view() && trail.hasConflictiveClause()
+								showUPs: showUPs && trail.showingCtx(),
+								showCA: trail.showingCtx() && trail.hasConflictiveClause()
 							}}
 							emitRevert={(assignment: VariableAssignment) => emitRevert(assignment, index)}
 						/>
@@ -241,8 +230,8 @@
 						ofLastTrail={trails.length === index + 1}
 						iconClassStyle={makeStatusIconStyle(trail)}
 						trailState={trail.getState()}
-						expanded={trail.view()}
-						onToggleExpand={() => toggleTrailView(index)}
+						expanded={trail.showingCtx()}
+						onToggleExpand={() => toggleTrailCtxView(index)}
 						disableClick={solver.identify() === 'bkt' && trail.getConflictiveClause() === undefined}
 					/>
 				</div>

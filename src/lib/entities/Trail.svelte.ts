@@ -25,7 +25,7 @@ export class Trail {
 	private dl: number = 0;
 	private resolutionCtx: Either<ResolutionContext, NeverFn>[] = $state([]); // this is just for representing the conflict analysis view
 	private upContext: Either<UPContext, NeverFn>[] = $derived.by(() => this._upContext());
-	private fullView: boolean = $state(false); // UI state for knowing whenever for that trail it was required to show more information
+	private showCtxView: boolean = $state(false); // UI state for knowing whenever for that trail it was required to show more information
 	private lemma: Clause | undefined = $state(undefined);
 	private conflictiveClause: Clause | undefined = $state(undefined);
 	private state: TrailState = $state('running');
@@ -214,16 +214,20 @@ export class Trail {
 		return levels[dl - 1];
 	}
 
-	toggleView(): void {
-		this.fullView = !this.fullView;
+	toggleCtx(): void {
+		this.showCtxView = !this.showCtxView;
 	}
 
-	setView(view: boolean): void {
-		this.fullView = view;
+	hideCtx(): void {
+		this.showCtxView = false;
 	}
 
-	view(): boolean {
-		return this.fullView;
+	showCtx(): void {
+		this.showCtxView = true;
+	}
+
+	showingCtx(): boolean {
+		return this.showCtxView;
 	}
 
 	setHeight(height: number): void {
@@ -348,7 +352,7 @@ export class Trail {
 
 	private _computeHeight(): number {
 		let height = this.defaultTrailHeight;
-		if (this.fullView) {
+		if (this.showCtxView) {
 			const solver = getSolverMachine();
 			if (solver.identify() === 'bkt') {
 				if (this.conflictiveClause !== undefined) {

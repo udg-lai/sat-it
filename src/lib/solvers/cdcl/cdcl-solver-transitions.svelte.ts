@@ -4,11 +4,7 @@ import Literal from '$lib/entities/Literal.svelte.ts';
 import OccurrenceList from '$lib/entities/OccurrenceList.svelte.ts';
 import type { Trail } from '$lib/entities/Trail.svelte.ts';
 import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
-import {
-	conflictDetectionEventBus,
-	newTrailPushed,
-	toggleTrailViewEventBus
-} from '$lib/events/events.ts';
+import { conflictDetectionEventBus, newTrailPushed } from '$lib/events/events.ts';
 import { getConflictAnalysis } from '$lib/states/conflict-anlysis.svelte.ts';
 import { focusOnAssignment, wipeFocusAssignment } from '$lib/states/focused-assignment.svelte.ts';
 import { getOccurrenceList, updateOccurrenceList } from '$lib/states/occurrence-list.svelte.ts';
@@ -188,7 +184,7 @@ const conflictDetectionBlock = (): void => {
 		const isConflictive: boolean = conflictiveTransition(cRef);
 		if (isConflictive) {
 			getLatestTrail().attachConflictiveClause(getClausePool().at(cRef));
-			toggleTrailViewEventBus.emit();
+			getLatestTrail().showCtx();
 		} else {
 			const unitClause: boolean = unitClauseTransition(cRef);
 			if (unitClause) {

@@ -16,7 +16,12 @@ export const nTrails = (): number => {
 	return trails.length;
 };
 
-export const stackTrail = (trail: Trail): void => {
+export const stackTrail = (trail: Trail, hidePreviousCtx: boolean = false): void => {
+	if (hidePreviousCtx) {
+		for (const t of trails) {
+			t.hideCtx();
+		}
+	}
 	trails = [...trails, trail];
 };
 

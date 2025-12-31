@@ -335,7 +335,7 @@ export const backjumping: CDCL_BACKJUMPING_FUN = (trail: Trail, dl: number) => {
 export type CDCL_PUSH_TRAIL_FUN = (trail: Trail) => void;
 
 export const pushTrail: CDCL_PUSH_TRAIL_FUN = (trail: Trail) => {
-	stackTrail(trail);
+	stackTrail(trail, true);
 };
 
 export type CDCL_PROPAGATE_CC_FUN = (cRef: CRef) => Lit;
