@@ -16,9 +16,7 @@
 		type StateMachineEvent,
 		type StateMachineLifeCycleEvent,
 		type UndoToDecisionEvent,
-
 		resetProblemEventBus
-
 	} from '$lib/events/events.ts';
 	import type { DimacsInstance } from '$lib/instances/dimacs-instance.interface.ts';
 	import type { SolverMachine } from '$lib/solvers/SolverMachine.svelte.ts';
@@ -87,7 +85,7 @@
 		syncProblemWithInstance(dimacsInstance ?? getActiveInstance().getInstance());
 
 		// Drop the current trails
-		wipeTrails()
+		wipeTrails();
 		renderTrailsEventBus.emit(getTrails());
 	}
 
@@ -156,11 +154,11 @@
 			updateAll();
 		} else if (l === 'finish-step') {
 			// Also, all actions should be performed if a single step has been finished and the solver machine is not in auto mode
-			if (!solverMachine.isInAutoMode()) {
+			if (!solverMachine.runningOnAutomatic()) {
 				updateAll();
 			} else if (updateOnStep) {
 				// Lastly, only trails should be updated if the updateOnStep is activated.
-			// 	forceTrailsRenderEventBus.emit(getTrails());
+				// 	forceTrailsRenderEventBus.emit(getTrails());
 			}
 		}
 	}

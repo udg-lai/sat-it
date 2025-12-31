@@ -30,7 +30,7 @@
 	let onConflictDetection = $derived(solverMachine.onDetectingConflict());
 	let onConflict = $derived(solverMachine.onConflictState());
 	let finished = $derived(solverMachine.onFinalState());
-	let inAutoMode = $derived(solverMachine.isInAutoMode());
+	let inAutoMode = $derived(solverMachine.runningOnAutomatic());
 
 	let emptyClauseIcon = '/icons/Empty Clause.svg';
 </script>

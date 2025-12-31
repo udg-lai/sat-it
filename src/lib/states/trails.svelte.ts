@@ -32,7 +32,7 @@ export const getTrails = () => trails;
 
 export const wipeTrails = (): void => {
 	trails = [new Trail()];
-}
+};
 
 export const wrapLearnedClauses = (): Clause[] => {
 	// This function goes through the trails and collects all learned clauses

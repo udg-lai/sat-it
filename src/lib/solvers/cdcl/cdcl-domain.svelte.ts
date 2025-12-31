@@ -32,7 +32,7 @@ import {
 	getOccurrenceListQueue,
 	wipeOccurrenceListQueue
 } from '$lib/states/queue-occurrence-lists.svelte.ts';
-import { logFatal, logInfo } from '$lib/states/toasts.svelte.ts';
+import { logFatal } from '$lib/states/toasts.svelte.ts';
 import { getLatestTrail, stackTrail } from '$lib/states/trails.svelte.ts';
 import type { CRef, List, Lit } from '$lib/types/types.ts';
 

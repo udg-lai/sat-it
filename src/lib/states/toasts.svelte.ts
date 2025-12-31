@@ -47,8 +47,8 @@ const addToast = (toast: Toast) => {
 	if (t.dismissible && t.timeout) setTimeout(() => dismissToast(id), t.timeout);
 };
 
-export const logWarning = (title: string, description: string): void => {
-	console.info('title:\n', title, '\ndescription:\n', description);
+export const logWarning = (title: string, description: string = ''): void => {
+	console.warn('title:\n', title, '\ndescription:\n', description);
 	addToast({
 		type: 'warn',
 		title: formatText(title),

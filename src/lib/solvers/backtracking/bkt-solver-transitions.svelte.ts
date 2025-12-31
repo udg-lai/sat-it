@@ -92,7 +92,7 @@ const afterAssignmentBlock = (
 	);
 	queueOccurrenceListTransition(stateMachine, solver, -assignment, complementaryClauses);
 	pickPendingOccurrenceListTransition(stateMachine, solver);
-	if (!solver.isInAutoMode()) conflictDetectionEventBus.emit();
+	if (!solver.runningOnAutomatic()) conflictDetectionEventBus.emit();
 };
 
 const conflictDetectionBlock = (stateMachine: BKT_StateMachine, pendingClauses: Set<CRef>) => {

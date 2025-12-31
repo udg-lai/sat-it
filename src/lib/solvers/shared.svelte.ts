@@ -141,7 +141,7 @@ const doAssignment = (varId: Var, assignment: Assignment): void => {
 
 const handleBreakpoints = (assignment: Lit): void => {
 	const solverMachine = getSolverMachine();
-	const runningInAutoMode: boolean = solverMachine.isInAutoMode();
+	const runningInAutoMode: boolean = solverMachine.runningOnAutomatic();
 	const isBP: boolean = isBreakpoint(assignment);
 	if (isBP) {
 		const varId: Var = Literal.var(assignment);
@@ -149,7 +149,7 @@ const handleBreakpoints = (assignment: Lit): void => {
 		logBreakpoint('Breakpoint', `Variable ${varId} assigned to ${!hatted}`);
 	}
 	if (runningInAutoMode && isBP) {
-		solverMachine.stopAutoMode();
+		solverMachine.stopRunningOnAutomatic();
 	}
 };
 

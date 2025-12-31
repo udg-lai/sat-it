@@ -169,7 +169,7 @@ const afterComplementaryBlock = (occurrenceList: OccurrenceList): void => {
 		allVariablesAssignedTransition();
 	}
 	// This is for showing the up-1 and up-n view
-	if (!getSolverMachine().isInAutoMode()) conflictDetectionEventBus.emit();
+	if (!getSolverMachine().runningOnAutomatic()) conflictDetectionEventBus.emit();
 };
 
 const conflictDetectionBlock = (): void => {

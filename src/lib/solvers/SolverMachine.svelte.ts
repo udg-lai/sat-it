@@ -1,10 +1,10 @@
-import { logFatal, logInfo, logWarning } from '$lib/states/toasts.svelte.ts';
 import {
 	solverFinishedAutoMode,
 	solverStartedAutoMode,
 	stateMachineLifeCycleEventBus,
 	type StateMachineEvent
 } from '$lib/events/events.ts';
+import { logFatal } from '$lib/states/toasts.svelte.ts';
 import { tick } from 'svelte';
 import type { State, StateFun, StateInput, StateMachine } from './StateMachine.svelte.ts';
 
@@ -16,8 +16,8 @@ export interface SolverStateInterface<F extends StateFun, I extends StateInput> 
 	getActiveStateId: () => number;
 	updateActiveStateId: (id: number) => void;
 	getActiveState: () => State<F, I>;
-	isInAutoMode: () => boolean;
-	stopAutoMode: () => void;
+	runningOnAutomatic: () => boolean;
+	stopRunningOnAutomatic: () => void;
 	onConflictState: () => boolean;
 	onInitialState: () => boolean;
 	onFinalState: () => boolean;
@@ -54,7 +54,7 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 		this.updateStopTimeout(0);
 	}
 
-	isInAutoMode(): boolean {
+	runningOnAutomatic(): boolean {
 		return this.runningOnAuto;
 	}
 
@@ -102,12 +102,12 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 	}
 
 	stop(): void {
-		if (this.isInAutoMode()) {
-			this.stopAutoMode();
+		if (this.runningOnAutomatic()) {
+			this.stopRunningOnAutomatic();
 		}
 	}
 
-	stopAutoMode(): void {
+	stopRunningOnAutomatic(): void {
 		this.forcedStop = true;
 	}
 
@@ -143,13 +143,14 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 		stateMachineLifeCycleEventBus.emit('finish-step');
 	}
 
-	protected async stepByStep(continueCond: () => boolean): Promise<void> {
-		if (!this.assertPreAuto()) {
+	protected async autoStepByStep(continueCond: () => boolean): Promise<void> {
+		if (this.runningOnAutomatic()) {
+			console.warn('Solver is already running in automatic mode.');
 			return;
 		}
 		this._preStepByStep();
 		const times: number[] = [];
-		while (continueCond() && !this.forcedStop) {
+		while (!this.forcedStop && !this.onFinalState() && continueCond()) {
 			this._step();
 			if (this.stopTimeoutMS > 0) {
 				await tick();
@@ -181,15 +182,15 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 	}
 
 	protected async solveUntilDecision(): Promise<void> {
-		this.stepByStep(() => !this.onDecisionState() && !this.onFinalState());
+		this.autoStepByStep(() => !this.onDecisionState() && !this.onFinalState());
 	}
 
 	protected async solveAllStepByStep(): Promise<void> {
-		this.stepByStep(() => !this.onFinalState());
+		this.autoStepByStep(() => !this.onFinalState());
 	}
 
 	protected async solveTrailStepByStep(): Promise<void> {
-		this.stepByStep(() => !this.onConflictState() && !this.onFinalState());
+		this.autoStepByStep(() => !this.onConflictState() && !this.onFinalState());
 	}
 
 	protected abstract solveToNextVariableStepByStep(): Promise<void>;
@@ -203,19 +204,5 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 
 	private setFlagsPostAuto(): void {
 		this.runningOnAuto = false;
-	}
-
-	private assertPreAuto(): boolean {
-		let assert = true;
-		if (this.isInAutoMode()) {
-			logWarning('Solver machine', 'Solver is already running on auto');
-			assert = false;
-		}
-		if (this.stateMachine.onFinalState()) {
-			this.runningOnAuto = false;
-			logWarning('Solver machine', 'Solver is already completed');
-			assert = false;
-		}
-		return assert;
 	}
 }

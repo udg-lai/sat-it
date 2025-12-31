@@ -46,7 +46,7 @@
 	};
 
 	function isSolverRunningSolo(): boolean {
-		const autoMode: boolean = solver.isInAutoMode();
+		const autoMode: boolean = solver.runningOnAutomatic();
 		return autoMode;
 	}
 

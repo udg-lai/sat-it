@@ -20,14 +20,9 @@
 	function openModal(): void {
 		modalOpened = true;
 	}
-
 </script>
 
-<button
-	class="btn general-btn"
-	title="Reset"
-	onclick={openModal}
->
+<button class="btn general-btn" title="Reset" onclick={openModal}>
 	<ImageRender icon={resetIcon} alt="Reset Problem icon" />
 	<Modal bind:open={modalOpened} size="xs" class="modal-style" dismissable={false}>
 		<div class="text-center">
@@ -35,14 +30,8 @@
 			<h3 class="mb-5 text-lg font-normal text-gray-600">
 				By resetting the problem, the assignments will be erased. Are you sure?
 			</h3>
-			<button
-				class="btn btn-modal mr-4"
-				onclick={resetProblem}>Yes, I'm sure</button
-			>
-			<button
-				class="btn btn-modal"
-				onclick={cancelReset}>No, cancel</button
-			>
+			<button class="btn btn-modal mr-4" onclick={resetProblem}>Yes, I'm sure</button>
+			<button class="btn btn-modal" onclick={cancelReset}>No, cancel</button>
 		</div>
 	</Modal>
 </button>

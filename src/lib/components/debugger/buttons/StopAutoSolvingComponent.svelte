@@ -9,6 +9,6 @@
 	let stopIcon = '/icons/Pause Auto.svg';
 </script>
 
-<button class="btn general-btn" onclick={() => solverMachine.stopAutoMode()} title="Stop">
+<button class="btn general-btn" onclick={() => solverMachine.stopRunningOnAutomatic()} title="Stop">
 	<ImageRender icon={stopIcon} alt="Pause automatic steps" />
 </button>
