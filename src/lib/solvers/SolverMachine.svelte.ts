@@ -130,8 +130,10 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 			await this.solveTrailStepByStep();
 		} else if (input === 'automatic_steps' || input === 'solve_all') {
 			await this.solveAllStepByStep();
+		} else if (input === 'nextDecision') {
+			await this.solveToNextDecisionStepByStep();
 		} else {
-			logFatal('Non expected input in Solver State Machine');
+			logFatal('Transition By Event Error', `Unknown event ${input} for solver machine`);
 		}
 	}
 
@@ -143,7 +145,7 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 		stateMachineLifeCycleEventBus.emit('finish-step');
 	}
 
-	protected async autoStepByStep(continueCond: () => boolean): Promise<void> {
+	protected async automaticStepByStep(continueCond: () => boolean): Promise<void> {
 		if (this.runningOnAutomatic()) {
 			console.warn('Solver is already running in automatic mode.');
 			return;
@@ -182,20 +184,25 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 	}
 
 	protected async solveUntilDecision(): Promise<void> {
-		this.autoStepByStep(() => !this.onDecisionState() && !this.onFinalState());
+		this.automaticStepByStep(() => !this.onDecisionState() && !this.onFinalState());
 	}
 
 	protected async solveAllStepByStep(): Promise<void> {
-		this.autoStepByStep(() => !this.onFinalState());
+		this.automaticStepByStep(() => !this.onFinalState());
 	}
 
 	protected async solveTrailStepByStep(): Promise<void> {
-		this.autoStepByStep(() => !this.onConflictState() && !this.onFinalState());
+		this.automaticStepByStep(() => !this.onConflictState() && !this.onFinalState());
 	}
 
 	protected abstract solveToNextVariableStepByStep(): Promise<void>;
 
 	protected abstract solveCDStepByStep(): Promise<void>;
+
+	// Method for running the solver until the next decision is required
+	protected async solveToNextDecisionStepByStep(): Promise<void> {
+		this.automaticStepByStep(() => !this.onDecisionState() && !this.onFinalState());
+	}
 
 	private setFlagsPreAuto(): void {
 		this.forcedStop = false;

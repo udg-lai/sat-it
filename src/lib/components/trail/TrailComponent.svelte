@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
-	import { differPos } from '$lib/states/trail-diff-start.svelte.ts';
+	import { differOf } from '$lib/states/trail-differ-sequence.svelte.ts';
 	import type { ComposedTrail } from '$lib/types/types.ts';
 	import { setLastTrailSize } from '../../states/trail-size.svelte.ts';
 	import BackjumpingComponent from '../assignment/BackjumpingComponent.svelte';
@@ -14,16 +14,18 @@
 	}
 
 	interface Props {
-		trail: ComposedTrail;
+		composedTrail: ComposedTrail;
 		emitRevert?: (assignment: VariableAssignment) => void;
 	}
 
-	let { trail, emitRevert = () => {} }: Props = $props();
+	let { composedTrail, emitRevert = () => {} }: Props = $props();
 
-	let initialPropagations: VariableAssignment[] = $derived(trail.trail.getInitialPropagations());
+	let initialPropagations: VariableAssignment[] = $derived(
+		composedTrail.trail.getInitialPropagations()
+	);
 
 	let decisions: DecisionLevel[] = $derived(
-		trail.trail.getDecisions().map((a, idx) => {
+		composedTrail.trail.getDecisions().map((a, idx) => {
 			return {
 				assignment: a,
 				level: idx + 1
@@ -35,7 +37,7 @@
 		const widthObserver = new ResizeObserver((entries) => {
 			for (const entry of entries) {
 				const contentWidth: number = entry.contentRect.width;
-				if (trail.isLast) {
+				if (composedTrail.isLast) {
 					setLastTrailSize(contentWidth);
 				}
 			}
@@ -54,33 +56,36 @@
 		{#if assignment.isK()}
 			<BacktrackingComponent
 				{assignment}
-				isLast={trail.isLast}
-				fromPreviousTrail={trail.trail.indexOfAssignment(assignment) < differPos(trail.index)}
+				isLast={composedTrail.isLast}
+				fromPreviousTrail={composedTrail.trail.indexOfAssignment(assignment) <
+					differOf(composedTrail.id)}
 			/>
 		{:else if assignment.isBJ()}
 			<BackjumpingComponent
 				{assignment}
-				isLast={trail.isLast}
-				fromPreviousTrail={trail.trail.indexOfAssignment(assignment) < differPos(trail.index)}
-				detailsExpanded={trail.showCA || trail.showUPs}
-				showUPInfo={!trail.showUPs}
+				isLast={composedTrail.isLast}
+				fromPreviousTrail={composedTrail.trail.indexOfAssignment(assignment) <
+					differOf(composedTrail.id)}
+				detailsExpanded={composedTrail.showCA || composedTrail.showUPs}
+				showUPInfo={!composedTrail.showUPs}
 			/>
 		{:else}
 			<UnitPropagationComponent
 				{assignment}
-				isLast={trail.isLast}
-				fromPreviousTrail={trail.trail.indexOfAssignment(assignment) < differPos(trail.index)}
-				detailsExpanded={trail.showCA || trail.showUPs}
-				showUPInfo={!trail.showUPs}
+				isLast={composedTrail.isLast}
+				fromPreviousTrail={composedTrail.trail.indexOfAssignment(assignment) <
+					differOf(composedTrail.id)}
+				detailsExpanded={composedTrail.showCA || composedTrail.showUPs}
+				showUPInfo={!composedTrail.showUPs}
 			/>
 		{/if}
 	{/each}
 
 	{#each decisions as { level, assignment } (level)}
 		<DecisionLevelComponent
-			{trail}
+			{composedTrail}
 			decision={assignment}
-			propagations={trail.trail.getPropagationsAtLevel(level)}
+			propagations={composedTrail.trail.getPropagationsAtLevel(level)}
 			emitRevertUpToX={() => {
 				emitRevert(assignment);
 			}}

@@ -159,7 +159,7 @@
 		background-color: var(--main-bg-color);
 	}
 	:global(.bottomNavCenter:hover) {
-		background-color: var(--conflict-color);
+		background-color: var(--boolean-constraint-propagation);
 	}
 	:global(.tooltip) {
 		background-color: var(--main-bg-color);

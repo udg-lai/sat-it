@@ -127,16 +127,16 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 
 	protected async solveToNextVariableStepByStep(): Promise<void> {
 		const postponedClauses: Set<number> = this.consultPostponed().occ;
-		this.autoStepByStep(() => postponedClauses.size !== 0);
+		this.automaticStepByStep(() => postponedClauses.size !== 0);
 	}
 
 	protected async solveCDStepByStep(): Promise<void> {
-		this.autoStepByStep(() => !this.pendingOccurrenceLists.isEmpty());
+		this.automaticStepByStep(() => !this.pendingOccurrenceLists.isEmpty());
 	}
 
 	protected async unitPropagate(): Promise<void> {
 		const previousUPs: number = getNoUnitPropagations();
-		this.autoStepByStep(
+		this.automaticStepByStep(
 			() => previousUPs >= getNoUnitPropagations() && !this.pendingOccurrenceLists.isEmpty()
 		);
 	}

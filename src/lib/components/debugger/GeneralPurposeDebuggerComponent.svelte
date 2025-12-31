@@ -32,7 +32,7 @@
 			// We undo the last decision
 			algorithmicUndoEventBus.emit({
 				decision: getLatestTrail().getDecisions()[-1],
-				trailIndex: getDecisions().length
+				trailID: getDecisions().length
 			});
 		}
 	}

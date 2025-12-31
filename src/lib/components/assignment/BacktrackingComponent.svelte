@@ -47,8 +47,8 @@
 
 <style>
 	.backtracking {
-		border-color: var(--conflict-color);
-		color: var(--conflict-color);
+		border-color: var(--boolean-constraint-propagation);
+		color: var(--boolean-constraint-propagation);
 		border-top: 1px transparent;
 		border-left: 1px transparent;
 		border-right: 1px transparent;
@@ -57,7 +57,7 @@
 	}
 
 	.previous-assignment {
-		color: color-mix(in srgb, var(--conflict-color) 60%, transparent);
+		color: color-mix(in srgb, var(--boolean-constraint-propagation) 60%, transparent);
 	}
 
 	:global(mover mo) {

@@ -60,7 +60,7 @@ export const conflictDetectionEventBus = createEventBus<void>();
 
 export type UndoToDecisionEvent = {
 	decision: VariableAssignment;
-	trailIndex: number;
+	trailID: number; // trail id matches the trail index
 };
 
 // event bus for opening the conflict detection view
@@ -87,5 +87,5 @@ export const changeStepDelayEventBus = createEventBus<number>();
 // event bus to notify about new decisions made by the algorithms.
 export const decisionMadeEventBus = createEventBus<Lit>();
 
-// event bus to notify about a new trail pushed
-export const newTrailPushed = createEventBus<void>();
+// event bus to notify about a new trail stacked
+export const trailStackedEventBus = createEventBus<void>();

@@ -17,7 +17,7 @@
 	// Chromium does not control the part of the range that is "filled" so we need to create a gradient and add it to the background
 	let percentage: number = $derived(((delay - min) / (max - min)) * 100);
 	let chromiumBackground: string = $derived(
-		`linear-gradient(to right, var(--conflict-color) 0%, var(--conflict-color) ${percentage}%, var(--inspecting-color) ${percentage}%, var(--inspecting-color) 100%)`
+		`linear-gradient(to right, var(--boolean-constraint-propagation) 0%, var(--boolean-constraint-propagation) ${percentage}%, var(--inspecting-color) ${percentage}%, var(--inspecting-color) 100%)`
 	);
 
 	let mappedDelay = $derived(
@@ -69,16 +69,16 @@
 		}
 		/* modify the highlighted part of the track in firefox web browser */
 		&::-moz-range-progress {
-			background-color: var(--conflict-color);
+			background-color: var(--boolean-constraint-propagation);
 		}
 		/* modify the thumb in chromium and macOS web browser */
 		&::-webkit-slider-thumb {
-			background-color: var(--conflict-color);
+			background-color: var(--boolean-constraint-propagation);
 			margin-top: -5px;
 		}
 		/* modify the thumb in firefox web browser */
 		&::-moz-range-thumb {
-			background-color: var(--conflict-color);
+			background-color: var(--boolean-constraint-propagation);
 		}
 	}
 </style>

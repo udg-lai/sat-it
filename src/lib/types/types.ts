@@ -26,7 +26,7 @@ export const Lit = (n: number): Lit => {
 
 export type ComposedTrail = {
 	trail: Trail;
-	index: number;
+	id: number;
 	expanded: boolean;
 	isLast: boolean;
 	showUPs: boolean;

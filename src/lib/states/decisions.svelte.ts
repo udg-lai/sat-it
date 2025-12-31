@@ -1,5 +1,5 @@
 import { List, type Lit } from '$lib/types/types.ts';
-import { logError } from './toasts.svelte.ts';
+import { logError, logFatal } from './toasts.svelte.ts';
 
 /**
  * 1, 2, 3, 4up
@@ -29,31 +29,34 @@ export function saveDecision(decision: Lit) {
 	decisions[decisions.length - 1].push({ decision });
 }
 
-export function addNewTrailDecisionsList() {
+export function allocDecisionsTrail() {
 	decisions.push([]);
 }
 
-export function undo(trailIndex: number, decision: Lit): List<SavedDecision> {
-	if (trailIndex < 1 || trailIndex > decisions.length) {
-		logError('Undo', 'Saved index out of range');
+export function undo(trailID: number, decision: Lit): List<SavedDecision> {
+	if (trailID < 0 || trailID >= decisions.length) {
+		logFatal(
+			'Undo',
+			`Unknown trailID ${trailID} for trails' decisions of length ${decisions.length}`
+		);
 	}
 
-	const previousTrailPos = decisions.slice(0, trailIndex - 1);
-	const decisionsAtPos: List<SavedDecision> = decisions[trailIndex - 1];
-	const atTrailPos = List<SavedDecision>();
+	const previousDecisions: List<SavedDecision> = decisions.slice(0, trailID).flat();
+	const decisionsAtTrail: List<SavedDecision> = decisions[trailID];
+	const previousDecisionsAtTrail = List<SavedDecision>();
 
 	let i = 0;
 	let found = false;
-	while (i < decisionsAtPos.length && !found) {
-		const { decision: d } = decisionsAtPos[i];
+	while (i < decisionsAtTrail.length && !found) {
+		const { decision: d } = decisionsAtTrail[i];
 		if (d == decision) found = true;
 		else {
-			atTrailPos.push({ decision: d });
+			previousDecisionsAtTrail.push({ decision: d });
 			i++;
 		}
 	}
 
-	if (!found) logError('Undo algorithm', 'Decision not found in the decisions lists');
+	if (!found) logFatal('Undo algorithm', 'Decision not found in the decisions lists');
 
-	return previousTrailPos.flat().concat(atTrailPos);
+	return previousDecisions.concat(previousDecisionsAtTrail);
 }

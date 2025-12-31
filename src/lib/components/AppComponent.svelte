@@ -8,7 +8,7 @@
 		changeInstanceEventBus,
 		changeStepDelayEventBus,
 		decisionMadeEventBus,
-		newTrailPushed,
+		trailStackedEventBus,
 		stateMachineEventBus,
 		stateMachineLifeCycleEventBus,
 		renderTrailsEventBus,
@@ -24,8 +24,8 @@
 	import { updateAssignment } from '$lib/states/assignment.svelte.ts';
 	import { clearBreakpoints } from '$lib/states/breakpoints.svelte.ts';
 	import {
-		addNewTrailDecisionsList,
-		undo as keptDecision,
+		allocDecisionsTrail,
+		undo,
 		saveDecision,
 		wipeDecisions,
 		type SavedDecision
@@ -40,7 +40,7 @@
 	} from '$lib/states/solver-machine.svelte.ts';
 	import { increaseNoDecisions, resetStatistics } from '$lib/states/statistics.svelte.ts';
 	import { logError } from '$lib/states/toasts.svelte.ts';
-	import { appendDifferTrailPos, wipeDifferTrailPos } from '$lib/states/trail-diff-start.svelte.ts';
+	import { stackDifferPos, wipeDifferSequence } from '$lib/states/trail-differ-sequence.svelte.ts';
 	import { getLatestTrail, getTrails, wipeTrails } from '$lib/states/trails.svelte.ts';
 	import type { Algorithm } from '$lib/types/algorithm.ts';
 	import type { List, Lit, Var } from '$lib/types/types.ts';
@@ -49,6 +49,7 @@
 	import DebuggerComponent from './debugger/DebuggerComponent.svelte';
 	import { getConfiguredAlgorithm } from './settings/engine/state.svelte.ts';
 	import SolvingInformationComponent from './SolvingInformationComponent.svelte';
+	import Literal from '$lib/entities/Literal.svelte.ts';
 
 	let trails: Trail[] = $state([]);
 
@@ -79,7 +80,7 @@
 		// Reset the problem, statistics, stack and reload from an initial empty snapshot.
 		resetStatistics();
 		wipeDecisions();
-		wipeDifferTrailPos();
+		wipeDifferSequence();
 		// Sync the problem with the new instance, meaning we create
 		// a new set of variables and clauses from the instance.
 		syncProblemWithInstance(dimacsInstance ?? getActiveInstance().getInstance());
@@ -113,9 +114,9 @@
 		shareReset(instance);
 	}
 
-	function onTrailInsertion() {
-		addNewTrailDecisionsList();
-		appendDifferTrailPos(getLatestTrail().getAssignments().length);
+	function onTrailStacked() {
+		allocDecisionsTrail();
+		stackDifferPos(getLatestTrail().getAssignments().length);
 	}
 
 	function algorithmicUndoSave(event: UndoToDecisionEvent): void {
@@ -125,18 +126,20 @@
 		}
 		// Get the decisions that will be kept
 		const decision: Lit = event.decision.toLit();
-		const trailIndex: number = event.trailIndex;
+		const trailID: number = event.trailID;
 
-		const decisions: List<SavedDecision> = keptDecision(trailIndex, decision);
+		// This are the decisions that will be reapplied
+		// As solvers are deterministic, reapplying them will lead to the same state.
+		const decisions: List<SavedDecision> = undo(trailID, decision);
 		// As solver will automatically do the solving process again,
-		// let's reset the context.
-		shareReset();
+		// let's reset the problem.
+		onProblemReset();
 
 		getSolverMachine().transitionByEvent('nextDecision');
-		for (const d of decisions) {
+		for (const { decision } of decisions) {
 			//a "manual assignment will be performed"
-			const polarity: boolean = d.decision > 0;
-			const variable: Var = Math.abs(d.decision);
+			const polarity: boolean = !Literal.hatted(decision);
+			const variable: Var = Literal.var(decision);
 			updateAssignment('manual', polarity, variable);
 			// Then decisions will be done until the following decision is found.
 			getSolverMachine().transitionByEvent('nextDecision');
@@ -196,7 +199,7 @@
 		// record and statistics update done when a decision is made
 		subs.push(decisionMadeEventBus.subscribe(onDecision));
 		// update the structures when a trail has been pushed.
-		subs.push(newTrailPushed.subscribe(onTrailInsertion));
+		subs.push(trailStackedEventBus.subscribe(onTrailStacked));
 
 		return () => {
 			subs.forEach((f) => f());

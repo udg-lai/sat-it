@@ -135,15 +135,12 @@
 	function emitRevert(assignment: VariableAssignment, index: number) {
 		algorithmicUndoEventBus.emit({
 			decision: assignment,
-			trailIndex: index
+			trailID: index
 		});
 	}
 
-	function alignItem(index: number, trail: Trail): string {
+	function alignItem(trail: Trail): string {
 		let classStyle = '';
-		if (index + 1 < trails.length) {
-			classStyle += 'opacity';
-		}
 		if (showUPs && trail.hasConflictiveClause()) {
 			classStyle += ' center';
 		} else if (showUPs) {
@@ -168,6 +165,10 @@
 			classStyle = 'icon-center';
 		}
 		return classStyle;
+	}
+
+	function computeStatusIndicatorOpacity(trailID: number): string {
+		return trailID + 1 < trails.length ? 'opacity-40' : '';
 	}
 
 	onMount(() => {
@@ -210,7 +211,7 @@
 						<ComposedTrailComponent
 							trail={{
 								trail: trail,
-								index: index + 1,
+								id: index,
 								expanded: expandedTrails,
 								isLast: trails.length === index + 1,
 								showUPs: showUPs && trail.showingCtx(),
@@ -225,9 +226,11 @@
 
 		<editor-info class="container-padding direction">
 			{#each trails as trail, index (index)}
-				<div class="item {alignItem(index, trail)}" style="--height: {trail.getHeight()}px;">
+				<div
+					class="item {alignItem(trail)} {computeStatusIndicatorOpacity(index)}"
+					style="--height: {trail.getHeight()}px;"
+				>
 					<StatusIndicator
-						ofLastTrail={trails.length === index + 1}
 						iconClassStyle={makeStatusIconStyle(trail)}
 						trailState={trail.getState()}
 						expanded={trail.showingCtx()}
@@ -241,7 +244,7 @@
 </trail-editor>
 
 {#snippet enumerateSnippet(trail: Trail, index: number)}
-	<div class="item {alignItem(index, trail)}" style="--height: {trail.getHeight()}px;">
+	<div class="item {alignItem(trail)}" style="--height: {trail.getHeight()}px;">
 		<div class="enumerate">
 			<span class:opacity={index + 1 < trails.length}>{index + 1}.</span>
 		</div>
@@ -311,6 +314,10 @@
 
 	.opacity {
 		opacity: var(--opacity-50);
+	}
+
+	.opacity-40 {
+		opacity: 0.4;
 	}
 
 	.top {
