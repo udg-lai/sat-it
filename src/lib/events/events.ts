@@ -8,6 +8,9 @@ import { createEventBus } from './createEventBus.ts';
 // observable of instance changes
 export const changeInstanceEventBus = createEventBus<string>();
 
+// emit that the problem has been reset
+export const resetProblemEventBus = createEventBus<void>();
+
 // open settings and more event
 export const openSettingsViewEventBus = createEventBus<void>();
 

@@ -307,7 +307,7 @@ export const learnConflictClause: CDCL_LEARN_CONFLICT_CLAUSE_FUN = (lemma: Claus
 	// Saves the learnt clause in the trail
 	getLatestTrail().attachLemma(lemma);
 
-	logInfo('New clause learned', `Clause ${cRef} added to the clause pool`);
+	console.info(`New clause learned - cRef ${cRef} added to the clause pool`);
 
 	return cRef;
 };

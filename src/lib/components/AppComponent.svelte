@@ -15,7 +15,10 @@
 		userActionEventBus,
 		type StateMachineEvent,
 		type StateMachineLifeCycleEvent,
-		type UndoToDecisionEvent
+		type UndoToDecisionEvent,
+
+		resetProblemEventBus
+
 	} from '$lib/events/events.ts';
 	import type { DimacsInstance } from '$lib/instances/dimacs-instance.interface.ts';
 	import type { SolverMachine } from '$lib/solvers/SolverMachine.svelte.ts';
@@ -74,7 +77,7 @@
 		}
 	}
 
-	function reset(dimacsInstance: DimacsInstance | undefined = undefined): void {
+	function shareReset(dimacsInstance: DimacsInstance | undefined = undefined): void {
 		// Reset the problem, statistics, stack and reload from an initial empty snapshot.
 		resetStatistics();
 		wipeDecisions();
@@ -91,12 +94,7 @@
 	function onAlgorithmChanged(algorithm: Algorithm): void {
 		stopSolverMachine();
 		activateSolverMachine(algorithm);
-		reset();
-	}
-
-	function onTrailInsertion() {
-		addNewTrailDecisionsList();
-		appendDifferTrailPos(getLatestTrail().getAssignments().length);
+		shareReset();
 	}
 
 	function onInstanceChanged(instanceName: string): void {
@@ -104,7 +102,22 @@
 		// We can not keep the breakpoints when the instance is changed
 		clearBreakpoints();
 		modifyLiteralWidth(instance.summary.varCount);
-		reset(instance);
+		shareReset(instance);
+	}
+
+	function onProblemReset(): void {
+		// Stops the current solver machine and activate the configured one again.
+		stopSolverMachine();
+		activateSolverMachine(getConfiguredAlgorithm());
+
+		// Reset the problem with the current instance.
+		const instance: DimacsInstance = getInstance(getActiveInstance().getInstanceName());
+		shareReset(instance);
+	}
+
+	function onTrailInsertion() {
+		addNewTrailDecisionsList();
+		appendDifferTrailPos(getLatestTrail().getAssignments().length);
 	}
 
 	function algorithmicUndoSave(event: UndoToDecisionEvent): void {
@@ -119,7 +132,7 @@
 		const decisions: List<SavedDecision> = keptDecision(trailIndex, decision);
 		// As solver will automatically do the solving process again,
 		// let's reset the context.
-		reset();
+		shareReset();
 
 		getSolverMachine().transitionByEvent('nextDecision');
 		for (const d of decisions) {
@@ -170,6 +183,8 @@
 		subs.push(stateMachineEventBus.subscribe(stateMachineEvent));
 		// reset the machine + breakpoints when an instance is changed.
 		subs.push(changeInstanceEventBus.subscribe(onInstanceChanged));
+		// reset the machine when the problem is reset.
+		subs.push(resetProblemEventBus.subscribe(onProblemReset));
 		// reset the machine when the algorithm is changed.
 		subs.push(changeAlgorithmEventBus.subscribe(onAlgorithmChanged));
 		// update the problem when an undo is performed.

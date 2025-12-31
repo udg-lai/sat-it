@@ -1,4 +1,4 @@
-import { logFatal, logWarning } from '$lib/states/toasts.svelte.ts';
+import { logFatal, logInfo, logWarning } from '$lib/states/toasts.svelte.ts';
 import {
 	solverFinishedAutoMode,
 	solverStartedAutoMode,

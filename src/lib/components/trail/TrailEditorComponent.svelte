@@ -189,8 +189,6 @@
 			openTrailView(trails.length - 1)
 		);
 
-		console.log('TrailEditorComponent mounted.');
-
 		return () => {
 			unsubscribeTrailTracking();
 			unsubscribeExpandedTrails();
