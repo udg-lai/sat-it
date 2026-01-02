@@ -1,6 +1,6 @@
 <script lang="ts">
 	import {
-		stateMachineEventBus,
+		solverCommandEventBus,
 		toggleTrailExpandEventBus,
 		userActionEventBus
 	} from '$lib/events/events.ts';
@@ -19,7 +19,7 @@
 
 	function solveAutomatic() {
 		updateAssignment('automated');
-		stateMachineEventBus.emit('automatic_steps');
+		solverCommandEventBus.emit('automatic_steps');
 		userActionEventBus.emit('record');
 		toggleTrailExpandEventBus.emit(true);
 	}

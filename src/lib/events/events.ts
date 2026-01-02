@@ -24,7 +24,7 @@ export const userActionEventBus = createEventBus<ActionEvent>();
 
 // decision that user can take for the state machine
 
-export type StateMachineEvent =
+export type SolverCommand =
 	| 'step'
 	| 'solve_trail'
 	| 'automatic_steps'
@@ -36,7 +36,16 @@ export type StateMachineEvent =
 	| 'nextDecision' // propagates until next decision (DECISION not executed)
 	| 'branching'; // execute a branching (DECISION executed + propagations)
 
-export const stateMachineEventBus = createEventBus<StateMachineEvent>();
+export const solverCommandEventBus = createEventBus<SolverCommand>();
+
+export type SolverSignal =
+	| 'begin-step'
+	| 'begin-step-by-step'
+	| 'finish-step'
+	| 'finish-step-by-step';
+
+// event bus dedicated to the life cycle of the state machine
+export const solverSignalEventBus = createEventBus<SolverSignal>();
 
 // observable of algorithm changes
 export const changeAlgorithmEventBus = createEventBus<Algorithm>();
@@ -50,12 +59,6 @@ export const trailTrackingEventBus = createEventBus<number>();
 // event bus for collapse/expand of the trails
 export const toggleTrailExpandEventBus = createEventBus<boolean>();
 
-// every time solver started running on automatic it emits an event
-export const solverStartedAutoMode = createEventBus<void>();
-
-// every time solver finished running on automatic it emits an event
-export const solverFinishedAutoMode = createEventBus<void>();
-
 // event bus for opening the conflict detection view
 export const conflictDetectionEventBus = createEventBus<void>();
 
@@ -66,15 +69,6 @@ export type UndoToDecisionEvent = {
 
 // event bus for opening the conflict detection view
 export const algorithmicUndoEventBus = createEventBus<UndoToDecisionEvent>();
-
-export type StateMachineLifeCycleEvent =
-	| 'begin-step'
-	| 'begin-step-by-step'
-	| 'finish-step'
-	| 'finish-step-by-step';
-
-// event bus dedicated to the life cycle of the state machine
-export const stateMachineLifeCycleEventBus = createEventBus<StateMachineLifeCycleEvent>();
 
 // event bus dedicated to toggle the trail view
 // export const toggleTrailViewEventBus = createEventBus<void>();

@@ -10,13 +10,13 @@
 		decisionMadeEventBus,
 		renderTrailsEventBus,
 		resetProblemEventBus,
-		stateMachineEventBus,
-		stateMachineLifeCycleEventBus,
+		solverCommandEventBus,
+		solverSignalEventBus,
 		stepDelayEventBus,
 		trailStackedEventBus,
 		userActionEventBus,
-		type StateMachineEvent,
-		type StateMachineLifeCycleEvent,
+		type SolverCommand,
+		type SolverSignal,
 		type UndoToDecisionEvent
 	} from '$lib/events/events.ts';
 	import type { DimacsInstance } from '$lib/instances/dimacs-instance.interface.ts';
@@ -64,7 +64,7 @@
 		increaseNoDecisions();
 	}
 
-	async function stateMachineEvent(s: StateMachineEvent) {
+	async function stateMachineEvent(s: SolverCommand) {
 		if (s !== 'automatic_steps' && s !== 'step') {
 			updateOnStep = false;
 			solverMachine.disableStepDelay();
@@ -149,7 +149,11 @@
 		}
 	}
 
-	function lifeCycleController(l: StateMachineLifeCycleEvent): void {
+	function solverSignalHandler(l: SolverSignal): void {
+		// This function handles the signals emitted by the solver machine
+
+		console.debug('Solver signal received:', l);
+
 		const updateAll = () => {
 			renderTrailsEventBus.emit(getTrails());
 			userActionEventBus.emit('record');
@@ -184,7 +188,7 @@
 	onMount(() => {
 		const subs: (() => void)[] = [];
 		// transition the state machine event.
-		subs.push(stateMachineEventBus.subscribe(stateMachineEvent));
+		subs.push(solverCommandEventBus.subscribe(stateMachineEvent));
 		// reset the machine + breakpoints when an instance is changed.
 		subs.push(changeInstanceEventBus.subscribe(onInstanceChanged));
 		// reset the machine when the problem is reset.
@@ -194,7 +198,7 @@
 		// update the problem when an undo is performed.
 		subs.push(algorithmicUndoEventBus.subscribe(algorithmicUndoSave));
 		// Control what is rendered and what is saved depending on the life cycle of the state machine.
-		subs.push(stateMachineLifeCycleEventBus.subscribe(lifeCycleController));
+		subs.push(solverSignalEventBus.subscribe(solverSignalHandler));
 		// update our trails to render them when asked to.
 		subs.push(renderTrailsEventBus.subscribe(updateTrails));
 		// update machine delay

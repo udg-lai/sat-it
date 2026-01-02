@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { stateMachineEventBus } from '$lib/events/events.ts';
+	import { solverCommandEventBus } from '$lib/events/events.ts';
 	import '../style.css';
 	import ImageRender from '$lib/components/tools/ImageRender.svelte';
 
@@ -16,7 +16,7 @@
 	class="btn general-btn conflict-btn join"
 	class:invalidOption={finished || onConflictDetection}
 	onclick={() => {
-		stateMachineEventBus.emit('step');
+		solverCommandEventBus.emit('step');
 	}}
 	title="Backtrack"
 	disabled={finished || onConflictDetection}

@@ -1,16 +1,11 @@
-import {
-	solverFinishedAutoMode,
-	solverStartedAutoMode,
-	stateMachineLifeCycleEventBus,
-	type StateMachineEvent
-} from '$lib/events/events.ts';
+import { solverSignalEventBus, type SolverCommand } from '$lib/events/events.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
 import type { State, StateFun, StateInput, StateMachine } from './StateMachine.svelte.ts';
 
 export type KnownSolver = 'bkt' | 'dpll' | 'cdcl';
 
 export interface SolverStateInterface<F extends StateFun, I extends StateInput> {
-	transitionByEvent: (input: StateMachineEvent) => Promise<void>;
+	transitionByEvent: (input: SolverCommand) => Promise<void>;
 	transition: (input: I) => void;
 	getActiveStateId: () => number;
 	updateActiveStateId: (id: number) => void;
@@ -118,7 +113,7 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 		this.stateMachine.transition(input);
 	}
 
-	async transitionByEvent(input: StateMachineEvent): Promise<void> {
+	async transitionByEvent(input: SolverCommand): Promise<void> {
 		if (input === 'step') {
 			this._step();
 		} else if (input === 'nextVariable') {
@@ -141,50 +136,41 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 	protected abstract step(): void;
 
 	private _step(): void {
-		stateMachineLifeCycleEventBus.emit('begin-step');
+		solverSignalEventBus.emit('begin-step');
 		this.step();
-		stateMachineLifeCycleEventBus.emit('finish-step');
+		solverSignalEventBus.emit('finish-step');
 	}
 
 	protected async automaticStepByStep(continueCond: () => boolean): Promise<void> {
+		// Once solver started running on automatic mode it should finish.
+		// So, it cannot be interrupted by another automatic run.
 		if (this.runningOnAutomatic()) {
 			console.warn('Solver is already running in automatic mode.');
 			return;
 		}
-		this._preStepByStep();
-		const timeouts: number[] = [];
-		while (!this.forcedStop && !this.onFinalState() && continueCond()) {
-			this._step();
-			if (this.stepDelayMS > 0) {
-				const promise = new Promise<void>((resolve) => {
-					const id = setTimeout(resolve, this.stepDelayMS);
-					timeouts.push(id);
-				});
-				await promise;
+		this._preAutomaticStepByStep();
+		try {
+			// Transition the state machine while the continue condition is true
+			while (!this.forcedStop && !this.onFinalState() && continueCond()) {
+				this._step();
+				if (this.stepDelayMS > 0) {
+					const promise = new Promise<void>((resolve) => setTimeout(resolve, this.stepDelayMS));
+					await promise;
+				}
 			}
+		} finally {
+			this._postAutomaticStepByStep();
 		}
-		timeouts.forEach(clearTimeout);
-		this._postStepByStep();
 	}
 
-	private _preStepByStep(): void {
+	private _preAutomaticStepByStep(): void {
 		this.setFlagsPreAuto();
-		this.notifyRunningOnAuto();
-		stateMachineLifeCycleEventBus.emit('begin-step-by-step');
+		solverSignalEventBus.emit('begin-step-by-step');
 	}
 
-	private _postStepByStep(): void {
+	private _postAutomaticStepByStep(): void {
 		this.setFlagsPostAuto();
-		this.notifyFinishRunningOnAuto();
-		stateMachineLifeCycleEventBus.emit('finish-step-by-step');
-	}
-
-	private notifyRunningOnAuto(): void {
-		solverStartedAutoMode.emit();
-	}
-
-	private notifyFinishRunningOnAuto(): void {
-		solverFinishedAutoMode.emit();
+		solverSignalEventBus.emit('finish-step-by-step');
 	}
 
 	protected async solveAllStepByStep(): Promise<void> {

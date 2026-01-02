@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { stateMachineEventBus } from '$lib/events/events.ts';
+	import { solverCommandEventBus } from '$lib/events/events.ts';
 	import { updateAssignment } from '$lib/states/assignment.svelte.ts';
 	import { getVariablePool } from '$lib/states/problem.svelte.ts';
 	import { logInfo, logWarning } from '$lib/states/toasts.svelte.ts';
@@ -82,7 +82,7 @@
 	const emitAssignment = (literal: Lit | undefined): void => {
 		if (literal === undefined) {
 			updateAssignment('automated');
-			stateMachineEventBus.emit('step');
+			solverCommandEventBus.emit('step');
 		} else {
 			if (alreadyAssignedTruthValue(literal)) {
 				const variable: number = Math.abs(literal);
@@ -94,7 +94,7 @@
 				const truthValue: boolean = literal > 0;
 				const variable: number = Math.abs(literal);
 				updateAssignment('manual', truthValue, variable);
-				stateMachineEventBus.emit('step');
+				solverCommandEventBus.emit('step');
 			}
 			inputLiteral = undefined;
 		}

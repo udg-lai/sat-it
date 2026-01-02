@@ -3,7 +3,7 @@
 	import VariableAssignment from '$lib/entities/VariableAssignment.ts';
 	import {
 		algorithmicUndoEventBus,
-		solverStartedAutoMode,
+		solverSignalEventBus,
 		toggleTrailExpandEventBus,
 		trailTrackingEventBus
 	} from '$lib/events/events.ts';
@@ -14,6 +14,7 @@
 	import { onMount } from 'svelte';
 	import ComposedTrailComponent from './ComposedTrailComponent.svelte';
 	import StatusIndicator from './StatusIndicator.svelte';
+	import { filter } from '$lib/events/createEventBus.ts';
 
 	interface Props {
 		trails: Trail[];
@@ -176,9 +177,9 @@
 		const unsubscribeExpandedTrails = toggleTrailExpandEventBus.subscribe(
 			(expanded) => (expandedTrails = expanded)
 		);
-		const unsubscribeRunningOnAuto = solverStartedAutoMode.subscribe(() =>
-			rearrangeTrailEditor(lastReference)
-		);
+		const unsubscribeRunningOnAuto = solverSignalEventBus
+			.pipe(filter((t) => t == 'begin-step-by-step'))
+			.subscribe(() => rearrangeTrailEditor(lastReference));
 
 		return () => {
 			unsubscribeTrailTracking();

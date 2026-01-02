@@ -13,7 +13,7 @@ import {
 import { DPLL_StateMachine, makeDPLLMachine } from './dpll-state-machine.svelte.ts';
 import { dpll_stateName2StateId } from './dpll-states.svelte.ts';
 import { getNoUnitPropagations } from '$lib/states/statistics.svelte.ts';
-import type { StateMachineEvent } from '$lib/events/events.ts';
+import type { SolverCommand } from '$lib/events/events.ts';
 
 export const makeDPLLSolver = (): DPLL_SolverMachine => {
 	return new DPLL_SolverMachine(getStepDelay());
@@ -91,7 +91,7 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 		}
 	}
 
-	async transitionByEvent(input: StateMachineEvent): Promise<void> {
+	async transitionByEvent(input: SolverCommand): Promise<void> {
 		if (input === 'up1') {
 			await this.unitPropagate();
 		} else {

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { stateMachineEventBus, toggleTrailExpandEventBus } from '$lib/events/events.ts';
+	import { solverCommandEventBus, toggleTrailExpandEventBus } from '$lib/events/events.ts';
 	import '../style.css';
 	import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 	import ImageRender from '$lib/components/tools/ImageRender.svelte';
@@ -9,7 +9,7 @@
 	function finishConflictDetection(): void {
 		getSolverMachine().disableStepDelay();
 		toggleTrailExpandEventBus.emit(true);
-		stateMachineEventBus.emit('up1');
+		solverCommandEventBus.emit('up1');
 	}
 </script>
 

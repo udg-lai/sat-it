@@ -1,6 +1,6 @@
 import type OccurrenceList from '$lib/entities/OccurrenceList.svelte.ts';
 import { Queue } from '$lib/entities/Queue.svelte.ts';
-import { type StateMachineEvent } from '$lib/events/events.ts';
+import { type SolverCommand } from '$lib/events/events.ts';
 import { getConflictAnalysis } from '$lib/states/conflict-anlysis.svelte.ts';
 import { getConfDelayMS } from '$lib/states/parameters.svelte.ts';
 import { getOccurrenceListQueue } from '$lib/states/queue-occurrence-lists.svelte.ts';
@@ -28,7 +28,7 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 	}
 	// ** functions related to conflict analysis **
 
-	async transitionByEvent(event: StateMachineEvent): Promise<void> {
+	async transitionByEvent(event: SolverCommand): Promise<void> {
 		if (event === 'finishCA') {
 			await this.solveCAStepByStep();
 		} else if (event === 'up1') {

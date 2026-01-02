@@ -22,6 +22,7 @@ export const stackTrail = (trail: Trail, hidePreviousCtx: boolean = false): void
 			t.hideCtx();
 		}
 	}
+	console.debug('Stacking new trail:', trail);
 	trails = [...trails, trail];
 };
 

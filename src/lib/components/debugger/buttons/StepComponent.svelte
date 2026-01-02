@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { stateMachineEventBus } from '$lib/events/events.ts';
+	import { solverCommandEventBus } from '$lib/events/events.ts';
 	import ImageRender from '$lib/components/tools/ImageRender.svelte';
 	import '../style.css';
 
@@ -15,7 +15,7 @@
 <button
 	class="btn general-btn {myClass}"
 	onclick={() => {
-		stateMachineEventBus.emit('step');
+		solverCommandEventBus.emit('step');
 	}}
 	title="Step"
 >
