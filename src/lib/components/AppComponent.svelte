@@ -135,6 +135,7 @@
 		// let's reset the problem.
 		onProblemReset();
 
+		// Forces solver to run to the decide state first (propagating if needed)
 		await getSolverMachine().transitionByEvent('nextDecision');
 		for (const { decision } of decisions) {
 			//a "manual assignment will be performed"
@@ -143,7 +144,8 @@
 			updateAssignment('manual', polarity, variable);
 			// Then decisions will be done until the following decision is found.
 			console.debug('Reapplying decision:', decision);
-			await getSolverMachine().transitionByEvent('nextDecision');
+			// Forces the solver to decide and propagate
+			await getSolverMachine().transitionByEvent('branching');
 		}
 	}
 

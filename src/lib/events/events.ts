@@ -33,7 +33,8 @@ export type StateMachineEvent =
 	| 'up1'
 	| 'finishCD'
 	| 'finishCA'
-	| 'nextDecision';
+	| 'nextDecision' // propagates until next decision (DECISION not executed)
+	| 'branching'; // execute a branching (DECISION executed + propagations)
 
 export const stateMachineEventBus = createEventBus<StateMachineEvent>();
 

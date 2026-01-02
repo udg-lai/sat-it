@@ -62,22 +62,22 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 
 	protected async solveToNextVariableStepByStep(): Promise<void> {
 		const occurrences: OccurrenceList = getOccurrenceListQueue().element();
-		this.automaticStepByStep(() => !occurrences.traversed());
+		await this.automaticStepByStep(() => !occurrences.traversed());
 	}
 
 	protected async solveCDStepByStep(): Promise<void> {
 		const queueOccurrences: Queue<OccurrenceList> = getOccurrenceListQueue();
-		this.automaticStepByStep(() => !queueOccurrences.isEmpty());
+		await this.automaticStepByStep(() => !queueOccurrences.isEmpty());
 	}
 
 	protected async solveCAStepByStep(): Promise<void> {
-		this.automaticStepByStep(() => !getConflictAnalysis().finished());
+		await this.automaticStepByStep(() => !getConflictAnalysis().finished());
 	}
 
 	protected async unitPropagate(): Promise<void> {
 		const queueOccurrences: Queue<OccurrenceList> = getOccurrenceListQueue();
 		const previousUPs: number = getNoUnitPropagations(); // This is monotonically increasing
-		this.automaticStepByStep(
+		await this.automaticStepByStep(
 			() => previousUPs == getNoUnitPropagations() && !queueOccurrences.isEmpty()
 		);
 	}

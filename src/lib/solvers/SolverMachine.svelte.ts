@@ -130,7 +130,9 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 		} else if (input === 'automatic_steps' || input === 'solve_all') {
 			await this.solveAllStepByStep();
 		} else if (input === 'nextDecision') {
-			await this.solveToNextDecisionStepByStep();
+			await this.propagate();
+		} else if (input === 'branching') {
+			await this.branching();
 		} else {
 			logFatal('Transition By Event Error', `Unknown event ${input} for solver machine`);
 		}
@@ -185,25 +187,29 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 		solverFinishedAutoMode.emit();
 	}
 
-	protected async solveUntilDecision(): Promise<void> {
-		this.automaticStepByStep(() => !this.onDecisionState() && !this.onFinalState());
-	}
-
 	protected async solveAllStepByStep(): Promise<void> {
-		this.automaticStepByStep(() => !this.onFinalState());
+		await this.automaticStepByStep(() => !this.onFinalState());
 	}
 
 	protected async solveTrailStepByStep(): Promise<void> {
-		this.automaticStepByStep(() => !this.onConflictState() && !this.onFinalState());
+		await this.automaticStepByStep(() => !this.onConflictState() && !this.onFinalState());
 	}
 
 	protected abstract solveToNextVariableStepByStep(): Promise<void>;
 
 	protected abstract solveCDStepByStep(): Promise<void>;
 
-	// Method for running the solver until the next decision is required
-	protected async solveToNextDecisionStepByStep(): Promise<void> {
-		this.automaticStepByStep(() => !this.onDecisionState() && !this.onFinalState());
+	protected async branching(): Promise<void> {
+		if (!this.onDecisionState()) {
+			logFatal('Branching Error', 'Not in a decision state to perform branching');
+		}
+		this._step(); // Execute decision
+		await this.propagate(); // Propagate until next decision or final state
+	}
+
+	// Propagate until next decision or final state
+	protected async propagate(): Promise<void> {
+		await this.automaticStepByStep(() => !this.onDecisionState() && !this.onFinalState());
 	}
 
 	private setFlagsPreAuto(): void {
