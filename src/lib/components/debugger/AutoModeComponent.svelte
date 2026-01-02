@@ -1,18 +1,18 @@
 <script lang="ts">
-	import { MAX_DELAY_MS, MIN_DELAY_MS, setStepDelay } from '$lib/states/delay-ms.svelte.ts';
 	import {
-		getBaselineDelay,
-		MAX_DELAY,
-		MIN_DELAY,
-		STEP_DELAY
+		getConfDelay,
+		MAX_DELAY_PARAMETER,
+		MIN_DELAY_PARAMETER,
+		setConfDelay,
+		STEP_DELAY_PARAMETER
 	} from '$lib/states/parameters.svelte.ts';
 	import { Range } from 'flowbite-svelte';
 	import StopAutoSolvingComponent from './buttons/StopAutoSolvingComponent.svelte';
 
-	let min = MIN_DELAY;
-	let max = MAX_DELAY;
-	let step = STEP_DELAY;
-	let delay = $state(getBaselineDelay());
+	let min = MIN_DELAY_PARAMETER;
+	let max = MAX_DELAY_PARAMETER;
+	let step = STEP_DELAY_PARAMETER;
+	let delay = $state(getConfDelay());
 
 	// Chromium does not control the part of the range that is "filled" so we need to create a gradient and add it to the background
 	let percentage: number = $derived(((delay - min) / (max - min)) * 100);
@@ -20,13 +20,8 @@
 		`linear-gradient(to right, var(--boolean-constraint-propagation) 0%, var(--boolean-constraint-propagation) ${percentage}%, var(--inspecting-color) ${percentage}%, var(--inspecting-color) 100%)`
 	);
 
-	let mappedDelay = $derived(
-		MIN_DELAY_MS * (MAX_DELAY_MS / MIN_DELAY_MS) ** ((max - delay) / (max - min))
-	);
-
-	$effect(() => {
-		setStepDelay(mappedDelay);
-	});
+	// Updates the configured delay when the slider is changed
+	$effect(() => setConfDelay(delay));
 </script>
 
 <auto-mode>

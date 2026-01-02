@@ -7,7 +7,7 @@
 	let nextClauseIcon = '/icons/Inspect All Clauses.svg';
 
 	function goToNextVariable(): void {
-		getSolverMachine().disableStops();
+		getSolverMachine().disableStepDelay();
 		toggleTrailExpandEventBus.emit(true);
 		stateMachineEventBus.emit('nextVariable');
 	}

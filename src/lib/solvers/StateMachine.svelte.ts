@@ -140,7 +140,10 @@ export abstract class StateMachine<F extends StateFun, I extends StateInput>
 				'It is not possible to perform a transition in a final state'
 			);
 		} else {
-			const nextState = this.getNextState(input);
+			const nextState: State<F, I> = this.getNextState(input);
+
+			console.info(`Transitioning ${this.active} ~> ${nextState.id} with input ${input}`);
+
 			this.active = nextState.id;
 			if (this.onFinalState()) {
 				finalStateControl();

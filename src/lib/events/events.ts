@@ -82,7 +82,7 @@ export const stateMachineLifeCycleEventBus = createEventBus<StateMachineLifeCycl
 export const renderTrailsEventBus = createEventBus<Trail[]>();
 
 // event bus to change the delay of the application.
-export const changeStepDelayEventBus = createEventBus<number>();
+export const stepDelayEventBus = createEventBus<number>();
 
 // event bus to notify about new decisions made by the algorithms.
 export const decisionMadeEventBus = createEventBus<Lit>();

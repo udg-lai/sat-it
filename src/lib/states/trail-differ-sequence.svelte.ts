@@ -20,7 +20,3 @@ export const differOf = (trailID: number): number => {
 		logFatal('Tried to access invalid differ trail position index');
 	return differSequence[trailID];
 };
-
-setInterval(() => {
-	console.log('Differ sequence:', differSequence);
-}, 10000);

@@ -2,7 +2,7 @@ import type OccurrenceList from '$lib/entities/OccurrenceList.svelte.ts';
 import { Queue } from '$lib/entities/Queue.svelte.ts';
 import { type StateMachineEvent } from '$lib/events/events.ts';
 import { getConflictAnalysis } from '$lib/states/conflict-anlysis.svelte.ts';
-import { getStepDelay } from '$lib/states/delay-ms.svelte.ts';
+import { getConfDelayMS } from '$lib/states/parameters.svelte.ts';
 import { getOccurrenceListQueue } from '$lib/states/queue-occurrence-lists.svelte.ts';
 import { getNoUnitPropagations } from '$lib/states/statistics.svelte.ts';
 import { SolverMachine } from '../SolverMachine.svelte.ts';
@@ -18,7 +18,7 @@ import { CDCL_StateMachine, makeCDCLStateMachine } from './cdcl-state-machine.sv
 import { cdcl_stateName2StateId } from './cdcl-states.svelte.ts';
 
 export const makeCDCLSolver = (): CDCL_SolverMachine => {
-	return new CDCL_SolverMachine(getStepDelay());
+	return new CDCL_SolverMachine(getConfDelayMS());
 };
 
 export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {

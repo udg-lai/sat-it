@@ -1,11 +1,11 @@
 <script lang="ts">
 	import DynamicRender from '$lib/components/DynamicRender.svelte';
 	import {
-		getBaselineDelay,
+		getConfDelay,
 		getBaselinePolarity,
-		MAX_DELAY,
-		MIN_DELAY,
-		setBaselineDelay,
+		MAX_DELAY_PARAMETER,
+		MIN_DELAY_PARAMETER,
+		setConfDelay,
 		setBaselinePolarity
 	} from '$lib/states/parameters.svelte.ts';
 	import { CogOutline } from 'flowbite-svelte-icons';
@@ -18,7 +18,7 @@
 	const elementClass: string =
 		'rounded-lg bg-[var(--main-bg-color)] border border-[var(--border-color)] p-2';
 
-	let baselineDelay: number = $state(getBaselineDelay());
+	let baselineDelay: number = $state(getConfDelay());
 
 	const baselinePolarity: boolean = $derived(getBaselinePolarity());
 
@@ -39,11 +39,11 @@
 		<div class="flex items-center gap-2">
 			<button
 				onclick={() => {
-					baselineDelay = Math.max(MIN_DELAY, baselineDelay - 1);
-					setBaselineDelay(baselineDelay);
+					baselineDelay = Math.max(MIN_DELAY_PARAMETER, baselineDelay - 1);
+					setConfDelay(baselineDelay);
 				}}
 				class="delay-buttons"
-				class:inactive={baselineDelay === MIN_DELAY}
+				class:inactive={baselineDelay === MIN_DELAY_PARAMETER}
 			>
 				−
 			</button>
@@ -56,11 +56,11 @@
 			/>
 			<button
 				onclick={() => {
-					baselineDelay = Math.min(MAX_DELAY, baselineDelay + 1);
-					setBaselineDelay(baselineDelay);
+					baselineDelay = Math.min(MAX_DELAY_PARAMETER, baselineDelay + 1);
+					setConfDelay(baselineDelay);
 				}}
 				class="delay-buttons"
-				class:inactive={baselineDelay === MAX_DELAY}
+				class:inactive={baselineDelay === MAX_DELAY_PARAMETER}
 			>
 				+
 			</button>

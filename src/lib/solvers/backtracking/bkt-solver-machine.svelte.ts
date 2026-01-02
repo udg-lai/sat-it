@@ -12,7 +12,6 @@ import {
 } from './bkt-solver-transitions.svelte.ts';
 import { BKT_StateMachine, makeBKTStateMachine } from './bkt-state-machine.svelte.ts';
 import { bkt_stateName2StateId } from './bkt-states.svelte.ts';
-import { getStepDelay } from '$lib/states/delay-ms.svelte.ts';
 
 export const makeBKTSolver = (): BKT_SolverMachine => {
 	return new BKT_SolverMachine(getStepDelay());

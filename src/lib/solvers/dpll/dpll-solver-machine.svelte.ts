@@ -12,7 +12,6 @@ import {
 } from './dpll-solver-transitions.svelte.ts';
 import { DPLL_StateMachine, makeDPLLMachine } from './dpll-state-machine.svelte.ts';
 import { dpll_stateName2StateId } from './dpll-states.svelte.ts';
-import { getStepDelay } from '$lib/states/delay-ms.svelte.ts';
 import { getNoUnitPropagations } from '$lib/states/statistics.svelte.ts';
 import type { StateMachineEvent } from '$lib/events/events.ts';
 

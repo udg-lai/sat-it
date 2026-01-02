@@ -1,14 +1,34 @@
-export const MIN_DELAY: number = 1;
-export const MAX_DELAY: number = 10;
-export const STEP_DELAY: number = 0.5;
+import { stepDelayEventBus } from '$lib/events/events.ts';
 
-let baselineDelay: number = $state(3);
+export const MIN_DELAY_PARAMETER: number = 1;
+export const MAX_DELAY_PARAMETER: number = 10;
+export const STEP_DELAY_PARAMETER: number = 0.5;
 
-export const getBaselineDelay = () => baselineDelay;
+const MIN_DELAY_MS_PARAMETERS: number = MIN_DELAY_PARAMETER * 100;
+const MAX_DELAY_MS_PARAMETERS: number = MAX_DELAY_PARAMETER * 100;
 
-export const setBaselineDelay = (delay: number): void => {
-	baselineDelay = Math.min(Math.max(delay, MIN_DELAY), MAX_DELAY);
+// Configured delay [1..10] solver
+let confDelay: number = $state(3);
+
+// Mapping to milliseconds, inverse exponential scale
+let confDelayMS: number = $derived.by(() => {
+	const inverseDecay: number =
+		MIN_DELAY_MS_PARAMETERS *
+		(MAX_DELAY_MS_PARAMETERS / MIN_DELAY_MS_PARAMETERS) **
+			((MAX_DELAY_PARAMETER - confDelay) / (MAX_DELAY_PARAMETER - MIN_DELAY_PARAMETER));
+	return Math.floor(inverseDecay);
+});
+
+export const getConfDelay = () => confDelay;
+
+export const setConfDelay = (delay: number): void => {
+	// Updates the delay within bounds
+	confDelay = Math.min(Math.max(delay, MIN_DELAY_PARAMETER), MAX_DELAY_PARAMETER);
+	// Notify the change to the event bus
+	stepDelayEventBus.emit(getConfDelayMS());
 };
+
+export const getConfDelayMS = () => confDelayMS;
 
 export const DEFAULT_POLARITY = true;
 

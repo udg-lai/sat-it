@@ -7,7 +7,7 @@
 	let up1Icon = '/icons/UP1.svg';
 
 	function finishConflictDetection(): void {
-		getSolverMachine().disableStops();
+		getSolverMachine().disableStepDelay();
 		toggleTrailExpandEventBus.emit(true);
 		stateMachineEventBus.emit('up1');
 	}

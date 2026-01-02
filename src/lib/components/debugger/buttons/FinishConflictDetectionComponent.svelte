@@ -7,7 +7,7 @@
 	let upnIcon = '/icons/UPn.svg';
 
 	function finishConflictDetection(): void {
-		getSolverMachine().disableStops();
+		getSolverMachine().disableStepDelay();
 		toggleTrailExpandEventBus.emit(true);
 		stateMachineEventBus.emit('finishCD');
 	}

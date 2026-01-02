@@ -5,7 +5,6 @@ import {
 	type StateMachineEvent
 } from '$lib/events/events.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
-import { tick } from 'svelte';
 import type { State, StateFun, StateInput, StateMachine } from './StateMachine.svelte.ts';
 
 export type KnownSolver = 'bkt' | 'dpll' | 'cdcl';
@@ -24,8 +23,8 @@ export interface SolverStateInterface<F extends StateFun, I extends StateInput> 
 	onDetectingConflict: () => boolean;
 	identify: () => KnownSolver;
 	getStateMachine: () => StateMachine<F, I>;
-	updateStopTimeout: (ms: number) => void;
-	disableStops(): void;
+	updateStepDelayMS: (ms: number) => void;
+	disableStepDelay(): void;
 	stop(): void;
 }
 
@@ -36,22 +35,22 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 	private runningOnAuto: boolean = $state(false);
 	private forcedStop: boolean = $state(false);
 	private solverId: KnownSolver = $state('bkt');
-	private stopTimeoutMS: number = 0;
+	private stepDelayMS: number = 0;
 
-	constructor(stateMachine: StateMachine<F, I>, solverId: KnownSolver, stopTimeoutMS: number = 0) {
+	constructor(stateMachine: StateMachine<F, I>, solverId: KnownSolver, stepDelayMS: number = 0) {
 		this.stateMachine = stateMachine;
 		this.runningOnAuto = false;
 		this.forcedStop = false;
 		this.solverId = solverId;
-		this.stopTimeoutMS = stopTimeoutMS;
+		this.stepDelayMS = stepDelayMS;
 	}
 
-	updateStopTimeout(ms: number): void {
-		this.stopTimeoutMS = Math.max(0, ms);
+	updateStepDelayMS(delayMS: number): void {
+		this.stepDelayMS = Math.max(0, delayMS);
 	}
 
-	disableStops(): void {
-		this.updateStopTimeout(0);
+	disableStepDelay(): void {
+		this.updateStepDelayMS(0);
 	}
 
 	runningOnAutomatic(): boolean {
@@ -151,15 +150,18 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 			return;
 		}
 		this._preStepByStep();
-		const times: number[] = [];
+		const timeouts: number[] = [];
 		while (!this.forcedStop && !this.onFinalState() && continueCond()) {
 			this._step();
-			if (this.stopTimeoutMS > 0) {
-				await tick();
-				await new Promise((r) => times.push(setTimeout(r, this.stopTimeoutMS)));
+			if (this.stepDelayMS > 0) {
+				const promise = new Promise<void>((resolve) => {
+					const id = setTimeout(resolve, this.stepDelayMS);
+					timeouts.push(id);
+				});
+				await promise;
 			}
 		}
-		times.forEach(clearTimeout);
+		timeouts.forEach(clearTimeout);
 		this._postStepByStep();
 	}
 

@@ -15,7 +15,7 @@
 	let finishTrailIcon = '/icons/Finish Trail.svg';
 
 	function completeTrail(): void {
-		getSolverMachine().disableStops();
+		getSolverMachine().disableStepDelay();
 		updateAssignment('automated');
 		stateMachineEventBus.emit('solve_trail');
 		toggleTrailExpandEventBus.emit(true);

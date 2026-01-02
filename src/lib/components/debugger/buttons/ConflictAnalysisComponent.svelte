@@ -8,7 +8,7 @@
 	let backtrackingIcon = '/icons/Backtracking.svg';
 
 	function finishConflictAnalysis(): void {
-		getSolverMachine().disableStops();
+		getSolverMachine().disableStepDelay();
 		toggleTrailExpandEventBus.emit(true);
 		stateMachineEventBus.emit('finishCA');
 	}

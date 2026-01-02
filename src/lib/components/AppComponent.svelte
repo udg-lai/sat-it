@@ -1,22 +1,23 @@
 <script lang="ts">
 	import TrailEditor from '$lib/components/trail/TrailEditorComponent.svelte';
+	import Literal from '$lib/entities/Literal.svelte.ts';
 	import type { Trail } from '$lib/entities/Trail.svelte.ts';
 	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
 	import {
 		algorithmicUndoEventBus,
 		changeAlgorithmEventBus,
 		changeInstanceEventBus,
-		changeStepDelayEventBus,
 		decisionMadeEventBus,
-		trailStackedEventBus,
+		renderTrailsEventBus,
+		resetProblemEventBus,
 		stateMachineEventBus,
 		stateMachineLifeCycleEventBus,
-		renderTrailsEventBus,
+		stepDelayEventBus,
+		trailStackedEventBus,
 		userActionEventBus,
 		type StateMachineEvent,
 		type StateMachineLifeCycleEvent,
-		type UndoToDecisionEvent,
-		resetProblemEventBus
+		type UndoToDecisionEvent
 	} from '$lib/events/events.ts';
 	import type { DimacsInstance } from '$lib/instances/dimacs-instance.interface.ts';
 	import type { SolverMachine } from '$lib/solvers/SolverMachine.svelte.ts';
@@ -25,13 +26,13 @@
 	import { clearBreakpoints } from '$lib/states/breakpoints.svelte.ts';
 	import {
 		allocDecisionsTrail,
-		undo,
 		saveDecision,
+		undo,
 		wipeDecisions,
 		type SavedDecision
 	} from '$lib/states/decisions.svelte.ts';
-	import { getStepDelay } from '$lib/states/delay-ms.svelte.ts';
 	import { getActiveInstance, getInstance } from '$lib/states/instances.svelte.ts';
+	import { getConfDelayMS } from '$lib/states/parameters.svelte.ts';
 	import { syncProblemWithInstance } from '$lib/states/problem.svelte.ts';
 	import {
 		activateSolverMachine,
@@ -39,7 +40,7 @@
 		stopSolverMachine
 	} from '$lib/states/solver-machine.svelte.ts';
 	import { increaseNoDecisions, resetStatistics } from '$lib/states/statistics.svelte.ts';
-	import { logError } from '$lib/states/toasts.svelte.ts';
+	import { logFatal } from '$lib/states/toasts.svelte.ts';
 	import { stackDifferPos, wipeDifferSequence } from '$lib/states/trail-differ-sequence.svelte.ts';
 	import { getLatestTrail, getTrails, wipeTrails } from '$lib/states/trails.svelte.ts';
 	import type { Algorithm } from '$lib/types/algorithm.ts';
@@ -49,7 +50,6 @@
 	import DebuggerComponent from './debugger/DebuggerComponent.svelte';
 	import { getConfiguredAlgorithm } from './settings/engine/state.svelte.ts';
 	import SolvingInformationComponent from './SolvingInformationComponent.svelte';
-	import Literal from '$lib/entities/Literal.svelte.ts';
 
 	let trails: Trail[] = $state([]);
 
@@ -67,12 +67,12 @@
 	async function stateMachineEvent(s: StateMachineEvent) {
 		if (s !== 'automatic_steps' && s !== 'step') {
 			updateOnStep = false;
-			solverMachine.disableStops();
+			solverMachine.disableStepDelay();
 		}
 		await solverMachine.transitionByEvent(s);
 		if (s !== 'automatic_steps' && s !== 'step') {
 			updateOnStep = true;
-			solverMachine.updateStopTimeout(getStepDelay());
+			solverMachine.updateStepDelayMS(getConfDelayMS());
 		}
 	}
 
@@ -119,10 +119,10 @@
 		stackDifferPos(getLatestTrail().getAssignments().length);
 	}
 
-	function algorithmicUndoSave(event: UndoToDecisionEvent): void {
+	async function algorithmicUndoSave(event: UndoToDecisionEvent): Promise<void> {
 		const varAssignment: VariableAssignment = event.decision;
 		if (!varAssignment.isD()) {
-			logError('Algorithm undo', 'You can only undo to decisions');
+			logFatal('Algorithm undo', 'You can only undo to decisions');
 		}
 		// Get the decisions that will be kept
 		const decision: Lit = event.decision.toLit();
@@ -135,14 +135,15 @@
 		// let's reset the problem.
 		onProblemReset();
 
-		getSolverMachine().transitionByEvent('nextDecision');
+		await getSolverMachine().transitionByEvent('nextDecision');
 		for (const { decision } of decisions) {
 			//a "manual assignment will be performed"
 			const polarity: boolean = !Literal.hatted(decision);
 			const variable: Var = Literal.var(decision);
 			updateAssignment('manual', polarity, variable);
 			// Then decisions will be done until the following decision is found.
-			getSolverMachine().transitionByEvent('nextDecision');
+			console.debug('Reapplying decision:', decision);
+			await getSolverMachine().transitionByEvent('nextDecision');
 		}
 	}
 
@@ -195,7 +196,7 @@
 		// update our trails to render them when asked to.
 		subs.push(renderTrailsEventBus.subscribe(updateTrails));
 		// update machine delay
-		subs.push(changeStepDelayEventBus.subscribe((time) => solverMachine.updateStopTimeout(time)));
+		subs.push(stepDelayEventBus.subscribe((delay) => solverMachine.updateStepDelayMS(delay)));
 		// record and statistics update done when a decision is made
 		subs.push(decisionMadeEventBus.subscribe(onDecision));
 		// update the structures when a trail has been pushed.
