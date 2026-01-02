@@ -25,4 +25,4 @@ export const activateSolverMachine = (algorithm: Algorithm): void => {
 	}
 };
 
-export const getSolverMachine = () => solverMachine;
+export const getSolverMachine = (): SolverMachine<StateFun, StateInput> => solverMachine;

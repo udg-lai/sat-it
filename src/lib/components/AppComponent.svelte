@@ -27,10 +27,10 @@
 	import {
 		allocDecisionsTrail,
 		saveDecision,
-		undo,
+		retrieveEarlierDecisions,
 		wipeDecisions,
 		type SavedDecision
-	} from '$lib/states/decisions.svelte.ts';
+	} from '$lib/states/trail-decisions.svelte.ts';
 	import { getActiveInstance, getInstance } from '$lib/states/instances.svelte.ts';
 	import { getConfDelayMS } from '$lib/states/parameters.svelte.ts';
 	import { syncProblemWithInstance } from '$lib/states/problem.svelte.ts';
@@ -50,6 +50,7 @@
 	import DebuggerComponent from './debugger/DebuggerComponent.svelte';
 	import { getConfiguredAlgorithm } from './settings/engine/state.svelte.ts';
 	import SolvingInformationComponent from './SolvingInformationComponent.svelte';
+	import { wipeOccurrenceListQueue } from '$lib/states/queue-occurrence-lists.svelte.ts';
 
 	let trails: Trail[] = $state([]);
 
@@ -81,6 +82,9 @@
 		resetStatistics();
 		wipeDecisions();
 		wipeDifferSequence();
+		// No more occurrence lists queued
+		wipeOccurrenceListQueue();
+
 		// Sync the problem with the new instance, meaning we create
 		// a new set of variables and clauses from the instance.
 		syncProblemWithInstance(dimacsInstance ?? getActiveInstance().getInstance());
@@ -130,10 +134,15 @@
 
 		// This are the decisions that will be reapplied
 		// As solvers are deterministic, reapplying them will lead to the same state.
-		const decisions: List<SavedDecision> = undo(trailID, decision);
+		// PSS. It is mandatory to do it before onProblemReset as the the decisions are wiped there.
+		const decisions: List<SavedDecision> = retrieveEarlierDecisions(trailID, decision);
+
 		// As solver will automatically do the solving process again,
 		// let's reset the problem.
 		onProblemReset();
+
+		// Disable step delays, no animation is required, just solve to the state after reapplying decisions.
+		solverMachine.disableStepDelay();
 
 		// Forces solver to run to the decide state first (propagating if needed)
 		await getSolverMachine().transitionByEvent('nextDecision');

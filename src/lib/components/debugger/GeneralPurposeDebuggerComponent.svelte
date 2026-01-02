@@ -5,7 +5,7 @@
 		getTrailsExpanded,
 		setTrailsExpanded
 	} from '$lib/states/decision-levels-expanded.svelte.ts';
-	import { getDecisions } from '$lib/states/decisions.svelte.ts';
+	import { getDecisions } from '$lib/states/trail-decisions.svelte.ts';
 	import { onDestroy, onMount } from 'svelte';
 	import ExpColTrailComponent from './buttons/ExpColTrailComponent.svelte';
 	import ResetProblem from './buttons/ResetProblemComponent.svelte';
