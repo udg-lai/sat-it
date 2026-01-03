@@ -98,7 +98,8 @@
 		min-height: var(--trail-height);
 		display: flex;
 		flex-direction: row;
-		align-items: end;
+		align-items: center;
 		width: fit-content;
+		gap: var(--assignments-gap);
 	}
 </style>

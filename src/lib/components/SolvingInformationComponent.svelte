@@ -15,13 +15,19 @@
 </script>
 
 <solving-info>
+	<statistics>
+		<StatisticsComponent />
+	</statistics>
 	<div class="selected-configuration">
 		<span>{instanceName} - {algorithm}</span>
 	</div>
-	<StatisticsComponent />
 </solving-info>
 
 <style>
+	statistics {
+		flex: 1;
+	}
+
 	solving-info {
 		height: var(--solving-info-height);
 		border-top: 1px solid var(--border-color);

@@ -346,7 +346,7 @@
 	}
 
 	.container-padding {
-		gap: 1rem;
+		gap: var(--trails-gap);
 	}
 
 	.direction {

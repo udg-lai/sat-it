@@ -68,7 +68,10 @@
 <style>
 	statistics {
 		border: none;
+		font-size: var(--TeX-font-size);
+		height: 100%;
 	}
+
 	.metric {
 		display: flex;
 		justify-content: space-around;
