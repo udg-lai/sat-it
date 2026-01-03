@@ -90,8 +90,7 @@
 			renderTrailsEventBus.emit(getTrails());
 		} else {
 			// If not running on automatic, only update on finish-step-by-step
-			if (signal === 'finish-step-by-step')
-				renderTrailsEventBus.emit(getTrails());
+			if (signal === 'finish-step-by-step') renderTrailsEventBus.emit(getTrails());
 		}
 	}
 
@@ -199,9 +198,11 @@
 		// update the problem when an undo is performed.
 		subs.push(algorithmicUndoEventBus.subscribe(algorithmicUndoSave));
 		// Control what is rendered and what is saved depending on the life cycle of the state machine.
-		subs.push(solverSignalEventBus
-			.pipe(filter(e => e === 'finish-step-by-step' || e == 'finish-step'))
-			.subscribe(solverFinishSignalHandler));
+		subs.push(
+			solverSignalEventBus
+				.pipe(filter((e) => e === 'finish-step-by-step' || e == 'finish-step'))
+				.subscribe(solverFinishSignalHandler)
+		);
 		// update our trails to render them when asked to.
 		subs.push(renderTrailsEventBus.subscribe(updateTrails));
 		// update machine delay
