@@ -38,11 +38,10 @@ export type SolverCommand =
 
 export const solverCommandEventBus = createEventBus<SolverCommand>();
 
-export type SolverSignal =
-	| 'begin-step'
-	| 'begin-step-by-step'
-	| 'finish-step'
-	| 'finish-step-by-step';
+export type FinishSolverSignal = 'finish-step' | 'finish-step-by-step';
+export type BeginSolverSignal = 'begin-step' | 'begin-step-by-step';
+
+export type SolverSignal = FinishSolverSignal | BeginSolverSignal;
 
 // event bus dedicated to the life cycle of the state machine
 export const solverSignalEventBus = createEventBus<SolverSignal>();

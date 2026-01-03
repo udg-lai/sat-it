@@ -3,6 +3,7 @@
 	import Literal from '$lib/entities/Literal.svelte.ts';
 	import type { Trail } from '$lib/entities/Trail.svelte.ts';
 	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
+	import { filter } from '$lib/events/createEventBus.ts';
 	import {
 		algorithmicUndoEventBus,
 		changeAlgorithmEventBus,
@@ -14,7 +15,6 @@
 		solverSignalEventBus,
 		stepDelayEventBus,
 		trailStackedEventBus,
-		userActionEventBus,
 		type SolverCommand,
 		type SolverSignal,
 		type UndoToDecisionEvent
@@ -24,16 +24,10 @@
 	import type { StateFun, StateInput } from '$lib/solvers/StateMachine.svelte.ts';
 	import { updateAssignment } from '$lib/states/assignment.svelte.ts';
 	import { clearBreakpoints } from '$lib/states/breakpoints.svelte.ts';
-	import {
-		allocDecisionsTrail,
-		saveDecision,
-		retrieveEarlierDecisions,
-		wipeDecisions,
-		type SavedDecision
-	} from '$lib/states/trail-decisions.svelte.ts';
 	import { getActiveInstance, getInstance } from '$lib/states/instances.svelte.ts';
 	import { getConfDelayMS } from '$lib/states/parameters.svelte.ts';
 	import { syncProblemWithInstance } from '$lib/states/problem.svelte.ts';
+	import { wipeOccurrenceListQueue } from '$lib/states/queue-occurrence-lists.svelte.ts';
 	import {
 		activateSolverMachine,
 		getSolverMachine,
@@ -41,6 +35,13 @@
 	} from '$lib/states/solver-machine.svelte.ts';
 	import { increaseNoDecisions, resetStatistics } from '$lib/states/statistics.svelte.ts';
 	import { logFatal } from '$lib/states/toasts.svelte.ts';
+	import {
+		allocDecisionsTrail,
+		retrieveEarlierDecisions,
+		saveDecision,
+		wipeDecisions,
+		type SavedDecision
+	} from '$lib/states/trail-decisions.svelte.ts';
 	import { stackDifferPos, wipeDifferSequence } from '$lib/states/trail-differ-sequence.svelte.ts';
 	import { getLatestTrail, getTrails, wipeTrails } from '$lib/states/trails.svelte.ts';
 	import type { Algorithm } from '$lib/types/algorithm.ts';
@@ -50,13 +51,10 @@
 	import DebuggerComponent from './debugger/DebuggerComponent.svelte';
 	import { getConfiguredAlgorithm } from './settings/engine/state.svelte.ts';
 	import SolvingInformationComponent from './SolvingInformationComponent.svelte';
-	import { wipeOccurrenceListQueue } from '$lib/states/queue-occurrence-lists.svelte.ts';
 
 	let trails: Trail[] = $state([]);
 
 	let solverMachine: SolverMachine<StateFun, StateInput> = $derived(getSolverMachine());
-
-	let updateOnStep = true;
 
 	function onDecision(decision: Lit) {
 		// The decision is saved in the list
@@ -65,15 +63,35 @@
 		increaseNoDecisions();
 	}
 
-	async function stateMachineEvent(s: SolverCommand) {
+	async function solverCommandHandler(s: SolverCommand) {
 		if (s !== 'automatic_steps' && s !== 'step') {
-			updateOnStep = false;
 			solverMachine.disableStepDelay();
 		}
 		await solverMachine.transitionByEvent(s);
 		if (s !== 'automatic_steps' && s !== 'step') {
-			updateOnStep = true;
 			solverMachine.updateStepDelayMS(getConfDelayMS());
+		}
+	}
+
+	function solverFinishSignalHandler(signal: SolverSignal): void {
+		// This handler only deals with finishing signals,
+		// it is important because the solver offers two kind of solving modes:
+		// 1. Automatic solving: where the solver runs without stopping until a solution or conflict is found.
+		// 2. Transitioning to certain points: where the solver stops at certain points to allow user interaction.
+		// Option 1 requires updating the trails at each step, while option 2 only requires updating the trails
+		// when the step-by-step finishing signal is received.
+
+		if (signal !== 'finish-step' && signal !== 'finish-step-by-step') {
+			logFatal('Solver Signal', `Unsupported solver finish signal: ${signal}`);
+		}
+
+		if (solverMachine.runningOnAutomatic()) {
+			// Update the trails on each step when running automatically
+			renderTrailsEventBus.emit(getTrails());
+		} else {
+			// If not running on automatic, only update on finish-step-by-step
+			if (signal === 'finish-step-by-step')
+				renderTrailsEventBus.emit(getTrails());
 		}
 	}
 
@@ -151,34 +169,8 @@
 			const polarity: boolean = !Literal.hatted(decision);
 			const variable: Var = Literal.var(decision);
 			updateAssignment('manual', polarity, variable);
-			// Then decisions will be done until the following decision is found.
-			console.debug('Reapplying decision:', decision);
 			// Forces the solver to decide and propagate
 			await getSolverMachine().transitionByEvent('branching');
-		}
-	}
-
-	function solverSignalHandler(l: SolverSignal): void {
-		// This function handles the signals emitted by the solver machine
-
-		console.debug('Solver signal received:', l);
-
-		const updateAll = () => {
-			renderTrailsEventBus.emit(getTrails());
-			userActionEventBus.emit('record');
-		};
-
-		// If it is a finish-step-by-step then all action should be performed
-		if (l === 'finish-step-by-step') {
-			updateAll();
-		} else if (l === 'finish-step') {
-			// Also, all actions should be performed if a single step has been finished and the solver machine is not in auto mode
-			if (!solverMachine.runningOnAutomatic()) {
-				updateAll();
-			} else if (updateOnStep) {
-				// Lastly, only trails should be updated if the updateOnStep is activated.
-				// 	forceTrailsRenderEventBus.emit(getTrails());
-			}
 		}
 	}
 
@@ -197,7 +189,7 @@
 	onMount(() => {
 		const subs: (() => void)[] = [];
 		// transition the state machine event.
-		subs.push(solverCommandEventBus.subscribe(stateMachineEvent));
+		subs.push(solverCommandEventBus.subscribe(solverCommandHandler));
 		// reset the machine + breakpoints when an instance is changed.
 		subs.push(changeInstanceEventBus.subscribe(onInstanceChanged));
 		// reset the machine when the problem is reset.
@@ -207,7 +199,9 @@
 		// update the problem when an undo is performed.
 		subs.push(algorithmicUndoEventBus.subscribe(algorithmicUndoSave));
 		// Control what is rendered and what is saved depending on the life cycle of the state machine.
-		subs.push(solverSignalEventBus.subscribe(solverSignalHandler));
+		subs.push(solverSignalEventBus
+			.pipe(filter(e => e === 'finish-step-by-step' || e == 'finish-step'))
+			.subscribe(solverFinishSignalHandler));
 		// update our trails to render them when asked to.
 		subs.push(renderTrailsEventBus.subscribe(updateTrails));
 		// update machine delay

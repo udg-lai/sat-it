@@ -21,7 +21,7 @@ export function getDecisions(): SavedDecisions {
 
 export const wipeDecisions = (): void => {
 	trailDecisions = [[]];
-}
+};
 
 export function saveDecision(decision: Lit): void {
 	if (trailDecisions.length < 1) {
