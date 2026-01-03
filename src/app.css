@@ -40,7 +40,7 @@
 	--assignment-width-small: 30px;
 	--assignments-gap: 5px;
 	--assignment-width: var(--assignment-width-large);
-	--popover-font-size: 0.9rem;
+	--popover-font-size: 12px;
 	--button-size: 43px;
 	--variable-input-width: 60px;
 	--icon-unselected: #828282;

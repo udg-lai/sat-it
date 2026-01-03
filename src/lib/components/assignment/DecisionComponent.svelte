@@ -71,25 +71,25 @@
 		>
 			<MathTexComponent equation={assignment.toTeX()} />
 		</button>
-
-		<Dropdown open={isOpen} class="dropdownClass">
-			<DropdownItem onclick={emitLevelOpen}>
-				<button>
-					{#if openLevel}
-						Collapse DL
-					{:else}
-						Open DL
-					{/if}
-				</button>
-			</DropdownItem>
-			{#if !fromPreviousTrail}
-				<DropdownItem onclick={emitRevert}>
-					<button> Revert up to here </button>
-				</DropdownItem>
-			{/if}
-		</Dropdown>
 	</decision>
 </HeadTailComponent>
+
+<Dropdown open={isOpen} class="dropdownClass">
+	<DropdownItem onclick={emitLevelOpen}>
+		<button>
+			{#if openLevel}
+				Collapse DL
+			{:else}
+				Open DL
+			{/if}
+		</button>
+	</DropdownItem>
+	{#if !fromPreviousTrail}
+		<DropdownItem onclick={emitRevert}>
+			<button> Revert up to here </button>
+		</DropdownItem>
+	{/if}
+</Dropdown>
 
 <style>
 	.decision {

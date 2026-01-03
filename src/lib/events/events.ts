@@ -2,7 +2,7 @@ import type { Trail } from '$lib/entities/Trail.svelte.ts';
 import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
 import type { LiteralBreakpoint } from '$lib/states/breakpoints.svelte.ts';
 import type { Algorithm } from '$lib/types/algorithm.ts';
-import type { Lit } from '$lib/types/types.ts';
+import type { CRef, Lit } from '$lib/types/types.ts';
 import { createEventBus } from './createEventBus.ts';
 
 // observable of instance changes
@@ -83,3 +83,6 @@ export const decisionMadeEventBus = createEventBus<Lit>();
 
 // event bus to notify about a new trail stacked
 export const trailStackedEventBus = createEventBus<void>();
+
+// event bus for focusing on a clause in the list of clauses by its cref
+export const focusClauseByCRefEventBus = createEventBus<CRef>();
