@@ -23,16 +23,16 @@
 <style>
 	@keyframes blink {
 		0% {
-			opacity: 0.5;
-			transform: translateX(-50%) scale(0.8);
+			opacity: 0.7;
+			transform: translateX(-50%) scale(0.9);
 		}
 		50% {
 			opacity: 1;
 			transform: translateX(-50%) scale(1);
 		}
 		100% {
-			opacity: 0.5;
-			transform: translateX(-50%) scale(0.8);
+			opacity: 0.7;
+			transform: translateX(-50%) scale(0.9);
 		}
 	}
 
@@ -58,7 +58,7 @@
 		opacity: var(--inspecting-opacity);
 		transition: opacity 0.15s ease;
 
-		animation: blink 1s infinite ease-in-out;
+		animation: blink 2s infinite ease-in-out;
 		animation-play-state: paused;
 	}
 

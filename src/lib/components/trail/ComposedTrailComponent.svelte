@@ -77,6 +77,7 @@
 				align={'end'}
 				reverse={true}
 				repeat={false}
+				aspect={'padding-top: 1rem;'}
 			/>
 		</div>
 	{/if}
@@ -87,7 +88,7 @@
 		<div class="empty-slot"></div>
 	</div>
 	{#if trail.showCA}
-		<CanvasComponent context={resolutions} width={trailWidth} align={'start'} />
+		<CanvasComponent context={resolutions} width={trailWidth} align={'start'} aspect={'padding-bottom: 1rem;'} />
 	{/if}
 </composed-trail>
 
@@ -109,6 +110,7 @@
 
 	.fit-content {
 		width: fit-content;
+		max-height: var(--trail-height);
 	}
 
 	.empty-slot {
@@ -121,6 +123,7 @@
 		display: flex;
 		flex-direction: column;
 		position: relative;
-		top: 7.5px;
+		top: var(--composed-top);
+		flex: 1;
 	}
 </style>

@@ -17,9 +17,10 @@
 		align: 'end' | 'start';
 		reverse?: boolean;
 		repeat?: boolean;
+		aspect?: string;
 	}
 
-	let { context, width, align, reverse = false, repeat = true }: Props = $props();
+	let { context, width, align, reverse = false, repeat = true, aspect }: Props = $props();
 
 	let canvasContainer: HTMLDivElement;
 
@@ -31,12 +32,17 @@
 		}
 	}
 
+	let style: string = $derived.by(() => {
+		return aspect ? aspect : '' + '--width: ' + width + 'px;';
+	});
+
+
 	$effect(() => {
 		if (context) scrollToBottom(); // Scroll to bottom when context changes
 	});
 </script>
 
-<trail-canvas class="canvas" bind:this={canvasContainer} style="--width: {width}px">
+<trail-canvas class="canvas" bind:this={canvasContainer} style={style}>
 	<div class="canvas-sheet" style="--align: {align}">
 		{#each context as ctx, index (index)}
 			{#if isLeft(ctx)}
@@ -55,7 +61,7 @@
 
 <style>
 	.empty-slot {
-		width: var(--empty-slot);
+		width: var(--vertical-clause-width);
 	}
 
 	.canvas {
@@ -78,5 +84,6 @@
 		align-items: var(--align);
 		min-height: 100%;
 		color: var(--unsatisfied-color);
+		gap: var(--vertical-clauses-gap);
 	}
 </style>
