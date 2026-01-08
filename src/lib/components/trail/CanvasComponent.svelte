@@ -65,7 +65,6 @@
 	}
 
 	.canvas {
-		height: 150px;
 		width: var(--width);
 		overflow-y: auto;
 		overflow-x: hidden;

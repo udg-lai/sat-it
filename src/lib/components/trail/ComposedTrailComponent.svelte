@@ -81,7 +81,7 @@
 			/>
 		</div>
 	{/if}
-	<div use:observeWidth class="fit-content width-observer">
+	<div id={"trail_" + trail.id}  use:observeWidth class="fit-content width-observer">
 		<div class:views-opened={trail.showCA || trail.showUPs}>
 			<TrailComponent composedTrail={trail} {emitRevert} />
 		</div>

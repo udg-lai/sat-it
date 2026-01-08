@@ -29,9 +29,6 @@ export class Trail {
 	private lemma: Clause | undefined = $state(undefined);
 	private conflictiveClause: Clause | undefined = $state(undefined);
 	private state: TrailState = $state('running');
-	private trailHeight: number = $derived.by(() => this._computeHeight());
-	private readonly defaultTrailHeight: number = 56;
-	private readonly canvasHeight: number = 150;
 
 	copy(): Trail {
 		const newTrail = new Trail();
@@ -230,14 +227,6 @@ export class Trail {
 		return this.showCtxView;
 	}
 
-	setHeight(height: number): void {
-		this.trailHeight = height;
-	}
-
-	getHeight(): number {
-		return this.trailHeight;
-	}
-
 	[Symbol.iterator]() {
 		return this.assignments.values();
 	}
@@ -348,23 +337,5 @@ export class Trail {
 			clause: this.getConflictiveClause() as Clause,
 			literal: 0
 		});
-	}
-
-	private _computeHeight(): number {
-		let height = this.defaultTrailHeight;
-		if (this.showCtxView) {
-			const solver = getSolverMachine();
-			if (solver.identify() === 'bkt') {
-				if (this.conflictiveClause !== undefined) {
-					height += this.canvasHeight; // Extra height for conflictive clause
-				}
-			} else {
-				height += this.canvasHeight; // Extra height for ups
-				if (this.hasConflictiveClause()) {
-					height += this.canvasHeight; // Extra height for conflictive clause and conflict analysis
-				}
-			}
-		}
-		return height;
 	}
 }
