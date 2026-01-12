@@ -100,7 +100,7 @@ export const preConflictAnalysis = () => {
 		getSolverMachine().transition('unsat_state');
 	} else {
 		getSolverMachine().transition('build_conflict_analysis_state');
-		
+
 		buildConflictAnalysisTransition();
 
 		// This is keep now, when the chronological backtracking is implemented,

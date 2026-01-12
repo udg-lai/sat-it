@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { userActionEventBus } from '$lib/events/events.ts';
-	import '../style.css';
 	import ImageRender from '$lib/components/tools/ImageRender.svelte';
+	import { decisionUndoEventBus } from '$lib/events/events.ts';
+	import '../style.css';
 
 	interface Props {
 		btnUndoActive?: boolean;
@@ -16,7 +16,7 @@
 	class:invalidOption={!btnUndoActive}
 	title="Undo"
 	disabled={!btnUndoActive}
-	onclick={() => userActionEventBus.emit('undo')}
+	onclick={() => decisionUndoEventBus.emit()}
 >
 	<ImageRender icon={undoIcon} alt="User undo icon" />
 </button>

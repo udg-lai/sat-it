@@ -1,12 +1,8 @@
 <script lang="ts">
-	import {
-		solverCommandEventBus,
-		toggleTrailExpandEventBus,
-		userActionEventBus
-	} from '$lib/events/events.ts';
+	import ImageRender from '$lib/components/tools/ImageRender.svelte';
+	import { solverCommandEventBus, toggleTrailExpandEventBus } from '$lib/events/events.ts';
 	import { updateAssignment } from '$lib/states/assignment.svelte.ts';
 	import '../style.css';
-	import ImageRender from '$lib/components/tools/ImageRender.svelte';
 
 	interface Props {
 		finished?: boolean;
@@ -20,7 +16,6 @@
 	function solveAutomatic() {
 		updateAssignment('automated');
 		solverCommandEventBus.emit('automatic_steps');
-		userActionEventBus.emit('record');
 		toggleTrailExpandEventBus.emit(true);
 	}
 </script>
