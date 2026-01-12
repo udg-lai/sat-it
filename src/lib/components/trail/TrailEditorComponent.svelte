@@ -174,7 +174,6 @@
 
 	function getTopOffset(trailIndex: number): number {
 		const el: HTMLElement | null = document.getElementById(`trail_${trailIndex}`);
-		console.log(el);
 		if (el) {
 			const rect = el.getBoundingClientRect();
 			const parentRect = el.parentElement?.getBoundingClientRect();

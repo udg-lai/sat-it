@@ -92,6 +92,13 @@
 		} else {
 			// If not running on automatic, only update on finish-step-by-step
 			if (signal === 'finish-step-by-step') renderTrailsEventBus.emit(getTrails());
+			else {
+				// For some reason a n+1 trail is created when finishing a step
+				// we need to show it
+				if (getTrails().length > trails.length) {
+					renderTrailsEventBus.emit(getTrails());
+				}
+			}
 		}
 	}
 
@@ -206,7 +213,7 @@
 		// Control what is rendered and what is saved depending on the life cycle of the state machine.
 		subs.push(
 			solverSignalEventBus
-				.pipe(filter((e) => e === 'finish-step-by-step' || e == 'finish-step'))
+				.pipe(filter((e: SolverSignal) => e === 'finish-step-by-step' || e == 'finish-step'))
 				.subscribe(solverFinishSignalHandler)
 		);
 		// update our trails to render them when asked to.
