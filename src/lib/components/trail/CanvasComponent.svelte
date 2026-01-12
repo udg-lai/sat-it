@@ -36,13 +36,12 @@
 		return aspect ? aspect : '' + '--width: ' + width + 'px;';
 	});
 
-
 	$effect(() => {
 		if (context) scrollToBottom(); // Scroll to bottom when context changes
 	});
 </script>
 
-<trail-canvas class="canvas" bind:this={canvasContainer} style={style}>
+<trail-canvas class="canvas" bind:this={canvasContainer} {style}>
 	<div class="canvas-sheet" style="--align: {align}">
 		{#each context as ctx, index (index)}
 			{#if isLeft(ctx)}

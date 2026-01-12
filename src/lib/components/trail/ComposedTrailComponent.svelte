@@ -81,14 +81,19 @@
 			/>
 		</div>
 	{/if}
-	<div id={"trail_" + trail.id}  use:observeWidth class="fit-content width-observer">
+	<div id={'trail_' + trail.id} use:observeWidth class="fit-content width-observer">
 		<div class:views-opened={trail.showCA || trail.showUPs}>
 			<TrailComponent composedTrail={trail} {emitRevert} />
 		</div>
 		<div class="empty-slot"></div>
 	</div>
 	{#if trail.showCA}
-		<CanvasComponent context={resolutions} width={trailWidth} align={'start'} aspect={'padding-bottom: 1rem;'} />
+		<CanvasComponent
+			context={resolutions}
+			width={trailWidth}
+			align={'start'}
+			aspect={'padding-bottom: 1rem;'}
+		/>
 	{/if}
 </composed-trail>
 

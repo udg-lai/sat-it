@@ -1,5 +1,6 @@
 import { List, type Lit } from '$lib/types/types.ts';
 import { logError, logFatal } from './toasts.svelte.ts';
+import { nTrails } from './trails.svelte.ts';
 
 /**
  * 1, 2, 3, 4up
@@ -10,28 +11,33 @@ export interface SavedDecision {
 	decision: Lit;
 }
 
-export type SavedDecisions = List<List<SavedDecision>>;
+export interface TrailDecisions {
+	trailId: number;
+	decisions: List<SavedDecision>;
+}
+
+export type SavedDecisions = List<TrailDecisions>;
 
 // For each trail it contains the decisions made at that trail
-let trailDecisions: SavedDecisions = $state([[]]);
+let trailDecisions: SavedDecisions = $state([{ trailId: 0, decisions: List() }]);
 
-export function getDecisions(): SavedDecisions {
-	return trailDecisions;
+export function getDecisions(): List<SavedDecision> {
+	return trailDecisions.map(({ decisions }: TrailDecisions) => decisions).flat();
 }
 
 export const wipeDecisions = (): void => {
-	trailDecisions = [[]];
+	trailDecisions = [{ trailId: 0, decisions: List() }];
 };
 
 export function saveDecision(decision: Lit): void {
 	if (trailDecisions.length < 1) {
 		logError('Decision store', 'Missing last decisions list');
 	}
-	trailDecisions[trailDecisions.length - 1].push({ decision });
+	trailDecisions[trailDecisions.length - 1].decisions.push({ decision });
 }
 
 export function allocDecisionsTrail(): void {
-	trailDecisions.push([]);
+	trailDecisions.push({ trailId: nTrails() - 1, decisions: List() });
 }
 
 export function retrieveEarlierDecisions(trailID: number, decision: Lit): List<SavedDecision> {
@@ -45,8 +51,12 @@ export function retrieveEarlierDecisions(trailID: number, decision: Lit): List<S
 		);
 	}
 
-	const previousDecisions: List<SavedDecision> = trailDecisions.slice(0, trailID).flat();
-	const decisionsAtTrail: List<SavedDecision> = trailDecisions[trailID];
+	const previousDecisions: List<SavedDecision> = trailDecisions
+		.slice(0, trailID)
+		.map(({ decisions }: TrailDecisions) => decisions)
+		.flat();
+
+	const decisionsAtTrail: List<SavedDecision> = trailDecisions[trailID].decisions;
 	const previousDecisionsAtTrail = List<SavedDecision>();
 
 	let i = 0;

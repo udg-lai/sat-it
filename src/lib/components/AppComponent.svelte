@@ -1,6 +1,6 @@
 <script lang="ts">
+	import { replay } from '$lib/algorithms/replay.ts';
 	import TrailEditor from '$lib/components/trail/TrailEditorComponent.svelte';
-	import Literal from '$lib/entities/Literal.svelte.ts';
 	import type { Trail } from '$lib/entities/Trail.svelte.ts';
 	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
 	import { filter } from '$lib/events/createEventBus.ts';
@@ -8,6 +8,7 @@
 		algorithmicUndoEventBus,
 		changeAlgorithmEventBus,
 		changeInstanceEventBus,
+		ctrlZEventBus,
 		decisionMadeEventBus,
 		renderTrailsEventBus,
 		resetProblemEventBus,
@@ -22,7 +23,6 @@
 	import type { DimacsInstance } from '$lib/instances/dimacs-instance.interface.ts';
 	import type { SolverMachine } from '$lib/solvers/SolverMachine.svelte.ts';
 	import type { StateFun, StateInput } from '$lib/solvers/StateMachine.svelte.ts';
-	import { updateAssignment } from '$lib/states/assignment.svelte.ts';
 	import { clearBreakpoints } from '$lib/states/breakpoints.svelte.ts';
 	import { getActiveInstance, getInstance } from '$lib/states/instances.svelte.ts';
 	import { getConfDelayMS } from '$lib/states/parameters.svelte.ts';
@@ -37,6 +37,7 @@
 	import { logFatal } from '$lib/states/toasts.svelte.ts';
 	import {
 		allocDecisionsTrail,
+		getDecisions,
 		retrieveEarlierDecisions,
 		saveDecision,
 		wipeDecisions,
@@ -45,7 +46,7 @@
 	import { stackDifferPos, wipeDifferSequence } from '$lib/states/trail-differ-sequence.svelte.ts';
 	import { getLatestTrail, getTrails, wipeTrails } from '$lib/states/trails.svelte.ts';
 	import type { Algorithm } from '$lib/types/algorithm.ts';
-	import type { List, Lit, Var } from '$lib/types/types.ts';
+	import type { List, Lit } from '$lib/types/types.ts';
 	import { modifyLiteralWidth } from '$lib/utils.ts';
 	import { onMount } from 'svelte';
 	import DebuggerComponent from './debugger/DebuggerComponent.svelte';
@@ -161,16 +162,21 @@
 		// Disable step delays, no animation is required, just solve to the state after reapplying decisions.
 		solverMachine.disableStepDelay();
 
-		// Forces solver to run to the decide state first (propagating if needed)
-		await getSolverMachine().transitionByEvent('nextDecision');
-		for (const { decision } of decisions) {
-			//a "manual assignment will be performed"
-			const polarity: boolean = !Literal.hatted(decision);
-			const variable: Var = Literal.var(decision);
-			updateAssignment('manual', polarity, variable);
-			// Forces the solver to decide and propagate
-			await getSolverMachine().transitionByEvent('branching');
-		}
+		await replay(decisions);
+	}
+
+	async function singleUndo(): Promise<void> {
+		// This function reverts the last decision made in the latest trail.
+		// By replaying all the earlier decisions except the last one
+
+		let decisions: List<SavedDecision> = getDecisions();
+		decisions = decisions.slice(0, decisions.length - 1);
+
+		onProblemReset();
+
+		solverMachine.disableStepDelay();
+
+		await replay(decisions);
 	}
 
 	function updateTrails(xs: Trail[]): void {
@@ -211,6 +217,8 @@
 		subs.push(decisionMadeEventBus.subscribe(onDecision));
 		// update the structures when a trail has been pushed.
 		subs.push(trailStackedEventBus.subscribe(onTrailStacked));
+		// undo the last decision that was done
+		subs.push(ctrlZEventBus.subscribe(singleUndo));
 
 		return () => {
 			subs.forEach((f) => f());

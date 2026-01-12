@@ -51,7 +51,7 @@
 	}
 </script>
 
-<trail  class="trail" use:listenContentWidth>
+<trail class="trail" use:listenContentWidth>
 	{#each initialPropagations as assignment (assignment.toVar())}
 		{#if assignment.isK()}
 			<BacktrackingComponent

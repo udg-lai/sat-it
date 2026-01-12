@@ -206,7 +206,6 @@
 			.pipe(filter((t) => t == 'begin-step-by-step'))
 			.subscribe(() => rearrangeTrailEditor(lastReference));
 
-
 		updatesComposedTrailsHeight();
 		updatesTrailTopPositions();
 

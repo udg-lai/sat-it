@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import { algorithmicUndoEventBus } from '$lib/events/events.ts';
+	import { ctrlZEventBus } from '$lib/events/events.ts';
 	import {
 		getTrailsExpanded,
 		setTrailsExpanded
@@ -11,7 +11,6 @@
 	import ResetProblem from './buttons/ResetProblemComponent.svelte';
 	import UndoComponent from './buttons/UndoComponent.svelte';
 	import './style.css';
-	import { getLatestTrail } from '$lib/states/trails.svelte.ts';
 
 	let expanded = $derived(getTrailsExpanded());
 	let btnUndoActive = $derived(getDecisions().length > 0);
@@ -29,11 +28,7 @@
 
 		if (isUndo) {
 			event.preventDefault();
-			// We undo the last decision
-			algorithmicUndoEventBus.emit({
-				decision: getLatestTrail().getDecisions()[-1],
-				trailID: getDecisions().length
-			});
+			ctrlZEventBus.emit();
 		}
 	}
 
