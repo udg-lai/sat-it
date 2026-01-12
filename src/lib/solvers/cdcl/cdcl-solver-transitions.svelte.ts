@@ -100,21 +100,22 @@ export const preConflictAnalysis = () => {
 		getSolverMachine().transition('unsat_state');
 	} else {
 		getSolverMachine().transition('build_conflict_analysis_state');
-	}
-	buildConflictAnalysisTransition();
+		
+		buildConflictAnalysisTransition();
 
-	// This is keep now, when the chronological backtracking is implemented,
-	// the conflictive clause might actually be asserting.
-	const asserting: boolean = assertingClauseInConflictAnalysis();
-	if (asserting) {
-		logFatal(
-			'CDCL Conflict Analysis',
-			'The conflict clause should not be asserting (non-chronological backtracking)'
-		);
-	} else {
-		//In case there is something to apply resolution to, let's highlight it.
-		const nextUP: VariableAssignment = getConflictAnalysis().currentImplication();
-		focusOnAssignment(nextUP.toLit());
+		// This is keep now, when the chronological backtracking is implemented,
+		// the conflictive clause might actually be asserting.
+		const asserting: boolean = assertingClauseInConflictAnalysis();
+		if (asserting) {
+			logFatal(
+				'CDCL Conflict Analysis',
+				'The conflict clause should not be asserting (non-chronological backtracking)'
+			);
+		} else {
+			//In case there is something to apply resolution to, let's highlight it.
+			const nextUP: VariableAssignment = getConflictAnalysis().currentImplication();
+			focusOnAssignment(nextUP.toLit());
+		}
 	}
 };
 
