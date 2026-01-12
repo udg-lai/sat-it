@@ -26,7 +26,7 @@
 		assignment,
 		isLast = false,
 		fromPreviousTrail = false,
-		detailsExpanded = false,
+		detailsExpanded = false
 	}: Props = $props();
 	let buttonId: string = 'btn-' + nanoid();
 
@@ -54,14 +54,6 @@
 	});
 
 	const reasonCRef: CRef = $derived(reasonClause.getCRef());
-
-	const conflictClauseTeX: string = $derived(
-		reasonClause
-			.map((literal) => {
-				return literal.toTeX();
-			})
-			.join('\\: \\:')
-	);
 
 	let chrome: boolean = $derived(onChrome());
 </script>

@@ -9,16 +9,18 @@
 	import { getOccurrenceList } from '$lib/states/occurrence-list.svelte.ts';
 	import { getClausePool } from '$lib/states/problem.svelte.ts';
 	import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
+	import { isJust, makeJust, makeNothing, type Maybe } from '$lib/types/maybe.ts';
 	import type { CRef } from '$lib/types/types.ts';
 	import ClauseComponent from '../ClauseComponent.svelte';
-	import HeadTailComponent from '../HeadTailComponent.svelte';
-	import MathTexComponent from '../MathTexComponent.svelte';
+	import { fromJust } from './../../types/maybe.ts';
+	import HeadTailComponent from './../HeadTailComponent.svelte';
 
 	const solverMachine = $derived(getSolverMachine());
 
-	let clauses: Clause[] = $derived.by(() => {
+	let clauses: Maybe<Clause>[] = $derived.by(() => {
 		const cRefs: CRef[] = getOccurrenceList().getCRefs();
-		return cRefs.map((cRef) => getClausePool().at(cRef));
+		const realClauses: Maybe<Clause>[] = cRefs.map((cRef) => makeJust(getClausePool().at(cRef)));
+		return [makeNothing(), ...realClauses];
 	});
 
 	let focusCRef: CRef | undefined = $derived.by(() => {
@@ -43,79 +45,38 @@
 	}
 </script>
 
-<div class="enumerate-clause">
-	<div class="enumerate"></div>
-	<HeadTailComponent display={focusCRef === undefined}>
-		<div class="static">
-			{#if clauses.length !== 0}
-				{#each clauses[0] as lit, i (i)}
-					<MathTexComponent equation={lit.toTeX()} />
-					{#if i < clauses[0].size() - 1}
-						<MathTexComponent equation={'\\lor'} fontSize={'1rem'} />
-					{/if}
-				{/each}
-			{:else}
-				<MathTexComponent equation={'1'} />
-			{/if}
-		</div>
-	</HeadTailComponent>
-</div>
-<conflict-detection>
-	{#each clauses as clause, i (i)}
-		<div class="enumerate-clause">
+<occurrence-list>
+	{#each clauses as maybeClause, i (i)}
+		<div class="occurrence-list-item">
 			<div class="enumerate">
-				<span>
-					{clause.getCRef()}.
-				</span>
+				<HeadTailComponent display={getOccurrenceList().getPointer() + 1 === i}>
+					{#if isJust(maybeClause)}
+						<span>
+							{fromJust(maybeClause).getCRef()}.
+						</span>
+					{:else}
+						<span></span>
+					{/if}
+				</HeadTailComponent>
 			</div>
-			<HeadTailComponent
-				display={focusCRef === clause.getCRef() && solverMachine.onDetectingConflict()}
-			>
+
+			{#if isJust(maybeClause)}
 				<div
 					class="clause-highlighter"
-					class:inspectedTrue={isSat(clause)}
-					class:inspectedFalse={isUnSat(clause)}
+					class:inspectedTrue={isSat(fromJust(maybeClause))}
+					class:inspectedFalse={isUnSat(fromJust(maybeClause))}
 					class:visited-clause={getOccurrenceList().getPointer() >= i &&
-						isPartial(clause) &&
+						isPartial(fromJust(maybeClause)) &&
 						solverMachine.onDetectingConflict()}
 				>
-					<ClauseComponent {clause} />
+					<ClauseComponent clause={fromJust(maybeClause)} />
 				</div>
-			</HeadTailComponent>
+			{/if}
 		</div>
 	{/each}
-</conflict-detection>
+</occurrence-list>
 
 <style>
-	.static {
-		color: var(--main-bg-color);
-		display: flex;
-		flex-direction: row;
-		gap: 0.5rem;
-		align-items: end;
-		padding: 0.25rem;
-	}
-
-	.enumerate-clause {
-		display: flex;
-		height: 100%;
-		flex-direction: row;
-		gap: 0.5rem;
-		align-items: end;
-		height: 50px;
-		align-items: center;
-		width: fit-content;
-	}
-
-	.enumerate {
-		width: 3.5rem;
-		display: flex;
-		align-items: end;
-		justify-content: center;
-		font-size: 1rem;
-		opacity: var(--opacity-50);
-	}
-
 	.inspectedTrue {
 		background-color: var(--shaded-satisfied-color);
 	}
@@ -126,5 +87,28 @@
 
 	.visited-clause {
 		background-color: var(--visited-clause-color);
+	}
+
+	occurrence-list {
+		display: flex;
+		flex-direction: column;
+		width: 100%;
+	}
+
+	occurrence-list .occurrence-list-item {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.2rem 0.4rem;
+	}
+
+	.enumerate {
+		width: var(--assignment-width);
+		height: var(--assignment-width);
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		text-align: right;
 	}
 </style>
