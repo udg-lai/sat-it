@@ -74,6 +74,7 @@ body {
 	font-size: var(--font-size);
 	font-family: 'Biryani', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 	overflow: hidden;
+	line-height: 1;
 }
 
 body > div {
@@ -96,10 +97,7 @@ body > div {
 	font-style: normal;
 }
 
-.pad-chrome {
-	padding-bottom: var(--TeX-padding-bottom-chrome);
-}
 
-.pad-others {
-	padding-bottom: var(--TeX-padding-bottom-others);
+*, *::before, *::after {
+  box-sizing: border-box;
 }

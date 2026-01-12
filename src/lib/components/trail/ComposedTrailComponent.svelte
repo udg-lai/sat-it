@@ -1,13 +1,12 @@
 <script lang="ts">
-	import type Clause from '$lib/entities/Clause.svelte.ts';
 	import type { ResolutionContext, UPContext } from '$lib/entities/Trail.svelte.ts';
 	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
-	import { getClausePool } from '$lib/states/problem.svelte.ts';
 	import { isLeft, makeLeft, makeRight, unwrapEither, type Either } from '$lib/types/either.ts';
 	import type { ComposedTrail, NeverFn } from '$lib/types/types.ts';
 	import { error } from '$lib/utils.ts';
 	import CanvasComponent, { type CanvasContext } from './CanvasComponent.svelte';
 	import TrailComponent from './TrailComponent.svelte';
+	import UPContextComponent from './UPContextComponent.svelte';
 
 	interface Props {
 		trail: ComposedTrail;
@@ -15,20 +14,6 @@
 	}
 
 	let { trail, emitRevert }: Props = $props();
-
-	function computeUPs(): CanvasContext {
-		const upContext: Either<UPContext, NeverFn>[] = trail.trail.getUPContext();
-		return upContext.map((c) => {
-			if (isLeft(c)) {
-				const { reasonCRef, propagated }: UPContext = unwrapEither(c);
-				const clause: Clause = getClausePool().at(reasonCRef);
-				return makeLeft({
-					clause,
-					hidden: [propagated]
-				});
-			} else return makeRight(error);
-		});
-	}
 
 	function computeResolutions(): CanvasContext {
 		if (!trail.showCA) return [];
@@ -48,7 +33,6 @@
 		}
 	}
 
-	let unitPropagations: CanvasContext = $derived.by(computeUPs);
 	let resolutions: CanvasContext = $derived.by(computeResolutions);
 
 	let trailWidth = $state(0);
@@ -71,14 +55,7 @@
 <composed-trail class="composed-trail" class:opened-views={trail.showUPs || trail.showCA}>
 	{#if trail.showUPs}
 		<div class="up-view">
-			<CanvasComponent
-				context={unitPropagations}
-				width={trailWidth}
-				align={'end'}
-				reverse={true}
-				repeat={false}
-				aspect={'padding-top: 1rem;'}
-			/>
+			<UPContextComponent context={trail.trail.getUPContext()} />
 		</div>
 	{/if}
 	<div id={'trail_' + trail.id} use:observeWidth class="fit-content width-observer">
@@ -98,6 +75,17 @@
 </composed-trail>
 
 <style>
+
+	.up-view {
+		position: relative;
+	}
+
+	.up-view > * {
+		position: relative;
+		top: var(--composed-top);
+	}
+
+
 	.composed-trail {
 		display: flex;
 		flex-direction: column;

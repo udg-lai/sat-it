@@ -43,6 +43,7 @@
 		align-items: center;
 		max-width: var(--vertical-clause-width);
 		min-width: var(--vertical-clause-width);
+		justify-content: end;
 	}
 
 	.satisfied-background {
@@ -52,7 +53,6 @@
 	.satisfied-background::after {
 		position: absolute;
 		width: var(--vertical-clause-width);
-		border-top: 1px solid;
 		border-color: var(--satisfied-border-color-o);
 		content: '';
 	}
@@ -65,7 +65,6 @@
 		position: absolute;
 		width: var(--vertical-clause-width);
 		height: 1px;
-		border-top: 1px solid;
 		border-color: var(--unsatisfied-border-color-o);
 		content: '';
 	}
@@ -75,7 +74,6 @@
 		bottom: 0px;
 		width: var(--vertical-clause-width);
 		height: 1px;
-		border-top: 1px solid;
 		border-color: var(--unsatisfied-border-color-o);
 		content: '';
 	}
@@ -89,7 +87,6 @@
 		top: 0px;
 		width: var(--vertical-clause-width);
 		height: 1px;
-		border-top: 1px solid;
 		border-color: var(--temporal-color);
 		content: '';
 	}

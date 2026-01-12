@@ -135,10 +135,14 @@
 		}
 		trails.at(trailID)?.toggleCtx();
 
-		setTimeout(() => {
-			updatesComposedTrailsHeight();
-			updatesTrailTopPositions();
-		}, 0);
+		// This is mandatory to update the heights and positions when trails change
+		// If no timeout is used, the heights are not correctly computed
+		setTimeout(composedTrailCompanionPositions);
+	}
+
+	function composedTrailCompanionPositions(): void {
+		updatesComposedTrailsHeight();
+		updatesTrailTopPositions();
 	}
 
 	function emitRevert(assignment: VariableAssignment, index: number) {
@@ -196,6 +200,11 @@
 	function updatesComposedTrailsHeight() {
 		composedTrailsHeight = trails.map((_, i) => getComposedTrailHeight(i));
 	}
+
+	$effect(() => {
+		// This is mandatory to update the heights and positions when trails change
+		composedTrailCompanionPositions();
+	})
 
 	onMount(() => {
 		const unsubscribeTrailTracking = trailTrackingEventBus.subscribe(rearrangeTrailEditor);
@@ -278,7 +287,9 @@
 {#snippet enumerateSnippet(trail: Trail, index: number)}
 	<div class="item" style="--height: {composedTrailsHeight[index]}px;">
 		<div class="trail-index" style="--top: {trailsTopPosition[index]}px;">
-			<span class:opacity={index + 1 < trails.length}>{index + 1}.</span>
+			<div class="trail-index-content">
+				<span class:opacity={index + 1 < trails.length}>{index + 1}.</span>
+			</div>
 		</div>
 	</div>
 {/snippet}
@@ -291,7 +302,6 @@
 		overflow-y: auto;
 		overflow-x: hidden;
 		padding: 1.5rem 0.5rem;
-		height: calc(100% - var(--debugger-height) - var(--solving-info-height));
 		background-color: var(--lighter-bg-color);
 	}
 
@@ -342,9 +352,13 @@
 		position: absolute;
 	}
 
-	.trail-index span {
-		position: absolute;
-		margin-top: var(--trail-gap);
+	.trail-index-content {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		height: var(--assignment-width);
+		width: var(--assignment-width);
 	}
 
 	.opacity {

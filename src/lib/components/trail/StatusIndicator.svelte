@@ -86,7 +86,8 @@
 
 	.notification {
 		width: 100%;
-		height: var(--trail-height);
+		height: var(--assignment-width);
+		width: var(--assignment-width);
 		display: flex;
 		justify-content: center;
 		align-items: center;
