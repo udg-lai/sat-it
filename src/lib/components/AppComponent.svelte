@@ -8,8 +8,8 @@
 		algorithmicUndoEventBus,
 		changeAlgorithmEventBus,
 		changeInstanceEventBus,
+		ctrlZEventBus,
 		decisionMadeEventBus,
-		decisionUndoEventBus,
 		renderTrailsEventBus,
 		resetProblemEventBus,
 		solverCommandEventBus,
@@ -166,6 +166,9 @@
 	}
 
 	async function singleUndo(): Promise<void> {
+		// This function reverts the last decision made in the latest trail.
+		// By replaying all the earlier decisions except the last one
+
 		let decisions: List<SavedDecision> = getDecisions();
 		decisions = decisions.slice(0, decisions.length - 1);
 
@@ -215,7 +218,7 @@
 		// update the structures when a trail has been pushed.
 		subs.push(trailStackedEventBus.subscribe(onTrailStacked));
 		// undo the last decision that was done
-		subs.push(decisionUndoEventBus.subscribe(singleUndo));
+		subs.push(ctrlZEventBus.subscribe(singleUndo));
 
 		return () => {
 			subs.forEach((f) => f());

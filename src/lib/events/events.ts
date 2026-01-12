@@ -80,4 +80,4 @@ export const decisionMadeEventBus = createEventBus<Lit>();
 export const trailStackedEventBus = createEventBus<void>();
 
 // event bus to notify a single undo wants to be done.
-export const decisionUndoEventBus = createEventBus<void>();
+export const ctrlZEventBus = createEventBus<void>();

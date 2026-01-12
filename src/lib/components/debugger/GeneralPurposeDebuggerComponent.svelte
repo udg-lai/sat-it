@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import { decisionUndoEventBus } from '$lib/events/events.ts';
+	import { ctrlZEventBus } from '$lib/events/events.ts';
 	import {
 		getTrailsExpanded,
 		setTrailsExpanded
@@ -28,7 +28,7 @@
 
 		if (isUndo) {
 			event.preventDefault();
-			decisionUndoEventBus.emit();
+			ctrlZEventBus.emit();
 		}
 	}
 
