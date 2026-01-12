@@ -27,7 +27,6 @@
 		isLast = false,
 		fromPreviousTrail = false,
 		detailsExpanded = false,
-		showUPInfo = false
 	}: Props = $props();
 	let buttonId: string = 'btn-' + nanoid();
 

@@ -56,14 +56,6 @@
 
 	const reasonCRef: CRef = $derived(reasonClause.getCRef());
 
-	const reasonClauseTeX: string = $derived(
-		reasonClause
-			.map((literal) => {
-				return literal.toTeX();
-			})
-			.join('\\: \\:')
-	);
-
 	let chrome: boolean = $derived(onChrome());
 </script>
 

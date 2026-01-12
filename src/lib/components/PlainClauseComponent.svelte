@@ -8,9 +8,10 @@
 		reverse?: boolean;
 		hidden?: number[];
 		state?: 'unsatisfied' | 'satisfied' | undefined;
+		style?: string;
 	}
 
-	let { clause, reverse = false, hidden = [], state }: Props = $props();
+	let { clause, reverse = false, hidden = [], state, style = '' }: Props = $props();
 
 	const hiddenSet = new Set(hidden);
 
@@ -26,6 +27,7 @@
 	class:unsatisfied-background={state === 'unsatisfied'}
 	class:temporal-background={state === undefined && clause.isTemporal()}
 	class:lemma-background={state === undefined && !clause.isTemporal()}
+	{style}
 >
 	{#each literals as lit, i (i)}
 		<PlainLiteralComponent
@@ -43,7 +45,6 @@
 		align-items: center;
 		max-width: var(--vertical-clause-width);
 		min-width: var(--vertical-clause-width);
-		justify-content: end;
 	}
 
 	.satisfied-background {

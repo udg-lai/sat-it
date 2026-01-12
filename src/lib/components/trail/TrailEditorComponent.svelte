@@ -203,7 +203,7 @@
 	$effect(() => {
 		// This is mandatory to update the heights and positions when trails change
 		composedTrailCompanionPositions();
-	})
+	});
 
 	onMount(() => {
 		const unsubscribeTrailTracking = trailTrackingEventBus.subscribe(rearrangeTrailEditor);
@@ -237,7 +237,7 @@
 	<editor-leaf use:listenContentHeight>
 		<editor-indexes class="direction container-padding">
 			{#each trails as trail, index (index)}
-				{@render enumerateSnippet(trail, index)}
+				{@render enumerateSnippet(index)}
 			{/each}
 		</editor-indexes>
 
@@ -283,7 +283,7 @@
 	</editor-leaf>
 </trail-editor>
 
-{#snippet enumerateSnippet(trail: Trail, index: number)}
+{#snippet enumerateSnippet(index: number)}
 	<div class="item" style="--height: {composedTrailsHeight[index]}px;">
 		<div class="trail-index" style="--top: {trailsTopPosition[index]}px;">
 			<div class="trail-index-content">

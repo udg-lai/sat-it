@@ -1,10 +1,7 @@
 <script lang="ts">
-	import type { ResolutionContext, UPContext } from '$lib/entities/Trail.svelte.ts';
 	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
-	import { isLeft, makeLeft, makeRight, unwrapEither, type Either } from '$lib/types/either.ts';
-	import type { ComposedTrail, NeverFn } from '$lib/types/types.ts';
-	import { error } from '$lib/utils.ts';
-	import CanvasComponent, { type CanvasContext } from './CanvasComponent.svelte';
+	import type { ComposedTrail } from '$lib/types/types.ts';
+	import ResolutionContextComponent from './ResolutionContextComponent.svelte';
 	import TrailComponent from './TrailComponent.svelte';
 	import UPContextComponent from './UPContextComponent.svelte';
 
@@ -14,26 +11,6 @@
 	}
 
 	let { trail, emitRevert }: Props = $props();
-
-	function computeResolutions(): CanvasContext {
-		if (!trail.showCA) return [];
-		else if (!trail.trail.hasConflictiveClause()) return [];
-		else {
-			const resolutionContext: Either<ResolutionContext, NeverFn>[] =
-				trail.trail.getResolutionContext();
-			return resolutionContext.map((c) => {
-				if (isLeft(c)) {
-					const { clause }: ResolutionContext = unwrapEither(c);
-					return makeLeft({
-						clause,
-						hidden: []
-					});
-				} else return makeRight(error);
-			});
-		}
-	}
-
-	let resolutions: CanvasContext = $derived.by(computeResolutions);
 
 	let trailWidth = $state(0);
 
@@ -65,17 +42,11 @@
 		<div class="empty-slot"></div>
 	</div>
 	{#if trail.showCA}
-		<CanvasComponent
-			context={resolutions}
-			width={trailWidth}
-			align={'start'}
-			aspect={'padding-bottom: 1rem;'}
-		/>
+		<ResolutionContextComponent context={trail.trail.getResolutionContext()} />
 	{/if}
 </composed-trail>
 
 <style>
-
 	.up-view {
 		position: relative;
 	}
@@ -84,7 +55,6 @@
 		position: relative;
 		top: var(--composed-top);
 	}
-
 
 	.composed-trail {
 		display: flex;

@@ -39,6 +39,7 @@
 	.unsatisfied-background {
 		border-color: var(--unsatisfied-border-color-o);
 		background-color: var(--unsatisfied-color-o);
+		color: var(--unsatisfied-color);
 	}
 
 	.temporal-background {
