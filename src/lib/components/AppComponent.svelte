@@ -119,6 +119,10 @@
 	}
 
 	function onInstanceChanged(instanceName: string): void {
+		// Stops the current solver machine and activate the configured one again.
+		stopSolverMachine();
+		activateSolverMachine(getConfiguredAlgorithm());
+
 		const instance: DimacsInstance = getInstance(instanceName);
 		// We can not keep the breakpoints when the instance is changed
 		clearBreakpoints();
