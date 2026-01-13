@@ -26,7 +26,7 @@
 		assignment,
 		isLast = false,
 		fromPreviousTrail = false,
-		detailsExpanded = false,
+		detailsExpanded = false
 	}: Props = $props();
 	let buttonId: string = 'btn-' + nanoid();
 

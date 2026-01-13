@@ -48,7 +48,9 @@
 <occurrence-list>
 	{#each clauses as maybeClause, i (i)}
 		<div class="occurrence-list-item">
-			<div class="enumerate">
+			<div 
+			class="enumerate"
+			class:inspecting={getOccurrenceList().getPointer() + 1 === i}>
 				<HeadTailComponent display={getOccurrenceList().getPointer() + 1 === i}>
 					{#if isJust(maybeClause)}
 						<span>
@@ -110,5 +112,10 @@
 		justify-content: center;
 		align-items: center;
 		text-align: right;
+		opacity: var(--non-inspecting-opacity);
+	}
+	
+	.inspecting {
+		opacity: 1.0;
 	}
 </style>

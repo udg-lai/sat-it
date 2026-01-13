@@ -365,7 +365,7 @@
 	}
 
 	.opacity-40 {
-		opacity: 0.4;
+		opacity: var(--non-inspecting-opacity);
 	}
 
 	.top {

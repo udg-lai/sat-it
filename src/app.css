@@ -64,6 +64,7 @@
 	--plain-literal-height: 25px;
 	--cite-bg-color: #cacaca60;
 	--context-max-height: calc(6 * var(--assignment-width));
+	--non-inspecting-opacity: 0.4;
 }
 
 html,
