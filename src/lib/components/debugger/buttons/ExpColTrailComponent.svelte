@@ -1,9 +1,12 @@
 <script lang="ts">
 	import ImageRender from '$lib/components/tools/ImageRender.svelte';
-	import { getTrailsExpanded, setTrailsExpanded } from '$lib/states/decision-levels-expanded.svelte.ts';
+	import {
+		getTrailsExpanded,
+		setTrailsExpanded
+	} from '$lib/states/decision-levels-expanded.svelte.ts';
 	import '../style.css';
 
-	const expanded:boolean = $derived(getTrailsExpanded());
+	const expanded: boolean = $derived(getTrailsExpanded());
 
 	let textCollapse = $derived(expanded ? 'Collapse propagations' : 'Expand propagations');
 
@@ -11,7 +14,7 @@
 	let collapseIcon = '/icons/Collapse.svg';
 
 	const expCol = (): void => {
-		setTrailsExpanded(!expanded)
+		setTrailsExpanded(!expanded);
 	};
 </script>
 

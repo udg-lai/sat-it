@@ -67,11 +67,10 @@
 	async function solverCommandHandler(s: SolverCommand) {
 		if (s !== 'automatic_steps' && s !== 'step') {
 			solverMachine.disableStepDelay();
-		}
-		await solverMachine.transitionByEvent(s);
-		if (s !== 'automatic_steps' && s !== 'step') {
+		} else {
 			solverMachine.updateStepDelayMS(getConfDelayMS());
 		}
+		await solverMachine.transitionByEvent(s);
 	}
 
 	function solverFinishSignalHandler(signal: SolverSignal): void {

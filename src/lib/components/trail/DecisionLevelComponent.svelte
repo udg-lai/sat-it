@@ -19,16 +19,16 @@
 
 	let { composedTrail, decision, propagations = [], emitRevertUpToX }: Props = $props();
 
-	let expanded = $state(true)
+	let expanded = $state(true);
 
 	const emitToggle = (decisionState: boolean): void => {
 		expanded = decisionState;
-	}
+	};
 
 	onMount(() => {
 		const subs: (() => void)[] = [];
-		subs.push(toggleTrailExpandEventBus.subscribe(emitToggle))
-	})
+		subs.push(toggleTrailExpandEventBus.subscribe(emitToggle));
+	});
 </script>
 
 {#if propagations?.length === 0}
@@ -40,10 +40,10 @@
 	/>
 {:else}
 	<DecisionComponent
-		expanded={expanded}
+		{expanded}
 		assignment={decision}
 		isLast={composedTrail.isLast}
-		emitToggle={emitToggle}
+		{emitToggle}
 		fromPreviousTrail={composedTrail.trail.indexOfAssignment(decision) < differOf(composedTrail.id)}
 		{emitRevertUpToX}
 	/>
