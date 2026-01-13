@@ -35,8 +35,6 @@
 	let trailsTopPosition: number[] = $state([0]);
 	let composedTrailsHeight: number[] = $state([0]);
 
-	let expandedTrails: boolean = $state(true);
-
 	let solver: SolverMachine<StateFun, StateInput> = $derived(getSolverMachine());
 
 	let showUPs: boolean = $derived.by(() => {
@@ -207,9 +205,6 @@
 
 	onMount(() => {
 		const unsubscribeTrailTracking = trailTrackingEventBus.subscribe(rearrangeTrailEditor);
-		const unsubscribeExpandedTrails = toggleTrailExpandEventBus.subscribe(
-			(expanded) => (expandedTrails = expanded)
-		);
 		const unsubscribeRunningOnAuto = solverSignalEventBus
 			.pipe(filter((t) => t == 'begin-step-by-step'))
 			.subscribe(() => rearrangeTrailEditor(lastReference));
@@ -219,7 +214,6 @@
 
 		return () => {
 			unsubscribeTrailTracking();
-			unsubscribeExpandedTrails();
 			unsubscribeRunningOnAuto();
 		};
 	});
@@ -249,7 +243,6 @@
 							trail={{
 								trail: trail,
 								id: index,
-								expanded: expandedTrails,
 								isLast: trails.length === index + 1,
 								showUPs: showUPs && trail.showingCtx(),
 								showCA: trail.showingCtx() && trail.hasConflictiveClause()

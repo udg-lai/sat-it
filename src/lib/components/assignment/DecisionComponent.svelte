@@ -13,7 +13,7 @@
 		assignment: VariableAssignment;
 		isLast: boolean;
 		expanded: boolean;
-		emitToggle?: () => void;
+		emitToggle?: (decisionState: boolean) => void;
 		fromPreviousTrail?: boolean;
 		emitRevertUpToX?: () => void;
 	}
@@ -27,8 +27,6 @@
 		emitRevertUpToX
 	}: Props = $props();
 
-	let openLevel: boolean = $state(false);
-
 	const inspectedLiteral: Maybe<Lit> = $derived(getFocusedAssignment());
 	let inspecting: boolean = $derived.by(() => {
 		if (!isJust(inspectedLiteral)) {
@@ -41,21 +39,15 @@
 
 	let chrome: boolean = $derived(onChrome());
 
-	let isOpen: boolean = $state(false);
-
-	$effect(() => {
-		openLevel = expanded;
-	});
+	let openOptions: boolean = $state(false);
 
 	function emitLevelOpen(): void {
-		emitToggle?.();
-		openLevel = !openLevel;
-		isOpen = !isOpen;
+		emitToggle?.(!expanded);
 	}
 
 	const emitRevert = (): void => {
 		emitRevertUpToX?.();
-		isOpen = !isOpen;
+		openOptions = !openOptions;
 	};
 </script>
 
@@ -64,9 +56,9 @@
 		<button
 			class="literal-style decision {chrome ? 'pad-chrome' : 'pad-others'}"
 			class:previous-assignment={fromPreviousTrail}
-			class:open={openLevel}
+			class:open={expanded}
 			onclick={() => {
-				isOpen = !isOpen;
+				openOptions = !openOptions;
 			}}
 		>
 			<MathTexComponent equation={assignment.toTeX()} />
@@ -74,10 +66,10 @@
 	</decision>
 </HeadTailComponent>
 
-<Dropdown open={isOpen} class="dropdownClass">
+<Dropdown open={openOptions} class="dropdownClass">
 	<DropdownItem onclick={emitLevelOpen}>
 		<button>
-			{#if openLevel}
+			{#if expanded}
 				Collapse DL
 			{:else}
 				Open DL

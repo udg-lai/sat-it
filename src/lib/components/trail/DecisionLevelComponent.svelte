@@ -2,11 +2,13 @@
 	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
 	import { differOf } from '$lib/states/trail-differ-sequence.svelte.ts';
 	import type { ComposedTrail } from '$lib/types/types.ts';
+	import { onMount } from 'svelte';
 	import BackjumpingComponent from '../assignment/BackjumpingComponent.svelte';
 	import BacktrackingComponent from '../assignment/BacktrackingComponent.svelte';
 	import ChildlessDecisionComponent from '../assignment/ChildlessDecisionComponent.svelte';
 	import DecisionComponent from '../assignment/DecisionComponent.svelte';
 	import UnitPropagationComponent from '../assignment/UnitPropagationComponent.svelte';
+	import { toggleTrailExpandEventBus } from '$lib/events/events.ts';
 
 	interface Props {
 		composedTrail: ComposedTrail;
@@ -16,6 +18,17 @@
 	}
 
 	let { composedTrail, decision, propagations = [], emitRevertUpToX }: Props = $props();
+
+	let expanded = $state(true)
+
+	const emitToggle = (decisionState: boolean): void => {
+		expanded = decisionState;
+	}
+
+	onMount(() => {
+		const subs: (() => void)[] = [];
+		subs.push(toggleTrailExpandEventBus.subscribe(emitToggle))
+	})
 </script>
 
 {#if propagations?.length === 0}
@@ -27,14 +40,14 @@
 	/>
 {:else}
 	<DecisionComponent
-		expanded={composedTrail.expanded}
+		expanded={expanded}
 		assignment={decision}
 		isLast={composedTrail.isLast}
-		emitToggle={() => (composedTrail.expanded = !composedTrail.expanded)}
+		emitToggle={emitToggle}
 		fromPreviousTrail={composedTrail.trail.indexOfAssignment(decision) < differOf(composedTrail.id)}
 		{emitRevertUpToX}
 	/>
-	{#if composedTrail.expanded}
+	{#if expanded}
 		{#each propagations as assignment (assignment.toVar())}
 			{#if assignment.isK()}
 				<BacktrackingComponent
