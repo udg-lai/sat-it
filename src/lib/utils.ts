@@ -7,9 +7,13 @@ export function enableContextMenu(event: Event) {
 }
 
 export const modifyLiteralWidth = (varCount: number): void => {
-	const width =
-		varCount >= 1000 ? 'var(--trail-literal-large-width)' : 'var(--trail-literal-standard)';
-	document.documentElement.style.setProperty('--trail-literal-min-width', width);
+	const widthKind =
+		varCount >= 1000
+			? 'var(--assignment-width-large)'
+			: varCount >= 100
+				? 'var(--assignment-width-normal)'
+				: 'var(--assignment-width-small)';
+	document.documentElement.style.setProperty('--assignment-width', widthKind);
 };
 
 // Check to see if Chrome or Chromium is the current user's browser.

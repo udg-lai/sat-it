@@ -1,13 +1,9 @@
 <script lang="ts">
-	import type Clause from '$lib/entities/Clause.svelte.ts';
-	import type { ResolutionContext, UPContext } from '$lib/entities/Trail.svelte.ts';
 	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
-	import { getClausePool } from '$lib/states/problem.svelte.ts';
-	import { isLeft, makeLeft, makeRight, unwrapEither, type Either } from '$lib/types/either.ts';
-	import type { ComposedTrail, NeverFn } from '$lib/types/types.ts';
-	import { error } from '$lib/utils.ts';
-	import CanvasComponent, { type CanvasContext } from './CanvasComponent.svelte';
+	import type { ComposedTrail } from '$lib/types/types.ts';
+	import ResolutionContextComponent from './ResolutionContextComponent.svelte';
 	import TrailComponent from './TrailComponent.svelte';
+	import UPContextComponent from './UPContextComponent.svelte';
 
 	interface Props {
 		trail: ComposedTrail;
@@ -15,41 +11,6 @@
 	}
 
 	let { trail, emitRevert }: Props = $props();
-
-	function computeUPs(): CanvasContext {
-		const upContext: Either<UPContext, NeverFn>[] = trail.trail.getUPContext();
-		return upContext.map((c) => {
-			if (isLeft(c)) {
-				const { reasonCRef, propagated }: UPContext = unwrapEither(c);
-				const clause: Clause = getClausePool().at(reasonCRef);
-				return makeLeft({
-					clause,
-					hidden: [propagated]
-				});
-			} else return makeRight(error);
-		});
-	}
-
-	function computeResolutions(): CanvasContext {
-		if (!trail.showCA) return [];
-		else if (!trail.trail.hasConflictiveClause()) return [];
-		else {
-			const resolutionContext: Either<ResolutionContext, NeverFn>[] =
-				trail.trail.getResolutionContext();
-			return resolutionContext.map((c) => {
-				if (isLeft(c)) {
-					const { clause }: ResolutionContext = unwrapEither(c);
-					return makeLeft({
-						clause,
-						hidden: []
-					});
-				} else return makeRight(error);
-			});
-		}
-	}
-
-	let unitPropagations: CanvasContext = $derived.by(computeUPs);
-	let resolutions: CanvasContext = $derived.by(computeResolutions);
 
 	let trailWidth = $state(0);
 
@@ -71,27 +32,30 @@
 <composed-trail class="composed-trail" class:opened-views={trail.showUPs || trail.showCA}>
 	{#if trail.showUPs}
 		<div class="up-view">
-			<CanvasComponent
-				context={unitPropagations}
-				width={trailWidth}
-				align={'end'}
-				reverse={true}
-				repeat={false}
-			/>
+			<UPContextComponent context={trail.trail.getUPContext()} />
 		</div>
 	{/if}
-	<div use:observeWidth class="fit-content width-observer">
+	<div id={'trail_' + trail.id} use:observeWidth class="fit-content width-observer">
 		<div class:views-opened={trail.showCA || trail.showUPs}>
 			<TrailComponent composedTrail={trail} {emitRevert} />
 		</div>
 		<div class="empty-slot"></div>
 	</div>
 	{#if trail.showCA}
-		<CanvasComponent context={resolutions} width={trailWidth} align={'start'} />
+		<ResolutionContextComponent context={trail.trail.getResolutionContext()} />
 	{/if}
 </composed-trail>
 
 <style>
+	.up-view {
+		position: relative;
+	}
+
+	.up-view > * {
+		position: relative;
+		top: var(--composed-top);
+	}
+
 	.composed-trail {
 		display: flex;
 		flex-direction: column;
@@ -109,6 +73,7 @@
 
 	.fit-content {
 		width: fit-content;
+		max-height: var(--trail-height);
 	}
 
 	.empty-slot {
@@ -121,6 +86,7 @@
 		display: flex;
 		flex-direction: column;
 		position: relative;
-		top: 7.5px;
+		top: var(--composed-top);
+		flex: 1;
 	}
 </style>

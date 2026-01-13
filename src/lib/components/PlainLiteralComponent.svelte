@@ -23,9 +23,8 @@
 
 <style>
 	.literal-component {
-		width: var(--plain-literal-width);
-		height: var(--plain-literal-height);
-		padding-top: 30px;
+		width: 100%;
+		height: var(--assignment-width);
 		display: flex;
 		flex-direction: column;
 		justify-content: flex-end;
@@ -33,28 +32,22 @@
 
 	.satisfied-background {
 		background-color: var(--satisfied-color-o);
-		border-left: 1px solid;
-		border-right: 1px solid;
 		border-color: var(--satisfied-border-color-o);
+		color: var(--satisfied-color);
 	}
 
 	.unsatisfied-background {
-		border-left: 1px solid;
-		border-right: 1px solid;
 		border-color: var(--unsatisfied-border-color-o);
 		background-color: var(--unsatisfied-color-o);
+		color: var(--unsatisfied-color);
 	}
 
 	.temporal-background {
-		border-left: 1px solid;
-		border-right: 1px solid;
 		border-color: var(--temporal-color);
 	}
 
 	.lemma-background {
 		background-color: var(--lemma-color);
-		border-left: 1px solid;
-		border-right: 1px solid;
 		border-color: var(--lemma-border-color);
 	}
 </style>

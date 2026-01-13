@@ -2,7 +2,7 @@ import type { Trail } from '$lib/entities/Trail.svelte.ts';
 import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
 import type { LiteralBreakpoint } from '$lib/states/breakpoints.svelte.ts';
 import type { Algorithm } from '$lib/types/algorithm.ts';
-import type { Lit } from '$lib/types/types.ts';
+import type { CRef, Lit } from '$lib/types/types.ts';
 import { createEventBus } from './createEventBus.ts';
 
 // observable of instance changes

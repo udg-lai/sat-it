@@ -8,9 +8,10 @@
 		reverse?: boolean;
 		hidden?: number[];
 		state?: 'unsatisfied' | 'satisfied' | undefined;
+		style?: string;
 	}
 
-	let { clause, reverse = false, hidden = [], state }: Props = $props();
+	let { clause, reverse = false, hidden = [], state, style = '' }: Props = $props();
 
 	const hiddenSet = new Set(hidden);
 
@@ -26,6 +27,7 @@
 	class:unsatisfied-background={state === 'unsatisfied'}
 	class:temporal-background={state === undefined && clause.isTemporal()}
 	class:lemma-background={state === undefined && !clause.isTemporal()}
+	{style}
 >
 	{#each literals as lit, i (i)}
 		<PlainLiteralComponent
@@ -41,8 +43,8 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		padding: 0 calc(4px + 0.25rem);
-		min-width: var(--empty-slot);
+		max-width: var(--vertical-clause-width);
+		min-width: var(--vertical-clause-width);
 	}
 
 	.satisfied-background {
@@ -51,9 +53,7 @@
 
 	.satisfied-background::after {
 		position: absolute;
-		top: -1px;
-		width: var(--plain-literal-width);
-		border-top: 1px solid;
+		width: var(--vertical-clause-width);
 		border-color: var(--satisfied-border-color-o);
 		content: '';
 	}
@@ -64,10 +64,8 @@
 
 	.unsatisfied-background::after {
 		position: absolute;
-		top: 0px;
-		width: var(--plain-literal-width);
+		width: var(--vertical-clause-width);
 		height: 1px;
-		border-top: 1px solid;
 		border-color: var(--unsatisfied-border-color-o);
 		content: '';
 	}
@@ -75,9 +73,8 @@
 	.unsatisfied-background::before {
 		position: absolute;
 		bottom: 0px;
-		width: var(--plain-literal-width);
+		width: var(--vertical-clause-width);
 		height: 1px;
-		border-top: 1px solid;
 		border-color: var(--unsatisfied-border-color-o);
 		content: '';
 	}
@@ -89,9 +86,8 @@
 	.temporal-background::before {
 		position: absolute;
 		top: 0px;
-		width: var(--plain-literal-width);
+		width: var(--vertical-clause-width);
 		height: 1px;
-		border-top: 1px solid;
 		border-color: var(--temporal-color);
 		content: '';
 	}
@@ -99,9 +95,8 @@
 	.temporal-background::after {
 		position: absolute;
 		bottom: 0px;
-		width: var(--plain-literal-width);
+		width: var(--vertical-clause-width);
 		height: 1px;
-		border-top: 1px solid;
 		border-color: var(--temporal-color);
 		content: '';
 	}
@@ -113,9 +108,8 @@
 	.lemma-background::before {
 		position: absolute;
 		top: 0px;
-		width: var(--plain-literal-width);
+		width: var(--vertical-clause-width);
 		height: 1px;
-		border-top: 1px solid;
 		border-color: var(--lemma-border-color);
 		content: '';
 	}
@@ -123,9 +117,8 @@
 	.lemma-background::after {
 		position: absolute;
 		bottom: 0px;
-		width: var(--plain-literal-width);
+		width: var(--vertical-clause-width);
 		height: 1px;
-		border-top: 1px solid;
 		border-color: var(--lemma-border-color);
 		content: '';
 	}

@@ -50,7 +50,6 @@
 					fromPreviousTrail={composedTrail.trail.indexOfAssignment(assignment) <
 						differOf(composedTrail.id)}
 					detailsExpanded={composedTrail.showCA || composedTrail.showUPs}
-					showUPInfo={!composedTrail.showUPs}
 				/>
 			{:else}
 				<UnitPropagationComponent
@@ -59,7 +58,6 @@
 					fromPreviousTrail={composedTrail.trail.indexOfAssignment(assignment) <
 						differOf(composedTrail.id)}
 					detailsExpanded={composedTrail.showCA || composedTrail.showUPs}
-					showUPInfo={!composedTrail.showUPs}
 				/>
 			{/if}
 		{/each}

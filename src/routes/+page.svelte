@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { wipeDecisions } from './../lib/states/trail-decisions.svelte.ts';
 	import { beforeNavigate } from '$app/navigation';
 	import AppComponent from '$lib/components/AppComponent.svelte';
 	import SettingsComponent from '$lib/components/settings/SettingsComponent.svelte';
@@ -34,7 +35,9 @@
 	});
 </script>
 
+<!-- Disable right-click context menu globally -->
 <svelte:body oncontextmenu={disableContextMenu} />
+
 <main class="chakra-petch-medium">
 	{#if toasts}
 		<div class="toasts">

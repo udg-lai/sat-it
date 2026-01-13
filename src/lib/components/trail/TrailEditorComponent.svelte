@@ -32,6 +32,9 @@
 	let lastReference: number = $state(0);
 	const recoveryTimeout: number = 2.5 * 1000;
 
+	let trailsTopPosition: number[] = $state([0]);
+	let composedTrailsHeight: number[] = $state([0]);
+
 	let expandedTrails: boolean = $state(true);
 
 	let solver: SolverMachine<StateFun, StateInput> = $derived(getSolverMachine());
@@ -131,6 +134,15 @@
 			}
 		}
 		trails.at(trailID)?.toggleCtx();
+
+		// This is mandatory to update the heights and positions when trails change
+		// If no timeout is used, the heights are not correctly computed
+		setTimeout(composedTrailCompanionPositions);
+	}
+
+	function composedTrailCompanionPositions(): void {
+		updatesComposedTrailsHeight();
+		updatesTrailTopPositions();
 	}
 
 	function emitRevert(assignment: VariableAssignment, index: number) {
@@ -138,18 +150,6 @@
 			decision: assignment,
 			trailID: index
 		});
-	}
-
-	function alignItem(trail: Trail): string {
-		let classStyle = '';
-		if (showUPs && trail.hasConflictiveClause()) {
-			classStyle += ' center';
-		} else if (showUPs) {
-			classStyle += ' bottom';
-		} else if (trail.hasConflictiveClause()) {
-			classStyle += ' top';
-		}
-		return classStyle;
 	}
 
 	function makeStatusIconStyle(trail: Trail): string {
@@ -172,6 +172,39 @@
 		return trailID + 1 < trails.length ? 'opacity-40' : '';
 	}
 
+	function getTopOffset(trailIndex: number): number {
+		const el: HTMLElement | null = document.getElementById(`trail_${trailIndex}`);
+		if (el) {
+			const rect = el.getBoundingClientRect();
+			const parentRect = el.parentElement?.getBoundingClientRect();
+			if (parentRect) {
+				return rect.top - parentRect.top;
+			}
+		}
+		return 10;
+	}
+
+	function getComposedTrailHeight(trailIndex: number): number {
+		const el: HTMLElement | null = document.getElementById(`composed-trail_${trailIndex}`);
+		if (el) {
+			return el.offsetHeight;
+		}
+		return 0;
+	}
+
+	function updatesTrailTopPositions() {
+		trailsTopPosition = trails.map((_, i) => getTopOffset(i));
+	}
+
+	function updatesComposedTrailsHeight() {
+		composedTrailsHeight = trails.map((_, i) => getComposedTrailHeight(i));
+	}
+
+	$effect(() => {
+		// This is mandatory to update the heights and positions when trails change
+		composedTrailCompanionPositions();
+	});
+
 	onMount(() => {
 		const unsubscribeTrailTracking = trailTrackingEventBus.subscribe(rearrangeTrailEditor);
 		const unsubscribeExpandedTrails = toggleTrailExpandEventBus.subscribe(
@@ -180,6 +213,9 @@
 		const unsubscribeRunningOnAuto = solverSignalEventBus
 			.pipe(filter((t) => t == 'begin-step-by-step'))
 			.subscribe(() => rearrangeTrailEditor(lastReference));
+
+		updatesComposedTrailsHeight();
+		updatesTrailTopPositions();
 
 		return () => {
 			unsubscribeTrailTracking();
@@ -201,14 +237,14 @@
 	<editor-leaf use:listenContentHeight>
 		<editor-indexes class="direction container-padding">
 			{#each trails as trail, index (index)}
-				{@render enumerateSnippet(trail, index)}
+				{@render enumerateSnippet(index)}
 			{/each}
 		</editor-indexes>
 
 		<trails-leaf bind:this={trailsLeafElement}>
 			<editor-trails class="container-padding">
 				{#each trails as trail, index (index)}
-					<div class="composed-trail-observer">
+					<div id={`composed-trail_${index}`} class="composed-trail-observer">
 						<ComposedTrailComponent
 							trail={{
 								trail: trail,
@@ -228,26 +264,31 @@
 		<editor-info class="container-padding direction">
 			{#each trails as trail, index (index)}
 				<div
-					class="item {alignItem(trail)} {computeStatusIndicatorOpacity(index)}"
-					style="--height: {trail.getHeight()}px;"
+					class="item {computeStatusIndicatorOpacity(index)}"
+					style="--height: {composedTrailsHeight[index]}px;"
 				>
-					<StatusIndicator
-						iconClassStyle={makeStatusIconStyle(trail)}
-						trailState={trail.getState()}
-						expanded={trail.showingCtx()}
-						onToggleExpand={() => toggleTrailCtxView(index)}
-						disableClick={solver.identify() === 'bkt' && trail.getConflictiveClause() === undefined}
-					/>
+					<div class="trail-index" style="--top: {trailsTopPosition[index]}px;">
+						<StatusIndicator
+							iconClassStyle={makeStatusIconStyle(trail)}
+							trailState={trail.getState()}
+							expanded={trail.showingCtx()}
+							onToggleExpand={() => toggleTrailCtxView(index)}
+							disableClick={solver.identify() === 'bkt' &&
+								trail.getConflictiveClause() === undefined}
+						/>
+					</div>
 				</div>
 			{/each}
 		</editor-info>
 	</editor-leaf>
 </trail-editor>
 
-{#snippet enumerateSnippet(trail: Trail, index: number)}
-	<div class="item {alignItem(trail)}" style="--height: {trail.getHeight()}px;">
-		<div class="enumerate">
-			<span class:opacity={index + 1 < trails.length}>{index + 1}.</span>
+{#snippet enumerateSnippet(index: number)}
+	<div class="item" style="--height: {composedTrailsHeight[index]}px;">
+		<div class="trail-index" style="--top: {trailsTopPosition[index]}px;">
+			<div class="trail-index-content">
+				<span class:opacity={index + 1 < trails.length}>{index + 1}.</span>
+			</div>
 		</div>
 	</div>
 {/snippet}
@@ -260,7 +301,6 @@
 		overflow-y: auto;
 		overflow-x: hidden;
 		padding: 1.5rem 0.5rem;
-		height: calc(100% - var(--debugger-height) - var(--solving-info-height));
 		background-color: var(--lighter-bg-color);
 	}
 
@@ -298,19 +338,26 @@
 		width: var(--trail-height);
 		display: flex;
 		justify-content: center;
+		position: relative;
 	}
 
-	.enumerate {
-		min-height: var(--trail-height);
+	.trail-index {
+		height: var(--trail-height);
 		width: 100%;
 		align-items: center;
 		justify-content: center;
 		display: flex;
+		top: var(--top);
+		position: absolute;
 	}
 
-	.enumerate span {
-		position: absolute;
-		margin-top: var(--trail-gap);
+	.trail-index-content {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		height: var(--assignment-width);
+		width: var(--assignment-width);
 	}
 
 	.opacity {
@@ -346,7 +393,7 @@
 	}
 
 	.container-padding {
-		gap: 1rem;
+		gap: var(--trails-gap);
 	}
 
 	.direction {
