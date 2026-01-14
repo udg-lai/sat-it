@@ -84,10 +84,6 @@ export const initialTransition = (): void => {
 	}
 };
 
-export const preConflictDetection = (): void => {
-	conflictDetectionBlock();
-};
-
 export const decide = (): void => {
 	const assignment: Lit = decideTransition();
 	const occurrenceList: OccurrenceList = complementaryOccurrencesDetectionTransition(assignment);
@@ -167,7 +163,7 @@ const afterComplementaryBlock = (occurrenceList: OccurrenceList): void => {
 	if (!getSolverMachine().runningOnAutomatic()) conflictDetectionEventBus.emit();
 };
 
-const conflictDetectionBlock = (): void => {
+export const conflictDetectionBlock = (): void => {
 	const traversedOccurrenceList = traversedOccurrenceListTransition();
 	if (traversedOccurrenceList) {
 		dequeueOccurrenceListTransition();

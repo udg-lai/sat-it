@@ -1,4 +1,4 @@
-import { updateOccurrenceList } from '$lib/states/occurrence-list.svelte.ts';
+import { getOccurrenceList, updateOccurrenceList } from '$lib/states/occurrence-list.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
 import { SvelteSet } from 'svelte/reactivity';
 import { SolverMachine } from '../SolverMachine.svelte.ts';
@@ -12,101 +12,36 @@ import {
 } from './bkt-solver-transitions.svelte.ts';
 import { BKT_StateMachine, makeBKTStateMachine } from './bkt-state-machine.svelte.ts';
 import { bkt_stateName2StateId } from './bkt-states.svelte.ts';
+import { getConfDelayMS } from '$lib/states/parameters.svelte.ts';
+import OccurrenceList from '$lib/entities/OccurrenceList.svelte.ts';
 
 export const makeBKTSolver = (): BKT_SolverMachine => {
-	return new BKT_SolverMachine(getStepDelay());
+	return new BKT_SolverMachine(getConfDelayMS());
 };
 
 export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
-	occurrenceList: Occurrences | undefined = $state(undefined);
-
 	constructor(stopTimeMS: number) {
 		const stateMachine: BKT_StateMachine = makeBKTStateMachine();
 		super(stateMachine, 'bkt', stopTimeMS);
-		this.occurrenceList = undefined;
-	}
-
-	resolveOccurrences(): void {
-		this.occurrenceList = undefined;
-	}
-
-	setOccurrenceList(occurrenceList: Occurrences): void {
-		this.occurrenceList = occurrenceList;
-	}
-
-	visitClause(clauseTag: number): void {
-		if (this.occurrenceList === undefined) {
-			logFatal(
-				'Conflict analysis not initialized',
-				'Error at visiting a clause in the BKT Solver Machine'
-			);
-		}
-
-		const { occ: clauses }: Occurrences = this.occurrenceList;
-
-		if (!clauses.has(clauseTag)) {
-			logFatal('Clause not found', 'Error at removing a clause from the BKT Solver Machine');
-		} else {
-			clauses.delete(clauseTag);
-		}
-	}
-
-	consultOccurrenceList(): Occurrences {
-		if (this.occurrenceList === undefined) {
-			logFatal(
-				'Conflict analysis not initialized',
-				'Error at consulting a conflict in the BKT Solver Machine'
-			);
-		}
-		return this.occurrenceList;
-	}
-
-	getRecord(): Record<string, unknown> {
-		return {
-			pending: this.makeOccurrenceListCopy()
-		};
-	}
-
-	private makeOccurrenceListCopy(): Occurrences | undefined {
-		if (this.occurrenceList !== undefined) {
-			const clauses: SvelteSet<number> = new SvelteSet<number>([
-				...this.occurrenceList.occ.values()
-			]);
-			const literal: number = this.occurrenceList.literal;
-			return { occ: clauses, literal };
-		}
-		return undefined;
-	}
-
-	// ** abstract functions **
-	updateFromRecord(record: Record<string, unknown> | undefined): void {
-		if (record === undefined) {
-			this.occurrenceList = undefined;
-			cleanClausesToCheck();
-			return;
-		}
-		const occurrenceListRecord: Occurrences = record['pending'] as Occurrences;
-		this.setOccurrenceList(occurrenceListRecord);
-		if (this.onDetectingConflict()) {
-			const { occ: clauses, literal }: Occurrences = occurrenceListRecord;
-			updateOccurrenceList(clauses, literal);
-		} else {
-			cleanClausesToCheck();
-		}
 	}
 
 	step(): void {
 		const activeId: number = this.stateMachine.getActiveId();
+		// Initial state
 		if (activeId === bkt_stateName2StateId.empty_clause_state) {
-			initialTransition(this);
-		} else if (activeId === bkt_stateName2StateId.all_clauses_checked_state) {
-			preConflictDetection(this);
-		} else if (activeId === bkt_stateName2StateId.delete_clause_state) {
-			analyzeClause(this);
-		} else if (activeId === bkt_stateName2StateId.decide_state) {
-			decide(this);
-		} else if (activeId === bkt_stateName2StateId.empty_pending_occurrence_list_state) {
-			backtracking(this);
+			initialTransition();
+		}
+		// Waiting to analyze the following clause
+		else if (activeId === bkt_stateName2StateId.traversed_occurrences_state) {
+			preConflictDetection();
+		} 
+		// Waiting to do a decision
+		else if (activeId === bkt_stateName2StateId.decide_state) {
+			decide();
+		}
+		// Waiting to perform a backtracking
+		else if (activeId === bkt_stateName2StateId.wipe_occurrence_queue_state) {
+			backtracking();
 		}
 	}
 
@@ -119,11 +54,7 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 	}
 
 	onDetectingConflict(): boolean {
-		if (this.occurrenceList === undefined) {
-			return false;
-		} else {
-			const { occ: clauses }: Occurrences = this.occurrenceList;
-			return clauses.size > 0 && !this.stateMachine.onConflictState();
-		}
+		const occurrenceList: OccurrenceList = getOccurrenceList();
+		return !occurrenceList.isEmpty() && !this.stateMachine.onConflictState()
 	}
 }

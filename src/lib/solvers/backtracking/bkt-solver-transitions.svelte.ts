@@ -11,8 +11,8 @@ import type { CRef, Lit } from '$lib/types/types.ts';
 import type { NonFinalState } from '../StateMachine.svelte.ts';
 import type { Occurrences } from '../types.ts';
 import type {
-	BKT_ALL_CLAUSES_CHECKED_FUN,
-	BKT_ALL_CLAUSES_CHECKED_INPUT,
+	BKT_TRAVERSED_OCCURRENCE_LIST_FUN,
+	BKT_TRAVERSED_OCCURRENCE_LIST_INPUT,
 	BKT_ALL_VARIABLES_ASSIGNED_FUN,
 	BKT_ALL_VARIABLES_ASSIGNED_INPUT,
 	BKT_BACKTRACKING_FUN,
@@ -23,18 +23,18 @@ import type {
 	BKT_CONFLICT_DETECTION_INPUT,
 	BKT_DECIDE_FUN,
 	BKT_DECIDE_INPUT,
-	BKT_DECISION_LEVEL_FUN,
-	BKT_DECISION_LEVEL_INPUT,
-	BKT_DELETE_CLAUSE_FUN,
-	BKT_DELETE_CLAUSE_INPUT,
+	BKT_AT_LEVEL_ZERO_FUN,
+	BKT_AT_LEVEL_ZERO_INPUT,
+	BKT_DEQUEUE_OCCURRENCE_LIST_FUN,
+	BKT_DEQUEUE_OCCURRENCE_LIST_INPUT,
 	BKT_EMPTY_CLAUSE_FUN,
 	BKT_EMPTY_CLAUSE_INPUT,
-	BKT_EMPTY_PENDING_OCCURRENCE_LIST_FUN,
-	BKT_EMPTY_PENDING_OCCURRENCE_LIST_INPUT,
-	BKT_NEXT_CLAUSE_FUN,
-	BKT_NEXT_CLAUSE_INPUT,
-	BKT_PENDING_OCCURRENCE_LIST_INPUT,
-	BKT_PICK_PENDING_CLAUSE_SET_FUN,
+	BKT_WIPE_OCCURRENCE_QUEUE_FUN,
+	BKT_WIPE_OCCURRENCE_QUEUE_INPUT,
+	BKT_NEXT_OCCURRENCE_FUN,
+	BKT_NEXT_OCCURRENCE_INPUT,
+	BKT_PICK_OCCURRENCE_LIST_INPUT,
+	BKT_PICK_OCCURRENCE_LIST_FUN,
 	BKT_QUEUE_OCCURRENCE_LIST_FUN,
 	BKT_QUEUE_OCCURRENCE_LIST_INPUT
 } from './bkt-domain.svelte.ts';
@@ -148,8 +148,8 @@ const allVariablesAssignedTransition = (stateMachine: BKT_StateMachine): void =>
 
 const nextClauseTransition = (stateMachine: BKT_StateMachine, pendingSet: Set<number>): number => {
 	const nextClauseState = stateMachine.getActiveState() as NonFinalState<
-		BKT_NEXT_CLAUSE_FUN,
-		BKT_NEXT_CLAUSE_INPUT
+		BKT_NEXT_OCCURRENCE_FUN,
+		BKT_NEXT_OCCURRENCE_INPUT
 	>;
 	if (nextClauseState.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Next Clause state');
@@ -178,8 +178,8 @@ const emptyPendingSetTransition = (
 	solver: BKT_SolverMachine
 ): void => {
 	const emptyClauseSetState = stateMachine.getActiveState() as NonFinalState<
-		BKT_EMPTY_PENDING_OCCURRENCE_LIST_FUN,
-		BKT_EMPTY_PENDING_OCCURRENCE_LIST_INPUT
+		BKT_WIPE_OCCURRENCE_QUEUE_FUN,
+		BKT_WIPE_OCCURRENCE_QUEUE_INPUT
 	>;
 	if (emptyClauseSetState.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Empty Clause Set state');
@@ -190,8 +190,8 @@ const emptyPendingSetTransition = (
 
 const decisionLevelTransition = (stateMachine: BKT_StateMachine): boolean => {
 	const decisionLevelState = stateMachine.getActiveState() as NonFinalState<
-		BKT_DECISION_LEVEL_FUN,
-		BKT_DECISION_LEVEL_INPUT
+		BKT_AT_LEVEL_ZERO_FUN,
+		BKT_AT_LEVEL_ZERO_INPUT
 	>;
 	if (decisionLevelState.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Decision Level state');
@@ -224,8 +224,8 @@ const allClausesCheckedTransition = (
 	pendingSet: Set<number>
 ): boolean => {
 	const allClausesCheckedState = stateMachine.getActiveState() as NonFinalState<
-		BKT_ALL_CLAUSES_CHECKED_FUN,
-		BKT_ALL_CLAUSES_CHECKED_INPUT
+		BKT_TRAVERSED_OCCURRENCE_LIST_FUN,
+		BKT_TRAVERSED_OCCURRENCE_LIST_INPUT
 	>;
 	if (allClausesCheckedState.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the All Clauses Checked state');
@@ -303,8 +303,8 @@ const pickPendingOccurrenceListTransition = (
 	solver: BKT_SolverMachine
 ): Set<number> => {
 	const pickPendingOccurrenceListState = stateMachine.getActiveState() as NonFinalState<
-		BKT_PICK_PENDING_CLAUSE_SET_FUN,
-		BKT_PENDING_OCCURRENCE_LIST_INPUT
+		BKT_PICK_OCCURRENCE_LIST_FUN,
+		BKT_PICK_OCCURRENCE_LIST_INPUT
 	>;
 	if (pickPendingOccurrenceListState.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Peek Pending Set state');
