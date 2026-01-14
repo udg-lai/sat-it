@@ -36,7 +36,9 @@ export type BKT_CONFLICT_DETECTION_INPUT =
 	| 'dequeue_occurrence_list_state';
 export type BKT_AT_LEVEL_ZERO_INPUT = 'backtracking_state' | 'unsat_state';
 export type BKT_BACKTRACKING_INPUT = 'complementary_occurrences_state';
-export type BKT_DEQUEUE_OCCURRENCE_LIST_INPUT = 'all_variables_assigned_state' | 'at_level_zero_state';
+export type BKT_DEQUEUE_OCCURRENCE_LIST_INPUT =
+	| 'all_variables_assigned_state'
+	| 'at_level_zero_state';
 
 export type BKT_INPUT =
 	| BKT_EMPTY_CLAUSE_INPUT
@@ -86,7 +88,7 @@ export type BKT_QUEUE_OCCURRENCE_LIST_FUN = (occurrenceList: OccurrenceList) => 
 export const queueOccurrenceList: BKT_QUEUE_OCCURRENCE_LIST_FUN = (
 	occurrenceList: OccurrenceList
 ) => {
-	updateOccurrenceList(occurrenceList)
+	updateOccurrenceList(occurrenceList);
 };
 
 export type BKT_DEQUEUE_OCCURRENCE_LIST_FUN = () => void;
