@@ -15,7 +15,6 @@ export const stopSolverMachine = () => {
 export const activateSolverMachine = (algorithm: Algorithm): void => {
 	if (algorithm === 'backtracking') {
 		solverMachine = makeBKTSolver();
-		solverMachine = solverMachine;
 	} else if (algorithm === 'dpll') {
 		//solverMachine = makeDPLLSolver();
 		solverMachine = solverMachine;

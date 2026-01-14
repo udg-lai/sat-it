@@ -1,5 +1,6 @@
 import Literal from '$lib/entities/Literal.svelte.ts';
 import OccurrenceList from '$lib/entities/OccurrenceList.svelte.ts';
+import { conflictDetectionEventBus } from '$lib/events/events.ts';
 import { getOccurrenceList } from '$lib/states/occurrence-list.svelte.ts';
 import { getClausePool } from '$lib/states/problem.svelte.ts';
 import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
@@ -58,6 +59,9 @@ export const backtracking = (): void => {
 const afterAssignmentBlock = (assignment: Lit): void => {
 	const occurrenceList: OccurrenceList = complementaryOccurrencesTransition(assignment);
 	queueOccurrenceListTransition(occurrenceList);
+
+	// This is for showing the up-1 and up-n view
+	if (!getSolverMachine().runningOnAutomatic()) conflictDetectionEventBus.emit();
 };
 
 export const conflictDetectionBlock = () => {
@@ -143,7 +147,10 @@ const dequeueOccurrenceListTransition = (fromConflict: boolean): void => {
 		BKT_DEQUEUE_OCCURRENCE_LIST_INPUT
 	>;
 	if (state.run === undefined) {
-		logFatal('Function call error', 'There should be a function in the Empty Clause Set state');
+		logFatal(
+			'Function call error',
+			'There should be a function in the Dequeue Occurrence List state'
+		);
 	}
 	state.run();
 	if (fromConflict) getSolverMachine().transition('at_level_zero_state');
@@ -228,7 +235,7 @@ const queueOccurrenceListTransition = (occurrenceList: OccurrenceList): void => 
 		BKT_QUEUE_OCCURRENCE_LIST_INPUT
 	>;
 	if (state.run === undefined) {
-		logFatal('Function call error', 'There should be a function in the Queue Clause Set state');
+		logFatal('Function call error', 'There should be a function in the Queue Clause List state');
 	}
 	state.run(occurrenceList);
 	getSolverMachine().transition('traversed_occurrences_state');

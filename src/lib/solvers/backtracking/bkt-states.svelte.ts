@@ -170,10 +170,9 @@ const dequeue_occurrence_list_state: NonFinalState<
 	id: bkt_stateName2StateId['dequeue_occurrence_list_state'],
 	run: dequeueOccurrenceList,
 	description: `Dequeues the analyzed occurrence list`,
-	transitions: new Map<BKT_DEQUEUE_OCCURRENCE_LIST_INPUT, number>().set(
-		'all_variables_assigned_state',
-		bkt_stateName2StateId['all_variables_assigned_state']
-	)
+	transitions: new Map<BKT_DEQUEUE_OCCURRENCE_LIST_INPUT, number>()
+		.set('all_variables_assigned_state', bkt_stateName2StateId['all_variables_assigned_state'])
+		.set('at_level_zero_state', bkt_stateName2StateId['at_level_zero_state'])
 };
 
 const at_level_zero_state: NonFinalState<BKT_AT_LEVEL_ZERO_FUN, BKT_AT_LEVEL_ZERO_INPUT> = {
