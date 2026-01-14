@@ -230,7 +230,7 @@
 >
 	<editor-leaf use:listenContentHeight>
 		<editor-indexes class="direction container-padding">
-			{#each trails as trail, index (index)}
+			{#each trails as _, index (index)}
 				{@render enumerateSnippet(index)}
 			{/each}
 		</editor-indexes>

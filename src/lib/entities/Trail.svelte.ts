@@ -1,4 +1,3 @@
-import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 import { logError, logFatal } from '$lib/states/toasts.svelte.ts';
 import type { CRef, Lit, NeverFn, Var } from '$lib/types/types.ts';
 import { error } from '$lib/utils.ts';
