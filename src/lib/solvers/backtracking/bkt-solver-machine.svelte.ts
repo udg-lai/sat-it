@@ -1,19 +1,16 @@
-import { getOccurrenceList, updateOccurrenceList } from '$lib/states/occurrence-list.svelte.ts';
-import { logFatal } from '$lib/states/toasts.svelte.ts';
-import { SvelteSet } from 'svelte/reactivity';
+import OccurrenceList from '$lib/entities/OccurrenceList.svelte.ts';
+import { getOccurrenceList } from '$lib/states/occurrence-list.svelte.ts';
+import { getConfDelayMS } from '$lib/states/parameters.svelte.ts';
 import { SolverMachine } from '../SolverMachine.svelte.ts';
 import type { BKT_FUN, BKT_INPUT } from './bkt-domain.svelte.ts';
 import {
-	analyzeClause,
 	backtracking,
+	conflictDetectionBlock,
 	decide,
-	initialTransition,
-	preConflictDetection
+	initialTransition
 } from './bkt-solver-transitions.svelte.ts';
 import { BKT_StateMachine, makeBKTStateMachine } from './bkt-state-machine.svelte.ts';
 import { bkt_stateName2StateId } from './bkt-states.svelte.ts';
-import { getConfDelayMS } from '$lib/states/parameters.svelte.ts';
-import OccurrenceList from '$lib/entities/OccurrenceList.svelte.ts';
 
 export const makeBKTSolver = (): BKT_SolverMachine => {
 	return new BKT_SolverMachine(getConfDelayMS());
@@ -33,14 +30,14 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 		}
 		// Waiting to analyze the following clause
 		else if (activeId === bkt_stateName2StateId.traversed_occurrences_state) {
-			preConflictDetection();
+			conflictDetectionBlock();
 		}
 		// Waiting to do a decision
 		else if (activeId === bkt_stateName2StateId.decide_state) {
 			decide();
 		}
 		// Waiting to perform a backtracking
-		else if (activeId === bkt_stateName2StateId.wipe_occurrence_queue_state) {
+		else if (activeId === bkt_stateName2StateId.dequeue_occurrence_list_state) {
 			backtracking();
 		}
 	}

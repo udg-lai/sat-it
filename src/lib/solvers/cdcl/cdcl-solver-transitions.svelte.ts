@@ -330,7 +330,7 @@ const nextOccurrenceTransition = (): number => {
 		logFatal('Function call error', 'There should be a function in the Next Clause state');
 	}
 	// Returns the next clause to be checked from the occurrence list at the head of the queue
-	const cRef: number = state.run();
+	const cRef: CRef = state.run();
 	getSolverMachine().transition('falsified_clause_state');
 	return cRef;
 };
