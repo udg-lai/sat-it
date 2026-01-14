@@ -34,7 +34,7 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 		// Waiting to analyze the following clause
 		else if (activeId === bkt_stateName2StateId.traversed_occurrences_state) {
 			preConflictDetection();
-		} 
+		}
 		// Waiting to do a decision
 		else if (activeId === bkt_stateName2StateId.decide_state) {
 			decide();
@@ -55,6 +55,6 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 
 	onDetectingConflict(): boolean {
 		const occurrenceList: OccurrenceList = getOccurrenceList();
-		return !occurrenceList.isEmpty() && !this.stateMachine.onConflictState()
+		return !occurrenceList.isEmpty() && !this.stateMachine.onConflictState();
 	}
 }

@@ -17,7 +17,10 @@ import {
 	getOccurrencesTableMapping,
 	getVariablePool
 } from '$lib/states/problem.svelte.ts';
-import { getOccurrenceListQueue, wipeOccurrenceListQueue } from '$lib/states/queue-occurrence-lists.svelte.ts';
+import {
+	getOccurrenceListQueue,
+	wipeOccurrenceListQueue
+} from '$lib/states/queue-occurrence-lists.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
 import type { CRef, Lit } from '$lib/types/types.ts';
 
@@ -29,7 +32,9 @@ export type BKT_DECIDE_INPUT = 'complementary_occurrences_state';
 export type BKT_COMPLEMENTARY_OCCURRENCES_INPUT = 'queue_occurrence_list_state';
 export type BKT_QUEUE_OCCURRENCE_LIST_INPUT = 'pick_occurrence_list_state';
 export type BKT_PICK_OCCURRENCE_LIST_INPUT = 'traversed_occurrences_state';
-export type BKT_TRAVERSED_OCCURRENCE_LIST_INPUT = 'next_clause_state' | 'dequeue_occurrence_list_state';
+export type BKT_TRAVERSED_OCCURRENCE_LIST_INPUT =
+	| 'next_clause_state'
+	| 'dequeue_occurrence_list_state';
 export type BKT_NEXT_OCCURRENCE_INPUT = 'falsified_clause_state';
 export type BKT_CONFLICT_DETECTION_INPUT =
 	| 'traversed_occurrences_state'
@@ -95,8 +100,8 @@ export const queueOccurrenceList: BKT_QUEUE_OCCURRENCE_LIST_FUN = (
 export type BKT_PICK_OCCURRENCE_LIST_FUN = () => OccurrenceList;
 
 export const pickPendingOccurrenceList: BKT_PICK_OCCURRENCE_LIST_FUN = () => {
-	const occurrenceList: OccurrenceList = getOccurrenceListQueue().element()
-	updateOccurrenceList(occurrenceList)
+	const occurrenceList: OccurrenceList = getOccurrenceListQueue().element();
+	updateOccurrenceList(occurrenceList);
 	return occurrenceList;
 };
 
@@ -109,7 +114,9 @@ export const dequeueOccurrenceList: BKT_DEQUEUE_OCCURRENCE_LIST_FUN = () => {
 
 export type BKT_TRAVERSED_OCCURRENCE_LIST_FUN = (occurrenceList: OccurrenceList) => boolean;
 
-export const traversedOccurrenceList: BKT_TRAVERSED_OCCURRENCE_LIST_FUN = (occurrenceList: OccurrenceList) => {
+export const traversedOccurrenceList: BKT_TRAVERSED_OCCURRENCE_LIST_FUN = (
+	occurrenceList: OccurrenceList
+) => {
 	return occurrenceList.traversed();
 };
 
@@ -135,10 +142,9 @@ export type BKT_WIPE_OCCURRENCE_QUEUE_FUN = () => void;
 
 export const wipeOccurrenceQueue: BKT_WIPE_OCCURRENCE_QUEUE_FUN = () => {
 	// Drop all the occurrence lists inside the solver (There will only be one)
-	wipeOccurrenceListQueue()
+	wipeOccurrenceListQueue();
 	// Updates the view with an empty occurrence list
-	updateOccurrenceList(new OccurrenceList())
-
+	updateOccurrenceList(new OccurrenceList());
 };
 
 export type BKT_AT_LEVEL_ZERO_FUN = () => boolean;

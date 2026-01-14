@@ -9,8 +9,8 @@
 	import PlainClauseComponent from '../PlainClauseComponent.svelte';
 
 	interface LevelContext {
-		context: Either<UPContext, NeverFn>
-		level: number
+		context: Either<UPContext, NeverFn>;
+		level: number;
 	}
 
 	interface Context {

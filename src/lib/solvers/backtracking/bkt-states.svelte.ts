@@ -64,7 +64,7 @@ export const bkt_stateName2StateId = {
 	falsified_clause_state: 7,
 	wipe_occurrence_queue_state: 8,
 	at_level_zero_state: 9,
-	dequeue_occurrence_list_state: 10,
+	dequeue_occurrence_list_state: 10
 };
 
 // ** define state nodes **
@@ -181,13 +181,13 @@ const falsified_clause_state: NonFinalState<
 	description: 'Check if current clause is unsatisfied',
 	transitions: new Map<BKT_CONFLICT_DETECTION_INPUT, number>()
 		.set('traversed_occurrences_state', bkt_stateName2StateId['traversed_occurrences_state'])
-		.set(
-			'wipe_occurrence_queue_state',
-			bkt_stateName2StateId['wipe_occurrence_queue_state']
-		)
+		.set('wipe_occurrence_queue_state', bkt_stateName2StateId['wipe_occurrence_queue_state'])
 };
 
-const dequeue_occurrence_list_state: NonFinalState<BKT_DEQUEUE_OCCURRENCE_LIST_FUN, BKT_DEQUEUE_OCCURRENCE_LIST_INPUT> = {
+const dequeue_occurrence_list_state: NonFinalState<
+	BKT_DEQUEUE_OCCURRENCE_LIST_FUN,
+	BKT_DEQUEUE_OCCURRENCE_LIST_INPUT
+> = {
 	id: bkt_stateName2StateId['dequeue_occurrence_list_state'],
 	run: dequeueOccurrenceList,
 	description: `Dequeues the analyzed occurrence list`,

@@ -30,7 +30,6 @@ export class Trail {
 	private conflictiveClause: Clause | undefined = $state(undefined);
 	private state: TrailState = $state('running');
 
-
 	copy(): Trail {
 		const newTrail = new Trail();
 		newTrail.assignments = this.assignments.map((assignment) => assignment.copy());

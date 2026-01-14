@@ -52,7 +52,7 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 		else if (activeId === cdcl_stateName2StateId.decide_state) {
 			decide();
 		}
-		// Waiting to begin the conflict analysis process once a conflict has been found 
+		// Waiting to begin the conflict analysis process once a conflict has been found
 		else if (activeId === cdcl_stateName2StateId.wipe_occurrence_queue_state) {
 			preConflictAnalysis();
 		}
