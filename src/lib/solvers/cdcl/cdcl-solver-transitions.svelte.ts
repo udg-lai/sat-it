@@ -71,13 +71,7 @@ import type {
 
 export const initialTransition = (): void => {
 	ecTransition();
-	if (getSolverMachine().onFinalState()) {
-		if (dlZeroCheck()) {
-			getSolverMachine().transition('unsat_state');
-		} else {
-			logError('Initial transition', 'Solver machine on final state but dl different than zero');
-		}
-	} else {
+	if (!getSolverMachine().onFinalState()) {
 		const unitClauses: Set<CRef> = ucdTransition();
 		const occurrenceList: OccurrenceList = new OccurrenceList(makeNothing(), [...unitClauses]);
 		afterComplementaryBlock(occurrenceList);
@@ -214,7 +208,7 @@ const ecTransition = (): void => {
 	} else {
 		const emptyClause: boolean = ecState.run();
 		if (emptyClause) {
-			getSolverMachine().transition('at_level_zero_state');
+			getSolverMachine().transition('unsat_state');
 		} else {
 			getSolverMachine().transition('unit_clauses_detection_state');
 		}

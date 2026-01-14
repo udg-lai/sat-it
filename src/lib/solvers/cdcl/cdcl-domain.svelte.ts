@@ -38,7 +38,7 @@ import type { CRef, List, Lit } from '$lib/types/types.ts';
 
 // ** state inputs **
 
-export type CDCL_EMPTY_CLAUSE_INPUT = 'unit_clauses_detection_state' | 'at_level_zero_state';
+export type CDCL_EMPTY_CLAUSE_INPUT = 'unit_clauses_detection_state' | 'unsat_state';
 
 export type CDCL_UNIT_CLAUSES_DETECTION_INPUT = 'queue_occurrence_list_state';
 
