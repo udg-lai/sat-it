@@ -5,6 +5,7 @@ import {
 	incrementCheckingIndex
 } from '$lib/states/occurrence-list.svelte.ts';
 import { getClausePool } from '$lib/states/problem.svelte.ts';
+import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
 import { getLatestTrail } from '$lib/states/trails.svelte.ts';
 import type { CRef, Lit } from '$lib/types/types.ts';
@@ -43,10 +44,9 @@ import type { BKT_StateMachine } from './bkt-state-machine.svelte.ts';
 
 /* exported transitions */
 
-export const initialTransition = (solver: BKT_SolverMachine): void => {
-	const stateMachine: BKT_StateMachine = solver.getStateMachine();
-	ecTransition(stateMachine);
-	if (stateMachine.onFinalState()) return;
+export const initialTransition = (): void => {
+	ecTransition();
+	if (getSolverMachine().onFinalState()) return;
 	allVariablesAssignedTransition(stateMachine);
 };
 
@@ -111,14 +111,14 @@ const conflictDetectionBlock = (stateMachine: BKT_StateMachine, pendingClauses: 
 	}
 };
 
-const ecTransition = (stateMachine: BKT_StateMachine): void => {
-	if (stateMachine.getActiveId() !== 0) {
+const ecTransition = (): void => {
+	if (getSolverMachine().getActiveStateId() !== 0) {
 		logFatal(
 			'Fail Initial',
 			'Trying to use initialTransition in a state that is not the initial one'
 		);
 	}
-	const ecState = stateMachine.getActiveState() as NonFinalState<
+	const ecState = getSolverMachine().getActiveState() as NonFinalState<
 		BKT_EMPTY_CLAUSE_FUN,
 		BKT_EMPTY_CLAUSE_INPUT
 	>;
@@ -126,8 +126,8 @@ const ecTransition = (stateMachine: BKT_StateMachine): void => {
 		logFatal('Function call error', 'There should be a function in the Empty Clause state');
 	}
 	const result: boolean = ecState.run();
-	if (result) stateMachine.transition('unsat_state');
-	else stateMachine.transition('all_variables_assigned_state');
+	if (result) getSolverMachine().transition('at_level_zero_state');
+	else getSolverMachine().transition('all_variables_assigned_state');
 };
 
 const allVariablesAssignedTransition = (stateMachine: BKT_StateMachine): void => {
