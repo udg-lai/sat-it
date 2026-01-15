@@ -180,7 +180,7 @@ const pick_occurrence_list_state: NonFinalState<
 	description: 'Selects the next occurrence list to process queued',
 	run: pickPendingOccurrenceList,
 	transitions: new Map<CDCL_PICK_OCCURRENCE_LIST_INPUT, number>().set(
-		'all_clauses_checked_state',
+		'traversed_occurrences_state',
 		cdcl_stateName2StateId['traversed_occurrences_state']
 	)
 };

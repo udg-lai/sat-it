@@ -42,7 +42,7 @@ export type CDCL_EMPTY_CLAUSE_INPUT = 'unit_clauses_detection_state' | 'unsat_st
 
 export type CDCL_UNIT_CLAUSES_DETECTION_INPUT = 'queue_occurrence_list_state';
 
-export type CDCL_PICK_OCCURRENCE_LIST_INPUT = 'all_clauses_checked_state';
+export type CDCL_PICK_OCCURRENCE_LIST_INPUT = 'traversed_occurrences_state';
 
 export type CDCL_CHECK_PENDING_OCCURRENCE_LISTS_INPUT =
 	| 'all_variables_assigned_state'

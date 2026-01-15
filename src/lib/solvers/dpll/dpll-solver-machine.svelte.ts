@@ -20,7 +20,6 @@ export const makeDPLLSolver = (): DPLL_SolverMachine => {
 };
 
 export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
-
 	constructor(stopTimeMS: number) {
 		const stateMachine: DPLL_StateMachine = makeDPLLMachine();
 		super(stateMachine, 'dpll', stopTimeMS);
@@ -61,7 +60,7 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 	}
 
 	protected async solveCDStepByStep(): Promise<void> {
-		const queueOccurrences: Queue<OccurrenceList> = getOccurrenceListQueue()
+		const queueOccurrences: Queue<OccurrenceList> = getOccurrenceListQueue();
 		this.automaticStepByStep(() => !queueOccurrences.isEmpty());
 	}
 

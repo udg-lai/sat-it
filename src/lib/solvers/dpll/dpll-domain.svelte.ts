@@ -19,7 +19,10 @@ import {
 	getOccurrencesTableMapping,
 	getVariablePool
 } from '$lib/states/problem.svelte.ts';
-import { getOccurrenceListQueue, wipeOccurrenceListQueue } from '$lib/states/queue-occurrence-lists.svelte.ts';
+import {
+	getOccurrenceListQueue,
+	wipeOccurrenceListQueue
+} from '$lib/states/queue-occurrence-lists.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
 import type { CRef, Lit } from '$lib/types/types.ts';
 
@@ -42,8 +45,8 @@ export type DPLL_QUEUE_OCCURRENCE_LIST_INPUT =
 export type DPLL_UNSTACK_CLAUSE_SET_INPUT = 'are_remaining_occurrences_state';
 
 export type DPLL_TRAVERSED_OCCURRENCE_LIST_INPUT =
-	'next_clause_state' |
-	'dequeue_occurrence_list_state';
+	| 'next_clause_state'
+	| 'dequeue_occurrence_list_state';
 
 export type DPLL_NEXT_OCCURRENCE_INPUT = 'falsified_clause_state';
 
@@ -110,7 +113,9 @@ export const emptyClauseDetection: DPLL_EMPTY_CLAUSE_FUN = () => {
 
 export type DPLL_QUEUE_OCCURRENCE_LIST_FUN = (occurrenceList: OccurrenceList) => void;
 
-export const queueOccurrenceList: DPLL_QUEUE_OCCURRENCE_LIST_FUN = (occurrenceList: OccurrenceList) => {
+export const queueOccurrenceList: DPLL_QUEUE_OCCURRENCE_LIST_FUN = (
+	occurrenceList: OccurrenceList
+) => {
 	getOccurrenceListQueue().enqueue(occurrenceList);
 };
 
@@ -118,7 +123,7 @@ export type DPLL_UNSTACK_OCCURRENCE_LIST_FUN = () => void;
 
 export const unstackOccurrenceList: DPLL_UNSTACK_OCCURRENCE_LIST_FUN = () => {
 	getOccurrenceListQueue().dequeue();
-	updateOccurrenceList(new OccurrenceList())
+	updateOccurrenceList(new OccurrenceList());
 };
 
 export type DPLL_UNIT_CLAUSES_DETECTION_FUN = () => Set<CRef>;
@@ -137,16 +142,18 @@ export const pickPendingOccurrenceList: DPLL_PICK_OCCURRENCE_LIST_FUN = () => {
 
 export type DPLL_TRAVERSED_OCCURRENCE_LIST_FUN = (occurrenceList: OccurrenceList) => boolean;
 
-export const traversedOccurrenceList: DPLL_TRAVERSED_OCCURRENCE_LIST_FUN = (occurrenceList: OccurrenceList) => {
+export const traversedOccurrenceList: DPLL_TRAVERSED_OCCURRENCE_LIST_FUN = (
+	occurrenceList: OccurrenceList
+) => {
 	return occurrenceList.traversed();
 };
 
 export type DPLL_NEXT_OCCURRENCE_FUN = () => CRef;
 
 export const nextClause: DPLL_NEXT_OCCURRENCE_FUN = () => {
-	const occurrenceList: OccurrenceList = getOccurrenceList()
+	const occurrenceList: OccurrenceList = getOccurrenceList();
 	if (occurrenceList.isEmpty()) {
-		logFatal('A non empty set was expected')
+		logFatal('A non empty set was expected');
 	}
 	return occurrenceList.next();
 };
@@ -162,7 +169,7 @@ export const unsatisfiedClause: DPLL_CONFLICT_DETECTION_FUN = (cRef: CRef) => {
 export type DPLL_CHECK_PENDING_OCCURRENCE_LISTS_FUN = () => boolean;
 
 export const pendingOccurrenceList: DPLL_CHECK_PENDING_OCCURRENCE_LISTS_FUN = () => {
-	return getOccurrenceListQueue().isEmpty();
+	return !getOccurrenceListQueue().isEmpty();
 };
 
 export type DPLL_UNIT_CLAUSE_FUN = (cRef: CRef) => boolean;

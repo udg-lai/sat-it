@@ -295,7 +295,7 @@ const pickOccurrenceListTransition = (): void => {
 		logFatal('Function call error', 'No function defined for picking the occurrence list');
 	}
 	state.run();
-	getSolverMachine().transition('all_clauses_checked_state');
+	getSolverMachine().transition('traversed_occurrences_state');
 };
 
 const traversedOccurrenceListTransition = (): boolean => {
@@ -366,7 +366,7 @@ const unitClauseTransition = (cRef: CRef): boolean => {
 	}
 	const isUnit: boolean = unitClauseState.run(cRef);
 	if (isUnit) getSolverMachine().transition('unit_propagation_state');
-	else getSolverMachine().transition('all_clauses_checked_state');
+	else getSolverMachine().transition('traversed_occurrences_state');
 	return isUnit;
 };
 

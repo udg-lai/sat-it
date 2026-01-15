@@ -151,7 +151,10 @@ const are_remaining_occurrences_state: NonFinalState<
 		.set('all_variables_assigned_state', dpll_stateName2StateId['all_variables_assigned_state'])
 };
 
-const pick_occurrence_list_state: NonFinalState<DPLL_PICK_OCCURRENCE_LIST_FUN, DPLL_PICK_OCCURRENCE_LIST_INPUT> = {
+const pick_occurrence_list_state: NonFinalState<
+	DPLL_PICK_OCCURRENCE_LIST_FUN,
+	DPLL_PICK_OCCURRENCE_LIST_INPUT
+> = {
 	id: dpll_stateName2StateId['pick_clause_set_state'],
 	description: 'Get next pending clause set from the queue',
 	run: pickPendingOccurrenceList,
@@ -258,10 +261,7 @@ const dequeue_occurrence_list_state: NonFinalState<
 	)
 };
 
-const at_level_zero_state: NonFinalState<
-	DPLL_AT_LEVEL_ZERO_FUN,
-	DPLL_AT_LEVEL_ZERO_INPUT
-> = {
+const at_level_zero_state: NonFinalState<DPLL_AT_LEVEL_ZERO_FUN, DPLL_AT_LEVEL_ZERO_INPUT> = {
 	id: dpll_stateName2StateId['at_level_zero_state'],
 	run: atLevelZeroFun,
 	description: `Check if decision level of the latest trail is === 0`,
