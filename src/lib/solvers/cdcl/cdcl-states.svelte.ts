@@ -11,7 +11,7 @@ import {
 	emptyClauseDetection,
 	learnConflictClause,
 	nextClause,
-	nonDecisionMade,
+	atLevelZeroFun,
 	pendingOccurrenceList,
 	pickPendingOccurrenceList,
 	pushTrail,
@@ -88,12 +88,12 @@ export const cdcl_stateName2StateId = {
 	clause_evaluation_state: 7,
 	traversed_occurrences_state: 8,
 	next_clause_state: 9,
-	unsatisfied_clause_state: 10,
+	falsified_clause_state: 10,
 	unit_clause_state: 11,
 	unit_propagation_state: 13,
 	complementary_occurrences_state: 14,
 	at_level_zero_state: 15,
-	wipe_occurrence_queue_state: 16,
+	wipe_occurrences_queue_state: 16,
 	build_conflict_analysis_state: 17,
 	asserting_clause_state: 18,
 	virtual_resolution_state: 19,
@@ -203,7 +203,7 @@ const next_clause_state: NonFinalState<CDCL_NEXT_OCCURRENCE_FUN, CDCL_NEXT_OCCUR
 	run: nextClause,
 	transitions: new Map<CDCL_NEXT_OCCURRENCE_INPUT, number>().set(
 		'falsified_clause_state',
-		cdcl_stateName2StateId['unsatisfied_clause_state']
+		cdcl_stateName2StateId['falsified_clause_state']
 	)
 };
 
@@ -211,12 +211,12 @@ const falsified_clause_state: NonFinalState<
 	CDCL_CONFLICT_DETECTION_FUN,
 	CDCL_CONFLICT_DETECTION_INPUT
 > = {
-	id: cdcl_stateName2StateId['unsatisfied_clause_state'],
+	id: cdcl_stateName2StateId['falsified_clause_state'],
 	run: unsatisfiedClause,
 	description: 'Checks if the visiting clause has been falsified',
 	transitions: new Map<CDCL_CONFLICT_DETECTION_INPUT, number>()
 		.set('unit_clause_state', cdcl_stateName2StateId['unit_clause_state'])
-		.set('empty_occurrence_lists_state', cdcl_stateName2StateId['wipe_occurrence_queue_state'])
+		.set('wipe_occurrences_queue_state', cdcl_stateName2StateId['wipe_occurrences_queue_state'])
 };
 
 const unit_clause_state: NonFinalState<CDCL_UNIT_CLAUSE_FUN, CDCL_UNIT_CLAUSE_INPUT> = {
@@ -224,7 +224,7 @@ const unit_clause_state: NonFinalState<CDCL_UNIT_CLAUSE_FUN, CDCL_UNIT_CLAUSE_IN
 	run: unitClause,
 	description: 'Check if current clause is unit',
 	transitions: new Map<CDCL_UNIT_CLAUSE_INPUT, number>()
-		.set('all_clauses_checked_state', cdcl_stateName2StateId['traversed_occurrences_state'])
+		.set('traversed_occurrences_state', cdcl_stateName2StateId['traversed_occurrences_state'])
 		.set('unit_propagation_state', cdcl_stateName2StateId['unit_propagation_state'])
 };
 
@@ -266,7 +266,7 @@ const queue_occurrence_list_state: NonFinalState<
 			'are_remaining_occurrences_state',
 			cdcl_stateName2StateId['are_remaining_occurrences_state']
 		)
-		.set('all_clauses_checked_state', cdcl_stateName2StateId['traversed_occurrences_state'])
+		.set('traversed_occurrences_state', cdcl_stateName2StateId['traversed_occurrences_state'])
 };
 
 const dequeue_occurrence_list_state: NonFinalState<
@@ -284,7 +284,7 @@ const dequeue_occurrence_list_state: NonFinalState<
 
 const at_level_zero_state: NonFinalState<CDCL_AT_LEVEL_ZERO_FUN, CDCL_AT_LEVEL_ZERO_INPUT> = {
 	id: cdcl_stateName2StateId['at_level_zero_state'],
-	run: nonDecisionMade,
+	run: atLevelZeroFun,
 	description: `Check if decision level of the latest trail is === 0`,
 	transitions: new Map<CDCL_AT_LEVEL_ZERO_INPUT, number>()
 		.set('build_conflict_analysis_state', cdcl_stateName2StateId['build_conflict_analysis_state'])
@@ -295,7 +295,7 @@ const wipe_occurrence_queue_state: NonFinalState<
 	CDCL_WIPE_OCCURRENCE_QUEUE_FUN,
 	CDCL_WIPE_OCCURRENCE_QUEUE_INPUT
 > = {
-	id: cdcl_stateName2StateId['wipe_occurrence_queue_state'],
+	id: cdcl_stateName2StateId['wipe_occurrences_queue_state'],
 	run: wipeOccurrenceQueue,
 	description: `Wipes the occurrence queue`,
 	transitions: new Map<CDCL_WIPE_OCCURRENCE_QUEUE_INPUT, number>().set(

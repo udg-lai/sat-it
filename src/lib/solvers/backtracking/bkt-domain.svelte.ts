@@ -129,7 +129,7 @@ export const nonDecisionMade: BKT_AT_LEVEL_ZERO_FUN = () => {
 	return atLevelZero();
 };
 
-export type BKT_BACKTRACKING_FUN = () => number;
+export type BKT_BACKTRACKING_FUN = () => Lit;
 
 export const backtracking: BKT_BACKTRACKING_FUN = () => {
 	const pool: VariablePool = getVariablePool();
