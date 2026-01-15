@@ -67,8 +67,8 @@ export default class WatchTable {
 
 		// The clause allocator (i.e., ClausePool) must have already assigned tags to all clauses
 		for (const clause of clauses) {
-			// The 2-watch scheme makes no sense for unit clauses
-			if (clause.size() === 1) continue;
+			// The 2-watch scheme makes no sense for unit clauses and EMPTY CLAUSES
+			if (clause.size() <= 1) continue;
 
 			// Otherwise, get the first two literals to watch
 			const literals: Literal[] = clause.getLiterals();

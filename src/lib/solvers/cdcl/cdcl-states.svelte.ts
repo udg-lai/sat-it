@@ -135,7 +135,7 @@ const empty_clause_state: NonFinalState<CDCL_EMPTY_CLAUSE_FUN, CDCL_EMPTY_CLAUSE
 	description: 'Seeks for the empty clause in the clause pool',
 	transitions: new Map<CDCL_EMPTY_CLAUSE_INPUT, number>()
 		.set('unit_clauses_detection_state', cdcl_stateName2StateId['unit_clauses_detection_state'])
-		.set('at_level_zero_state', cdcl_stateName2StateId['at_level_zero_state'])
+		.set('unsat_state', cdcl_stateName2StateId['unsat_state'])
 };
 
 const decide_state: NonFinalState<CDCL_DECIDE_FUN, CDCL_DECIDE_INPUT> = {
