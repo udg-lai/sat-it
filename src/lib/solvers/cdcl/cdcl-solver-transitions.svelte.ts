@@ -78,10 +78,6 @@ export const initialTransition = (): void => {
 	}
 };
 
-export const preConflictDetection = (): void => {
-	conflictDetectionBlock();
-};
-
 export const decide = (): void => {
 	const assignment: Lit = decideTransition();
 	const occurrenceList: OccurrenceList = complementaryOccurrencesDetectionTransition(assignment);
@@ -161,7 +157,7 @@ const afterComplementaryBlock = (occurrenceList: OccurrenceList): void => {
 	if (!getSolverMachine().runningOnAutomatic()) conflictDetectionEventBus.emit();
 };
 
-const conflictDetectionBlock = (): void => {
+export const conflictDetectionBlock = (): void => {
 	const traversedOccurrenceList = traversedOccurrenceListTransition();
 	if (traversedOccurrenceList) {
 		dequeueOccurrenceListTransition();
@@ -328,7 +324,7 @@ const nextOccurrenceTransition = (): number => {
 		logFatal('Function call error', 'There should be a function in the Next Clause state');
 	}
 	// Returns the next clause to be checked from the occurrence list at the head of the queue
-	const cRef: number = state.run();
+	const cRef: CRef = state.run();
 	getSolverMachine().transition('falsified_clause_state');
 	return cRef;
 };

@@ -188,7 +188,7 @@ export const backtracking = (pool: VariablePool): Lit => {
 	newTrail.push(VariableAssignment.newBacktrackingAssignment(variable));
 
 	increaseNoConflicts();
-	stackTrail(newTrail);
+	stackTrail(newTrail, true);
 
 	//Notify that a new trail has been pushed
 	trailStackedEventBus.emit();

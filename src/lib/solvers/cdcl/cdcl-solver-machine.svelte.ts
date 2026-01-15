@@ -9,10 +9,10 @@ import { SolverMachine } from '../SolverMachine.svelte.ts';
 import type { CDCL_FUN, CDCL_INPUT } from './cdcl-domain.svelte.ts';
 import {
 	conflictAnalysisBlock,
+	conflictDetectionBlock,
 	decide,
 	initialTransition,
-	preConflictAnalysis,
-	preConflictDetection
+	preConflictAnalysis
 } from './cdcl-solver-transitions.svelte.ts';
 import { CDCL_StateMachine, makeCDCLStateMachine } from './cdcl-state-machine.svelte.ts';
 import { cdcl_stateName2StateId } from './cdcl-states.svelte.ts';
@@ -46,15 +46,17 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 		}
 		//Waiting to enter or not the clause analysis
 		else if (activeId === cdcl_stateName2StateId.traversed_occurrences_state) {
-			preConflictDetection();
+			conflictDetectionBlock();
 		}
 		//Waiting to decide a variables
 		else if (activeId === cdcl_stateName2StateId.decide_state) {
 			decide();
-		} else if (activeId === cdcl_stateName2StateId.wipe_occurrence_queue_state) {
+		}
+		// Waiting to begin the conflict analysis process once a conflict has been found
+		else if (activeId === cdcl_stateName2StateId.wipe_occurrence_queue_state) {
 			preConflictAnalysis();
 		}
-		//Waiting to backtrack an assignment
+		// Waiting to analyze a conflict
 		else if (activeId === cdcl_stateName2StateId.virtual_resolution_state) {
 			conflictAnalysisBlock();
 		}
