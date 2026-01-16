@@ -13,9 +13,7 @@
 
 <clause class={classStyle ?? ''}>
 	{#if clause.isEmpty()}
-		<empty-clause>
-			
-		</empty-clause>
+		<empty-clause> </empty-clause>
 	{:else}
 		{#each clause as lit, i (i)}
 			<LiteralComponent literal={lit} />

@@ -32,7 +32,6 @@
 					{#if ctx.left.clause.isEmpty()}
 						<empty-clause></empty-clause>
 					{:else}
-
 						<PlainClauseComponent
 							clause={ctx.left.clause}
 							hidden={[]}
@@ -76,7 +75,7 @@
 	.scrollable-context.is-scrollable:hover {
 		cursor: ns-resize;
 	}
-	
+
 	empty-clause {
 		height: var(--font-size);
 		width: var(--font-size);
