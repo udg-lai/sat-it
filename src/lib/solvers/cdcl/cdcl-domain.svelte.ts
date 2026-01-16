@@ -315,15 +315,19 @@ export const learnConflictClause: CDCL_LEARN_CONFLICT_CLAUSE_FUN = (lemma: Claus
 export type CDCL_SECOND_HIGHEST_DL_FUN = (lemma: Clause) => number;
 
 export const sndHighestDL: CDCL_SECOND_HIGHEST_DL_FUN = (lemma: Clause) => {
-	const clauseVariables: number[] = lemma.getLiterals().map((literal) => {
+	const variables: number[] = lemma.getLiterals().map((literal) => {
 		return literal.getVariable().toInt();
 	});
-	const dLevels = clauseVariables.map((variable) => getLatestTrail().getVariableDL(variable));
 
-	const uniqueDLs: Set<number> = new Set(dLevels);
-	const sorted: List<number> = [...uniqueDLs].sort((a, b) => b - a);
-
-	return sorted.length >= 2 ? sorted[1] : sorted[0] - 1;
+	if (variables.length < 1) logFatal("sndHighestDL", "Dealing with an empty clause")
+	if (variables.length == 1) return 0; // This is a special case because
+	else {
+		const dLevels: List<number> = variables.map((variable) => getLatestTrail().getVariableDL(variable));	
+		const uniqueDLs: Set<number> = new Set(dLevels);
+		if (uniqueDLs.size < 2) logFatal("sndHighestDL", "After applying unique values of DL, there are less than 2 different DL")
+		const sortedDLs: List<number> = [...uniqueDLs].sort((a, b) => b - a); // Sort from greater to minor
+		return sortedDLs[1];
+	}
 };
 
 export type CDCL_BACKJUMPING_FUN = (trail: Trail, decisionLevel: number) => Trail;
