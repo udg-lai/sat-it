@@ -11,14 +11,13 @@ import {
 	backtracking,
 	complementaryOccurrences,
 	decide,
-	emptyClauseDetection,
 	nextClause,
 	pendingOccurrenceList,
 	pickPendingOccurrenceList,
 	queueOccurrenceList,
 	traversedOccurrenceList,
 	unitClause,
-	unitClauseDetection,
+	unitEmptyClauseDetection,
 	unitPropagation,
 	unsatisfiedClause,
 	unstackOccurrenceList,
@@ -37,8 +36,6 @@ import {
 	type DPLL_CONFLICT_DETECTION_INPUT,
 	type DPLL_DECIDE_FUN,
 	type DPLL_DECIDE_INPUT,
-	type DPLL_EMPTY_CLAUSE_FUN,
-	type DPLL_EMPTY_CLAUSE_INPUT,
 	type DPLL_FUN,
 	type DPLL_INPUT,
 	type DPLL_NEXT_OCCURRENCE_FUN,
@@ -51,8 +48,8 @@ import {
 	type DPLL_TRAVERSED_OCCURRENCE_LIST_INPUT,
 	type DPLL_UNIT_CLAUSE_FUN,
 	type DPLL_UNIT_CLAUSE_INPUT,
-	type DPLL_UNIT_CLAUSES_DETECTION_FUN,
-	type DPLL_UNIT_CLAUSES_DETECTION_INPUT,
+	type DPLL_UNARY_EMPTY_CLAUSES_DETECTION_FUN,
+	type DPLL_UNARY_EMPTY_CLAUSES_DETECTION_INPUT,
 	type DPLL_UNIT_PROPAGATION_FUN,
 	type DPLL_UNIT_PROPAGATION_INPUT,
 	type DPLL_UNSTACK_CLAUSE_SET_INPUT,
@@ -66,22 +63,21 @@ export const dpll_stateName2StateId = {
 	unsat_state: UNSAT_STATE_ID,
 	backtracking_state: BACKTRACKING_STATE_ID,
 	decide_state: DECIDE_STATE_ID,
-	empty_clause_state: 0,
-	unit_clauses_detection_state: 1,
-	queue_occurrence_list_state: 2,
-	are_remaining_occurrences_state: 3,
-	pick_clause_set_state: 4,
-	all_variables_assigned_state: 5,
-	dequeue_occurrence_list_state: 6,
-	clause_evaluation_state: 7,
-	traversed_occurrences_state: 8,
-	next_clause_state: 9,
-	falsified_clause_state: 10,
-	unit_clause_state: 11,
-	unit_propagation_state: 12,
-	complementary_occurrences_state: 13,
-	at_level_zero_state: 14,
-	wipe_occurrence_queue_state: 15
+	unary_empty_clauses_detection_state: 0,
+	queue_occurrence_list_state: 1,
+	are_remaining_occurrences_state: 2,
+	pick_clause_set_state: 3,
+	all_variables_assigned_state: 4,
+	dequeue_occurrence_list_state: 5,
+	clause_evaluation_state: 6,
+	traversed_occurrences_state: 7,
+	next_clause_state: 8,
+	falsified_clause_state: 9,
+	unit_clause_state: 10,
+	unit_propagation_state: 11,
+	complementary_occurrences_state: 12,
+	at_level_zero_state: 13,
+	wipe_occurrence_queue_state: 14
 };
 
 // *** define state nodes ***
@@ -95,26 +91,17 @@ const sat_state: FinalState<never> = {
 	description: 'SAT state'
 };
 
-const unit_clauses_detection_state: NonFinalState<
-	DPLL_UNIT_CLAUSES_DETECTION_FUN,
-	DPLL_UNIT_CLAUSES_DETECTION_INPUT
+const unary_empty_clauses_detection_state: NonFinalState<
+	DPLL_UNARY_EMPTY_CLAUSES_DETECTION_FUN,
+	DPLL_UNARY_EMPTY_CLAUSES_DETECTION_INPUT
 > = {
-	id: dpll_stateName2StateId['unit_clauses_detection_state'],
-	run: unitClauseDetection,
+	id: dpll_stateName2StateId['unary_empty_clauses_detection_state'],
+	run: unitEmptyClauseDetection,
 	description: 'Seeks for the problem s unit clauses',
-	transitions: new Map<DPLL_UNIT_CLAUSES_DETECTION_INPUT, number>().set(
+	transitions: new Map<DPLL_UNARY_EMPTY_CLAUSES_DETECTION_INPUT, number>().set(
 		'queue_occurrence_list_state',
 		dpll_stateName2StateId['queue_occurrence_list_state']
 	)
-};
-
-const empty_clause_state: NonFinalState<DPLL_EMPTY_CLAUSE_FUN, DPLL_EMPTY_CLAUSE_INPUT> = {
-	id: dpll_stateName2StateId['empty_clause_state'],
-	run: emptyClauseDetection,
-	description: 'Seeks for the empty clause in the clause pool',
-	transitions: new Map<DPLL_EMPTY_CLAUSE_INPUT, number>()
-		.set('unit_clauses_detection_state', dpll_stateName2StateId['unit_clauses_detection_state'])
-		.set('unsat_state', dpll_stateName2StateId['unsat_state'])
 };
 
 const decide_state: NonFinalState<DPLL_DECIDE_FUN, DPLL_DECIDE_INPUT> = {
@@ -296,8 +283,7 @@ const wipe_occurrence_queue_state: NonFinalState<
 // *** adding states to the set of states ***
 export const states: Map<number, State<DPLL_FUN, DPLL_INPUT>> = new Map();
 
-states.set(empty_clause_state.id, empty_clause_state);
-states.set(unit_clauses_detection_state.id, unit_clauses_detection_state);
+states.set(unary_empty_clauses_detection_state.id, unary_empty_clauses_detection_state);
 states.set(unsat_state.id, unsat_state);
 states.set(sat_state.id, sat_state);
 states.set(are_remaining_occurrences_state.id, are_remaining_occurrences_state);
@@ -316,7 +302,7 @@ states.set(at_level_zero_state.id, at_level_zero_state);
 states.set(backtracking_state.id, backtracking_state);
 states.set(wipe_occurrence_queue_state.id, wipe_occurrence_queue_state);
 
-export const initial = empty_clause_state.id;
+export const initial = unary_empty_clauses_detection_state.id;
 
 export const conflict = wipe_occurrence_queue_state.id;
 

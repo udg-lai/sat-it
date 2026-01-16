@@ -25,8 +25,6 @@ import type {
 	DPLL_CONFLICT_DETECTION_INPUT,
 	DPLL_DECIDE_FUN,
 	DPLL_DECIDE_INPUT,
-	DPLL_EMPTY_CLAUSE_FUN,
-	DPLL_EMPTY_CLAUSE_INPUT,
 	DPLL_NEXT_OCCURRENCE_FUN,
 	DPLL_NEXT_OCCURRENCE_INPUT,
 	DPLL_PICK_OCCURRENCE_LIST_FUN,
@@ -37,8 +35,8 @@ import type {
 	DPLL_TRAVERSED_OCCURRENCE_LIST_INPUT,
 	DPLL_UNIT_CLAUSE_FUN,
 	DPLL_UNIT_CLAUSE_INPUT,
-	DPLL_UNIT_CLAUSES_DETECTION_FUN,
-	DPLL_UNIT_CLAUSES_DETECTION_INPUT,
+	DPLL_UNARY_EMPTY_CLAUSES_DETECTION_FUN,
+	DPLL_UNARY_EMPTY_CLAUSES_DETECTION_INPUT,
 	DPLL_UNIT_PROPAGATION_FUN,
 	DPLL_UNIT_PROPAGATION_INPUT,
 	DPLL_UNSTACK_CLAUSE_SET_INPUT,
@@ -50,12 +48,9 @@ import type {
 /* exported transitions */
 
 export const initialTransition = (): void => {
-	ecTransition();
-	if (!getSolverMachine().onFinalState()) {
-		const unitClauses: Set<CRef> = ucdTransition();
-		const occurrenceList: OccurrenceList = new OccurrenceList(makeNothing(), [...unitClauses]);
-		afterComplementaryBlock(occurrenceList);
-	}
+	const unaryEmptyCRefs: Set<CRef> = unaryEmptyClausesTransition();
+	const occurrenceList: OccurrenceList = new OccurrenceList(makeNothing(), [...unaryEmptyCRefs]);
+	afterComplementaryBlock(occurrenceList);
 };
 
 export const decide = (): void => {
@@ -117,44 +112,20 @@ const afterComplementaryBlock = (occurrenceList: OccurrenceList): void => {
 };
 
 /* Specific Transitions */
-
-const ecTransition = (): void => {
-	if (getSolverMachine().getActiveStateId() !== 0) {
-		logFatal(
-			'Fail Initial',
-			'Trying to use initialTransition in a state that is not the initial one'
-		);
-	}
+const unaryEmptyClausesTransition = (): Set<CRef> => {
 	const state = getSolverMachine().getActiveState() as NonFinalState<
-		DPLL_EMPTY_CLAUSE_FUN,
-		DPLL_EMPTY_CLAUSE_INPUT
-	>;
-	if (state.run === undefined) {
-		logFatal('Function call error', 'There should be a function in the Empty Clause state');
-	} else {
-		const result: boolean = state.run();
-		if (result) {
-			getSolverMachine().transition('unsat_state');
-		} else {
-			getSolverMachine().transition('unit_clauses_detection_state');
-		}
-	}
-};
-
-const ucdTransition = (): Set<CRef> => {
-	const state = getSolverMachine().getActiveState() as NonFinalState<
-		DPLL_UNIT_CLAUSES_DETECTION_FUN,
-		DPLL_UNIT_CLAUSES_DETECTION_INPUT
+		DPLL_UNARY_EMPTY_CLAUSES_DETECTION_FUN,
+		DPLL_UNARY_EMPTY_CLAUSES_DETECTION_INPUT
 	>;
 	if (state.run === undefined) {
 		logFatal(
 			'Function call error',
-			'There should be a function in the Unit Clause Detection state'
+			'There should be a function in the Unary Clause Detection state'
 		);
 	}
-	const units: Set<CRef> = state.run();
+	const unaryEmptyCRefs: Set<CRef> = state.run();
 	getSolverMachine().transition('queue_occurrence_list_state');
-	return units;
+	return unaryEmptyCRefs;
 };
 
 const allVariablesAssignedTransition = (): void => {

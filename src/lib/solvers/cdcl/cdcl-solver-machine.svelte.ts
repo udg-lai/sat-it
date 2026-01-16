@@ -41,7 +41,7 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 	step(): void {
 		const activeId: number = this.stateMachine.getActiveId();
 		//The initial state
-		if (activeId === cdcl_stateName2StateId.empty_clause_state) {
+		if (activeId === cdcl_stateName2StateId.unary_empty_clause_detection_state) {
 			initialTransition();
 		}
 		//Waiting to enter or not the clause analysis

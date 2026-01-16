@@ -78,6 +78,10 @@ class ClausePool implements IClausePool {
 		return this.getClauses().filter((c: Clause) => c.isUnit());
 	}
 
+	getEmptyClauses(): Clause[] {
+		return this.getClauses().filter((c: Clause) => c.isEmpty());
+	}
+
 	getSingleLiteralClauses(): SvelteSet<number> {
 		const S = new SvelteSet<number>();
 		for (const c of this.getClauses()) {

@@ -16,8 +16,7 @@ import {
 	allAssigned as solverAllAssigned,
 	complementaryOccurrences as solverComplementaryOccurrences,
 	decide as solverDecide,
-	emptyClauseDetection as solverEmptyClauseDetection,
-	unitClauseDetection as solverUnitClauseDetection,
+	unaryEmptyClauseDetection as solverUnitClauseDetection,
 	unitPropagation as solverUnitPropagation
 } from '$lib/solvers/shared.svelte.ts';
 import { getConflictAnalysis, setConflictAnalysis } from '$lib/states/conflict-anlysis.svelte.ts';
@@ -38,9 +37,7 @@ import type { CRef, List, Lit } from '$lib/types/types.ts';
 
 // ** state inputs **
 
-export type CDCL_EMPTY_CLAUSE_INPUT = 'unit_clauses_detection_state' | 'unsat_state';
-
-export type CDCL_UNIT_CLAUSES_DETECTION_INPUT = 'queue_occurrence_list_state';
+export type CDCL_UNARY_EMPTY_CLAUSES_DETECTION_INPUT = 'queue_occurrence_list_state';
 
 export type CDCL_PICK_OCCURRENCE_LIST_INPUT = 'traversed_occurrences_state';
 
@@ -95,8 +92,7 @@ export type CDCL_PUSH_TRAIL_INPUT = 'unit_propagation_state';
 export type CDCL_PROPAGATE_CC_INPUT = 'complementary_occurrences_state';
 
 export type CDCL_INPUT =
-	| CDCL_EMPTY_CLAUSE_INPUT
-	| CDCL_UNIT_CLAUSES_DETECTION_INPUT
+	CDCL_UNARY_EMPTY_CLAUSES_DETECTION_INPUT
 	| CDCL_PICK_OCCURRENCE_LIST_INPUT
 	| CDCL_ALL_VARIABLES_ASSIGNED_INPUT
 	| CDCL_QUEUE_OCCURRENCE_LIST_INPUT
@@ -137,13 +133,6 @@ export const allAssigned: CDCL_ALL_VARIABLES_ASSIGNED_FUN = () => {
 	return solverAllAssigned(pool);
 };
 
-export type CDCL_EMPTY_CLAUSE_FUN = () => boolean;
-
-export const emptyClauseDetection: CDCL_EMPTY_CLAUSE_FUN = () => {
-	const hasConflict: boolean = solverEmptyClauseDetection(getClausePool());
-	return hasConflict;
-};
-
 export type CDCL_QUEUE_OCCURRENCE_LIST_FUN = (occurrenceList: OccurrenceList) => void;
 
 export const queueOccurrenceList: CDCL_QUEUE_OCCURRENCE_LIST_FUN = (
@@ -159,9 +148,9 @@ export const dequeueOccurrenceList: CDCL_UNSTACK_OCCURRENCE_LIST_FUN = () => {
 	updateOccurrenceList(new OccurrenceList());
 };
 
-export type CDCL_UNIT_CLAUSES_DETECTION_FUN = () => Set<CRef>;
+export type CDCL_UNARY_EMPTY_CLAUSES_DETECTION_FUN = () => Set<CRef>;
 
-export const unitClauseDetection: CDCL_UNIT_CLAUSES_DETECTION_FUN = () => {
+export const unaryEmptyClausesDetection: CDCL_UNARY_EMPTY_CLAUSES_DETECTION_FUN = () => {
 	const pool: ClausePool = getClausePool();
 	return solverUnitClauseDetection(pool);
 };
@@ -321,7 +310,7 @@ export const sndHighestDL: CDCL_SECOND_HIGHEST_DL_FUN = (lemma: Clause) => {
 	if (variables.length < 1) logFatal("sndHighestDL", "Dealing with an empty clause")
 	if (variables.length == 1) return 0; // This is a special case because
 	else {
-		const dLevels: List<number> = variables.map((variable) => getLatestTrail().getVariableDL(variable));	
+		const dLevels: List<number> = variables.map((variable) => getLatestTrail().getVariableDL(variable));
 		const uniqueDLs: Set<number> = new Set(dLevels);
 		if (uniqueDLs.size < 2) logFatal("sndHighestDL", "After applying unique values of DL, there are less than 2 different DL")
 		const sortedDLs: List<number> = [...uniqueDLs].sort((a, b) => b - a); // Sort from greater to minor
@@ -350,8 +339,7 @@ export const propagateCC: CDCL_PROPAGATE_CC_FUN = (cRef: CRef) => {
 };
 
 export type CDCL_FUN =
-	| CDCL_EMPTY_CLAUSE_FUN
-	| CDCL_UNIT_CLAUSES_DETECTION_FUN
+	| CDCL_UNARY_EMPTY_CLAUSES_DETECTION_FUN
 	| CDCL_PICK_OCCURRENCE_LIST_FUN
 	| CDCL_CHECK_PENDING_OCCURRENCE_LISTS_FUN
 	| CDCL_ALL_VARIABLES_ASSIGNED_FUN

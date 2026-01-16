@@ -23,14 +23,10 @@ import type { CRef, Lit, Var } from '$lib/types/types.ts';
 import { isUnSAT } from '../interfaces/IClausePool.ts';
 import { fromJust, isJust, type Maybe } from '../types/maybe.ts';
 
-export const emptyClauseDetection = (pool: ClausePool): boolean => {
-	const evaluation = pool.eval();
-	return isUnSAT(evaluation);
-};
-
-export const unitClauseDetection = (pool: ClausePool): Set<CRef> => {
-	const units: Clause[] = pool.getUnitClauses();
-	return new Set(units.map((c) => c.getCRef()));
+export const unaryEmptyClauseDetection = (pool: ClausePool): Set<CRef> => {
+	const unaryEmptyClauses: Clause[] = [...pool.getUnitClauses(), ...pool.getEmptyClauses()];
+	unaryEmptyClauses.sort((a, b) => a.getCRef() - b.getCRef());
+	return new Set(unaryEmptyClauses.map((c) => c.getCRef()));
 };
 
 export const allAssigned = (pool: VariablePool): boolean => {

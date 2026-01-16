@@ -8,7 +8,6 @@ import {
 	complementaryOccurrences,
 	decide,
 	dequeueOccurrenceList,
-	emptyClauseDetection,
 	learnConflictClause,
 	nextClause,
 	atLevelZeroFun,
@@ -19,7 +18,7 @@ import {
 	sndHighestDL,
 	traversedOccurrenceList,
 	unitClause,
-	unitClauseDetection,
+	unaryEmptyClausesDetection,
 	unitPropagation,
 	unsatisfiedClause,
 	virtualResolution,
@@ -42,8 +41,6 @@ import {
 	type CDCL_CONFLICT_DETECTION_INPUT,
 	type CDCL_DECIDE_FUN,
 	type CDCL_DECIDE_INPUT,
-	type CDCL_EMPTY_CLAUSE_FUN,
-	type CDCL_EMPTY_CLAUSE_INPUT,
 	type CDCL_FUN,
 	type CDCL_INPUT,
 	type CDCL_LEARN_CONFLICT_CLAUSE_FUN,
@@ -62,8 +59,8 @@ import {
 	type CDCL_TRAVERSED_OCCURRENCE_LIST_INPUT,
 	type CDCL_UNIT_CLAUSE_FUN,
 	type CDCL_UNIT_CLAUSE_INPUT,
-	type CDCL_UNIT_CLAUSES_DETECTION_FUN,
-	type CDCL_UNIT_CLAUSES_DETECTION_INPUT,
+	type CDCL_UNARY_EMPTY_CLAUSES_DETECTION_FUN,
+	type CDCL_UNARY_EMPTY_CLAUSES_DETECTION_INPUT,
 	type CDCL_UNIT_PROPAGATION_FUN,
 	type CDCL_UNIT_PROPAGATION_INPUT,
 	type CDCL_UNSTACK_OCCURRENCE_LIST_FUN,
@@ -78,29 +75,28 @@ export const cdcl_stateName2StateId = {
 	sat_state: SAT_STATE_ID,
 	unsat_state: UNSAT_STATE_ID,
 	decide_state: DECIDE_STATE_ID,
-	empty_clause_state: 0,
-	unit_clauses_detection_state: 1,
-	queue_occurrence_list_state: 2,
-	are_remaining_occurrences_state: 3,
-	pick_occurrence_list_state: 4,
-	all_variables_assigned_state: 5,
-	dequeue_occurrence_list_state: 6,
-	clause_evaluation_state: 7,
-	traversed_occurrences_state: 8,
-	next_clause_state: 9,
-	falsified_clause_state: 10,
-	unit_clause_state: 11,
-	unit_propagation_state: 13,
-	complementary_occurrences_state: 14,
-	at_level_zero_state: 15,
-	wipe_occurrences_queue_state: 16,
-	build_conflict_analysis_state: 17,
-	asserting_clause_state: 18,
-	virtual_resolution_state: 19,
-	learn_cc_state: 23,
-	second_highest_dl_state: 24,
-	undo_trail_to_shdl_state: 25,
-	push_trail_state: 26
+	unary_empty_clause_detection_state: 0,
+	queue_occurrence_list_state: 1,
+	are_remaining_occurrences_state: 2,
+	pick_occurrence_list_state: 3,
+	all_variables_assigned_state: 4,
+	dequeue_occurrence_list_state: 5,
+	clause_evaluation_state: 6,
+	traversed_occurrences_state: 7,
+	next_clause_state: 8,
+	falsified_clause_state: 9,
+	unit_clause_state: 10,
+	unit_propagation_state: 11,
+	complementary_occurrences_state: 12,
+	at_level_zero_state: 13,
+	wipe_occurrences_queue_state: 14,
+	build_conflict_analysis_state: 15,
+	asserting_clause_state: 16,
+	virtual_resolution_state: 17,
+	learn_cc_state: 18,
+	second_highest_dl_state: 19,
+	undo_trail_to_shdl_state: 20,
+	push_trail_state: 21
 };
 
 // *** define state nodes ***
@@ -115,27 +111,17 @@ const sat_state: FinalState<never> = {
 };
 
 // FYI: this state retrieves the clauses that are unit
-const unit_clauses_detection_state: NonFinalState<
-	CDCL_UNIT_CLAUSES_DETECTION_FUN,
-	CDCL_UNIT_CLAUSES_DETECTION_INPUT
+const unary_empty_clauses_detection_state: NonFinalState<
+	CDCL_UNARY_EMPTY_CLAUSES_DETECTION_FUN,
+	CDCL_UNARY_EMPTY_CLAUSES_DETECTION_INPUT
 > = {
-	id: cdcl_stateName2StateId['unit_clauses_detection_state'],
-	run: unitClauseDetection,
+	id: cdcl_stateName2StateId['unary_empty_clause_detection_state'],
+	run: unaryEmptyClausesDetection,
 	description: 'Seeks for the problem s unit clauses',
-	transitions: new Map<CDCL_UNIT_CLAUSES_DETECTION_INPUT, number>().set(
+	transitions: new Map<CDCL_UNARY_EMPTY_CLAUSES_DETECTION_INPUT, number>().set(
 		'queue_occurrence_list_state',
 		cdcl_stateName2StateId['queue_occurrence_list_state']
 	)
-};
-
-// FYI: seeks for the empty clause in the pool, i.e., UNSAT
-const empty_clause_state: NonFinalState<CDCL_EMPTY_CLAUSE_FUN, CDCL_EMPTY_CLAUSE_INPUT> = {
-	id: cdcl_stateName2StateId['empty_clause_state'],
-	run: emptyClauseDetection,
-	description: 'Seeks for the empty clause in the clause pool',
-	transitions: new Map<CDCL_EMPTY_CLAUSE_INPUT, number>()
-		.set('unit_clauses_detection_state', cdcl_stateName2StateId['unit_clauses_detection_state'])
-		.set('unsat_state', cdcl_stateName2StateId['unsat_state'])
 };
 
 const decide_state: NonFinalState<CDCL_DECIDE_FUN, CDCL_DECIDE_INPUT> = {
@@ -395,8 +381,7 @@ export const states: Map<number, State<CDCL_FUN, CDCL_INPUT>> = new Map();
 
 states.set(unsat_state.id, unsat_state);
 states.set(sat_state.id, sat_state);
-states.set(empty_clause_state.id, empty_clause_state);
-states.set(unit_clauses_detection_state.id, unit_clauses_detection_state);
+states.set(unary_empty_clauses_detection_state.id, unary_empty_clauses_detection_state);
 states.set(are_remaining_occurrences_state.id, are_remaining_occurrences_state);
 states.set(queue_occurrence_list_state.id, queue_occurrence_list_state);
 states.set(pick_occurrence_list_state.id, pick_occurrence_list_state);
@@ -419,7 +404,7 @@ states.set(undo_trail_to_shdl_state.id, undo_trail_to_shdl_state);
 states.set(push_trail_state.id, push_trail_state);
 states.set(virtual_resolution_state.id, virtual_resolution_state);
 
-export const initial = empty_clause_state.id;
+export const initial = unary_empty_clauses_detection_state.id;
 
 export const conflict = virtual_resolution_state.id;
 
