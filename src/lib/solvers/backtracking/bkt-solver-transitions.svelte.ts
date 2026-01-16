@@ -207,7 +207,7 @@ const backtrackingTransition = (): Lit => {
 	if (state.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Backtracking state');
 	}
-	const assignment: number = state.run();
+	const assignment: Lit = state.run();
 	getSolverMachine().transition('complementary_occurrences_state');
 	return assignment;
 };

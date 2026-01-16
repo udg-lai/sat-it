@@ -1,25 +1,22 @@
 import Literal from '$lib/entities/Literal.svelte.ts';
-import { conflictDetectionEventBus, toggleTrailViewEventBus } from '$lib/events/events.ts';
-import {
-	cleanClausesToCheck,
-	getCheckedClause,
-	incrementCheckingIndex
-} from '$lib/states/occurrence-list.svelte.ts';
+import OccurrenceList from '$lib/entities/OccurrenceList.svelte.ts';
+import { conflictDetectionEventBus } from '$lib/events/events.ts';
+import { getOccurrenceList, updateOccurrenceList } from '$lib/states/occurrence-list.svelte.ts';
 import { getClausePool } from '$lib/states/problem.svelte.ts';
+import { getOccurrenceListQueue } from '$lib/states/queue-occurrence-lists.svelte.ts';
+import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
 import { getLatestTrail } from '$lib/states/trails.svelte.ts';
+import { makeJust, makeNothing } from '$lib/types/maybe.ts';
 import type { CRef, Lit } from '$lib/types/types.ts';
 import { type NonFinalState } from '../StateMachine.svelte.ts';
-import type { Occurrences } from '../types.ts';
 import type {
-	DPLL_ALL_CLAUSES_CHECKED_FUN,
-	DPLL_ALL_CLAUSES_CHECKED_INPUT,
 	DPLL_ALL_VARIABLES_ASSIGNED_FUN,
 	DPLL_ALL_VARIABLES_ASSIGNED_INPUT,
+	DPLL_AT_LEVEL_ZERO_FUN,
+	DPLL_AT_LEVEL_ZERO_INPUT,
 	DPLL_BACKTRACKING_FUN,
 	DPLL_BACKTRACKING_INPUT,
-	DPLL_CHECK_NON_DECISION_MADE_FUN,
-	DPLL_CHECK_NON_DECISION_MADE_INPUT,
 	DPLL_CHECK_PENDING_OCCURRENCE_LISTS_FUN,
 	DPLL_CHECK_PENDING_OCCURRENCE_LISTS_INPUT,
 	DPLL_COMPLEMENTARY_OCCURRENCES_FUN,
@@ -28,18 +25,16 @@ import type {
 	DPLL_CONFLICT_DETECTION_INPUT,
 	DPLL_DECIDE_FUN,
 	DPLL_DECIDE_INPUT,
-	DPLL_DELETE_CLAUSE_FUN,
-	DPLL_DELETE_CLAUSE_INPUT,
 	DPLL_EMPTY_CLAUSE_FUN,
 	DPLL_EMPTY_CLAUSE_INPUT,
-	DPLL_EMPTY_OCCURRENCE_LISTS_FUN,
-	DPLL_EMPTY_OCCURRENCE_LISTS_INPUT,
-	DPLL_NEXT_CLAUSE_FUN,
-	DPLL_NEXT_CLAUSE_INPUT,
-	DPLL_PICK_CLAUSE_SET_FUN,
-	DPLL_PICK_CLAUSE_SET_INPUT,
+	DPLL_NEXT_OCCURRENCE_FUN,
+	DPLL_NEXT_OCCURRENCE_INPUT,
+	DPLL_PICK_OCCURRENCE_LIST_FUN,
+	DPLL_PICK_OCCURRENCE_LIST_INPUT,
 	DPLL_QUEUE_OCCURRENCE_LIST_FUN,
 	DPLL_QUEUE_OCCURRENCE_LIST_INPUT,
+	DPLL_TRAVERSED_OCCURRENCE_LIST_FUN,
+	DPLL_TRAVERSED_OCCURRENCE_LIST_INPUT,
 	DPLL_UNIT_CLAUSE_FUN,
 	DPLL_UNIT_CLAUSE_INPUT,
 	DPLL_UNIT_CLAUSES_DETECTION_FUN,
@@ -47,420 +42,343 @@ import type {
 	DPLL_UNIT_PROPAGATION_FUN,
 	DPLL_UNIT_PROPAGATION_INPUT,
 	DPLL_UNSTACK_CLAUSE_SET_INPUT,
-	DPLL_UNSTACK_OCCURRENCE_LIST_FUN
+	DPLL_UNSTACK_OCCURRENCE_LIST_FUN,
+	DPLL_WIPE_OCCURRENCE_QUEUE_FUN,
+	DPLL_WIPE_OCCURRENCE_QUEUE_INPUT
 } from './dpll-domain.svelte.ts';
-import type { DPLL_SolverMachine } from './dpll-solver-machine.svelte.ts';
-import type { DPLL_StateMachine } from './dpll-state-machine.svelte.ts';
 
 /* exported transitions */
 
-export const initialTransition = (solver: DPLL_SolverMachine): void => {
-	const stateMachine: DPLL_StateMachine = solver.getStateMachine();
-	ecTransition(stateMachine);
-	if (stateMachine.onFinalState()) return;
-	const occurrenceList: Set<CRef> = ucdTransition(stateMachine);
-	afterComplementaryBlock(solver, stateMachine, 0, occurrenceList);
-};
-
-export const preConflictDetection = (solver: DPLL_SolverMachine): void => {
-	const stateMachine: DPLL_StateMachine = solver.getStateMachine();
-	const pendingConflict: Occurrences = solver.consultPostponed();
-	const clauseSet: Set<number> = pendingConflict.occ;
-	conflictDetectionBlock(solver, stateMachine, clauseSet);
-};
-
-export const analyzeClause = (solver: DPLL_SolverMachine): void => {
-	const stateMachine: DPLL_StateMachine = solver.getStateMachine();
-	const pendingConflict: Occurrences = solver.consultPostponed();
-	const clauseSet: Set<number> = pendingConflict.occ;
-	const clauseTag: number | undefined = getCheckedClause();
-	if (clauseTag === undefined) {
-		logFatal('Unexpected undefined in inspectedClause');
+export const initialTransition = (): void => {
+	ecTransition();
+	if (!getSolverMachine().onFinalState()) {
+		const unitClauses: Set<CRef> = ucdTransition();
+		const occurrenceList: OccurrenceList = new OccurrenceList(makeNothing(), [...unitClauses]);
+		afterComplementaryBlock(occurrenceList);
 	}
-	deleteClauseTransition(stateMachine, clauseSet, clauseTag);
-	conflictDetectionBlock(solver, stateMachine, clauseSet);
 };
 
-export const decide = (solver: DPLL_SolverMachine): void => {
-	const stateMachine: DPLL_StateMachine = solver.getStateMachine();
-	const assignedLiteral: number = decideTransition(stateMachine);
-	const complementaryClauses: Set<number> = complementaryOccurrencesTransition(
-		stateMachine,
-		assignedLiteral
-	);
-	afterComplementaryBlock(solver, stateMachine, assignedLiteral, complementaryClauses);
+export const decide = (): void => {
+	const assignment: Lit = decideTransition();
+	const occurrenceList: OccurrenceList = complementaryOccurrencesTransition(assignment);
+	afterComplementaryBlock(occurrenceList);
 };
 
-export const conflictiveState = (solver: DPLL_SolverMachine): void => {
-	const stateMachine: DPLL_StateMachine = solver.getStateMachine();
-	emptyClauseSetTransition(stateMachine, solver);
-	const firstLevel: boolean = decisionLevelTransition(stateMachine);
-	if (firstLevel) return;
-	const assignedLiteral = backtrackingTransition(stateMachine);
-	const complementaryClauses: Set<number> = complementaryOccurrencesTransition(
-		stateMachine,
-		assignedLiteral
-	);
-	afterComplementaryBlock(solver, stateMachine, assignedLiteral, complementaryClauses);
+export const conflictDetectionBlock = (): void => {
+	const traversedOccurrenceList: boolean = traversedOccurrenceListTransition();
+	if (traversedOccurrenceList) {
+		dequeueOccurrenceListTransition();
+		const pendingOcc: boolean = checkPendingOccurrenceListsTransition();
+		if (pendingOcc) {
+			pickOccurrenceListTransition();
+		} else {
+			updateOccurrenceList(new OccurrenceList());
+			allVariablesAssignedTransition();
+		}
+	} else {
+		const cRef: CRef = nextOccurrenceTransition();
+		const isConflictive: boolean = conflictDetectionTransition(cRef);
+		if (isConflictive) {
+			getLatestTrail().attachConflictiveClause(getClausePool().at(cRef));
+			getLatestTrail().showCtx();
+		} else {
+			const unitClause: boolean = unitClauseTransition(cRef);
+			if (unitClause) {
+				const propagated: Lit = unitPropagationTransition(cRef);
+				const occurrenceList: OccurrenceList = complementaryOccurrencesTransition(propagated);
+				queueOccurrenceListTransition(occurrenceList);
+			}
+		}
+	}
+};
+
+export const conflictiveState = (): void => {
+	wipeOccurrenceQueueTransition();
+	const atLevelZero: boolean = dlZeroTransition();
+	if (!atLevelZero) {
+		const assignment = backtrackingTransition();
+		const occurrenceList: OccurrenceList = complementaryOccurrencesTransition(assignment);
+		afterComplementaryBlock(occurrenceList);
+	}
 };
 
 /* General non-exported transitions */
 
-const afterComplementaryBlock = (
-	solver: DPLL_SolverMachine,
-	stateMachine: DPLL_StateMachine,
-	assignment: Lit,
-	occurrenceList: Set<number>
-): void => {
-	queueOccurrenceListTransition(
-		stateMachine,
-		solver,
-		Literal.complementary(assignment),
-		occurrenceList
-	);
-	const pendingClausesSet: boolean = checkPendingOccurrenceListsTransition(stateMachine, solver);
-	if (!pendingClausesSet) {
-		allVariablesAssignedTransition(stateMachine);
-		return;
+const afterComplementaryBlock = (occurrenceList: OccurrenceList): void => {
+	queueOccurrenceListTransition(occurrenceList);
+	const thereAreOccurrences: boolean = checkPendingOccurrenceListsTransition();
+	if (thereAreOccurrences) {
+		pickOccurrenceListTransition();
+	} else {
+		allVariablesAssignedTransition();
 	}
-	pickClauseSetTransition(stateMachine, solver);
-	if (!solver.runningOnAutomatic()) conflictDetectionEventBus.emit();
-};
-
-const conflictDetectionBlock = (
-	solver: DPLL_SolverMachine,
-	stateMachine: DPLL_StateMachine,
-	clauseSet: Set<number>
-): void => {
-	const allClausesChecked = allClausesCheckedTransition(stateMachine, clauseSet);
-	if (allClausesChecked) {
-		unstackOccurrenceListTransition(stateMachine, solver);
-		const pendingOccurrenceLists: boolean = checkPendingOccurrenceListsTransition(
-			stateMachine,
-			solver
-		);
-		if (!pendingOccurrenceLists) {
-			cleanClausesToCheck();
-			allVariablesAssignedTransition(stateMachine);
-			return;
-		}
-		pickClauseSetTransition(stateMachine, solver);
-		return;
-	}
-	const nextCRef: CRef = nextClauseTransition(stateMachine, clauseSet);
-	const isConflictive: boolean = conflictDetectionTransition(stateMachine, nextCRef);
-	if (isConflictive) {
-		// Attach the conflictive clause to the last trail
-		getLatestTrail().attachConflictiveClause(getClausePool().at(nextCRef));
-		toggleTrailViewEventBus.emit();
-		return;
-	}
-	const unitClause: boolean = unitClauseTransition(stateMachine, nextCRef);
-	if (!unitClause) return;
-	const assignedLiteral: number = unitPropagationTransition(stateMachine, nextCRef);
-	const complementaryClauses: Set<number> = complementaryOccurrencesTransition(
-		stateMachine,
-		assignedLiteral
-	);
-	queueOccurrenceListTransition(stateMachine, solver, -assignedLiteral, complementaryClauses);
+	// This is for showing the up-1 and up-n view
+	if (!getSolverMachine().runningOnAutomatic()) conflictDetectionEventBus.emit();
 };
 
 /* Specific Transitions */
 
-const ecTransition = (stateMachine: DPLL_StateMachine): void => {
-	if (stateMachine.getActiveId() !== 0) {
+const ecTransition = (): void => {
+	if (getSolverMachine().getActiveStateId() !== 0) {
 		logFatal(
 			'Fail Initial',
 			'Trying to use initialTransition in a state that is not the initial one'
 		);
 	}
-	const ecState = stateMachine.getActiveState() as NonFinalState<
+	const state = getSolverMachine().getActiveState() as NonFinalState<
 		DPLL_EMPTY_CLAUSE_FUN,
 		DPLL_EMPTY_CLAUSE_INPUT
 	>;
-	if (ecState.run === undefined) {
+	if (state.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Empty Clause state');
 	} else {
-		const result: boolean = ecState.run();
+		const result: boolean = state.run();
 		if (result) {
-			stateMachine.transition('unsat_state');
+			getSolverMachine().transition('unsat_state');
 		} else {
-			stateMachine.transition('unit_clauses_detection_state');
+			getSolverMachine().transition('unit_clauses_detection_state');
 		}
 	}
 };
 
-const ucdTransition = (stateMachine: DPLL_StateMachine): Set<number> => {
-	const ucdState = stateMachine.getActiveState() as NonFinalState<
+const ucdTransition = (): Set<CRef> => {
+	const state = getSolverMachine().getActiveState() as NonFinalState<
 		DPLL_UNIT_CLAUSES_DETECTION_FUN,
 		DPLL_UNIT_CLAUSES_DETECTION_INPUT
 	>;
-	if (ucdState.run === undefined) {
+	if (state.run === undefined) {
 		logFatal(
 			'Function call error',
 			'There should be a function in the Unit Clause Detection state'
 		);
 	}
-	const result: Set<number> = ucdState.run();
-	stateMachine.transition('queue_occurrence_list_state');
-	return result;
+	const units: Set<CRef> = state.run();
+	getSolverMachine().transition('queue_occurrence_list_state');
+	return units;
 };
 
-const allVariablesAssignedTransition = (stateMachine: DPLL_StateMachine): void => {
-	const allVariablesAssignedState = stateMachine.getActiveState() as NonFinalState<
+const allVariablesAssignedTransition = (): void => {
+	const state = getSolverMachine().getActiveState() as NonFinalState<
 		DPLL_ALL_VARIABLES_ASSIGNED_FUN,
 		DPLL_ALL_VARIABLES_ASSIGNED_INPUT
 	>;
-	if (allVariablesAssignedState.run === undefined) {
+	if (state.run === undefined) {
 		logFatal(
 			'Function call error',
 			'There should be a function in the All Variables Assigned state'
 		);
 	}
-	const result: boolean = allVariablesAssignedState.run();
-	if (result) stateMachine.transition('sat_state');
-	else stateMachine.transition('decide_state');
+	const allAssigned: boolean = state.run();
+	if (allAssigned) getSolverMachine().transition('sat_state');
+	else getSolverMachine().transition('decide_state');
 };
 
-const queueOccurrenceListTransition = (
-	stateMachine: DPLL_StateMachine,
-	solver: DPLL_SolverMachine,
-	variable: number,
-	clauseSet: Set<number>
-): void => {
-	const queueOccurrenceListState = stateMachine.getActiveState() as NonFinalState<
+const queueOccurrenceListTransition = (occurrenceList: OccurrenceList): void => {
+	const state = getSolverMachine().getActiveState() as NonFinalState<
 		DPLL_QUEUE_OCCURRENCE_LIST_FUN,
 		DPLL_QUEUE_OCCURRENCE_LIST_INPUT
 	>;
-	if (queueOccurrenceListState.run === undefined) {
+	if (state.run === undefined) {
 		logFatal(
 			'Function call error',
 			'There should be a function in the Queue Occurrence List state'
 		);
 	}
-	const size: number = queueOccurrenceListState.run(variable, clauseSet, solver);
-	if (size > 1) stateMachine.transition('delete_clause_state');
-	else stateMachine.transition('check_pending_occurrence_lists_state');
+	state.run(occurrenceList);
+	// NOTE: This transition is being used in two places in the dpll solver diagram.
+	const queueSize = getOccurrenceListQueue().size();
+	if (queueSize > 1) {
+		// This means, we came from UP and complementary occurrence detection
+		getSolverMachine().transition('traversed_occurrences_state');
+	} else if (queueSize === 1) {
+		// This means we came from initial UPs or decide transitions
+		getSolverMachine().transition('are_remaining_occurrences_state');
+	} else {
+		logFatal('DPLL Solver Transition Error', "Occurrences Queue shouldn't be empty here");
+	}
 };
 
-const checkPendingOccurrenceListsTransition = (
-	stateMachine: DPLL_StateMachine,
-	solver: DPLL_SolverMachine
-): boolean => {
-	const checkPendingOccurrenceListsState = stateMachine.getActiveState() as NonFinalState<
+const checkPendingOccurrenceListsTransition = (): boolean => {
+	const state = getSolverMachine().getActiveState() as NonFinalState<
 		DPLL_CHECK_PENDING_OCCURRENCE_LISTS_FUN,
 		DPLL_CHECK_PENDING_OCCURRENCE_LISTS_INPUT
 	>;
-	if (checkPendingOccurrenceListsState.run === undefined) {
+	if (state.run === undefined) {
 		logFatal(
 			'Function call error',
 			'There should be a function in the Pending Occurrence Lists state'
 		);
 	}
-	const result: boolean = checkPendingOccurrenceListsState.run(solver);
-	if (result) stateMachine.transition('pick_clause_set_state');
-	else stateMachine.transition('all_variables_assigned_state');
-	return result;
+	const pendingOcc: boolean = state.run();
+	if (pendingOcc) getSolverMachine().transition('pick_occurrence_list_state');
+	else getSolverMachine().transition('all_variables_assigned_state');
+	return pendingOcc;
 };
 
-const pickClauseSetTransition = (
-	stateMachine: DPLL_StateMachine,
-	solver: DPLL_SolverMachine
-): Set<number> => {
-	const pickClauseSetState = stateMachine.getActiveState() as NonFinalState<
-		DPLL_PICK_CLAUSE_SET_FUN,
-		DPLL_PICK_CLAUSE_SET_INPUT
+const pickOccurrenceListTransition = (): void => {
+	const state = getSolverMachine().getActiveState() as NonFinalState<
+		DPLL_PICK_OCCURRENCE_LIST_FUN,
+		DPLL_PICK_OCCURRENCE_LIST_INPUT
 	>;
-	if (pickClauseSetState.run === undefined) {
+	if (state.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Peek Clause Set state');
 	}
-	const result: Set<number> = pickClauseSetState.run(solver);
-	stateMachine.transition('all_clauses_checked_state');
-	return result;
+	state.run();
+	getSolverMachine().transition('all_clauses_checked_state');
 };
 
-const allClausesCheckedTransition = (
-	stateMachine: DPLL_StateMachine,
-	clauses: Set<number>
-): boolean => {
-	const allClausesCheckedState = stateMachine.getActiveState() as NonFinalState<
-		DPLL_ALL_CLAUSES_CHECKED_FUN,
-		DPLL_ALL_CLAUSES_CHECKED_INPUT
+const traversedOccurrenceListTransition = (): boolean => {
+	const state = getSolverMachine().getActiveState() as NonFinalState<
+		DPLL_TRAVERSED_OCCURRENCE_LIST_FUN,
+		DPLL_TRAVERSED_OCCURRENCE_LIST_INPUT
 	>;
-	if (allClausesCheckedState.run === undefined) {
+	if (state.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the All Clauses Checked state');
 	}
-	const result: boolean = allClausesCheckedState.run(clauses);
-	if (result) stateMachine.transition('unstack_clause_set_state');
-	else stateMachine.transition('next_clause_state');
-	return result;
+	const occurrenceList: OccurrenceList = getOccurrenceList();
+	const traversed: boolean = state.run(occurrenceList);
+	if (traversed) getSolverMachine().transition('dequeue_occurrence_list_state');
+	else getSolverMachine().transition('next_clause_state');
+	return traversed;
 };
 
-const nextClauseTransition = (stateMachine: DPLL_StateMachine, clauseSet: Set<number>): number => {
-	const nextClauseState = stateMachine.getActiveState() as NonFinalState<
-		DPLL_NEXT_CLAUSE_FUN,
-		DPLL_NEXT_CLAUSE_INPUT
+const nextOccurrenceTransition = (): CRef => {
+	const state = getSolverMachine().getActiveState() as NonFinalState<
+		DPLL_NEXT_OCCURRENCE_FUN,
+		DPLL_NEXT_OCCURRENCE_INPUT
 	>;
-	if (nextClauseState.run === undefined) {
+	if (state.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Next Clause state');
 	}
-	const clauseTag: number = nextClauseState.run(clauseSet);
-	stateMachine.transition('falsified_clause_state');
-	return clauseTag;
+	const cRef: CRef = state.run();
+	getSolverMachine().transition('falsified_clause_state');
+	return cRef;
 };
 
-const conflictDetectionTransition = (
-	stateMachine: DPLL_StateMachine,
-	clauseTag: number
-): boolean => {
-	const conflictDetectionState = stateMachine.getActiveState() as NonFinalState<
+const conflictDetectionTransition = (cRef: CRef): boolean => {
+	const state = getSolverMachine().getActiveState() as NonFinalState<
 		DPLL_CONFLICT_DETECTION_FUN,
 		DPLL_CONFLICT_DETECTION_INPUT
 	>;
-	if (conflictDetectionState.run === undefined) {
+	if (state.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Conflict Detection state');
 	}
-	const result: boolean = conflictDetectionState.run(clauseTag);
-	if (result) stateMachine.transition('empty_occurrence_lists_state');
-	else stateMachine.transition('unit_clause_state');
-	return result;
+	const conflict: boolean = state.run(cRef);
+	if (conflict) getSolverMachine().transition('wipe_occurrence_queue_state');
+	else getSolverMachine().transition('unit_clause_state');
+	return conflict;
 };
 
-const decisionLevelTransition = (stateMachine: DPLL_StateMachine): boolean => {
-	const decisionLevelState = stateMachine.getActiveState() as NonFinalState<
-		DPLL_CHECK_NON_DECISION_MADE_FUN,
-		DPLL_CHECK_NON_DECISION_MADE_INPUT
+const dlZeroTransition = (): boolean => {
+	const state = getSolverMachine().getActiveState() as NonFinalState<
+		DPLL_AT_LEVEL_ZERO_FUN,
+		DPLL_AT_LEVEL_ZERO_INPUT
 	>;
-	if (decisionLevelState.run === undefined) {
+	if (state.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Decision Level state');
 	}
-	const onLevelZero: boolean = decisionLevelState.run();
-	if (onLevelZero) stateMachine.transition('unsat_state');
-	else stateMachine.transition('backtracking_state');
+	const onLevelZero: boolean = state.run();
+	if (onLevelZero) getSolverMachine().transition('unsat_state');
+	else getSolverMachine().transition('backtracking_state');
 	return onLevelZero;
 };
 
-const unitClauseTransition = (stateMachine: DPLL_StateMachine, clauseTag: number): boolean => {
-	const unitClauseState = stateMachine.getActiveState() as NonFinalState<
+const unitClauseTransition = (clauseTag: CRef): boolean => {
+	const state = getSolverMachine().getActiveState() as NonFinalState<
 		DPLL_UNIT_CLAUSE_FUN,
 		DPLL_UNIT_CLAUSE_INPUT
 	>;
-	if (unitClauseState.run === undefined) {
+	if (state.run === undefined) {
 		logFatal(
 			'Function call error',
 			'There should be a function in the Unit Clause Detection state'
 		);
 	}
-	const result: boolean = unitClauseState.run(clauseTag);
-	if (result) stateMachine.transition('unit_propagation_state');
-	else stateMachine.transition('delete_clause_state');
-	return result;
+	const unit: boolean = state.run(clauseTag);
+	if (unit) getSolverMachine().transition('unit_propagation_state');
+	else getSolverMachine().transition('traversed_occurrences_state');
+	return unit;
 };
 
-const deleteClauseTransition = (
-	stateMachine: DPLL_StateMachine,
-	clauseSet: Set<number>,
-	clauseTag: number
-): void => {
-	const deleteClauseState = stateMachine.getActiveState() as NonFinalState<
-		DPLL_DELETE_CLAUSE_FUN,
-		DPLL_DELETE_CLAUSE_INPUT
-	>;
-	if (deleteClauseState.run === undefined) {
-		logFatal('Function call error', 'There should be a function in the Delete Clause state');
-	}
-	deleteClauseState.run(clauseSet, clauseTag);
-	stateMachine.transition('all_clauses_checked_state');
-	incrementCheckingIndex();
-};
-
-const unstackOccurrenceListTransition = (
-	stateMachine: DPLL_StateMachine,
-	solver: DPLL_SolverMachine
-): void => {
-	const unstackOccurrenceListSetState = stateMachine.getActiveState() as NonFinalState<
+const dequeueOccurrenceListTransition = (): void => {
+	const state = getSolverMachine().getActiveState() as NonFinalState<
 		DPLL_UNSTACK_OCCURRENCE_LIST_FUN,
 		DPLL_UNSTACK_CLAUSE_SET_INPUT
 	>;
-	if (unstackOccurrenceListSetState.run === undefined) {
+	if (state.run === undefined) {
 		logFatal(
 			'Function call error',
 			'There should be a function in the Unstack Occurrence List state'
 		);
 	}
-	unstackOccurrenceListSetState.run(solver);
-	stateMachine.transition('check_pending_occurrence_lists_state');
+	state.run();
+	getSolverMachine().transition('are_remaining_occurrences_state');
 };
 
-const unitPropagationTransition = (stateMachine: DPLL_StateMachine, clauseTag: number): number => {
-	const unitPropagationState = stateMachine.getActiveState() as NonFinalState<
+const unitPropagationTransition = (cRef: CRef): number => {
+	const state = getSolverMachine().getActiveState() as NonFinalState<
 		DPLL_UNIT_PROPAGATION_FUN,
 		DPLL_UNIT_PROPAGATION_INPUT
 	>;
-	if (unitPropagationState.run === undefined) {
+	if (state.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Unit Propagation state');
 	}
-	const literalToPropagate: number = unitPropagationState.run(clauseTag);
-	stateMachine.transition('complementary_occurrences_state');
-	return literalToPropagate;
+	const propagated: Lit = state.run(cRef);
+	getSolverMachine().transition('complementary_occurrences_state');
+	return propagated;
 };
 
-const complementaryOccurrencesTransition = (
-	stateMachine: DPLL_StateMachine,
-	literalToPropagate: number
-): Set<number> => {
-	const complementaryOccurrencesState = stateMachine.getActiveState() as NonFinalState<
+const complementaryOccurrencesTransition = (assignment: Lit): OccurrenceList => {
+	const state = getSolverMachine().getActiveState() as NonFinalState<
 		DPLL_COMPLEMENTARY_OCCURRENCES_FUN,
 		DPLL_COMPLEMENTARY_OCCURRENCES_INPUT
 	>;
-	if (complementaryOccurrencesState.run === undefined) {
+	if (state.run === undefined) {
 		logFatal(
 			'Function call error',
 			'There should be a function in the Complementary Occurrences state'
 		);
 	}
-	const clauses: Set<number> = complementaryOccurrencesState.run(literalToPropagate);
-	stateMachine.transition('queue_occurrence_list_state');
-	return clauses;
+	const cRefs: Set<CRef> = state.run(assignment);
+	getSolverMachine().transition('queue_occurrence_list_state');
+	const complementary: Lit = Literal.complementary(assignment);
+	return new OccurrenceList(makeJust(complementary), [...cRefs]);
 };
 
-const decideTransition = (stateMachine: DPLL_StateMachine): number => {
-	const decideState = stateMachine.getActiveState() as NonFinalState<
+const decideTransition = (): number => {
+	const state = getSolverMachine().getActiveState() as NonFinalState<
 		DPLL_DECIDE_FUN,
 		DPLL_DECIDE_INPUT
 	>;
-	if (decideState.run === undefined) {
+	if (state.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Decide state');
 	}
-	const literalToPropagate: number = decideState.run();
-	stateMachine.transition('complementary_occurrences_state');
-	return literalToPropagate;
+	const assignment: Lit = state.run();
+	getSolverMachine().transition('complementary_occurrences_state');
+	return assignment;
 };
 
-const backtrackingTransition = (stateMachine: DPLL_StateMachine): number => {
-	const backtrackingState = stateMachine.getActiveState() as NonFinalState<
+const backtrackingTransition = (): Lit => {
+	const state = getSolverMachine().getActiveState() as NonFinalState<
 		DPLL_BACKTRACKING_FUN,
 		DPLL_BACKTRACKING_INPUT
 	>;
-	if (backtrackingState.run === undefined) {
+	if (state.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Decide state');
 	}
-	const literalToPropagate: number = backtrackingState.run();
-	stateMachine.transition('complementary_occurrences_state');
-	return literalToPropagate;
+	const assignment: Lit = state.run();
+	getSolverMachine().transition('complementary_occurrences_state');
+	return assignment;
 };
 
-const emptyClauseSetTransition = (
-	stateMachine: DPLL_StateMachine,
-	solver: DPLL_SolverMachine
-): void => {
-	const emptyClauseSetState = stateMachine.getActiveState() as NonFinalState<
-		DPLL_EMPTY_OCCURRENCE_LISTS_FUN,
-		DPLL_EMPTY_OCCURRENCE_LISTS_INPUT
+const wipeOccurrenceQueueTransition = (): void => {
+	const state = getSolverMachine().getActiveState() as NonFinalState<
+		DPLL_WIPE_OCCURRENCE_QUEUE_FUN,
+		DPLL_WIPE_OCCURRENCE_QUEUE_INPUT
 	>;
-	if (emptyClauseSetState.run === undefined) {
+	if (state.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Empty Clause Set state');
 	}
-	emptyClauseSetState.run(solver);
-	stateMachine.transition('at_level_zero_state');
+	state.run();
+	getSolverMachine().transition('at_level_zero_state');
 };

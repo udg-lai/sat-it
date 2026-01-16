@@ -42,7 +42,7 @@ export type CDCL_EMPTY_CLAUSE_INPUT = 'unit_clauses_detection_state' | 'unsat_st
 
 export type CDCL_UNIT_CLAUSES_DETECTION_INPUT = 'queue_occurrence_list_state';
 
-export type CDCL_PICK_OCCURRENCE_LIST_INPUT = 'all_clauses_checked_state';
+export type CDCL_PICK_OCCURRENCE_LIST_INPUT = 'traversed_occurrences_state';
 
 export type CDCL_CHECK_PENDING_OCCURRENCE_LISTS_INPUT =
 	| 'all_variables_assigned_state'
@@ -50,7 +50,7 @@ export type CDCL_CHECK_PENDING_OCCURRENCE_LISTS_INPUT =
 
 export type CDCL_QUEUE_OCCURRENCE_LIST_INPUT =
 	| 'are_remaining_occurrences_state'
-	| 'all_clauses_checked_state';
+	| 'traversed_occurrences_state';
 
 export type CDCL_UNSTACK_OCCURRENCE_LIST_INPUT = 'are_remaining_occurrences_state';
 
@@ -60,9 +60,9 @@ export type CDCL_TRAVERSED_OCCURRENCE_LIST_INPUT =
 
 export type CDCL_NEXT_OCCURRENCE_INPUT = 'falsified_clause_state';
 
-export type CDCL_CONFLICT_DETECTION_INPUT = 'unit_clause_state' | 'empty_occurrence_lists_state';
+export type CDCL_CONFLICT_DETECTION_INPUT = 'unit_clause_state' | 'wipe_occurrences_queue_state';
 
-export type CDCL_UNIT_CLAUSE_INPUT = 'all_clauses_checked_state' | 'unit_propagation_state';
+export type CDCL_UNIT_CLAUSE_INPUT = 'traversed_occurrences_state' | 'unit_propagation_state';
 
 export type CDCL_ALL_VARIABLES_ASSIGNED_INPUT = 'sat_state' | 'decide_state';
 
@@ -122,7 +122,7 @@ export type CDCL_INPUT =
 
 // ** state functions **
 
-export type CDCL_DECIDE_FUN = () => number;
+export type CDCL_DECIDE_FUN = () => Lit;
 
 export const decide: CDCL_DECIDE_FUN = () => {
 	const pool: VariablePool = getVariablePool();
@@ -166,12 +166,11 @@ export const unitClauseDetection: CDCL_UNIT_CLAUSES_DETECTION_FUN = () => {
 	return solverUnitClauseDetection(pool);
 };
 
-export type CDCL_PICK_OCCURRENCE_LIST_FUN = () => OccurrenceList;
+export type CDCL_PICK_OCCURRENCE_LIST_FUN = () => void;
 
 export const pickPendingOccurrenceList: CDCL_PICK_OCCURRENCE_LIST_FUN = () => {
 	const occurrenceList: OccurrenceList = getOccurrenceListQueue().element();
 	updateOccurrenceList(occurrenceList);
-	return occurrenceList;
 };
 
 export type CDCL_TRAVERSED_OCCURRENCE_LIST_FUN = (occurrenceList: OccurrenceList) => boolean;
@@ -192,9 +191,9 @@ export const nextClause: CDCL_NEXT_OCCURRENCE_FUN = () => {
 	return occurrenceList.next();
 };
 
-export type CDCL_CONFLICT_DETECTION_FUN = (cRef: number) => boolean;
+export type CDCL_CONFLICT_DETECTION_FUN = (cRef: CRef) => boolean;
 
-export const unsatisfiedClause: CDCL_CONFLICT_DETECTION_FUN = (cRef: number) => {
+export const unsatisfiedClause: CDCL_CONFLICT_DETECTION_FUN = (cRef: CRef) => {
 	const pool: ClausePool = getClausePool();
 	const evaluation: ClauseEval = clauseEvaluation(pool, cRef);
 	return isUnsatisfiedEval(evaluation);
@@ -234,7 +233,7 @@ export const complementaryOccurrences: CDCL_COMPLEMENTARY_OCCURRENCES_FUN = (ass
 
 export type CDCL_AT_LEVEL_ZERO_FUN = () => boolean;
 
-export const nonDecisionMade: CDCL_AT_LEVEL_ZERO_FUN = () => {
+export const atLevelZeroFun: CDCL_AT_LEVEL_ZERO_FUN = () => {
 	return atLevelZero();
 };
 
