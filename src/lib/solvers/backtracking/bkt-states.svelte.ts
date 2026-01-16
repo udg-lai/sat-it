@@ -71,12 +71,17 @@ const sat_state: FinalState<never> = {
 	description: 'SAT state'
 };
 
-const empty_clause_state: NonFinalState<BKT_EMPTY_CLAUSES_DETECTION_FUN, BKT_EMPTY_CLAUSES_DETECTION_INPUT> = {
+const empty_clause_state: NonFinalState<
+	BKT_EMPTY_CLAUSES_DETECTION_FUN,
+	BKT_EMPTY_CLAUSES_DETECTION_INPUT
+> = {
 	id: bkt_stateName2StateId['empty_clause_state'],
 	run: emptyClausesDetection,
 	description: 'Seeks for the empty clause in the clause pool',
-	transitions: new Map<BKT_EMPTY_CLAUSES_DETECTION_INPUT, number>()
-		.set('queue_occurrence_list_state', bkt_stateName2StateId['queue_occurrence_list_state'])
+	transitions: new Map<BKT_EMPTY_CLAUSES_DETECTION_INPUT, number>().set(
+		'queue_occurrence_list_state',
+		bkt_stateName2StateId['queue_occurrence_list_state']
+	)
 };
 
 const all_variables_assigned_state: NonFinalState<

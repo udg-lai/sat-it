@@ -12,12 +12,18 @@
 </script>
 
 <clause class={classStyle ?? ''}>
-	{#each clause as lit, i (i)}
-		<LiteralComponent literal={lit} />
-		{#if i < clause.size() - 1}
-			<MathTexComponent equation={'\\lor'} fontSize={'1rem'} />
-		{/if}
-	{/each}
+	{#if clause.isEmpty()}
+		<empty-clause>
+			
+		</empty-clause>
+	{:else}
+		{#each clause as lit, i (i)}
+			<LiteralComponent literal={lit} />
+			{#if i < clause.size() - 1}
+				<MathTexComponent equation={'\\lor'} fontSize={'1rem'} />
+			{/if}
+		{/each}
+	{/if}
 </clause>
 
 <style>
@@ -28,5 +34,13 @@
 		gap: 0.5rem;
 		align-items: end;
 		padding: 0.25rem;
+	}
+
+	empty-clause {
+		height: var(--font-size);
+		width: var(--font-size);
+		color: var(--clause-color);
+		border-color: var(--unsatisfied-color);
+		border-width: 1px;
 	}
 </style>
