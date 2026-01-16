@@ -42,12 +42,14 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 		}
 	}
 
-	protected async solveToNextVariableStepByStep(): Promise<void> {
-		this.automaticStepByStep(() => this.onDetectingConflict());
+	protected async traverseCurrentOccurrenceListStepByStep(): Promise<void> {
+		// BKT only needs to check if it is in the conflict detection "area" to know if there are still occurrences to check.
+		// The only exit points are either finding a conflict (conflict state) or traverse all clauses(decide or sat state).
+		await this.automaticStepByStep(() => this.onDetectingConflict());
 	}
 
 	protected async solveCDStepByStep(): Promise<void> {
-		this.solveToNextVariableStepByStep();
+		this.traverseCurrentOccurrenceListStepByStep();
 	}
 
 	onDetectingConflict(): boolean {

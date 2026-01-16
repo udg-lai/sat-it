@@ -117,7 +117,7 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 		if (input === 'step') {
 			this._step();
 		} else if (input === 'nextVariable') {
-			await this.solveToNextVariableStepByStep();
+			await this.traverseCurrentOccurrenceListStepByStep();
 		} else if (input === 'finishCD') {
 			await this.solveCDStepByStep();
 		} else if (input === 'solve_trail') {
@@ -181,7 +181,7 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 		await this.automaticStepByStep(() => !this.onConflictState() && !this.onFinalState());
 	}
 
-	protected abstract solveToNextVariableStepByStep(): Promise<void>;
+	protected abstract traverseCurrentOccurrenceListStepByStep(): Promise<void>;
 
 	protected abstract solveCDStepByStep(): Promise<void>;
 
