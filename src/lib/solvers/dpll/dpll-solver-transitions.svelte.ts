@@ -75,7 +75,7 @@ export const conflictDetectionBlock = (): void => {
 		const isConflictive: boolean = conflictDetectionTransition(cRef);
 		if (isConflictive) {
 			getLatestTrail().attachConflictiveClause(getClausePool().at(cRef));
-			getLatestTrail().showCtx();
+			getLatestTrail().expandContext();
 		} else {
 			const unitClause: boolean = unitClauseTransition(cRef);
 			if (unitClause) {

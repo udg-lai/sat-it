@@ -128,10 +128,10 @@
 
 		for (let i = 0; i < trails.length; i++) {
 			if (trailID != i) {
-				trails.at(i)?.hideCtx();
+				trails.at(i)?.collapseContext();
 			}
 		}
-		trails.at(trailID)?.toggleCtx();
+		trails.at(trailID)?.toggleContext();
 
 		// This is mandatory to update the heights and positions when trails change
 		// If no timeout is used, the heights are not correctly computed
@@ -152,7 +152,7 @@
 
 	function makeStatusIconStyle(trail: Trail): string {
 		let classStyle = '';
-		if (trail.showingCtx()) {
+		if (trail.showingContext()) {
 			if (showUPs && !trail.hasConflictiveClause()) {
 				classStyle = 'icon-bottom';
 			} else if (!showUPs && trail.hasConflictiveClause()) {
@@ -244,8 +244,8 @@
 								trail: trail,
 								id: index,
 								isLast: trails.length === index + 1,
-								showUPs: showUPs && trail.showingCtx(),
-								showCA: trail.showingCtx() && trail.hasConflictiveClause()
+								showUPs: showUPs && trail.showingContext(),
+								showCA: trail.showingContext() && trail.hasConflictiveClause()
 							}}
 							emitRevert={(assignment: VariableAssignment) => emitRevert(assignment, index)}
 						/>
@@ -264,7 +264,7 @@
 						<StatusIndicator
 							iconClassStyle={makeStatusIconStyle(trail)}
 							trailState={trail.getState()}
-							expanded={trail.showingCtx()}
+							expanded={trail.showingContext()}
 							onToggleExpand={() => toggleTrailCtxView(index)}
 							disableClick={solver.identify() === 'bkt' &&
 								trail.getConflictiveClause() === undefined}
