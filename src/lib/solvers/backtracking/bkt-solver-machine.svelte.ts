@@ -49,7 +49,7 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 	}
 
 	protected async solveCDStepByStep(): Promise<void> {
-		this.traverseCurrentOccurrenceListStepByStep();
+		await this.traverseCurrentOccurrenceListStepByStep();
 	}
 
 	onDetectingConflict(): boolean {
