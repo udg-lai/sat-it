@@ -24,7 +24,6 @@ import { fromJust, isJust, type Maybe } from '../types/maybe.ts';
 
 export const unaryEmptyClauseDetection = (pool: ClausePool): Set<CRef> => {
 	const clauses: Clause[] = [...pool.getClauses((c: Clause) => c.isUnit() || c.isEmpty())];
-	clauses.sort((a, b) => a.getCRef() - b.getCRef());
 	return new Set(clauses.map((c) => c.getCRef()));
 };
 
