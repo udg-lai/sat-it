@@ -4,7 +4,7 @@
 	import {
 		algorithmicUndoEventBus,
 		solverSignalEventBus,
-		toggleTrailExpandEventBus,
+		expandEditorTrailsEventBus,
 		trailTrackingEventBus
 	} from '$lib/events/events.ts';
 	import type { SolverMachine } from '$lib/solvers/SolverMachine.svelte.ts';

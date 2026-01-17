@@ -8,18 +8,13 @@
 	import { onMount } from 'svelte';
 	import PlainClauseComponent from '../PlainClauseComponent.svelte';
 
-	interface LevelContext {
-		context: Either<UPContext, NeverFn>;
-		level: number;
-	}
-
 	interface Context {
 		clause: Clause;
 		hidden: Lit[];
 	}
 
 	interface Props {
-		context: LevelContext[];
+		context: Either<UPContext, NeverFn>[];
 	}
 
 	let { context }: Props = $props();
