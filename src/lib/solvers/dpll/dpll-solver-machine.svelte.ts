@@ -54,20 +54,33 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 		}
 	}
 
-	protected async solveToNextVariableStepByStep(): Promise<void> {
+	protected async traverseCurrentOccurrenceListStepByStep(): Promise<void> {
+		// To traverse the whole list, there are 2 different things that can happen:
+		//	1. If a conflict has been found, the machine should wait for the user to notice this error.
+		//	2. If the occurrence list has been analyzed, then we should upload the following occurrence list form the queue or go to the decision state.
+
+		// Get the current occurrence list
 		const occurrences: OccurrenceList = getOccurrenceListQueue().element();
-		this.automaticStepByStep(() => !occurrences.traversed());
+
+		// Either traverse it or find a conflict.
+		await this.automaticStepByStep(() => !occurrences.traversed() && !this.onConflictState());
+
+		// If there is no conflict, then we need to do an extra step for either uploading the following occurrence list or continue to the decision state.
+		// Because of this, an extra step should be done.
+		if (!this.onConflictState()) {
+			this.step();
+		}
 	}
 
 	protected async solveCDStepByStep(): Promise<void> {
 		const queueOccurrences: Queue<OccurrenceList> = getOccurrenceListQueue();
-		this.automaticStepByStep(() => !queueOccurrences.isEmpty());
+		await this.automaticStepByStep(() => !queueOccurrences.isEmpty());
 	}
 
 	protected async unitPropagate(): Promise<void> {
 		const queueOccurrences: Queue<OccurrenceList> = getOccurrenceListQueue();
 		const previousUPs: number = getNoUnitPropagations();
-		this.automaticStepByStep(
+		await this.automaticStepByStep(
 			() => previousUPs >= getNoUnitPropagations() && !queueOccurrences.isEmpty()
 		);
 	}
