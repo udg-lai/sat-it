@@ -92,7 +92,7 @@ export type CDCL_PUSH_TRAIL_INPUT = 'unit_propagation_state';
 export type CDCL_PROPAGATE_CC_INPUT = 'complementary_occurrences_state';
 
 export type CDCL_INPUT =
-	CDCL_UNARY_EMPTY_CLAUSES_DETECTION_INPUT
+	| CDCL_UNARY_EMPTY_CLAUSES_DETECTION_INPUT
 	| CDCL_PICK_OCCURRENCE_LIST_INPUT
 	| CDCL_ALL_VARIABLES_ASSIGNED_INPUT
 	| CDCL_QUEUE_OCCURRENCE_LIST_INPUT
@@ -307,12 +307,19 @@ export const sndHighestDL: CDCL_SECOND_HIGHEST_DL_FUN = (lemma: Clause) => {
 		return literal.getVariable().toInt();
 	});
 
-	if (variables.length < 1) logFatal("sndHighestDL", "Dealing with an empty clause")
-	if (variables.length == 1) return 0; // This is a special case because
+	if (variables.length < 1) logFatal('sndHighestDL', 'Dealing with an empty clause');
+	if (variables.length == 1)
+		return 0; // This is a special case because
 	else {
-		const dLevels: List<number> = variables.map((variable) => getLatestTrail().getVariableDL(variable));
+		const dLevels: List<number> = variables.map((variable) =>
+			getLatestTrail().getVariableDL(variable)
+		);
 		const uniqueDLs: Set<number> = new Set(dLevels);
-		if (uniqueDLs.size < 2) logFatal("sndHighestDL", "After applying unique values of DL, there are less than 2 different DL")
+		if (uniqueDLs.size < 2)
+			logFatal(
+				'sndHighestDL',
+				'After applying unique values of DL, there are less than 2 different DL'
+			);
 		const sortedDLs: List<number> = [...uniqueDLs].sort((a, b) => b - a); // Sort from greater to minor
 		return sortedDLs[1];
 	}
