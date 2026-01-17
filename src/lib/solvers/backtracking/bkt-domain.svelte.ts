@@ -57,7 +57,7 @@ export type BKT_EMPTY_CLAUSES_DETECTION_FUN = () => Set<CRef>;
 
 export const emptyClausesDetection: BKT_EMPTY_CLAUSES_DETECTION_FUN = () => {
 	const clausePool: ClausePool = getClausePool();
-	const emptyClauses: Clause[] = clausePool.getEmptyClauses();
+	const emptyClauses: Clause[] = clausePool.getClauses((c: Clause) => c.isEmpty());
 	return new Set(emptyClauses.map((c: Clause) => c.getCRef()));
 };
 

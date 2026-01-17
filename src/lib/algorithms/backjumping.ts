@@ -14,11 +14,11 @@ export const backjumping = (variables: VariablePool, trail: Trail, dl: number): 
 
 	// As the propagations are not meant to be deleted, the DL+1 is obtained
 	const shrinkTo = bjTrail.getMarkOfDecisionLevel(dl + 1);
-	
+
 	while (bjTrail.size() > shrinkTo) {
 		const last: VariableAssignment = bjTrail.pop() as VariableAssignment;
 		variables.unassign(last.getVariable().toInt());
 	}
-	
+
 	return bjTrail;
 };
