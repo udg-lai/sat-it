@@ -29,12 +29,16 @@
 		<resolution-context>
 			{#each context as ctx, index (index)}
 				{#if isLeft(ctx)}
-					<PlainClauseComponent
-						clause={ctx.left.clause}
-						hidden={[]}
-						state="unsatisfied"
-						style={'justify-content: start;'}
-					/>
+					{#if ctx.left.clause.isEmpty()}
+						<empty-clause></empty-clause>
+					{:else}
+						<PlainClauseComponent
+							clause={ctx.left.clause}
+							hidden={[]}
+							state="unsatisfied"
+							style={'justify-content: start;'}
+						/>
+					{/if}
 				{:else}
 					<div class="empty-slot"></div>
 				{/if}
@@ -70,5 +74,13 @@
 
 	.scrollable-context.is-scrollable:hover {
 		cursor: ns-resize;
+	}
+
+	empty-clause {
+		height: var(--font-size);
+		width: var(--font-size);
+		color: var(--clause-color);
+		border-color: var(--unsatisfied-color);
+		border-width: 1px;
 	}
 </style>

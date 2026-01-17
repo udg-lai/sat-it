@@ -37,7 +37,7 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 		const activeId: number = this.stateMachine.getActiveId();
 
 		//The initial state
-		if (activeId === dpll_stateName2StateId.empty_clause_state) {
+		if (activeId === dpll_stateName2StateId.unary_empty_clauses_detection_state) {
 			initialTransition();
 		}
 		//Waiting to analyze the next clause or changing the clause set

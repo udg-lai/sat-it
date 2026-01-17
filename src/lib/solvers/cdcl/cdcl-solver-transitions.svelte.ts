@@ -39,8 +39,6 @@ import type {
 	CDCL_DECIDE_INPUT,
 	CDCL_UNSTACK_OCCURRENCE_LIST_FUN as CDCL_DEQUEUE_OCCURRENCE_LIST_FUN,
 	CDCL_UNSTACK_OCCURRENCE_LIST_INPUT as CDCL_DEQUEUE_OCCURRENCE_LIST_INPUT,
-	CDCL_EMPTY_CLAUSE_FUN,
-	CDCL_EMPTY_CLAUSE_INPUT,
 	CDCL_LEARN_CONFLICT_CLAUSE_FUN,
 	CDCL_LEARN_CONFLICT_CLAUSE_INPUT,
 	CDCL_NEXT_OCCURRENCE_FUN,
@@ -57,8 +55,8 @@ import type {
 	CDCL_TRAVERSED_OCCURRENCE_LIST_INPUT,
 	CDCL_UNIT_CLAUSE_FUN,
 	CDCL_UNIT_CLAUSE_INPUT,
-	CDCL_UNIT_CLAUSES_DETECTION_FUN,
-	CDCL_UNIT_CLAUSES_DETECTION_INPUT,
+	CDCL_UNARY_EMPTY_CLAUSES_DETECTION_FUN,
+	CDCL_UNARY_EMPTY_CLAUSES_DETECTION_INPUT,
 	CDCL_UNIT_PROPAGATION_FUN,
 	CDCL_UNIT_PROPAGATION_INPUT,
 	CDCL_VIRTUAL_RESOLUTION_FUN,
@@ -70,12 +68,9 @@ import type {
 /* exported transitions */
 
 export const initialTransition = (): void => {
-	ecTransition();
-	if (!getSolverMachine().onFinalState()) {
-		const unitClauses: Set<CRef> = ucdTransition();
-		const occurrenceList: OccurrenceList = new OccurrenceList(makeNothing(), [...unitClauses]);
-		afterComplementaryBlock(occurrenceList);
-	}
+	const unaryEmptyCRefs: Set<CRef> = unaryEmptyClausesTransition();
+	const occurrenceList: OccurrenceList = new OccurrenceList(makeNothing(), [...unaryEmptyCRefs]);
+	afterComplementaryBlock(occurrenceList);
 };
 
 export const decide = (): void => {
@@ -188,41 +183,18 @@ export const conflictDetectionBlock = (): void => {
 
 /* Specific Transitions */
 
-const ecTransition = (): void => {
-	if (getSolverMachine().getActiveStateId() !== 0) {
-		logFatal(
-			'Fail Initial',
-			'Trying to use initialTransition in a state that is not the initial one'
-		);
-	}
-	const ecState = getSolverMachine().getActiveState() as NonFinalState<
-		CDCL_EMPTY_CLAUSE_FUN,
-		CDCL_EMPTY_CLAUSE_INPUT
+const unaryEmptyClausesTransition = (): Set<CRef> => {
+	const state = getSolverMachine().getActiveState() as NonFinalState<
+		CDCL_UNARY_EMPTY_CLAUSES_DETECTION_FUN,
+		CDCL_UNARY_EMPTY_CLAUSES_DETECTION_INPUT
 	>;
-	if (ecState.run === undefined) {
-		logFatal('Function call error', 'There should be a function in the Empty Clause state');
-	} else {
-		const emptyClause: boolean = ecState.run();
-		if (emptyClause) {
-			getSolverMachine().transition('unsat_state');
-		} else {
-			getSolverMachine().transition('unit_clauses_detection_state');
-		}
-	}
-};
-
-const ucdTransition = (): Set<CRef> => {
-	const ucdState = getSolverMachine().getActiveState() as NonFinalState<
-		CDCL_UNIT_CLAUSES_DETECTION_FUN,
-		CDCL_UNIT_CLAUSES_DETECTION_INPUT
-	>;
-	if (ucdState.run === undefined) {
+	if (state.run === undefined) {
 		logFatal(
 			'Function call error',
-			'There should be a function in the Unit Clause Detection state'
+			'There should be a function in the Unary Empty Clauses  Transition state'
 		);
 	}
-	const units: Set<CRef> = ucdState.run();
+	const units: Set<CRef> = state.run();
 	getSolverMachine().transition('queue_occurrence_list_state');
 	return units;
 };

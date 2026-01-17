@@ -11,7 +11,7 @@ import {
 	complementaryOccurrences,
 	decide,
 	dequeueOccurrenceList,
-	emptyClauseDetection,
+	emptyClausesDetection,
 	nextClause,
 	nonDecisionMade,
 	queueOccurrenceList,
@@ -31,8 +31,8 @@ import {
 	type BKT_DECIDE_INPUT,
 	type BKT_DEQUEUE_OCCURRENCE_LIST_FUN,
 	type BKT_DEQUEUE_OCCURRENCE_LIST_INPUT,
-	type BKT_EMPTY_CLAUSE_FUN,
-	type BKT_EMPTY_CLAUSE_INPUT,
+	type BKT_EMPTY_CLAUSES_DETECTION_FUN,
+	type BKT_EMPTY_CLAUSES_DETECTION_INPUT,
 	type BKT_FUN,
 	type BKT_INPUT,
 	type BKT_NEXT_OCCURRENCE_FUN,
@@ -71,13 +71,17 @@ const sat_state: FinalState<never> = {
 	description: 'SAT state'
 };
 
-const empty_clause_state: NonFinalState<BKT_EMPTY_CLAUSE_FUN, BKT_EMPTY_CLAUSE_INPUT> = {
+const empty_clause_state: NonFinalState<
+	BKT_EMPTY_CLAUSES_DETECTION_FUN,
+	BKT_EMPTY_CLAUSES_DETECTION_INPUT
+> = {
 	id: bkt_stateName2StateId['empty_clause_state'],
-	run: emptyClauseDetection,
+	run: emptyClausesDetection,
 	description: 'Seeks for the empty clause in the clause pool',
-	transitions: new Map<BKT_EMPTY_CLAUSE_INPUT, number>()
-		.set('all_variables_assigned_state', bkt_stateName2StateId['all_variables_assigned_state'])
-		.set('unsat_state', bkt_stateName2StateId['unsat_state'])
+	transitions: new Map<BKT_EMPTY_CLAUSES_DETECTION_INPUT, number>().set(
+		'queue_occurrence_list_state',
+		bkt_stateName2StateId['queue_occurrence_list_state']
+	)
 };
 
 const all_variables_assigned_state: NonFinalState<

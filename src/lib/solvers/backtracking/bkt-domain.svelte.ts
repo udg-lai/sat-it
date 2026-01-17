@@ -1,4 +1,4 @@
-import { isUnsatisfiedEval, type ClauseEval } from '$lib/entities/Clause.svelte.ts';
+import Clause, { isUnsatisfiedEval, type ClauseEval } from '$lib/entities/Clause.svelte.ts';
 import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
 import OccurrenceList from '$lib/entities/OccurrenceList.svelte.ts';
 import type { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
@@ -8,8 +8,7 @@ import {
 	backtracking as solverBacktracking,
 	clauseEvaluation as solverClauseEvaluation,
 	complementaryOccurrences as solverComplementaryOccurrences,
-	decide as solverDecide,
-	emptyClauseDetection as solverEmptyClauseDetection
+	decide as solverDecide
 } from '$lib/solvers/shared.svelte.ts';
 import { getOccurrenceList, updateOccurrenceList } from '$lib/states/occurrence-list.svelte.ts';
 import {
@@ -22,7 +21,7 @@ import type { CRef, Lit } from '$lib/types/types.ts';
 
 // **state inputs **
 
-export type BKT_EMPTY_CLAUSE_INPUT = 'all_variables_assigned_state' | 'unsat_state';
+export type BKT_EMPTY_CLAUSES_DETECTION_INPUT = 'queue_occurrence_list_state';
 export type BKT_ALL_VARIABLES_ASSIGNED_INPUT = 'sat_state' | 'decide_state';
 export type BKT_DECIDE_INPUT = 'complementary_occurrences_state';
 export type BKT_COMPLEMENTARY_OCCURRENCES_INPUT = 'queue_occurrence_list_state';
@@ -41,7 +40,7 @@ export type BKT_DEQUEUE_OCCURRENCE_LIST_INPUT =
 	| 'at_level_zero_state';
 
 export type BKT_INPUT =
-	| BKT_EMPTY_CLAUSE_INPUT
+	| BKT_EMPTY_CLAUSES_DETECTION_INPUT
 	| BKT_ALL_VARIABLES_ASSIGNED_INPUT
 	| BKT_DECIDE_INPUT
 	| BKT_COMPLEMENTARY_OCCURRENCES_INPUT
@@ -54,11 +53,12 @@ export type BKT_INPUT =
 
 // ** state functions **
 
-export type BKT_EMPTY_CLAUSE_FUN = () => boolean;
+export type BKT_EMPTY_CLAUSES_DETECTION_FUN = () => Set<CRef>;
 
-export const emptyClauseDetection: BKT_EMPTY_CLAUSE_FUN = () => {
-	const pool: ClausePool = getClausePool();
-	return solverEmptyClauseDetection(pool);
+export const emptyClausesDetection: BKT_EMPTY_CLAUSES_DETECTION_FUN = () => {
+	const clausePool: ClausePool = getClausePool();
+	const emptyClauses: Clause[] = clausePool.getClauses((c: Clause) => c.isEmpty());
+	return new Set(emptyClauses.map((c: Clause) => c.getCRef()));
 };
 
 export type BKT_ALL_VARIABLES_ASSIGNED_FUN = () => boolean;
@@ -137,7 +137,7 @@ export const backtracking: BKT_BACKTRACKING_FUN = () => {
 };
 
 export type BKT_FUN =
-	| BKT_EMPTY_CLAUSE_FUN
+	| BKT_EMPTY_CLAUSES_DETECTION_FUN
 	| BKT_ALL_VARIABLES_ASSIGNED_FUN
 	| BKT_DECIDE_FUN
 	| BKT_COMPLEMENTARY_OCCURRENCES_FUN

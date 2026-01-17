@@ -9,8 +9,7 @@ import {
 	backtracking as solverBacktracking,
 	complementaryOccurrences as solverComplementaryOccurrences,
 	decide as solverDecide,
-	emptyClauseDetection as solverEmptyClauseDetection,
-	unitClauseDetection as solverUnitClauseDetection,
+	unaryEmptyClauseDetection as solverUnitClauseDetection,
 	unitPropagation as solverUnitPropagation
 } from '$lib/solvers/shared.svelte.ts';
 import { getOccurrenceList, updateOccurrenceList } from '$lib/states/occurrence-list.svelte.ts';
@@ -28,9 +27,7 @@ import type { CRef, Lit } from '$lib/types/types.ts';
 
 // ** state inputs **
 
-export type DPLL_EMPTY_CLAUSE_INPUT = 'unit_clauses_detection_state' | 'unsat_state';
-
-export type DPLL_UNIT_CLAUSES_DETECTION_INPUT = 'queue_occurrence_list_state';
+export type DPLL_UNARY_EMPTY_CLAUSES_DETECTION_INPUT = 'queue_occurrence_list_state';
 
 export type DPLL_PICK_OCCURRENCE_LIST_INPUT = 'all_clauses_checked_state';
 
@@ -69,8 +66,7 @@ export type DPLL_DECIDE_INPUT = 'complementary_occurrences_state';
 export type DPLL_WIPE_OCCURRENCE_QUEUE_INPUT = 'at_level_zero_state';
 
 export type DPLL_INPUT =
-	| DPLL_EMPTY_CLAUSE_INPUT
-	| DPLL_UNIT_CLAUSES_DETECTION_INPUT
+	| DPLL_UNARY_EMPTY_CLAUSES_DETECTION_INPUT
 	| DPLL_PICK_OCCURRENCE_LIST_INPUT
 	| DPLL_ALL_VARIABLES_ASSIGNED_INPUT
 	| DPLL_QUEUE_OCCURRENCE_LIST_INPUT
@@ -104,13 +100,6 @@ export const allAssigned: DPLL_ALL_VARIABLES_ASSIGNED_FUN = () => {
 	return solverAllAssigned(pool);
 };
 
-export type DPLL_EMPTY_CLAUSE_FUN = () => boolean;
-
-export const emptyClauseDetection: DPLL_EMPTY_CLAUSE_FUN = () => {
-	const hasConflict: boolean = solverEmptyClauseDetection(getClausePool());
-	return hasConflict;
-};
-
 export type DPLL_QUEUE_OCCURRENCE_LIST_FUN = (occurrenceList: OccurrenceList) => void;
 
 export const queueOccurrenceList: DPLL_QUEUE_OCCURRENCE_LIST_FUN = (
@@ -126,9 +115,9 @@ export const unstackOccurrenceList: DPLL_UNSTACK_OCCURRENCE_LIST_FUN = () => {
 	updateOccurrenceList(new OccurrenceList());
 };
 
-export type DPLL_UNIT_CLAUSES_DETECTION_FUN = () => Set<CRef>;
+export type DPLL_UNARY_EMPTY_CLAUSES_DETECTION_FUN = () => Set<CRef>;
 
-export const unitClauseDetection: DPLL_UNIT_CLAUSES_DETECTION_FUN = () => {
+export const unitEmptyClauseDetection: DPLL_UNARY_EMPTY_CLAUSES_DETECTION_FUN = () => {
 	const pool: ClausePool = getClausePool();
 	return solverUnitClauseDetection(pool);
 };
@@ -218,8 +207,7 @@ export const wipeOccurrenceQueue: DPLL_WIPE_OCCURRENCE_QUEUE_FUN = () => {
 };
 
 export type DPLL_FUN =
-	| DPLL_EMPTY_CLAUSE_FUN
-	| DPLL_UNIT_CLAUSES_DETECTION_FUN
+	| DPLL_UNARY_EMPTY_CLAUSES_DETECTION_FUN
 	| DPLL_PICK_OCCURRENCE_LIST_FUN
 	| DPLL_CHECK_PENDING_OCCURRENCE_LISTS_FUN
 	| DPLL_ALL_VARIABLES_ASSIGNED_FUN

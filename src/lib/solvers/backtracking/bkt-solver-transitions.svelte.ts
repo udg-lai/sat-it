@@ -6,7 +6,7 @@ import { getClausePool } from '$lib/states/problem.svelte.ts';
 import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
 import { getLatestTrail } from '$lib/states/trails.svelte.ts';
-import { makeJust } from '$lib/types/maybe.ts';
+import { makeJust, makeNothing } from '$lib/types/maybe.ts';
 import type { CRef, Lit } from '$lib/types/types.ts';
 import type { NonFinalState } from '../StateMachine.svelte.ts';
 import type {
@@ -24,8 +24,8 @@ import type {
 	BKT_DECIDE_INPUT,
 	BKT_DEQUEUE_OCCURRENCE_LIST_FUN,
 	BKT_DEQUEUE_OCCURRENCE_LIST_INPUT,
-	BKT_EMPTY_CLAUSE_FUN,
-	BKT_EMPTY_CLAUSE_INPUT,
+	BKT_EMPTY_CLAUSES_DETECTION_FUN,
+	BKT_EMPTY_CLAUSES_DETECTION_INPUT,
 	BKT_NEXT_OCCURRENCE_FUN,
 	BKT_NEXT_OCCURRENCE_INPUT,
 	BKT_QUEUE_OCCURRENCE_LIST_FUN,
@@ -37,10 +37,12 @@ import type {
 /* exported transitions */
 
 export const initialTransition = (): void => {
-	ecTransition();
-	if (!getSolverMachine().onFinalState()) {
-		allVariablesAssignedTransition();
-	}
+	const emptyCRefs: Set<CRef> = ecTransition();
+	const occurrenceList: OccurrenceList = new OccurrenceList(makeNothing(), [...emptyCRefs]);
+	queueOccurrenceListTransition(occurrenceList);
+
+	// This is for showing the up-1 and up-n view
+	if (!getSolverMachine().runningOnAutomatic()) conflictDetectionEventBus.emit();
 };
 
 export const decide = (): void => {
@@ -60,7 +62,6 @@ const afterAssignmentBlock = (assignment: Lit): void => {
 	const occurrenceList: OccurrenceList = complementaryOccurrencesTransition(assignment);
 	queueOccurrenceListTransition(occurrenceList);
 
-	// This is for showing the up-1 and up-n view
 	if (!getSolverMachine().runningOnAutomatic()) conflictDetectionEventBus.emit();
 };
 
@@ -79,7 +80,7 @@ export const conflictDetectionBlock = () => {
 	}
 };
 
-const ecTransition = (): void => {
+const ecTransition = (): Set<CRef> => {
 	if (getSolverMachine().getActiveStateId() !== 0) {
 		logFatal(
 			'Fail Initial',
@@ -87,15 +88,15 @@ const ecTransition = (): void => {
 		);
 	}
 	const state = getSolverMachine().getActiveState() as NonFinalState<
-		BKT_EMPTY_CLAUSE_FUN,
-		BKT_EMPTY_CLAUSE_INPUT
+		BKT_EMPTY_CLAUSES_DETECTION_FUN,
+		BKT_EMPTY_CLAUSES_DETECTION_INPUT
 	>;
 	if (state.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Empty Clause state');
 	}
-	const result: boolean = state.run();
-	if (result) getSolverMachine().transition('unsat_state');
-	else getSolverMachine().transition('all_variables_assigned_state');
+	const emptyCRefs: Set<CRef> = state.run();
+	getSolverMachine().transition('queue_occurrence_list_state');
+	return emptyCRefs;
 };
 
 const allVariablesAssignedTransition = (): void => {
