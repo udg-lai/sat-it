@@ -15,8 +15,7 @@ export interface IClausePool {
 	eval(): AssignmentEval;
 	addClause(clause: Clause): CRef;
 	at(clause: CRef): Clause;
-	getClauses(): Clause[];
-	getUnitClauses(): Clause[];
+	getClauses(p?: (clause: Clause) => boolean): Clause[];
 	getLearnedClauses(): Clause[];
 	size(): number;
 }
@@ -74,14 +73,6 @@ class ClausePool implements IClausePool {
 		return this._at(cRef);
 	}
 
-	getUnitClauses(): Clause[] {
-		return this.getClauses().filter((c: Clause) => c.isUnit());
-	}
-
-	getEmptyClauses(): Clause[] {
-		return this.getClauses().filter((c: Clause) => c.isEmpty());
-	}
-
 	getSingleLiteralClauses(): SvelteSet<number> {
 		const S = new SvelteSet<number>();
 		for (const c of this.getClauses()) {
@@ -90,8 +81,8 @@ class ClausePool implements IClausePool {
 		return S;
 	}
 
-	getClauses(): Clause[] {
-		return [...this.clauses.values()];
+	getClauses(p?: (clause: Clause) => boolean): Clause[] {
+		return p ? [...this.clauses.values()].filter(p) : [...this.clauses.values()];
 	}
 
 	leftToSatisfy(): number {

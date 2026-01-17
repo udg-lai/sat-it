@@ -19,13 +19,13 @@ describe('unit clause', () => {
 		const variablePool = new VariablePool(3);
 		const clausePool = ClausePool.buildFrom(summary.claims, variablePool);
 		variablePool.assign(3, false);
-		expect(clausePool.getUnitClauses().length).toBe(1);
+		expect(clausePool.getClauses((p) => p.isUnit()).length).toBe(1);
 	});
 	it('0 unit clause', () => {
 		const variablePool = new VariablePool(3);
 		const clausePool = ClausePool.buildFrom(summary.claims, variablePool);
 		variablePool.assign(1, true);
 		variablePool.assign(3, true);
-		expect(clausePool.getUnitClauses().length).toBe(0);
+		expect(clausePool.getClauses((p) => p.isUnit()).length).toBe(0);
 	});
 });

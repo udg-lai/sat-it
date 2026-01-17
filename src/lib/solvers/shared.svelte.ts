@@ -20,13 +20,12 @@ import {
 import { logBreakpoint, logFatal } from '$lib/states/toasts.svelte.ts';
 import { getLatestTrail, getTrails, stackTrail } from '$lib/states/trails.svelte.ts';
 import type { CRef, Lit, Var } from '$lib/types/types.ts';
-import { isUnSAT } from '../interfaces/IClausePool.ts';
 import { fromJust, isJust, type Maybe } from '../types/maybe.ts';
 
 export const unaryEmptyClauseDetection = (pool: ClausePool): Set<CRef> => {
-	const unaryEmptyClauses: Clause[] = [...pool.getUnitClauses(), ...pool.getEmptyClauses()];
-	unaryEmptyClauses.sort((a, b) => a.getCRef() - b.getCRef());
-	return new Set(unaryEmptyClauses.map((c) => c.getCRef()));
+	const clauses: Clause[] = [...pool.getClauses((c: Clause) => c.isUnit() || c.isEmpty())];
+	clauses.sort((a, b) => a.getCRef() - b.getCRef());
+	return new Set(clauses.map((c) => c.getCRef()));
 };
 
 export const allAssigned = (pool: VariablePool): boolean => {
