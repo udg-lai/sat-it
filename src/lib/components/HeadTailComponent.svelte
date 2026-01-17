@@ -5,9 +5,15 @@
 		children: Snippet;
 		display: boolean;
 		padding?: string;
+		verticalList?: boolean;
 	}
 
-	let { display: inspecting, children, padding = '0.25rem' }: Props = $props();
+	let {
+		display: inspecting,
+		children,
+		padding = '0.25rem',
+		verticalList = false
+	}: Props = $props();
 
 	let color = $derived(inspecting ? 'var(--inspecting-color)' : 'transparent');
 
@@ -16,6 +22,8 @@
 
 <head-tail
 	style="--color: {color}; --padding: {padding}; --inspecting-opacity: {inspectingOpacity}"
+	class:horizontal-display={!verticalList}
+	class:vertical-display={verticalList}
 >
 	{@render children()}
 </head-tail>
@@ -44,8 +52,6 @@
 	head-tail::after {
 		content: '';
 		position: absolute;
-		left: 50%;
-		bottom: -8px;
 
 		width: 4px;
 		height: 4px;
@@ -63,6 +69,15 @@
 	}
 
 	head-tail[style*='--inspecting-opacity: 1']::after {
-		animation-play-state: running;
+		animation-play-state: runninsg;
+	}
+
+	.horizontal-display::after {
+		left: 50%;
+		bottom: -8px;
+	}
+
+	.vertical-display::after {
+		bottom: 12px;
 	}
 </style>
