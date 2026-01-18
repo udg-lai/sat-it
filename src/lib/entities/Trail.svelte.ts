@@ -253,12 +253,48 @@ export class Trail {
 		return this.assignments[pos].isD();
 	}
 
+	isFullyExpanded(): boolean {
+		return this.expandedDLs.slice(1).every((expanded) => expanded);
+	}
+
 	anyCollapsedDL(): boolean {
 		return this.expandedDLs.slice(1).some((expanded) => !expanded);
 	}
 
+	nCollapsedDLs(): number {
+		return this.expandedDLs.slice(1).filter((expanded) => !expanded).length;
+	}
+
+	collapseDls(p?: (dl: number) => boolean): void {
+		if (p === undefined) {
+			this.collapseAllDLs();
+			return;
+		}
+		this.expandedDLs = this.expandedDLs.map((_, index) => {
+			if (index === 0) {
+				return false;
+			} else {
+				return p(index);
+			}
+		});
+	}
+
 	collapseAllDLs(): void {
 		this.expandedDLs = this.expandedDLs.map(() => false);
+	}
+
+	expandDLs(p?: (dl: number) => boolean): void {
+		if (p === undefined) {
+			this.expandAllDLs();
+			return;
+		}
+		this.expandedDLs = this.expandedDLs.map((_, index) => {
+			if (index === 0) {
+				return true;
+			} else {
+				return p(index);
+			}
+		});
 	}
 
 	expandAllDLs(): void {
@@ -284,6 +320,10 @@ export class Trail {
 
 	nAssignments(): number {
 		return this.assignments.length;
+	}
+
+	nDecisions(): number {
+		return this.getDLMarks().length;
 	}
 
 	[Symbol.iterator]() {

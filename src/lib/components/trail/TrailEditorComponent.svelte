@@ -15,6 +15,7 @@
 	import { onMount } from 'svelte';
 	import ComposedTrailComponent from './ComposedTrailComponent.svelte';
 	import StatusIndicator from './StatusIndicator.svelte';
+	import { setTrailsExpanded } from '$lib/states/decision-levels-expanded.svelte.ts';
 
 	interface Props {
 		trails: Trail[];
@@ -201,9 +202,10 @@
 	function handleExpandRequest(trail: Trail) {
 		// If there is at least one collapsed DL, expand all. Otherwise, collapse all.
 		if (trail.anyCollapsedDL()) {
-			trail.expandAllDLs();
+			trail.expandDLs();
 		} else {
-			trail.collapseAllDLs();
+			trail.collapseDls();
+			trail.expandDLs((dl) => dl == trail.getDL());
 		}
 	}
 
@@ -212,7 +214,8 @@
 			if (expand) {
 				trail.expandAllDLs();
 			} else {
-				trail.collapseAllDLs();
+				trail.collapseDls();
+				trail.expandDLs((dl) => dl == trail.getDL());
 			}
 		});
 	}
@@ -303,9 +306,15 @@
 {#snippet enumerateSnippet(id: number, trail: Trail)}
 	<div class="item" style="--height: {composedTrailsHeight[id]}px;">
 		<div class="trail-index" style="--top: {trailsTopPosition[id]}px;">
-			<button class="trail-index-content" onclick={() => handleExpandRequest(trail)}>
-				<span class:opacity={id + 1 < trails.length}>{id + 1}.</span>
-			</button>
+			{#if trail.nDecisions() > 1}
+				<button class="trail-index-content" onclick={() => handleExpandRequest(trail)}>
+					<span class:opacity={id + 1 < trails.length}>{id + 1}.</span>
+				</button>
+			{:else}
+				<div class="trail-index-content">
+					<span class:opacity={id + 1 < trails.length}>{id + 1}.</span>
+				</div>
+			{/if}
 		</div>
 	</div>
 {/snippet}
