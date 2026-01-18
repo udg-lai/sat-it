@@ -31,7 +31,7 @@ export class Trail {
 	private state: TrailState = $state('running');
 
 	// State expanded DLs. Indicates if `this` was required to show the propagations at each decision level
-	private expandedDLs: boolean[] = $state([false]);
+	private expandedDLs: boolean[] = $state([true]);
 
 	copy(): Trail {
 		const newTrail = new Trail();
@@ -251,6 +251,10 @@ export class Trail {
 			logFatal(`Position ${pos} is out of bounds for trail of size ${this.assignments.length}`);
 		}
 		return this.assignments[pos].isD();
+	}
+
+	anyCollapsedDL(): boolean {
+		return this.expandedDLs.slice(1).some((expanded) => !expanded);
 	}
 
 	collapseAllDLs(): void {

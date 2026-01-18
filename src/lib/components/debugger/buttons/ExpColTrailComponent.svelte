@@ -13,11 +13,12 @@
 	let expandIcon = '/icons/Expand.svg';
 	let collapseIcon = '/icons/Collapse.svg';
 
-	const expCol = (): void => {
+	function expandCollapse() {
+		console.log('Toggling expand/collapse of decision levels');
 		setTrailsExpanded(!expanded);
-	};
+	}
 </script>
 
-<button class="btn general-btn" title={textCollapse} onclick={expCol}>
+<button class="btn general-btn" title={textCollapse} onclick={expandCollapse}>
 	<ImageRender icon={expanded ? collapseIcon : expandIcon} alt={expanded ? 'Collapse' : 'Expand'} />
 </button>

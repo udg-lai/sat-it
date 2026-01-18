@@ -1,7 +1,7 @@
 // A simple event bus implementation with pipeable streams and some operators
 
-type Unsubscribe = () => void;
-type Subscriber<T> = (event: T) => void;
+export type Unsubscribe = () => void;
+export type Subscriber<T> = (event: T) => void;
 
 export interface EventStream<T> {
 	subscribe(fn: Subscriber<T>): Unsubscribe;

@@ -1,10 +1,11 @@
 <script lang="ts">
 	import type { Trail } from '$lib/entities/Trail.svelte.ts';
 	import VariableAssignment from '$lib/entities/VariableAssignment.ts';
+	import { filter, type Unsubscribe } from '$lib/events/createEventBus.ts';
 	import {
 		algorithmicUndoEventBus,
-		solverSignalEventBus,
 		expandEditorTrailsEventBus,
+		solverSignalEventBus,
 		trailTrackingEventBus
 	} from '$lib/events/events.ts';
 	import type { SolverMachine } from '$lib/solvers/SolverMachine.svelte.ts';
@@ -14,7 +15,6 @@
 	import { onMount } from 'svelte';
 	import ComposedTrailComponent from './ComposedTrailComponent.svelte';
 	import StatusIndicator from './StatusIndicator.svelte';
-	import { filter } from '$lib/events/createEventBus.ts';
 
 	interface Props {
 		trails: Trail[];
@@ -198,23 +198,47 @@
 		composedTrailsHeight = trails.map((_, i) => getComposedTrailHeight(i));
 	}
 
+	function handleExpandRequest(trail: Trail) {
+		// If there is at least one collapsed DL, expand all. Otherwise, collapse all.
+		if (trail.anyCollapsedDL()) {
+			trail.expandAllDLs();
+		} else {
+			trail.collapseAllDLs();
+		}
+	}
+
+	function handleExpandCollapseEditorRequest(expand: boolean) {
+		trails.forEach((trail) => {
+			if (expand) {
+				trail.expandAllDLs();
+			} else {
+				trail.collapseAllDLs();
+			}
+		});
+	}
+
 	$effect(() => {
 		// This is mandatory to update the heights and positions when trails change
 		composedTrailCompanionPositions();
 	});
 
 	onMount(() => {
-		const unsubscribeTrailTracking = trailTrackingEventBus.subscribe(rearrangeTrailEditor);
-		const unsubscribeRunningOnAuto = solverSignalEventBus
-			.pipe(filter((t) => t == 'begin-step-by-step'))
-			.subscribe(() => rearrangeTrailEditor(lastReference));
+		const unsubscribe: Unsubscribe[] = [];
+
+		unsubscribe.push(trailTrackingEventBus.subscribe(rearrangeTrailEditor));
+		unsubscribe.push(
+			solverSignalEventBus
+				.pipe(filter((t) => t == 'begin-step-by-step'))
+				.subscribe(() => rearrangeTrailEditor(lastReference))
+		);
 
 		updatesComposedTrailsHeight();
 		updatesTrailTopPositions();
 
+		unsubscribe.push(expandEditorTrailsEventBus.subscribe(handleExpandCollapseEditorRequest));
+
 		return () => {
-			unsubscribeTrailTracking();
-			unsubscribeRunningOnAuto();
+			unsubscribe.forEach((unsub) => unsub());
 		};
 	});
 </script>
@@ -230,24 +254,24 @@
 >
 	<editor-leaf use:listenContentHeight>
 		<editor-indexes class="direction container-padding">
-			{#each trails as _, index (index)}
-				{@render enumerateSnippet(index)}
+			{#each trails as trail, id (id)}
+				{@render enumerateSnippet(id, trail)}
 			{/each}
 		</editor-indexes>
 
 		<trails-leaf bind:this={trailsLeafElement}>
 			<editor-trails class="container-padding">
-				{#each trails as trail, index (index)}
-					<div id={`composed-trail_${index}`} class="composed-trail-observer">
+				{#each trails as trail, id (id)}
+					<div id={`composed-trail_${id}`} class="composed-trail-observer">
 						<ComposedTrailComponent
 							trail={{
 								trail: trail,
-								id: index,
-								isLast: trails.length === index + 1,
+								id: id,
+								isLast: trails.length === id + 1,
 								showUPs: showUPs && trail.showingCtx(),
 								showCA: trail.showingCtx() && trail.hasConflictiveClause()
 							}}
-							emitRevert={(assignment: VariableAssignment) => emitRevert(assignment, index)}
+							emitRevert={(assignment: VariableAssignment) => emitRevert(assignment, id)}
 						/>
 					</div>
 				{/each}
@@ -255,17 +279,17 @@
 		</trails-leaf>
 
 		<editor-info class="container-padding direction">
-			{#each trails as trail, index (index)}
+			{#each trails as trail, id (id)}
 				<div
-					class="item {computeStatusIndicatorOpacity(index)}"
-					style="--height: {composedTrailsHeight[index]}px;"
+					class="item {computeStatusIndicatorOpacity(id)}"
+					style="--height: {composedTrailsHeight[id]}px;"
 				>
-					<div class="trail-index" style="--top: {trailsTopPosition[index]}px;">
+					<div class="trail-index" style="--top: {trailsTopPosition[id]}px;">
 						<StatusIndicator
 							iconClassStyle={makeStatusIconStyle(trail)}
 							trailState={trail.getState()}
 							expanded={trail.showingCtx()}
-							onToggleExpand={() => toggleTrailCtxView(index)}
+							onToggleExpand={() => toggleTrailCtxView(id)}
 							disableClick={solver.identify() === 'bkt' &&
 								trail.getConflictiveClause() === undefined}
 						/>
@@ -276,12 +300,12 @@
 	</editor-leaf>
 </trail-editor>
 
-{#snippet enumerateSnippet(index: number)}
-	<div class="item" style="--height: {composedTrailsHeight[index]}px;">
-		<div class="trail-index" style="--top: {trailsTopPosition[index]}px;">
-			<div class="trail-index-content">
-				<span class:opacity={index + 1 < trails.length}>{index + 1}.</span>
-			</div>
+{#snippet enumerateSnippet(id: number, trail: Trail)}
+	<div class="item" style="--height: {composedTrailsHeight[id]}px;">
+		<div class="trail-index" style="--top: {trailsTopPosition[id]}px;">
+			<button class="trail-index-content" onclick={() => handleExpandRequest(trail)}>
+				<span class:opacity={id + 1 < trails.length}>{id + 1}.</span>
+			</button>
 		</div>
 	</div>
 {/snippet}
