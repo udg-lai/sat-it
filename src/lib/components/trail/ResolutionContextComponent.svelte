@@ -1,15 +1,39 @@
 <script lang="ts">
-	import type { ResolutionContext } from '$lib/entities/Trail.svelte.ts';
+	import type { ResolutionContext, Trail } from '$lib/entities/Trail.svelte.ts';
 	import { isLeft, type Either } from '$lib/types/either.ts';
 	import type { NeverFn } from '$lib/types/types.ts';
 	import { onMount } from 'svelte';
 	import PlainClauseComponent from '../PlainClauseComponent.svelte';
 
 	interface Props {
-		context: Either<ResolutionContext, NeverFn>[];
+		trail: Trail;
 	}
 
-	let { context }: Props = $props();
+	function computeVisibleContext(
+		context: Either<ResolutionContext, NeverFn>[]
+	): Either<ResolutionContext, NeverFn>[] {
+		const alignedContext: Either<ResolutionContext, NeverFn>[] = context.slice(
+			0,
+			trail.nAssignments()
+		);
+		const conflictiveClause: Either<ResolutionContext, NeverFn> = context[context.length - 1];
+
+		const visibleContext: Either<ResolutionContext, NeverFn>[] = alignedContext.filter(
+			(_, pos: number) => {
+				const dl: number = trail.dlOfPosition(pos);
+				// Any decision or expanded decision level shows its resolution context
+				// The context of a decision is always shown
+				return trail.isDecision(pos) || trail.isDLExpanded(dl);
+			}
+		);
+		return [...visibleContext, conflictiveClause];
+	}
+
+	let context: Either<ResolutionContext, NeverFn>[] = $derived.by(() =>
+		computeVisibleContext(trail.getResolutionContext())
+	);
+
+	let { trail }: Props = $props();
 
 	let scrollEl: HTMLDivElement;
 	let isScrollable = $state(false);
@@ -66,6 +90,7 @@
 
 	.scrollable-wrapper {
 		padding-bottom: var(--composed-top);
+		width: fit-content;
 	}
 
 	.scrollable-context.is-scrollable {

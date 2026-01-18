@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type Clause from '$lib/entities/Clause.svelte.ts';
-	import type { UPContext } from '$lib/entities/Trail.svelte.ts';
+	import type { Trail, UPContext } from '$lib/entities/Trail.svelte.ts';
 	import { getClausePool } from '$lib/states/problem.svelte.ts';
 	import { isLeft, makeLeft, makeRight, unwrapEither, type Either } from '$lib/types/either.ts';
 	import type { Lit, NeverFn } from '$lib/types/types.ts';
@@ -14,14 +14,22 @@
 	}
 
 	interface Props {
-		context: Either<UPContext, NeverFn>[];
+		trail: Trail;
 	}
 
-	let { context }: Props = $props();
+	let { trail }: Props = $props();
 
-	function computeUPcontext(): Either<Context, NeverFn>[] {
-		const upContext: Either<UPContext, NeverFn>[] = context;
-		return upContext.map((c) => {
+	function computeVisibleContext(
+		context: Either<UPContext, NeverFn>[]
+	): Either<Context, NeverFn>[] {
+		const visibleContext: Either<UPContext, NeverFn>[] = context.filter((_, pos: number) => {
+			const dl: number = trail.dlOfPosition(pos);
+			// Any decision or expanded decision level shows its UP context
+			// The context of a decision is always shown
+			return trail.isDecision(pos) || trail.isDLExpanded(dl);
+		});
+
+		return visibleContext.map((c: Either<UPContext, NeverFn>) => {
 			if (isLeft(c)) {
 				const { reasonCRef, propagated }: UPContext = unwrapEither(c);
 				const clause: Clause = getClausePool().at(reasonCRef);
@@ -33,7 +41,9 @@
 		});
 	}
 
-	let upContext: Either<Context, NeverFn>[] = $derived.by(computeUPcontext);
+	let context: Either<Context, NeverFn>[] = $derived.by(() =>
+		computeVisibleContext(trail.getUPContext())
+	);
 
 	let scrollEl: HTMLDivElement;
 	let isScrollable = $state(false);
@@ -50,7 +60,7 @@
 
 <div class="scrollable-context" class:is-scrollable={isScrollable} bind:this={scrollEl}>
 	<up-context>
-		{#each upContext as ctx, index (index)}
+		{#each context as ctx, index (index)}
 			{#if isLeft(ctx)}
 				<PlainClauseComponent
 					clause={ctx.left.clause}

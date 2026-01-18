@@ -42,6 +42,7 @@ export class Trail {
 		newTrail.conflictiveClause = this.conflictiveClause;
 		newTrail.resolutionCtx = [...this.resolutionCtx];
 		newTrail.state = this.state;
+		newTrail.expandedDLs = [...this.expandedDLs];
 		return newTrail;
 	}
 
@@ -245,12 +246,40 @@ export class Trail {
 		return this.expandedDLs[level];
 	}
 
+	isDecision(pos: number): boolean {
+		if (pos < 0 || pos >= this.assignments.length) {
+			logFatal(`Position ${pos} is out of bounds for trail of size ${this.assignments.length}`);
+		}
+		return this.assignments[pos].isD();
+	}
+
 	collapseAllDLs(): void {
 		this.expandedDLs = this.expandedDLs.map(() => false);
 	}
 
 	expandAllDLs(): void {
 		this.expandedDLs = this.expandedDLs.map(() => true);
+	}
+
+	dlOfPosition(pos: number): number {
+		if (pos < 0 || pos >= this.assignments.length) {
+			logFatal(`Position ${pos} is out of bounds for trail of size ${this.assignments.length}`);
+		}
+
+		let level: number = this.bookmarkDLs.length - 1;
+		let found: boolean = false;
+		while (level >= 1 && !found) {
+			if (pos >= this.bookmarkDLs[level]) {
+				found = true;
+			} else {
+				level = level - 1;
+			}
+		}
+		return level; // returns a range between 0 and dl
+	}
+
+	nAssignments(): number {
+		return this.assignments.length;
 	}
 
 	[Symbol.iterator]() {

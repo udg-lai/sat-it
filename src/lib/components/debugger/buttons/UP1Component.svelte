@@ -8,8 +8,8 @@
 
 	function finishConflictDetection(): void {
 		getSolverMachine().disableStepDelay();
-		expandEditorTrailsEventBus.emit(true);
 		solverCommandEventBus.emit('up1');
+		expandEditorTrailsEventBus.emit(true);
 	}
 </script>
 

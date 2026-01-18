@@ -36,7 +36,7 @@
 		/>
 	{:else}
 		<DecisionComponent
-			expanded={!expandedDL}
+			expanded={expandedDL}
 			assignment={decision}
 			isLast={composedTrail.isLast}
 			emitToggle={toggleDL}
@@ -74,7 +74,6 @@
 		{/if}
 	{/if}
 </decision-level>
-
 
 <style>
 	decision-level {
