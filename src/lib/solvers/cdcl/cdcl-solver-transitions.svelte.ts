@@ -4,7 +4,7 @@ import Literal from '$lib/entities/Literal.svelte.ts';
 import OccurrenceList from '$lib/entities/OccurrenceList.svelte.ts';
 import type { Trail } from '$lib/entities/Trail.svelte.ts';
 import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
-import { conflictDetectionEventBus, trailStackedEventBus } from '$lib/events/events.ts';
+import { conflictDetectionEventBus, newTrailStackedEventBus } from '$lib/events/events.ts';
 import { getConflictAnalysis } from '$lib/states/conflict-anlysis.svelte.ts';
 import { focusOnAssignment, wipeFocusAssignment } from '$lib/states/focused-assignment.svelte.ts';
 import { getOccurrenceList, updateOccurrenceList } from '$lib/states/occurrence-list.svelte.ts';
@@ -126,7 +126,6 @@ export const conflictAnalysisBlock = (): void => {
 
 		// Push the new trail after backjumping and notify
 		pushTrailTransition(trailAfterBJ);
-		trailStackedEventBus.emit();
 
 		const propagated: Lit = unitPropagationTransition(cRef, 'backjumping');
 		const occurrenceList: OccurrenceList = complementaryOccurrencesDetectionTransition(propagated);
@@ -168,7 +167,7 @@ export const conflictDetectionBlock = (): void => {
 		const isConflictive: boolean = conflictiveTransition(cRef);
 		if (isConflictive) {
 			getLatestTrail().attachConflictiveClause(getClausePool().at(cRef));
-			getLatestTrail().showCtx();
+			getLatestTrail().expandContext();
 		} else {
 			const unitClause: boolean = unitClauseTransition(cRef);
 			if (unitClause) {

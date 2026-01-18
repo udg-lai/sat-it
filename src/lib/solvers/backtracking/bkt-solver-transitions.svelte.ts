@@ -76,7 +76,7 @@ export const conflictDetectionBlock = () => {
 	const isConflictive: boolean = conflictDetectionTransition(cRef);
 	if (isConflictive) {
 		getLatestTrail().attachConflictiveClause(getClausePool().at(cRef));
-		getLatestTrail().showCtx();
+		getLatestTrail().expandContext();
 	}
 };
 

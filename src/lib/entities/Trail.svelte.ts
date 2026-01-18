@@ -210,19 +210,19 @@ export class Trail {
 		return levels[dl - 1];
 	}
 
-	toggleCtx(): void {
+	toggleContext(): void {
 		this.showCtxView = !this.showCtxView;
 	}
 
-	hideCtx(): void {
+	collapseContext(): void {
 		this.showCtxView = false;
 	}
 
-	showCtx(): void {
+	expandContext(): void {
 		this.showCtxView = true;
 	}
 
-	showingCtx(): boolean {
+	showingContext(): boolean {
 		return this.showCtxView;
 	}
 
