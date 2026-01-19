@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
+	import { decisionLevelToggledEventBus } from '$lib/events/events.ts';
 	import { differOf } from '$lib/states/trail-differ-sequence.svelte.ts';
 	import type { ComposedTrail } from '$lib/types/types.ts';
 	import BackjumpingComponent from '../assignment/BackjumpingComponent.svelte';
@@ -22,6 +23,7 @@
 
 	const toggleDL = (): void => {
 		composedTrail.trail.toggleDLExpanded(dlLevel);
+		decisionLevelToggledEventBus.emit();
 	};
 </script>
 

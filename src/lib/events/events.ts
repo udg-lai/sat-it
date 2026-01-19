@@ -84,3 +84,6 @@ export const newTrailStackedEventBus = createEventBus<void>();
 
 // event bus to notify a single undo wants to be done.
 export const ctrlZEventBus = createEventBus<void>();
+
+// A individual DL from the trail has been expanded or collapsed by the user
+export const decisionLevelToggledEventBus = createEventBus<void>();

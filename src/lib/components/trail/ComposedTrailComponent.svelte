@@ -11,22 +11,6 @@
 	}
 
 	let { trail, emitRevert }: Props = $props();
-
-	let trailWidth = $state(0);
-
-	function observeWidth(element: HTMLElement) {
-		const previewObserver = new ResizeObserver((entries) => {
-			for (const entry of entries) {
-				trailWidth = entry.contentRect.width;
-			}
-		});
-		previewObserver.observe(element);
-		return {
-			destroy() {
-				previewObserver.disconnect();
-			}
-		};
-	}
 </script>
 
 <composed-trail class="composed-trail" class:opened-views={trail.showUPs || trail.showCA}>
@@ -35,7 +19,7 @@
 			<UPContextComponent trail={trail.trail} />
 		</div>
 	{/if}
-	<div id={'trail_' + trail.id} use:observeWidth class="fit-content width-observer">
+	<div id={'trail_' + trail.id} class="fit-content width-observer">
 		<div class:views-opened={trail.showCA || trail.showUPs}>
 			<TrailComponent composedTrail={trail} {emitRevert} />
 		</div>

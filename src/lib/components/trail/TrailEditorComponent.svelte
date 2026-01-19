@@ -5,6 +5,7 @@
 	import {
 		algorithmicUndoEventBus,
 		conflictDetectedEventBus,
+		decisionLevelToggledEventBus,
 		expandEditorTrailsEventBus,
 		solverSignalEventBus,
 		trailTrackingEventBus
@@ -144,6 +145,14 @@
 		updatesTrailTopPositions();
 	}
 
+	function asyncComputeComposedTrailCompanionPositions(): void {
+		// Mandatory to let the UI update the heights and positions
+		setTimeout(() => {
+			updatesComposedTrailsHeight();
+			updatesTrailTopPositions();
+		}, 0);
+	}
+
 	function emitRevert(assignment: VariableAssignment, index: number) {
 		algorithmicUndoEventBus.emit({
 			decision: assignment,
@@ -207,6 +216,7 @@
 			trail.collapseDls();
 			trail.expandDLs((dl) => dl == trail.getDL());
 		}
+		asyncComputeComposedTrailCompanionPositions();
 	}
 
 	function handleExpandCollapseEditorRequest(expand: boolean) {
@@ -218,6 +228,7 @@
 				trail.expandDLs((dl) => dl == trail.getDL());
 			}
 		});
+		asyncComputeComposedTrailCompanionPositions();
 	}
 
 	function openConflictiveContext(): void {
@@ -239,15 +250,12 @@
 		} else {
 			logFatal('openConflictiveContext', 'No trails available upon conflict detection.');
 		}
-		// Mandatory to let the UI update the heights and positions
-		setTimeout(() => {
-			computeComposedTrailCompanionPositions();
-		}, 0);
+		asyncComputeComposedTrailCompanionPositions();
 	}
 
 	$effect(() => {
 		// This is mandatory to update the heights and positions when trails change
-		computeComposedTrailCompanionPositions();
+		asyncComputeComposedTrailCompanionPositions();
 	});
 
 	onMount(() => {
@@ -261,10 +269,12 @@
 		);
 
 		unsubscribe.push(expandEditorTrailsEventBus.subscribe(handleExpandCollapseEditorRequest));
-
 		unsubscribe.push(conflictDetectedEventBus.subscribe(openConflictiveContext));
+		unsubscribe.push(
+			decisionLevelToggledEventBus.subscribe(asyncComputeComposedTrailCompanionPositions)
+		);
 
-		computeComposedTrailCompanionPositions();
+		asyncComputeComposedTrailCompanionPositions();
 
 		return () => {
 			unsubscribe.forEach((unsub) => unsub());
