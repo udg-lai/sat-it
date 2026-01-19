@@ -1,7 +1,7 @@
 // A simple event bus implementation with pipeable streams and some operators
 
-type Unsubscribe = () => void;
-type Subscriber<T> = (event: T) => void;
+export type Unsubscribe = () => void;
+export type Subscriber<T> = (event: T) => void;
 
 export interface EventStream<T> {
 	subscribe(fn: Subscriber<T>): Unsubscribe;
@@ -71,6 +71,20 @@ export function filter<T>(condition: (value: T) => boolean): Operator<T, T> {
 			if (condition(value)) {
 				bus.emit(value);
 			}
+		});
+
+		return makePipeable(bus);
+	};
+}
+
+export function delay<T>(ms: number): Operator<T, T> {
+	return (source: EventStream<T>): PipeableEventStream<T> => {
+		// Creates a new event bus to emit only the filtered events
+		const bus = createEventBus<T>();
+		source.subscribe((value) => {
+			setTimeout(() => {
+				bus.emit(value);
+			}, ms);
 		});
 
 		return makePipeable(bus);

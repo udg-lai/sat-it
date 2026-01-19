@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { solverCommandEventBus, toggleTrailExpandEventBus } from '$lib/events/events.ts';
+	import { solverCommandEventBus, expandEditorTrailsEventBus } from '$lib/events/events.ts';
 	import { updateAssignment } from '$lib/states/assignment.svelte.ts';
 	import ImageRender from '$lib/components/tools/ImageRender.svelte';
 	import '../style.css';
@@ -16,7 +16,7 @@
 	function solveProblem(): void {
 		updateAssignment('automated');
 		solverCommandEventBus.emit('solve_all');
-		toggleTrailExpandEventBus.emit(true);
+		expandEditorTrailsEventBus.emit(true);
 	}
 </script>
 

@@ -10,7 +10,7 @@
 
 	interface DecisionLevel {
 		assignment: VariableAssignment;
-		level: number;
+		dlLevel: number;
 	}
 
 	interface Props {
@@ -25,10 +25,10 @@
 	);
 
 	let decisions: DecisionLevel[] = $derived(
-		composedTrail.trail.getDecisions().map((a, idx) => {
+		composedTrail.trail.getDecisions().map((a, i) => {
 			return {
 				assignment: a,
-				level: idx + 1
+				dlLevel: i + 1
 			};
 		})
 	);
@@ -81,9 +81,10 @@
 		{/if}
 	{/each}
 
-	{#each decisions as { level, assignment } (level)}
+	{#each decisions as { dlLevel: level, assignment } (level)}
 		<DecisionLevelComponent
 			{composedTrail}
+			dlLevel={level}
 			decision={assignment}
 			propagations={composedTrail.trail.getPropagationsAtLevel(level)}
 			emitRevertUpToX={() => {

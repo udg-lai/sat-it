@@ -23,14 +23,6 @@
 		return [makeNothing(), ...realClauses];
 	});
 
-	let focusCRef: CRef | undefined = $derived.by(() => {
-		if (getOccurrenceList().getPointer() < 0) {
-			return undefined;
-		} else {
-			return getOccurrenceList().pointedCRef();
-		}
-	});
-
 	function isSat(clause: Clause): boolean {
 		return isSatisfiedEval(clause.eval());
 	}

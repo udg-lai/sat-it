@@ -1,5 +1,8 @@
 <script lang="ts">
-	import { conflictDetectionEventBus, openSettingsViewEventBus } from '$lib/events/events.ts';
+	import {
+		visitingComplementaryOccEventBus,
+		openSettingsViewEventBus
+	} from '$lib/events/events.ts';
 	import { ArrowUpFromBracketOutline, BookOutline, ClipboardOutline } from 'flowbite-svelte-icons';
 	import { onMount } from 'svelte';
 	import Button from './Button.svelte';
@@ -161,7 +164,7 @@
 
 	onMount(() => {
 		const unsubscribeConflictDetection =
-			conflictDetectionEventBus.subscribe(openConflictDetectionView);
+			visitingComplementaryOccEventBus.subscribe(openConflictDetectionView);
 		return () => {
 			unsubscribeConflictDetection();
 		};

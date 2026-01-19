@@ -4,7 +4,11 @@ import Literal from '$lib/entities/Literal.svelte.ts';
 import OccurrenceList from '$lib/entities/OccurrenceList.svelte.ts';
 import type { Trail } from '$lib/entities/Trail.svelte.ts';
 import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
-import { conflictDetectionEventBus, newTrailStackedEventBus } from '$lib/events/events.ts';
+import {
+	conflictAnalysisFinishedEventBus,
+	conflictDetectedEventBus,
+	visitingComplementaryOccEventBus
+} from '$lib/events/events.ts';
 import { getConflictAnalysis } from '$lib/states/conflict-anlysis.svelte.ts';
 import { focusOnAssignment, wipeFocusAssignment } from '$lib/states/focused-assignment.svelte.ts';
 import { getOccurrenceList, updateOccurrenceList } from '$lib/states/occurrence-list.svelte.ts';
@@ -12,7 +16,7 @@ import { getClausePool } from '$lib/states/problem.svelte.ts';
 import { getOccurrenceListQueue } from '$lib/states/queue-occurrence-lists.svelte.ts';
 import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 import { increaseNoConflicts } from '$lib/states/statistics.svelte.ts';
-import { logError, logFatal } from '$lib/states/toasts.svelte.ts';
+import { logFatal } from '$lib/states/toasts.svelte.ts';
 import { getLatestTrail } from '$lib/states/trails.svelte.ts';
 import { fromRight, isLeft } from '$lib/types/either.ts';
 import { makeJust, makeNothing } from '$lib/types/maybe.ts';
@@ -53,10 +57,10 @@ import type {
 	CDCL_SECOND_HIGHEST_DL_INPUT,
 	CDCL_TRAVERSED_OCCURRENCE_LIST_FUN,
 	CDCL_TRAVERSED_OCCURRENCE_LIST_INPUT,
-	CDCL_UNIT_CLAUSE_FUN,
-	CDCL_UNIT_CLAUSE_INPUT,
 	CDCL_UNARY_EMPTY_CLAUSES_DETECTION_FUN,
 	CDCL_UNARY_EMPTY_CLAUSES_DETECTION_INPUT,
+	CDCL_UNIT_CLAUSE_FUN,
+	CDCL_UNIT_CLAUSE_INPUT,
 	CDCL_UNIT_PROPAGATION_FUN,
 	CDCL_UNIT_PROPAGATION_INPUT,
 	CDCL_VIRTUAL_RESOLUTION_FUN,
@@ -114,6 +118,7 @@ export const conflictAnalysisBlock = (): void => {
 		const { resolvent } = fromRight(virtualResolution);
 		getLatestTrail().updateResolutionContext(resolvent.clause);
 	}
+
 	const asserting: boolean = assertingClauseInConflictAnalysis();
 
 	if (asserting) {
@@ -131,6 +136,9 @@ export const conflictAnalysisBlock = (): void => {
 		const occurrenceList: OccurrenceList = complementaryOccurrencesDetectionTransition(propagated);
 
 		afterComplementaryBlock(occurrenceList);
+
+		// After the conflict analysis finishes we notify it
+		conflictAnalysisFinishedEventBus.emit();
 	} else {
 		const nextUP: VariableAssignment = getConflictAnalysis().currentImplication();
 		focusOnAssignment(nextUP.toLit());
@@ -148,7 +156,9 @@ const afterComplementaryBlock = (occurrenceList: OccurrenceList): void => {
 		allVariablesAssignedTransition();
 	}
 	// This is for showing the up-1 and up-n view
-	if (!getSolverMachine().runningOnAutomatic()) conflictDetectionEventBus.emit();
+	if (!getSolverMachine().runningOnAutomatic()) {
+		visitingComplementaryOccEventBus.emit();
+	}
 };
 
 export const conflictDetectionBlock = (): void => {
@@ -167,7 +177,7 @@ export const conflictDetectionBlock = (): void => {
 		const isConflictive: boolean = conflictiveTransition(cRef);
 		if (isConflictive) {
 			getLatestTrail().attachConflictiveClause(getClausePool().at(cRef));
-			getLatestTrail().expandContext();
+			conflictDetectedEventBus.emit();
 		} else {
 			const unitClause: boolean = unitClauseTransition(cRef);
 			if (unitClause) {

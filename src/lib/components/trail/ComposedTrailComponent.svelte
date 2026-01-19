@@ -11,44 +11,29 @@
 	}
 
 	let { trail, emitRevert }: Props = $props();
-
-	let trailWidth = $state(0);
-
-	function observeWidth(element: HTMLElement) {
-		const previewObserver = new ResizeObserver((entries) => {
-			for (const entry of entries) {
-				trailWidth = entry.contentRect.width;
-			}
-		});
-		previewObserver.observe(element);
-		return {
-			destroy() {
-				previewObserver.disconnect();
-			}
-		};
-	}
 </script>
 
 <composed-trail class="composed-trail" class:opened-views={trail.showUPs || trail.showCA}>
 	{#if trail.showUPs}
 		<div class="up-view">
-			<UPContextComponent context={trail.trail.getUPContext()} />
+			<UPContextComponent trail={trail.trail} />
 		</div>
 	{/if}
-	<div id={'trail_' + trail.id} use:observeWidth class="fit-content width-observer">
+	<div id={'trail_' + trail.id} class="fit-content width-observer">
 		<div class:views-opened={trail.showCA || trail.showUPs}>
 			<TrailComponent composedTrail={trail} {emitRevert} />
 		</div>
 		<div class="empty-slot"></div>
 	</div>
 	{#if trail.showCA}
-		<ResolutionContextComponent context={trail.trail.getResolutionContext()} />
+		<ResolutionContextComponent trail={trail.trail} />
 	{/if}
 </composed-trail>
 
 <style>
 	.up-view {
 		position: relative;
+		width: fit-content;
 	}
 
 	.up-view > * {
@@ -56,10 +41,11 @@
 		top: var(--composed-top);
 	}
 
-	.composed-trail {
+	composed-trail {
 		display: flex;
 		flex-direction: column;
 		overflow: hidden;
+		width: fit-content;
 	}
 
 	.opened-views {

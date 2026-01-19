@@ -51,17 +51,23 @@ export const breakpointEvent = createEventBus<LiteralBreakpoint>();
 export const trailTrackingEventBus = createEventBus<number>();
 
 // event bus for collapse/expand of the trails
-export const toggleTrailExpandEventBus = createEventBus<boolean>();
+export const expandEditorTrailsEventBus = createEventBus<boolean>();
 
-// event bus for opening the conflict detection view
-export const conflictDetectionEventBus = createEventBus<void>();
+// event bus for notify if complementary occurrences are being visited
+export const visitingComplementaryOccEventBus = createEventBus<void>();
+
+// event bus for notify when a conflict detection is started
+export const conflictDetectedEventBus = createEventBus<void>();
+
+// event bus for notify when a conflict analysis is finished
+export const conflictAnalysisFinishedEventBus = createEventBus<void>();
 
 export type UndoToDecisionEvent = {
 	decision: VariableAssignment;
 	trailID: number; // trail id matches the trail index
 };
 
-// event bus for opening the conflict detection view
+// event bus undo by means of deterministic steps until a given decision
 export const algorithmicUndoEventBus = createEventBus<UndoToDecisionEvent>();
 
 // event bus dedicated to toggle the trail view
@@ -81,3 +87,6 @@ export const newTrailStackedEventBus = createEventBus<void>();
 
 // event bus to notify a single undo wants to be done.
 export const ctrlZEventBus = createEventBus<void>();
+
+// A individual DL from the trail has been expanded or collapsed by the user
+export const decisionLevelToggledEventBus = createEventBus<void>();

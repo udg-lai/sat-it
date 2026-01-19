@@ -13,7 +13,7 @@
 		assignment: VariableAssignment;
 		isLast: boolean;
 		expanded: boolean;
-		emitToggle?: (decisionState: boolean) => void;
+		emitToggle?: () => void;
 		fromPreviousTrail?: boolean;
 		emitRevertUpToX?: () => void;
 	}
@@ -42,7 +42,7 @@
 	let openOptions: boolean = $state(false);
 
 	function emitLevelOpen(): void {
-		emitToggle?.(!expanded);
+		emitToggle?.();
 	}
 
 	const emitRevert = (): void => {

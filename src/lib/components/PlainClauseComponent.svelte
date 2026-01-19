@@ -1,54 +1,38 @@
 <script lang="ts">
-	import Clause from '$lib/entities/Clause.svelte.ts';
 	import PlainLiteralComponent from './PlainLiteralComponent.svelte';
 	import type Literal from '$lib/entities/Literal.svelte.ts';
 
 	interface Props {
-		clause: Clause;
-		reverse?: boolean;
-		hidden?: number[];
-		state?: 'unsatisfied' | 'satisfied' | undefined;
-		style?: string;
+		literals: Literal[];
+		satisfiedClause: boolean;
+		satisfiedLiterals: boolean;
 	}
 
-	let { clause, reverse = false, hidden = [], state, style = '' }: Props = $props();
-
-	const hiddenSet = new Set(hidden);
-
-	let literals: Literal[] = $derived.by(() => {
-		const lits = [...clause];
-		const reversed = reverse ? lits.reverse() : lits;
-		return reversed.filter((lit) => !hiddenSet.has(lit.toInt()));
-	});
+	let { literals, satisfiedClause, satisfiedLiterals }: Props = $props();
 </script>
 
-<clause
-	class:satisfied-background={state === 'satisfied'}
-	class:unsatisfied-background={state === 'unsatisfied'}
-	class:temporal-background={state === undefined && clause.isTemporal()}
-	class:lemma-background={state === undefined && !clause.isTemporal()}
-	{style}
+<plain-clause
+	class:satisfied-background={satisfiedClause}
+	class:unsatisfied-background={!satisfiedClause}
 >
 	{#each literals as lit, i (i)}
-		<PlainLiteralComponent
-			literal={lit}
-			{state}
-			learned={state === undefined && !clause.isTemporal()}
-		/>
+		<PlainLiteralComponent literal={lit} state={satisfiedLiterals ? 'satisfied' : 'unsatisfied'} />
 	{/each}
-</clause>
+</plain-clause>
 
 <style>
-	clause {
+	plain-clause {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
 		max-width: var(--vertical-clause-width);
 		min-width: var(--vertical-clause-width);
+		height: fit-content;
 	}
 
 	.satisfied-background {
 		position: relative;
+		background-color: var(--satisfied-color-o);
 	}
 
 	.satisfied-background::after {
@@ -60,6 +44,7 @@
 
 	.unsatisfied-background {
 		position: relative;
+		background-color: var(--unsatisfied-color-o);
 	}
 
 	.unsatisfied-background::after {
@@ -76,50 +61,6 @@
 		width: var(--vertical-clause-width);
 		height: 1px;
 		border-color: var(--unsatisfied-border-color-o);
-		content: '';
-	}
-
-	.temporal-background {
-		position: relative;
-	}
-
-	.temporal-background::before {
-		position: absolute;
-		top: 0px;
-		width: var(--vertical-clause-width);
-		height: 1px;
-		border-color: var(--temporal-color);
-		content: '';
-	}
-
-	.temporal-background::after {
-		position: absolute;
-		bottom: 0px;
-		width: var(--vertical-clause-width);
-		height: 1px;
-		border-color: var(--temporal-color);
-		content: '';
-	}
-
-	.lemma-background {
-		position: relative;
-	}
-
-	.lemma-background::before {
-		position: absolute;
-		top: 0px;
-		width: var(--vertical-clause-width);
-		height: 1px;
-		border-color: var(--lemma-border-color);
-		content: '';
-	}
-
-	.lemma-background::after {
-		position: absolute;
-		bottom: 0px;
-		width: var(--vertical-clause-width);
-		height: 1px;
-		border-color: var(--lemma-border-color);
 		content: '';
 	}
 </style>

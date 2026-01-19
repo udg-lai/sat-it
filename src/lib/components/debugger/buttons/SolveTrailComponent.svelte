@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { solverCommandEventBus, toggleTrailExpandEventBus } from '$lib/events/events.ts';
+	import { solverCommandEventBus, expandEditorTrailsEventBus } from '$lib/events/events.ts';
 	import { updateAssignment } from '$lib/states/assignment.svelte.ts';
 	import '../style.css';
 	import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
@@ -18,7 +18,7 @@
 		getSolverMachine().disableStepDelay();
 		updateAssignment('automated');
 		solverCommandEventBus.emit('solve_trail');
-		toggleTrailExpandEventBus.emit(true);
+		expandEditorTrailsEventBus.emit(true);
 	}
 </script>
 

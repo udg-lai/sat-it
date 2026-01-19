@@ -1,6 +1,6 @@
 <script lang="ts">
 	import ImageRender from '$lib/components/tools/ImageRender.svelte';
-	import { solverCommandEventBus, toggleTrailExpandEventBus } from '$lib/events/events.ts';
+	import { solverCommandEventBus, expandEditorTrailsEventBus } from '$lib/events/events.ts';
 	import { updateAssignment } from '$lib/states/assignment.svelte.ts';
 	import '../style.css';
 
@@ -16,7 +16,7 @@
 	function solveAutomatic() {
 		updateAssignment('automated');
 		solverCommandEventBus.emit('automatic_steps');
-		toggleTrailExpandEventBus.emit(true);
+		expandEditorTrailsEventBus.emit(true);
 	}
 </script>
 
