@@ -27,7 +27,7 @@
 			// Any decision or expanded decision level shows its UP context
 			// The context of a decision is always shown
 			// Any propagation before any decision is always shown
-			return dl == 0 ||trail.isDecision(pos) || trail.isDLExpanded(dl);
+			return dl == 0 || trail.isDecision(pos) || trail.isDLExpanded(dl);
 		});
 
 		return visibleContext.map((c: Either<UPContext, NeverFn>) => {

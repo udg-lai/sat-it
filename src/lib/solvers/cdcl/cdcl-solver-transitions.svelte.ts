@@ -4,7 +4,11 @@ import Literal from '$lib/entities/Literal.svelte.ts';
 import OccurrenceList from '$lib/entities/OccurrenceList.svelte.ts';
 import type { Trail } from '$lib/entities/Trail.svelte.ts';
 import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
-import { visitingComplementaryOccEventBus, trailStackedEventBus, conflictDetectedEventBus } from '$lib/events/events.ts';
+import {
+	visitingComplementaryOccEventBus,
+	trailStackedEventBus,
+	conflictDetectedEventBus
+} from '$lib/events/events.ts';
 import { getConflictAnalysis } from '$lib/states/conflict-anlysis.svelte.ts';
 import { focusOnAssignment, wipeFocusAssignment } from '$lib/states/focused-assignment.svelte.ts';
 import { getOccurrenceList, updateOccurrenceList } from '$lib/states/occurrence-list.svelte.ts';

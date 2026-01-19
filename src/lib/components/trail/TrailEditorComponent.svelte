@@ -8,9 +8,7 @@
 		expandEditorTrailsEventBus,
 		solverSignalEventBus,
 		trailTrackingEventBus,
-
 		conflictDetectedEventBus
-
 	} from '$lib/events/events.ts';
 	import type { SolverMachine } from '$lib/solvers/SolverMachine.svelte.ts';
 	import type { StateFun, StateInput } from '$lib/solvers/StateMachine.svelte.ts';
@@ -233,12 +231,13 @@
 			const lastTrail = trails[trails.length - 1];
 			if (lastTrail.hasConflictiveClause()) {
 				lastTrail.showCtx();
+			} else {
+				logFatal(
+					'openConflictiveContext',
+					'No conflictive clause found in the last trail upon conflict detection.'
+				);
 			}
-			else {
-				logFatal('openConflictiveContext', 'No conflictive clause found in the last trail upon conflict detection.');
-			}
-		}
-		else {
+		} else {
 			logFatal('openConflictiveContext', 'No trails available upon conflict detection.');
 		}
 		// Mandatory to let the UI update the heights and positions

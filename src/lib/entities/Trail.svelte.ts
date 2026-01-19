@@ -233,7 +233,10 @@ export class Trail {
 
 	toggleDLExpanded(level: number): void {
 		if (level <= 0 || level > this.dl) {
-			logFatal(`Runtime exception, toggleDLExpanded`, `Decision level ${level} is out of bounds for trail DL ${this.dl}`);
+			logFatal(
+				`Runtime exception, toggleDLExpanded`,
+				`Decision level ${level} is out of bounds for trail DL ${this.dl}`
+			);
 		}
 		this.expandedDLs[level] = !this.expandedDLs[level];
 		this.expandedDLs = [...this.expandedDLs]; // trigger reactivity
@@ -241,14 +244,20 @@ export class Trail {
 
 	isDLExpanded(level: number): boolean {
 		if (level <= 0 || level > this.dl) {
-			logFatal(`Runtime exception, isDLExpanded`, `Decision level ${level} is out of bounds for trail DL ${this.dl}`);
+			logFatal(
+				`Runtime exception, isDLExpanded`,
+				`Decision level ${level} is out of bounds for trail DL ${this.dl}`
+			);
 		}
 		return this.expandedDLs[level];
 	}
 
 	isDecision(pos: number): boolean {
 		if (pos < 0 || pos >= this.assignments.length) {
-			logFatal(`Runtime exception, isDecision`, `Position ${pos} is out of bounds for trail of size ${this.assignments.length}`);
+			logFatal(
+				`Runtime exception, isDecision`,
+				`Position ${pos} is out of bounds for trail of size ${this.assignments.length}`
+			);
 		}
 		return this.assignments[pos].isD();
 	}
@@ -303,8 +312,10 @@ export class Trail {
 
 	dlOfPosition(pos: number): number {
 		if (pos < 0 || pos >= this.assignments.length) {
-			logFatal(`Runtime exception, dlOfPosition`,
-				`Position ${pos} is out of bounds for trail of size ${this.assignments.length}`);
+			logFatal(
+				`Runtime exception, dlOfPosition`,
+				`Position ${pos} is out of bounds for trail of size ${this.assignments.length}`
+			);
 		}
 
 		let level: number = this.bookmarkDLs.length - 1;
