@@ -76,3 +76,17 @@ export function filter<T>(condition: (value: T) => boolean): Operator<T, T> {
 		return makePipeable(bus);
 	};
 }
+
+export function delay<T>(ms: number): Operator<T, T> {
+	return (source: EventStream<T>): PipeableEventStream<T> => {
+		// Creates a new event bus to emit only the filtered events
+		const bus = createEventBus<T>();
+		source.subscribe((value) => {
+			setTimeout(() => {
+				bus.emit(value);
+			}, ms);
+		});
+
+		return makePipeable(bus);
+	};
+}

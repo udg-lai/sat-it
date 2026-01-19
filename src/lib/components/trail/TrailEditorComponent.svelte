@@ -1,12 +1,16 @@
 <script lang="ts">
 	import type { Trail } from '$lib/entities/Trail.svelte.ts';
 	import VariableAssignment from '$lib/entities/VariableAssignment.ts';
-	import { filter, type Unsubscribe } from '$lib/events/createEventBus.ts';
+	import { delay, filter, type Unsubscribe } from '$lib/events/createEventBus.ts';
 	import {
 		algorithmicUndoEventBus,
+		visitingComplementaryOccEventBus,
 		expandEditorTrailsEventBus,
 		solverSignalEventBus,
-		trailTrackingEventBus
+		trailTrackingEventBus,
+
+		conflictDetectedEventBus
+
 	} from '$lib/events/events.ts';
 	import type { SolverMachine } from '$lib/solvers/SolverMachine.svelte.ts';
 	import type { StateFun, StateInput } from '$lib/solvers/StateMachine.svelte.ts';
@@ -15,7 +19,6 @@
 	import { onMount } from 'svelte';
 	import ComposedTrailComponent from './ComposedTrailComponent.svelte';
 	import StatusIndicator from './StatusIndicator.svelte';
-	import { setTrailsExpanded } from '$lib/states/decision-levels-expanded.svelte.ts';
 
 	interface Props {
 		trails: Trail[];
@@ -136,10 +139,10 @@
 
 		// This is mandatory to update the heights and positions when trails change
 		// If no timeout is used, the heights are not correctly computed
-		setTimeout(composedTrailCompanionPositions);
+		setTimeout(computeComposedTrailCompanionPositions);
 	}
 
-	function composedTrailCompanionPositions(): void {
+	function computeComposedTrailCompanionPositions(): void {
 		updatesComposedTrailsHeight();
 		updatesTrailTopPositions();
 	}
@@ -171,18 +174,6 @@
 		return trailID + 1 < trails.length ? 'opacity-40' : '';
 	}
 
-	function getTopOffset(trailIndex: number): number {
-		const el: HTMLElement | null = document.getElementById(`trail_${trailIndex}`);
-		if (el) {
-			const rect = el.getBoundingClientRect();
-			const parentRect = el.parentElement?.getBoundingClientRect();
-			if (parentRect) {
-				return rect.top - parentRect.top;
-			}
-		}
-		return 10;
-	}
-
 	function getComposedTrailHeight(trailIndex: number): number {
 		const el: HTMLElement | null = document.getElementById(`composed-trail_${trailIndex}`);
 		if (el) {
@@ -192,6 +183,18 @@
 	}
 
 	function updatesTrailTopPositions() {
+		// Compute the top offsets of each trail
+		function getTopOffset(trailIndex: number): number {
+			const el: HTMLElement | null = document.getElementById(`trail_${trailIndex}`);
+			if (el) {
+				const rect = el.getBoundingClientRect();
+				const parentRect = el.parentElement?.getBoundingClientRect();
+				if (parentRect) {
+					return rect.top - parentRect.top;
+				}
+			}
+			return 10;
+		}
 		trailsTopPosition = trails.map((_, i) => getTopOffset(i));
 	}
 
@@ -220,9 +223,33 @@
 		});
 	}
 
+	function openConflictiveContext(): void {
+		// When a conflict is detected, open the context of the last trail that has the conflictive clause
+		for (let i = 0; i < trails.length - 1; i++) {
+			const trail = trails[i];
+			trail.hideCtx();
+		}
+		if (trails.length > 0) {
+			const lastTrail = trails[trails.length - 1];
+			if (lastTrail.hasConflictiveClause()) {
+				lastTrail.showCtx();
+			}
+			else {
+				logFatal('openConflictiveContext', 'No conflictive clause found in the last trail upon conflict detection.');
+			}
+		}
+		else {
+			logFatal('openConflictiveContext', 'No trails available upon conflict detection.');
+		}
+		// Mandatory to let the UI update the heights and positions
+		setTimeout(() => {
+			computeComposedTrailCompanionPositions();
+		}, 0);
+	}
+
 	$effect(() => {
 		// This is mandatory to update the heights and positions when trails change
-		composedTrailCompanionPositions();
+		computeComposedTrailCompanionPositions();
 	});
 
 	onMount(() => {
@@ -235,10 +262,11 @@
 				.subscribe(() => rearrangeTrailEditor(lastReference))
 		);
 
-		updatesComposedTrailsHeight();
-		updatesTrailTopPositions();
-
 		unsubscribe.push(expandEditorTrailsEventBus.subscribe(handleExpandCollapseEditorRequest));
+
+		unsubscribe.push(conflictDetectedEventBus.subscribe(openConflictiveContext));
+
+		computeComposedTrailCompanionPositions();
 
 		return () => {
 			unsubscribe.forEach((unsub) => unsub());

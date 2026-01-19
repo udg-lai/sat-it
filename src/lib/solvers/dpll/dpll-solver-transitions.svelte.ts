@@ -1,6 +1,6 @@
 import Literal from '$lib/entities/Literal.svelte.ts';
 import OccurrenceList from '$lib/entities/OccurrenceList.svelte.ts';
-import { conflictDetectionEventBus } from '$lib/events/events.ts';
+import { conflictDetectedEventBus, visitingComplementaryOccEventBus } from '$lib/events/events.ts';
 import { getOccurrenceList, updateOccurrenceList } from '$lib/states/occurrence-list.svelte.ts';
 import { getClausePool } from '$lib/states/problem.svelte.ts';
 import { getOccurrenceListQueue } from '$lib/states/queue-occurrence-lists.svelte.ts';
@@ -75,7 +75,7 @@ export const conflictDetectionBlock = (): void => {
 		const isConflictive: boolean = conflictDetectionTransition(cRef);
 		if (isConflictive) {
 			getLatestTrail().attachConflictiveClause(getClausePool().at(cRef));
-			getLatestTrail().showCtx();
+			conflictDetectedEventBus.emit();
 		} else {
 			const unitClause: boolean = unitClauseTransition(cRef);
 			if (unitClause) {
@@ -108,7 +108,7 @@ const afterComplementaryBlock = (occurrenceList: OccurrenceList): void => {
 		allVariablesAssignedTransition();
 	}
 	// This is for showing the up-1 and up-n view
-	if (!getSolverMachine().runningOnAutomatic()) conflictDetectionEventBus.emit();
+	if (!getSolverMachine().runningOnAutomatic()) visitingComplementaryOccEventBus.emit();
 };
 
 /* Specific Transitions */
