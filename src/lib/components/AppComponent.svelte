@@ -15,7 +15,7 @@
 		solverCommandEventBus,
 		solverSignalEventBus,
 		stepDelayEventBus,
-		trailStackedEventBus,
+		newTrailStackedEventBus,
 		type SolverCommand,
 		type SolverSignal,
 		type UndoToDecisionEvent
@@ -44,7 +44,12 @@
 		type SavedDecision
 	} from '$lib/states/trail-decisions.svelte.ts';
 	import { stackDifferPos, wipeDifferSequence } from '$lib/states/trail-differ-sequence.svelte.ts';
-	import { getLatestTrail, getTrails, wipeTrails } from '$lib/states/trails.svelte.ts';
+	import {
+		collapseTrailsContext,
+		getLatestTrail,
+		getTrails,
+		wipeTrails
+	} from '$lib/states/trails.svelte.ts';
 	import type { Algorithm } from '$lib/types/algorithm.ts';
 	import type { List, Lit } from '$lib/types/types.ts';
 	import { modifyLiteralWidth } from '$lib/utils.ts';
@@ -151,6 +156,7 @@
 	}
 
 	function onTrailStacked() {
+		collapseTrailsContext();
 		allocDecisionsTrail();
 		stackDifferPos(getLatestTrail().getAssignments().length);
 	}
@@ -230,7 +236,7 @@
 		// record and statistics update done when a decision is made
 		subs.push(decisionMadeEventBus.subscribe(onDecision));
 		// update the structures when a trail has been pushed.
-		subs.push(trailStackedEventBus.subscribe(onTrailStacked));
+		subs.push(newTrailStackedEventBus.subscribe(onTrailStacked));
 		// undo the last decision that was done
 		subs.push(ctrlZEventBus.subscribe(singleUndo));
 

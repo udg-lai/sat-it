@@ -1,14 +1,13 @@
 <script lang="ts">
 	import type { Trail } from '$lib/entities/Trail.svelte.ts';
 	import VariableAssignment from '$lib/entities/VariableAssignment.ts';
-	import { delay, filter, type Unsubscribe } from '$lib/events/createEventBus.ts';
+	import { filter, type Unsubscribe } from '$lib/events/createEventBus.ts';
 	import {
 		algorithmicUndoEventBus,
-		visitingComplementaryOccEventBus,
+		conflictDetectedEventBus,
 		expandEditorTrailsEventBus,
 		solverSignalEventBus,
-		trailTrackingEventBus,
-		conflictDetectedEventBus
+		trailTrackingEventBus
 	} from '$lib/events/events.ts';
 	import type { SolverMachine } from '$lib/solvers/SolverMachine.svelte.ts';
 	import type { StateFun, StateInput } from '$lib/solvers/StateMachine.svelte.ts';
@@ -130,10 +129,10 @@
 
 		for (let i = 0; i < trails.length; i++) {
 			if (trailID != i) {
-				trails.at(i)?.hideCtx();
+				trails.at(i)?.collapseContext();
 			}
 		}
-		trails.at(trailID)?.toggleCtx();
+		trails.at(trailID)?.toggleContext();
 
 		// This is mandatory to update the heights and positions when trails change
 		// If no timeout is used, the heights are not correctly computed
@@ -154,7 +153,7 @@
 
 	function makeStatusIconStyle(trail: Trail): string {
 		let classStyle = '';
-		if (trail.showingCtx()) {
+		if (trail.showingContext()) {
 			if (showUPs && !trail.hasConflictiveClause()) {
 				classStyle = 'icon-bottom';
 			} else if (!showUPs && trail.hasConflictiveClause()) {
@@ -225,12 +224,12 @@
 		// When a conflict is detected, open the context of the last trail that has the conflictive clause
 		for (let i = 0; i < trails.length - 1; i++) {
 			const trail = trails[i];
-			trail.hideCtx();
+			trail.collapseContext();
 		}
 		if (trails.length > 0) {
 			const lastTrail = trails[trails.length - 1];
 			if (lastTrail.hasConflictiveClause()) {
-				lastTrail.showCtx();
+				lastTrail.expandContext();
 			} else {
 				logFatal(
 					'openConflictiveContext',
@@ -298,8 +297,8 @@
 								trail: trail,
 								id: id,
 								isLast: trails.length === id + 1,
-								showUPs: showUPs && trail.showingCtx(),
-								showCA: trail.showingCtx() && trail.hasConflictiveClause()
+								showUPs: showUPs && trail.isContextExpanded(),
+								showCA: trail.isContextExpanded() && trail.hasConflictiveClause()
 							}}
 							emitRevert={(assignment: VariableAssignment) => emitRevert(assignment, id)}
 						/>
@@ -318,7 +317,7 @@
 						<StatusIndicator
 							iconClassStyle={makeStatusIconStyle(trail)}
 							trailState={trail.getState()}
-							expanded={trail.showingCtx()}
+							expanded={trail.showingContext()}
 							onToggleExpand={() => toggleTrailCtxView(id)}
 							disableClick={solver.identify() === 'bkt' &&
 								trail.getConflictiveClause() === undefined}

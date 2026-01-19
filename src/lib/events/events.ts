@@ -80,7 +80,7 @@ export const stepDelayEventBus = createEventBus<number>();
 export const decisionMadeEventBus = createEventBus<Lit>();
 
 // event bus to notify about a new trail stacked
-export const trailStackedEventBus = createEventBus<void>();
+export const newTrailStackedEventBus = createEventBus<void>();
 
 // event bus to notify a single undo wants to be done.
 export const ctrlZEventBus = createEventBus<void>();

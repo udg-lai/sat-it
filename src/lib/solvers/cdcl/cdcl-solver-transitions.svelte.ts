@@ -4,11 +4,7 @@ import Literal from '$lib/entities/Literal.svelte.ts';
 import OccurrenceList from '$lib/entities/OccurrenceList.svelte.ts';
 import type { Trail } from '$lib/entities/Trail.svelte.ts';
 import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
-import {
-	visitingComplementaryOccEventBus,
-	trailStackedEventBus,
-	conflictDetectedEventBus
-} from '$lib/events/events.ts';
+import { conflictDetectedEventBus, visitingComplementaryOccEventBus } from '$lib/events/events.ts';
 import { getConflictAnalysis } from '$lib/states/conflict-anlysis.svelte.ts';
 import { focusOnAssignment, wipeFocusAssignment } from '$lib/states/focused-assignment.svelte.ts';
 import { getOccurrenceList, updateOccurrenceList } from '$lib/states/occurrence-list.svelte.ts';
@@ -16,7 +12,7 @@ import { getClausePool } from '$lib/states/problem.svelte.ts';
 import { getOccurrenceListQueue } from '$lib/states/queue-occurrence-lists.svelte.ts';
 import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 import { increaseNoConflicts } from '$lib/states/statistics.svelte.ts';
-import { logError, logFatal } from '$lib/states/toasts.svelte.ts';
+import { logFatal } from '$lib/states/toasts.svelte.ts';
 import { getLatestTrail } from '$lib/states/trails.svelte.ts';
 import { fromRight, isLeft } from '$lib/types/either.ts';
 import { makeJust, makeNothing } from '$lib/types/maybe.ts';
@@ -57,10 +53,10 @@ import type {
 	CDCL_SECOND_HIGHEST_DL_INPUT,
 	CDCL_TRAVERSED_OCCURRENCE_LIST_FUN,
 	CDCL_TRAVERSED_OCCURRENCE_LIST_INPUT,
-	CDCL_UNIT_CLAUSE_FUN,
-	CDCL_UNIT_CLAUSE_INPUT,
 	CDCL_UNARY_EMPTY_CLAUSES_DETECTION_FUN,
 	CDCL_UNARY_EMPTY_CLAUSES_DETECTION_INPUT,
+	CDCL_UNIT_CLAUSE_FUN,
+	CDCL_UNIT_CLAUSE_INPUT,
 	CDCL_UNIT_PROPAGATION_FUN,
 	CDCL_UNIT_PROPAGATION_INPUT,
 	CDCL_VIRTUAL_RESOLUTION_FUN,
@@ -130,7 +126,6 @@ export const conflictAnalysisBlock = (): void => {
 
 		// Push the new trail after backjumping and notify
 		pushTrailTransition(trailAfterBJ);
-		trailStackedEventBus.emit();
 
 		const propagated: Lit = unitPropagationTransition(cRef, 'backjumping');
 		const occurrenceList: OccurrenceList = complementaryOccurrencesDetectionTransition(propagated);

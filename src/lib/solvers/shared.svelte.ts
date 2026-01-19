@@ -7,7 +7,7 @@ import type Variable from '$lib/entities/Variable.svelte.ts';
 import type { Assignment } from '$lib/entities/Variable.svelte.ts';
 import VariableAssignment from '$lib/entities/VariableAssignment.ts';
 import type { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
-import { decisionMadeEventBus, trailStackedEventBus } from '$lib/events/events.ts';
+import { decisionMadeEventBus, newTrailStackedEventBus } from '$lib/events/events.ts';
 import { getAssignment, type AssignmentEvent } from '$lib/states/assignment.svelte.ts';
 import { isBreakpoint } from '$lib/states/breakpoints.svelte.ts';
 import { getVariablePool } from '$lib/states/problem.svelte.ts';
@@ -182,10 +182,10 @@ export const backtracking = (pool: VariablePool): Lit => {
 	newTrail.push(VariableAssignment.newBacktrackingAssignment(variable));
 
 	increaseNoConflicts();
-	stackTrail(newTrail, true);
+	stackTrail(newTrail);
 
 	//Notify that a new trail has been pushed
-	trailStackedEventBus.emit();
+	newTrailStackedEventBus.emit();
 
 	return variable.toLit();
 };

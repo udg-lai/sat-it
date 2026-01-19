@@ -215,22 +215,6 @@ export class Trail {
 		return levels[dl - 1];
 	}
 
-	toggleCtx(): void {
-		this.expandedContext = !this.expandedContext;
-	}
-
-	hideCtx(): void {
-		this.expandedContext = false;
-	}
-
-	showCtx(): void {
-		this.expandedContext = true;
-	}
-
-	showingCtx(): boolean {
-		return this.expandedContext;
-	}
-
 	toggleDLExpanded(level: number): void {
 		if (level <= 0 || level > this.dl) {
 			logFatal(
@@ -336,6 +320,26 @@ export class Trail {
 
 	nDecisions(): number {
 		return this.getDLMarks().length;
+	}
+
+	toggleContext(): void {
+		this.expandedContext = !this.expandedContext;
+	}
+
+	collapseContext(): void {
+		this.expandedContext = false;
+	}
+
+	expandContext(): void {
+		this.expandedContext = true;
+	}
+
+	showingContext(): boolean {
+		return this.expandedContext;
+	}
+
+	isContextExpanded(): boolean {
+		return this.expandedContext;
 	}
 
 	[Symbol.iterator]() {
