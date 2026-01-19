@@ -8,6 +8,7 @@
 		conflictDetectedEventBus,
 		decisionLevelToggledEventBus,
 		expandEditorTrailsEventBus,
+		resetProblemEventBus,
 		solverSignalEventBus,
 		trailTrackingEventBus
 	} from '$lib/events/events.ts';
@@ -260,28 +261,30 @@
 	});
 
 	onMount(() => {
-		const unsubscribe: Unsubscribe[] = [];
+		const subs: Unsubscribe[] = [];
 
-		unsubscribe.push(trailTrackingEventBus.subscribe(rearrangeTrailEditor));
-		unsubscribe.push(
+		subs.push(trailTrackingEventBus.subscribe(rearrangeTrailEditor));
+		subs.push(
 			solverSignalEventBus
 				.pipe(filter((t) => t == 'begin-step-by-step'))
 				.subscribe(() => rearrangeTrailEditor(lastReference))
 		);
 
-		unsubscribe.push(expandEditorTrailsEventBus.subscribe(handleExpandCollapseEditorRequest));
-		unsubscribe.push(conflictDetectedEventBus.subscribe(openConflictiveContext));
-		unsubscribe.push(
+		subs.push(expandEditorTrailsEventBus.subscribe(handleExpandCollapseEditorRequest));
+		subs.push(conflictDetectedEventBus.subscribe(openConflictiveContext));
+		subs.push(
 			conflictAnalysisFinishedEventBus.subscribe(asyncComputeComposedTrailCompanionPositions)
 		);
-		unsubscribe.push(
+		subs.push(
 			decisionLevelToggledEventBus.subscribe(asyncComputeComposedTrailCompanionPositions)
 		);
+
+		subs.push(resetProblemEventBus.subscribe(asyncComputeComposedTrailCompanionPositions));
 
 		asyncComputeComposedTrailCompanionPositions();
 
 		return () => {
-			unsubscribe.forEach((unsub) => unsub());
+			subs.forEach((unsub) => unsub());
 		};
 	});
 </script>
