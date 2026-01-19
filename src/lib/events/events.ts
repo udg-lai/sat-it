@@ -59,6 +59,9 @@ export const visitingComplementaryOccEventBus = createEventBus<void>();
 // event bus for notify when a conflict detection is started
 export const conflictDetectedEventBus = createEventBus<void>();
 
+// event bus for notify when a conflict analysis is finished
+export const conflictAnalysisFinishedEventBus = createEventBus<void>();
+
 export type UndoToDecisionEvent = {
 	decision: VariableAssignment;
 	trailID: number; // trail id matches the trail index

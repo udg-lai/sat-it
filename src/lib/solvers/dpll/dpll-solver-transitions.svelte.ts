@@ -1,6 +1,10 @@
 import Literal from '$lib/entities/Literal.svelte.ts';
 import OccurrenceList from '$lib/entities/OccurrenceList.svelte.ts';
-import { conflictDetectedEventBus, visitingComplementaryOccEventBus } from '$lib/events/events.ts';
+import {
+	conflictAnalysisFinishedEventBus,
+	conflictDetectedEventBus,
+	visitingComplementaryOccEventBus
+} from '$lib/events/events.ts';
 import { getOccurrenceList, updateOccurrenceList } from '$lib/states/occurrence-list.svelte.ts';
 import { getClausePool } from '$lib/states/problem.svelte.ts';
 import { getOccurrenceListQueue } from '$lib/states/queue-occurrence-lists.svelte.ts';
@@ -95,6 +99,7 @@ export const conflictiveState = (): void => {
 		const occurrenceList: OccurrenceList = complementaryOccurrencesTransition(assignment);
 		afterComplementaryBlock(occurrenceList);
 	}
+	conflictAnalysisFinishedEventBus.emit();
 };
 
 /* General non-exported transitions */

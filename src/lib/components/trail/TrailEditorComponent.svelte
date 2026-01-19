@@ -4,6 +4,7 @@
 	import { filter, type Unsubscribe } from '$lib/events/createEventBus.ts';
 	import {
 		algorithmicUndoEventBus,
+		conflictAnalysisFinishedEventBus,
 		conflictDetectedEventBus,
 		decisionLevelToggledEventBus,
 		expandEditorTrailsEventBus,
@@ -270,6 +271,9 @@
 
 		unsubscribe.push(expandEditorTrailsEventBus.subscribe(handleExpandCollapseEditorRequest));
 		unsubscribe.push(conflictDetectedEventBus.subscribe(openConflictiveContext));
+		unsubscribe.push(
+			conflictAnalysisFinishedEventBus.subscribe(asyncComputeComposedTrailCompanionPositions)
+		);
 		unsubscribe.push(
 			decisionLevelToggledEventBus.subscribe(asyncComputeComposedTrailCompanionPositions)
 		);

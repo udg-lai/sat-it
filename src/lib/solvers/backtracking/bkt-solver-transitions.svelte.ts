@@ -1,6 +1,10 @@
 import Literal from '$lib/entities/Literal.svelte.ts';
 import OccurrenceList from '$lib/entities/OccurrenceList.svelte.ts';
-import { conflictDetectedEventBus, visitingComplementaryOccEventBus } from '$lib/events/events.ts';
+import {
+	conflictAnalysisFinishedEventBus,
+	conflictDetectedEventBus,
+	visitingComplementaryOccEventBus
+} from '$lib/events/events.ts';
 import { getOccurrenceList } from '$lib/states/occurrence-list.svelte.ts';
 import { getClausePool } from '$lib/states/problem.svelte.ts';
 import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
@@ -56,6 +60,7 @@ export const backtracking = (): void => {
 		const assignment: Lit = backtrackingTransition();
 		afterAssignmentBlock(assignment);
 	}
+	conflictAnalysisFinishedEventBus.emit();
 };
 
 const afterAssignmentBlock = (assignment: Lit): void => {

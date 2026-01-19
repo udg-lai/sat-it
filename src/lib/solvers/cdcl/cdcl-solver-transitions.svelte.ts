@@ -4,7 +4,11 @@ import Literal from '$lib/entities/Literal.svelte.ts';
 import OccurrenceList from '$lib/entities/OccurrenceList.svelte.ts';
 import type { Trail } from '$lib/entities/Trail.svelte.ts';
 import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
-import { conflictDetectedEventBus, visitingComplementaryOccEventBus } from '$lib/events/events.ts';
+import {
+	conflictAnalysisFinishedEventBus,
+	conflictDetectedEventBus,
+	visitingComplementaryOccEventBus
+} from '$lib/events/events.ts';
 import { getConflictAnalysis } from '$lib/states/conflict-anlysis.svelte.ts';
 import { focusOnAssignment, wipeFocusAssignment } from '$lib/states/focused-assignment.svelte.ts';
 import { getOccurrenceList, updateOccurrenceList } from '$lib/states/occurrence-list.svelte.ts';
@@ -114,6 +118,7 @@ export const conflictAnalysisBlock = (): void => {
 		const { resolvent } = fromRight(virtualResolution);
 		getLatestTrail().updateResolutionContext(resolvent.clause);
 	}
+
 	const asserting: boolean = assertingClauseInConflictAnalysis();
 
 	if (asserting) {
@@ -131,6 +136,9 @@ export const conflictAnalysisBlock = (): void => {
 		const occurrenceList: OccurrenceList = complementaryOccurrencesDetectionTransition(propagated);
 
 		afterComplementaryBlock(occurrenceList);
+
+		// After the conflict analysis finishes we notify it
+		conflictAnalysisFinishedEventBus.emit();
 	} else {
 		const nextUP: VariableAssignment = getConflictAnalysis().currentImplication();
 		focusOnAssignment(nextUP.toLit());
