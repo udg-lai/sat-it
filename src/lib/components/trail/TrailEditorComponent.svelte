@@ -275,9 +275,7 @@
 		subs.push(
 			conflictAnalysisFinishedEventBus.subscribe(asyncComputeComposedTrailCompanionPositions)
 		);
-		subs.push(
-			decisionLevelToggledEventBus.subscribe(asyncComputeComposedTrailCompanionPositions)
-		);
+		subs.push(decisionLevelToggledEventBus.subscribe(asyncComputeComposedTrailCompanionPositions));
 
 		subs.push(resetProblemEventBus.subscribe(asyncComputeComposedTrailCompanionPositions));
 

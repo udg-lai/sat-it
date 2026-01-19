@@ -4,6 +4,7 @@
 	import type { NeverFn } from '$lib/types/types.ts';
 	import { onMount } from 'svelte';
 	import PlainClauseComponent from '../PlainClauseComponent.svelte';
+	import type Literal from '$lib/entities/Literal.svelte.ts';
 
 	interface Props {
 		trail: Trail;
@@ -58,10 +59,9 @@
 						<empty-clause></empty-clause>
 					{:else}
 						<PlainClauseComponent
-							clause={ctx.left.clause}
-							hidden={[]}
-							state="unsatisfied"
-							style={'justify-content: start;'}
+							literals={ctx.left.clause.getLiterals()}
+							satisfiedClause={false}
+							satisfiedLiterals={false}
 						/>
 					{/if}
 				{:else}

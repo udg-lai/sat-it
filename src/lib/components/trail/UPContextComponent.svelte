@@ -1,16 +1,16 @@
 <script lang="ts">
 	import type Clause from '$lib/entities/Clause.svelte.ts';
+	import type Literal from '$lib/entities/Literal.svelte.ts';
 	import type { Trail, UPContext } from '$lib/entities/Trail.svelte.ts';
 	import { getClausePool } from '$lib/states/problem.svelte.ts';
 	import { isLeft, makeLeft, makeRight, unwrapEither, type Either } from '$lib/types/either.ts';
-	import type { Lit, NeverFn } from '$lib/types/types.ts';
+	import type { NeverFn } from '$lib/types/types.ts';
 	import { error } from '$lib/utils.ts';
 	import { onMount } from 'svelte';
 	import PlainClauseComponent from '../PlainClauseComponent.svelte';
 
 	interface Context {
-		clause: Clause;
-		hidden: Lit[];
+		literals: Literal[];
 	}
 
 	interface Props {
@@ -34,9 +34,11 @@
 			if (isLeft(c)) {
 				const { reasonCRef, propagated }: UPContext = unwrapEither(c);
 				const clause: Clause = getClausePool().at(reasonCRef);
+				const visible: Literal[] = clause
+					.getLiterals()
+					.filter((lit: Literal) => lit.toInt() !== propagated);
 				return makeLeft({
-					clause,
-					hidden: [propagated]
+					literals: visible
 				});
 			} else return makeRight(error);
 		});
@@ -64,10 +66,9 @@
 		{#each context as ctx, index (index)}
 			{#if isLeft(ctx)}
 				<PlainClauseComponent
-					clause={ctx.left.clause}
-					hidden={ctx.left.hidden}
-					state="satisfied"
-					style="justify-content: end;"
+					literals={ctx.left.literals}
+					satisfiedClause={true}
+					satisfiedLiterals={false}
 				/>
 			{:else}
 				<div class="empty-slot"></div>
@@ -80,6 +81,7 @@
 	up-context {
 		display: flex;
 		flex-direction: row;
+		align-items: end;
 		gap: var(--assignments-gap);
 	}
 
