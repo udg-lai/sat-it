@@ -23,7 +23,8 @@
 				const dl: number = trail.dlOfPosition(pos);
 				// Any decision or expanded decision level shows its resolution context
 				// The context of a decision is always shown
-				return trail.isDecision(pos) || trail.isDLExpanded(dl);
+				// Any propagation before any decision is always shown
+				return dl == 0 || trail.isDecision(pos) || trail.isDLExpanded(dl);
 			}
 		);
 		return [...visibleContext, conflictiveClause];

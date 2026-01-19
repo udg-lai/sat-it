@@ -1,4 +1,4 @@
-import { logError, logFatal } from '$lib/states/toasts.svelte.ts';
+import { logFatal } from '$lib/states/toasts.svelte.ts';
 import type { CRef, Lit, NeverFn, Var } from '$lib/types/types.ts';
 import { error } from '$lib/utils.ts';
 import { makeLeft, makeRight, type Either } from '../types/either.ts';
@@ -131,7 +131,7 @@ export class Trail {
 	indexOfAssignment(varAssignment: VariableAssignment): number {
 		const index = this.assignments.indexOf(varAssignment);
 		if (index === -1) {
-			logError('Assignment index error', 'The variable assignment does not belong to the trail.');
+			logFatal('Assignment index error', 'The variable assignment does not belong to the trail.');
 		}
 		return index;
 	}
@@ -233,7 +233,7 @@ export class Trail {
 
 	toggleDLExpanded(level: number): void {
 		if (level <= 0 || level > this.dl) {
-			logFatal(`Decision level ${level} is out of bounds for trail DL ${this.dl}`);
+			logFatal(`Runtime exception, toggleDLExpanded`, `Decision level ${level} is out of bounds for trail DL ${this.dl}`);
 		}
 		this.expandedDLs[level] = !this.expandedDLs[level];
 		this.expandedDLs = [...this.expandedDLs]; // trigger reactivity
@@ -241,14 +241,14 @@ export class Trail {
 
 	isDLExpanded(level: number): boolean {
 		if (level <= 0 || level > this.dl) {
-			logFatal(`Decision level ${level} is out of bounds for trail DL ${this.dl}`);
+			logFatal(`Runtime exception, isDLExpanded`, `Decision level ${level} is out of bounds for trail DL ${this.dl}`);
 		}
 		return this.expandedDLs[level];
 	}
 
 	isDecision(pos: number): boolean {
 		if (pos < 0 || pos >= this.assignments.length) {
-			logFatal(`Position ${pos} is out of bounds for trail of size ${this.assignments.length}`);
+			logFatal(`Runtime exception, isDecision`, `Position ${pos} is out of bounds for trail of size ${this.assignments.length}`);
 		}
 		return this.assignments[pos].isD();
 	}
@@ -303,7 +303,8 @@ export class Trail {
 
 	dlOfPosition(pos: number): number {
 		if (pos < 0 || pos >= this.assignments.length) {
-			logFatal(`Position ${pos} is out of bounds for trail of size ${this.assignments.length}`);
+			logFatal(`Runtime exception, dlOfPosition`,
+				`Position ${pos} is out of bounds for trail of size ${this.assignments.length}`);
 		}
 
 		let level: number = this.bookmarkDLs.length - 1;
