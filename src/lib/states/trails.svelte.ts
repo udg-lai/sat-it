@@ -19,7 +19,7 @@ export const nTrails = (): number => {
 
 export const collapseTrailsContext = (): void => {
 	trails.forEach((trail) => trail.collapseContext());
-}
+};
 
 export const stackTrail = (trail: Trail): void => {
 	trails = [...trails, trail];
@@ -38,7 +38,6 @@ export const getTrails = () => trails;
 
 export const wipeTrails = (): void => {
 	trails = [new Trail()];
-	newTrailStackedEventBus.emit();
 };
 
 export const wrapLearnedClauses = (): Clause[] => {

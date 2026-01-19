@@ -156,6 +156,7 @@
 	}
 
 	function onTrailStacked() {
+		// Hides the context of all trails
 		collapseTrailsContext();
 		allocDecisionsTrail();
 		stackDifferPos(getLatestTrail().getAssignments().length);
