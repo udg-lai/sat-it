@@ -290,7 +290,7 @@ export const learnConflictClause: CDCL_LEARN_CONFLICT_CLAUSE_FUN = (lemma: Claus
 	lemma.setAsLemma();
 
 	//The lemma is stored inside the pool
-	const cRef: CRef = getProblemStore().addClause(lemma);
+	const cRef: CRef = getProblemStore().learnClause(lemma);
 
 	// Saves the learnt clause in the trail
 	getLatestTrail().attachLemma(lemma);
