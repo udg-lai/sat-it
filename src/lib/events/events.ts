@@ -1,25 +1,25 @@
 import type { Trail } from '$lib/entities/Trail.svelte.ts';
 import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
 import type { LiteralBreakpoint } from '$lib/states/breakpoints.svelte.ts';
+import type { Algorithm } from '$lib/types/algorithm.ts';
+import type { Lit } from '$lib/types/types.ts';
 import { createEventBus } from './createEventBus.ts';
 
 // observable of instance changes
 export const changeInstanceEventBus = createEventBus<string>();
 
-// open settings and more event
+// emit that the problem has been reset
+export const resetProblemEventBus = createEventBus<void>();
+
+// open settings and moe event
 export const openSettingsViewEventBus = createEventBus<void>();
 
 // close settings settings and more event
 export const closeSettingsViewEventBus = createEventBus<void>();
 
-// user action
-export type ActionEvent = 'record' | 'undo' | 'redo';
-
-export const userActionEventBus = createEventBus<ActionEvent>();
-
 // decision that user can take for the state machine
 
-export type StateMachineEvent =
+export type SolverCommand =
 	| 'step'
 	| 'solve_trail'
 	| 'automatic_steps'
@@ -27,12 +27,22 @@ export type StateMachineEvent =
 	| 'nextVariable'
 	| 'up1'
 	| 'finishCD'
-	| 'finishCA';
+	| 'finishCA'
+	| 'nextDecision' // propagates until next decision (DECISION not executed)
+	| 'branching'; // execute a branching (DECISION executed + propagations)
 
-export const stateMachineEventBus = createEventBus<StateMachineEvent>();
+export const solverCommandEventBus = createEventBus<SolverCommand>();
+
+export type FinishSolverSignal = 'finish-step' | 'finish-step-by-step';
+export type BeginSolverSignal = 'begin-step' | 'begin-step-by-step';
+
+export type SolverSignal = FinishSolverSignal | BeginSolverSignal;
+
+// event bus dedicated to the life cycle of the state machine
+export const solverSignalEventBus = createEventBus<SolverSignal>();
 
 // observable of algorithm changes
-export const changeAlgorithmEventBus = createEventBus<void>();
+export const changeAlgorithmEventBus = createEventBus<Algorithm>();
 
 // event bus for breakpoints
 export const breakpointEvent = createEventBus<LiteralBreakpoint>();
@@ -41,39 +51,42 @@ export const breakpointEvent = createEventBus<LiteralBreakpoint>();
 export const trailTrackingEventBus = createEventBus<number>();
 
 // event bus for collapse/expand of the trails
-export const toggleTrailExpandEventBus = createEventBus<boolean>();
+export const expandEditorTrailsEventBus = createEventBus<boolean>();
 
-// every time solver started running on automatic it emits an event
-export const solverStartedAutoMode = createEventBus<void>();
+// event bus for notify if complementary occurrences are being visited
+export const visitingComplementaryOccEventBus = createEventBus<void>();
 
-// every time solver finished running on automatic it emits an event
-export const solverFinishedAutoMode = createEventBus<void>();
+// event bus for notify when a conflict detection is started
+export const conflictDetectedEventBus = createEventBus<void>();
 
-// event bus for opening the conflict detection view
-export const conflictDetectionEventBus = createEventBus<void>();
+// event bus for notify when a conflict analysis is finished
+export const conflictAnalysisFinishedEventBus = createEventBus<void>();
 
-export type AlgorithmicUndoEvent = {
-	objectiveAssignment: VariableAssignment;
-	trailIndex: number;
+export type UndoToDecisionEvent = {
+	decision: VariableAssignment;
+	trailID: number; // trail id matches the trail index
 };
 
-// event bus for opening the conflict detection view
-export const algorithmicUndoEventBus = createEventBus<AlgorithmicUndoEvent>();
-
-export type StateMachineLifeCycleEvent =
-	| 'begin-step'
-	| 'begin-step-by-step'
-	| 'finish-step'
-	| 'finish-step-by-step';
-
-// event bus dedicated to the life cycle of the state machine
-export const stateMachineLifeCycleEventBus = createEventBus<StateMachineLifeCycleEvent>();
+// event bus undo by means of deterministic steps until a given decision
+export const algorithmicUndoEventBus = createEventBus<UndoToDecisionEvent>();
 
 // event bus dedicated to toggle the trail view
-export const toggleTrailViewEventBus = createEventBus<void>();
+// export const toggleTrailViewEventBus = createEventBus<void>();
 
-// event bus to know when trails can be updated to show.
-export const updateTrailsEventBus = createEventBus<Trail[]>();
+// event that contains the trails to render (for performance and solver stages reasons)
+export const renderTrailsEventBus = createEventBus<Trail[]>();
 
 // event bus to change the delay of the application.
-export const changeStepDelayEventBus = createEventBus<number>();
+export const stepDelayEventBus = createEventBus<number>();
+
+// event bus to notify about new decisions made by the algorithms.
+export const decisionMadeEventBus = createEventBus<Lit>();
+
+// event bus to notify about a new trail stacked
+export const newTrailStackedEventBus = createEventBus<void>();
+
+// event bus to notify a single undo wants to be done.
+export const ctrlZEventBus = createEventBus<void>();
+
+// A individual DL from the trail has been expanded or collapsed by the user
+export const decisionLevelToggledEventBus = createEventBus<void>();

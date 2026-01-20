@@ -71,7 +71,7 @@
 <style>
 	:global(.addInstance) {
 		color: white;
-		background-color: var(--conflict-color);
+		background-color: var(--boolean-constraint-propagation);
 		border-radius: 50px;
 	}
 </style>

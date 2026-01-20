@@ -1,42 +1,34 @@
 <script lang="ts">
-	import type { Trail } from '$lib/entities/Trail.svelte.ts';
 	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
+	import { differOf } from '$lib/states/trail-differ-sequence.svelte.ts';
+	import type { ComposedTrail } from '$lib/types/types.ts';
+	import { setLastTrailSize } from '../../states/trail-size.svelte.ts';
 	import BackjumpingComponent from '../assignment/BackjumpingComponent.svelte';
 	import BacktrackingComponent from '../assignment/BacktrackingComponent.svelte';
 	import UnitPropagationComponent from '../assignment/UnitPropagationComponent.svelte';
 	import DecisionLevelComponent from './DecisionLevelComponent.svelte';
-	import { setLastTrailSize } from '../../states/trail-size.svelte.ts';
 
 	interface DecisionLevel {
 		assignment: VariableAssignment;
-		level: number;
+		dlLevel: number;
 	}
 
 	interface Props {
-		trail: Trail;
-		expanded: boolean;
-		isLast?: boolean;
+		composedTrail: ComposedTrail;
 		emitRevert?: (assignment: VariableAssignment) => void;
-		detailsExpanded?: boolean;
-		showUPInfo?: boolean;
 	}
 
-	let {
-		trail,
-		expanded,
-		isLast = true,
-		emitRevert = () => {},
-		detailsExpanded = false,
-		showUPInfo = false
-	}: Props = $props();
+	let { composedTrail, emitRevert = () => {} }: Props = $props();
 
-	let initialPropagations: VariableAssignment[] = $derived(trail.getInitialPropagations());
+	let initialPropagations: VariableAssignment[] = $derived(
+		composedTrail.trail.getInitialPropagations()
+	);
 
 	let decisions: DecisionLevel[] = $derived(
-		trail.getDecisions().map((a, idx) => {
+		composedTrail.trail.getDecisions().map((a, i) => {
 			return {
 				assignment: a,
-				level: idx + 1
+				dlLevel: i + 1
 			};
 		})
 	);
@@ -45,7 +37,7 @@
 		const widthObserver = new ResizeObserver((entries) => {
 			for (const entry of entries) {
 				const contentWidth: number = entry.contentRect.width;
-				if (isLast) {
+				if (composedTrail.isLast) {
 					setLastTrailSize(contentWidth);
 				}
 			}
@@ -60,44 +52,44 @@
 </script>
 
 <trail class="trail" use:listenContentWidth>
-	{#each initialPropagations as assignment (assignment.variableId())}
+	{#each initialPropagations as assignment (assignment.toVar())}
 		{#if assignment.isK()}
 			<BacktrackingComponent
 				{assignment}
-				{isLast}
-				fromPreviousTrail={trail.isAssignmentFromPreviousTrail(assignment)}
+				isLast={composedTrail.isLast}
+				fromPreviousTrail={composedTrail.trail.indexOfAssignment(assignment) <
+					differOf(composedTrail.id)}
 			/>
 		{:else if assignment.isBJ()}
 			<BackjumpingComponent
 				{assignment}
-				{isLast}
-				fromPreviousTrail={trail.isAssignmentFromPreviousTrail(assignment)}
-				{detailsExpanded}
-				{showUPInfo}
+				isLast={composedTrail.isLast}
+				fromPreviousTrail={composedTrail.trail.indexOfAssignment(assignment) <
+					differOf(composedTrail.id)}
+				detailsExpanded={composedTrail.showCA || composedTrail.showUPs}
+				showUPInfo={!composedTrail.showUPs}
 			/>
 		{:else}
 			<UnitPropagationComponent
 				{assignment}
-				{isLast}
-				fromPreviousTrail={trail.isAssignmentFromPreviousTrail(assignment)}
-				{detailsExpanded}
-				{showUPInfo}
+				isLast={composedTrail.isLast}
+				fromPreviousTrail={composedTrail.trail.indexOfAssignment(assignment) <
+					differOf(composedTrail.id)}
+				detailsExpanded={composedTrail.showCA || composedTrail.showUPs}
+				showUPInfo={!composedTrail.showUPs}
 			/>
 		{/if}
 	{/each}
 
-	{#each decisions as { level, assignment } (level)}
+	{#each decisions as { dlLevel: level, assignment } (level)}
 		<DecisionLevelComponent
+			{composedTrail}
+			dlLevel={level}
 			decision={assignment}
-			propagations={trail.getPropagationsAt(level)}
-			{expanded}
-			{isLast}
-			{trail}
+			propagations={composedTrail.trail.getPropagationsAtLevel(level)}
 			emitRevertUpToX={() => {
 				emitRevert(assignment);
 			}}
-			{detailsExpanded}
-			{showUPInfo}
 		/>
 	{/each}
 </trail>
@@ -107,7 +99,8 @@
 		min-height: var(--trail-height);
 		display: flex;
 		flex-direction: row;
-		align-items: end;
+		align-items: center;
 		width: fit-content;
+		gap: var(--assignments-gap);
 	}
 </style>

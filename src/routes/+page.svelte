@@ -34,7 +34,9 @@
 	});
 </script>
 
+<!-- Disable right-click context menu globally -->
 <svelte:body oncontextmenu={disableContextMenu} />
+
 <main class="chakra-petch-medium">
 	{#if toasts}
 		<div class="toasts">

@@ -2,7 +2,9 @@
 	import { onChrome } from '$lib/app.svelte.ts';
 	import MathTexComponent from '$lib/components/MathTexComponent.svelte';
 	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
-	import { getInspectedVariable } from '$lib/states/inspectedVariable.svelte.ts';
+	import { getFocusedAssignment } from '$lib/states/focused-assignment.svelte.ts';
+	import { fromJust, isJust, type Maybe } from '$lib/types/maybe.ts';
+	import type { Lit } from '$lib/types/types.ts';
 	import { Dropdown, DropdownItem } from 'flowbite-svelte';
 	import HeadTailComponent from './../HeadTailComponent.svelte';
 	import './style.css';
@@ -16,8 +18,15 @@
 
 	let { assignment, isLast = false, fromPreviousTrail = false, emitRevertUpToX }: Props = $props();
 
-	const inspectedVariable: number = $derived(getInspectedVariable());
-	let inspecting: boolean = $derived(assignment.variableId() === inspectedVariable && isLast);
+	const inspectedLiteral: Maybe<Lit> = $derived(getFocusedAssignment());
+	let inspecting: boolean = $derived.by(() => {
+		if (!isJust(inspectedLiteral)) {
+			return false;
+		} else {
+			const literal: Lit = fromJust(inspectedLiteral);
+			return assignment.toLit() === literal && isLast;
+		}
+	});
 
 	let chrome: boolean = $derived(onChrome());
 	let isOpen: boolean = $state(false);
@@ -28,7 +37,7 @@
 	};
 </script>
 
-<HeadTailComponent {inspecting}>
+<HeadTailComponent display={inspecting}>
 	<childless-decision class:current-trail={!fromPreviousTrail}>
 		<button
 			class="literal-style decision level-expanded childless {chrome ? 'pad-chrome' : 'pad-others'}"

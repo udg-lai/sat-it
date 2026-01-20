@@ -40,7 +40,7 @@
 
 	let summary: Either<Clause, string>[] = $derived.by(() => {
 		const poolSize: number = getClausePool().size();
-		const learntSize: number = getClausePool().getLearnt().length;
+		const learntSize: number = getClausePool().getLearnedClauses().length;
 
 		const originalClauses = clauses.slice(0, poolSize - learntSize);
 		const learnedClauses = clauses.slice(poolSize - learntSize);
@@ -85,7 +85,7 @@
 
 {#snippet renderClause(clause: Clause)}
 	<div class="tagged-clause">
-		<span class="enumerate">{clause.getTag()}.</span>
+		<span class="enumerate">{clause.getCRef()}.</span>
 		<ClauseComponent {clause} />
 	</div>
 {/snippet}

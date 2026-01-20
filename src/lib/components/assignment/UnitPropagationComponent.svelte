@@ -4,14 +4,15 @@
 	import type Clause from '$lib/entities/Clause.svelte.ts';
 	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
 	import { isUnitPropagationReason } from '$lib/entities/VariableAssignment.ts';
+	import { getFocusedAssignment } from '$lib/states/focused-assignment.svelte.ts';
 	import { getClausePool } from '$lib/states/problem.svelte.ts';
 	import { logFatal } from '$lib/states/toasts.svelte.ts';
+	import { fromJust, isJust, type Maybe } from '$lib/types/maybe.ts';
+	import type { CRef, Lit } from '$lib/types/types.ts';
 	import { Popover } from 'flowbite-svelte';
 	import { nanoid } from 'nanoid';
 	import HeadTailComponent from './../HeadTailComponent.svelte';
 	import './style.css';
-	import { getInspectedVariable } from '$lib/states/inspectedVariable.svelte.ts';
-	import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
 
 	interface Props {
 		assignment: VariableAssignment;
@@ -25,20 +26,25 @@
 		assignment,
 		isLast = false,
 		fromPreviousTrail = false,
-		detailsExpanded = false,
-		showUPInfo = false
+		detailsExpanded = false
 	}: Props = $props();
 	let buttonId: string = 'btn-' + nanoid();
 
-	let inspectedVariable: number = $derived(getInspectedVariable());
-	let inspecting: boolean = $derived(assignment.variableId() === inspectedVariable && isLast);
+	const inspectedLiteral: Maybe<Lit> = $derived(getFocusedAssignment());
+	let inspecting: boolean = $derived.by(() => {
+		if (!isJust(inspectedLiteral)) {
+			return false;
+		} else {
+			const literal: Lit = fromJust(inspectedLiteral);
+			return assignment.toLit() === literal && isLast;
+		}
+	});
 
-	const clausePool: ClausePool = $derived(getClausePool());
-	const propagatedClause: Clause = $derived.by(() => {
+	const reasonClause: Clause = $derived.by(() => {
 		if (assignment.isUP()) {
 			const reason = assignment.getReason();
 			if (isUnitPropagationReason(reason)) {
-				return clausePool.get(reason.clauseTag);
+				return getClausePool().at(reason.cRef);
 			} else {
 				logFatal('Reason error', 'The reason is not a unit propagation');
 			}
@@ -47,20 +53,12 @@
 		}
 	});
 
-	const conflictiveClauseTag: number | undefined = $derived(propagatedClause.getTag());
-
-	const conflictClauseString: string = $derived(
-		propagatedClause
-			.map((literal) => {
-				return literal.toTeX();
-			})
-			.join('\\: \\:')
-	);
+	const reasonCRef: CRef = $derived(reasonClause.getCRef());
 
 	let chrome: boolean = $derived(onChrome());
 </script>
 
-<HeadTailComponent {inspecting}>
+<HeadTailComponent display={inspecting}>
 	<unit-propagation class:previous-assignment={fromPreviousTrail}>
 		<button
 			id={buttonId}
@@ -69,17 +67,16 @@
 		>
 			<MathTexComponent equation={assignment.toTeX()} />
 		</button>
-
-		<Popover triggeredBy={'#' + buttonId} class="app-popover" trigger="click" placement="bottom">
-			<div class="popover-content">
-				<span class="clause-id">{conflictiveClauseTag}.</span>
-				{#if showUPInfo}
-					<MathTexComponent equation={conflictClauseString} fontSize="var(--popover-font-size)" />
-				{/if}
-			</div>
-		</Popover>
 	</unit-propagation>
 </HeadTailComponent>
+
+<Popover triggeredBy={'#' + buttonId} class="app-popover" trigger="click" placement="bottom">
+	<div class="popover-content">
+		<button>
+			<span class="clause-id">{reasonCRef}</span>
+		</button>
+	</div>
+</Popover>
 
 <style>
 	:global(.app-popover) {
@@ -94,7 +91,6 @@
 		display: flex;
 		flex-direction: row;
 		align-items: center;
-		font-size: var(--popover-font-size);
 		gap: 0.5rem;
 	}
 
@@ -108,6 +104,11 @@
 
 	:global(.app-popover > .px-3) {
 		padding: 0rem;
+	}
+
+	:global(.popover-content button) {
+		width: var(--assignment-width);
+		font-size: var(--popover-font-size);
 	}
 
 	.previous-assignment {

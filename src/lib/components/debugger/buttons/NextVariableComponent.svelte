@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { stateMachineEventBus, toggleTrailExpandEventBus } from '$lib/events/events.ts';
+	import { solverCommandEventBus, expandEditorTrailsEventBus } from '$lib/events/events.ts';
 	import '../style.css';
 	import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 	import ImageRender from '$lib/components/tools/ImageRender.svelte';
@@ -7,9 +7,9 @@
 	let nextClauseIcon = '/icons/Inspect All Clauses.svg';
 
 	function goToNextVariable(): void {
-		getSolverMachine().disableStops();
-		toggleTrailExpandEventBus.emit(true);
-		stateMachineEventBus.emit('nextVariable');
+		getSolverMachine().disableStepDelay();
+		expandEditorTrailsEventBus.emit(true);
+		solverCommandEventBus.emit('nextVariable');
 	}
 </script>
 

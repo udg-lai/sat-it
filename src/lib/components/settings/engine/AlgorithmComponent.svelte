@@ -30,7 +30,7 @@
 	const acceptChange = (algorithmSelected: Algorithm) => {
 		openModal = false;
 		setConfiguredAlgorithm(algorithmSelected);
-		changeAlgorithmEventBus.emit();
+		changeAlgorithmEventBus.emit(getConfiguredAlgorithm());
 	};
 </script>
 

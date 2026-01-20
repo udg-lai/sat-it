@@ -1,104 +1,59 @@
-import { SvelteSet } from 'svelte/reactivity';
-import ClausePool from './ClausePool.svelte.ts';
-import { VariablePool } from './VariablePool.svelte.ts';
 import type { DimacsInstance } from '$lib/instances/dimacs-instance.interface.ts';
+import { logError } from '$lib/states/toasts.svelte.ts';
+import type { CRef, Lit } from '$lib/types/types.ts';
 import type Clause from './Clause.svelte.ts';
-import type { Trail } from './Trail.svelte.ts';
-import type Variable from './Variable.svelte.ts';
-import { getTrails } from '$lib/states/trails.svelte.ts';
-import { logFatal } from '$lib/states/toasts.svelte.ts';
-
-export type OccurrenceTable = Map<number, SvelteSet<number>>;
-export type WatchTable = Map<number, SvelteSet<number>>;
+import ClausePool from './ClausePool.svelte.ts';
+import OccurrenceTable from './OccurrenceTable.svelte.ts';
+import { VariablePool } from './VariablePool.svelte.ts';
+import WatchTable from './WatchTable.svelte.ts';
 
 export default class Problem {
 	private variables: VariablePool = $state(new VariablePool(0));
 	private clauses: ClausePool = $state(new ClausePool());
-	private occurrencesTable: OccurrenceTable = $state(new Map<number, SvelteSet<number>>());
-	private watchTable: OccurrenceTable = $state(new Map<number, SvelteSet<number>>());
+	private occurrencesTable: OccurrenceTable = $state(new OccurrenceTable());
+	private watchTable: WatchTable = $state(new WatchTable());
+
+	constructor(instance: DimacsInstance | undefined = undefined) {
+		if (instance !== undefined) this.syncWithDimacsInstance(instance);
+	}
 
 	getClausePool(): ClausePool {
 		return this.clauses;
 	}
 
-	getOccurrencesTable(): OccurrenceTable {
-		return this.occurrencesTable;
+	getOccurrencesTableMapping(): Map<Lit, Set<CRef>> {
+		return this.occurrencesTable.getTable();
 	}
 
 	getVariablePool(): VariablePool {
 		return this.variables;
 	}
 
-	updateProblemDomain(instance: DimacsInstance): void {
-		const { varCount, claims } = instance.summary;
-
+	syncWithDimacsInstance({ summary }: DimacsInstance): void {
+		const { varCount, claims } = summary;
 		this.variables = new VariablePool(varCount);
 		this.clauses = ClausePool.buildFrom(claims, this.variables);
-		this.occurrencesTable = this._makeOccurrencesList();
+		this.occurrencesTable = new OccurrenceTable(this.clauses.getClauses());
+		this.watchTable = new WatchTable(this.clauses.getClauses());
 	}
 
-	reset(): void {
-		this.variables.reset();
+	forgetLearnedClauses() {
+		const removedClauses: Clause[] = this.clauses.pruneLearnedClauses();
+		this.occurrencesTable.multipleRemoveOccurrences(removedClauses);
 	}
 
-	updateProblemFromTrail(trail: Trail) {
-		//Reset the variables
-		this.variables.reset();
-		trail.forEach((assignment) => {
-			const variable: Variable = assignment.getVariable();
-			this.variables.assign(variable.getInt(), variable.getAssignment());
-		});
-
-		//Now we need to relearn the clauses
-		this.clauses.clearLearnt();
-
-		//The learnt clauses from the trails are added to the clause pool
-		getTrails().forEach((trail) => {
-			const learntClause = trail.getLearntClause();
-			if (learntClause !== undefined) {
-				this.clauses.addClause(learntClause);
-			}
-		});
-
-		//Reset the mapping
-		this.occurrencesTable = this._makeOccurrencesList();
+	learnClauses(clauses: Clause[]) {
+		for (const clause of clauses) {
+			if (!clause.isLemma())
+				logError('Learning clause', 'Clause to be learned was not marked as learned');
+			this.clauses.addClause(clause);
+			this.occurrencesTable.addOccurrences(clause);
+		}
 	}
 
-	resetProblem() {
-		this.variables.reset();
-		this.clauses.clearLearnt();
-		this.occurrencesTable = this._makeOccurrencesList();
+	addClause(clause: Clause): CRef {
+		const cRef: CRef = this.clauses.addClause(clause);
+		this.occurrencesTable.addOccurrences(clause);
+		return cRef;
 	}
-
-	addClauseToClausePool(lemma: Clause) {
-		this.clauses.addClause(lemma);
-
-		if (lemma.getTag() === undefined)
-			logFatal('Saving lemma', 'Lemma clause was not giving a tag at adding it into the pool');
-
-		this._addClauseToMapping(lemma, lemma.getTag() as number, this.occurrencesTable);
-	}
-
-	private _makeOccurrencesList(): OccurrenceTable {
-		const mapping: Map<number, SvelteSet<number>> = new Map();
-
-		this.clauses.getClauses().forEach((clause, clauseTag) => {
-			this._addClauseToMapping(clause, clauseTag, mapping);
-		});
-
-		return mapping;
-	}
-
-	private _addClauseToMapping = (clause: Clause, clauseTag: number, mapping: OccurrenceTable) => {
-		clause.getLiterals().forEach((literal) => {
-			const literalId = literal.toInt();
-			if (mapping.has(literalId)) {
-				const s = mapping.get(literalId);
-				s?.add(clauseTag);
-			} else {
-				const s = new SvelteSet([clauseTag]);
-				mapping.set(literalId, s);
-			}
-		});
-	};
 }

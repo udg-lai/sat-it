@@ -7,12 +7,11 @@
 		isBreakpoint,
 		removeBreakpoint
 	} from '$lib/states/breakpoints.svelte.ts';
-	import { getProblemStore, getVariablePool } from '$lib/states/problem.svelte.ts';
+	import { getVariablePool } from '$lib/states/problem.svelte.ts';
 	import { logInfo } from '$lib/states/toasts.svelte.ts';
 	import { BugOutline } from 'flowbite-svelte-icons';
 	import BreakpointPrinter from './BreakpointPrinterComponent.svelte';
 	import './style.css';
-	import type Problem from '$lib/entities/Problem.svelte.ts';
 
 	interface Props {
 		iconClass: { size: string };
@@ -46,9 +45,7 @@
 
 	let literalBreakpoint: number | undefined = $state();
 
-	const problem: Problem = $derived(getProblemStore());
-
-	let max: number = $derived(problem.variables.size());
+	let max: number = $derived(getVariablePool().size());
 	let min: number = $derived(max * -1);
 
 	const addLiteralBreakpoint = (): void => {
@@ -60,7 +57,7 @@
 				`Variable ${Math.abs(literalBreakpoint)} for ${literalBreakpoint > 0} assignment already added`
 			);
 		}
-		if (!isNaN(literalBreakpoint) && problem.variables.includes(Math.abs(literalBreakpoint))) {
+		if (!isNaN(literalBreakpoint) && getVariablePool().includes(Math.abs(literalBreakpoint))) {
 			addBreakpoint({ type: 'literal', literal: literalBreakpoint });
 		}
 		literalBreakpoint = undefined;

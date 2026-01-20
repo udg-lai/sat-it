@@ -15,7 +15,6 @@
 		trailState: TrailState;
 		btnClassStyle?: string;
 		iconClassStyle?: string;
-		ofLastTrail?: boolean; // Optional prop to indicate if this is the last trail
 		disableClick?: boolean;
 	}
 
@@ -24,7 +23,6 @@
 		onToggleExpand,
 		expanded,
 		btnClassStyle = '',
-		ofLastTrail = false,
 		disableClick = true
 	}: Props = $props();
 
@@ -38,15 +36,9 @@
 
 	let status = $derived.by(() => {
 		if (expanded) {
-			return 'Click to collapse';
-		} else if (trailState === 'unsat') {
-			return 'The problem is unsatisfiable';
-		} else if (trailState === 'sat') {
-			return 'The problem has been satisfied';
-		} else if (trailState === 'conflict') {
-			return 'A conflict has been detected';
+			return 'Collapse';
 		} else {
-			return 'Running...';
+			return 'Expand';
 		}
 	});
 </script>
@@ -62,7 +54,7 @@
 		class:disableClick
 	>
 		<div class="dynamic-render">
-			{#if expanded && !ofLastTrail}
+			{#if expanded}
 				<DynamicRender component={CompressOutline} props={iconProps} />
 			{:else if trailState === 'unsat'}
 				<DynamicRender component={CloseOutline} props={iconProps} />
@@ -94,14 +86,15 @@
 
 	.notification {
 		width: 100%;
-		height: var(--trail-height);
+		height: var(--assignment-width);
+		width: var(--assignment-width);
 		display: flex;
 		justify-content: center;
 		align-items: center;
 	}
 
 	.notification.conflict {
-		color: var(--conflict-color);
+		color: rgb(18, 18, 18);
 	}
 
 	.notification.unsat {

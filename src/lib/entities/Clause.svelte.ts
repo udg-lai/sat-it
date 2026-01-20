@@ -1,31 +1,84 @@
+import { assertiveAlgorithm } from '$lib/algorithms/assertive.ts';
 import logicResolution from '$lib/algorithms/resolution.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
+import type { CRef, Lit } from '$lib/types/types.ts';
 import type { Comparable } from '../interfaces/Comparable.ts';
 import type { Claim } from '../parsers/dimacs.ts';
 import { arraysEqual } from '../types/array.ts';
 import Literal from './Literal.svelte.ts';
 import type { VariablePool } from './VariablePool.svelte.ts';
 
-type ClauseOptions = {
-	comments?: string[];
-	tag?: number;
-	learnt?: boolean;
+export interface UNSATISFIED {
+	type: 'SAT';
+}
+
+export interface SATISFIED {
+	type: 'UnSAT';
+}
+
+export interface UNIT {
+	type: 'UNIT';
+	literal: number;
+}
+
+export interface UNRESOLVED {
+	type: 'UNRESOLVED';
+}
+
+export type ClauseEval = UNSATISFIED | SATISFIED | UNIT | UNRESOLVED;
+
+export const makeSatisfiedEval = (): UNSATISFIED => {
+	return { type: 'SAT' };
 };
 
-class Clause implements Comparable<Clause> {
-	private _literals: Literal[] = [];
-	private _comments: string[] = $state([]);
-	private _tag: number | undefined;
-	private _learnt: boolean = false;
+export const makeUnsatisfiedEval = (): SATISFIED => {
+	return { type: 'UnSAT' };
+};
+
+export const makeUnitEval = (literal: number): UNIT => {
+	return { type: 'UNIT', literal };
+};
+
+export const makeUnresolvedEval = (): UNRESOLVED => {
+	return { type: 'UNRESOLVED' };
+};
+
+export const isUnsatisfiedEval = (e: ClauseEval): e is SATISFIED => {
+	return e.type === 'UnSAT';
+};
+
+export const isSatisfiedEval = (e: ClauseEval): e is UNSATISFIED => {
+	return e.type === 'SAT';
+};
+
+export const isUnresolvedEval = (e: ClauseEval): e is UNRESOLVED => {
+	return e.type === 'UNRESOLVED';
+};
+
+export const isUnitEval = (e: ClauseEval): e is UNIT => {
+	return e.type === 'UNIT';
+};
+
+type ClauseOptions = {
+	comments?: string[];
+	cRef?: CRef;
+	learned?: boolean;
+};
+
+export default class Clause implements Comparable<Clause> {
+	private literals: Literal[] = [];
+	private comments: string[] = $state([]);
+	private cRef: number | undefined;
+	private learned: boolean = false;
 
 	constructor(
 		literals: Literal[],
-		{ comments = [], tag = undefined, learnt = false }: ClauseOptions = {}
+		{ comments = [], cRef = undefined, learned = false }: ClauseOptions = {}
 	) {
-		this._literals = literals;
-		this._comments = comments;
-		this._tag = tag;
-		this._learnt = learnt;
+		this.literals = literals;
+		this.comments = comments;
+		this.cRef = cRef;
+		this.learned = learned;
 	}
 
 	static buildFrom(claim: Claim, variables: VariablePool): Clause {
@@ -34,43 +87,55 @@ class Clause implements Comparable<Clause> {
 		const tag: number | undefined = claim.id;
 		return new Clause(literals, {
 			comments,
-			tag,
-			learnt: false
+			cRef: tag,
+			learned: false
 		});
 	}
 
 	addLiteral(lit: Literal) {
-		this._literals.push(lit);
+		this.literals.push(lit);
 	}
 
-	getTag(): number | undefined {
-		return this._tag;
+	getCRef(): CRef {
+		// cRef can be undefined for temporal clauses, check if it is a temporal clause before using this method
+		if (this.isTemporal()) {
+			logFatal('Get CRef', 'Cannot get CRef of a temporal clause');
+		}
+		return this.cRef as CRef;
 	}
 
-	setTag(tag: number): void {
-		this._tag = tag;
+	setCRef(cRef: CRef): void {
+		this.cRef = cRef;
 	}
 
-	learnt(): boolean {
-		return this._learnt;
+	isLemma(): boolean {
+		return this.learned;
 	}
 
-	setAsLearntClause(): void {
-		this._learnt = true;
+	setAsLemma(): void {
+		this.learned = true;
 	}
 
-	findUnassignedLiteral(): number {
+	isTemporal(): boolean {
+		return this.cRef === undefined;
+	}
+
+	isAssertive(literals: Lit[]): boolean {
+		return assertiveAlgorithm(this, literals);
+	}
+
+	fstUnassignedLiteral(): Literal {
 		let i = 0;
-		let literal = undefined;
-		while (i < this._literals.length && !literal) {
-			if (!this._literals[i].isAssigned()) {
-				literal = this._literals[i].toInt();
+		let literal: Literal | undefined = undefined;
+		while (i < this.literals.length && !literal) {
+			if (!this.literals[i].hasTruthValue()) {
+				literal = this.literals[i];
 			} else {
 				i++;
 			}
 		}
 		if (!literal) {
-			throw logFatal('Non unassigned literal was found');
+			logFatal('First unassigned literal', 'No unassigned literal found in clause');
 		}
 		return literal;
 	}
@@ -80,31 +145,35 @@ class Clause implements Comparable<Clause> {
 		const unassignedLiterals: number[] = [];
 
 		let i = 0;
-		while (i < this._literals.length && !satisfied) {
-			const lit: Literal = this._literals[i];
+		while (i < this.literals.length && !satisfied) {
+			const lit: Literal = this.literals[i];
 			if (lit.isTrue()) satisfied = true;
 			else {
-				if (!lit.isAssigned()) unassignedLiterals.push(lit.toInt());
+				if (!lit.hasTruthValue()) unassignedLiterals.push(lit.toInt());
 				i++;
 			}
 		}
 		let state: ClauseEval;
-		if (satisfied) state = makeSatClause();
-		else if (unassignedLiterals.length === 1) state = makeUnitClause(unassignedLiterals[0]);
-		else if (unassignedLiterals.length === 0) state = makeUnSATClause();
-		else state = makeUnresolvedClause();
+		if (satisfied) state = makeSatisfiedEval();
+		else if (unassignedLiterals.length === 1) state = makeUnitEval(unassignedLiterals[0]);
+		else if (unassignedLiterals.length === 0) state = makeUnsatisfiedEval();
+		else state = makeUnresolvedEval();
 
 		return state;
+	}
+
+	falsified(): boolean {
+		return this.isEmpty() || this.eval().type === 'UnSAT';
 	}
 
 	isUnit(): boolean {
 		let nNotAssigned = 0;
 		let i = 0;
-		const len = this._literals.length;
+		const len = this.literals.length;
 		let satisfied = false;
 		while (i < len && nNotAssigned < 2 && !satisfied) {
-			const lit: Literal = this._literals[i];
-			if (!lit.isAssigned()) {
+			const lit: Literal = this.literals[i];
+			if (!lit.hasTruthValue()) {
 				nNotAssigned += 1;
 			} else {
 				satisfied = lit.isTrue();
@@ -115,21 +184,19 @@ class Clause implements Comparable<Clause> {
 		return unit;
 	}
 
-	// This function will check if the clause has 1 literal (not if it is assigned)
-	isSingleLiteralClause(): boolean {
-		return this._literals.length === 1;
-	}
-
-	containsVariable(variableId: number): boolean {
-		const found = this._literals.find((lit) => {
-			const id = lit.toInt();
-			return Math.abs(id) === variableId;
-		});
-		return found !== undefined;
+	contains(literal: Lit): boolean {
+		let found = false;
+		for (const lit of this.literals) {
+			if (lit.toInt() === literal) {
+				found = true;
+				break;
+			}
+		}
+		return found;
 	}
 
 	getLiterals(): Literal[] {
-		return [...this._literals];
+		return [...this.literals];
 	}
 
 	resolution(other: Clause): Clause {
@@ -137,99 +204,50 @@ class Clause implements Comparable<Clause> {
 	}
 
 	equals(other: Clause): boolean {
-		const c1 = this._literals.map((l) => l.toInt());
-		const c2 = other._literals.map((l) => l.toInt());
+		const c1 = this.literals.map((l) => l.toInt());
+		const c2 = other.literals.map((l) => l.toInt());
 		return arraysEqual(c1.sort(), c2.sort());
 	}
 
-	nLiterals(): number {
-		return this._literals.length;
+	size(): number {
+		return this.literals.length;
 	}
 
 	getComments(): string[] {
-		return this._comments;
+		return this.comments;
 	}
 
 	copy(): Clause {
-		return new Clause(this._literals, {
-			comments: [...this._comments],
-			tag: this._tag,
-			learnt: this._learnt
+		return new Clause(this.literals, {
+			comments: [...this.comments],
+			cRef: this.cRef,
+			learned: this.learned
 		});
 	}
 
 	isEmpty(): boolean {
-		return this._literals.length === 0;
+		return this.literals.length === 0;
 	}
 
 	[Symbol.iterator]() {
-		return this._literals.values();
+		return this.literals.values();
 	}
 
 	map<T>(
 		callback: (literal: Literal, index: number, array: Literal[]) => T,
 		thisArg?: unknown
 	): T[] {
-		return this._literals.map(callback, thisArg);
+		return this.literals.map(callback, thisArg);
 	}
 
 	forEach(
 		callback: (literal: Literal, index: number, array: Literal[]) => void,
 		thisArg?: unknown
 	): void {
-		this._literals.forEach(callback, thisArg);
+		this.literals.forEach(callback, thisArg);
+	}
+
+	toString(): string {
+		return '{' + this.literals.map((lit: Literal) => lit.toString()).join(', ') + '}';
 	}
 }
-
-export interface SATClause {
-	type: 'SAT';
-}
-
-export interface UnSATClause {
-	type: 'UnSAT';
-}
-
-export interface UNITClause {
-	type: 'UNIT';
-	literal: number;
-}
-
-export interface UNRESOLVEDClause {
-	type: 'UNRESOLVED';
-}
-
-export type ClauseEval = SATClause | UnSATClause | UNITClause | UNRESOLVEDClause;
-
-export const makeSatClause = (): SATClause => {
-	return { type: 'SAT' };
-};
-
-export const makeUnSATClause = (): UnSATClause => {
-	return { type: 'UnSAT' };
-};
-
-export const makeUnitClause = (literal: number): UNITClause => {
-	return { type: 'UNIT', literal };
-};
-
-export const makeUnresolvedClause = (): UNRESOLVEDClause => {
-	return { type: 'UNRESOLVED' };
-};
-
-export const isUnSATClause = (e: ClauseEval): e is UnSATClause => {
-	return e.type === 'UnSAT';
-};
-
-export const isSatClause = (e: ClauseEval): e is SATClause => {
-	return e.type === 'SAT';
-};
-
-export const isUnresolvedClause = (e: ClauseEval): e is UNRESOLVEDClause => {
-	return e.type === 'UNRESOLVED';
-};
-
-export const isUnitClause = (e: ClauseEval): e is UNITClause => {
-	return e.type === 'UNIT';
-};
-
-export default Clause;

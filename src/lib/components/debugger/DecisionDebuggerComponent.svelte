@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { stateMachineEventBus } from '$lib/events/events.ts';
+	import { solverCommandEventBus } from '$lib/events/events.ts';
 	import { updateAssignment } from '$lib/states/assignment.svelte.ts';
 	import { getVariablePool } from '$lib/states/problem.svelte.ts';
 	import { logInfo, logWarning } from '$lib/states/toasts.svelte.ts';
@@ -7,17 +7,18 @@
 	import BacktrackingComponent from './buttons/BacktrackingComponent.svelte';
 	import type { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
 	import ImageRender from '../tools/ImageRender.svelte';
+	import { Lit } from '$lib/types/types.ts';
 
 	interface Props {
 		onConflict: boolean;
 		finished: boolean;
 		onConflictDetection: boolean;
-		nextLiteral: number | undefined;
+		nextLiteral: Lit | undefined;
 	}
 
 	let { onConflict, finished, onConflictDetection, nextLiteral }: Props = $props();
 
-	let inputLiteral: number | undefined = $state(undefined);
+	let inputLiteral: Lit | undefined = $state(undefined);
 
 	// -----Code related to checking manual decisions-----
 	const variables: VariablePool = $derived(getVariablePool());
@@ -44,7 +45,7 @@
 			return;
 		}
 
-		const literal: number = Number(input.value);
+		const literal: Lit = Number(input.value);
 
 		if (isNaN(literal)) {
 			inputLiteral = undefined;
@@ -62,7 +63,7 @@
 			return;
 		}
 
-		// Only "possible" variable assignment
+		// Only "possible" literal assignment
 		inputLiteral = literal;
 	};
 
@@ -73,15 +74,15 @@
 		}
 	};
 
-	const alreadyAssignedTruthValue = (literal: number): boolean => {
+	const alreadyAssignedTruthValue = (literal: Lit): boolean => {
 		const variable = Math.abs(literal);
 		return variables.assignedTruthValue(variable);
 	};
 
-	const emitAssignment = (literal: number | undefined): void => {
+	const emitAssignment = (literal: Lit | undefined): void => {
 		if (literal === undefined) {
 			updateAssignment('automated');
-			stateMachineEventBus.emit('step');
+			solverCommandEventBus.emit('step');
 		} else {
 			if (alreadyAssignedTruthValue(literal)) {
 				const variable: number = Math.abs(literal);
@@ -93,7 +94,7 @@
 				const truthValue: boolean = literal > 0;
 				const variable: number = Math.abs(literal);
 				updateAssignment('manual', truthValue, variable);
-				stateMachineEventBus.emit('step');
+				solverCommandEventBus.emit('step');
 			}
 			inputLiteral = undefined;
 		}

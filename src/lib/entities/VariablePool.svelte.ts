@@ -1,4 +1,5 @@
 import { logFatal } from '$lib/states/toasts.svelte.ts';
+import type { CRef, Var } from '$lib/types/types.ts';
 import { makeJust, makeNothing, type Maybe } from '../types/maybe.ts';
 import Variable, { type Assignment } from './Variable.svelte.ts';
 
@@ -8,8 +9,7 @@ export interface IVariablePool {
 	assign(variableId: number, assignment: Assignment): void;
 	unassign(variableId: number): void;
 	getVariable(variable: number): void;
-	getVariableCopy(variable: number): Variable;
-	reset(): void;
+	wipe(): void;
 	allAssigned(): boolean;
 	size(): number;
 	includes(variableId: number): boolean;
@@ -27,12 +27,12 @@ export class VariablePool implements IVariablePool {
 		this.nvPointer = 0;
 	}
 
-	reset(): void {
+	wipe(): void {
 		this.variables.forEach((variable) => variable.assign(undefined));
 		this.nvPointer = 0;
 	}
 
-	nextVariableToAssign(): Maybe<number> {
+	nextVariableToAssign(): Maybe<CRef> {
 		return this.getNextId();
 	}
 
@@ -41,21 +41,17 @@ export class VariablePool implements IVariablePool {
 		return this.nvPointer === this.capacity;
 	}
 
-	unassign(variableId: number): void {
-		this._assign(variableId, undefined);
+	unassign(varId: Var): void {
+		this._assign(varId, undefined);
 	}
 
-	assign(variableId: number, assignment: Assignment): void {
-		this._assign(variableId, assignment);
+	assign(varId: number, assignment: Assignment): void {
+		this._assign(varId, assignment);
 	}
 
 	getVariable(variable: number): Variable {
 		const idx = this.checkIndex(variable);
 		return this.variables[idx];
-	}
-
-	getVariableCopy(variable: number): Variable {
-		return this.getVariable(variable).copy();
 	}
 
 	includes(varId: number): boolean {
@@ -73,12 +69,12 @@ export class VariablePool implements IVariablePool {
 	private _assignedTruthValue(): Set<number> {
 		const assigned: number[] = this.variables
 			.filter((v) => v.hasTruthValue())
-			.map((v) => v.getInt());
+			.map((v) => v.toInt());
 		return new Set([...assigned]);
 	}
 
-	private _assign(variableId: number, assignment: Assignment): void {
-		const varIndex: number = this.checkIndex(variableId);
+	private _assign(varId: Var, assignment: Assignment): void {
+		const varIndex: number = this.checkIndex(varId);
 		const variable: Variable = this.variables[varIndex];
 		const pAssignment: Assignment = variable.getAssignment();
 		if (pAssignment !== undefined) {
@@ -110,7 +106,7 @@ export class VariablePool implements IVariablePool {
 				this.nvPointer++;
 			}
 		}
-		return nextFound ? makeJust(this.variables[this.nvPointer].getInt()) : makeNothing();
+		return nextFound ? makeJust(this.variables[this.nvPointer].toInt()) : makeNothing();
 	}
 
 	private checkIndex(variableId: number): number {

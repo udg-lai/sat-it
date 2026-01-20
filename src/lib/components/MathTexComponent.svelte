@@ -24,8 +24,11 @@
 	span {
 		display: table;
 		margin: 0;
+		height: 100%;
 		font-size: var(--fontSize);
 		text-align: center;
-		vertical-align: center;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 	}
 </style>

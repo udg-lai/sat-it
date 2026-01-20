@@ -1,4 +1,5 @@
 import { logFatal } from '$lib/states/toasts.svelte.ts';
+import type { Lit, Var } from '$lib/types/types.ts';
 import type Variable from './Variable.svelte.ts';
 
 export type Automated = {
@@ -14,15 +15,15 @@ export type Decision = Automated | Manual;
 
 export type UnitPropagation = {
 	type: 'propagated';
-	clauseTag: number;
+	cRef: number;
 };
 
-export type Backjumping = {
+export type BackJumping = {
 	type: 'backjumping';
-	clauseTag: number;
+	cRef: number;
 };
 
-export type Propagation = UnitPropagation | Backjumping;
+export type Propagation = UnitPropagation | BackJumping;
 
 export type Backtracking = {
 	type: 'backtracking';
@@ -46,7 +47,7 @@ export const isUnitPropagationReason = (r: Reason): r is UnitPropagation => {
 	return r.type === 'propagated';
 };
 
-export const isBackjumpingReason = (r: Reason): r is Backjumping => {
+export const isBackJumpingReason = (r: Reason): r is BackJumping => {
 	return r.type === 'backjumping';
 };
 
@@ -74,14 +75,14 @@ export const makeManualReason = (): Manual => {
 export const makeUnitPropagationReason = (clauseTag: number): UnitPropagation => {
 	return {
 		type: 'propagated',
-		clauseTag
+		cRef: clauseTag
 	};
 };
 
-export const makeBackjumpingResason = (clauseTag: number): Backjumping => {
+export const makeBackJumpingReason = (clauseTag: number): BackJumping => {
 	return {
 		type: 'backjumping',
-		clauseTag
+		cRef: clauseTag
 	};
 };
 
@@ -112,8 +113,8 @@ export default class VariableAssignment {
 		return new VariableAssignment(variable, makeUnitPropagationReason(clauseTag));
 	}
 
-	static newBackjumpingAssignment(variable: Variable, clauseTag: number) {
-		return new VariableAssignment(variable, makeBackjumpingResason(clauseTag));
+	static newBackJumpingAssignment(variable: Variable, clauseTag: number) {
+		return new VariableAssignment(variable, makeBackJumpingReason(clauseTag));
 	}
 
 	static newBacktrackingAssignment(variable: Variable) {
@@ -137,11 +138,15 @@ export default class VariableAssignment {
 	}
 
 	isBJ(): boolean {
-		return isBackjumpingReason(this.reason);
+		return isBackJumpingReason(this.reason);
 	}
 
 	isK(): boolean {
 		return isBacktrackingReason(this.reason);
+	}
+
+	wasPropagated(): boolean {
+		return isPropagationReason(this.reason);
 	}
 
 	getReason(): Reason {
@@ -152,17 +157,23 @@ export default class VariableAssignment {
 		this.variable.unassign();
 	}
 
-	toInt(): number {
+	toLit(): Lit {
+		if (!this.variable.hasTruthValue()) {
+			logFatal(
+				'Evaluating a variable assignment with not assigned value',
+				'The evaluation is given by its variable which is not yet assigned'
+			);
+		}
 		const assignment = this.variable.getAssignment();
 		if (assignment) {
-			return this.variable.getInt();
+			return this.variable.toInt();
 		} else {
-			return this.variable.getInt() * -1;
+			return this.variable.toInt() * -1;
 		}
 	}
 
-	variableId(): number {
-		return this.variable.getInt();
+	toVar(): Var {
+		return this.variable.toInt();
 	}
 
 	toTeX(): string {
@@ -173,7 +184,7 @@ export default class VariableAssignment {
 			);
 		}
 		const truthValue: boolean = this.variable.getAssignment() as boolean;
-		const variableId = this.variable.getInt();
+		const variableId = this.variable.toInt();
 		let text: string;
 		if (truthValue) {
 			text = variableId.toString();

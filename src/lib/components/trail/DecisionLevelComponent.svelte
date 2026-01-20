@@ -1,6 +1,8 @@
 <script lang="ts">
-	import type { Trail } from '$lib/entities/Trail.svelte.ts';
 	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
+	import { decisionLevelToggledEventBus } from '$lib/events/events.ts';
+	import { differOf } from '$lib/states/trail-differ-sequence.svelte.ts';
+	import type { ComposedTrail } from '$lib/types/types.ts';
 	import BackjumpingComponent from '../assignment/BackjumpingComponent.svelte';
 	import BacktrackingComponent from '../assignment/BacktrackingComponent.svelte';
 	import ChildlessDecisionComponent from '../assignment/ChildlessDecisionComponent.svelte';
@@ -8,69 +10,77 @@
 	import UnitPropagationComponent from '../assignment/UnitPropagationComponent.svelte';
 
 	interface Props {
+		composedTrail: ComposedTrail;
 		decision: VariableAssignment;
-		expanded: boolean;
+		dlLevel: number;
 		propagations?: VariableAssignment[];
-		isLast?: boolean;
-		trail: Trail;
 		emitRevertUpToX: () => void;
-		detailsExpanded?: boolean;
-		showUPInfo?: boolean;
 	}
 
-	let {
-		decision,
-		expanded,
-		propagations = [],
-		isLast = false,
-		trail,
-		emitRevertUpToX,
-		detailsExpanded = false,
-		showUPInfo = false
-	}: Props = $props();
+	let { composedTrail, decision, dlLevel, propagations = [], emitRevertUpToX }: Props = $props();
+
+	let expandedDL = $derived(composedTrail.trail.isDLExpanded(dlLevel));
+
+	const toggleDL = (): void => {
+		composedTrail.trail.toggleDLExpanded(dlLevel);
+		decisionLevelToggledEventBus.emit();
+	};
 </script>
 
-{#if propagations?.length === 0}
-	<ChildlessDecisionComponent
-		assignment={decision}
-		{isLast}
-		fromPreviousTrail={trail.isAssignmentFromPreviousTrail(decision)}
-		{emitRevertUpToX}
-	/>
-{:else}
-	<DecisionComponent
-		{expanded}
-		assignment={decision}
-		{isLast}
-		emitToggle={() => (expanded = !expanded)}
-		fromPreviousTrail={trail.isAssignmentFromPreviousTrail(decision)}
-		{emitRevertUpToX}
-	/>
-	{#if expanded}
-		{#each propagations as assignment (assignment.variableId())}
-			{#if assignment.isK()}
-				<BacktrackingComponent
-					{assignment}
-					{isLast}
-					fromPreviousTrail={trail.isAssignmentFromPreviousTrail(assignment)}
-				/>
-			{:else if assignment.isBJ()}
-				<BackjumpingComponent
-					{assignment}
-					{isLast}
-					fromPreviousTrail={trail.isAssignmentFromPreviousTrail(assignment)}
-					{detailsExpanded}
-					{showUPInfo}
-				/>
-			{:else}
-				<UnitPropagationComponent
-					{assignment}
-					{isLast}
-					fromPreviousTrail={trail.isAssignmentFromPreviousTrail(assignment)}
-					{detailsExpanded}
-					{showUPInfo}
-				/>
-			{/if}
-		{/each}
+<decision-level>
+	{#if propagations?.length === 0}
+		<ChildlessDecisionComponent
+			assignment={decision}
+			isLast={composedTrail.isLast}
+			fromPreviousTrail={composedTrail.trail.indexOfAssignment(decision) <
+				differOf(composedTrail.id)}
+			{emitRevertUpToX}
+		/>
+	{:else}
+		<DecisionComponent
+			expanded={expandedDL}
+			assignment={decision}
+			isLast={composedTrail.isLast}
+			emitToggle={toggleDL}
+			fromPreviousTrail={composedTrail.trail.indexOfAssignment(decision) <
+				differOf(composedTrail.id)}
+			{emitRevertUpToX}
+		/>
+		{#if expandedDL}
+			{#each propagations as assignment (assignment.toVar())}
+				{#if assignment.isK()}
+					<BacktrackingComponent
+						{assignment}
+						isLast={composedTrail.isLast}
+						fromPreviousTrail={composedTrail.trail.indexOfAssignment(assignment) <
+							differOf(composedTrail.id)}
+					/>
+				{:else if assignment.isBJ()}
+					<BackjumpingComponent
+						{assignment}
+						isLast={composedTrail.isLast}
+						fromPreviousTrail={composedTrail.trail.indexOfAssignment(assignment) <
+							differOf(composedTrail.id)}
+						detailsExpanded={composedTrail.showCA || composedTrail.showUPs}
+					/>
+				{:else}
+					<UnitPropagationComponent
+						{assignment}
+						isLast={composedTrail.isLast}
+						fromPreviousTrail={composedTrail.trail.indexOfAssignment(assignment) <
+							differOf(composedTrail.id)}
+						detailsExpanded={composedTrail.showCA || composedTrail.showUPs}
+					/>
+				{/if}
+			{/each}
+		{/if}
 	{/if}
-{/if}
+</decision-level>
+
+<style>
+	decision-level {
+		display: flex;
+		flex-direction: row;
+		gap: var(--assignments-gap);
+	}
+</style>

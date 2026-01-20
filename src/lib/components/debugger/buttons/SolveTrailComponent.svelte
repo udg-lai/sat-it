@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { stateMachineEventBus, toggleTrailExpandEventBus } from '$lib/events/events.ts';
+	import { solverCommandEventBus, expandEditorTrailsEventBus } from '$lib/events/events.ts';
 	import { updateAssignment } from '$lib/states/assignment.svelte.ts';
 	import '../style.css';
 	import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
@@ -15,10 +15,10 @@
 	let finishTrailIcon = '/icons/Finish Trail.svg';
 
 	function completeTrail(): void {
-		getSolverMachine().disableStops();
+		getSolverMachine().disableStepDelay();
 		updateAssignment('automated');
-		stateMachineEventBus.emit('solve_trail');
-		toggleTrailExpandEventBus.emit(true);
+		solverCommandEventBus.emit('solve_trail');
+		expandEditorTrailsEventBus.emit(true);
 	}
 </script>
 

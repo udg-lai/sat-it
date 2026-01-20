@@ -1,6 +1,5 @@
-import { getProblemStore } from '$lib/states/problem.svelte.ts';
-import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
+import type { CRef, Lit, NeverFn, Var } from '$lib/types/types.ts';
 import { error } from '$lib/utils.ts';
 import { makeLeft, makeRight, type Either } from '../types/either.ts';
 import type Clause from './Clause.svelte.ts';
@@ -9,42 +8,46 @@ import { type UnitPropagation } from './VariableAssignment.ts';
 
 export type TrailState = 'sat' | 'unsat' | 'conflict' | 'running';
 
+// Represents the propagated literal and the reason cRef
 export interface UPContext {
-	clauseTag: number;
-	literal: number;
+	reasonCRef: CRef;
+	propagated: Lit;
 }
 
-export interface ConflictAnalysisContext {
+export interface ResolutionContext {
 	clause: Clause;
-	literal: number;
 }
 
 export class Trail {
 	private assignments: VariableAssignment[] = $state([]);
-	private decisionLevelBookmark: number[] = $state([-1]);
-	private followUPIndex: number = 0;
-	private decisionLevel: number = 0;
-	private conflictAnalysisCtx: Either<ConflictAnalysisContext, () => never>[] = $state([]); // this is just for representing the conflict analysis view
-	private upContext: Either<UPContext, () => never>[] = $derived.by(() => this._upContext());
-	private fullView: boolean = $state(false); // UI state for knowing whenever for that trail it was required to show more information
-	private learntClause: Clause | undefined = $state(undefined);
+	private bookmarkDLs: number[] = $state([-1]);
+	private dl: number = 0;
+	// Steps of resolution context of a trail. Empty spaces are represented as NeverFn
+	private resolutionCtx: Either<ResolutionContext, NeverFn>[] = $state([]);
+	// State that indicates if `this` was required to show the context information
+	private expandedContext: boolean = $state(false);
+	private lemma: Clause | undefined = $state(undefined);
 	private conflictiveClause: Clause | undefined = $state(undefined);
 	private state: TrailState = $state('running');
-	private trailHeight: number = $derived.by(() => this._computeHeight());
-	private readonly defaultTrailHeight: number = 56;
-	private readonly canvasHeight: number = 150;
+
+	// State expanded DLs. Indicates if `this` was required to show the propagations at each decision level
+	private expandedDLs: boolean[] = $state([true]);
 
 	copy(): Trail {
 		const newTrail = new Trail();
 		newTrail.assignments = this.assignments.map((assignment) => assignment.copy());
-		newTrail.decisionLevelBookmark = [...this.decisionLevelBookmark];
-		newTrail.followUPIndex = this.followUPIndex;
-		newTrail.decisionLevel = this.decisionLevel;
-		newTrail.learntClause = this.learntClause;
+		newTrail.bookmarkDLs = [...this.bookmarkDLs];
+		newTrail.dl = this.dl;
+		newTrail.lemma = this.lemma;
 		newTrail.conflictiveClause = this.conflictiveClause;
-		newTrail.conflictAnalysisCtx = [...this.conflictAnalysisCtx];
+		newTrail.resolutionCtx = [...this.resolutionCtx];
 		newTrail.state = this.state;
+		newTrail.expandedDLs = [...this.expandedDLs];
 		return newTrail;
+	}
+
+	isEmpty(): boolean {
+		return this.assignments.length === 0;
 	}
 
 	setState(state: TrailState): void {
@@ -55,45 +58,56 @@ export class Trail {
 		return this.state;
 	}
 
-	//This partial copy is needed as we don't want to have the same "conflictiveClause" and "learnedClause" as this function is meant for creating the new "latestTrail"
-	partialCopy(): Trail {
-		const newTrail = new Trail();
-		newTrail.assignments = this.assignments.map((assignment) => assignment.copy());
-		newTrail.decisionLevelBookmark = [...this.decisionLevelBookmark];
-		newTrail.followUPIndex = this.followUPIndex;
-		newTrail.decisionLevel = this.decisionLevel;
-		return newTrail;
+	cleanConflict(): void {
+		this.conflictiveClause = undefined;
+		this.resolutionCtx = [];
+		this.lemma = undefined;
+		this.state = 'running';
 	}
 
-	getDecisionLevel(): number {
-		return this.decisionLevel;
+	getDL(): number {
+		return this.dl;
 	}
 
 	getAssignments(): VariableAssignment[] {
 		return [...this.assignments];
 	}
 
-	getFollowUpAssignments(): VariableAssignment[] {
-		return this.assignments.slice(this.followUPIndex);
+	getFollowUpAssignments(trailStart: number): VariableAssignment[] {
+		return this.assignments.slice(trailStart);
 	}
 
-	pickLastAssignment(): VariableAssignment {
+	lastAssignment(): VariableAssignment {
+		if (this.isEmpty()) {
+			logFatal('Trail underflow', 'Trying to get the last assignment from an empty trail');
+		}
 		return this.assignments[this.assignments.length - 1];
 	}
 
+	lastDecision(): VariableAssignment {
+		if (this.isEmpty() || this.getDLMarks().length < 1) {
+			logFatal(
+				'Trail underflow',
+				'Trying to get the last decision from an empty trail or trail with no decisions'
+			);
+		}
+		const lastDLIndex = this.getDLMarks()[this.getDLMarks().length - 1];
+		return this.assignments[lastDLIndex];
+	}
+
 	getDecisions(): VariableAssignment[] {
-		return this.getDecisionLevelMarks().map((mark) => this.assignments[mark]);
+		return this.getDLMarks().map((mark) => this.assignments[mark]);
 	}
 
 	getInitialPropagations(): VariableAssignment[] {
-		return this.getPropagationsAt(0);
+		return this.getPropagationsAtLevel(0);
 	}
 
-	getPropagationsAt(level: number): VariableAssignment[] {
+	getPropagationsAtLevel(level: number): VariableAssignment[] {
 		return this._propagationsAt(level);
 	}
 
-	getAssignmentsAt(level: number): VariableAssignment[] {
+	getAssignmentsAtLevel(level: number): VariableAssignment[] {
 		if (level === 0) {
 			return this._propagationsAt(0);
 		} else {
@@ -101,21 +115,28 @@ export class Trail {
 		}
 	}
 
-	getVariableDecisionLevel(variable: number): number {
-		const index = this.assignments.findIndex((a) => a.getVariable().getInt() === variable);
-		if (index === -1) {
-			logFatal(`Variable ${variable} not found in trail`);
+	getVariableDL(varId: Var): number {
+		const varIdx = this.assignments.findIndex((a) => a.getVariable().toInt() === varId);
+		if (varIdx === -1) {
+			logFatal(`Variable ${varId} not found in trail`);
 		}
-
-		for (let level = this.decisionLevelBookmark.length - 1; level >= 0; level--) {
-			if (index >= this.decisionLevelBookmark[level]) {
-				return level;
+		for (let dl = this.bookmarkDLs.length - 1; dl >= 0; dl--) {
+			if (varIdx >= this.bookmarkDLs[dl]) {
+				return dl;
 			}
 		}
-		logFatal(`Unable to determine decision level for variable ${variable}`);
+		logFatal(`Unable to determine decision level for variable ${varId}`);
 	}
 
-	setConflictiveClause(clause: Clause): void {
+	indexOfAssignment(varAssignment: VariableAssignment): number {
+		const index = this.assignments.indexOf(varAssignment);
+		if (index === -1) {
+			logFatal('Assignment index error', 'The variable assignment does not belong to the trail.');
+		}
+		return index;
+	}
+
+	attachConflictiveClause(clause: Clause): void {
 		this.conflictiveClause = clause;
 	}
 
@@ -127,101 +148,198 @@ export class Trail {
 		return this.conflictiveClause;
 	}
 
-	clean(): void {
-		this._clean();
+	getResolutionContext(): Either<ResolutionContext, NeverFn>[] {
+		return this._makeResolutionContext();
 	}
 
-	getConflictAnalysisCtx(): Either<ConflictAnalysisContext, () => never>[] {
-		return this._makeConflictAnalysisCtx();
-	}
-
-	updateConflictAnalysisCtx(ctx: ConflictAnalysisContext | undefined = undefined): void {
-		const ca: Either<ConflictAnalysisContext, undefined> =
-			ctx === undefined ? makeRight(undefined) : makeLeft(ctx);
-		this.conflictAnalysisCtx = [ca, ...this.conflictAnalysisCtx];
+	updateResolutionContext(clause: Clause | undefined = undefined): void {
+		const ca: Either<ResolutionContext, NeverFn> =
+			clause === undefined ? makeRight(error) : makeLeft({ clause });
+		this.resolutionCtx = [ca, ...this.resolutionCtx];
 	}
 
 	hasPropagations(level: number): boolean {
-		return this.getPropagationsAt(level).length > 0;
+		return this.getPropagationsAtLevel(level).length > 0;
 	}
 
-	push(assignment: VariableAssignment) {
+	push(assignment: VariableAssignment): void {
 		this.assignments.push(assignment);
 		if (assignment.isD()) {
 			this.registerNewDecisionLevel();
 		}
 	}
 
-	pop(): VariableAssignment | undefined {
-		const returnValue = this.assignments.pop();
-		if (returnValue?.isD()) {
-			this.deleteCurrentDecisionLevel();
+	pop(): VariableAssignment {
+		if (this.isEmpty()) {
+			logFatal('Trail underflow', 'Trying to pop from an empty trail');
 		}
-		return returnValue;
+		const assignment = this.assignments.pop() as VariableAssignment;
+		if (assignment.isD()) {
+			this.shrinkOneDL();
+		}
+		return assignment;
 	}
 
-	getLearntClause(): Clause | undefined {
-		return this.learntClause;
+	size(): number {
+		return this.assignments.length;
 	}
 
-	learnClause(lemma: Clause): void {
-		this.learntClause = lemma;
+	getAttachedLemma(): Clause {
+		// Calling this function when no clause was learned is an error
+		if (!this.hasLemmaAttached())
+			logFatal('Getting learned clause', 'No clause was learned in this trail');
+		return this.lemma as Clause;
 	}
 
-	getFollowUpIndex(): number {
-		return this.followUPIndex;
+	hasLemmaAttached(): boolean {
+		return this.lemma !== undefined;
 	}
 
-	setFollowUpIndex(): void {
-		this.followUPIndex = this.assignments.length - 1;
+	attachLemma(clause: Clause): void {
+		if (!clause.isLemma()) {
+			logFatal('Attaching learned clause', 'Clause to be attached is not marked as learned');
+		}
+		this.lemma = clause;
 	}
 
-	isAssignmentFromPreviousTrail(assignment: VariableAssignment): boolean {
-		const assignmentIndex: number = this.assignments.indexOf(assignment);
-		return assignmentIndex < this.followUPIndex;
+	getUPContext(): Either<UPContext, NeverFn>[] {
+		return this._computeUPContext();
 	}
 
-	backjump(dl: number): void {
-		// Security check
-		if (dl < 0 || dl > this.decisionLevel) {
-			logFatal('Decision level error', 'The entered decision level is not valid');
+	getMarkOfDecisionLevel(dl: number): number {
+		// Returns from the mapping of decision levels to index, where it occurs in the list of assignments
+		if (!this.dlExists(dl)) {
+			logFatal(`Level ${dl} does not exist`);
+		}
+		const levels = this.getDLMarks();
+		return levels[dl - 1];
+	}
+
+	toggleDLExpanded(level: number): void {
+		if (level <= 0 || level > this.dl) {
+			logFatal(
+				`Runtime exception, toggleDLExpanded`,
+				`Decision level ${level} is out of bounds for trail DL ${this.dl}`
+			);
+		}
+		this.expandedDLs[level] = !this.expandedDLs[level];
+		this.expandedDLs = [...this.expandedDLs]; // trigger reactivity
+	}
+
+	isDLExpanded(level: number): boolean {
+		if (level <= 0 || level > this.dl) {
+			logFatal(
+				`Runtime exception, isDLExpanded`,
+				`Decision level ${level} is out of bounds for trail DL ${this.dl}`
+			);
+		}
+		return this.expandedDLs[level];
+	}
+
+	isDecision(pos: number): boolean {
+		if (pos < 0 || pos >= this.assignments.length) {
+			logFatal(
+				`Runtime exception, isDecision`,
+				`Position ${pos} is out of bounds for trail of size ${this.assignments.length}`
+			);
+		}
+		return this.assignments[pos].isD();
+	}
+
+	isFullyExpanded(): boolean {
+		return this.expandedDLs.slice(1).every((expanded) => expanded);
+	}
+
+	anyCollapsedDL(): boolean {
+		return this.expandedDLs.slice(1).some((expanded) => !expanded);
+	}
+
+	nCollapsedDLs(): number {
+		return this.expandedDLs.slice(1).filter((expanded) => !expanded).length;
+	}
+
+	collapseDls(p?: (dl: number) => boolean): void {
+		if (p === undefined) {
+			this.collapseAllDLs();
+			return;
+		}
+		this.expandedDLs = this.expandedDLs.map((_, index) => {
+			if (index === 0) {
+				return false;
+			} else {
+				return p(index);
+			}
+		});
+	}
+
+	collapseAllDLs(): void {
+		this.expandedDLs = this.expandedDLs.map(() => false);
+	}
+
+	expandDLs(p?: (dl: number) => boolean): void {
+		if (p === undefined) {
+			this.expandAllDLs();
+			return;
+		}
+		this.expandedDLs = this.expandedDLs.map((_, index) => {
+			if (index === 0) {
+				return true;
+			} else {
+				return p(index);
+			}
+		});
+	}
+
+	expandAllDLs(): void {
+		this.expandedDLs = this.expandedDLs.map(() => true);
+	}
+
+	dlOfPosition(pos: number): number {
+		if (pos < 0 || pos >= this.assignments.length) {
+			logFatal(
+				`Runtime exception, dlOfPosition`,
+				`Position ${pos} is out of bounds for trail of size ${this.assignments.length}`
+			);
 		}
 
-		// As the propagations are not meant to be deleted, the DL+1 is obtained
-		const targetIndex =
-			dl === 0 ? this.getMarkOfDecisionLevel(1) : this.getMarkOfDecisionLevel(dl + 1);
-		while (this.assignments.length > targetIndex) {
-			const last: VariableAssignment = this.pop() as VariableAssignment;
-			getProblemStore().variables.unassign(last.getVariable().getInt());
+		let level: number = this.bookmarkDLs.length - 1;
+		let found: boolean = false;
+		while (level >= 1 && !found) {
+			if (pos >= this.bookmarkDLs[level]) {
+				found = true;
+			} else {
+				level = level - 1;
+			}
 		}
-
-		// Set the new decision level parameters
-		this.decisionLevelBookmark = this.decisionLevelBookmark.slice(0, dl + 1);
-		this.decisionLevel = dl;
+		return level; // returns a range between 0 and dl
 	}
 
-	getUPContext(): Either<UPContext, never>[] {
-		return this.upContext;
+	nAssignments(): number {
+		return this.assignments.length;
 	}
 
-	toggleView(): void {
-		this.fullView = !this.fullView;
+	nDecisions(): number {
+		return this.getDLMarks().length;
 	}
 
-	setView(view: boolean): void {
-		this.fullView = view;
+	toggleContext(): void {
+		this.expandedContext = !this.expandedContext;
 	}
 
-	view(): boolean {
-		return this.fullView;
+	collapseContext(): void {
+		this.expandedContext = false;
 	}
 
-	setHeight(height: number): void {
-		this.trailHeight = height;
+	expandContext(): void {
+		this.expandedContext = true;
 	}
 
-	getHeight(): number {
-		return this.trailHeight;
+	showingContext(): boolean {
+		return this.expandedContext;
+	}
+
+	isContextExpanded(): boolean {
+		return this.expandedContext;
 	}
 
 	[Symbol.iterator]() {
@@ -246,7 +364,7 @@ export class Trail {
 		} else {
 			const startMark = this.getMarkOfDecisionLevel(level);
 			let endMark;
-			if (this.decisionLevelExists(level + 1)) {
+			if (this.dlExists(level + 1)) {
 				endMark = this.getMarkOfDecisionLevel(level + 1);
 			} else {
 				endMark = this.assignments.length;
@@ -258,7 +376,7 @@ export class Trail {
 	private _assignmentsAt(level: number): VariableAssignment[] {
 		const startMark = this.getMarkOfDecisionLevel(level);
 		let endMark;
-		if (this.decisionLevelExists(level + 1)) {
+		if (this.dlExists(level + 1)) {
 			endMark = this.getMarkOfDecisionLevel(level + 1);
 		} else {
 			endMark = this.assignments.length;
@@ -267,52 +385,46 @@ export class Trail {
 	}
 
 	private registerNewDecisionLevel(): void {
-		const nextDecisionLevel = this.decisionLevel + 1;
-		if (this.decisionLevelExists(nextDecisionLevel)) {
+		const nextDecisionLevel = this.dl + 1;
+		if (this.dlExists(nextDecisionLevel)) {
 			logFatal(`Trying to save an existing decision level ${nextDecisionLevel}`);
 		}
-		this.decisionLevel = nextDecisionLevel;
+		this.dl = nextDecisionLevel;
 		const decisionMark = this.assignments.length - 1;
-		this.decisionLevelBookmark.push(decisionMark);
+		this.bookmarkDLs.push(decisionMark);
+		this.expandedDLs = [...this.expandedDLs, true];
 	}
 
-	private deleteCurrentDecisionLevel(): void {
-		if (!this.decisionLevelExists(this.decisionLevel)) {
+	private shrinkOneDL(): void {
+		if (!this.dlExists(this.dl)) {
 			logFatal(`Trying to delete current decision level but was not saved`);
 		}
-		this.decisionLevelBookmark = this.decisionLevelBookmark.slice(0, -1);
-		this.decisionLevel = this.decisionLevel - 1;
+		this.bookmarkDLs = this.bookmarkDLs.slice(0, -1);
+		this.expandedDLs = this.expandedDLs.slice(0, -1);
+		this.dl = this.dl - 1;
 	}
 
-	private decisionLevelExists(level: number): boolean {
-		const levels = this.getDecisionLevelMarks();
+	private dlExists(level: number): boolean {
+		const levels = this.getDLMarks();
 		return level > 0 && level <= levels.length;
 	}
 
-	private getMarkOfDecisionLevel(level: number): number {
-		if (!this.decisionLevelExists(level)) {
-			logFatal(`Level ${level} does not exist`);
-		}
-		const levels = this.getDecisionLevelMarks();
-		return levels[level - 1];
-	}
-
-	private getDecisionLevelMarks(): number[] {
-		return this.decisionLevelBookmark.slice(1);
+	private getDLMarks(): number[] {
+		return this.bookmarkDLs.slice(1);
 	}
 
 	private hasDecisions(): boolean {
-		const levels = this.getDecisionLevelMarks();
+		const levels = this.getDLMarks();
 		return levels.length > 0;
 	}
 
-	private _upContext(): Either<UPContext, () => never>[] {
+	private _computeUPContext(): Either<UPContext, NeverFn>[] {
 		return this.assignments.map((a: VariableAssignment) => {
-			if (a.isUP() || a.isBJ()) {
+			if (a.wasPropagated()) {
 				const reason = a.getReason() as UnitPropagation;
 				return makeLeft({
-					clauseTag: reason.clauseTag,
-					literal: a.toInt()
+					reasonCRef: reason.cRef,
+					propagated: a.toLit()
 				});
 			} else {
 				return makeRight(error);
@@ -320,26 +432,18 @@ export class Trail {
 		});
 	}
 
-	private _clean(): void {
-		this.conflictiveClause = undefined;
-		this.conflictAnalysisCtx = [];
-		this.learntClause = undefined;
-		this.conflictiveClause = undefined;
-		this.state = 'running';
-	}
-
-	private _makeConflictAnalysisCtx(): Either<ConflictAnalysisContext, () => never>[] {
+	private _makeResolutionContext(): Either<ResolutionContext, NeverFn>[] {
 		const nAssignments: number = this.assignments.length;
-		const gaps: number = Math.max(nAssignments - this.conflictAnalysisCtx.length, 0);
-		const ctx: Either<ConflictAnalysisContext, () => never>[] = [
-			...Array<Either<ConflictAnalysisContext, () => never>>(gaps).fill(makeRight(error)),
-			...this.conflictAnalysisCtx,
+		const gaps: number = Math.max(nAssignments - this.resolutionCtx.length, 0);
+		const ctx: Either<ResolutionContext, NeverFn>[] = [
+			...Array<Either<ResolutionContext, NeverFn>>(gaps).fill(makeRight(error)),
+			...this.resolutionCtx,
 			this._makeConflictAnalysisCtxTail()
 		];
 		return ctx;
 	}
 
-	private _makeConflictAnalysisCtxTail(): Either<ConflictAnalysisContext, () => never> {
+	private _makeConflictAnalysisCtxTail(): Either<ResolutionContext, NeverFn> {
 		if (this.getConflictiveClause() === undefined) {
 			logFatal(
 				'Trail',
@@ -350,23 +454,5 @@ export class Trail {
 			clause: this.getConflictiveClause() as Clause,
 			literal: 0
 		});
-	}
-
-	private _computeHeight(): number {
-		let height = this.defaultTrailHeight;
-		if (this.fullView) {
-			const solver = getSolverMachine();
-			if (solver.identify() === 'bkt') {
-				if (this.conflictiveClause !== undefined) {
-					height += this.canvasHeight; // Extra height for conflictive clause
-				}
-			} else {
-				height += this.canvasHeight; // Extra height for ups
-				if (this.hasConflictiveClause()) {
-					height += this.canvasHeight; // Extra height for conflictive clause and conflict analysis
-				}
-			}
-		}
-		return height;
 	}
 }

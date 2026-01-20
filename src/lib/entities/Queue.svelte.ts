@@ -20,7 +20,7 @@ export class Queue<T> {
 		return head;
 	}
 
-	pick(): T {
+	element(): T {
 		if (this.isEmpty()) {
 			logError('Can not pick first element of an empty queue');
 		}
@@ -41,5 +41,11 @@ export class Queue<T> {
 
 	toArray(): T[] {
 		return [...this.items];
+	}
+
+	copy(): Queue<T> {
+		const newQueue = new Queue<T>();
+		newQueue.items = [...this.items];
+		return newQueue;
 	}
 }

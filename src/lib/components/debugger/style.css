@@ -35,9 +35,9 @@
 }
 
 .conflict-btn {
-	color: var(--conflict-color);
+	color: var(--boolean-constraint-propagation);
 	box-shadow: 0 2px 6px #8a3ffc55;
-	border-color: var(--conflict-color);
+	border-color: var(--boolean-constraint-propagation);
 	transition: border-color 0.3s ease;
 	border-style: dashed;
 }

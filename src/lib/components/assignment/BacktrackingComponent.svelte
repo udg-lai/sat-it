@@ -1,8 +1,10 @@
 <script lang="ts">
-	import MathTexComponent from '$lib/components/MathTexComponent.svelte';
 	import { onChrome } from '$lib/app.svelte.ts';
+	import MathTexComponent from '$lib/components/MathTexComponent.svelte';
 	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
-	import { getInspectedVariable } from '$lib/states/inspectedVariable.svelte.ts';
+	import { getFocusedAssignment } from '$lib/states/focused-assignment.svelte.ts';
+	import { fromJust, isJust, type Maybe } from '$lib/types/maybe.ts';
+	import type { Lit } from '$lib/types/types.ts';
 	import HeadTailComponent from '../HeadTailComponent.svelte';
 	import './style.css';
 
@@ -15,8 +17,15 @@
 
 	let { assignment, isLast = false, fromPreviousTrail = false, eventClick }: Props = $props();
 
-	const inspectedVariable: number = $derived(getInspectedVariable());
-	let inspecting: boolean = $derived(assignment.variableId() === inspectedVariable && isLast);
+	const inspectedLiteral: Maybe<Lit> = $derived(getFocusedAssignment());
+	let inspecting: boolean = $derived.by(() => {
+		if (!isJust(inspectedLiteral)) {
+			return false;
+		} else {
+			const literal: Lit = fromJust(inspectedLiteral);
+			return assignment.toLit() === literal && isLast;
+		}
+	});
 
 	function onClick() {
 		eventClick?.();
@@ -25,7 +34,7 @@
 	let chrome: boolean = $derived(onChrome());
 </script>
 
-<HeadTailComponent {inspecting}>
+<HeadTailComponent display={inspecting}>
 	<backtracking class:previous-assignment={fromPreviousTrail}>
 		<button
 			class="literal-style backtracking {chrome ? 'pad-chrome' : 'pad-others'}"
@@ -38,8 +47,8 @@
 
 <style>
 	.backtracking {
-		border-color: var(--conflict-color);
-		color: var(--conflict-color);
+		border-color: var(--boolean-constraint-propagation);
+		color: var(--boolean-constraint-propagation);
 		border-top: 1px transparent;
 		border-left: 1px transparent;
 		border-right: 1px transparent;
@@ -48,7 +57,7 @@
 	}
 
 	.previous-assignment {
-		color: color-mix(in srgb, var(--conflict-color) 60%, transparent);
+		color: color-mix(in srgb, var(--boolean-constraint-propagation) 60%, transparent);
 	}
 
 	:global(mover mo) {

@@ -1,3 +1,5 @@
+import type { CRef } from '$lib/types/types.ts';
+
 type UnSAT = {
 	type: 'UnSAT';
 	conflictClause: number;
@@ -25,8 +27,8 @@ export const isUnresolved = (e: AssignmentEval): e is Unresolved => {
 	return e.type === 'UNRESOLVED';
 };
 
-export const makeUnSAT = (conflictClause: number): UnSAT => {
-	return { type: 'UnSAT', conflictClause };
+export const makeUnSAT = (cRef: CRef): UnSAT => {
+	return { type: 'UnSAT', conflictClause: cRef };
 };
 
 export const makeSat = (): Sat => {

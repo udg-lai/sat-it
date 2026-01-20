@@ -27,7 +27,7 @@
 		size: 'lg'
 	};
 	const conflictProps = {
-		color: 'var(--conflict-color)',
+		color: 'var(--boolean-constraint-propagation)',
 		size: 'lg'
 	};
 	const trailProps = {

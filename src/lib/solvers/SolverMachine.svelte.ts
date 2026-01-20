@@ -1,32 +1,25 @@
-import { logFatal, logWarning } from '$lib/states/toasts.svelte.ts';
-import {
-	solverFinishedAutoMode,
-	solverStartedAutoMode,
-	stateMachineLifeCycleEventBus,
-	type StateMachineEvent
-} from '$lib/events/events.ts';
-import { tick } from 'svelte';
-import type { StateFun, StateInput, StateMachine } from './StateMachine.svelte.ts';
+import { solverSignalEventBus, type SolverCommand } from '$lib/events/events.ts';
+import { logFatal } from '$lib/states/toasts.svelte.ts';
+import type { State, StateFun, StateInput, StateMachine } from './StateMachine.svelte.ts';
 
 export type KnownSolver = 'bkt' | 'dpll' | 'cdcl';
 
 export interface SolverStateInterface<F extends StateFun, I extends StateInput> {
-	transition: (input: StateMachineEvent) => Promise<void>;
+	transitionByEvent: (input: SolverCommand) => Promise<void>;
+	transition: (input: I) => void;
 	getActiveStateId: () => number;
 	updateActiveStateId: (id: number) => void;
-	updateFromRecord: (record: Record<string, unknown>) => void;
-	isInAutoMode: () => boolean;
-	stopAutoMode: () => void;
-	completed: () => boolean;
-	onPreConflictState: () => boolean;
+	getActiveState: () => State<F, I>;
+	runningOnAutomatic: () => boolean;
+	stopRunningOnAutomatic: () => void;
 	onConflictState: () => boolean;
 	onInitialState: () => boolean;
 	onFinalState: () => boolean;
-	onConflictDetection: () => boolean;
+	onDetectingConflict: () => boolean;
 	identify: () => KnownSolver;
 	getStateMachine: () => StateMachine<F, I>;
-	updateStopTimeout: (ms: number) => void;
-	disableStops(): void;
+	updateStepDelayMS: (ms: number) => void;
+	disableStepDelay(): void;
 	stop(): void;
 }
 
@@ -37,29 +30,25 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 	private runningOnAuto: boolean = $state(false);
 	private forcedStop: boolean = $state(false);
 	private solverId: KnownSolver = $state('bkt');
-	private stopTimeoutMS: number = 0;
+	private stepDelayMS: number = 0;
 
-	constructor(stateMachine: StateMachine<F, I>, solverId: KnownSolver, stopTimeoutMS: number = 0) {
+	constructor(stateMachine: StateMachine<F, I>, solverId: KnownSolver, stepDelayMS: number = 0) {
 		this.stateMachine = stateMachine;
 		this.runningOnAuto = false;
 		this.forcedStop = false;
 		this.solverId = solverId;
-		this.stopTimeoutMS = stopTimeoutMS;
+		this.stepDelayMS = stepDelayMS;
 	}
 
-	abstract getRecord(): Record<string, unknown>;
-
-	abstract updateFromRecord(record: Record<string, unknown> | undefined): void;
-
-	updateStopTimeout(ms: number): void {
-		this.stopTimeoutMS = Math.max(0, ms);
+	updateStepDelayMS(delayMS: number): void {
+		this.stepDelayMS = Math.max(0, delayMS);
 	}
 
-	disableStops(): void {
-		this.updateStopTimeout(0);
+	disableStepDelay(): void {
+		this.updateStepDelayMS(0);
 	}
 
-	isInAutoMode(): boolean {
+	runningOnAutomatic(): boolean {
 		return this.runningOnAuto;
 	}
 
@@ -75,16 +64,19 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 		this.stateMachine.setActiveId(id);
 	}
 
-	completed(): boolean {
-		return this.stateMachine.onFinalState();
+	getActiveState(): State<F, I> {
+		return this.stateMachine.getActiveState();
 	}
 
-	onPreConflictState(): boolean {
-		return this.stateMachine.onPreConflictState();
-	}
+	// Every node in the UP + conflict detection block except the conflict state
+	abstract onDetectingConflict(): boolean;
 
 	onConflictState(): boolean {
 		return this.stateMachine.onConflictState();
+	}
+
+	onDecisionState(): boolean {
+		return this.stateMachine.onDecisionState();
 	}
 
 	onUnsatState(): boolean {
@@ -103,15 +95,13 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 		return this.stateMachine.onInitialState();
 	}
 
-	abstract onConflictDetection(): boolean;
-
 	stop(): void {
-		if (this.isInAutoMode()) {
-			this.stopAutoMode();
+		if (this.runningOnAutomatic()) {
+			this.stopRunningOnAutomatic();
 		}
 	}
 
-	stopAutoMode(): void {
+	stopRunningOnAutomatic(): void {
 		this.forcedStop = true;
 	}
 
@@ -119,78 +109,94 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 		return this.solverId;
 	}
 
-	async transition(input: StateMachineEvent): Promise<void> {
+	transition(input: I): void {
+		this.stateMachine.transition(input);
+	}
+
+	async transitionByEvent(input: SolverCommand): Promise<void> {
 		if (input === 'step') {
 			this._step();
 		} else if (input === 'nextVariable') {
-			await this.solveToNextVariableStepByStep();
+			await this.traverseCurrentOccurrenceListStepByStep();
 		} else if (input === 'finishCD') {
 			await this.solveCDStepByStep();
 		} else if (input === 'solve_trail') {
 			await this.solveTrailStepByStep();
 		} else if (input === 'automatic_steps' || input === 'solve_all') {
 			await this.solveAllStepByStep();
+		} else if (input === 'nextDecision') {
+			await this.propagate();
+		} else if (input === 'branching') {
+			await this.branching();
 		} else {
-			logFatal('Non expected input in Solver State Machine');
+			logFatal('Transition By Event Error', `Unknown event ${input} for solver machine`);
 		}
 	}
 
 	protected abstract step(): void;
 
 	private _step(): void {
-		stateMachineLifeCycleEventBus.emit('begin-step');
+		solverSignalEventBus.emit('begin-step');
 		this.step();
-		stateMachineLifeCycleEventBus.emit('finish-step');
+		solverSignalEventBus.emit('finish-step');
 	}
 
-	protected async stepByStep(continueCond: () => boolean): Promise<void> {
-		if (!this.assertPreAuto()) {
+	protected async automaticStepByStep(continueCond: () => boolean): Promise<void> {
+		// Once solver started running on automatic mode it should finish.
+		// So, it cannot be interrupted by another automatic run.
+		if (this.runningOnAutomatic()) {
+			console.warn('Solver is already running in automatic mode.');
 			return;
 		}
-		this._preStepByStep();
-		const times: number[] = [];
-		while (continueCond() && !this.forcedStop) {
-			this._step();
-			if (this.stopTimeoutMS > 0) {
-				await tick();
-				await new Promise((r) => times.push(setTimeout(r, this.stopTimeoutMS)));
+		this._preAutomaticStepByStep();
+		try {
+			// Transition the state machine while the continue condition is true
+			while (!this.forcedStop && !this.onFinalState() && continueCond()) {
+				this._step();
+				if (this.stepDelayMS > 0) {
+					const promise = new Promise<void>((resolve) => setTimeout(resolve, this.stepDelayMS));
+					await promise;
+				}
 			}
+		} finally {
+			this._postAutomaticStepByStep();
 		}
-		times.forEach(clearTimeout);
-		this._postStepByStep();
 	}
 
-	private _preStepByStep(): void {
+	private _preAutomaticStepByStep(): void {
 		this.setFlagsPreAuto();
-		this.notifyRunningOnAuto();
-		stateMachineLifeCycleEventBus.emit('begin-step-by-step');
+		solverSignalEventBus.emit('begin-step-by-step');
 	}
 
-	private _postStepByStep(): void {
+	private _postAutomaticStepByStep(): void {
 		this.setFlagsPostAuto();
-		this.notifyFinishRunningOnAuto();
-		stateMachineLifeCycleEventBus.emit('finish-step-by-step');
-	}
-
-	private notifyRunningOnAuto(): void {
-		solverStartedAutoMode.emit();
-	}
-
-	private notifyFinishRunningOnAuto(): void {
-		solverFinishedAutoMode.emit();
+		solverSignalEventBus.emit('finish-step-by-step');
 	}
 
 	protected async solveAllStepByStep(): Promise<void> {
-		this.stepByStep(() => !this.completed());
+		await this.automaticStepByStep(() => !this.onFinalState());
 	}
 
 	protected async solveTrailStepByStep(): Promise<void> {
-		this.stepByStep(() => !this.onConflictState() && !this.completed());
+		await this.automaticStepByStep(() => !this.onConflictState() && !this.onFinalState());
 	}
 
-	protected abstract solveToNextVariableStepByStep(): Promise<void>;
+	protected abstract traverseCurrentOccurrenceListStepByStep(): Promise<void>;
 
 	protected abstract solveCDStepByStep(): Promise<void>;
+
+	protected async branching(): Promise<void> {
+		if (!this.onDecisionState()) {
+			logFatal('Branching Error', 'Not in a decision state to perform branching');
+		}
+		this._step(); // Execute decision
+		await this.propagate(); // Propagate until next decision or final state
+	}
+
+	// Propagate until next decision or final state
+	protected async propagate(): Promise<void> {
+		await this.automaticStepByStep(() => !this.onDecisionState() && !this.onFinalState());
+	}
 
 	private setFlagsPreAuto(): void {
 		this.forcedStop = false;
@@ -199,19 +205,5 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 
 	private setFlagsPostAuto(): void {
 		this.runningOnAuto = false;
-	}
-
-	private assertPreAuto(): boolean {
-		let assert = true;
-		if (this.isInAutoMode()) {
-			logWarning('Solver machine', 'Solver is already running on auto');
-			assert = false;
-		}
-		if (this.stateMachine.onFinalState()) {
-			this.runningOnAuto = false;
-			logWarning('Solver machine', 'Solver is already completed');
-			assert = false;
-		}
-		return assert;
 	}
 }

@@ -11,7 +11,7 @@
 
 <div
 	class="literal-component"
-	class:undefined={!literal.isAssigned()}
+	class:undefined={!literal.hasTruthValue()}
 	class:true={literal.isTrue()}
 	class:false={literal.isFalse()}
 >
