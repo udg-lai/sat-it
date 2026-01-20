@@ -3,8 +3,9 @@
 	import '../style.css';
 	import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 	import ImageRender from '$lib/components/tools/ImageRender.svelte';
+	import { asset } from '$app/paths';
 
-	let upnIcon = '/icons/UPn.svg';
+	let upnIcon = asset('/icons/UPn.svg');
 
 	function finishConflictDetection(): void {
 		getSolverMachine().disableStepDelay();

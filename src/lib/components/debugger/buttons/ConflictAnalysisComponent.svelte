@@ -5,7 +5,9 @@
 	import '../style.css';
 	import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 
-	let backtrackingIcon = '/icons/Backtracking.svg';
+	import { asset } from '$app/paths';
+
+	let backtrackingIcon = asset('/icons/Backtracking.svg');
 
 	function finishConflictAnalysis(): void {
 		getSolverMachine().disableStepDelay();
