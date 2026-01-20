@@ -25,6 +25,10 @@ export default class Problem {
 		return this.occurrencesTable.getTable();
 	}
 
+	getWatchTableMapping(): WatchTable {
+		return this.watchTable;
+	}
+
 	getVariablePool(): VariablePool {
 		return this.variables;
 	}

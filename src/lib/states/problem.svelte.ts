@@ -10,6 +10,8 @@ export const getClausePool = () => getProblemStore().getClausePool();
 
 export const getOccurrencesTableMapping = () => getProblemStore().getOccurrencesTableMapping();
 
+export const getWatchTableMapping = () => getProblemStore().getWatchTableMapping();
+
 export const getVariablePool = () => getProblemStore().getVariablePool();
 
 export const syncProblemWithInstance = (instance: DimacsInstance) => {
