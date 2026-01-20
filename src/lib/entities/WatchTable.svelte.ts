@@ -6,6 +6,7 @@ import type Literal from './Literal.svelte.ts';
 
 export interface Watch {
 	cRef: CRef;
+	// For the moment the blocker won't be used. (jordi said this)
 	blocker: Literal; // One of the two watched literals
 }
 

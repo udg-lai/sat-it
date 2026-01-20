@@ -2,7 +2,7 @@ import { solverSignalEventBus, type SolverCommand } from '$lib/events/events.ts'
 import { logFatal } from '$lib/states/toasts.svelte.ts';
 import type { State, StateFun, StateInput, StateMachine } from './StateMachine.svelte.ts';
 
-export type KnownSolver = 'bkt' | 'dpll' | 'cdcl';
+export type KnownSolver = 'bkt' | 'dpll' | 'cdcl' | 'twatch';
 
 export interface SolverStateInterface<F extends StateFun, I extends StateInput> {
 	transitionByEvent: (input: SolverCommand) => Promise<void>;
