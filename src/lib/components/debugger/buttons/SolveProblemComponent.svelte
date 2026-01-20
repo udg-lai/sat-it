@@ -3,6 +3,7 @@
 	import { updateAssignment } from '$lib/states/assignment.svelte.ts';
 	import ImageRender from '$lib/components/tools/ImageRender.svelte';
 	import '../style.css';
+	import { asset } from '$app/paths';
 
 	interface Props {
 		finished?: boolean;
@@ -11,7 +12,7 @@
 
 	let { finished = false, backtrackingState = false }: Props = $props();
 
-	let solveIcon = '/icons/Solve.svg';
+	let solveIcon = asset('/icons/Solve.svg');
 
 	function solveProblem(): void {
 		updateAssignment('automated');

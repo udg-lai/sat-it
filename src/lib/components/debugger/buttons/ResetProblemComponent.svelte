@@ -4,9 +4,10 @@
 	import { Modal } from 'flowbite-svelte';
 	import { ExclamationCircleOutline } from 'flowbite-svelte-icons';
 	import '../style.css';
+	import { asset } from '$app/paths';
 
 	let modalOpened: boolean = $state(false);
-	let resetIcon = '/icons/Reset.svg';
+	let resetIcon = asset('/icons/Reset.svg');
 
 	function resetProblem(): void {
 		resetProblemEventBus.emit();

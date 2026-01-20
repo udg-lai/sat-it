@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { asset } from '$app/paths';
 	import ImageRender from '$lib/components/tools/ImageRender.svelte';
 	import { ctrlZEventBus } from '$lib/events/events.ts';
 
@@ -7,7 +8,7 @@
 	}
 
 	let { btnUndoActive = true }: Props = $props();
-	let undoIcon = '/icons/User Undo.svg';
+	let undoIcon = asset('/icons/User Undo.svg');
 </script>
 
 <button

@@ -3,8 +3,9 @@
 	import '../style.css';
 	import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 	import ImageRender from '$lib/components/tools/ImageRender.svelte';
+	import { asset } from '$app/paths';
 
-	let nextClauseIcon = '/icons/Inspect All Clauses.svg';
+	let nextClauseIcon = asset('/icons/Inspect All Clauses.svg');
 
 	function goToNextVariable(): void {
 		getSolverMachine().disableStepDelay();

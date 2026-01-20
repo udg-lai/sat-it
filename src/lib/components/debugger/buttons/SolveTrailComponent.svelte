@@ -4,6 +4,7 @@
 	import '../style.css';
 	import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 	import ImageRender from '$lib/components/tools/ImageRender.svelte';
+	import { asset } from '$app/paths';
 
 	interface Props {
 		finished?: boolean;
@@ -12,7 +13,7 @@
 
 	let { finished = false, backtrackingState = false }: Props = $props();
 
-	let finishTrailIcon = '/icons/Finish Trail.svg';
+	let finishTrailIcon = asset('/icons/Finish Trail.svg');
 
 	function completeTrail(): void {
 		getSolverMachine().disableStepDelay();

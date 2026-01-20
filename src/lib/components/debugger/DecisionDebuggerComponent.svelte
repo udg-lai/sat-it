@@ -8,6 +8,7 @@
 	import type { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
 	import ImageRender from '../tools/ImageRender.svelte';
 	import { Lit } from '$lib/types/types.ts';
+	import { asset } from '$app/paths';
 
 	interface Props {
 		onConflict: boolean;
@@ -100,7 +101,7 @@
 		}
 	};
 
-	let decisionIcon = './icons/Decision.svg';
+	let decisionIcon = asset('/icons/Decision.svg');
 </script>
 
 <decision-debugger>
