@@ -39,7 +39,10 @@
 <occurrence-list>
 	{#each clauses as maybeClause, i (i)}
 		<div class="occurrence-list-item">
-			<HeadTailComponent display={getCurrentOccurrences().getPointer() + 1 === i} verticalList={true}>
+			<HeadTailComponent
+				display={getCurrentOccurrences().getPointer() + 1 === i}
+				verticalList={true}
+			>
 				<div class="enumerate" class:inspecting={getCurrentOccurrences().getPointer() + 1 === i}>
 					{#if isJust(maybeClause)}
 						<span>
