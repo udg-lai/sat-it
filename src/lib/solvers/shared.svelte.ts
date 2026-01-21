@@ -129,7 +129,10 @@ const doAssignment = (varId: Var, assignment: Assignment): void => {
 	updateClausesLeft(getTrails().length);
 	if (assignment !== undefined) {
 		// i.e., assignment is either true or false
-		handleBreakpoints(Literal.toLit(varId, assignment));
+		// Here assignment is inverted as when creating the literal the second parameter indicates if it has hat or not
+		// 	thus indicating that if assignment is true it won't have, true otherwise.
+		const hasHat: boolean = !assignment 
+		handleBreakpoints(Literal.toLit(varId, hasHat));
 	}
 };
 

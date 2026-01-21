@@ -14,6 +14,7 @@ export const addBreakpoint = (breakpoint: LiteralBreakpoint): void => {
 	} else {
 		logError('Unsupported breakpoint type:', breakpoint.type);
 	}
+	console.log(breakpoint)
 };
 
 export const isBreakpoint = (literal: number): boolean => {
