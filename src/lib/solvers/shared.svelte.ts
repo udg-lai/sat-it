@@ -131,7 +131,7 @@ const doAssignment = (varId: Var, assignment: Assignment): void => {
 		// i.e., assignment is either true or false
 		// Here assignment is inverted as when creating the literal the second parameter indicates if it has hat or not
 		// 	thus indicating that if assignment is true it won't have, true otherwise.
-		const hasHat: boolean = !assignment 
+		const hasHat: boolean = !assignment;
 		handleBreakpoints(Literal.toLit(varId, hasHat));
 	}
 };
