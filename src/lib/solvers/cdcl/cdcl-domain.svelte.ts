@@ -20,17 +20,15 @@ import {
 	unitPropagation as solverUnitPropagation
 } from '$lib/solvers/shared.svelte.ts';
 import { getConflictAnalysis, setConflictAnalysis } from '$lib/states/conflict-anlysis.svelte.ts';
-import { getOccurrenceList, updateOccurrenceList } from '$lib/states/occurrence-list.svelte.ts';
 import {
 	getClausePool,
+	getOccurrenceList,
+	getOccurrenceListQueue,
 	getOccurrencesTableMapping,
 	getProblemStore,
-	getVariablePool
+	getVariablePool,
+	wipeOccurrences
 } from '$lib/states/problem.svelte.ts';
-import {
-	getOccurrenceListQueue,
-	wipeOccurrenceListQueue
-} from '$lib/states/queue-occurrence-lists.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
 import { getLatestTrail, stackTrail } from '$lib/states/trails.svelte.ts';
 import type { CRef, List, Lit } from '$lib/types/types.ts';
@@ -145,7 +143,7 @@ export type CDCL_UNSTACK_OCCURRENCE_LIST_FUN = () => void;
 
 export const dequeueOccurrenceList: CDCL_UNSTACK_OCCURRENCE_LIST_FUN = () => {
 	getOccurrenceListQueue().dequeue();
-	updateOccurrenceList(new OccurrenceList());
+	getProblemStore().updateInspectingOccurrences(new OccurrenceList());
 };
 
 export type CDCL_UNARY_EMPTY_CLAUSES_DETECTION_FUN = () => Set<CRef>;
@@ -159,7 +157,7 @@ export type CDCL_PICK_OCCURRENCE_LIST_FUN = () => void;
 
 export const pickPendingOccurrenceList: CDCL_PICK_OCCURRENCE_LIST_FUN = () => {
 	const occurrenceList: OccurrenceList = getOccurrenceListQueue().element();
-	updateOccurrenceList(occurrenceList);
+	getProblemStore().updateInspectingOccurrences(occurrenceList);
 };
 
 export type CDCL_TRAVERSED_OCCURRENCE_LIST_FUN = (occurrenceList: OccurrenceList) => boolean;
@@ -230,9 +228,7 @@ export type CDCL_WIPE_OCCURRENCE_QUEUE_FUN = () => void;
 
 export const wipeOccurrenceQueue: CDCL_WIPE_OCCURRENCE_QUEUE_FUN = () => {
 	// Drop all the occurrences lists inside the solver's queue
-	wipeOccurrenceListQueue();
-	// Updates the view with and empty occurrence list
-	updateOccurrenceList(new OccurrenceList());
+	wipeOccurrences()
 };
 
 // ** additional cdcl function **

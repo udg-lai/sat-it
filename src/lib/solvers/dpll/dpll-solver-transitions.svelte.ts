@@ -5,9 +5,7 @@ import {
 	conflictDetectedEventBus,
 	visitingComplementaryOccEventBus
 } from '$lib/events/events.ts';
-import { getOccurrenceList, updateOccurrenceList } from '$lib/states/occurrence-list.svelte.ts';
-import { getClausePool } from '$lib/states/problem.svelte.ts';
-import { getOccurrenceListQueue } from '$lib/states/queue-occurrence-lists.svelte.ts';
+import { getClausePool, getOccurrenceList, getOccurrenceListQueue, getProblemStore } from '$lib/states/problem.svelte.ts';
 import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
 import { getLatestTrail } from '$lib/states/trails.svelte.ts';
@@ -37,10 +35,10 @@ import type {
 	DPLL_QUEUE_OCCURRENCE_LIST_INPUT,
 	DPLL_TRAVERSED_OCCURRENCE_LIST_FUN,
 	DPLL_TRAVERSED_OCCURRENCE_LIST_INPUT,
-	DPLL_UNIT_CLAUSE_FUN,
-	DPLL_UNIT_CLAUSE_INPUT,
 	DPLL_UNARY_EMPTY_CLAUSES_DETECTION_FUN,
 	DPLL_UNARY_EMPTY_CLAUSES_DETECTION_INPUT,
+	DPLL_UNIT_CLAUSE_FUN,
+	DPLL_UNIT_CLAUSE_INPUT,
 	DPLL_UNIT_PROPAGATION_FUN,
 	DPLL_UNIT_PROPAGATION_INPUT,
 	DPLL_UNSTACK_CLAUSE_SET_INPUT,
@@ -71,7 +69,7 @@ export const conflictDetectionBlock = (): void => {
 		if (pendingOcc) {
 			pickOccurrenceListTransition();
 		} else {
-			updateOccurrenceList(new OccurrenceList());
+			getProblemStore().updateInspectingOccurrences(new OccurrenceList());
 			allVariablesAssignedTransition();
 		}
 	} else {

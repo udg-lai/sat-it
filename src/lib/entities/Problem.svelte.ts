@@ -1,9 +1,13 @@
 import type { DimacsInstance } from '$lib/instances/dimacs-instance.interface.ts';
+import { focusOnAssignment, wipeFocusAssignment } from '$lib/states/focused-assignment.svelte.ts';
 import { logError } from '$lib/states/toasts.svelte.ts';
+import { fromJust, isJust, type Maybe } from '$lib/types/maybe.ts';
 import type { CRef, Lit } from '$lib/types/types.ts';
 import type Clause from './Clause.svelte.ts';
 import ClausePool from './ClausePool.svelte.ts';
+import OccurrenceList from './OccurrenceList.svelte.ts';
 import OccurrenceTable from './OccurrenceTable.svelte.ts';
+import { Queue } from './Queue.svelte.ts';
 import { VariablePool } from './VariablePool.svelte.ts';
 import WatchTable from './WatchTable.svelte.ts';
 
@@ -12,6 +16,9 @@ export default class Problem {
 	private clauses: ClausePool = $state(new ClausePool());
 	private occurrencesTable: OccurrenceTable = $state(new OccurrenceTable());
 	private watchTable: WatchTable = $state(new WatchTable());
+
+	private occurrenceList: OccurrenceList = $state(new OccurrenceList());
+	private occurrenceQueue: Queue<OccurrenceList> = $state(new Queue<OccurrenceList>())
 
 	constructor(instance: DimacsInstance | undefined = undefined) {
 		if (instance !== undefined) this.syncWithDimacsInstance(instance);
@@ -29,12 +36,21 @@ export default class Problem {
 		return this.variables;
 	}
 
+	getOccurrenceList(): OccurrenceList {
+		return this.occurrenceList;
+	}
+
+	getOccurrenceListQueue(): Queue<OccurrenceList> {
+		return this.occurrenceQueue;	
+	}
+
 	syncWithDimacsInstance({ summary }: DimacsInstance): void {
 		const { varCount, claims } = summary;
 		this.variables = new VariablePool(varCount);
 		this.clauses = ClausePool.buildFrom(claims, this.variables);
 		this.occurrencesTable = new OccurrenceTable(this.clauses.getClauses());
 		this.watchTable = new WatchTable(this.clauses.getClauses());
+		this.wipeOccurrences();
 	}
 
 	forgetLearnedClauses() {
@@ -55,5 +71,18 @@ export default class Problem {
 		const cRef: CRef = this.clauses.addClause(clause);
 		this.occurrencesTable.addOccurrences(clause);
 		return cRef;
+	}
+
+	updateInspectingOccurrences(newOL: OccurrenceList): void {
+		this.occurrenceList = newOL;
+		const literal: Maybe<Lit> = this.occurrenceList.getLiteral();
+		//The value is * -1 as the trail contains the complementary of the literal whose clauses are being checked
+		if (isJust(literal)) focusOnAssignment(fromJust(literal) * -1);
+		else wipeFocusAssignment();
+	}
+
+	wipeOccurrences(): void {
+		this.occurrenceList = new OccurrenceList();
+		this.occurrenceQueue = new Queue<OccurrenceList>()
 	}
 }

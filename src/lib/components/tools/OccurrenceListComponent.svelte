@@ -6,8 +6,7 @@
 		isUnresolvedEval,
 		isUnsatisfiedEval
 	} from '$lib/entities/Clause.svelte.ts';
-	import { getOccurrenceList } from '$lib/states/occurrence-list.svelte.ts';
-	import { getClausePool } from '$lib/states/problem.svelte.ts';
+	import { getClausePool, getOccurrenceList } from '$lib/states/problem.svelte.ts';
 	import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 	import { isJust, makeJust, makeNothing, type Maybe } from '$lib/types/maybe.ts';
 	import type { CRef } from '$lib/types/types.ts';

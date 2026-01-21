@@ -5,8 +5,7 @@ import {
 	conflictDetectedEventBus,
 	visitingComplementaryOccEventBus
 } from '$lib/events/events.ts';
-import { getOccurrenceList } from '$lib/states/occurrence-list.svelte.ts';
-import { getClausePool } from '$lib/states/problem.svelte.ts';
+import { getClausePool, getOccurrenceList } from '$lib/states/problem.svelte.ts';
 import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
 import { getLatestTrail } from '$lib/states/trails.svelte.ts';

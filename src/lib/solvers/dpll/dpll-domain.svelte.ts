@@ -12,16 +12,15 @@ import {
 	unaryEmptyClauseDetection as solverUnitClauseDetection,
 	unitPropagation as solverUnitPropagation
 } from '$lib/solvers/shared.svelte.ts';
-import { getOccurrenceList, updateOccurrenceList } from '$lib/states/occurrence-list.svelte.ts';
 import {
 	getClausePool,
-	getOccurrencesTableMapping,
-	getVariablePool
-} from '$lib/states/problem.svelte.ts';
-import {
+	getOccurrenceList,
 	getOccurrenceListQueue,
-	wipeOccurrenceListQueue
-} from '$lib/states/queue-occurrence-lists.svelte.ts';
+	getOccurrencesTableMapping,
+	getProblemStore,
+	getVariablePool,
+	wipeOccurrences
+} from '$lib/states/problem.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
 import type { CRef, Lit } from '$lib/types/types.ts';
 
@@ -112,7 +111,7 @@ export type DPLL_UNSTACK_OCCURRENCE_LIST_FUN = () => void;
 
 export const unstackOccurrenceList: DPLL_UNSTACK_OCCURRENCE_LIST_FUN = () => {
 	getOccurrenceListQueue().dequeue();
-	updateOccurrenceList(new OccurrenceList());
+	getProblemStore().updateInspectingOccurrences(new OccurrenceList());
 };
 
 export type DPLL_UNARY_EMPTY_CLAUSES_DETECTION_FUN = () => Set<CRef>;
@@ -126,7 +125,7 @@ export type DPLL_PICK_OCCURRENCE_LIST_FUN = () => void;
 
 export const pickPendingOccurrenceList: DPLL_PICK_OCCURRENCE_LIST_FUN = () => {
 	const occurrenceList: OccurrenceList = getOccurrenceListQueue().element();
-	updateOccurrenceList(occurrenceList);
+	getProblemStore().updateInspectingOccurrences(occurrenceList);
 };
 
 export type DPLL_TRAVERSED_OCCURRENCE_LIST_FUN = (occurrenceList: OccurrenceList) => boolean;
@@ -201,9 +200,7 @@ export type DPLL_WIPE_OCCURRENCE_QUEUE_FUN = () => void;
 
 export const wipeOccurrenceQueue: DPLL_WIPE_OCCURRENCE_QUEUE_FUN = () => {
 	// Drop all the occurrences lists inside the solver's queue
-	wipeOccurrenceListQueue();
-	// Updates the view with and empty occurrence list
-	updateOccurrenceList(new OccurrenceList());
+	wipeOccurrences();
 };
 
 export type DPLL_FUN =

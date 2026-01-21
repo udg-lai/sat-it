@@ -10,10 +10,11 @@ import {
 	complementaryOccurrences as solverComplementaryOccurrences,
 	decide as solverDecide
 } from '$lib/solvers/shared.svelte.ts';
-import { getOccurrenceList, updateOccurrenceList } from '$lib/states/occurrence-list.svelte.ts';
 import {
 	getClausePool,
+	getOccurrenceList,
 	getOccurrencesTableMapping,
+	getProblemStore,
 	getVariablePool
 } from '$lib/states/problem.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
@@ -88,13 +89,13 @@ export type BKT_QUEUE_OCCURRENCE_LIST_FUN = (occurrenceList: OccurrenceList) => 
 export const queueOccurrenceList: BKT_QUEUE_OCCURRENCE_LIST_FUN = (
 	occurrenceList: OccurrenceList
 ) => {
-	updateOccurrenceList(occurrenceList);
+	getProblemStore().updateInspectingOccurrences(occurrenceList);
 };
 
 export type BKT_DEQUEUE_OCCURRENCE_LIST_FUN = () => void;
 
 export const dequeueOccurrenceList: BKT_DEQUEUE_OCCURRENCE_LIST_FUN = () => {
-	updateOccurrenceList(new OccurrenceList());
+	getProblemStore().updateInspectingOccurrences(new OccurrenceList());
 };
 
 export type BKT_TRAVERSED_OCCURRENCE_LIST_FUN = (occurrenceList: OccurrenceList) => boolean;

@@ -11,9 +11,7 @@ import {
 } from '$lib/events/events.ts';
 import { getConflictAnalysis } from '$lib/states/conflict-anlysis.svelte.ts';
 import { focusOnAssignment, wipeFocusAssignment } from '$lib/states/focused-assignment.svelte.ts';
-import { getOccurrenceList, updateOccurrenceList } from '$lib/states/occurrence-list.svelte.ts';
-import { getClausePool } from '$lib/states/problem.svelte.ts';
-import { getOccurrenceListQueue } from '$lib/states/queue-occurrence-lists.svelte.ts';
+import { getClausePool, getOccurrenceList, getOccurrenceListQueue, getProblemStore } from '$lib/states/problem.svelte.ts';
 import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 import { increaseNoConflicts } from '$lib/states/statistics.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
@@ -169,7 +167,7 @@ export const conflictDetectionBlock = (): void => {
 		if (pendingOcc) {
 			pickOccurrenceListTransition();
 		} else {
-			updateOccurrenceList(new OccurrenceList());
+			getProblemStore().updateInspectingOccurrences(new OccurrenceList());
 			allVariablesAssignedTransition();
 		}
 	} else {
