@@ -22,7 +22,7 @@ import {
 import { getConflictAnalysis, setConflictAnalysis } from '$lib/states/conflict-anlysis.svelte.ts';
 import {
 	getClausePool,
-	getOccurrenceList,
+	getCurrentOccurrences,
 	getOccurrenceListQueue,
 	getOccurrencesTableMapping,
 	getProblemStore,
@@ -143,7 +143,7 @@ export type CDCL_UNSTACK_OCCURRENCE_LIST_FUN = () => void;
 
 export const dequeueOccurrenceList: CDCL_UNSTACK_OCCURRENCE_LIST_FUN = () => {
 	getOccurrenceListQueue().dequeue();
-	getProblemStore().updateInspectingOccurrences(new OccurrenceList());
+	getProblemStore().updateCurrentOccurrences(new OccurrenceList());
 };
 
 export type CDCL_UNARY_EMPTY_CLAUSES_DETECTION_FUN = () => Set<CRef>;
@@ -157,7 +157,7 @@ export type CDCL_PICK_OCCURRENCE_LIST_FUN = () => void;
 
 export const pickPendingOccurrenceList: CDCL_PICK_OCCURRENCE_LIST_FUN = () => {
 	const occurrenceList: OccurrenceList = getOccurrenceListQueue().element();
-	getProblemStore().updateInspectingOccurrences(occurrenceList);
+	getProblemStore().updateCurrentOccurrences(occurrenceList);
 };
 
 export type CDCL_TRAVERSED_OCCURRENCE_LIST_FUN = (occurrenceList: OccurrenceList) => boolean;
@@ -171,7 +171,7 @@ export const traversedOccurrenceList: CDCL_TRAVERSED_OCCURRENCE_LIST_FUN = (
 export type CDCL_NEXT_OCCURRENCE_FUN = () => CRef;
 
 export const nextClause: CDCL_NEXT_OCCURRENCE_FUN = () => {
-	const occurrenceList: OccurrenceList = getOccurrenceList();
+	const occurrenceList: OccurrenceList = getCurrentOccurrences();
 	if (occurrenceList.isEmpty()) {
 		logFatal('A non empty set was expected');
 	}
@@ -228,7 +228,7 @@ export type CDCL_WIPE_OCCURRENCE_QUEUE_FUN = () => void;
 
 export const wipeOccurrenceQueue: CDCL_WIPE_OCCURRENCE_QUEUE_FUN = () => {
 	// Drop all the occurrences lists inside the solver's queue
-	wipeOccurrences()
+	wipeOccurrences();
 };
 
 // ** additional cdcl function **

@@ -6,7 +6,7 @@
 		isUnresolvedEval,
 		isUnsatisfiedEval
 	} from '$lib/entities/Clause.svelte.ts';
-	import { getClausePool, getOccurrenceList } from '$lib/states/problem.svelte.ts';
+	import { getClausePool, getCurrentOccurrences } from '$lib/states/problem.svelte.ts';
 	import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 	import { isJust, makeJust, makeNothing, type Maybe } from '$lib/types/maybe.ts';
 	import type { CRef } from '$lib/types/types.ts';
@@ -17,7 +17,7 @@
 	const solverMachine = $derived(getSolverMachine());
 
 	let clauses: Maybe<Clause>[] = $derived.by(() => {
-		const cRefs: CRef[] = getOccurrenceList().getCRefs();
+		const cRefs: CRef[] = getCurrentOccurrences().getCRefs();
 		const realClauses: Maybe<Clause>[] = cRefs.map((cRef) => makeJust(getClausePool().at(cRef)));
 		return [makeNothing(), ...realClauses];
 	});
@@ -39,8 +39,8 @@
 <occurrence-list>
 	{#each clauses as maybeClause, i (i)}
 		<div class="occurrence-list-item">
-			<HeadTailComponent display={getOccurrenceList().getPointer() + 1 === i} verticalList={true}>
-				<div class="enumerate" class:inspecting={getOccurrenceList().getPointer() + 1 === i}>
+			<HeadTailComponent display={getCurrentOccurrences().getPointer() + 1 === i} verticalList={true}>
+				<div class="enumerate" class:inspecting={getCurrentOccurrences().getPointer() + 1 === i}>
 					{#if isJust(maybeClause)}
 						<span>
 							{fromJust(maybeClause).getCRef()}.
@@ -56,7 +56,7 @@
 					class="clause-highlighter"
 					class:inspectedTrue={isSat(fromJust(maybeClause))}
 					class:inspectedFalse={isUnSat(fromJust(maybeClause))}
-					class:visited-clause={getOccurrenceList().getPointer() >= i &&
+					class:visited-clause={getCurrentOccurrences().getPointer() >= i &&
 						isPartial(fromJust(maybeClause)) &&
 						solverMachine.onDetectingConflict()}
 				>

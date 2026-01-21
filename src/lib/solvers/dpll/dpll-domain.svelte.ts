@@ -14,7 +14,7 @@ import {
 } from '$lib/solvers/shared.svelte.ts';
 import {
 	getClausePool,
-	getOccurrenceList,
+	getCurrentOccurrences,
 	getOccurrenceListQueue,
 	getOccurrencesTableMapping,
 	getProblemStore,
@@ -111,7 +111,7 @@ export type DPLL_UNSTACK_OCCURRENCE_LIST_FUN = () => void;
 
 export const unstackOccurrenceList: DPLL_UNSTACK_OCCURRENCE_LIST_FUN = () => {
 	getOccurrenceListQueue().dequeue();
-	getProblemStore().updateInspectingOccurrences(new OccurrenceList());
+	getProblemStore().updateCurrentOccurrences(new OccurrenceList());
 };
 
 export type DPLL_UNARY_EMPTY_CLAUSES_DETECTION_FUN = () => Set<CRef>;
@@ -125,7 +125,7 @@ export type DPLL_PICK_OCCURRENCE_LIST_FUN = () => void;
 
 export const pickPendingOccurrenceList: DPLL_PICK_OCCURRENCE_LIST_FUN = () => {
 	const occurrenceList: OccurrenceList = getOccurrenceListQueue().element();
-	getProblemStore().updateInspectingOccurrences(occurrenceList);
+	getProblemStore().updateCurrentOccurrences(occurrenceList);
 };
 
 export type DPLL_TRAVERSED_OCCURRENCE_LIST_FUN = (occurrenceList: OccurrenceList) => boolean;
@@ -139,7 +139,7 @@ export const traversedOccurrenceList: DPLL_TRAVERSED_OCCURRENCE_LIST_FUN = (
 export type DPLL_NEXT_OCCURRENCE_FUN = () => CRef;
 
 export const nextClause: DPLL_NEXT_OCCURRENCE_FUN = () => {
-	const occurrenceList: OccurrenceList = getOccurrenceList();
+	const occurrenceList: OccurrenceList = getCurrentOccurrences();
 	if (occurrenceList.isEmpty()) {
 		logFatal('A non empty set was expected');
 	}

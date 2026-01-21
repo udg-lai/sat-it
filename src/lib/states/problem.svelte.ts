@@ -12,7 +12,7 @@ export const getOccurrencesTableMapping = () => getProblemStore().getOccurrences
 
 export const getVariablePool = () => getProblemStore().getVariablePool();
 
-export const getOccurrenceList = () => getProblemStore().getOccurrenceList();
+export const getCurrentOccurrences = () => getProblemStore().getCurrentOccurrences();
 
 export const getOccurrenceListQueue = () => getProblemStore().getOccurrenceListQueue();
 
@@ -30,4 +30,4 @@ export const learnClauses = (clauses: Clause[]): void => {
 
 export const wipeOccurrences = (): void => {
 	getProblemStore().wipeOccurrences();
-}
+};

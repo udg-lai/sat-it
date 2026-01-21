@@ -5,7 +5,12 @@ import {
 	conflictDetectedEventBus,
 	visitingComplementaryOccEventBus
 } from '$lib/events/events.ts';
-import { getClausePool, getOccurrenceList, getOccurrenceListQueue, getProblemStore } from '$lib/states/problem.svelte.ts';
+import {
+	getClausePool,
+	getCurrentOccurrences,
+	getOccurrenceListQueue,
+	getProblemStore
+} from '$lib/states/problem.svelte.ts';
 import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
 import { getLatestTrail } from '$lib/states/trails.svelte.ts';
@@ -69,7 +74,7 @@ export const conflictDetectionBlock = (): void => {
 		if (pendingOcc) {
 			pickOccurrenceListTransition();
 		} else {
-			getProblemStore().updateInspectingOccurrences(new OccurrenceList());
+			getProblemStore().updateCurrentOccurrences(new OccurrenceList());
 			allVariablesAssignedTransition();
 		}
 	} else {
@@ -209,7 +214,7 @@ const traversedOccurrenceListTransition = (): boolean => {
 	if (state.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the All Clauses Checked state');
 	}
-	const occurrenceList: OccurrenceList = getOccurrenceList();
+	const occurrenceList: OccurrenceList = getCurrentOccurrences();
 	const traversed: boolean = state.run(occurrenceList);
 	if (traversed) getSolverMachine().transition('dequeue_occurrence_list_state');
 	else getSolverMachine().transition('next_clause_state');

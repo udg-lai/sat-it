@@ -11,7 +11,12 @@ import {
 } from '$lib/events/events.ts';
 import { getConflictAnalysis } from '$lib/states/conflict-anlysis.svelte.ts';
 import { focusOnAssignment, wipeFocusAssignment } from '$lib/states/focused-assignment.svelte.ts';
-import { getClausePool, getOccurrenceList, getOccurrenceListQueue, getProblemStore } from '$lib/states/problem.svelte.ts';
+import {
+	getClausePool,
+	getCurrentOccurrences,
+	getOccurrenceListQueue,
+	getProblemStore
+} from '$lib/states/problem.svelte.ts';
 import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 import { increaseNoConflicts } from '$lib/states/statistics.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
@@ -167,7 +172,7 @@ export const conflictDetectionBlock = (): void => {
 		if (pendingOcc) {
 			pickOccurrenceListTransition();
 		} else {
-			getProblemStore().updateInspectingOccurrences(new OccurrenceList());
+			getProblemStore().updateCurrentOccurrences(new OccurrenceList());
 			allVariablesAssignedTransition();
 		}
 	} else {
@@ -285,7 +290,7 @@ const traversedOccurrenceListTransition = (): boolean => {
 	if (state.run === undefined) {
 		logFatal('Function call error', 'A function that validates all occurrences checked is needed');
 	}
-	const occurrenceList: OccurrenceList = getOccurrenceList();
+	const occurrenceList: OccurrenceList = getCurrentOccurrences();
 	const traversed: boolean = state.run(occurrenceList);
 	if (traversed) getSolverMachine().transition('dequeue_occurrence_list_state');
 	else getSolverMachine().transition('next_clause_state');

@@ -112,7 +112,7 @@
 		wipeDecisions();
 		wipeDifferSequence();
 		// The current occurrence list must be updated as well
-		getProblemStore().updateInspectingOccurrences(new OccurrenceList());
+		getProblemStore().updateCurrentOccurrences(new OccurrenceList());
 
 		// Sync the problem with the new instance, meaning we create
 		// a new set of variables and clauses from the instance.

@@ -17,8 +17,8 @@ export default class Problem {
 	private occurrencesTable: OccurrenceTable = $state(new OccurrenceTable());
 	private watchTable: WatchTable = $state(new WatchTable());
 
-	private occurrenceList: OccurrenceList = $state(new OccurrenceList());
-	private occurrenceQueue: Queue<OccurrenceList> = $state(new Queue<OccurrenceList>())
+	private currentOccurrences: OccurrenceList = $state(new OccurrenceList());
+	private occurrenceQueue: Queue<OccurrenceList> = $state(new Queue<OccurrenceList>());
 
 	constructor(instance: DimacsInstance | undefined = undefined) {
 		if (instance !== undefined) this.syncWithDimacsInstance(instance);
@@ -36,12 +36,12 @@ export default class Problem {
 		return this.variables;
 	}
 
-	getOccurrenceList(): OccurrenceList {
-		return this.occurrenceList;
+	getCurrentOccurrences(): OccurrenceList {
+		return this.currentOccurrences;
 	}
 
 	getOccurrenceListQueue(): Queue<OccurrenceList> {
-		return this.occurrenceQueue;	
+		return this.occurrenceQueue;
 	}
 
 	syncWithDimacsInstance({ summary }: DimacsInstance): void {
@@ -73,16 +73,16 @@ export default class Problem {
 		return cRef;
 	}
 
-	updateInspectingOccurrences(newOL: OccurrenceList): void {
-		this.occurrenceList = newOL;
-		const literal: Maybe<Lit> = this.occurrenceList.getLiteral();
+	updateCurrentOccurrences(newOL: OccurrenceList): void {
+		this.currentOccurrences = newOL;
+		const literal: Maybe<Lit> = this.currentOccurrences.getLiteral();
 		//The value is * -1 as the trail contains the complementary of the literal whose clauses are being checked
 		if (isJust(literal)) focusOnAssignment(fromJust(literal) * -1);
 		else wipeFocusAssignment();
 	}
 
 	wipeOccurrences(): void {
-		this.occurrenceList = new OccurrenceList();
-		this.occurrenceQueue = new Queue<OccurrenceList>()
+		this.currentOccurrences = new OccurrenceList();
+		this.occurrenceQueue = new Queue<OccurrenceList>();
 	}
 }

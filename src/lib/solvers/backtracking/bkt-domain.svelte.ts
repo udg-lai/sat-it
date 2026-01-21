@@ -12,7 +12,7 @@ import {
 } from '$lib/solvers/shared.svelte.ts';
 import {
 	getClausePool,
-	getOccurrenceList,
+	getCurrentOccurrences,
 	getOccurrencesTableMapping,
 	getProblemStore,
 	getVariablePool
@@ -89,13 +89,13 @@ export type BKT_QUEUE_OCCURRENCE_LIST_FUN = (occurrenceList: OccurrenceList) => 
 export const queueOccurrenceList: BKT_QUEUE_OCCURRENCE_LIST_FUN = (
 	occurrenceList: OccurrenceList
 ) => {
-	getProblemStore().updateInspectingOccurrences(occurrenceList);
+	getProblemStore().updateCurrentOccurrences(occurrenceList);
 };
 
 export type BKT_DEQUEUE_OCCURRENCE_LIST_FUN = () => void;
 
 export const dequeueOccurrenceList: BKT_DEQUEUE_OCCURRENCE_LIST_FUN = () => {
-	getProblemStore().updateInspectingOccurrences(new OccurrenceList());
+	getProblemStore().updateCurrentOccurrences(new OccurrenceList());
 };
 
 export type BKT_TRAVERSED_OCCURRENCE_LIST_FUN = (occurrenceList: OccurrenceList) => boolean;
@@ -109,7 +109,7 @@ export const traversedOccurrenceList: BKT_TRAVERSED_OCCURRENCE_LIST_FUN = (
 export type BKT_NEXT_OCCURRENCE_FUN = () => CRef;
 
 export const nextClause: BKT_NEXT_OCCURRENCE_FUN = () => {
-	const occurrenceList: OccurrenceList = getOccurrenceList();
+	const occurrenceList: OccurrenceList = getCurrentOccurrences();
 	if (occurrenceList.isEmpty()) {
 		logFatal('A non empty set was expected');
 	}
