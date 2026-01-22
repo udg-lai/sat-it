@@ -7,7 +7,7 @@ import type { CRef, List, Lit } from '$lib/types/types.ts';
 // but because of the initial unit propagations
 // (i.e., no assignment triggered the visiting of the occurrences' complementary assignment)
 export default class OccurrenceList {
-	private literal: Maybe<Lit>;
+	private literal: Maybe<Lit> = $state(makeNothing());
 	private cRefs: List<CRef>;
 	private pointer: number = $state(-1);
 

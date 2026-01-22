@@ -10,7 +10,6 @@ import {
 	visitingComplementaryOccEventBus
 } from '$lib/events/events.ts';
 import { getConflictAnalysis } from '$lib/states/conflict-anlysis.svelte.ts';
-import { focusOnAssignment, wipeFocusAssignment } from '$lib/states/focused-assignment.svelte.ts';
 import {
 	getClausePool,
 	getCurrentOccurrences,
@@ -50,8 +49,6 @@ import type {
 	CDCL_LEARN_CONFLICT_CLAUSE_INPUT,
 	CDCL_NEXT_OCCURRENCE_FUN,
 	CDCL_NEXT_OCCURRENCE_INPUT,
-	CDCL_PICK_OCCURRENCE_LIST_FUN,
-	CDCL_PICK_OCCURRENCE_LIST_INPUT,
 	CDCL_PUSH_TRAIL_FUN,
 	CDCL_PUSH_TRAIL_INPUT,
 	CDCL_QUEUE_OCCURRENCE_LIST_FUN,
@@ -106,7 +103,7 @@ export const preConflictAnalysis = () => {
 		} else {
 			//In case there is something to apply resolution to, let's highlight it.
 			const nextUP: VariableAssignment = getConflictAnalysis().currentImplication();
-			focusOnAssignment(nextUP.toLit());
+			getProblemStore().focusOnAssignment(nextUP.toLit());
 		}
 	}
 };
@@ -125,8 +122,6 @@ export const conflictAnalysisBlock = (): void => {
 	const asserting: boolean = assertingClauseInConflictAnalysis();
 
 	if (asserting) {
-		//This needs to be cleared
-		wipeFocusAssignment();
 		// This is kinda stupid but (resolvent.asserting -> asserting)
 		const cRef: CRef = learnConflictClauseTransition();
 		const sndHighestDL: number = getSecondHighestDLTransition(cRef);
@@ -144,7 +139,7 @@ export const conflictAnalysisBlock = (): void => {
 		conflictAnalysisFinishedEventBus.emit();
 	} else {
 		const nextUP: VariableAssignment = getConflictAnalysis().currentImplication();
-		focusOnAssignment(nextUP.toLit());
+		getProblemStore().focusOnAssignment(nextUP.toLit());
 	}
 };
 
@@ -153,9 +148,7 @@ export const conflictAnalysisBlock = (): void => {
 const afterComplementaryBlock = (occurrenceList: OccurrenceList): void => {
 	queueOccurrenceListTransition(occurrenceList);
 	const thereAreOccurrences: boolean = checkPendingOccurrenceListsTransition();
-	if (thereAreOccurrences) {
-		pickOccurrenceListTransition();
-	} else {
+	if (!thereAreOccurrences) {
 		allVariablesAssignedTransition();
 	}
 	// This is for showing the up-1 and up-n view
@@ -169,10 +162,7 @@ export const conflictDetectionBlock = (): void => {
 	if (traversedOccurrenceList) {
 		dequeueOccurrenceListTransition();
 		const pendingOcc: boolean = checkPendingOccurrenceListsTransition();
-		if (pendingOcc) {
-			pickOccurrenceListTransition();
-		} else {
-			getProblemStore().updateCurrentOccurrences(new OccurrenceList());
+		if (!pendingOcc) {
 			allVariablesAssignedTransition();
 		}
 	} else {
@@ -264,22 +254,9 @@ const checkPendingOccurrenceListsTransition = (): boolean => {
 		);
 	}
 	const pendingOcc: boolean = state.run();
-	if (pendingOcc) getSolverMachine().transition('pick_occurrence_list_state');
+	if (pendingOcc) getSolverMachine().transition('traversed_occurrences_state');
 	else getSolverMachine().transition('all_variables_assigned_state');
 	return pendingOcc;
-};
-
-const pickOccurrenceListTransition = (): void => {
-	// This method just updates the occurrences lits view with the first occurrence list in the queue.
-	const state = getSolverMachine().getActiveState() as NonFinalState<
-		CDCL_PICK_OCCURRENCE_LIST_FUN,
-		CDCL_PICK_OCCURRENCE_LIST_INPUT
-	>;
-	if (state.run === undefined) {
-		logFatal('Function call error', 'No function defined for picking the occurrence list');
-	}
-	state.run();
-	getSolverMachine().transition('traversed_occurrences_state');
 };
 
 const traversedOccurrenceListTransition = (): boolean => {

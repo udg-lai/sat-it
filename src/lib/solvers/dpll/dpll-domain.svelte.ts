@@ -17,7 +17,6 @@ import {
 	getCurrentOccurrences,
 	getOccurrenceListQueue,
 	getOccurrencesTableMapping,
-	getProblemStore,
 	getVariablePool,
 	wipeOccurrences
 } from '$lib/states/problem.svelte.ts';
@@ -28,11 +27,9 @@ import type { CRef, Lit } from '$lib/types/types.ts';
 
 export type DPLL_UNARY_EMPTY_CLAUSES_DETECTION_INPUT = 'queue_occurrence_list_state';
 
-export type DPLL_PICK_OCCURRENCE_LIST_INPUT = 'all_clauses_checked_state';
-
 export type DPLL_CHECK_PENDING_OCCURRENCE_LISTS_INPUT =
 	| 'all_variables_assigned_state'
-	| 'pick_occurrence_list_state';
+	| 'traversed_occurrences_state';
 
 export type DPLL_QUEUE_OCCURRENCE_LIST_INPUT =
 	| 'are_remaining_occurrences_state'
@@ -66,7 +63,6 @@ export type DPLL_WIPE_OCCURRENCE_QUEUE_INPUT = 'at_level_zero_state';
 
 export type DPLL_INPUT =
 	| DPLL_UNARY_EMPTY_CLAUSES_DETECTION_INPUT
-	| DPLL_PICK_OCCURRENCE_LIST_INPUT
 	| DPLL_ALL_VARIABLES_ASSIGNED_INPUT
 	| DPLL_QUEUE_OCCURRENCE_LIST_INPUT
 	| DPLL_UNSTACK_CLAUSE_SET_INPUT
@@ -111,7 +107,6 @@ export type DPLL_UNSTACK_OCCURRENCE_LIST_FUN = () => void;
 
 export const unstackOccurrenceList: DPLL_UNSTACK_OCCURRENCE_LIST_FUN = () => {
 	getOccurrenceListQueue().dequeue();
-	getProblemStore().updateCurrentOccurrences(new OccurrenceList());
 };
 
 export type DPLL_UNARY_EMPTY_CLAUSES_DETECTION_FUN = () => Set<CRef>;
@@ -119,13 +114,6 @@ export type DPLL_UNARY_EMPTY_CLAUSES_DETECTION_FUN = () => Set<CRef>;
 export const unitEmptyClauseDetection: DPLL_UNARY_EMPTY_CLAUSES_DETECTION_FUN = () => {
 	const pool: ClausePool = getClausePool();
 	return solverUnitClauseDetection(pool);
-};
-
-export type DPLL_PICK_OCCURRENCE_LIST_FUN = () => void;
-
-export const pickPendingOccurrenceList: DPLL_PICK_OCCURRENCE_LIST_FUN = () => {
-	const occurrenceList: OccurrenceList = getOccurrenceListQueue().element();
-	getProblemStore().updateCurrentOccurrences(occurrenceList);
 };
 
 export type DPLL_TRAVERSED_OCCURRENCE_LIST_FUN = (occurrenceList: OccurrenceList) => boolean;
@@ -205,7 +193,6 @@ export const wipeOccurrenceQueue: DPLL_WIPE_OCCURRENCE_QUEUE_FUN = () => {
 
 export type DPLL_FUN =
 	| DPLL_UNARY_EMPTY_CLAUSES_DETECTION_FUN
-	| DPLL_PICK_OCCURRENCE_LIST_FUN
 	| DPLL_CHECK_PENDING_OCCURRENCE_LISTS_FUN
 	| DPLL_ALL_VARIABLES_ASSIGNED_FUN
 	| DPLL_QUEUE_OCCURRENCE_LIST_FUN

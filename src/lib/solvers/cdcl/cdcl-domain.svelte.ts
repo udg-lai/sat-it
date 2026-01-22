@@ -37,11 +37,9 @@ import type { CRef, List, Lit } from '$lib/types/types.ts';
 
 export type CDCL_UNARY_EMPTY_CLAUSES_DETECTION_INPUT = 'queue_occurrence_list_state';
 
-export type CDCL_PICK_OCCURRENCE_LIST_INPUT = 'traversed_occurrences_state';
-
 export type CDCL_CHECK_PENDING_OCCURRENCE_LISTS_INPUT =
 	| 'all_variables_assigned_state'
-	| 'pick_occurrence_list_state';
+	| 'traversed_occurrences_state';
 
 export type CDCL_QUEUE_OCCURRENCE_LIST_INPUT =
 	| 'are_remaining_occurrences_state'
@@ -91,7 +89,6 @@ export type CDCL_PROPAGATE_CC_INPUT = 'complementary_occurrences_state';
 
 export type CDCL_INPUT =
 	| CDCL_UNARY_EMPTY_CLAUSES_DETECTION_INPUT
-	| CDCL_PICK_OCCURRENCE_LIST_INPUT
 	| CDCL_ALL_VARIABLES_ASSIGNED_INPUT
 	| CDCL_QUEUE_OCCURRENCE_LIST_INPUT
 	| CDCL_UNSTACK_OCCURRENCE_LIST_INPUT
@@ -143,7 +140,6 @@ export type CDCL_UNSTACK_OCCURRENCE_LIST_FUN = () => void;
 
 export const dequeueOccurrenceList: CDCL_UNSTACK_OCCURRENCE_LIST_FUN = () => {
 	getOccurrenceListQueue().dequeue();
-	getProblemStore().updateCurrentOccurrences(new OccurrenceList());
 };
 
 export type CDCL_UNARY_EMPTY_CLAUSES_DETECTION_FUN = () => Set<CRef>;
@@ -151,13 +147,6 @@ export type CDCL_UNARY_EMPTY_CLAUSES_DETECTION_FUN = () => Set<CRef>;
 export const unaryEmptyClausesDetection: CDCL_UNARY_EMPTY_CLAUSES_DETECTION_FUN = () => {
 	const pool: ClausePool = getClausePool();
 	return solverUnitClauseDetection(pool);
-};
-
-export type CDCL_PICK_OCCURRENCE_LIST_FUN = () => void;
-
-export const pickPendingOccurrenceList: CDCL_PICK_OCCURRENCE_LIST_FUN = () => {
-	const occurrenceList: OccurrenceList = getOccurrenceListQueue().element();
-	getProblemStore().updateCurrentOccurrences(occurrenceList);
 };
 
 export type CDCL_TRAVERSED_OCCURRENCE_LIST_FUN = (occurrenceList: OccurrenceList) => boolean;
@@ -343,7 +332,6 @@ export const propagateCC: CDCL_PROPAGATE_CC_FUN = (cRef: CRef) => {
 
 export type CDCL_FUN =
 	| CDCL_UNARY_EMPTY_CLAUSES_DETECTION_FUN
-	| CDCL_PICK_OCCURRENCE_LIST_FUN
 	| CDCL_CHECK_PENDING_OCCURRENCE_LISTS_FUN
 	| CDCL_ALL_VARIABLES_ASSIGNED_FUN
 	| CDCL_QUEUE_OCCURRENCE_LIST_FUN

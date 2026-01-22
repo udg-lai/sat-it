@@ -1,7 +1,6 @@
 import type { DimacsInstance } from '$lib/instances/dimacs-instance.interface.ts';
-import { focusOnAssignment, wipeFocusAssignment } from '$lib/states/focused-assignment.svelte.ts';
 import { logError } from '$lib/states/toasts.svelte.ts';
-import { fromJust, isJust, type Maybe } from '$lib/types/maybe.ts';
+import { makeJust, makeNothing, type Maybe } from '$lib/types/maybe.ts';
 import type { CRef, Lit } from '$lib/types/types.ts';
 import type Clause from './Clause.svelte.ts';
 import ClausePool from './ClausePool.svelte.ts';
@@ -17,8 +16,9 @@ export default class Problem {
 	private occurrencesTable: OccurrenceTable = $state(new OccurrenceTable());
 	private watchTable: WatchTable = $state(new WatchTable());
 
-	private currentOccurrences: OccurrenceList = $state(new OccurrenceList());
 	private occurrenceQueue: Queue<OccurrenceList> = $state(new Queue<OccurrenceList>());
+	private currentOccurrences: OccurrenceList = $derived(this.currentOccurrenceList());
+	private focusedAssignment: Maybe<Lit> = $derived(this.currentFocusedAssignment());
 
 	constructor(instance: DimacsInstance | undefined = undefined) {
 		if (instance !== undefined) this.syncWithDimacsInstance(instance);
@@ -36,6 +36,10 @@ export default class Problem {
 		return this.variables;
 	}
 
+	getFocusedAssignment(): Maybe<Lit> {
+		return this.focusedAssignment;
+	}
+
 	getCurrentOccurrences(): OccurrenceList {
 		return this.currentOccurrences;
 	}
@@ -50,7 +54,7 @@ export default class Problem {
 		this.clauses = ClausePool.buildFrom(claims, this.variables);
 		this.occurrencesTable = new OccurrenceTable(this.clauses.getClauses());
 		this.watchTable = new WatchTable(this.clauses.getClauses());
-		this.wipeOccurrences();
+		this.dropOccurrences();
 	}
 
 	forgetLearnedClauses() {
@@ -73,16 +77,28 @@ export default class Problem {
 		return cRef;
 	}
 
-	updateCurrentOccurrences(newOL: OccurrenceList): void {
-		this.currentOccurrences = newOL;
-		const literal: Maybe<Lit> = this.currentOccurrences.getLiteral();
-		//The value is * -1 as the trail contains the complementary of the literal whose clauses are being checked
-		if (isJust(literal)) focusOnAssignment(fromJust(literal) * -1);
-		else wipeFocusAssignment();
+	dropOccurrences(): void {
+		this.occurrenceQueue = new Queue<OccurrenceList>();
 	}
 
-	wipeOccurrences(): void {
-		this.currentOccurrences = new OccurrenceList();
-		this.occurrenceQueue = new Queue<OccurrenceList>();
+	focusOnAssignment(assignment: Lit): void {
+		this.currentFocusedAssignment(makeJust(assignment));
+	}
+
+	private currentOccurrenceList(): OccurrenceList {
+		if (this.occurrenceQueue.isEmpty()) {
+			return new OccurrenceList();
+		} else {
+			return this.occurrenceQueue.element();
+		}
+	}
+
+	// When in conflict analysis in CDCL, the focused assignment should be the one that is taking place in the current resolution.
+	private currentFocusedAssignment(focusedLiteral: Maybe<Lit> = makeNothing()): Maybe<Lit> {
+		if (this.currentOccurrences.isEmpty()) {
+			return focusedLiteral;
+		} else {
+			return this.currentOccurrences.getLiteral();
+		}
 	}
 }

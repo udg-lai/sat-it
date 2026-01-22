@@ -12,7 +12,6 @@ import {
 	nextClause,
 	atLevelZeroFun,
 	pendingOccurrenceList,
-	pickPendingOccurrenceList,
 	pushTrail,
 	queueOccurrenceList,
 	sndHighestDL,
@@ -47,8 +46,6 @@ import {
 	type CDCL_LEARN_CONFLICT_CLAUSE_INPUT,
 	type CDCL_NEXT_OCCURRENCE_FUN,
 	type CDCL_NEXT_OCCURRENCE_INPUT,
-	type CDCL_PICK_OCCURRENCE_LIST_FUN,
-	type CDCL_PICK_OCCURRENCE_LIST_INPUT,
 	type CDCL_PUSH_TRAIL_FUN,
 	type CDCL_PUSH_TRAIL_INPUT,
 	type CDCL_QUEUE_OCCURRENCE_LIST_FUN,
@@ -78,25 +75,24 @@ export const cdcl_stateName2StateId = {
 	unary_empty_clause_detection_state: 0,
 	queue_occurrence_list_state: 1,
 	are_remaining_occurrences_state: 2,
-	pick_occurrence_list_state: 3,
-	all_variables_assigned_state: 4,
-	dequeue_occurrence_list_state: 5,
-	clause_evaluation_state: 6,
-	traversed_occurrences_state: 7,
-	next_clause_state: 8,
-	falsified_clause_state: 9,
-	unit_clause_state: 10,
-	unit_propagation_state: 11,
-	complementary_occurrences_state: 12,
-	at_level_zero_state: 13,
-	wipe_occurrences_queue_state: 14,
-	build_conflict_analysis_state: 15,
-	asserting_clause_state: 16,
-	virtual_resolution_state: 17,
-	learn_cc_state: 18,
-	second_highest_dl_state: 19,
-	undo_trail_to_shdl_state: 20,
-	push_trail_state: 21
+	all_variables_assigned_state: 3,
+	dequeue_occurrence_list_state: 4,
+	clause_evaluation_state: 5,
+	traversed_occurrences_state: 6,
+	next_clause_state: 7,
+	falsified_clause_state: 8,
+	unit_clause_state: 9,
+	unit_propagation_state: 10,
+	complementary_occurrences_state: 11,
+	at_level_zero_state: 12,
+	wipe_occurrences_queue_state: 13,
+	build_conflict_analysis_state: 14,
+	asserting_clause_state: 15,
+	virtual_resolution_state: 16,
+	learn_cc_state: 17,
+	second_highest_dl_state: 18,
+	undo_trail_to_shdl_state: 19,
+	push_trail_state: 20
 };
 
 // *** define state nodes ***
@@ -154,21 +150,8 @@ const are_remaining_occurrences_state: NonFinalState<
 	description: 'True if there are occurrence lists postponed, false otherwise',
 	run: pendingOccurrenceList,
 	transitions: new Map<CDCL_CHECK_PENDING_OCCURRENCE_LISTS_INPUT, number>()
-		.set('pick_occurrence_list_state', cdcl_stateName2StateId['pick_occurrence_list_state'])
+		.set('traversed_occurrences_state', cdcl_stateName2StateId['traversed_occurrences_state'])
 		.set('all_variables_assigned_state', cdcl_stateName2StateId['all_variables_assigned_state'])
-};
-
-const pick_occurrence_list_state: NonFinalState<
-	CDCL_PICK_OCCURRENCE_LIST_FUN,
-	CDCL_PICK_OCCURRENCE_LIST_INPUT
-> = {
-	id: cdcl_stateName2StateId['pick_occurrence_list_state'],
-	description: 'Selects the next occurrence list to process queued',
-	run: pickPendingOccurrenceList,
-	transitions: new Map<CDCL_PICK_OCCURRENCE_LIST_INPUT, number>().set(
-		'traversed_occurrences_state',
-		cdcl_stateName2StateId['traversed_occurrences_state']
-	)
 };
 
 const occurrence_list_traversed_state: NonFinalState<
@@ -384,7 +367,6 @@ states.set(sat_state.id, sat_state);
 states.set(unary_empty_clauses_detection_state.id, unary_empty_clauses_detection_state);
 states.set(are_remaining_occurrences_state.id, are_remaining_occurrences_state);
 states.set(queue_occurrence_list_state.id, queue_occurrence_list_state);
-states.set(pick_occurrence_list_state.id, pick_occurrence_list_state);
 states.set(all_variables_assigned_state.id, all_variables_assigned_state);
 states.set(decide_state.id, decide_state);
 states.set(dequeue_occurrence_list_state.id, dequeue_occurrence_list_state);

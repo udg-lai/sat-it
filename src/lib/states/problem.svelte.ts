@@ -14,6 +14,8 @@ export const getVariablePool = () => getProblemStore().getVariablePool();
 
 export const getCurrentOccurrences = () => getProblemStore().getCurrentOccurrences();
 
+export const getFocusedAssignment = () => getProblemStore().getFocusedAssignment();
+
 export const getOccurrenceListQueue = () => getProblemStore().getOccurrenceListQueue();
 
 export const syncProblemWithInstance = (instance: DimacsInstance) => {
@@ -29,5 +31,5 @@ export const learnClauses = (clauses: Clause[]): void => {
 };
 
 export const wipeOccurrences = (): void => {
-	getProblemStore().wipeOccurrences();
+	getProblemStore().dropOccurrences();
 };

@@ -13,8 +13,8 @@ import {
 import {
 	getClausePool,
 	getCurrentOccurrences,
+	getOccurrenceListQueue,
 	getOccurrencesTableMapping,
-	getProblemStore,
 	getVariablePool
 } from '$lib/states/problem.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
@@ -89,13 +89,13 @@ export type BKT_QUEUE_OCCURRENCE_LIST_FUN = (occurrenceList: OccurrenceList) => 
 export const queueOccurrenceList: BKT_QUEUE_OCCURRENCE_LIST_FUN = (
 	occurrenceList: OccurrenceList
 ) => {
-	getProblemStore().updateCurrentOccurrences(occurrenceList);
+	getOccurrenceListQueue().enqueue(occurrenceList);
 };
 
 export type BKT_DEQUEUE_OCCURRENCE_LIST_FUN = () => void;
 
 export const dequeueOccurrenceList: BKT_DEQUEUE_OCCURRENCE_LIST_FUN = () => {
-	getProblemStore().updateCurrentOccurrences(new OccurrenceList());
+	getOccurrenceListQueue().dequeue();
 };
 
 export type BKT_TRAVERSED_OCCURRENCE_LIST_FUN = (occurrenceList: OccurrenceList) => boolean;
