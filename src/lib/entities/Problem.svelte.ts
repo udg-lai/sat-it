@@ -95,7 +95,9 @@ export default class Problem {
 	// When in conflict analysis in CDCL, the focused assignment should be the one that is taking place in the current resolution.
 	private currentFocusedAssignment(): Maybe<Lit> {
 		if (!this.currentOccurrences.isEmpty()) {
-			const trailAssignment: Lit = Literal.complementary(fromJust(this.currentOccurrences.getLiteral()));
+			const trailAssignment: Lit = Literal.complementary(
+				fromJust(this.currentOccurrences.getLiteral())
+			);
 			return makeJust(trailAssignment);
 		} else if (getSolverMachine().onConflictState() && getSolverMachine().identify() === 'cdcl') {
 			const currentImplication: Lit = getConflictAnalysis().currentImplication().toLit();
