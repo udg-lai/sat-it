@@ -4,15 +4,14 @@
 	import type Clause from '$lib/entities/Clause.svelte.ts';
 	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
 	import { isBackJumpingReason, type Reason } from '$lib/entities/VariableAssignment.ts';
-	import { getClausePool } from '$lib/states/problem.svelte.ts';
+	import { getClausePool, getFocusedAssignment } from '$lib/states/problem.svelte.ts';
 	import { logFatal } from '$lib/states/toasts.svelte.ts';
+	import { fromJust, isJust, type Maybe } from '$lib/types/maybe.ts';
+	import type { CRef, Lit } from '$lib/types/types.ts';
 	import { Popover } from 'flowbite-svelte';
 	import { nanoid } from 'nanoid';
 	import HeadTailComponent from '../HeadTailComponent.svelte';
 	import './style.css';
-	import type { CRef, Lit } from '$lib/types/types.ts';
-	import { getFocusedAssignment } from '$lib/states/focused-assignment.svelte.ts';
-	import { fromJust, isJust, type Maybe } from '$lib/types/maybe.ts';
 
 	interface Props {
 		assignment: VariableAssignment;

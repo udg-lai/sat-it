@@ -5,9 +5,11 @@ import {
 	conflictDetectedEventBus,
 	visitingComplementaryOccEventBus
 } from '$lib/events/events.ts';
-import { getOccurrenceList, updateOccurrenceList } from '$lib/states/occurrence-list.svelte.ts';
-import { getClausePool } from '$lib/states/problem.svelte.ts';
-import { getOccurrenceListQueue } from '$lib/states/queue-occurrence-lists.svelte.ts';
+import {
+	getClausePool,
+	getCurrentOccurrences,
+	getOccurrenceListQueue
+} from '$lib/states/problem.svelte.ts';
 import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
 import { getLatestTrail } from '$lib/states/trails.svelte.ts';
@@ -31,16 +33,14 @@ import type {
 	DPLL_DECIDE_INPUT,
 	DPLL_NEXT_OCCURRENCE_FUN,
 	DPLL_NEXT_OCCURRENCE_INPUT,
-	DPLL_PICK_OCCURRENCE_LIST_FUN,
-	DPLL_PICK_OCCURRENCE_LIST_INPUT,
 	DPLL_QUEUE_OCCURRENCE_LIST_FUN,
 	DPLL_QUEUE_OCCURRENCE_LIST_INPUT,
 	DPLL_TRAVERSED_OCCURRENCE_LIST_FUN,
 	DPLL_TRAVERSED_OCCURRENCE_LIST_INPUT,
-	DPLL_UNIT_CLAUSE_FUN,
-	DPLL_UNIT_CLAUSE_INPUT,
 	DPLL_UNARY_EMPTY_CLAUSES_DETECTION_FUN,
 	DPLL_UNARY_EMPTY_CLAUSES_DETECTION_INPUT,
+	DPLL_UNIT_CLAUSE_FUN,
+	DPLL_UNIT_CLAUSE_INPUT,
 	DPLL_UNIT_PROPAGATION_FUN,
 	DPLL_UNIT_PROPAGATION_INPUT,
 	DPLL_UNSTACK_CLAUSE_SET_INPUT,
@@ -68,10 +68,7 @@ export const conflictDetectionBlock = (): void => {
 	if (traversedOccurrenceList) {
 		dequeueOccurrenceListTransition();
 		const pendingOcc: boolean = checkPendingOccurrenceListsTransition();
-		if (pendingOcc) {
-			pickOccurrenceListTransition();
-		} else {
-			updateOccurrenceList(new OccurrenceList());
+		if (!pendingOcc) {
 			allVariablesAssignedTransition();
 		}
 	} else {
@@ -107,9 +104,7 @@ export const conflictiveState = (): void => {
 const afterComplementaryBlock = (occurrenceList: OccurrenceList): void => {
 	queueOccurrenceListTransition(occurrenceList);
 	const thereAreOccurrences: boolean = checkPendingOccurrenceListsTransition();
-	if (thereAreOccurrences) {
-		pickOccurrenceListTransition();
-	} else {
+	if (!thereAreOccurrences) {
 		allVariablesAssignedTransition();
 	}
 	// This is for showing the up-1 and up-n view
@@ -186,21 +181,9 @@ const checkPendingOccurrenceListsTransition = (): boolean => {
 		);
 	}
 	const pendingOcc: boolean = state.run();
-	if (pendingOcc) getSolverMachine().transition('pick_occurrence_list_state');
+	if (pendingOcc) getSolverMachine().transition('traversed_occurrences_state');
 	else getSolverMachine().transition('all_variables_assigned_state');
 	return pendingOcc;
-};
-
-const pickOccurrenceListTransition = (): void => {
-	const state = getSolverMachine().getActiveState() as NonFinalState<
-		DPLL_PICK_OCCURRENCE_LIST_FUN,
-		DPLL_PICK_OCCURRENCE_LIST_INPUT
-	>;
-	if (state.run === undefined) {
-		logFatal('Function call error', 'There should be a function in the Peek Clause Set state');
-	}
-	state.run();
-	getSolverMachine().transition('all_clauses_checked_state');
 };
 
 const traversedOccurrenceListTransition = (): boolean => {
@@ -211,7 +194,7 @@ const traversedOccurrenceListTransition = (): boolean => {
 	if (state.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the All Clauses Checked state');
 	}
-	const occurrenceList: OccurrenceList = getOccurrenceList();
+	const occurrenceList: OccurrenceList = getCurrentOccurrences();
 	const traversed: boolean = state.run(occurrenceList);
 	if (traversed) getSolverMachine().transition('dequeue_occurrence_list_state');
 	else getSolverMachine().transition('next_clause_state');

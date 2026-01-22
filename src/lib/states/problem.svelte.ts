@@ -12,6 +12,12 @@ export const getOccurrencesTableMapping = () => getProblemStore().getOccurrences
 
 export const getVariablePool = () => getProblemStore().getVariablePool();
 
+export const getCurrentOccurrences = () => getProblemStore().getCurrentOccurrences();
+
+export const getFocusedAssignment = () => getProblemStore().getFocusedAssignment();
+
+export const getOccurrenceListQueue = () => getProblemStore().getOccurrenceListQueue();
+
 export const syncProblemWithInstance = (instance: DimacsInstance) => {
 	getProblemStore().syncWithDimacsInstance(instance);
 };
@@ -22,4 +28,8 @@ export const forgetLearnedClauses = (): void => {
 
 export const learnClauses = (clauses: Clause[]): void => {
 	getProblemStore().learnClauses(clauses);
+};
+
+export const wipeOccurrences = (): void => {
+	getProblemStore().dropOccurrences();
 };

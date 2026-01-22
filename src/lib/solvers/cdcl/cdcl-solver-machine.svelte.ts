@@ -3,7 +3,7 @@ import { Queue } from '$lib/entities/Queue.svelte.ts';
 import { type SolverCommand } from '$lib/events/events.ts';
 import { getConflictAnalysis } from '$lib/states/conflict-anlysis.svelte.ts';
 import { getConfDelayMS } from '$lib/states/parameters.svelte.ts';
-import { getOccurrenceListQueue } from '$lib/states/queue-occurrence-lists.svelte.ts';
+import { getOccurrenceListQueue } from '$lib/states/problem.svelte.ts';
 import { getNoUnitPropagations } from '$lib/states/statistics.svelte.ts';
 import { SolverMachine } from '../SolverMachine.svelte.ts';
 import type { CDCL_FUN, CDCL_INPUT } from './cdcl-domain.svelte.ts';

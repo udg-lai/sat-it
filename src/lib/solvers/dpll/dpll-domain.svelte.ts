@@ -12,16 +12,14 @@ import {
 	unaryEmptyClauseDetection as solverUnitClauseDetection,
 	unitPropagation as solverUnitPropagation
 } from '$lib/solvers/shared.svelte.ts';
-import { getOccurrenceList, updateOccurrenceList } from '$lib/states/occurrence-list.svelte.ts';
 import {
 	getClausePool,
-	getOccurrencesTableMapping,
-	getVariablePool
-} from '$lib/states/problem.svelte.ts';
-import {
+	getCurrentOccurrences,
 	getOccurrenceListQueue,
-	wipeOccurrenceListQueue
-} from '$lib/states/queue-occurrence-lists.svelte.ts';
+	getOccurrencesTableMapping,
+	getVariablePool,
+	wipeOccurrences
+} from '$lib/states/problem.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
 import type { CRef, Lit } from '$lib/types/types.ts';
 
@@ -29,11 +27,9 @@ import type { CRef, Lit } from '$lib/types/types.ts';
 
 export type DPLL_UNARY_EMPTY_CLAUSES_DETECTION_INPUT = 'queue_occurrence_list_state';
 
-export type DPLL_PICK_OCCURRENCE_LIST_INPUT = 'all_clauses_checked_state';
-
 export type DPLL_CHECK_PENDING_OCCURRENCE_LISTS_INPUT =
 	| 'all_variables_assigned_state'
-	| 'pick_occurrence_list_state';
+	| 'traversed_occurrences_state';
 
 export type DPLL_QUEUE_OCCURRENCE_LIST_INPUT =
 	| 'are_remaining_occurrences_state'
@@ -67,7 +63,6 @@ export type DPLL_WIPE_OCCURRENCE_QUEUE_INPUT = 'at_level_zero_state';
 
 export type DPLL_INPUT =
 	| DPLL_UNARY_EMPTY_CLAUSES_DETECTION_INPUT
-	| DPLL_PICK_OCCURRENCE_LIST_INPUT
 	| DPLL_ALL_VARIABLES_ASSIGNED_INPUT
 	| DPLL_QUEUE_OCCURRENCE_LIST_INPUT
 	| DPLL_UNSTACK_CLAUSE_SET_INPUT
@@ -112,7 +107,6 @@ export type DPLL_UNSTACK_OCCURRENCE_LIST_FUN = () => void;
 
 export const unstackOccurrenceList: DPLL_UNSTACK_OCCURRENCE_LIST_FUN = () => {
 	getOccurrenceListQueue().dequeue();
-	updateOccurrenceList(new OccurrenceList());
 };
 
 export type DPLL_UNARY_EMPTY_CLAUSES_DETECTION_FUN = () => Set<CRef>;
@@ -120,13 +114,6 @@ export type DPLL_UNARY_EMPTY_CLAUSES_DETECTION_FUN = () => Set<CRef>;
 export const unitEmptyClauseDetection: DPLL_UNARY_EMPTY_CLAUSES_DETECTION_FUN = () => {
 	const pool: ClausePool = getClausePool();
 	return solverUnitClauseDetection(pool);
-};
-
-export type DPLL_PICK_OCCURRENCE_LIST_FUN = () => void;
-
-export const pickPendingOccurrenceList: DPLL_PICK_OCCURRENCE_LIST_FUN = () => {
-	const occurrenceList: OccurrenceList = getOccurrenceListQueue().element();
-	updateOccurrenceList(occurrenceList);
 };
 
 export type DPLL_TRAVERSED_OCCURRENCE_LIST_FUN = (occurrenceList: OccurrenceList) => boolean;
@@ -140,7 +127,7 @@ export const traversedOccurrenceList: DPLL_TRAVERSED_OCCURRENCE_LIST_FUN = (
 export type DPLL_NEXT_OCCURRENCE_FUN = () => CRef;
 
 export const nextClause: DPLL_NEXT_OCCURRENCE_FUN = () => {
-	const occurrenceList: OccurrenceList = getOccurrenceList();
+	const occurrenceList: OccurrenceList = getCurrentOccurrences();
 	if (occurrenceList.isEmpty()) {
 		logFatal('A non empty set was expected');
 	}
@@ -201,14 +188,11 @@ export type DPLL_WIPE_OCCURRENCE_QUEUE_FUN = () => void;
 
 export const wipeOccurrenceQueue: DPLL_WIPE_OCCURRENCE_QUEUE_FUN = () => {
 	// Drop all the occurrences lists inside the solver's queue
-	wipeOccurrenceListQueue();
-	// Updates the view with and empty occurrence list
-	updateOccurrenceList(new OccurrenceList());
+	wipeOccurrences();
 };
 
 export type DPLL_FUN =
 	| DPLL_UNARY_EMPTY_CLAUSES_DETECTION_FUN
-	| DPLL_PICK_OCCURRENCE_LIST_FUN
 	| DPLL_CHECK_PENDING_OCCURRENCE_LISTS_FUN
 	| DPLL_ALL_VARIABLES_ASSIGNED_FUN
 	| DPLL_QUEUE_OCCURRENCE_LIST_FUN

@@ -10,9 +10,10 @@ import {
 	complementaryOccurrences as solverComplementaryOccurrences,
 	decide as solverDecide
 } from '$lib/solvers/shared.svelte.ts';
-import { getOccurrenceList, updateOccurrenceList } from '$lib/states/occurrence-list.svelte.ts';
 import {
 	getClausePool,
+	getCurrentOccurrences,
+	getOccurrenceListQueue,
 	getOccurrencesTableMapping,
 	getVariablePool
 } from '$lib/states/problem.svelte.ts';
@@ -88,13 +89,13 @@ export type BKT_QUEUE_OCCURRENCE_LIST_FUN = (occurrenceList: OccurrenceList) => 
 export const queueOccurrenceList: BKT_QUEUE_OCCURRENCE_LIST_FUN = (
 	occurrenceList: OccurrenceList
 ) => {
-	updateOccurrenceList(occurrenceList);
+	getOccurrenceListQueue().enqueue(occurrenceList);
 };
 
 export type BKT_DEQUEUE_OCCURRENCE_LIST_FUN = () => void;
 
 export const dequeueOccurrenceList: BKT_DEQUEUE_OCCURRENCE_LIST_FUN = () => {
-	updateOccurrenceList(new OccurrenceList());
+	getOccurrenceListQueue().dequeue();
 };
 
 export type BKT_TRAVERSED_OCCURRENCE_LIST_FUN = (occurrenceList: OccurrenceList) => boolean;
@@ -108,7 +109,7 @@ export const traversedOccurrenceList: BKT_TRAVERSED_OCCURRENCE_LIST_FUN = (
 export type BKT_NEXT_OCCURRENCE_FUN = () => CRef;
 
 export const nextClause: BKT_NEXT_OCCURRENCE_FUN = () => {
-	const occurrenceList: OccurrenceList = getOccurrenceList();
+	const occurrenceList: OccurrenceList = getCurrentOccurrences();
 	if (occurrenceList.isEmpty()) {
 		logFatal('A non empty set was expected');
 	}
