@@ -3,7 +3,6 @@ import type { ConflictAnalysis, VirtualResolution } from '$lib/entities/Conflict
 import Literal from '$lib/entities/Literal.svelte.ts';
 import OccurrenceList from '$lib/entities/OccurrenceList.svelte.ts';
 import type { Trail } from '$lib/entities/Trail.svelte.ts';
-import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
 import {
 	conflictAnalysisFinishedEventBus,
 	conflictDetectedEventBus,
@@ -13,8 +12,7 @@ import { getConflictAnalysis } from '$lib/states/conflict-anlysis.svelte.ts';
 import {
 	getClausePool,
 	getCurrentOccurrences,
-	getOccurrenceListQueue,
-	getProblemStore
+	getOccurrenceListQueue
 } from '$lib/states/problem.svelte.ts';
 import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 import { increaseNoConflicts } from '$lib/states/statistics.svelte.ts';
@@ -100,10 +98,6 @@ export const preConflictAnalysis = () => {
 				'CDCL Conflict Analysis',
 				'The conflict clause should not be asserting (non-chronological backtracking)'
 			);
-		} else {
-			//In case there is something to apply resolution to, let's highlight it.
-			const nextUP: VariableAssignment = getConflictAnalysis().currentImplication();
-			getProblemStore().focusOnAssignment(nextUP.toLit());
 		}
 	}
 };
@@ -137,9 +131,6 @@ export const conflictAnalysisBlock = (): void => {
 
 		// After the conflict analysis finishes we notify it
 		conflictAnalysisFinishedEventBus.emit();
-	} else {
-		const nextUP: VariableAssignment = getConflictAnalysis().currentImplication();
-		getProblemStore().focusOnAssignment(nextUP.toLit());
 	}
 };
 

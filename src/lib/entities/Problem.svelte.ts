@@ -1,6 +1,8 @@
 import type { DimacsInstance } from '$lib/instances/dimacs-instance.interface.ts';
+import { getConflictAnalysis } from '$lib/states/conflict-anlysis.svelte.ts';
+import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 import { logError } from '$lib/states/toasts.svelte.ts';
-import { makeJust, makeNothing, type Maybe } from '$lib/types/maybe.ts';
+import { fromJust, makeJust, makeNothing, type Maybe } from '$lib/types/maybe.ts';
 import type { CRef, Lit } from '$lib/types/types.ts';
 import type Clause from './Clause.svelte.ts';
 import ClausePool from './ClausePool.svelte.ts';
@@ -81,10 +83,6 @@ export default class Problem {
 		this.occurrenceQueue = new Queue<OccurrenceList>();
 	}
 
-	focusOnAssignment(assignment: Lit): void {
-		this.currentFocusedAssignment(makeJust(assignment));
-	}
-
 	private currentOccurrenceList(): OccurrenceList {
 		if (this.occurrenceQueue.isEmpty()) {
 			return new OccurrenceList();
@@ -94,11 +92,15 @@ export default class Problem {
 	}
 
 	// When in conflict analysis in CDCL, the focused assignment should be the one that is taking place in the current resolution.
-	private currentFocusedAssignment(focusedLiteral: Maybe<Lit> = makeNothing()): Maybe<Lit> {
-		if (this.currentOccurrences.isEmpty()) {
-			return focusedLiteral;
+	private currentFocusedAssignment(): Maybe<Lit> {
+		if (!this.currentOccurrences.isEmpty()) {
+			const trailAssignment: Lit = fromJust(this.currentOccurrences.getLiteral()) * -1;
+			return makeJust(trailAssignment);
+		} else if (getSolverMachine().onConflictState() && getSolverMachine().identify() === 'cdcl') {
+			const currentImplication: Lit = getConflictAnalysis().currentImplication().toLit();
+			return makeJust(currentImplication);
 		} else {
-			return this.currentOccurrences.getLiteral();
+			return makeNothing();
 		}
 	}
 }

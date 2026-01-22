@@ -26,7 +26,7 @@
 	import { clearBreakpoints } from '$lib/states/breakpoints.svelte.ts';
 	import { getActiveInstance, getInstance } from '$lib/states/instances.svelte.ts';
 	import { getConfDelayMS } from '$lib/states/parameters.svelte.ts';
-	import { getFocusedAssignment, syncProblemWithInstance } from '$lib/states/problem.svelte.ts';
+	import { syncProblemWithInstance } from '$lib/states/problem.svelte.ts';
 	import {
 		activateSolverMachine,
 		getSolverMachine,
@@ -60,10 +60,6 @@
 	let trails: Trail[] = $state([]);
 
 	let solverMachine: SolverMachine<StateFun, StateInput> = $derived(getSolverMachine());
-
-	$effect(() => {
-		console.log(getFocusedAssignment())
-	})
 
 	function onDecision(decision: Lit) {
 		// The decision is saved in the list
