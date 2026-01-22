@@ -6,6 +6,7 @@ import { fromJust, makeJust, makeNothing, type Maybe } from '$lib/types/maybe.ts
 import type { CRef, Lit } from '$lib/types/types.ts';
 import type Clause from './Clause.svelte.ts';
 import ClausePool from './ClausePool.svelte.ts';
+import Literal from './Literal.svelte.ts';
 import OccurrenceList from './OccurrenceList.svelte.ts';
 import OccurrenceTable from './OccurrenceTable.svelte.ts';
 import { Queue } from './Queue.svelte.ts';
@@ -94,7 +95,7 @@ export default class Problem {
 	// When in conflict analysis in CDCL, the focused assignment should be the one that is taking place in the current resolution.
 	private currentFocusedAssignment(): Maybe<Lit> {
 		if (!this.currentOccurrences.isEmpty()) {
-			const trailAssignment: Lit = fromJust(this.currentOccurrences.getLiteral()) * -1;
+			const trailAssignment: Lit = Literal.complementary(fromJust(this.currentOccurrences.getLiteral()));
 			return makeJust(trailAssignment);
 		} else if (getSolverMachine().onConflictState() && getSolverMachine().identify() === 'cdcl') {
 			const currentImplication: Lit = getConflictAnalysis().currentImplication().toLit();
