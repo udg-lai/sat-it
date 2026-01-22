@@ -73,15 +73,13 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 	}
 
 	protected async solveCDStepByStep(): Promise<void> {
-		const queueOccurrences: Queue<OccurrenceList> = getOccurrenceListQueue();
-		await this.automaticStepByStep(() => !queueOccurrences.isEmpty());
+		await this.automaticStepByStep(() => this.onDetectingConflict());
 	}
 
 	protected async unitPropagate(): Promise<void> {
-		const queueOccurrences: Queue<OccurrenceList> = getOccurrenceListQueue();
 		const previousUPs: number = getNoUnitPropagations();
 		await this.automaticStepByStep(
-			() => previousUPs >= getNoUnitPropagations() && !queueOccurrences.isEmpty()
+			() => previousUPs >= getNoUnitPropagations() && this.onDetectingConflict()
 		);
 	}
 
