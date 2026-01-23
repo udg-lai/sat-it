@@ -89,15 +89,13 @@ export default class Problem {
 
 	learnClauses(clauses: Clause[]) {
 		for (const clause of clauses) {
-			if (!clause.isLemma())
-				logError('Learning clause', 'Clause to be learned was not marked as learned');
-			this.clauses.addClause(clause);
-			this.occurrencesTable.addOccurrences(clause);
-			this.watchTable.addWatches(clause);
+			this.learnClause(clause);
 		}
 	}
 
 	learnClause(clause: Clause): CRef {
+		if (!clause.isLemma())
+			logError('Learning clause', 'Clause to be learned was not marked as learned');
 		const cRef: CRef = this.clauses.addClause(clause);
 		this.occurrencesTable.addOccurrences(clause);
 		this.watchTable.addWatches(clause);
