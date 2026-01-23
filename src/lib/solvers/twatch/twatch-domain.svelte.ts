@@ -24,6 +24,7 @@ import { getConflictAnalysis, setConflictAnalysis } from '$lib/states/conflict-a
 import {
 	getClausePool,
 	getCurrentOccurrences,
+	getCurrentWatch,
 	getOccurrenceListQueue,
 	getOccurrencesTableMapping,
 	getProblemStore,
@@ -189,18 +190,18 @@ export const unaryEmptyClausesDetection: TWATCH_UNARY_EMPTY_CLAUSES_DETECTION_FU
 	return solverUnitClauseDetection(pool);
 };
 
-export type TWATCH_TRAVERSED_CURRENT_OCCURRENCES_FUN = (occurrenceList: OccurrenceList) => boolean;
+export type TWATCH_TRAVERSED_CURRENT_OCCURRENCES_FUN = (occurrenceList: OccurrenceList<Watch>) => boolean;
 
 export const traversedCurrentOccurrences: TWATCH_TRAVERSED_CURRENT_OCCURRENCES_FUN = (
-	occurrenceList: OccurrenceList
+	occurrenceList: OccurrenceList<Watch>
 ) => {
 	return occurrenceList.traversed();
 };
 
-export type TWATCH_NEXT_OCCURRENCE_FUN = () => CRef;
+export type TWATCH_NEXT_OCCURRENCE_FUN = () => Watch;
 
 export const nextClause: TWATCH_NEXT_OCCURRENCE_FUN = () => {
-	const occurrenceList: OccurrenceList = getCurrentOccurrences();
+	const occurrenceList: OccurrenceList<Watch> = getCurrentWatch();
 	if (occurrenceList.isEmpty()) {
 		logFatal('A non empty set was expected');
 	}
