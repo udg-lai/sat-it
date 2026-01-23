@@ -43,12 +43,6 @@ export default class OccurrenceTable {
 		}
 	}
 
-	multipleRemoveOccurrences(clauses: Clause[]): void {
-		for (const clause of clauses) {
-			this.removeOccurrences(clause);
-		}
-	}
-
 	getTable(): Map<Lit, Set<CRef>> {
 		return this.table;
 	}
