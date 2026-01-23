@@ -23,7 +23,6 @@ import {
 	getCurrentWatch,
 	getOccurrenceListQueue,
 	getOccurrencesTableMapping,
-	getProblemStore,
 	getVariablePool,
 	getWatchesQueue,
 	getWatchTableMapping,
@@ -310,7 +309,7 @@ export const learnConflictClause: TWATCH_LEARN_CONFLICT_CLAUSE_FUN = (lemma: Cla
 	lemma.setAsLemma();
 
 	//The lemma is stored inside the pool
-	const cRef: CRef = getProblemStore().addClause(lemma);
+	const cRef: CRef = getClausePool().addClause(lemma);
 
 	// Saves the learnt clause in the trail
 	getLatestTrail().attachLemma(lemma);
