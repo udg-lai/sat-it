@@ -109,16 +109,10 @@ class ClausePool implements IClausePool {
 		return learned;
 	}
 
-	pruneLearnedClauses(): Clause[] {
+	wipeLearnedClauses(): void {
 		// This functions removes all learned clauses from the pool
 		// and returns the removed clauses
-		const removedClauses: Clause[] = [];
-		for (const tag of this.learnedClauses) {
-			removedClauses.push(this.clauses.get(tag) as Clause);
-			this.clauses.delete(tag);
-		}
 		this.learnedClauses.clear();
-		return removedClauses;
 	}
 
 	private _addClause(clause: Clause): CRef {

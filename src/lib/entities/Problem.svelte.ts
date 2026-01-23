@@ -76,22 +76,29 @@ export default class Problem {
 	}
 
 	forgetLearnedClauses() {
-		const removedClauses: Clause[] = this.clauses.pruneLearnedClauses();
-		this.occurrencesTable.multipleRemoveOccurrences(removedClauses);
+		// This is for a future functionality about forget learned clauses
+		const learned: Clause[] = this.clauses.getLearnedClauses();
+		for (const clause of learned) {
+			if (!clause.isLemma())
+				logError('Forgetting learned clause', 'Clause to be forgotten was not marked as learned');
+			this.occurrencesTable.removeOccurrences(clause);
+			this.watchTable.deleteWatches(clause);
+		}
+		this.clauses.wipeLearnedClauses();
 	}
 
 	learnClauses(clauses: Clause[]) {
 		for (const clause of clauses) {
-			if (!clause.isLemma())
-				logError('Learning clause', 'Clause to be learned was not marked as learned');
-			this.clauses.addClause(clause);
-			this.occurrencesTable.addOccurrences(clause);
+			this.learnClause(clause);
 		}
 	}
 
-	addClause(clause: Clause): CRef {
+	learnClause(clause: Clause): CRef {
+		if (!clause.isLemma())
+			logError('Learning clause', 'Clause to be learned was not marked as learned');
 		const cRef: CRef = this.clauses.addClause(clause);
 		this.occurrencesTable.addOccurrences(clause);
+		this.watchTable.addWatches(clause);
 		return cRef;
 	}
 
