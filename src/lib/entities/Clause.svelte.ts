@@ -225,6 +225,16 @@ export default class Clause implements Comparable<Clause> {
 		});
 	}
 
+	swapLiterals(x: number, y: number) {
+		if (this.size() <= x || this.size() <= y) {
+			logFatal('Swap issue', 'You are trying to change out of bound positions');
+		} else {
+			const aux: Literal = this.literals[x];
+			this.literals[x] = this.literals[y];
+			this.literals[y] = aux;
+		}
+	}
+
 	isEmpty(): boolean {
 		return this.literals.length === 0;
 	}

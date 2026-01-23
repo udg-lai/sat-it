@@ -1,8 +1,5 @@
 import { backjumping as backjumpingAlg } from '$lib/algorithms/backjumping.ts';
-import Clause, {
-	isUnitEval,
-	type ClauseEval
-} from '$lib/entities/Clause.svelte.ts';
+import Clause, { isUnitEval, type ClauseEval } from '$lib/entities/Clause.svelte.ts';
 import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
 import { ConflictAnalysis, type VirtualResolution } from '$lib/entities/ConflictAnalysis.svelte.ts';
 import Literal from '$lib/entities/Literal.svelte.ts';
@@ -23,7 +20,6 @@ import {
 import { getConflictAnalysis, setConflictAnalysis } from '$lib/states/conflict-anlysis.svelte.ts';
 import {
 	getClausePool,
-	getCurrentOccurrences,
 	getCurrentWatch,
 	getOccurrenceListQueue,
 	getOccurrencesTableMapping,
@@ -35,6 +31,14 @@ import {
 } from '$lib/states/problem.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
 import { getLatestTrail, stackTrail } from '$lib/states/trails.svelte.ts';
+import {
+	fromJust,
+	isJust,
+	isNothing,
+	makeJust,
+	makeNothing,
+	type Maybe
+} from '$lib/types/maybe.ts';
 import { Lit, type CRef, type List } from '$lib/types/types.ts';
 
 // ** state inputs **
@@ -47,8 +51,7 @@ export type TWATCH_CHECK_PENDING_OCCURRENCES_INPUT =
 
 export type TWATCH_COMPLEMENTARY_OCCURRENCES_RETRIEVE_INPUT = 'queue_occurrences_state';
 
-export type TWATCH_QUEUE_OCCURRENCES_INPUT =
-	| 'complementary_watched_occurrences_retrieve_state';
+export type TWATCH_QUEUE_OCCURRENCES_INPUT = 'complementary_watched_occurrences_retrieve_state';
 
 export type TWATCH_DEQUEUE_CURRENT_OCCURRENCES_INPUT = 'are_remaining_occurrences_state';
 
@@ -89,7 +92,7 @@ export type TWATCH_PROPAGATE_CC_INPUT = 'complementary_occurrences_retrieve_stat
 // New 2watch Inputs
 
 export type TWATCH_COMPLEMENTARY_WATCHED_OCCURRENCES_RETRIEVE_INPUT =
-	| 'queue_watched_occurrences_state';
+	'queue_watched_occurrences_state';
 
 export type TWATCH_QUEUE_WATCHED_OCCURRENCES_INPUT =
 	| 'are_remaining_occurrences_state'
@@ -99,26 +102,23 @@ export type TWATCH_WATCH_AT_FIRST_POSITION_INPUT =
 	| 'swap_watches_state'
 	| 'first_literal_satisfied_state';
 
-export type TWATCH_SWAP_WATCHES_INPUT =
-	| 'first_literal_satisfied_state';
+export type TWATCH_SWAP_WATCHES_INPUT = 'first_literal_satisfied_state';
 
 export type TWATCH_FIRST_LITERAL_SATISFIED_INPUT =
 	| 'traversed_current_occurrences_state'
 	| 'look_non_falsified_literal_state';
 
-export type TWATCH_LOOK_NON_FALSIFIED_LITERAL_INPUT =
-	| 'non_falsified_literal_found_state';
+export type TWATCH_LOOK_NON_FALSIFIED_LITERAL_INPUT = 'non_falsified_literal_found_state';
 
 export type TWATCH_NON_FALSIFIED_LITERAL_FOUND_INPUT =
 	| 'swap_second_k_literal_position_state'
 	| 'first_literal_falsified_state';
 
-export type TWATCH_SWAP_SECOND_K_LITERAL_POSITION_INPUT =
-	| 'traversed_current_occurrences_state'
+export type TWATCH_SWAP_SECOND_K_LITERAL_POSITION_INPUT = 'traversed_current_occurrences_state';
 
 export type TWATCH_FIRST_LITERAL_FALSIFIED_INPUT =
 	| 'wipe_occurrences_queue_state'
-	| 'unit_propagation_state'
+	| 'unit_propagation_state';
 
 export type TWATCH_INPUT =
 	| TWATCH_UNARY_EMPTY_CLAUSES_DETECTION_INPUT
@@ -190,7 +190,9 @@ export const unaryEmptyClausesDetection: TWATCH_UNARY_EMPTY_CLAUSES_DETECTION_FU
 	return solverUnitClauseDetection(pool);
 };
 
-export type TWATCH_TRAVERSED_CURRENT_OCCURRENCES_FUN = (occurrenceList: OccurrenceList<Watch>) => boolean;
+export type TWATCH_TRAVERSED_CURRENT_OCCURRENCES_FUN = (
+	occurrenceList: OccurrenceList<Watch>
+) => boolean;
 
 export const traversedCurrentOccurrences: TWATCH_TRAVERSED_CURRENT_OCCURRENCES_FUN = (
 	occurrenceList: OccurrenceList<Watch>
@@ -235,7 +237,9 @@ export const unitPropagation: TWATCH_UNIT_PROPAGATION_FUN = (
 
 export type TWATCH_COMPLEMENTARY_OCCURRENCES_RETRIEVE_FUN = (assignment: Lit) => Set<CRef>;
 
-export const complementaryOccurrences: TWATCH_COMPLEMENTARY_OCCURRENCES_RETRIEVE_FUN = (assignment: Lit) => {
+export const complementaryOccurrences: TWATCH_COMPLEMENTARY_OCCURRENCES_RETRIEVE_FUN = (
+	assignment: Lit
+) => {
 	const mapping: Map<Lit, Set<CRef>> = getOccurrencesTableMapping();
 	return solverComplementaryOccurrences(mapping, assignment);
 };
@@ -365,29 +369,123 @@ export const propagateCC: TWATCH_PROPAGATE_CC_FUN = (cRef: CRef) => {
 
 export type TWATCH_COMPLEMENTARY_WATCHED_OCCURRENCES_RETRIEVE_FUN = (assignment: Lit) => Set<CRef>;
 
-export const complementaryWatchedOccurrences: TWATCH_COMPLEMENTARY_OCCURRENCES_RETRIEVE_FUN = (assignment) => {
+export const complementaryWatchedOccurrences: TWATCH_COMPLEMENTARY_OCCURRENCES_RETRIEVE_FUN = (
+	assignment
+) => {
 	const complementary: Lit = Literal.complementary(assignment);
 	// For the moment this will be done like this... I don't know if a special "occurrence List for watches should be created"
 	const watches: Watch[] = getWatchTableMapping().retrieveWatchesFromLiteral(complementary);
-	const occurrence: Set<CRef> = new Set<CRef>()
-	watches.forEach(watch => {
-		occurrence.add(watch.cRef)
+	const occurrence: Set<CRef> = new Set<CRef>();
+	watches.forEach((watch) => {
+		occurrence.add(watch.cRef);
 	});
-	return occurrence
-}
+	return occurrence;
+};
 
-export type TWATCH_QUEUE_WATCHED_OCCURRENCES_FUN = (watches: OccurrenceList) => void;
+export type TWATCH_QUEUE_WATCHED_OCCURRENCES_FUN = (watches: OccurrenceList<Watch>) => void;
 
-export const queueWatchedOccurrences: TWATCH_QUEUE_WATCHED_OCCURRENCES_FUN = (watches: OccurrenceList) => {
+export const queueWatchedOccurrences: TWATCH_QUEUE_WATCHED_OCCURRENCES_FUN = (
+	watches: OccurrenceList<Watch>
+) => {
 	getWatchesQueue().enqueue(watches);
-}
+};
 
-export type TWATCH_WATCH_AT_FIRST_POSITION_FUN = (cRef: CRef) => boolean;
+export type TWATCH_WATCH_AT_FIRST_POSITION_FUN = (watch: Watch) => boolean;
 
-export const watchAtFirstPosition: TWATCH_WATCH_AT_FIRST_POSITION_FUN = (cRef: CRef) => {
-	const pool = getClausePool();
-	const clause = pool.at(cRef)
-}
+export const watchAtFirstPosition: TWATCH_WATCH_AT_FIRST_POSITION_FUN = (watch: Watch) => {
+	const cLits: Literal[] = getClausePool().at(watch.cRef).getLiterals();
+	const currentWatch: OccurrenceList<Watch> = getCurrentWatch();
+
+	// WATCH OUT: This condition is necessary. Empty clauses and unary clauses may also go through this state
+	// 	as at the beginning unary and empty clauses are retrieved.
+	if (!isJust(currentWatch.getLiteral())) {
+		return false;
+	} else {
+		return cLits[0].toInt() === fromJust(currentWatch.getLiteral());
+	}
+};
+
+export type TWATCH_SWAP_WATCHES_FUN = (watch: Watch) => void;
+
+export const swapWatches: TWATCH_SWAP_WATCHES_FUN = (watch: Watch) => {
+	const clause: Clause = getClausePool().at(watch.cRef);
+	if (clause.size() < 2) {
+		logFatal('Swap issue', 'The clause you are trying to swap positions has less than 2 literals');
+	} else {
+		clause.swapLiterals(0, 1);
+	}
+};
+
+export type TWATCH_FIRST_LITERAL_SATISFIED_FUN = (watch: Watch) => boolean;
+
+export const firstLiteralSatisfied: TWATCH_FIRST_LITERAL_SATISFIED_FUN = (watch: Watch) => {
+	const clause: Clause = getClausePool().at(watch.cRef);
+
+	// This can happen if an empty clause reach this state which is not technically wrong
+	if (clause.size() < 1) {
+		return false;
+	} else {
+		return clause.getLiterals()[0].isTrue();
+	}
+};
+
+// It returns the positions where a non falsified literal is found
+export type TWATCH_LOOK_NON_FALSIFIED_LITERAL_FUN = (watch: Watch) => Maybe<number>;
+
+export const lookNonFalsifiedLiteral: TWATCH_LOOK_NON_FALSIFIED_LITERAL_FUN = (watch: Watch) => {
+	const candidates: Literal[] = getClausePool().at(watch.cRef).getLiterals();
+
+	let i = 2;
+	let selectedCandidate: Maybe<number> = makeNothing();
+	while (i < candidates.length && isNothing(selectedCandidate)) {
+		if (!candidates[i].isFalse()) {
+			selectedCandidate = makeJust(i);
+		}
+		i++;
+	}
+	return selectedCandidate;
+};
+
+export type TWATCH_NON_FALSIFIED_LITERAL_FOUND_FUN = (candidate: Maybe<number>) => boolean;
+
+export const nonFalsifiedLiteralFound: TWATCH_NON_FALSIFIED_LITERAL_FOUND_FUN = (
+	candidate: Maybe<number>
+) => {
+	return isJust(candidate);
+};
+
+export type TWATCH_SWAP_SECOND_K_LITERAL_POSITION_FUN = (
+	candidate: Maybe<number>,
+	watch: Watch
+) => void;
+
+export const swapSecondKLiteralPos: TWATCH_SWAP_SECOND_K_LITERAL_POSITION_FUN = (
+	candidate: Maybe<number>,
+	watch: Watch
+) => {
+	if (isNothing(candidate)) {
+		logFatal('Swapping issue', 'There is no candidate');
+	}
+	const clause: Clause = getClausePool().at(watch.cRef);
+	const pos: number = fromJust(candidate);
+
+	if (clause.size() < pos) {
+		logFatal('Swap issue', 'The candidate access an out of bound positions from the clause');
+	} else {
+		clause.swapLiterals(1, pos);
+	}
+};
+
+export type TWATCH_FIRST_LITERAL_FALSIFIED_FUN = (watch: Watch) => boolean;
+
+export const firstLiteralFalsified: TWATCH_FIRST_LITERAL_FALSIFIED_FUN = (watch: Watch) => {
+	const clause: Clause = getClausePool().at(watch.cRef);
+	if (clause.size() < 2) {
+		return true;
+	} else {
+		return !clause.getLiterals()[0].isFalse();
+	}
+};
 
 export type TWATCH_FUN =
 	| TWATCH_UNARY_EMPTY_CLAUSES_DETECTION_FUN

@@ -41,7 +41,9 @@ import type {
 
 export const initialTransition = (): void => {
 	const emptyCRefs: Set<CRef> = ecTransition();
-	const occurrenceList: OccurrenceList = new OccurrenceList(makeNothing(), [...emptyCRefs]);
+	const occurrenceList: OccurrenceList<CRef> = new OccurrenceList<CRef>(makeNothing(), [
+		...emptyCRefs
+	]);
 	queueOccurrenceListTransition(occurrenceList);
 
 	// This is for showing the up-1 and up-n view
@@ -63,7 +65,7 @@ export const backtracking = (): void => {
 };
 
 const afterAssignmentBlock = (assignment: Lit): void => {
-	const occurrenceList: OccurrenceList = complementaryOccurrencesTransition(assignment);
+	const occurrenceList: OccurrenceList<CRef> = complementaryOccurrencesTransition(assignment);
 	queueOccurrenceListTransition(occurrenceList);
 
 	if (!getSolverMachine().runningOnAutomatic()) visitingComplementaryOccEventBus.emit();
@@ -99,7 +101,7 @@ const ecTransition = (): Set<CRef> => {
 		logFatal('Function call error', 'There should be a function in the Empty Clause state');
 	}
 	const emptyCRefs: Set<CRef> = state.run();
-	getSolverMachine().transition('queue_occurrence_list_state');
+	getSolverMachine().transition('queue_occurrences_state');
 	return emptyCRefs;
 };
 
@@ -184,7 +186,7 @@ const traversedOccurrenceListTransition = (): boolean => {
 	if (state.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the All Clauses Checked state');
 	}
-	const occurrenceList: OccurrenceList = getCurrentOccurrences();
+	const occurrenceList: OccurrenceList<CRef> = getCurrentOccurrences();
 	const traversed: boolean = state.run(occurrenceList);
 	if (traversed) getSolverMachine().transition('dequeue_occurrence_list_state');
 	else getSolverMachine().transition('next_clause_state');
@@ -200,7 +202,7 @@ const decideTransition = (): Lit => {
 		logFatal('Function call error', 'There should be a function in the Decide state');
 	}
 	const decision: Lit = state.run();
-	getSolverMachine().transition('complementary_occurrences_state');
+	getSolverMachine().transition('complementary_occurrences_retrieve_state');
 	return decision;
 };
 
@@ -213,11 +215,11 @@ const backtrackingTransition = (): Lit => {
 		logFatal('Function call error', 'There should be a function in the Backtracking state');
 	}
 	const assignment: Lit = state.run();
-	getSolverMachine().transition('complementary_occurrences_state');
+	getSolverMachine().transition('complementary_occurrences_retrieve_state');
 	return assignment;
 };
 
-const complementaryOccurrencesTransition = (assignment: Lit): OccurrenceList => {
+const complementaryOccurrencesTransition = (assignment: Lit): OccurrenceList<CRef> => {
 	const state = getSolverMachine().getActiveState() as NonFinalState<
 		BKT_COMPLEMENTARY_OCCURRENCES_FUN,
 		BKT_COMPLEMENTARY_OCCURRENCES_INPUT
@@ -229,12 +231,12 @@ const complementaryOccurrencesTransition = (assignment: Lit): OccurrenceList => 
 		);
 	}
 	const clauses: Set<CRef> = state.run(assignment);
-	getSolverMachine().transition('queue_occurrence_list_state');
+	getSolverMachine().transition('queue_occurrences_state');
 	const complementary: Lit = Literal.complementary(assignment);
-	return new OccurrenceList(makeJust(complementary), [...clauses]);
+	return new OccurrenceList<CRef>(makeJust(complementary), [...clauses]);
 };
 
-const queueOccurrenceListTransition = (occurrenceList: OccurrenceList): void => {
+const queueOccurrenceListTransition = (occurrenceList: OccurrenceList<CRef>): void => {
 	const state = getSolverMachine().getActiveState() as NonFinalState<
 		BKT_QUEUE_OCCURRENCE_LIST_FUN,
 		BKT_QUEUE_OCCURRENCE_LIST_INPUT

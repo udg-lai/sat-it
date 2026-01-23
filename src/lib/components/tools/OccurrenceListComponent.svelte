@@ -17,7 +17,7 @@
 	const solverMachine = $derived(getSolverMachine());
 
 	let clauses: Maybe<Clause>[] = $derived.by(() => {
-		const cRefs: CRef[] = getCurrentOccurrences().getCRefs();
+		const cRefs: CRef[] = getCurrentOccurrences().getOccurrences();
 		const realClauses: Maybe<Clause>[] = cRefs.map((cRef) => makeJust(getClausePool().at(cRef)));
 		return [makeNothing(), ...realClauses];
 	});

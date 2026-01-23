@@ -151,7 +151,10 @@ const are_remaining_occurrences_state: NonFinalState<
 	description: 'True if there are occurrence lists postponed, false otherwise',
 	run: pendingOccurrences,
 	transitions: new Map<TWATCH_CHECK_PENDING_OCCURRENCES_INPUT, number>()
-		.set('traversed_current_occurrences_state', twatch_stateName2StateId['traversed_occurrences_state'])
+		.set(
+			'traversed_current_occurrences_state',
+			twatch_stateName2StateId['traversed_occurrences_state']
+		)
 		.set('all_variables_assigned_state', twatch_stateName2StateId['all_variables_assigned_state'])
 };
 
@@ -164,7 +167,10 @@ const occurrence_list_traversed_state: NonFinalState<
 	run: traversedCurrentOccurrences,
 	transitions: new Map<TWATCH_TRAVERSED_CURRENT_OCCURRENCES_INPUT, number>()
 		.set('next_clause_state', twatch_stateName2StateId['next_clause_state'])
-		.set('dequeue_current_occurrences_state', twatch_stateName2StateId['dequeue_occurrence_list_state'])
+		.set(
+			'dequeue_current_occurrences_state',
+			twatch_stateName2StateId['dequeue_occurrence_list_state']
+		)
 };
 
 const next_clause_state: NonFinalState<TWATCH_NEXT_OCCURRENCE_FUN, TWATCH_NEXT_OCCURRENCE_INPUT> = {

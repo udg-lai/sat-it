@@ -11,7 +11,7 @@ import OccurrenceList from './OccurrenceList.svelte.ts';
 import OccurrenceTable from './OccurrenceTable.svelte.ts';
 import { Queue } from './Queue.svelte.ts';
 import { VariablePool } from './VariablePool.svelte.ts';
-import WatchTable from './WatchTable.svelte.ts';
+import WatchTable, { type Watch } from './WatchTable.svelte.ts';
 
 export default class Problem {
 	private variables: VariablePool = $state(new VariablePool(0));
@@ -19,12 +19,12 @@ export default class Problem {
 	private occurrencesTable: OccurrenceTable = $state(new OccurrenceTable());
 	private watchTable: WatchTable = $state(new WatchTable());
 
-	private occurrenceQueue: Queue<OccurrenceList> = $state(new Queue<OccurrenceList>());
-	private currentOccurrences: OccurrenceList = $derived(this.currentOccurrenceList());
+	private occurrenceQueue: Queue<OccurrenceList<CRef>> = $state(new Queue<OccurrenceList<CRef>>());
+	private currentOccurrences: OccurrenceList<CRef> = $derived(this.currentOccurrenceList());
 	private focusedAssignment: Maybe<Lit> = $derived(this.currentFocusedAssignment());
 
-	private watchesQueue: Queue<OccurrenceList> = $state(new Queue<OccurrenceList>());
-	private currentWatch: OccurrenceList = $derived(this.watchesQueue.element());
+	private watchesQueue: Queue<OccurrenceList<Watch>> = $state(new Queue<OccurrenceList<Watch>>());
+	private currentWatch: OccurrenceList<Watch> = $derived(this.currentWatchList());
 
 	constructor(instance: DimacsInstance | undefined = undefined) {
 		if (instance !== undefined) this.syncWithDimacsInstance(instance);
@@ -50,19 +50,19 @@ export default class Problem {
 		return this.focusedAssignment;
 	}
 
-	getCurrentOccurrences(): OccurrenceList {
+	getCurrentOccurrences(): OccurrenceList<CRef> {
 		return this.currentOccurrences;
 	}
 
-	getOccurrenceListQueue(): Queue<OccurrenceList> {
+	getOccurrenceListQueue(): Queue<OccurrenceList<CRef>> {
 		return this.occurrenceQueue;
 	}
 
-	getCurrentWatch(): OccurrenceList {
+	getCurrentWatch(): OccurrenceList<Watch> {
 		return this.currentWatch;
 	}
 
-	getWatchesQueue(): Queue<OccurrenceList> {
+	getWatchesQueue(): Queue<OccurrenceList<Watch>> {
 		return this.watchesQueue;
 	}
 
@@ -96,14 +96,23 @@ export default class Problem {
 	}
 
 	dropOccurrences(): void {
-		this.occurrenceQueue = new Queue<OccurrenceList>();
+		this.occurrenceQueue = new Queue<OccurrenceList<CRef>>();
+		this.watchesQueue = new Queue<OccurrenceList<Watch>>();
 	}
 
-	private currentOccurrenceList(): OccurrenceList {
+	private currentOccurrenceList(): OccurrenceList<CRef> {
 		if (this.occurrenceQueue.isEmpty()) {
 			return new OccurrenceList();
 		} else {
 			return this.occurrenceQueue.element();
+		}
+	}
+
+	private currentWatchList(): OccurrenceList<Watch> {
+		if (this.watchesQueue.isEmpty()) {
+			return new OccurrenceList<Watch>();
+		} else {
+			return this.watchesQueue.element();
 		}
 	}
 

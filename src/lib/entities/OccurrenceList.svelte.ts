@@ -1,6 +1,6 @@
 import { logError } from '$lib/states/toasts.svelte.ts';
 import { makeNothing, type Maybe } from '$lib/types/maybe.ts';
-import type { CRef, List, Lit } from '$lib/types/types.ts';
+import type { List, Lit } from '$lib/types/types.ts';
 
 // Kinda static structure that holds the occurrences of clauses for a given literal.
 // The occurrence list not necessary is provided by the assignment of a literal,

@@ -95,10 +95,10 @@ export const allAssigned: DPLL_ALL_VARIABLES_ASSIGNED_FUN = () => {
 	return solverAllAssigned(pool);
 };
 
-export type DPLL_QUEUE_OCCURRENCE_LIST_FUN = (occurrenceList: OccurrenceList) => void;
+export type DPLL_QUEUE_OCCURRENCE_LIST_FUN = (occurrenceList: OccurrenceList<CRef>) => void;
 
 export const queueOccurrenceList: DPLL_QUEUE_OCCURRENCE_LIST_FUN = (
-	occurrenceList: OccurrenceList
+	occurrenceList: OccurrenceList<CRef>
 ) => {
 	getOccurrenceListQueue().enqueue(occurrenceList);
 };
@@ -116,10 +116,10 @@ export const unitEmptyClauseDetection: DPLL_UNARY_EMPTY_CLAUSES_DETECTION_FUN = 
 	return solverUnitClauseDetection(pool);
 };
 
-export type DPLL_TRAVERSED_OCCURRENCE_LIST_FUN = (occurrenceList: OccurrenceList) => boolean;
+export type DPLL_TRAVERSED_OCCURRENCE_LIST_FUN = (occurrenceList: OccurrenceList<CRef>) => boolean;
 
 export const traversedOccurrenceList: DPLL_TRAVERSED_OCCURRENCE_LIST_FUN = (
-	occurrenceList: OccurrenceList
+	occurrenceList: OccurrenceList<CRef>
 ) => {
 	return occurrenceList.traversed();
 };
@@ -127,7 +127,7 @@ export const traversedOccurrenceList: DPLL_TRAVERSED_OCCURRENCE_LIST_FUN = (
 export type DPLL_NEXT_OCCURRENCE_FUN = () => CRef;
 
 export const nextClause: DPLL_NEXT_OCCURRENCE_FUN = () => {
-	const occurrenceList: OccurrenceList = getCurrentOccurrences();
+	const occurrenceList: OccurrenceList<CRef> = getCurrentOccurrences();
 	if (occurrenceList.isEmpty()) {
 		logFatal('A non empty set was expected');
 	}

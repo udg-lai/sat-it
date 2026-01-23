@@ -84,10 +84,10 @@ export const complementaryOccurrences: BKT_COMPLEMENTARY_OCCURRENCES_FUN = (assi
 	return solverComplementaryOccurrences(mapping, assignment);
 };
 
-export type BKT_QUEUE_OCCURRENCE_LIST_FUN = (occurrenceList: OccurrenceList) => void;
+export type BKT_QUEUE_OCCURRENCE_LIST_FUN = (occurrenceList: OccurrenceList<CRef>) => void;
 
 export const queueOccurrenceList: BKT_QUEUE_OCCURRENCE_LIST_FUN = (
-	occurrenceList: OccurrenceList
+	occurrenceList: OccurrenceList<CRef>
 ) => {
 	getOccurrenceListQueue().enqueue(occurrenceList);
 };
@@ -98,10 +98,10 @@ export const dequeueOccurrenceList: BKT_DEQUEUE_OCCURRENCE_LIST_FUN = () => {
 	getOccurrenceListQueue().dequeue();
 };
 
-export type BKT_TRAVERSED_OCCURRENCE_LIST_FUN = (occurrenceList: OccurrenceList) => boolean;
+export type BKT_TRAVERSED_OCCURRENCE_LIST_FUN = (occurrenceList: OccurrenceList<CRef>) => boolean;
 
 export const traversedOccurrenceList: BKT_TRAVERSED_OCCURRENCE_LIST_FUN = (
-	occurrenceList: OccurrenceList
+	occurrenceList: OccurrenceList<CRef>
 ) => {
 	return occurrenceList.traversed();
 };
@@ -109,7 +109,7 @@ export const traversedOccurrenceList: BKT_TRAVERSED_OCCURRENCE_LIST_FUN = (
 export type BKT_NEXT_OCCURRENCE_FUN = () => CRef;
 
 export const nextClause: BKT_NEXT_OCCURRENCE_FUN = () => {
-	const occurrenceList: OccurrenceList = getCurrentOccurrences();
+	const occurrenceList: OccurrenceList<CRef> = getCurrentOccurrences();
 	if (occurrenceList.isEmpty()) {
 		logFatal('A non empty set was expected');
 	}

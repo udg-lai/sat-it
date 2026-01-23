@@ -5,6 +5,7 @@ import { getConflictAnalysis } from '$lib/states/conflict-anlysis.svelte.ts';
 import { getConfDelayMS } from '$lib/states/parameters.svelte.ts';
 import { getOccurrenceListQueue } from '$lib/states/problem.svelte.ts';
 import { getNoUnitPropagations } from '$lib/states/statistics.svelte.ts';
+import type { CRef } from '$lib/types/types.ts';
 import { SolverMachine } from '../SolverMachine.svelte.ts';
 import type { CDCL_FUN, CDCL_INPUT } from './cdcl-domain.svelte.ts';
 import {
@@ -68,7 +69,7 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 		//	2. If the occurrence list has been analyzed, then we should upload the following occurrence list form the queue or go to the decision state.
 
 		// Get the current occurrence list
-		const occurrences: OccurrenceList = getOccurrenceListQueue().element();
+		const occurrences: OccurrenceList<CRef> = getOccurrenceListQueue().element();
 
 		// Either traverse it or find a conflict.
 		await this.automaticStepByStep(() => !occurrences.traversed() && !this.onConflictState());
@@ -96,7 +97,7 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 	}
 
 	onDetectingConflict(): boolean {
-		const queueOccurrences: Queue<OccurrenceList> = getOccurrenceListQueue();
+		const queueOccurrences: Queue<OccurrenceList<CRef>> = getOccurrenceListQueue();
 		return !queueOccurrences.isEmpty() && !this.stateMachine.onConflictState();
 	}
 }

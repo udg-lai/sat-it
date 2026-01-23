@@ -71,13 +71,16 @@ import type {
 
 export const initialTransition = (): void => {
 	const unaryEmptyCRefs: Set<CRef> = unaryEmptyClausesTransition();
-	const occurrenceList: OccurrenceList = new OccurrenceList(makeNothing(), [...unaryEmptyCRefs]);
+	const occurrenceList: OccurrenceList<CRef> = new OccurrenceList<CRef>(makeNothing(), [
+		...unaryEmptyCRefs
+	]);
 	afterComplementaryBlock(occurrenceList);
 };
 
 export const decide = (): void => {
 	const assignment: Lit = decideTransition();
-	const occurrenceList: OccurrenceList = complementaryOccurrencesDetectionTransition(assignment);
+	const occurrenceList: OccurrenceList<CRef> =
+		complementaryOccurrencesDetectionTransition(assignment);
 	afterComplementaryBlock(occurrenceList);
 };
 
@@ -125,7 +128,8 @@ export const conflictAnalysisBlock = (): void => {
 		pushTrailTransition(trailAfterBJ);
 
 		const propagated: Lit = unitPropagationTransition(cRef, 'backjumping');
-		const occurrenceList: OccurrenceList = complementaryOccurrencesDetectionTransition(propagated);
+		const occurrenceList: OccurrenceList<CRef> =
+			complementaryOccurrencesDetectionTransition(propagated);
 
 		afterComplementaryBlock(occurrenceList);
 
@@ -136,7 +140,7 @@ export const conflictAnalysisBlock = (): void => {
 
 /* General non-exported transitions */
 
-const afterComplementaryBlock = (occurrenceList: OccurrenceList): void => {
+const afterComplementaryBlock = (occurrenceList: OccurrenceList<CRef>): void => {
 	queueOccurrenceListTransition(occurrenceList);
 	const thereAreOccurrences: boolean = checkPendingOccurrenceListsTransition();
 	if (!thereAreOccurrences) {
@@ -166,7 +170,7 @@ export const conflictDetectionBlock = (): void => {
 			const unitClause: boolean = unitClauseTransition(cRef);
 			if (unitClause) {
 				const propagated: Lit = unitPropagationTransition(cRef, 'up');
-				const occurrenceList: OccurrenceList =
+				const occurrenceList: OccurrenceList<CRef> =
 					complementaryOccurrencesDetectionTransition(propagated);
 				queueOccurrenceListTransition(occurrenceList);
 			}
@@ -188,7 +192,7 @@ const unaryEmptyClausesTransition = (): Set<CRef> => {
 		);
 	}
 	const units: Set<CRef> = state.run();
-	getSolverMachine().transition('queue_occurrence_list_state');
+	getSolverMachine().transition('queue_occurrences_state');
 	return units;
 };
 
@@ -208,7 +212,7 @@ const allVariablesAssignedTransition = (): void => {
 	else getSolverMachine().transition('decide_state');
 };
 
-const queueOccurrenceListTransition = (occurrenceList: OccurrenceList): void => {
+const queueOccurrenceListTransition = (occurrenceList: OccurrenceList<CRef>): void => {
 	const state = getSolverMachine().getActiveState() as NonFinalState<
 		CDCL_QUEUE_OCCURRENCE_LIST_FUN,
 		CDCL_QUEUE_OCCURRENCE_LIST_INPUT
@@ -258,7 +262,7 @@ const traversedOccurrenceListTransition = (): boolean => {
 	if (state.run === undefined) {
 		logFatal('Function call error', 'A function that validates all occurrences checked is needed');
 	}
-	const occurrenceList: OccurrenceList = getCurrentOccurrences();
+	const occurrenceList: OccurrenceList<CRef> = getCurrentOccurrences();
 	const traversed: boolean = state.run(occurrenceList);
 	if (traversed) getSolverMachine().transition('dequeue_occurrence_list_state');
 	else getSolverMachine().transition('next_clause_state');
@@ -348,11 +352,11 @@ const unitPropagationTransition = (cRef: CRef, reason: 'up' | 'backjumping'): Li
 		logFatal('Function call error', 'There should be a function in the Unit Propagation state');
 	}
 	const propagated: Lit = unitPropagationState.run(cRef, reason);
-	getSolverMachine().transition('complementary_occurrences_state');
+	getSolverMachine().transition('complementary_occurrences_retrieve_state');
 	return propagated;
 };
 
-const complementaryOccurrencesDetectionTransition = (assignment: Lit): OccurrenceList => {
+const complementaryOccurrencesDetectionTransition = (assignment: Lit): OccurrenceList<CRef> => {
 	const state = getSolverMachine().getActiveState() as NonFinalState<
 		CDCL_COMPLEMENTARY_OCCURRENCES_FUN,
 		CDCL_COMPLEMENTARY_OCCURRENCES_INPUT
@@ -364,9 +368,9 @@ const complementaryOccurrencesDetectionTransition = (assignment: Lit): Occurrenc
 		);
 	}
 	const clauses: Set<CRef> = state.run(assignment);
-	getSolverMachine().transition('queue_occurrence_list_state');
+	getSolverMachine().transition('queue_occurrences_state');
 	const complementary: Lit = Literal.complementary(assignment);
-	return new OccurrenceList(makeJust(complementary), [...clauses]);
+	return new OccurrenceList<CRef>(makeJust(complementary), [...clauses]);
 };
 
 const decideTransition = (): number => {
@@ -378,7 +382,7 @@ const decideTransition = (): number => {
 		logFatal('Function call error', 'There should be a function in the Decide state');
 	}
 	const decision: Lit = state.run();
-	getSolverMachine().transition('complementary_occurrences_state');
+	getSolverMachine().transition('complementary_occurrences_retrieve_state');
 	return decision;
 };
 

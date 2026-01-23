@@ -128,10 +128,10 @@ export const allAssigned: CDCL_ALL_VARIABLES_ASSIGNED_FUN = () => {
 	return solverAllAssigned(pool);
 };
 
-export type CDCL_QUEUE_OCCURRENCE_LIST_FUN = (occurrenceList: OccurrenceList) => void;
+export type CDCL_QUEUE_OCCURRENCE_LIST_FUN = (occurrenceList: OccurrenceList<CRef>) => void;
 
 export const queueOccurrenceList: CDCL_QUEUE_OCCURRENCE_LIST_FUN = (
-	occurrenceList: OccurrenceList
+	occurrenceList: OccurrenceList<CRef>
 ) => {
 	getOccurrenceListQueue().enqueue(occurrenceList);
 };
@@ -149,10 +149,10 @@ export const unaryEmptyClausesDetection: CDCL_UNARY_EMPTY_CLAUSES_DETECTION_FUN 
 	return solverUnitClauseDetection(pool);
 };
 
-export type CDCL_TRAVERSED_OCCURRENCE_LIST_FUN = (occurrenceList: OccurrenceList) => boolean;
+export type CDCL_TRAVERSED_OCCURRENCE_LIST_FUN = (occurrenceList: OccurrenceList<CRef>) => boolean;
 
 export const traversedOccurrenceList: CDCL_TRAVERSED_OCCURRENCE_LIST_FUN = (
-	occurrenceList: OccurrenceList
+	occurrenceList: OccurrenceList<CRef>
 ) => {
 	return occurrenceList.traversed();
 };
@@ -160,7 +160,7 @@ export const traversedOccurrenceList: CDCL_TRAVERSED_OCCURRENCE_LIST_FUN = (
 export type CDCL_NEXT_OCCURRENCE_FUN = () => CRef;
 
 export const nextClause: CDCL_NEXT_OCCURRENCE_FUN = () => {
-	const occurrenceList: OccurrenceList = getCurrentOccurrences();
+	const occurrenceList: OccurrenceList<CRef> = getCurrentOccurrences();
 	if (occurrenceList.isEmpty()) {
 		logFatal('A non empty set was expected');
 	}

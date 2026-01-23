@@ -1,6 +1,7 @@
 import OccurrenceList from '$lib/entities/OccurrenceList.svelte.ts';
 import { getConfDelayMS } from '$lib/states/parameters.svelte.ts';
 import { getCurrentOccurrences } from '$lib/states/problem.svelte.ts';
+import type { CRef } from '$lib/types/types.ts';
 import { SolverMachine } from '../SolverMachine.svelte.ts';
 import type { BKT_FUN, BKT_INPUT } from './bkt-domain.svelte.ts';
 import {
@@ -53,7 +54,7 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 	}
 
 	onDetectingConflict(): boolean {
-		const occurrenceList: OccurrenceList = getCurrentOccurrences();
+		const occurrenceList: OccurrenceList<CRef> = getCurrentOccurrences();
 		return !occurrenceList.isEmpty() && !this.stateMachine.onConflictState();
 	}
 }
