@@ -25,7 +25,7 @@ import type { CRef, Lit } from '$lib/types/types.ts';
 
 // ** state inputs **
 
-export type DPLL_UNARY_EMPTY_CLAUSES_DETECTION_INPUT = 'queue_occurrence_list_state';
+export type DPLL_UNARY_EMPTY_CLAUSES_DETECTION_INPUT = 'queue_occurrences_state';
 
 export type DPLL_CHECK_PENDING_OCCURRENCE_LISTS_INPUT =
 	| 'all_variables_assigned_state'
@@ -49,15 +49,15 @@ export type DPLL_UNIT_CLAUSE_INPUT = 'traversed_occurrences_state' | 'unit_propa
 
 export type DPLL_ALL_VARIABLES_ASSIGNED_INPUT = 'sat_state' | 'decide_state';
 
-export type DPLL_UNIT_PROPAGATION_INPUT = 'complementary_occurrences_state';
+export type DPLL_UNIT_PROPAGATION_INPUT = 'complementary_occurrences_retrieve_state';
 
-export type DPLL_COMPLEMENTARY_OCCURRENCES_INPUT = 'queue_occurrence_list_state';
+export type DPLL_COMPLEMENTARY_OCCURRENCES_INPUT = 'queue_occurrences_state';
 
 export type DPLL_AT_LEVEL_ZERO_INPUT = 'backtracking_state' | 'unsat_state';
 
-export type DPLL_BACKTRACKING_INPUT = 'complementary_occurrences_state';
+export type DPLL_BACKTRACKING_INPUT = 'complementary_occurrences_retrieve_state';
 
-export type DPLL_DECIDE_INPUT = 'complementary_occurrences_state';
+export type DPLL_DECIDE_INPUT = 'complementary_occurrences_retrieve_state';
 
 export type DPLL_WIPE_OCCURRENCE_QUEUE_INPUT = 'at_level_zero_state';
 

@@ -35,7 +35,7 @@ import type { CRef, List, Lit } from '$lib/types/types.ts';
 
 // ** state inputs **
 
-export type CDCL_UNARY_EMPTY_CLAUSES_DETECTION_INPUT = 'queue_occurrence_list_state';
+export type CDCL_UNARY_EMPTY_CLAUSES_DETECTION_INPUT = 'queue_occurrences_state';
 
 export type CDCL_CHECK_PENDING_OCCURRENCE_LISTS_INPUT =
 	| 'all_variables_assigned_state'
@@ -59,13 +59,13 @@ export type CDCL_UNIT_CLAUSE_INPUT = 'traversed_occurrences_state' | 'unit_propa
 
 export type CDCL_ALL_VARIABLES_ASSIGNED_INPUT = 'sat_state' | 'decide_state';
 
-export type CDCL_UNIT_PROPAGATION_INPUT = 'complementary_occurrences_state';
+export type CDCL_UNIT_PROPAGATION_INPUT = 'complementary_occurrences_retrieve_state';
 
-export type CDCL_COMPLEMENTARY_OCCURRENCES_INPUT = 'queue_occurrence_list_state';
+export type CDCL_COMPLEMENTARY_OCCURRENCES_INPUT = 'queue_occurrences_state';
 
 export type CDCL_AT_LEVEL_ZERO_INPUT = 'build_conflict_analysis_state' | 'unsat_state';
 
-export type CDCL_DECIDE_INPUT = 'complementary_occurrences_state';
+export type CDCL_DECIDE_INPUT = 'complementary_occurrences_retrieve_state';
 
 export type CDCL_WIPE_OCCURRENCE_QUEUE_INPUT = 'at_level_zero_state';
 
@@ -85,7 +85,7 @@ export type CDCL_BACKJUMPING_INPUT = 'push_trail_state';
 
 export type CDCL_PUSH_TRAIL_INPUT = 'unit_propagation_state';
 
-export type CDCL_PROPAGATE_CC_INPUT = 'complementary_occurrences_state';
+export type CDCL_PROPAGATE_CC_INPUT = 'complementary_occurrences_retrieve_state';
 
 export type CDCL_INPUT =
 	| CDCL_UNARY_EMPTY_CLAUSES_DETECTION_INPUT

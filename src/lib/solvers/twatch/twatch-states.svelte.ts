@@ -1,21 +1,21 @@
 import type { FinalState, NonFinalState, State } from '../StateMachine.svelte.ts';
 import { DECIDE_STATE_ID, SAT_STATE_ID, UNSAT_STATE_ID } from '../reserved.ts';
 import {
-	allAssigned,
+	allVariablesAssigned,
 	assertingClause,
 	atLevelZeroFun,
 	backjumping,
 	buildConflictAnalysis,
 	complementaryOccurrences,
 	decide,
-	dequeueOccurrenceList,
+	dequeueCurrentOccurrences,
 	learnConflictClause,
 	nextClause,
-	pendingOccurrenceList,
+	pendingOccurrences,
 	pushTrail,
-	queueOccurrenceList,
+	queueOccurrences,
 	sndHighestDL,
-	traversedOccurrenceList,
+	traversedCurrentOccurrences,
 	unaryEmptyClausesDetection,
 	unitClause,
 	unitPropagation,
@@ -32,10 +32,10 @@ import {
 	type TWATCH_BACKJUMPING_INPUT,
 	type TWATCH_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN,
 	type TWATCH_BUILD_CONFLICT_ANALYSIS_STRUCTURE_INPUT,
-	type TWATCH_CHECK_PENDING_OCCURRENCE_LISTS_FUN,
-	type TWATCH_CHECK_PENDING_OCCURRENCE_LISTS_INPUT,
-	type TWATCH_COMPLEMENTARY_OCCURRENCES_FUN,
-	type TWATCH_COMPLEMENTARY_OCCURRENCES_INPUT,
+	type TWATCH_CHECK_PENDING_OCCURRENCES_FUN,
+	type TWATCH_CHECK_PENDING_OCCURRENCES_INPUT,
+	type TWATCH_COMPLEMENTARY_OCCURRENCES_RETRIEVE_FUN,
+	type TWATCH_COMPLEMENTARY_OCCURRENCES_RETRIEVE_INPUT,
 	type TWATCH_CONFLICT_DETECTION_FUN,
 	type TWATCH_CONFLICT_DETECTION_INPUT,
 	type TWATCH_DECIDE_FUN,
@@ -48,20 +48,20 @@ import {
 	type TWATCH_NEXT_OCCURRENCE_INPUT,
 	type TWATCH_PUSH_TRAIL_FUN,
 	type TWATCH_PUSH_TRAIL_INPUT,
-	type TWATCH_QUEUE_OCCURRENCE_LIST_FUN,
-	type TWATCH_QUEUE_OCCURRENCE_LIST_INPUT,
+	type TWATCH_QUEUE_OCCURRENCES_FUN,
+	type TWATCH_QUEUE_OCCURRENCES_INPUT,
 	type TWATCH_SECOND_HIGHEST_DL_FUN,
 	type TWATCH_SECOND_HIGHEST_DL_INPUT,
-	type TWATCH_TRAVERSED_OCCURRENCE_LIST_FUN,
-	type TWATCH_TRAVERSED_OCCURRENCE_LIST_INPUT,
+	type TWATCH_TRAVERSED_CURRENT_OCCURRENCES_FUN,
+	type TWATCH_TRAVERSED_CURRENT_OCCURRENCES_INPUT,
 	type TWATCH_UNARY_EMPTY_CLAUSES_DETECTION_FUN,
 	type TWATCH_UNARY_EMPTY_CLAUSES_DETECTION_INPUT,
 	type TWATCH_UNIT_CLAUSE_FUN,
 	type TWATCH_UNIT_CLAUSE_INPUT,
 	type TWATCH_UNIT_PROPAGATION_FUN,
 	type TWATCH_UNIT_PROPAGATION_INPUT,
-	type TWATCH_UNSTACK_OCCURRENCE_LIST_FUN,
-	type TWATCH_UNSTACK_OCCURRENCE_LIST_INPUT,
+	type TWATCH_DEQUEUE_CURRENT_OCCURRENCES_FUN,
+	type TWATCH_DEQUEUE_CURRENT_OCCURRENCES_INPUT,
 	type TWATCH_VIRTUAL_RESOLUTION_FUN,
 	type TWATCH_VIRTUAL_RESOLUTION_INPUT,
 	type TWATCH_WIPE_OCCURRENCE_QUEUE_FUN,
@@ -116,7 +116,7 @@ const unary_empty_clauses_detection_state: NonFinalState<
 	run: unaryEmptyClausesDetection,
 	description: 'Seeks for the problem s unit clauses',
 	transitions: new Map<TWATCH_UNARY_EMPTY_CLAUSES_DETECTION_INPUT, number>().set(
-		'queue_occurrence_list_state',
+		'queue_occurrences_state',
 		twatch_stateName2StateId['queue_occurrence_list_state']
 	)
 };
@@ -126,7 +126,7 @@ const decide_state: NonFinalState<TWATCH_DECIDE_FUN, TWATCH_DECIDE_INPUT> = {
 	description: 'Executes a decide step',
 	run: decide,
 	transitions: new Map<TWATCH_DECIDE_INPUT, number>().set(
-		'complementary_occurrences_state',
+		'complementary_occurrences_retrieve_state',
 		twatch_stateName2StateId['complementary_occurrences_state']
 	)
 };
@@ -137,34 +137,34 @@ const all_variables_assigned_state: NonFinalState<
 > = {
 	id: twatch_stateName2StateId['all_variables_assigned_state'],
 	description: 'Verify if all variables have been assigned',
-	run: allAssigned,
+	run: allVariablesAssigned,
 	transitions: new Map<TWATCH_ALL_VARIABLES_ASSIGNED_INPUT, number>()
 		.set('sat_state', twatch_stateName2StateId['sat_state'])
 		.set('decide_state', twatch_stateName2StateId['decide_state'])
 };
 
 const are_remaining_occurrences_state: NonFinalState<
-	TWATCH_CHECK_PENDING_OCCURRENCE_LISTS_FUN,
-	TWATCH_CHECK_PENDING_OCCURRENCE_LISTS_INPUT
+	TWATCH_CHECK_PENDING_OCCURRENCES_FUN,
+	TWATCH_CHECK_PENDING_OCCURRENCES_INPUT
 > = {
 	id: twatch_stateName2StateId['are_remaining_occurrences_state'],
 	description: 'True if there are occurrence lists postponed, false otherwise',
-	run: pendingOccurrenceList,
-	transitions: new Map<TWATCH_CHECK_PENDING_OCCURRENCE_LISTS_INPUT, number>()
-		.set('traversed_occurrences_state', twatch_stateName2StateId['traversed_occurrences_state'])
+	run: pendingOccurrences,
+	transitions: new Map<TWATCH_CHECK_PENDING_OCCURRENCES_INPUT, number>()
+		.set('traversed_current_occurrences_state', twatch_stateName2StateId['traversed_occurrences_state'])
 		.set('all_variables_assigned_state', twatch_stateName2StateId['all_variables_assigned_state'])
 };
 
 const occurrence_list_traversed_state: NonFinalState<
-	TWATCH_TRAVERSED_OCCURRENCE_LIST_FUN,
-	TWATCH_TRAVERSED_OCCURRENCE_LIST_INPUT
+	TWATCH_TRAVERSED_CURRENT_OCCURRENCES_FUN,
+	TWATCH_TRAVERSED_CURRENT_OCCURRENCES_INPUT
 > = {
 	id: twatch_stateName2StateId['traversed_occurrences_state'],
 	description: 'True if current occurrence list has been completely traversed, false otherwise',
-	run: traversedOccurrenceList,
-	transitions: new Map<TWATCH_TRAVERSED_OCCURRENCE_LIST_INPUT, number>()
+	run: traversedCurrentOccurrences,
+	transitions: new Map<TWATCH_TRAVERSED_CURRENT_OCCURRENCES_INPUT, number>()
 		.set('next_clause_state', twatch_stateName2StateId['next_clause_state'])
-		.set('dequeue_occurrence_list_state', twatch_stateName2StateId['dequeue_occurrence_list_state'])
+		.set('dequeue_current_occurrences_state', twatch_stateName2StateId['dequeue_occurrence_list_state'])
 };
 
 const next_clause_state: NonFinalState<TWATCH_NEXT_OCCURRENCE_FUN, TWATCH_NEXT_OCCURRENCE_INPUT> = {
@@ -206,32 +206,32 @@ const unit_propagation_state: NonFinalState<
 	run: unitPropagation,
 	description: 'Propagates the unassigned literal of a clause',
 	transitions: new Map<TWATCH_UNIT_PROPAGATION_INPUT, number>().set(
-		'complementary_occurrences_state',
+		'complementary_occurrences_retrieve_state',
 		twatch_stateName2StateId['complementary_occurrences_state']
 	)
 };
 
 const complementary_occurrences_state: NonFinalState<
-	TWATCH_COMPLEMENTARY_OCCURRENCES_FUN,
-	TWATCH_COMPLEMENTARY_OCCURRENCES_INPUT
+	TWATCH_COMPLEMENTARY_OCCURRENCES_RETRIEVE_FUN,
+	TWATCH_COMPLEMENTARY_OCCURRENCES_RETRIEVE_INPUT
 > = {
 	id: twatch_stateName2StateId['complementary_occurrences_state'],
 	run: complementaryOccurrences,
 	description: 'Get the clauses where the complementary of the last assigned literal appear',
-	transitions: new Map<TWATCH_COMPLEMENTARY_OCCURRENCES_INPUT, number>().set(
-		'queue_occurrence_list_state',
+	transitions: new Map<TWATCH_COMPLEMENTARY_OCCURRENCES_RETRIEVE_INPUT, number>().set(
+		'queue_occurrences_state',
 		twatch_stateName2StateId['queue_occurrence_list_state']
 	)
 };
 
 const queue_occurrence_list_state: NonFinalState<
-	TWATCH_QUEUE_OCCURRENCE_LIST_FUN,
-	TWATCH_QUEUE_OCCURRENCE_LIST_INPUT
+	TWATCH_QUEUE_OCCURRENCES_FUN,
+	TWATCH_QUEUE_OCCURRENCES_INPUT
 > = {
 	id: twatch_stateName2StateId['queue_occurrence_list_state'],
-	run: queueOccurrenceList,
+	run: queueOccurrences,
 	description: 'Stack an occurrence list as pending',
-	transitions: new Map<TWATCH_QUEUE_OCCURRENCE_LIST_INPUT, number>()
+	transitions: new Map<TWATCH_QUEUE_OCCURRENCES_INPUT, number>()
 		.set(
 			'are_remaining_occurrences_state',
 			twatch_stateName2StateId['are_remaining_occurrences_state']
@@ -240,13 +240,13 @@ const queue_occurrence_list_state: NonFinalState<
 };
 
 const dequeue_occurrence_list_state: NonFinalState<
-	TWATCH_UNSTACK_OCCURRENCE_LIST_FUN,
-	TWATCH_UNSTACK_OCCURRENCE_LIST_INPUT
+	TWATCH_DEQUEUE_CURRENT_OCCURRENCES_FUN,
+	TWATCH_DEQUEUE_CURRENT_OCCURRENCES_INPUT
 > = {
 	id: twatch_stateName2StateId['dequeue_occurrence_list_state'],
-	run: dequeueOccurrenceList,
+	run: dequeueCurrentOccurrences,
 	description: 'Unstack the set of clause',
-	transitions: new Map<TWATCH_UNSTACK_OCCURRENCE_LIST_INPUT, number>().set(
+	transitions: new Map<TWATCH_DEQUEUE_CURRENT_OCCURRENCES_INPUT, number>().set(
 		'are_remaining_occurrences_state',
 		twatch_stateName2StateId['are_remaining_occurrences_state']
 	)

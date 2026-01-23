@@ -1,15 +1,16 @@
 import { backjumping as backjumpingAlg } from '$lib/algorithms/backjumping.ts';
 import Clause, {
 	isUnitEval,
-	isUnsatisfiedEval,
 	type ClauseEval
 } from '$lib/entities/Clause.svelte.ts';
 import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
 import { ConflictAnalysis, type VirtualResolution } from '$lib/entities/ConflictAnalysis.svelte.ts';
+import Literal from '$lib/entities/Literal.svelte.ts';
 import OccurrenceList from '$lib/entities/OccurrenceList.svelte.ts';
 import type { Trail } from '$lib/entities/Trail.svelte.ts';
 import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
 import type { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
+import type { Watch } from '$lib/entities/WatchTable.svelte.ts';
 import {
 	atLevelZero,
 	clauseEvaluation,
@@ -27,49 +28,46 @@ import {
 	getOccurrencesTableMapping,
 	getProblemStore,
 	getVariablePool,
+	getWatchesQueue,
+	getWatchTableMapping,
 	wipeOccurrences
 } from '$lib/states/problem.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
 import { getLatestTrail, stackTrail } from '$lib/states/trails.svelte.ts';
-import type { CRef, List, Lit } from '$lib/types/types.ts';
+import { Lit, type CRef, type List } from '$lib/types/types.ts';
 
 // ** state inputs **
 
-export type TWATCH_UNARY_EMPTY_CLAUSES_DETECTION_INPUT = 'queue_occurrence_list_state';
+export type TWATCH_UNARY_EMPTY_CLAUSES_DETECTION_INPUT = 'queue_occurrences_state';
 
-export type TWATCH_CHECK_PENDING_OCCURRENCE_LISTS_INPUT =
+export type TWATCH_CHECK_PENDING_OCCURRENCES_INPUT =
 	| 'all_variables_assigned_state'
-	| 'traversed_occurrences_state';
+	| 'traversed_current_occurrences_state';
 
-export type TWATCH_QUEUE_OCCURRENCE_LIST_INPUT =
-	| 'are_remaining_occurrences_state'
-	| 'traversed_occurrences_state';
+export type TWATCH_COMPLEMENTARY_OCCURRENCES_RETRIEVE_INPUT = 'queue_occurrences_state';
 
-export type TWATCH_UNSTACK_OCCURRENCE_LIST_INPUT = 'are_remaining_occurrences_state';
+export type TWATCH_QUEUE_OCCURRENCES_INPUT =
+	| 'complementary_watched_occurrences_retrieve_state';
 
-export type TWATCH_TRAVERSED_OCCURRENCE_LIST_INPUT =
+export type TWATCH_DEQUEUE_CURRENT_OCCURRENCES_INPUT = 'are_remaining_occurrences_state';
+
+export type TWATCH_TRAVERSED_CURRENT_OCCURRENCES_INPUT =
 	| 'next_clause_state'
-	| 'dequeue_occurrence_list_state';
+	| 'dequeue_current_occurrences_state';
 
-export type TWATCH_NEXT_OCCURRENCE_INPUT = 'falsified_clause_state';
-
-export type TWATCH_CONFLICT_DETECTION_INPUT = 'unit_clause_state' | 'wipe_occurrences_queue_state';
+export type TWATCH_NEXT_OCCURRENCE_INPUT = 'watch_at_first_position_state';
 
 export type TWATCH_UNIT_CLAUSE_INPUT = 'traversed_occurrences_state' | 'unit_propagation_state';
 
 export type TWATCH_ALL_VARIABLES_ASSIGNED_INPUT = 'sat_state' | 'decide_state';
 
-export type TWATCH_UNIT_PROPAGATION_INPUT = 'complementary_occurrences_state';
-
-export type TWATCH_COMPLEMENTARY_OCCURRENCES_INPUT = 'queue_occurrence_list_state';
+export type TWATCH_UNIT_PROPAGATION_INPUT = 'complementary_occurrences_retrieve_state';
 
 export type TWATCH_AT_LEVEL_ZERO_INPUT = 'build_conflict_analysis_state' | 'unsat_state';
 
-export type TWATCH_DECIDE_INPUT = 'complementary_occurrences_state';
+export type TWATCH_DECIDE_INPUT = 'complementary_occurrences_retrieve_state';
 
 export type TWATCH_WIPE_OCCURRENCE_QUEUE_INPUT = 'at_level_zero_state';
-
-//New CDCL Inputs
 
 export type TWATCH_BUILD_CONFLICT_ANALYSIS_STRUCTURE_INPUT = 'asserting_clause_state';
 
@@ -85,20 +83,53 @@ export type TWATCH_BACKJUMPING_INPUT = 'push_trail_state';
 
 export type TWATCH_PUSH_TRAIL_INPUT = 'unit_propagation_state';
 
-export type TWATCH_PROPAGATE_CC_INPUT = 'complementary_occurrences_state';
+export type TWATCH_PROPAGATE_CC_INPUT = 'complementary_occurrences_retrieve_state';
+
+// New 2watch Inputs
+
+export type TWATCH_COMPLEMENTARY_WATCHED_OCCURRENCES_RETRIEVE_INPUT =
+	| 'queue_watched_occurrences_state';
+
+export type TWATCH_QUEUE_WATCHED_OCCURRENCES_INPUT =
+	| 'are_remaining_occurrences_state'
+	| 'traversed_current_occurrences_state';
+
+export type TWATCH_WATCH_AT_FIRST_POSITION_INPUT =
+	| 'swap_watches_state'
+	| 'first_literal_satisfied_state';
+
+export type TWATCH_SWAP_WATCHES_INPUT =
+	| 'first_literal_satisfied_state';
+
+export type TWATCH_FIRST_LITERAL_SATISFIED_INPUT =
+	| 'traversed_current_occurrences_state'
+	| 'look_non_falsified_literal_state';
+
+export type TWATCH_LOOK_NON_FALSIFIED_LITERAL_INPUT =
+	| 'non_falsified_literal_found_state';
+
+export type TWATCH_NON_FALSIFIED_LITERAL_FOUND_INPUT =
+	| 'swap_second_k_literal_position_state'
+	| 'first_literal_falsified_state';
+
+export type TWATCH_SWAP_SECOND_K_LITERAL_POSITION_INPUT =
+	| 'traversed_current_occurrences_state'
+
+export type TWATCH_FIRST_LITERAL_FALSIFIED_INPUT =
+	| 'wipe_occurrences_queue_state'
+	| 'unit_propagation_state'
 
 export type TWATCH_INPUT =
 	| TWATCH_UNARY_EMPTY_CLAUSES_DETECTION_INPUT
 	| TWATCH_ALL_VARIABLES_ASSIGNED_INPUT
-	| TWATCH_QUEUE_OCCURRENCE_LIST_INPUT
-	| TWATCH_UNSTACK_OCCURRENCE_LIST_INPUT
-	| TWATCH_TRAVERSED_OCCURRENCE_LIST_INPUT
+	| TWATCH_QUEUE_OCCURRENCES_INPUT
+	| TWATCH_DEQUEUE_CURRENT_OCCURRENCES_INPUT
+	| TWATCH_TRAVERSED_CURRENT_OCCURRENCES_INPUT
 	| TWATCH_NEXT_OCCURRENCE_INPUT
-	| TWATCH_CONFLICT_DETECTION_INPUT
-	| TWATCH_CHECK_PENDING_OCCURRENCE_LISTS_INPUT
+	| TWATCH_CHECK_PENDING_OCCURRENCES_INPUT
 	| TWATCH_UNIT_CLAUSE_INPUT
 	| TWATCH_UNIT_PROPAGATION_INPUT
-	| TWATCH_COMPLEMENTARY_OCCURRENCES_INPUT
+	| TWATCH_COMPLEMENTARY_OCCURRENCES_RETRIEVE_INPUT
 	| TWATCH_AT_LEVEL_ZERO_INPUT
 	| TWATCH_DECIDE_INPUT
 	| TWATCH_WIPE_OCCURRENCE_QUEUE_INPUT
@@ -109,7 +140,16 @@ export type TWATCH_INPUT =
 	| TWATCH_SECOND_HIGHEST_DL_INPUT
 	| TWATCH_BACKJUMPING_INPUT
 	| TWATCH_PUSH_TRAIL_INPUT
-	| TWATCH_PROPAGATE_CC_INPUT;
+	| TWATCH_PROPAGATE_CC_INPUT
+	| TWATCH_COMPLEMENTARY_WATCHED_OCCURRENCES_RETRIEVE_INPUT
+	| TWATCH_QUEUE_WATCHED_OCCURRENCES_INPUT
+	| TWATCH_WATCH_AT_FIRST_POSITION_INPUT
+	| TWATCH_SWAP_WATCHES_INPUT
+	| TWATCH_FIRST_LITERAL_SATISFIED_INPUT
+	| TWATCH_LOOK_NON_FALSIFIED_LITERAL_INPUT
+	| TWATCH_NON_FALSIFIED_LITERAL_FOUND_INPUT
+	| TWATCH_SWAP_SECOND_K_LITERAL_POSITION_INPUT
+	| TWATCH_FIRST_LITERAL_FALSIFIED_INPUT;
 
 // ** state functions **
 
@@ -123,22 +163,22 @@ export const decide: TWATCH_DECIDE_FUN = () => {
 
 export type TWATCH_ALL_VARIABLES_ASSIGNED_FUN = () => boolean;
 
-export const allAssigned: TWATCH_ALL_VARIABLES_ASSIGNED_FUN = () => {
+export const allVariablesAssigned: TWATCH_ALL_VARIABLES_ASSIGNED_FUN = () => {
 	const pool = getVariablePool();
 	return solverAllAssigned(pool);
 };
 
-export type TWATCH_QUEUE_OCCURRENCE_LIST_FUN = (occurrenceList: OccurrenceList) => void;
+export type TWATCH_QUEUE_OCCURRENCES_FUN = (occurrenceList: OccurrenceList<CRef>) => void;
 
-export const queueOccurrenceList: TWATCH_QUEUE_OCCURRENCE_LIST_FUN = (
-	occurrenceList: OccurrenceList
+export const queueOccurrences: TWATCH_QUEUE_OCCURRENCES_FUN = (
+	occurrenceList: OccurrenceList<CRef>
 ) => {
 	getOccurrenceListQueue().enqueue(occurrenceList);
 };
 
-export type TWATCH_UNSTACK_OCCURRENCE_LIST_FUN = () => void;
+export type TWATCH_DEQUEUE_CURRENT_OCCURRENCES_FUN = () => void;
 
-export const dequeueOccurrenceList: TWATCH_UNSTACK_OCCURRENCE_LIST_FUN = () => {
+export const dequeueCurrentOccurrences: TWATCH_DEQUEUE_CURRENT_OCCURRENCES_FUN = () => {
 	getOccurrenceListQueue().dequeue();
 };
 
@@ -149,9 +189,9 @@ export const unaryEmptyClausesDetection: TWATCH_UNARY_EMPTY_CLAUSES_DETECTION_FU
 	return solverUnitClauseDetection(pool);
 };
 
-export type TWATCH_TRAVERSED_OCCURRENCE_LIST_FUN = (occurrenceList: OccurrenceList) => boolean;
+export type TWATCH_TRAVERSED_CURRENT_OCCURRENCES_FUN = (occurrenceList: OccurrenceList) => boolean;
 
-export const traversedOccurrenceList: TWATCH_TRAVERSED_OCCURRENCE_LIST_FUN = (
+export const traversedCurrentOccurrences: TWATCH_TRAVERSED_CURRENT_OCCURRENCES_FUN = (
 	occurrenceList: OccurrenceList
 ) => {
 	return occurrenceList.traversed();
@@ -167,17 +207,9 @@ export const nextClause: TWATCH_NEXT_OCCURRENCE_FUN = () => {
 	return occurrenceList.next();
 };
 
-export type TWATCH_CONFLICT_DETECTION_FUN = (cRef: CRef) => boolean;
+export type TWATCH_CHECK_PENDING_OCCURRENCES_FUN = () => boolean;
 
-export const unsatisfiedClause: TWATCH_CONFLICT_DETECTION_FUN = (cRef: CRef) => {
-	const pool: ClausePool = getClausePool();
-	const evaluation: ClauseEval = clauseEvaluation(pool, cRef);
-	return isUnsatisfiedEval(evaluation);
-};
-
-export type TWATCH_CHECK_PENDING_OCCURRENCE_LISTS_FUN = () => boolean;
-
-export const pendingOccurrenceList: TWATCH_CHECK_PENDING_OCCURRENCE_LISTS_FUN = () => {
+export const pendingOccurrences: TWATCH_CHECK_PENDING_OCCURRENCES_FUN = () => {
 	return !getOccurrenceListQueue().isEmpty();
 };
 
@@ -200,9 +232,9 @@ export const unitPropagation: TWATCH_UNIT_PROPAGATION_FUN = (
 	return solverUnitPropagation(variables, clauses, cRef, reason);
 };
 
-export type TWATCH_COMPLEMENTARY_OCCURRENCES_FUN = (assignment: Lit) => Set<CRef>;
+export type TWATCH_COMPLEMENTARY_OCCURRENCES_RETRIEVE_FUN = (assignment: Lit) => Set<CRef>;
 
-export const complementaryOccurrences: TWATCH_COMPLEMENTARY_OCCURRENCES_FUN = (assignment: Lit) => {
+export const complementaryOccurrences: TWATCH_COMPLEMENTARY_OCCURRENCES_RETRIEVE_FUN = (assignment: Lit) => {
 	const mapping: Map<Lit, Set<CRef>> = getOccurrencesTableMapping();
 	return solverComplementaryOccurrences(mapping, assignment);
 };
@@ -219,8 +251,6 @@ export const wipeOccurrenceQueue: TWATCH_WIPE_OCCURRENCE_QUEUE_FUN = () => {
 	// Drop all the occurrences lists inside the solver's queue
 	wipeOccurrences();
 };
-
-// ** additional cdcl function **
 
 export type TWATCH_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN = () => void;
 
@@ -330,16 +360,43 @@ export const propagateCC: TWATCH_PROPAGATE_CC_FUN = (cRef: CRef) => {
 	return solverUnitPropagation(variables, clauses, cRef, 'backjumping');
 };
 
+// ** additional 2watch functions
+
+export type TWATCH_COMPLEMENTARY_WATCHED_OCCURRENCES_RETRIEVE_FUN = (assignment: Lit) => Set<CRef>;
+
+export const complementaryWatchedOccurrences: TWATCH_COMPLEMENTARY_OCCURRENCES_RETRIEVE_FUN = (assignment) => {
+	const complementary: Lit = Literal.complementary(assignment);
+	// For the moment this will be done like this... I don't know if a special "occurrence List for watches should be created"
+	const watches: Watch[] = getWatchTableMapping().retrieveWatchesFromLiteral(complementary);
+	const occurrence: Set<CRef> = new Set<CRef>()
+	watches.forEach(watch => {
+		occurrence.add(watch.cRef)
+	});
+	return occurrence
+}
+
+export type TWATCH_QUEUE_WATCHED_OCCURRENCES_FUN = (watches: OccurrenceList) => void;
+
+export const queueWatchedOccurrences: TWATCH_QUEUE_WATCHED_OCCURRENCES_FUN = (watches: OccurrenceList) => {
+	getWatchesQueue().enqueue(watches);
+}
+
+export type TWATCH_WATCH_AT_FIRST_POSITION_FUN = (cRef: CRef) => boolean;
+
+export const watchAtFirstPosition: TWATCH_WATCH_AT_FIRST_POSITION_FUN = (cRef: CRef) => {
+	const pool = getClausePool();
+	const clause = pool.at(cRef)
+}
+
 export type TWATCH_FUN =
 	| TWATCH_UNARY_EMPTY_CLAUSES_DETECTION_FUN
-	| TWATCH_CHECK_PENDING_OCCURRENCE_LISTS_FUN
+	| TWATCH_CHECK_PENDING_OCCURRENCES_FUN
 	| TWATCH_ALL_VARIABLES_ASSIGNED_FUN
-	| TWATCH_QUEUE_OCCURRENCE_LIST_FUN
-	| TWATCH_UNSTACK_OCCURRENCE_LIST_FUN
-	| TWATCH_CONFLICT_DETECTION_FUN
+	| TWATCH_QUEUE_OCCURRENCES_FUN
+	| TWATCH_DEQUEUE_CURRENT_OCCURRENCES_FUN
 	| TWATCH_UNIT_CLAUSE_FUN
 	| TWATCH_UNIT_PROPAGATION_FUN
-	| TWATCH_COMPLEMENTARY_OCCURRENCES_FUN
+	| TWATCH_COMPLEMENTARY_OCCURRENCES_RETRIEVE_FUN
 	| TWATCH_AT_LEVEL_ZERO_FUN
 	| TWATCH_NEXT_OCCURRENCE_FUN
 	| TWATCH_DECIDE_FUN
@@ -351,4 +408,4 @@ export type TWATCH_FUN =
 	| TWATCH_SECOND_HIGHEST_DL_FUN
 	| TWATCH_BACKJUMPING_FUN
 	| TWATCH_PUSH_TRAIL_FUN
-	| TWATCH_TRAVERSED_OCCURRENCE_LIST_FUN;
+	| TWATCH_TRAVERSED_CURRENT_OCCURRENCES_FUN;

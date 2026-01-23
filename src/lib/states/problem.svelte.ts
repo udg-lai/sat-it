@@ -20,6 +20,10 @@ export const getFocusedAssignment = () => getProblemStore().getFocusedAssignment
 
 export const getOccurrenceListQueue = () => getProblemStore().getOccurrenceListQueue();
 
+export const getCurrentWatch = () => getProblemStore().getCurrentWatch();
+
+export const getWatchesQueue = () => getProblemStore().getWatchesQueue();
+
 export const syncProblemWithInstance = (instance: DimacsInstance) => {
 	getProblemStore().syncWithDimacsInstance(instance);
 };

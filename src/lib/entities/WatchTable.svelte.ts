@@ -63,6 +63,15 @@ export default class WatchTable {
 		}
 	}
 
+	retrieveWatchesFromLiteral(lit: Lit): Watch[] {
+		const watches: Watch[] | undefined = this.table.get(lit)
+		if(!watches) {
+			return []
+		} else {
+			return watches
+		}
+	}
+
 	private makeWatchTable(clauses: Clause[]): SvelteMap<Lit, Watch[]> {
 		const table: SvelteMap<Lit, Watch[]> = new SvelteMap();
 

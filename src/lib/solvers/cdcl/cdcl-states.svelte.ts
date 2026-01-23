@@ -115,7 +115,7 @@ const unary_empty_clauses_detection_state: NonFinalState<
 	run: unaryEmptyClausesDetection,
 	description: 'Seeks for the problem s unit clauses',
 	transitions: new Map<CDCL_UNARY_EMPTY_CLAUSES_DETECTION_INPUT, number>().set(
-		'queue_occurrence_list_state',
+		'queue_occurrences_state',
 		cdcl_stateName2StateId['queue_occurrence_list_state']
 	)
 };
@@ -125,7 +125,7 @@ const decide_state: NonFinalState<CDCL_DECIDE_FUN, CDCL_DECIDE_INPUT> = {
 	description: 'Executes a decide step',
 	run: decide,
 	transitions: new Map<CDCL_DECIDE_INPUT, number>().set(
-		'complementary_occurrences_state',
+		'complementary_occurrences_retrieve_state',
 		cdcl_stateName2StateId['complementary_occurrences_state']
 	)
 };
@@ -205,7 +205,7 @@ const unit_propagation_state: NonFinalState<
 	run: unitPropagation,
 	description: 'Propagates the unassigned literal of a clause',
 	transitions: new Map<CDCL_UNIT_PROPAGATION_INPUT, number>().set(
-		'complementary_occurrences_state',
+		'complementary_occurrences_retrieve_state',
 		cdcl_stateName2StateId['complementary_occurrences_state']
 	)
 };
@@ -218,7 +218,7 @@ const complementary_occurrences_state: NonFinalState<
 	run: complementaryOccurrences,
 	description: 'Get the clauses where the complementary of the last assigned literal appear',
 	transitions: new Map<CDCL_COMPLEMENTARY_OCCURRENCES_INPUT, number>().set(
-		'queue_occurrence_list_state',
+		'queue_occurrences_state',
 		cdcl_stateName2StateId['queue_occurrence_list_state']
 	)
 };

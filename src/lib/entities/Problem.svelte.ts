@@ -23,6 +23,9 @@ export default class Problem {
 	private currentOccurrences: OccurrenceList = $derived(this.currentOccurrenceList());
 	private focusedAssignment: Maybe<Lit> = $derived(this.currentFocusedAssignment());
 
+	private watchesQueue: Queue<OccurrenceList> = $state(new Queue<OccurrenceList>());
+	private currentWatch: OccurrenceList = $derived(this.watchesQueue.element());
+
 	constructor(instance: DimacsInstance | undefined = undefined) {
 		if (instance !== undefined) this.syncWithDimacsInstance(instance);
 	}
@@ -53,6 +56,14 @@ export default class Problem {
 
 	getOccurrenceListQueue(): Queue<OccurrenceList> {
 		return this.occurrenceQueue;
+	}
+
+	getCurrentWatch(): OccurrenceList {
+		return this.currentWatch;
+	}
+
+	getWatchesQueue(): Queue<OccurrenceList> {
+		return this.watchesQueue;
 	}
 
 	syncWithDimacsInstance({ summary }: DimacsInstance): void {
