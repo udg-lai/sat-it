@@ -20,17 +20,15 @@ import {
 	unitPropagation as solverUnitPropagation
 } from '$lib/solvers/shared.svelte.ts';
 import { getConflictAnalysis, setConflictAnalysis } from '$lib/states/conflict-anlysis.svelte.ts';
-import { getOccurrenceList, updateOccurrenceList } from '$lib/states/occurrence-list.svelte.ts';
 import {
 	getClausePool,
+	getCurrentOccurrences,
+	getOccurrenceListQueue,
 	getOccurrencesTableMapping,
 	getProblemStore,
-	getVariablePool
+	getVariablePool,
+	wipeOccurrences
 } from '$lib/states/problem.svelte.ts';
-import {
-	getOccurrenceListQueue,
-	wipeOccurrenceListQueue
-} from '$lib/states/queue-occurrence-lists.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
 import { getLatestTrail, stackTrail } from '$lib/states/trails.svelte.ts';
 import type { CRef, List, Lit } from '$lib/types/types.ts';
@@ -39,11 +37,9 @@ import type { CRef, List, Lit } from '$lib/types/types.ts';
 
 export type TWATCH_UNARY_EMPTY_CLAUSES_DETECTION_INPUT = 'queue_occurrence_list_state';
 
-export type TWATCH_PICK_OCCURRENCE_LIST_INPUT = 'traversed_occurrences_state';
-
 export type TWATCH_CHECK_PENDING_OCCURRENCE_LISTS_INPUT =
 	| 'all_variables_assigned_state'
-	| 'pick_occurrence_list_state';
+	| 'traversed_occurrences_state';
 
 export type TWATCH_QUEUE_OCCURRENCE_LIST_INPUT =
 	| 'are_remaining_occurrences_state'
@@ -93,7 +89,6 @@ export type TWATCH_PROPAGATE_CC_INPUT = 'complementary_occurrences_state';
 
 export type TWATCH_INPUT =
 	| TWATCH_UNARY_EMPTY_CLAUSES_DETECTION_INPUT
-	| TWATCH_PICK_OCCURRENCE_LIST_INPUT
 	| TWATCH_ALL_VARIABLES_ASSIGNED_INPUT
 	| TWATCH_QUEUE_OCCURRENCE_LIST_INPUT
 	| TWATCH_UNSTACK_OCCURRENCE_LIST_INPUT
@@ -145,7 +140,6 @@ export type TWATCH_UNSTACK_OCCURRENCE_LIST_FUN = () => void;
 
 export const dequeueOccurrenceList: TWATCH_UNSTACK_OCCURRENCE_LIST_FUN = () => {
 	getOccurrenceListQueue().dequeue();
-	updateOccurrenceList(new OccurrenceList());
 };
 
 export type TWATCH_UNARY_EMPTY_CLAUSES_DETECTION_FUN = () => Set<CRef>;
@@ -153,13 +147,6 @@ export type TWATCH_UNARY_EMPTY_CLAUSES_DETECTION_FUN = () => Set<CRef>;
 export const unaryEmptyClausesDetection: TWATCH_UNARY_EMPTY_CLAUSES_DETECTION_FUN = () => {
 	const pool: ClausePool = getClausePool();
 	return solverUnitClauseDetection(pool);
-};
-
-export type TWATCH_PICK_OCCURRENCE_LIST_FUN = () => void;
-
-export const pickPendingOccurrenceList: TWATCH_PICK_OCCURRENCE_LIST_FUN = () => {
-	const occurrenceList: OccurrenceList = getOccurrenceListQueue().element();
-	updateOccurrenceList(occurrenceList);
 };
 
 export type TWATCH_TRAVERSED_OCCURRENCE_LIST_FUN = (occurrenceList: OccurrenceList) => boolean;
@@ -173,7 +160,7 @@ export const traversedOccurrenceList: TWATCH_TRAVERSED_OCCURRENCE_LIST_FUN = (
 export type TWATCH_NEXT_OCCURRENCE_FUN = () => CRef;
 
 export const nextClause: TWATCH_NEXT_OCCURRENCE_FUN = () => {
-	const occurrenceList: OccurrenceList = getOccurrenceList();
+	const occurrenceList: OccurrenceList = getCurrentOccurrences();
 	if (occurrenceList.isEmpty()) {
 		logFatal('A non empty set was expected');
 	}
@@ -230,9 +217,7 @@ export type TWATCH_WIPE_OCCURRENCE_QUEUE_FUN = () => void;
 
 export const wipeOccurrenceQueue: TWATCH_WIPE_OCCURRENCE_QUEUE_FUN = () => {
 	// Drop all the occurrences lists inside the solver's queue
-	wipeOccurrenceListQueue();
-	// Updates the view with and empty occurrence list
-	updateOccurrenceList(new OccurrenceList());
+	wipeOccurrences();
 };
 
 // ** additional cdcl function **
@@ -347,7 +332,6 @@ export const propagateCC: TWATCH_PROPAGATE_CC_FUN = (cRef: CRef) => {
 
 export type TWATCH_FUN =
 	| TWATCH_UNARY_EMPTY_CLAUSES_DETECTION_FUN
-	| TWATCH_PICK_OCCURRENCE_LIST_FUN
 	| TWATCH_CHECK_PENDING_OCCURRENCE_LISTS_FUN
 	| TWATCH_ALL_VARIABLES_ASSIGNED_FUN
 	| TWATCH_QUEUE_OCCURRENCE_LIST_FUN

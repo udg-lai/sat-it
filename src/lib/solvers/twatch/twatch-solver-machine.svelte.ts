@@ -3,7 +3,7 @@ import { Queue } from '$lib/entities/Queue.svelte.ts';
 import { type SolverCommand } from '$lib/events/events.ts';
 import { getConflictAnalysis } from '$lib/states/conflict-anlysis.svelte.ts';
 import { getConfDelayMS } from '$lib/states/parameters.svelte.ts';
-import { getOccurrenceListQueue } from '$lib/states/queue-occurrence-lists.svelte.ts';
+import { getOccurrenceListQueue } from '$lib/states/problem.svelte.ts';
 import { getNoUnitPropagations } from '$lib/states/statistics.svelte.ts';
 import { SolverMachine } from '../SolverMachine.svelte.ts';
 import type { TWATCH_FUN, TWATCH_INPUT } from './twatch-domain.svelte.ts';
@@ -81,8 +81,7 @@ export class TWATCH_SolverMachine extends SolverMachine<TWATCH_FUN, TWATCH_INPUT
 	}
 
 	protected async solveCDStepByStep(): Promise<void> {
-		const queueOccurrences: Queue<OccurrenceList> = getOccurrenceListQueue();
-		await this.automaticStepByStep(() => !queueOccurrences.isEmpty());
+		await this.automaticStepByStep(() => this.onDetectingConflict());
 	}
 
 	protected async solveCAStepByStep(): Promise<void> {
@@ -90,10 +89,9 @@ export class TWATCH_SolverMachine extends SolverMachine<TWATCH_FUN, TWATCH_INPUT
 	}
 
 	protected async unitPropagate(): Promise<void> {
-		const queueOccurrences: Queue<OccurrenceList> = getOccurrenceListQueue();
 		const previousUPs: number = getNoUnitPropagations(); // This is monotonically increasing
 		await this.automaticStepByStep(
-			() => previousUPs == getNoUnitPropagations() && !queueOccurrences.isEmpty()
+			() => previousUPs == getNoUnitPropagations() && this.onDetectingConflict()
 		);
 	}
 

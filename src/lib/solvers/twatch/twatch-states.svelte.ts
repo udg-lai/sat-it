@@ -12,7 +12,6 @@ import {
 	learnConflictClause,
 	nextClause,
 	pendingOccurrenceList,
-	pickPendingOccurrenceList,
 	pushTrail,
 	queueOccurrenceList,
 	sndHighestDL,
@@ -47,8 +46,6 @@ import {
 	type TWATCH_LEARN_CONFLICT_CLAUSE_INPUT,
 	type TWATCH_NEXT_OCCURRENCE_FUN,
 	type TWATCH_NEXT_OCCURRENCE_INPUT,
-	type TWATCH_PICK_OCCURRENCE_LIST_FUN,
-	type TWATCH_PICK_OCCURRENCE_LIST_INPUT,
 	type TWATCH_PUSH_TRAIL_FUN,
 	type TWATCH_PUSH_TRAIL_INPUT,
 	type TWATCH_QUEUE_OCCURRENCE_LIST_FUN,
@@ -154,21 +151,8 @@ const are_remaining_occurrences_state: NonFinalState<
 	description: 'True if there are occurrence lists postponed, false otherwise',
 	run: pendingOccurrenceList,
 	transitions: new Map<TWATCH_CHECK_PENDING_OCCURRENCE_LISTS_INPUT, number>()
-		.set('pick_occurrence_list_state', twatch_stateName2StateId['pick_occurrence_list_state'])
+		.set('traversed_occurrences_state', twatch_stateName2StateId['traversed_occurrences_state'])
 		.set('all_variables_assigned_state', twatch_stateName2StateId['all_variables_assigned_state'])
-};
-
-const pick_occurrence_list_state: NonFinalState<
-	TWATCH_PICK_OCCURRENCE_LIST_FUN,
-	TWATCH_PICK_OCCURRENCE_LIST_INPUT
-> = {
-	id: twatch_stateName2StateId['pick_occurrence_list_state'],
-	description: 'Selects the next occurrence list to process queued',
-	run: pickPendingOccurrenceList,
-	transitions: new Map<TWATCH_PICK_OCCURRENCE_LIST_INPUT, number>().set(
-		'traversed_occurrences_state',
-		twatch_stateName2StateId['traversed_occurrences_state']
-	)
 };
 
 const occurrence_list_traversed_state: NonFinalState<
@@ -384,7 +368,6 @@ states.set(sat_state.id, sat_state);
 states.set(unary_empty_clauses_detection_state.id, unary_empty_clauses_detection_state);
 states.set(are_remaining_occurrences_state.id, are_remaining_occurrences_state);
 states.set(queue_occurrence_list_state.id, queue_occurrence_list_state);
-states.set(pick_occurrence_list_state.id, pick_occurrence_list_state);
 states.set(all_variables_assigned_state.id, all_variables_assigned_state);
 states.set(decide_state.id, decide_state);
 states.set(dequeue_occurrence_list_state.id, dequeue_occurrence_list_state);

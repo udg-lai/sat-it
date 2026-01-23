@@ -3,17 +3,17 @@ import type { ConflictAnalysis, VirtualResolution } from '$lib/entities/Conflict
 import Literal from '$lib/entities/Literal.svelte.ts';
 import OccurrenceList from '$lib/entities/OccurrenceList.svelte.ts';
 import type { Trail } from '$lib/entities/Trail.svelte.ts';
-import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
 import {
 	conflictAnalysisFinishedEventBus,
 	conflictDetectedEventBus,
 	visitingComplementaryOccEventBus
 } from '$lib/events/events.ts';
 import { getConflictAnalysis } from '$lib/states/conflict-anlysis.svelte.ts';
-import { focusOnAssignment, wipeFocusAssignment } from '$lib/states/focused-assignment.svelte.ts';
-import { getOccurrenceList, updateOccurrenceList } from '$lib/states/occurrence-list.svelte.ts';
-import { getClausePool } from '$lib/states/problem.svelte.ts';
-import { getOccurrenceListQueue } from '$lib/states/queue-occurrence-lists.svelte.ts';
+import {
+	getClausePool,
+	getCurrentOccurrences,
+	getOccurrenceListQueue
+} from '$lib/states/problem.svelte.ts';
 import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 import { increaseNoConflicts } from '$lib/states/statistics.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
@@ -45,8 +45,6 @@ import type {
 	TWATCH_LEARN_CONFLICT_CLAUSE_INPUT,
 	TWATCH_NEXT_OCCURRENCE_FUN,
 	TWATCH_NEXT_OCCURRENCE_INPUT,
-	TWATCH_PICK_OCCURRENCE_LIST_FUN,
-	TWATCH_PICK_OCCURRENCE_LIST_INPUT,
 	TWATCH_PUSH_TRAIL_FUN,
 	TWATCH_PUSH_TRAIL_INPUT,
 	TWATCH_QUEUE_OCCURRENCE_LIST_FUN,
@@ -100,10 +98,6 @@ export const preConflictAnalysis = () => {
 				'CDCL Conflict Analysis',
 				'The conflict clause should not be asserting (non-chronological backtracking)'
 			);
-		} else {
-			//In case there is something to apply resolution to, let's highlight it.
-			const nextUP: VariableAssignment = getConflictAnalysis().currentImplication();
-			focusOnAssignment(nextUP.toLit());
 		}
 	}
 };
@@ -122,8 +116,6 @@ export const conflictAnalysisBlock = (): void => {
 	const asserting: boolean = assertingClauseInConflictAnalysis();
 
 	if (asserting) {
-		//This needs to be cleared
-		wipeFocusAssignment();
 		// This is kinda stupid but (resolvent.asserting -> asserting)
 		const cRef: CRef = learnConflictClauseTransition();
 		const sndHighestDL: number = getSecondHighestDLTransition(cRef);
@@ -139,9 +131,6 @@ export const conflictAnalysisBlock = (): void => {
 
 		// After the conflict analysis finishes we notify it
 		conflictAnalysisFinishedEventBus.emit();
-	} else {
-		const nextUP: VariableAssignment = getConflictAnalysis().currentImplication();
-		focusOnAssignment(nextUP.toLit());
 	}
 };
 
@@ -150,9 +139,7 @@ export const conflictAnalysisBlock = (): void => {
 const afterComplementaryBlock = (occurrenceList: OccurrenceList): void => {
 	queueOccurrenceListTransition(occurrenceList);
 	const thereAreOccurrences: boolean = checkPendingOccurrenceListsTransition();
-	if (thereAreOccurrences) {
-		pickOccurrenceListTransition();
-	} else {
+	if (!thereAreOccurrences) {
 		allVariablesAssignedTransition();
 	}
 	// This is for showing the up-1 and up-n view
@@ -166,10 +153,7 @@ export const conflictDetectionBlock = (): void => {
 	if (traversedOccurrenceList) {
 		unstackOccurrenceListTransition();
 		const pendingOcc: boolean = checkPendingOccurrenceListsTransition();
-		if (pendingOcc) {
-			pickOccurrenceListTransition();
-		} else {
-			updateOccurrenceList(new OccurrenceList());
+		if (!pendingOcc) {
 			allVariablesAssignedTransition();
 		}
 	} else {
@@ -261,22 +245,9 @@ const checkPendingOccurrenceListsTransition = (): boolean => {
 		);
 	}
 	const pendingOcc: boolean = state.run();
-	if (pendingOcc) getSolverMachine().transition('pick_occurrence_list_state');
+	if (pendingOcc) getSolverMachine().transition('traversed_occurrences_state');
 	else getSolverMachine().transition('all_variables_assigned_state');
 	return pendingOcc;
-};
-
-const pickOccurrenceListTransition = (): void => {
-	// This method just updates the occurrences lits view with the first occurrence list in the queue.
-	const state = getSolverMachine().getActiveState() as NonFinalState<
-		TWATCH_PICK_OCCURRENCE_LIST_FUN,
-		TWATCH_PICK_OCCURRENCE_LIST_INPUT
-	>;
-	if (state.run === undefined) {
-		logFatal('Function call error', 'No function defined for picking the occurrence list');
-	}
-	state.run();
-	getSolverMachine().transition('traversed_occurrences_state');
 };
 
 const traversedOccurrenceListTransition = (): boolean => {
@@ -287,7 +258,7 @@ const traversedOccurrenceListTransition = (): boolean => {
 	if (state.run === undefined) {
 		logFatal('Function call error', 'A function that validates all occurrences checked is needed');
 	}
-	const occurrenceList: OccurrenceList = getOccurrenceList();
+	const occurrenceList: OccurrenceList = getCurrentOccurrences();
 	const traversed: boolean = state.run(occurrenceList);
 	if (traversed) getSolverMachine().transition('dequeue_occurrence_list_state');
 	else getSolverMachine().transition('next_clause_state');
