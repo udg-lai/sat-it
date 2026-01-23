@@ -31,16 +31,6 @@
 </composed-trail>
 
 <style>
-	.up-view {
-		position: relative;
-		width: fit-content;
-	}
-
-	.up-view > * {
-		position: relative;
-		top: var(--composed-top);
-	}
-
 	composed-trail {
 		display: flex;
 		flex-direction: column;
@@ -74,5 +64,7 @@
 		position: relative;
 		top: var(--composed-top);
 		flex: 1;
+		position: relative;
+		width: fit-content;
 	}
 </style>

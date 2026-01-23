@@ -1,8 +1,9 @@
 <script lang="ts">
 	import ConflictAnalysisComponent from './buttons/ConflictAnalysisComponent.svelte';
 	import ResolutionComponent from './buttons/StepComponent.svelte';
+	import { asset } from '$app/paths';
 
-	let resolutionIcon = '/icons/Resolution.svg';
+	let resolutionIcon = asset('/icons/Resolution.svg');
 </script>
 
 <conflict-analysis-debugger>

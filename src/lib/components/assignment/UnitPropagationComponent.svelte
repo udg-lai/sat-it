@@ -4,8 +4,7 @@
 	import type Clause from '$lib/entities/Clause.svelte.ts';
 	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
 	import { isUnitPropagationReason } from '$lib/entities/VariableAssignment.ts';
-	import { getFocusedAssignment } from '$lib/states/focused-assignment.svelte.ts';
-	import { getClausePool } from '$lib/states/problem.svelte.ts';
+	import { getClausePool, getFocusedAssignment } from '$lib/states/problem.svelte.ts';
 	import { logFatal } from '$lib/states/toasts.svelte.ts';
 	import { fromJust, isJust, type Maybe } from '$lib/types/maybe.ts';
 	import type { CRef, Lit } from '$lib/types/types.ts';

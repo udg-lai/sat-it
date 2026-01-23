@@ -1,8 +1,9 @@
 <script lang="ts">
 	import StepComponent from './buttons/StepComponent.svelte';
 	import NextVariableComponent from './buttons/NextVariableComponent.svelte';
+	import { asset } from '$app/paths';
 
-	let inspectClauseIcon = '/icons/Inspect Next Clause.svg';
+	let inspectClauseIcon = asset('/icons/Inspect Next Clause.svg');
 </script>
 
 <conflict-detection-debugger>

@@ -2,7 +2,7 @@ import type OccurrenceList from '$lib/entities/OccurrenceList.svelte.ts';
 import { Queue } from '$lib/entities/Queue.svelte.ts';
 import type { SolverCommand } from '$lib/events/events.ts';
 import { getConfDelayMS } from '$lib/states/parameters.svelte.ts';
-import { getOccurrenceListQueue } from '$lib/states/queue-occurrence-lists.svelte.ts';
+import { getOccurrenceListQueue } from '$lib/states/problem.svelte.ts';
 import { getNoUnitPropagations } from '$lib/states/statistics.svelte.ts';
 import { SolverMachine } from '../SolverMachine.svelte.ts';
 import type { DPLL_FUN, DPLL_INPUT } from './dpll-domain.svelte.ts';
@@ -73,15 +73,13 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 	}
 
 	protected async solveCDStepByStep(): Promise<void> {
-		const queueOccurrences: Queue<OccurrenceList> = getOccurrenceListQueue();
-		await this.automaticStepByStep(() => !queueOccurrences.isEmpty());
+		await this.automaticStepByStep(() => this.onDetectingConflict());
 	}
 
 	protected async unitPropagate(): Promise<void> {
-		const queueOccurrences: Queue<OccurrenceList> = getOccurrenceListQueue();
 		const previousUPs: number = getNoUnitPropagations();
 		await this.automaticStepByStep(
-			() => previousUPs >= getNoUnitPropagations() && !queueOccurrences.isEmpty()
+			() => previousUPs >= getNoUnitPropagations() && this.onDetectingConflict()
 		);
 	}
 

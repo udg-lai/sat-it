@@ -11,7 +11,7 @@ const MAX_DELAY_MS_PARAMETERS: number = MAX_DELAY_PARAMETER * 100;
 let confDelay: number = $state(3);
 
 // Mapping to milliseconds, inverse exponential scale
-let confDelayMS: number = $derived.by(() => {
+const confDelayMS: number = $derived.by(() => {
 	const inverseDecay: number =
 		MIN_DELAY_MS_PARAMETERS *
 		(MAX_DELAY_MS_PARAMETERS / MIN_DELAY_MS_PARAMETERS) **

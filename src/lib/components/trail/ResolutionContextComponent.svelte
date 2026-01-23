@@ -4,7 +4,6 @@
 	import type { NeverFn } from '$lib/types/types.ts';
 	import { onMount } from 'svelte';
 	import PlainClauseComponent from '../PlainClauseComponent.svelte';
-	import type Literal from '$lib/entities/Literal.svelte.ts';
 
 	interface Props {
 		trail: Trail;

@@ -10,12 +10,12 @@
 		changeInstanceEventBus,
 		ctrlZEventBus,
 		decisionMadeEventBus,
+		newTrailStackedEventBus,
 		renderTrailsEventBus,
 		resetProblemEventBus,
 		solverCommandEventBus,
 		solverSignalEventBus,
 		stepDelayEventBus,
-		newTrailStackedEventBus,
 		type SolverCommand,
 		type SolverSignal,
 		type UndoToDecisionEvent
@@ -27,7 +27,6 @@
 	import { getActiveInstance, getInstance } from '$lib/states/instances.svelte.ts';
 	import { getConfDelayMS } from '$lib/states/parameters.svelte.ts';
 	import { syncProblemWithInstance } from '$lib/states/problem.svelte.ts';
-	import { wipeOccurrenceListQueue } from '$lib/states/queue-occurrence-lists.svelte.ts';
 	import {
 		activateSolverMachine,
 		getSolverMachine,
@@ -57,8 +56,6 @@
 	import DebuggerComponent from './debugger/DebuggerComponent.svelte';
 	import { getConfiguredAlgorithm } from './settings/engine/state.svelte.ts';
 	import SolvingInformationComponent from './SolvingInformationComponent.svelte';
-	import { updateOccurrenceList } from '$lib/states/occurrence-list.svelte.ts';
-	import OccurrenceList from '$lib/entities/OccurrenceList.svelte.ts';
 
 	let trails: Trail[] = $state([]);
 
@@ -113,10 +110,6 @@
 		resetStatistics();
 		wipeDecisions();
 		wipeDifferSequence();
-		// No more occurrence lists queued
-		wipeOccurrenceListQueue();
-		// The current occurrence list must be updated as well
-		updateOccurrenceList(new OccurrenceList());
 
 		// Sync the problem with the new instance, meaning we create
 		// a new set of variables and clauses from the instance.
