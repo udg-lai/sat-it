@@ -1,24 +1,25 @@
 <script lang="ts">
-	import './style.css';
+	import { asset } from '$app/paths';
 	import ImageDescriptionComponent from './ImageDescriptionComponent.svelte';
+	import './style.css';
 
-	let decision = '/icons/Decision.svg';
-	let automaticSteps = '/icons/Automatic Steps.svg';
-	let backtracking = '/icons/Backtracking.svg';
-	let emptyClause = '/icons/Empty Clause.svg';
-	let finishTrail = '/icons/Finish Trail.svg';
-	let inspectAllClauses = '/icons/Inspect All Clauses.svg';
-	let inspectNextClause = '/icons/Inspect Next Clause.svg';
-	let pauseAuto = '/icons/Pause Auto.svg';
-	let resolution = '/icons/Resolution.svg';
-	let up1 = '/icons/UP1.svg';
-	let upn = '/icons/UPn.svg';
-	let expand = '/icons/Expand.svg';
-	let collapse = '/icons/Collapse.svg';
-	let solve = '/icons/Solve.svg';
-	let reset = '/icons/Reset.svg';
-	let userUndo = '/icons/User Undo.svg';
-	let userRedo = '/icons/User Redo.svg';
+	let decision = asset('/icons/Decision.svg');
+	let automaticSteps = asset('/icons/Automatic Steps.svg');
+	let backtracking = asset('/icons/Backtracking.svg');
+	let emptyClause = asset('/icons/Empty Clause.svg');
+	let finishTrail = asset('/icons/Finish Trail.svg');
+	let inspectAllClauses = asset('/icons/Inspect All Clauses.svg');
+	let inspectNextClause = asset('/icons/Inspect Next Clause.svg');
+	let pauseAuto = asset('/icons/Pause Auto.svg');
+	let resolution = asset('/icons/Resolution.svg');
+	let up1 = asset('/icons/UP1.svg');
+	let upn = asset('/icons/UPn.svg');
+	let expand = asset('/icons/Expand.svg');
+	let collapse = asset('/icons/Collapse.svg');
+	let solve = asset('/icons/Solve.svg');
+	let reset = asset('/icons/Reset.svg');
+	let userUndo = asset('/icons/User Undo.svg');
+	let userRedo = asset('/icons/User Redo.svg');
 </script>
 
 <div class="heading-class">

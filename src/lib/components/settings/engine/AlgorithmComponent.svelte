@@ -17,7 +17,7 @@
 	const elementClass: string =
 		'rounded-lg bg-[var(--main-bg-color)] border border-[var(--border-color)] p-2';
 
-	const availableAlgorithms: Algorithm[] = ['backtracking', 'dpll', 'cdcl'];
+	const availableAlgorithms: Algorithm[] = ['backtracking', 'dpll', 'cdcl', 'twatch'];
 	const showCDCL: boolean = $derived(getConfiguredAlgorithm() === 'cdcl');
 
 	let openModal: boolean = $state(false);

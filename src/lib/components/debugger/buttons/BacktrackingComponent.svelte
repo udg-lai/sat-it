@@ -1,7 +1,8 @@
 <script lang="ts">
-	import { solverCommandEventBus } from '$lib/events/events.ts';
-	import '../style.css';
 	import ImageRender from '$lib/components/tools/ImageRender.svelte';
+	import { solverCommandEventBus } from '$lib/events/events.ts';
+	import { asset } from '$app/paths';
+	import '../style.css';
 
 	interface Props {
 		finished?: boolean;
@@ -9,7 +10,7 @@
 	}
 
 	let { finished = false, onConflictDetection = false }: Props = $props();
-	let backtrackingIcon = '/icons/Backtracking.svg';
+	let backtrackingIcon = asset('/icons/Backtracking.svg');
 </script>
 
 <button

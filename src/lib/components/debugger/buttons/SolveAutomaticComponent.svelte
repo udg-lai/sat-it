@@ -2,6 +2,7 @@
 	import ImageRender from '$lib/components/tools/ImageRender.svelte';
 	import { solverCommandEventBus, expandEditorTrailsEventBus } from '$lib/events/events.ts';
 	import { updateAssignment } from '$lib/states/assignment.svelte.ts';
+	import { asset } from '$app/paths';
 	import '../style.css';
 
 	interface Props {
@@ -11,7 +12,7 @@
 
 	let { finished = false, backtrackingState = false }: Props = $props();
 
-	let automaticStepsIcon = '/icons/Automatic Steps.svg';
+	let automaticStepsIcon = asset('/icons/Automatic Steps.svg');
 
 	function solveAutomatic() {
 		updateAssignment('automated');

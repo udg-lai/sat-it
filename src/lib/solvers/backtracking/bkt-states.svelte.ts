@@ -79,7 +79,7 @@ const empty_clause_state: NonFinalState<
 	run: emptyClausesDetection,
 	description: 'Seeks for the empty clause in the clause pool',
 	transitions: new Map<BKT_EMPTY_CLAUSES_DETECTION_INPUT, number>().set(
-		'queue_occurrence_list_state',
+		'queue_occurrences_state',
 		bkt_stateName2StateId['queue_occurrence_list_state']
 	)
 };
@@ -101,7 +101,7 @@ const decide_state: NonFinalState<BKT_DECIDE_FUN, BKT_DECIDE_INPUT> = {
 	description: 'Executes a decide step',
 	run: decide,
 	transitions: new Map<BKT_DECIDE_INPUT, number>().set(
-		'complementary_occurrences_state',
+		'complementary_occurrences_retrieve_state',
 		bkt_stateName2StateId['complementary_occurrences_state']
 	)
 };
@@ -114,7 +114,7 @@ const complementary_occurrences_state: NonFinalState<
 	run: complementaryOccurrences,
 	description: 'Get the clauses where the complementary of the last assigned literal appear',
 	transitions: new Map<BKT_COMPLEMENTARY_OCCURRENCES_INPUT, number>().set(
-		'queue_occurrence_list_state',
+		'queue_occurrences_state',
 		bkt_stateName2StateId['queue_occurrence_list_state']
 	)
 };
@@ -193,7 +193,7 @@ const backtracking_state: NonFinalState<BKT_BACKTRACKING_FUN, BKT_BACKTRACKING_I
 	run: backtracking,
 	description: `Executes a backtracking step`,
 	transitions: new Map<BKT_BACKTRACKING_INPUT, number>().set(
-		'complementary_occurrences_state',
+		'complementary_occurrences_retrieve_state',
 		bkt_stateName2StateId['complementary_occurrences_state']
 	)
 };

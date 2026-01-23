@@ -6,18 +6,19 @@ import type { CRef, List, Lit } from '$lib/types/types.ts';
 // The occurrence list not necessary is provided by the assignment of a literal,
 // but because of the initial unit propagations
 // (i.e., no assignment triggered the visiting of the occurrences' complementary assignment)
-export default class OccurrenceList {
-	private literal: Maybe<Lit>;
-	private cRefs: List<CRef>;
+
+export default class OccurrenceList<T> {
+	private literal: Maybe<Lit> = $state(makeNothing());
+	private cRefs: List<T>;
 	private pointer: number = $state(-1);
 
-	constructor(literal: Maybe<Lit> = makeNothing(), cRefs: List<CRef> = []) {
+	constructor(literal: Maybe<Lit> = makeNothing(), cRefs: List<T> = []) {
 		this.literal = literal;
 		this.cRefs = cRefs;
 		this.pointer = -1;
 	}
 
-	next(): CRef {
+	next(): T {
 		this.pointer += 1;
 		if (this.pointer >= this.cRefs.length) {
 			logError('No more clauses to visit in this occurrence list.');
@@ -29,7 +30,7 @@ export default class OccurrenceList {
 		return this.literal;
 	}
 
-	getCRefs(): List<CRef> {
+	getOccurrences(): List<T> {
 		return this.cRefs;
 	}
 
@@ -37,7 +38,7 @@ export default class OccurrenceList {
 		return this.cRefs.length === 0;
 	}
 
-	at(index: number): CRef {
+	at(index: number): T {
 		if (index < 0 || index >= this.cRefs.length) {
 			logError('Index out of bounds in occurrence list.');
 		}
@@ -52,16 +53,16 @@ export default class OccurrenceList {
 		return this.pointer >= this.cRefs.length - 1;
 	}
 
-	pointedCRef(): CRef {
+	pointedCRef(): T {
 		if (this.pointer < 0 || this.pointer >= this.cRefs.length) {
 			logError('Pointer is out of bounds in occurrence list.');
 		}
 		return this.cRefs[this.pointer];
 	}
 
-	copy(): OccurrenceList {
+	copy(): OccurrenceList<T> {
 		const copiedLiteral: Maybe<Lit> = this.literal;
-		const copiedClauses: List<CRef> = [...this.cRefs];
+		const copiedClauses: List<T> = [...this.cRefs];
 		const newOccurrenceList = new OccurrenceList(copiedLiteral, copiedClauses);
 		newOccurrenceList.pointer = this.pointer;
 		return newOccurrenceList;

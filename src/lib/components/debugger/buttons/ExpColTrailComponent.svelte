@@ -5,13 +5,14 @@
 		setTrailsExpanded
 	} from '$lib/states/decision-levels-expanded.svelte.ts';
 	import '../style.css';
+	import { asset } from '$app/paths';
 
 	const expanded: boolean = $derived(getTrailsExpanded());
 
 	let textCollapse = $derived(expanded ? 'Collapse propagations' : 'Expand propagations');
 
-	let expandIcon = '/icons/Expand.svg';
-	let collapseIcon = '/icons/Collapse.svg';
+	let expandIcon = asset('/icons/Expand.svg');
+	let collapseIcon = asset('/icons/Collapse.svg');
 
 	function expandCollapse() {
 		console.log('Toggling expand/collapse of decision levels');

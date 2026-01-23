@@ -10,9 +10,10 @@ import {
 	complementaryOccurrences as solverComplementaryOccurrences,
 	decide as solverDecide
 } from '$lib/solvers/shared.svelte.ts';
-import { getOccurrenceList, updateOccurrenceList } from '$lib/states/occurrence-list.svelte.ts';
 import {
 	getClausePool,
+	getCurrentOccurrences,
+	getOccurrenceListQueue,
 	getOccurrencesTableMapping,
 	getVariablePool
 } from '$lib/states/problem.svelte.ts';
@@ -21,10 +22,10 @@ import type { CRef, Lit } from '$lib/types/types.ts';
 
 // **state inputs **
 
-export type BKT_EMPTY_CLAUSES_DETECTION_INPUT = 'queue_occurrence_list_state';
+export type BKT_EMPTY_CLAUSES_DETECTION_INPUT = 'queue_occurrences_state';
 export type BKT_ALL_VARIABLES_ASSIGNED_INPUT = 'sat_state' | 'decide_state';
-export type BKT_DECIDE_INPUT = 'complementary_occurrences_state';
-export type BKT_COMPLEMENTARY_OCCURRENCES_INPUT = 'queue_occurrence_list_state';
+export type BKT_DECIDE_INPUT = 'complementary_occurrences_retrieve_state';
+export type BKT_COMPLEMENTARY_OCCURRENCES_INPUT = 'queue_occurrences_state';
 export type BKT_QUEUE_OCCURRENCE_LIST_INPUT = 'traversed_occurrences_state';
 export type BKT_TRAVERSED_OCCURRENCE_LIST_INPUT =
 	| 'next_clause_state'
@@ -34,7 +35,7 @@ export type BKT_CONFLICT_DETECTION_INPUT =
 	| 'traversed_occurrences_state'
 	| 'dequeue_occurrence_list_state';
 export type BKT_AT_LEVEL_ZERO_INPUT = 'backtracking_state' | 'unsat_state';
-export type BKT_BACKTRACKING_INPUT = 'complementary_occurrences_state';
+export type BKT_BACKTRACKING_INPUT = 'complementary_occurrences_retrieve_state';
 export type BKT_DEQUEUE_OCCURRENCE_LIST_INPUT =
 	| 'all_variables_assigned_state'
 	| 'at_level_zero_state';
@@ -88,13 +89,13 @@ export type BKT_QUEUE_OCCURRENCE_LIST_FUN = (occurrenceList: OccurrenceList) => 
 export const queueOccurrenceList: BKT_QUEUE_OCCURRENCE_LIST_FUN = (
 	occurrenceList: OccurrenceList
 ) => {
-	updateOccurrenceList(occurrenceList);
+	getOccurrenceListQueue().enqueue(occurrenceList);
 };
 
 export type BKT_DEQUEUE_OCCURRENCE_LIST_FUN = () => void;
 
 export const dequeueOccurrenceList: BKT_DEQUEUE_OCCURRENCE_LIST_FUN = () => {
-	updateOccurrenceList(new OccurrenceList());
+	getOccurrenceListQueue().dequeue();
 };
 
 export type BKT_TRAVERSED_OCCURRENCE_LIST_FUN = (occurrenceList: OccurrenceList) => boolean;
@@ -108,7 +109,7 @@ export const traversedOccurrenceList: BKT_TRAVERSED_OCCURRENCE_LIST_FUN = (
 export type BKT_NEXT_OCCURRENCE_FUN = () => CRef;
 
 export const nextClause: BKT_NEXT_OCCURRENCE_FUN = () => {
-	const occurrenceList: OccurrenceList = getOccurrenceList();
+	const occurrenceList: OccurrenceList = getCurrentOccurrences();
 	if (occurrenceList.isEmpty()) {
 		logFatal('A non empty set was expected');
 	}

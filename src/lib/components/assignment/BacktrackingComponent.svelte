@@ -2,7 +2,7 @@
 	import { onChrome } from '$lib/app.svelte.ts';
 	import MathTexComponent from '$lib/components/MathTexComponent.svelte';
 	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
-	import { getFocusedAssignment } from '$lib/states/focused-assignment.svelte.ts';
+	import { getFocusedAssignment } from '$lib/states/problem.svelte.ts';
 	import { fromJust, isJust, type Maybe } from '$lib/types/maybe.ts';
 	import type { Lit } from '$lib/types/types.ts';
 	import HeadTailComponent from '../HeadTailComponent.svelte';

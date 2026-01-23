@@ -61,6 +61,15 @@ export default class WatchTable {
 		this.table.get(lit)?.push(watch);
 	}
 
+	retrieveWatchesFromLiteral(lit: Lit): Watch[] {
+		const watches: Watch[] | undefined = this.table.get(lit)
+		if(!watches) {
+			return []
+		} else {
+			return watches
+		}
+	}
+
 	private makeWatchTable(clauses: Clause[]): void {
 		// The clause allocator (i.e., ClausePool) must have already assigned tags to all clauses
 		for (const clause of clauses) {

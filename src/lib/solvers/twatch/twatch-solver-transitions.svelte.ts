@@ -23,49 +23,49 @@ import { makeJust, makeNothing } from '$lib/types/maybe.ts';
 import type { CRef, Lit } from '$lib/types/types.ts';
 import { type NonFinalState } from '../StateMachine.svelte.ts';
 import type {
-	CDCL_ALL_VARIABLES_ASSIGNED_FUN,
-	CDCL_ALL_VARIABLES_ASSIGNED_INPUT,
-	CDCL_ASSERTING_CLAUSE_FUN,
-	CDCL_ASSERTING_CLAUSE_INPUT,
-	CDCL_AT_LEVEL_ZERO_FUN,
-	CDCL_AT_LEVEL_ZERO_INPUT,
-	CDCL_BACKJUMPING_FUN,
-	CDCL_BACKJUMPING_INPUT,
-	CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN,
-	CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_INPUT,
-	CDCL_CHECK_PENDING_OCCURRENCE_LISTS_FUN,
-	CDCL_CHECK_PENDING_OCCURRENCE_LISTS_INPUT,
-	CDCL_COMPLEMENTARY_OCCURRENCES_FUN,
-	CDCL_COMPLEMENTARY_OCCURRENCES_INPUT,
-	CDCL_CONFLICT_DETECTION_FUN,
-	CDCL_CONFLICT_DETECTION_INPUT,
-	CDCL_DECIDE_FUN,
-	CDCL_DECIDE_INPUT,
-	CDCL_UNSTACK_OCCURRENCE_LIST_FUN,
-	CDCL_UNSTACK_OCCURRENCE_LIST_INPUT,
-	CDCL_LEARN_CONFLICT_CLAUSE_FUN,
-	CDCL_LEARN_CONFLICT_CLAUSE_INPUT,
-	CDCL_NEXT_OCCURRENCE_FUN,
-	CDCL_NEXT_OCCURRENCE_INPUT,
-	CDCL_PUSH_TRAIL_FUN,
-	CDCL_PUSH_TRAIL_INPUT,
-	CDCL_QUEUE_OCCURRENCE_LIST_FUN,
-	CDCL_QUEUE_OCCURRENCE_LIST_INPUT,
-	CDCL_SECOND_HIGHEST_DL_FUN,
-	CDCL_SECOND_HIGHEST_DL_INPUT,
-	CDCL_TRAVERSED_OCCURRENCE_LIST_FUN,
-	CDCL_TRAVERSED_OCCURRENCE_LIST_INPUT,
-	CDCL_UNARY_EMPTY_CLAUSES_DETECTION_FUN,
-	CDCL_UNARY_EMPTY_CLAUSES_DETECTION_INPUT,
-	CDCL_UNIT_CLAUSE_FUN,
-	CDCL_UNIT_CLAUSE_INPUT,
-	CDCL_UNIT_PROPAGATION_FUN,
-	CDCL_UNIT_PROPAGATION_INPUT,
-	CDCL_VIRTUAL_RESOLUTION_FUN,
-	CDCL_VIRTUAL_RESOLUTION_INPUT,
-	CDCL_WIPE_OCCURRENCE_QUEUE_FUN,
-	CDCL_WIPE_OCCURRENCE_QUEUE_INPUT
-} from './cdcl-domain.svelte.ts';
+	TWATCH_ALL_VARIABLES_ASSIGNED_FUN,
+	TWATCH_ALL_VARIABLES_ASSIGNED_INPUT,
+	TWATCH_ASSERTING_CLAUSE_FUN,
+	TWATCH_ASSERTING_CLAUSE_INPUT,
+	TWATCH_AT_LEVEL_ZERO_FUN,
+	TWATCH_AT_LEVEL_ZERO_INPUT,
+	TWATCH_BACKJUMPING_FUN,
+	TWATCH_BACKJUMPING_INPUT,
+	TWATCH_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN,
+	TWATCH_BUILD_CONFLICT_ANALYSIS_STRUCTURE_INPUT,
+	TWATCH_CHECK_PENDING_OCCURRENCES_FUN,
+	TWATCH_CHECK_PENDING_OCCURRENCES_INPUT,
+	TWATCH_COMPLEMENTARY_OCCURRENCES_RETRIEVE_FUN,
+	TWATCH_COMPLEMENTARY_OCCURRENCES_RETRIEVE_INPUT,
+	TWATCH_CONFLICT_DETECTION_FUN,
+	TWATCH_CONFLICT_DETECTION_INPUT,
+	TWATCH_DECIDE_FUN,
+	TWATCH_DECIDE_INPUT,
+	TWATCH_LEARN_CONFLICT_CLAUSE_FUN,
+	TWATCH_LEARN_CONFLICT_CLAUSE_INPUT,
+	TWATCH_NEXT_OCCURRENCE_FUN,
+	TWATCH_NEXT_OCCURRENCE_INPUT,
+	TWATCH_PUSH_TRAIL_FUN,
+	TWATCH_PUSH_TRAIL_INPUT,
+	TWATCH_QUEUE_OCCURRENCES_FUN,
+	TWATCH_QUEUE_OCCURRENCES_INPUT,
+	TWATCH_SECOND_HIGHEST_DL_FUN,
+	TWATCH_SECOND_HIGHEST_DL_INPUT,
+	TWATCH_TRAVERSED_CURRENT_OCCURRENCES_FUN,
+	TWATCH_TRAVERSED_CURRENT_OCCURRENCES_INPUT,
+	TWATCH_UNARY_EMPTY_CLAUSES_DETECTION_FUN,
+	TWATCH_UNARY_EMPTY_CLAUSES_DETECTION_INPUT,
+	TWATCH_UNIT_CLAUSE_FUN,
+	TWATCH_UNIT_CLAUSE_INPUT,
+	TWATCH_UNIT_PROPAGATION_FUN,
+	TWATCH_UNIT_PROPAGATION_INPUT,
+	TWATCH_DEQUEUE_CURRENT_OCCURRENCES_FUN,
+	TWATCH_DEQUEUE_CURRENT_OCCURRENCES_INPUT,
+	TWATCH_VIRTUAL_RESOLUTION_FUN,
+	TWATCH_VIRTUAL_RESOLUTION_INPUT,
+	TWATCH_WIPE_OCCURRENCE_QUEUE_FUN,
+	TWATCH_WIPE_OCCURRENCE_QUEUE_INPUT
+} from './twatch-domain.svelte.ts';
 
 /* exported transitions */
 
@@ -178,8 +178,8 @@ export const conflictDetectionBlock = (): void => {
 
 const unaryEmptyClausesTransition = (): Set<CRef> => {
 	const state = getSolverMachine().getActiveState() as NonFinalState<
-		CDCL_UNARY_EMPTY_CLAUSES_DETECTION_FUN,
-		CDCL_UNARY_EMPTY_CLAUSES_DETECTION_INPUT
+		TWATCH_UNARY_EMPTY_CLAUSES_DETECTION_FUN,
+		TWATCH_UNARY_EMPTY_CLAUSES_DETECTION_INPUT
 	>;
 	if (state.run === undefined) {
 		logFatal(
@@ -194,8 +194,8 @@ const unaryEmptyClausesTransition = (): Set<CRef> => {
 
 const allVariablesAssignedTransition = (): void => {
 	const allVariablesAssignedState = getSolverMachine().getActiveState() as NonFinalState<
-		CDCL_ALL_VARIABLES_ASSIGNED_FUN,
-		CDCL_ALL_VARIABLES_ASSIGNED_INPUT
+		TWATCH_ALL_VARIABLES_ASSIGNED_FUN,
+		TWATCH_ALL_VARIABLES_ASSIGNED_INPUT
 	>;
 	if (allVariablesAssignedState.run === undefined) {
 		logFatal(
@@ -210,8 +210,8 @@ const allVariablesAssignedTransition = (): void => {
 
 const queueOccurrenceListTransition = (occurrenceList: OccurrenceList): void => {
 	const state = getSolverMachine().getActiveState() as NonFinalState<
-		CDCL_QUEUE_OCCURRENCE_LIST_FUN,
-		CDCL_QUEUE_OCCURRENCE_LIST_INPUT
+		TWATCH_QUEUE_OCCURRENCES_FUN,
+		TWATCH_QUEUE_OCCURRENCES_INPUT
 	>;
 	if (state.run === undefined) {
 		logFatal(
@@ -235,8 +235,8 @@ const queueOccurrenceListTransition = (occurrenceList: OccurrenceList): void => 
 
 const checkPendingOccurrenceListsTransition = (): boolean => {
 	const state = getSolverMachine().getActiveState() as NonFinalState<
-		CDCL_CHECK_PENDING_OCCURRENCE_LISTS_FUN,
-		CDCL_CHECK_PENDING_OCCURRENCE_LISTS_INPUT
+		TWATCH_CHECK_PENDING_OCCURRENCES_FUN,
+		TWATCH_CHECK_PENDING_OCCURRENCES_INPUT
 	>;
 	if (state.run === undefined) {
 		logFatal(
@@ -252,8 +252,8 @@ const checkPendingOccurrenceListsTransition = (): boolean => {
 
 const traversedOccurrenceListTransition = (): boolean => {
 	const state = getSolverMachine().getActiveState() as NonFinalState<
-		CDCL_TRAVERSED_OCCURRENCE_LIST_FUN,
-		CDCL_TRAVERSED_OCCURRENCE_LIST_INPUT
+		TWATCH_TRAVERSED_CURRENT_OCCURRENCES_FUN,
+		TWATCH_TRAVERSED_CURRENT_OCCURRENCES_INPUT
 	>;
 	if (state.run === undefined) {
 		logFatal('Function call error', 'A function that validates all occurrences checked is needed');
@@ -268,8 +268,8 @@ const traversedOccurrenceListTransition = (): boolean => {
 const nextOccurrenceTransition = (): CRef => {
 	// Takes from the `head` of the occurrencesQueue the set of clauses to be checked
 	const state = getSolverMachine().getActiveState() as NonFinalState<
-		CDCL_NEXT_OCCURRENCE_FUN,
-		CDCL_NEXT_OCCURRENCE_INPUT
+		TWATCH_NEXT_OCCURRENCE_FUN,
+		TWATCH_NEXT_OCCURRENCE_INPUT
 	>;
 	if (state.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Next Clause state');
@@ -282,8 +282,8 @@ const nextOccurrenceTransition = (): CRef => {
 
 const conflictiveTransition = (cRef: CRef): boolean => {
 	const conflictDetectionState = getSolverMachine().getActiveState() as NonFinalState<
-		CDCL_CONFLICT_DETECTION_FUN,
-		CDCL_CONFLICT_DETECTION_INPUT
+		TWATCH_CONFLICT_DETECTION_FUN,
+		TWATCH_CONFLICT_DETECTION_INPUT
 	>;
 	if (conflictDetectionState.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Conflict Detection state');
@@ -296,8 +296,8 @@ const conflictiveTransition = (cRef: CRef): boolean => {
 
 const dlZeroCheck = (): boolean => {
 	const decisionLevelState = getSolverMachine().getActiveState() as NonFinalState<
-		CDCL_AT_LEVEL_ZERO_FUN,
-		CDCL_AT_LEVEL_ZERO_INPUT
+		TWATCH_AT_LEVEL_ZERO_FUN,
+		TWATCH_AT_LEVEL_ZERO_INPUT
 	>;
 	if (decisionLevelState.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Decision Level state');
@@ -307,8 +307,8 @@ const dlZeroCheck = (): boolean => {
 
 const unitClauseTransition = (cRef: CRef): boolean => {
 	const unitClauseState = getSolverMachine().getActiveState() as NonFinalState<
-		CDCL_UNIT_CLAUSE_FUN,
-		CDCL_UNIT_CLAUSE_INPUT
+		TWATCH_UNIT_CLAUSE_FUN,
+		TWATCH_UNIT_CLAUSE_INPUT
 	>;
 	if (unitClauseState.run === undefined) {
 		logFatal(
@@ -326,8 +326,8 @@ const unstackOccurrenceListTransition = (): void => {
 	// This transition removes the first Occurrence List from the occurrencesQueue.
 	// Of the CDCL_SolverMachine.
 	const state = getSolverMachine().getActiveState() as NonFinalState<
-		CDCL_UNSTACK_OCCURRENCE_LIST_FUN,
-		CDCL_UNSTACK_OCCURRENCE_LIST_INPUT
+		TWATCH_DEQUEUE_CURRENT_OCCURRENCES_FUN,
+		TWATCH_DEQUEUE_CURRENT_OCCURRENCES_INPUT
 	>;
 	if (state.run === undefined) {
 		logFatal(
@@ -341,8 +341,8 @@ const unstackOccurrenceListTransition = (): void => {
 
 const unitPropagationTransition = (cRef: CRef, reason: 'up' | 'backjumping'): Lit => {
 	const unitPropagationState = getSolverMachine().getActiveState() as NonFinalState<
-		CDCL_UNIT_PROPAGATION_FUN,
-		CDCL_UNIT_PROPAGATION_INPUT
+		TWATCH_UNIT_PROPAGATION_FUN,
+		TWATCH_UNIT_PROPAGATION_INPUT
 	>;
 	if (unitPropagationState.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Unit Propagation state');
@@ -354,8 +354,8 @@ const unitPropagationTransition = (cRef: CRef, reason: 'up' | 'backjumping'): Li
 
 const complementaryOccurrencesDetectionTransition = (assignment: Lit): OccurrenceList => {
 	const state = getSolverMachine().getActiveState() as NonFinalState<
-		CDCL_COMPLEMENTARY_OCCURRENCES_FUN,
-		CDCL_COMPLEMENTARY_OCCURRENCES_INPUT
+		TWATCH_COMPLEMENTARY_OCCURRENCES_RETRIEVE_FUN,
+		TWATCH_COMPLEMENTARY_OCCURRENCES_RETRIEVE_INPUT
 	>;
 	if (state.run === undefined) {
 		logFatal(
@@ -371,8 +371,8 @@ const complementaryOccurrencesDetectionTransition = (assignment: Lit): Occurrenc
 
 const decideTransition = (): number => {
 	const state = getSolverMachine().getActiveState() as NonFinalState<
-		CDCL_DECIDE_FUN,
-		CDCL_DECIDE_INPUT
+		TWATCH_DECIDE_FUN,
+		TWATCH_DECIDE_INPUT
 	>;
 	if (state.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Decide state');
@@ -384,8 +384,8 @@ const decideTransition = (): number => {
 
 const wipeOccurrenceQueueTransition = (): void => {
 	const state = getSolverMachine().getActiveState() as NonFinalState<
-		CDCL_WIPE_OCCURRENCE_QUEUE_FUN,
-		CDCL_WIPE_OCCURRENCE_QUEUE_INPUT
+		TWATCH_WIPE_OCCURRENCE_QUEUE_FUN,
+		TWATCH_WIPE_OCCURRENCE_QUEUE_INPUT
 	>;
 	if (state.run === undefined) {
 		logFatal(
@@ -401,8 +401,8 @@ const wipeOccurrenceQueueTransition = (): void => {
 
 const buildConflictAnalysisTransition = () => {
 	const state = getSolverMachine().getActiveState() as NonFinalState<
-		CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN,
-		CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_INPUT
+		TWATCH_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN,
+		TWATCH_BUILD_CONFLICT_ANALYSIS_STRUCTURE_INPUT
 	>;
 	if (state.run === undefined) {
 		logFatal(
@@ -416,8 +416,8 @@ const buildConflictAnalysisTransition = () => {
 
 const assertingClauseInConflictAnalysis = (): boolean => {
 	const state = getSolverMachine().getActiveState() as NonFinalState<
-		CDCL_ASSERTING_CLAUSE_FUN,
-		CDCL_ASSERTING_CLAUSE_INPUT
+		TWATCH_ASSERTING_CLAUSE_FUN,
+		TWATCH_ASSERTING_CLAUSE_INPUT
 	>;
 	if (state.run === undefined) {
 		logFatal(
@@ -433,8 +433,8 @@ const assertingClauseInConflictAnalysis = (): boolean => {
 
 const virtualResolutionTransition = () => {
 	const state = getSolverMachine().getActiveState() as NonFinalState<
-		CDCL_VIRTUAL_RESOLUTION_FUN,
-		CDCL_VIRTUAL_RESOLUTION_INPUT
+		TWATCH_VIRTUAL_RESOLUTION_FUN,
+		TWATCH_VIRTUAL_RESOLUTION_INPUT
 	>;
 	if (state.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Pick Last Assignment state');
@@ -446,8 +446,8 @@ const virtualResolutionTransition = () => {
 
 const learnConflictClauseTransition = (): CRef => {
 	const state = getSolverMachine().getActiveState() as NonFinalState<
-		CDCL_LEARN_CONFLICT_CLAUSE_FUN,
-		CDCL_LEARN_CONFLICT_CLAUSE_INPUT
+		TWATCH_LEARN_CONFLICT_CLAUSE_FUN,
+		TWATCH_LEARN_CONFLICT_CLAUSE_INPUT
 	>;
 	if (state.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Variable In CC state');
@@ -470,8 +470,8 @@ const learnConflictClauseTransition = (): CRef => {
 
 const getSecondHighestDLTransition = (cRef: CRef) => {
 	const state = getSolverMachine().getActiveState() as NonFinalState<
-		CDCL_SECOND_HIGHEST_DL_FUN,
-		CDCL_SECOND_HIGHEST_DL_INPUT
+		TWATCH_SECOND_HIGHEST_DL_FUN,
+		TWATCH_SECOND_HIGHEST_DL_INPUT
 	>;
 	if (state.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Variable In CC state');
@@ -486,8 +486,8 @@ const getSecondHighestDLTransition = (cRef: CRef) => {
 const backjumpingTransition = (trail: Trail, sndHighestDL: number): Trail => {
 	// This transition modifies the sent trail to
 	const state = getSolverMachine().getActiveState() as NonFinalState<
-		CDCL_BACKJUMPING_FUN,
-		CDCL_BACKJUMPING_INPUT
+		TWATCH_BACKJUMPING_FUN,
+		TWATCH_BACKJUMPING_INPUT
 	>;
 	if (state.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Variable In CC state');
@@ -500,8 +500,8 @@ const backjumpingTransition = (trail: Trail, sndHighestDL: number): Trail => {
 
 const pushTrailTransition = (trail: Trail): void => {
 	const state = getSolverMachine().getActiveState() as NonFinalState<
-		CDCL_PUSH_TRAIL_FUN,
-		CDCL_PUSH_TRAIL_INPUT
+		TWATCH_PUSH_TRAIL_FUN,
+		TWATCH_PUSH_TRAIL_INPUT
 	>;
 	if (state.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Variable In CC state');

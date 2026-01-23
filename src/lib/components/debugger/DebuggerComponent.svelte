@@ -1,21 +1,22 @@
 <script lang="ts">
+	import { asset } from '$app/paths';
+	import type { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
 	import type { SolverMachine } from '$lib/solvers/SolverMachine.svelte.ts';
 	import type { StateFun, StateInput } from '$lib/solvers/StateMachine.svelte.ts';
 	import { getBaselinePolarity } from '$lib/states/parameters.svelte.ts';
+	import { getVariablePool } from '$lib/states/problem.svelte.ts';
 	import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
+	import type { Algorithm } from '$lib/types/algorithm.ts';
 	import { fromJust, isJust, type Maybe } from '$lib/types/maybe.ts';
+	import { getConfiguredAlgorithm } from '../settings/engine/state.svelte.ts';
 	import AutoModeComponent from './AutoModeComponent.svelte';
+	import AutomaticSolvingComponent from './AutomaticSolvingComponent.svelte';
 	import ConflictAnalysisDebugger from './ConflictAnalysisDebuggerComponent.svelte';
 	import ConflictDetectionDebugger from './ConflictDetectionDebuggerComponent.svelte';
 	import DecisionDebugger from './DecisionDebuggerComponent.svelte';
-	import AutomaticSolvingComponent from './AutomaticSolvingComponent.svelte';
 	import GeneralPurposeDebuggerComponent from './GeneralPurposeDebuggerComponent.svelte';
-	import StepComponent from './buttons/StepComponent.svelte';
-	import type { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
-	import { getVariablePool } from '$lib/states/problem.svelte.ts';
-	import { getConfiguredAlgorithm } from '../settings/engine/state.svelte.ts';
-	import type { Algorithm } from '$lib/types/algorithm.ts';
 	import UnitPropagationDebuggerComponent from './UnitPropagationDebuggerComponent.svelte';
+	import StepComponent from './buttons/StepComponent.svelte';
 
 	const variables: VariablePool = $derived(getVariablePool());
 	const currentAlgorithm: Algorithm = $derived(getConfiguredAlgorithm());
@@ -32,7 +33,7 @@
 	let finished = $derived(solverMachine.onFinalState());
 	let inAutoMode = $derived(solverMachine.runningOnAutomatic());
 
-	let emptyClauseIcon = '/icons/Empty Clause.svg';
+	let emptyClauseIcon = asset('/icons/Empty Clause.svg');
 </script>
 
 <debugger>
@@ -49,7 +50,7 @@
 				{#if currentAlgorithm !== 'backtracking'}
 					<UnitPropagationDebuggerComponent />
 				{/if}
-			{:else if onConflict && currentAlgorithm === 'cdcl'}
+			{:else if onConflict && currentAlgorithm !== 'dpll' && currentAlgorithm !== 'backtracking'}
 				<ConflictAnalysisDebugger />
 			{:else if !finished}
 				<DecisionDebugger

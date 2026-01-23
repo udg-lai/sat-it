@@ -6,24 +6,24 @@ import { getConfDelayMS } from '$lib/states/parameters.svelte.ts';
 import { getOccurrenceListQueue } from '$lib/states/problem.svelte.ts';
 import { getNoUnitPropagations } from '$lib/states/statistics.svelte.ts';
 import { SolverMachine } from '../SolverMachine.svelte.ts';
-import type { CDCL_FUN, CDCL_INPUT } from './cdcl-domain.svelte.ts';
+import type { TWATCH_FUN, TWATCH_INPUT } from './twatch-domain.svelte.ts';
 import {
 	conflictAnalysisBlock,
 	conflictDetectionBlock,
 	decide,
 	initialTransition,
 	preConflictAnalysis
-} from './cdcl-solver-transitions.svelte.ts';
-import { CDCL_StateMachine, makeCDCLStateMachine } from './cdcl-state-machine.svelte.ts';
-import { cdcl_stateName2StateId } from './cdcl-states.svelte.ts';
+} from './twatch-solver-transitions.svelte.ts';
+import { TWATCH_StateMachine, makeTWATCHStateMachine } from './twatch-state-machine.svelte.ts';
+import { twatch_stateName2StateId } from './twatch-states.svelte.ts';
 
-export const makeCDCLSolver = (): CDCL_SolverMachine => {
-	return new CDCL_SolverMachine(getConfDelayMS());
+export const makeTWATCHSolver = (): TWATCH_SolverMachine => {
+	return new TWATCH_SolverMachine(getConfDelayMS());
 };
 
-export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
+export class TWATCH_SolverMachine extends SolverMachine<TWATCH_FUN, TWATCH_INPUT> {
 	constructor(stopTimeMS: number) {
-		const stateMachine: CDCL_StateMachine = makeCDCLStateMachine();
+		const stateMachine: TWATCH_StateMachine = makeTWATCHStateMachine();
 		super(stateMachine, 'cdcl', stopTimeMS);
 	}
 	// ** functions related to conflict analysis **
@@ -41,23 +41,23 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 	step(): void {
 		const activeId: number = this.stateMachine.getActiveId();
 		//The initial state
-		if (activeId === cdcl_stateName2StateId.unary_empty_clause_detection_state) {
+		if (activeId === twatch_stateName2StateId.unary_empty_clause_detection_state) {
 			initialTransition();
 		}
 		//Waiting to enter or not the clause analysis
-		else if (activeId === cdcl_stateName2StateId.traversed_occurrences_state) {
+		else if (activeId === twatch_stateName2StateId.traversed_occurrences_state) {
 			conflictDetectionBlock();
 		}
 		//Waiting to decide a variables
-		else if (activeId === cdcl_stateName2StateId.decide_state) {
+		else if (activeId === twatch_stateName2StateId.decide_state) {
 			decide();
 		}
 		// Waiting to begin the conflict analysis process once a conflict has been found
-		else if (activeId === cdcl_stateName2StateId.wipe_occurrences_queue_state) {
+		else if (activeId === twatch_stateName2StateId.wipe_occurrences_queue_state) {
 			preConflictAnalysis();
 		}
 		// Waiting to analyze a conflict
-		else if (activeId === cdcl_stateName2StateId.virtual_resolution_state) {
+		else if (activeId === twatch_stateName2StateId.virtual_resolution_state) {
 			conflictAnalysisBlock();
 		}
 	}
