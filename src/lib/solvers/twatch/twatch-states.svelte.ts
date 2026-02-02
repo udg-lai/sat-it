@@ -73,27 +73,26 @@ export const twatch_stateName2StateId = {
 	unsat_state: UNSAT_STATE_ID,
 	decide_state: DECIDE_STATE_ID,
 	unary_empty_clause_detection_state: 0,
-	queue_occurrence_list_state: 1,
-	are_remaining_occurrences_state: 2,
-	pick_occurrence_list_state: 3,
-	all_variables_assigned_state: 4,
-	dequeue_occurrence_list_state: 5,
-	clause_evaluation_state: 6,
-	traversed_occurrences_state: 7,
-	next_clause_state: 8,
-	falsified_clause_state: 9,
-	unit_clause_state: 10,
-	unit_propagation_state: 11,
-	complementary_occurrences_state: 12,
-	at_level_zero_state: 13,
-	wipe_occurrences_queue_state: 14,
-	build_conflict_analysis_state: 15,
-	asserting_clause_state: 16,
-	virtual_resolution_state: 17,
-	learn_cc_state: 18,
-	second_highest_dl_state: 19,
-	undo_trail_to_shdl_state: 20,
-	push_trail_state: 21
+	are_remaining_occurrences_state: 1,
+	complementary_occurrences_retrieve_state:2,	
+	queue_occurrences_state: 3,
+	dequeue_occurrence_list_state: 4,
+	traversed_occurrences_state: 5,
+	next_occurrence_state: 7,
+	unit_clause_state: 8,
+	all_variables_assigned_state: 6,
+	unit_propagation_state: 9,
+	at_level_zero_state: 10,
+	wipe_occurrences_queue_state: 11,
+	build_conflict_analysis_state: 12,
+	asserting_clause_state: 13,
+	virtual_resolution_state: 14,
+	learn_cc_state: 15,
+	second_highest_dl_state: 16,
+	undo_trail_to_shdl_state: 17,
+	push_trail_state: 18,
+	
+
 };
 
 // *** define state nodes ***
@@ -117,7 +116,7 @@ const unary_empty_clauses_detection_state: NonFinalState<
 	description: 'Seeks for the problem s unit clauses',
 	transitions: new Map<TWATCH_UNARY_EMPTY_CLAUSES_DETECTION_INPUT, number>().set(
 		'queue_occurrences_state',
-		twatch_stateName2StateId['queue_occurrence_list_state']
+		twatch_stateName2StateId['queue_occurrences_state']
 	)
 };
 
@@ -127,7 +126,7 @@ const decide_state: NonFinalState<TWATCH_DECIDE_FUN, TWATCH_DECIDE_INPUT> = {
 	run: decide,
 	transitions: new Map<TWATCH_DECIDE_INPUT, number>().set(
 		'complementary_occurrences_retrieve_state',
-		twatch_stateName2StateId['complementary_occurrences_state']
+		twatch_stateName2StateId['complementary_occurrences_retrieve_state']
 	)
 };
 
@@ -166,7 +165,7 @@ const occurrence_list_traversed_state: NonFinalState<
 	description: 'True if current occurrence list has been completely traversed, false otherwise',
 	run: traversedCurrentOccurrences,
 	transitions: new Map<TWATCH_TRAVERSED_CURRENT_OCCURRENCES_INPUT, number>()
-		.set('next_clause_state', twatch_stateName2StateId['next_clause_state'])
+		.set('next_clause_state', twatch_stateName2StateId['next_occurrence_state'])
 		.set(
 			'dequeue_current_occurrences_state',
 			twatch_stateName2StateId['dequeue_occurrence_list_state']
@@ -174,7 +173,7 @@ const occurrence_list_traversed_state: NonFinalState<
 };
 
 const next_clause_state: NonFinalState<TWATCH_NEXT_OCCURRENCE_FUN, TWATCH_NEXT_OCCURRENCE_INPUT> = {
-	id: twatch_stateName2StateId['next_clause_state'],
+	id: twatch_stateName2StateId['next_occurrence_state'],
 	description: 'Returns the next clause of the current occurrence list',
 	run: nextClause,
 	transitions: new Map<TWATCH_NEXT_OCCURRENCE_INPUT, number>().set(
@@ -213,7 +212,7 @@ const unit_propagation_state: NonFinalState<
 	description: 'Propagates the unassigned literal of a clause',
 	transitions: new Map<TWATCH_UNIT_PROPAGATION_INPUT, number>().set(
 		'complementary_occurrences_retrieve_state',
-		twatch_stateName2StateId['complementary_occurrences_state']
+		twatch_stateName2StateId['complementary_occurrences_retrieve_state']
 	)
 };
 
@@ -221,12 +220,12 @@ const complementary_occurrences_state: NonFinalState<
 	TWATCH_COMPLEMENTARY_OCCURRENCES_RETRIEVE_FUN,
 	TWATCH_COMPLEMENTARY_OCCURRENCES_RETRIEVE_INPUT
 > = {
-	id: twatch_stateName2StateId['complementary_occurrences_state'],
+	id: twatch_stateName2StateId['complementary_occurrences_retrieve_state'],
 	run: complementaryOccurrences,
 	description: 'Get the clauses where the complementary of the last assigned literal appear',
 	transitions: new Map<TWATCH_COMPLEMENTARY_OCCURRENCES_RETRIEVE_INPUT, number>().set(
 		'queue_occurrences_state',
-		twatch_stateName2StateId['queue_occurrence_list_state']
+		twatch_stateName2StateId['queue_occurrences_state']
 	)
 };
 
@@ -234,7 +233,7 @@ const queue_occurrence_list_state: NonFinalState<
 	TWATCH_QUEUE_OCCURRENCES_FUN,
 	TWATCH_QUEUE_OCCURRENCES_INPUT
 > = {
-	id: twatch_stateName2StateId['queue_occurrence_list_state'],
+	id: twatch_stateName2StateId['queue_occurrences_state'],
 	run: queueOccurrences,
 	description: 'Stack an occurrence list as pending',
 	transitions: new Map<TWATCH_QUEUE_OCCURRENCES_INPUT, number>()
