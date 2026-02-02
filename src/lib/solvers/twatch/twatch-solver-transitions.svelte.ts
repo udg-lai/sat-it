@@ -65,12 +65,13 @@ import type {
 	TWATCH_WIPE_OCCURRENCE_QUEUE_INPUT
 } from './twatch-domain.svelte.ts';
 import type { Watch } from '$lib/entities/WatchTable.svelte.ts';
+import type { EWC } from '$lib/entities/Problem.svelte.ts';
 
 /* exported transitions */
 
 export const initialTransition = (): void => {
 	const unaryEmptyCRefs: Set<CRef> = unaryEmptyClausesTransition();
-	const occurrenceList: OccurrenceList<Watch> = new OccurrenceList<Watch>(makeNothing(), [
+	const occurrenceList: OccurrenceList<EWC> = new OccurrenceList<EWC>(makeNothing(), [
 		...unaryEmptyCRefs
 	]);
 	afterComplementaryBlock(occurrenceList);

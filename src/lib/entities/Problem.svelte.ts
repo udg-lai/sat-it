@@ -2,6 +2,7 @@ import type { DimacsInstance } from '$lib/instances/dimacs-instance.interface.ts
 import { getConflictAnalysis } from '$lib/states/conflict-anlysis.svelte.ts';
 import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 import { logError } from '$lib/states/toasts.svelte.ts';
+import type { Either } from '$lib/types/either.ts';
 import { fromJust, makeJust, makeNothing, type Maybe } from '$lib/types/maybe.ts';
 import type { CRef, Lit } from '$lib/types/types.ts';
 import type Clause from './Clause.svelte.ts';
@@ -13,6 +14,8 @@ import { Queue } from './Queue.svelte.ts';
 import { VariablePool } from './VariablePool.svelte.ts';
 import WatchTable, { type Watch } from './WatchTable.svelte.ts';
 
+export type EWC = Either<Watch, CRef>;
+
 export default class Problem {
 	private variables: VariablePool = $state(new VariablePool(0));
 	private clauses: ClausePool = $state(new ClausePool());
@@ -23,8 +26,9 @@ export default class Problem {
 	private currentOccurrences: OccurrenceList<CRef> = $derived(this.currentOccurrenceList());
 	private focusedAssignment: Maybe<Lit> = $derived(this.currentFocusedAssignment());
 
-	private watchesQueue: Queue<OccurrenceList<Watch>> = $state(new Queue<OccurrenceList<Watch>>());
-	private currentWatch: OccurrenceList<Watch> = $derived(this.currentWatchList());
+	// The CRef is necessary at the inprocess step because unary and empty clauses do not have watches. :)
+	private watchesQueue: Queue<OccurrenceList<EWC>> = $state(new Queue<OccurrenceList<EWC>>());
+	private currentWatch: OccurrenceList<EWC> = $derived(this.currentWatchList());
 
 	constructor(instance: DimacsInstance | undefined = undefined) {
 		if (instance !== undefined) this.syncWithDimacsInstance(instance);
@@ -58,11 +62,11 @@ export default class Problem {
 		return this.occurrenceQueue;
 	}
 
-	getCurrentWatch(): OccurrenceList<Watch> {
+	getCurrentWatch(): OccurrenceList<EWC> {
 		return this.currentWatch;
 	}
 
-	getWatchesQueue(): Queue<OccurrenceList<Watch>> {
+	getWatchesQueue(): Queue<OccurrenceList<EWC>> {
 		return this.watchesQueue;
 	}
 
@@ -104,7 +108,7 @@ export default class Problem {
 
 	dropOccurrences(): void {
 		this.occurrenceQueue = new Queue<OccurrenceList<CRef>>();
-		this.watchesQueue = new Queue<OccurrenceList<Watch>>();
+		this.watchesQueue = new Queue<OccurrenceList<EWC>>();
 	}
 
 	private currentOccurrenceList(): OccurrenceList<CRef> {
@@ -115,9 +119,9 @@ export default class Problem {
 		}
 	}
 
-	private currentWatchList(): OccurrenceList<Watch> {
+	private currentWatchList(): OccurrenceList<EWC> {
 		if (this.watchesQueue.isEmpty()) {
-			return new OccurrenceList<Watch>();
+			return new OccurrenceList<EWC>();
 		} else {
 			return this.watchesQueue.element();
 		}

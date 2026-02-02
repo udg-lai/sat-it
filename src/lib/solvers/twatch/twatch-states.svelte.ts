@@ -7,20 +7,28 @@ import {
 	backjumping,
 	buildConflictAnalysis,
 	complementaryOccurrences,
+	complementaryWatchedOccurrences,
 	decide,
 	dequeueCurrentOccurrences,
+	firstLiteralFalsified,
+	firstLiteralSatisfied,
 	learnConflictClause,
+	lookNonFalsifiedLiteral,
 	nextClause,
+	nonFalsifiedLiteralFound,
 	pendingOccurrences,
 	pushTrail,
 	queueOccurrences,
+	queueWatchedOccurrences,
 	sndHighestDL,
+	swapSecondKLiteralPos,
+	swapWatches,
 	traversedCurrentOccurrences,
 	unaryEmptyClausesDetection,
 	unitClause,
 	unitPropagation,
-	unsatisfiedClause,
 	virtualResolution,
+	watchAtFirstPosition,
 	wipeOccurrenceQueue,
 	type TWATCH_ALL_VARIABLES_ASSIGNED_FUN,
 	type TWATCH_ALL_VARIABLES_ASSIGNED_INPUT,
@@ -36,22 +44,38 @@ import {
 	type TWATCH_CHECK_PENDING_OCCURRENCES_INPUT,
 	type TWATCH_COMPLEMENTARY_OCCURRENCES_RETRIEVE_FUN,
 	type TWATCH_COMPLEMENTARY_OCCURRENCES_RETRIEVE_INPUT,
-	type TWATCH_CONFLICT_DETECTION_FUN,
-	type TWATCH_CONFLICT_DETECTION_INPUT,
+	type TWATCH_COMPLEMENTARY_WATCHED_OCCURRENCES_RETRIEVE_FUN,
+	type TWATCH_COMPLEMENTARY_WATCHED_OCCURRENCES_RETRIEVE_INPUT,
 	type TWATCH_DECIDE_FUN,
 	type TWATCH_DECIDE_INPUT,
+	type TWATCH_DEQUEUE_CURRENT_OCCURRENCES_FUN,
+	type TWATCH_DEQUEUE_CURRENT_OCCURRENCES_INPUT,
+	type TWATCH_FIRST_LITERAL_FALSIFIED_FUN,
+	type TWATCH_FIRST_LITERAL_FALSIFIED_INPUT,
+	type TWATCH_FIRST_LITERAL_SATISFIED_FUN,
+	type TWATCH_FIRST_LITERAL_SATISFIED_INPUT,
 	type TWATCH_FUN,
 	type TWATCH_INPUT,
 	type TWATCH_LEARN_CONFLICT_CLAUSE_FUN,
 	type TWATCH_LEARN_CONFLICT_CLAUSE_INPUT,
+	type TWATCH_LOOK_NON_FALSIFIED_LITERAL_FUN,
+	type TWATCH_LOOK_NON_FALSIFIED_LITERAL_INPUT,
 	type TWATCH_NEXT_OCCURRENCE_FUN,
 	type TWATCH_NEXT_OCCURRENCE_INPUT,
+	type TWATCH_NON_FALSIFIED_LITERAL_FOUND_FUN,
+	type TWATCH_NON_FALSIFIED_LITERAL_FOUND_INPUT,
 	type TWATCH_PUSH_TRAIL_FUN,
 	type TWATCH_PUSH_TRAIL_INPUT,
 	type TWATCH_QUEUE_OCCURRENCES_FUN,
 	type TWATCH_QUEUE_OCCURRENCES_INPUT,
+	type TWATCH_QUEUE_WATCHED_OCCURRENCES_FUN,
+	type TWATCH_QUEUE_WATCHED_OCCURRENCES_INPUT,
 	type TWATCH_SECOND_HIGHEST_DL_FUN,
 	type TWATCH_SECOND_HIGHEST_DL_INPUT,
+	type TWATCH_SWAP_SECOND_K_LITERAL_POSITION_FUN,
+	type TWATCH_SWAP_SECOND_K_LITERAL_POSITION_INPUT,
+	type TWATCH_SWAP_WATCHES_FUN,
+	type TWATCH_SWAP_WATCHES_INPUT,
 	type TWATCH_TRAVERSED_CURRENT_OCCURRENCES_FUN,
 	type TWATCH_TRAVERSED_CURRENT_OCCURRENCES_INPUT,
 	type TWATCH_UNARY_EMPTY_CLAUSES_DETECTION_FUN,
@@ -60,10 +84,10 @@ import {
 	type TWATCH_UNIT_CLAUSE_INPUT,
 	type TWATCH_UNIT_PROPAGATION_FUN,
 	type TWATCH_UNIT_PROPAGATION_INPUT,
-	type TWATCH_DEQUEUE_CURRENT_OCCURRENCES_FUN,
-	type TWATCH_DEQUEUE_CURRENT_OCCURRENCES_INPUT,
 	type TWATCH_VIRTUAL_RESOLUTION_FUN,
 	type TWATCH_VIRTUAL_RESOLUTION_INPUT,
+	type TWATCH_WATCH_AT_FIRST_POSITION_FUN,
+	type TWATCH_WATCH_AT_FIRST_POSITION_INPUT,
 	type TWATCH_WIPE_OCCURRENCE_QUEUE_FUN,
 	type TWATCH_WIPE_OCCURRENCE_QUEUE_INPUT
 } from './twatch-domain.svelte.ts';
@@ -74,10 +98,10 @@ export const twatch_stateName2StateId = {
 	decide_state: DECIDE_STATE_ID,
 	unary_empty_clause_detection_state: 0,
 	are_remaining_occurrences_state: 1,
-	complementary_occurrences_retrieve_state:2,	
+	complementary_occurrences_retrieve_state: 2,
 	queue_occurrences_state: 3,
 	dequeue_occurrence_list_state: 4,
-	traversed_occurrences_state: 5,
+	traversed_current_occurrences_state: 5,
 	next_occurrence_state: 7,
 	unit_clause_state: 8,
 	all_variables_assigned_state: 6,
@@ -91,8 +115,15 @@ export const twatch_stateName2StateId = {
 	second_highest_dl_state: 16,
 	undo_trail_to_shdl_state: 17,
 	push_trail_state: 18,
-	
-
+	queue_watched_occurrences_state: 19,
+	watch_at_first_position_state: 20,
+	swap_watches_state: 21,
+	first_literal_satisfied_state: 22,
+	look_non_falsified_literal_state: 23,
+	non_falsified_literal_found_state: 24,
+	swap_second_k_literal_position_state: 25,
+	first_literal_falsified_state: 26,
+	complementary_watched_occurrences_retrieve_state: 27
 };
 
 // *** define state nodes ***
@@ -115,8 +146,8 @@ const unary_empty_clauses_detection_state: NonFinalState<
 	run: unaryEmptyClausesDetection,
 	description: 'Seeks for the problem s unit clauses',
 	transitions: new Map<TWATCH_UNARY_EMPTY_CLAUSES_DETECTION_INPUT, number>().set(
-		'queue_occurrences_state',
-		twatch_stateName2StateId['queue_occurrences_state']
+		'queue_watched_occurrences_state',
+		twatch_stateName2StateId['queue_watched_occurrences_state']
 	)
 };
 
@@ -152,7 +183,7 @@ const are_remaining_occurrences_state: NonFinalState<
 	transitions: new Map<TWATCH_CHECK_PENDING_OCCURRENCES_INPUT, number>()
 		.set(
 			'traversed_current_occurrences_state',
-			twatch_stateName2StateId['traversed_occurrences_state']
+			twatch_stateName2StateId['traversed_current_occurrences_state']
 		)
 		.set('all_variables_assigned_state', twatch_stateName2StateId['all_variables_assigned_state'])
 };
@@ -161,7 +192,7 @@ const occurrence_list_traversed_state: NonFinalState<
 	TWATCH_TRAVERSED_CURRENT_OCCURRENCES_FUN,
 	TWATCH_TRAVERSED_CURRENT_OCCURRENCES_INPUT
 > = {
-	id: twatch_stateName2StateId['traversed_occurrences_state'],
+	id: twatch_stateName2StateId['traversed_current_occurrences_state'],
 	description: 'True if current occurrence list has been completely traversed, false otherwise',
 	run: traversedCurrentOccurrences,
 	transitions: new Map<TWATCH_TRAVERSED_CURRENT_OCCURRENCES_INPUT, number>()
@@ -174,24 +205,12 @@ const occurrence_list_traversed_state: NonFinalState<
 
 const next_clause_state: NonFinalState<TWATCH_NEXT_OCCURRENCE_FUN, TWATCH_NEXT_OCCURRENCE_INPUT> = {
 	id: twatch_stateName2StateId['next_occurrence_state'],
-	description: 'Returns the next clause of the current occurrence list',
+	description: 'Returns the next occurrence of the current watched list',
 	run: nextClause,
 	transitions: new Map<TWATCH_NEXT_OCCURRENCE_INPUT, number>().set(
-		'falsified_clause_state',
-		twatch_stateName2StateId['falsified_clause_state']
+		'watch_at_first_position_state',
+		twatch_stateName2StateId['watch_at_first_position_state']
 	)
-};
-
-const falsified_clause_state: NonFinalState<
-	TWATCH_CONFLICT_DETECTION_FUN,
-	TWATCH_CONFLICT_DETECTION_INPUT
-> = {
-	id: twatch_stateName2StateId['falsified_clause_state'],
-	run: unsatisfiedClause,
-	description: 'Checks if the visiting clause has been falsified',
-	transitions: new Map<TWATCH_CONFLICT_DETECTION_INPUT, number>()
-		.set('unit_clause_state', twatch_stateName2StateId['unit_clause_state'])
-		.set('wipe_occurrences_queue_state', twatch_stateName2StateId['wipe_occurrences_queue_state'])
 };
 
 const unit_clause_state: NonFinalState<TWATCH_UNIT_CLAUSE_FUN, TWATCH_UNIT_CLAUSE_INPUT> = {
@@ -199,7 +218,10 @@ const unit_clause_state: NonFinalState<TWATCH_UNIT_CLAUSE_FUN, TWATCH_UNIT_CLAUS
 	run: unitClause,
 	description: 'Check if current clause is unit',
 	transitions: new Map<TWATCH_UNIT_CLAUSE_INPUT, number>()
-		.set('traversed_occurrences_state', twatch_stateName2StateId['traversed_occurrences_state'])
+		.set(
+			'traversed_occurrences_state',
+			twatch_stateName2StateId['traversed_current_occurrences_state']
+		)
 		.set('unit_propagation_state', twatch_stateName2StateId['unit_propagation_state'])
 };
 
@@ -236,12 +258,10 @@ const queue_occurrence_list_state: NonFinalState<
 	id: twatch_stateName2StateId['queue_occurrences_state'],
 	run: queueOccurrences,
 	description: 'Stack an occurrence list as pending',
-	transitions: new Map<TWATCH_QUEUE_OCCURRENCES_INPUT, number>()
-		.set(
-			'are_remaining_occurrences_state',
-			twatch_stateName2StateId['are_remaining_occurrences_state']
-		)
-		.set('traversed_occurrences_state', twatch_stateName2StateId['traversed_occurrences_state'])
+	transitions: new Map<TWATCH_QUEUE_OCCURRENCES_INPUT, number>().set(
+		'complementary_watched_occurrences_retrieve_state',
+		twatch_stateName2StateId['complementary_watched_occurrences_retrieve_state']
+	)
 };
 
 const dequeue_occurrence_list_state: NonFinalState<
@@ -278,8 +298,6 @@ const wipe_occurrence_queue_state: NonFinalState<
 		twatch_stateName2StateId['at_level_zero_state']
 	)
 };
-
-// ** additional states from cdcl **
 
 const virtual_resolution_state: NonFinalState<
 	TWATCH_VIRTUAL_RESOLUTION_FUN,
@@ -365,6 +383,134 @@ const push_trail_state: NonFinalState<TWATCH_PUSH_TRAIL_FUN, TWATCH_PUSH_TRAIL_I
 	)
 };
 
+// *** additional states from 2watch ***
+
+const complementary_watched_occurrences_retrieve_state: NonFinalState<
+	TWATCH_COMPLEMENTARY_WATCHED_OCCURRENCES_RETRIEVE_FUN,
+	TWATCH_COMPLEMENTARY_WATCHED_OCCURRENCES_RETRIEVE_INPUT
+> = {
+	id: twatch_stateName2StateId['complementary_watched_occurrences_retrieve_state'],
+	run: complementaryWatchedOccurrences,
+	description: '',
+	transitions: new Map<TWATCH_COMPLEMENTARY_WATCHED_OCCURRENCES_RETRIEVE_INPUT, number>().set(
+		'queue_watched_occurrences_state',
+		twatch_stateName2StateId['queue_watched_occurrences_state']
+	)
+};
+
+const queue_watched_occurrences_state: NonFinalState<
+	TWATCH_QUEUE_WATCHED_OCCURRENCES_FUN,
+	TWATCH_QUEUE_WATCHED_OCCURRENCES_INPUT
+> = {
+	id: twatch_stateName2StateId['unary_empty_clause_detection_state'],
+	run: queueWatchedOccurrences,
+	description: 'Queues the watched occurrences that need to be revised',
+	transitions: new Map<TWATCH_QUEUE_WATCHED_OCCURRENCES_INPUT, number>()
+		.set(
+			'are_remaining_occurrences_state',
+			twatch_stateName2StateId['are_remaining_occurrences_state']
+		)
+		.set(
+			'traversed_current_occurrences_state',
+			twatch_stateName2StateId['traversed_current_occurrences_state']
+		)
+};
+
+const is_watch_at_first_position_state: NonFinalState<
+	TWATCH_WATCH_AT_FIRST_POSITION_FUN,
+	TWATCH_WATCH_AT_FIRST_POSITION_INPUT
+> = {
+	id: twatch_stateName2StateId['watch_at_first_position_state'],
+	run: watchAtFirstPosition,
+	description:
+		'Returns true if the first position contains the complementary of the occurrence list from the current watch list',
+	transitions: new Map<TWATCH_WATCH_AT_FIRST_POSITION_INPUT, number>()
+		.set('swap_watches_state', twatch_stateName2StateId['swap_watches_state'])
+		.set('first_literal_satisfied_state', twatch_stateName2StateId['first_literal_satisfied_state'])
+};
+
+const swap_watches_state: NonFinalState<TWATCH_SWAP_WATCHES_FUN, TWATCH_SWAP_WATCHES_INPUT> = {
+	id: twatch_stateName2StateId['swap_watches_state'],
+	run: swapWatches,
+	description: 'Swap the position of the first and second watch',
+	transitions: new Map<TWATCH_SWAP_WATCHES_INPUT, number>().set(
+		'first_literal_satisfied_state',
+		twatch_stateName2StateId['first_literal_satisfied_state']
+	)
+};
+
+const first_literal_satisfied_state: NonFinalState<
+	TWATCH_FIRST_LITERAL_SATISFIED_FUN,
+	TWATCH_FIRST_LITERAL_SATISFIED_INPUT
+> = {
+	id: twatch_stateName2StateId['first_literal_satisfied_state'],
+	run: firstLiteralSatisfied,
+	description: 'Returns true if the first literal is satisfied',
+	transitions: new Map<TWATCH_FIRST_LITERAL_SATISFIED_INPUT, number>()
+		.set(
+			'traversed_current_occurrences_state',
+			twatch_stateName2StateId['traversed_current_occurrences_state']
+		)
+		.set(
+			'look_non_falsified_literal_state',
+			twatch_stateName2StateId['look_non_falsified_literal_state']
+		)
+};
+
+const look_non_falsified_literal_state: NonFinalState<
+	TWATCH_LOOK_NON_FALSIFIED_LITERAL_FUN,
+	TWATCH_LOOK_NON_FALSIFIED_LITERAL_INPUT
+> = {
+	id: twatch_stateName2StateId['look_non_falsified_literal_state'],
+	run: lookNonFalsifiedLiteral,
+	description:
+		'Returns the position of the literal which is not watched and is not falsified, -1 otherwise',
+	transitions: new Map<TWATCH_LOOK_NON_FALSIFIED_LITERAL_INPUT, number>().set(
+		'non_falsified_literal_found_state',
+		twatch_stateName2StateId['non_falsified_literal_found_state']
+	)
+};
+
+const non_falsified_literal_found_state: NonFinalState<
+	TWATCH_NON_FALSIFIED_LITERAL_FOUND_FUN,
+	TWATCH_NON_FALSIFIED_LITERAL_FOUND_INPUT
+> = {
+	id: twatch_stateName2StateId['non_falsified_literal_found_state'],
+	run: nonFalsifiedLiteralFound,
+	description: 'Returns true if a literal for swapping was found, false otherwise',
+	transitions: new Map<TWATCH_NON_FALSIFIED_LITERAL_FOUND_INPUT, number>()
+		.set(
+			'swap_second_k_literal_position_state',
+			twatch_stateName2StateId['swap_second_k_literal_position_state']
+		)
+		.set('first_literal_falsified_state', twatch_stateName2StateId['first_literal_falsified_state'])
+};
+
+const swap_second_k_literal_position_state: NonFinalState<
+	TWATCH_SWAP_SECOND_K_LITERAL_POSITION_FUN,
+	TWATCH_SWAP_SECOND_K_LITERAL_POSITION_INPUT
+> = {
+	id: twatch_stateName2StateId['swap_second_k_literal_position_state'],
+	run: swapSecondKLiteralPos,
+	description:
+		'Swaps the position of the literal that was found not falsified and the second position',
+	transitions: new Map<TWATCH_SWAP_SECOND_K_LITERAL_POSITION_INPUT, number>().set(
+		'traversed_current_occurrences_state',
+		twatch_stateName2StateId['traversed_current_occurrences_state']
+	)
+};
+
+const first_literal_falsified_state: NonFinalState<
+	TWATCH_FIRST_LITERAL_FALSIFIED_FUN,
+	TWATCH_FIRST_LITERAL_FALSIFIED_INPUT
+> = {
+	id: twatch_stateName2StateId['first_literal_falsified_state'],
+	run: firstLiteralFalsified,
+	description: 'Returns true if the first literal is falsified. False otherwise.',
+	transitions: new Map<TWATCH_FIRST_LITERAL_FALSIFIED_INPUT, number>()
+		.set('wipe_occurrences_queue_state', twatch_stateName2StateId['wipe_occurrences_queue_state'])
+		.set('unit_propagation_state', twatch_stateName2StateId['unit_propagation_state'])
+};
 // *** adding states to the set of states ***
 export const states: Map<number, State<TWATCH_FUN, TWATCH_INPUT>> = new Map();
 
@@ -378,7 +524,6 @@ states.set(decide_state.id, decide_state);
 states.set(dequeue_occurrence_list_state.id, dequeue_occurrence_list_state);
 states.set(next_clause_state.id, next_clause_state);
 states.set(occurrence_list_traversed_state.id, occurrence_list_traversed_state);
-states.set(falsified_clause_state.id, falsified_clause_state);
 states.set(unit_clause_state.id, unit_clause_state);
 states.set(unit_propagation_state.id, unit_propagation_state);
 states.set(complementary_occurrences_state.id, complementary_occurrences_state);
@@ -391,6 +536,18 @@ states.set(second_highest_dl_state.id, second_highest_dl_state);
 states.set(undo_trail_to_shdl_state.id, undo_trail_to_shdl_state);
 states.set(push_trail_state.id, push_trail_state);
 states.set(virtual_resolution_state.id, virtual_resolution_state);
+states.set(
+	complementary_watched_occurrences_retrieve_state.id,
+	complementary_watched_occurrences_retrieve_state
+);
+states.set(queue_watched_occurrences_state.id, queue_watched_occurrences_state);
+states.set(is_watch_at_first_position_state.id, is_watch_at_first_position_state);
+states.set(swap_watches_state.id, swap_watches_state);
+states.set(first_literal_satisfied_state.id, first_literal_satisfied_state);
+states.set(look_non_falsified_literal_state.id, look_non_falsified_literal_state);
+states.set(non_falsified_literal_found_state.id, non_falsified_literal_found_state);
+states.set(swap_second_k_literal_position_state.id, swap_second_k_literal_position_state);
+states.set(first_literal_falsified_state.id, first_literal_falsified_state);
 
 export const initial = unary_empty_clauses_detection_state.id;
 

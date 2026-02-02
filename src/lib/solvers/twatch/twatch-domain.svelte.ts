@@ -4,6 +4,7 @@ import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
 import { ConflictAnalysis, type VirtualResolution } from '$lib/entities/ConflictAnalysis.svelte.ts';
 import Literal from '$lib/entities/Literal.svelte.ts';
 import OccurrenceList from '$lib/entities/OccurrenceList.svelte.ts';
+import type { EWC } from '$lib/entities/Problem.svelte.ts';
 import type { Trail } from '$lib/entities/Trail.svelte.ts';
 import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
 import type { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
@@ -14,8 +15,8 @@ import {
 	allAssigned as solverAllAssigned,
 	complementaryOccurrences as solverComplementaryOccurrences,
 	decide as solverDecide,
-	unaryEmptyClauseDetection as solverUnitClauseDetection,
-	unitPropagation as solverUnitPropagation
+	unitPropagation as solverUnitPropagation,
+	unaryEmptyClauseDetection
 } from '$lib/solvers/shared.svelte.ts';
 import { getConflictAnalysis, setConflictAnalysis } from '$lib/states/conflict-anlysis.svelte.ts';
 import {
@@ -30,6 +31,7 @@ import {
 } from '$lib/states/problem.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
 import { getLatestTrail, stackTrail } from '$lib/states/trails.svelte.ts';
+import { fromLeft, fromRight, isLeft } from '$lib/types/either.ts';
 import {
 	fromJust,
 	isJust,
@@ -42,7 +44,7 @@ import { Lit, type CRef, type List } from '$lib/types/types.ts';
 
 // ** state inputs **
 
-export type TWATCH_UNARY_EMPTY_CLAUSES_DETECTION_INPUT = 'queue_occurrences_state';
+export type TWATCH_UNARY_EMPTY_CLAUSES_DETECTION_INPUT = 'queue_watched_occurrences_state';
 
 export type TWATCH_CHECK_PENDING_OCCURRENCES_INPUT =
 	| 'all_variables_assigned_state'
@@ -186,23 +188,23 @@ export type TWATCH_UNARY_EMPTY_CLAUSES_DETECTION_FUN = () => Set<CRef>;
 
 export const unaryEmptyClausesDetection: TWATCH_UNARY_EMPTY_CLAUSES_DETECTION_FUN = () => {
 	const pool: ClausePool = getClausePool();
-	return solverUnitClauseDetection(pool);
+	return unaryEmptyClauseDetection(pool);
 };
 
 export type TWATCH_TRAVERSED_CURRENT_OCCURRENCES_FUN = (
-	occurrenceList: OccurrenceList<Watch>
+	occurrenceList: OccurrenceList<EWC>
 ) => boolean;
 
 export const traversedCurrentOccurrences: TWATCH_TRAVERSED_CURRENT_OCCURRENCES_FUN = (
-	occurrenceList: OccurrenceList<Watch>
+	occurrenceList: OccurrenceList<EWC>
 ) => {
 	return occurrenceList.traversed();
 };
 
-export type TWATCH_NEXT_OCCURRENCE_FUN = () => Watch;
+export type TWATCH_NEXT_OCCURRENCE_FUN = () => EWC;
 
 export const nextClause: TWATCH_NEXT_OCCURRENCE_FUN = () => {
-	const occurrenceList: OccurrenceList<Watch> = getCurrentWatch();
+	const occurrenceList: OccurrenceList<EWC> = getCurrentWatch();
 	if (occurrenceList.isEmpty()) {
 		logFatal('A non empty set was expected');
 	}
@@ -381,19 +383,20 @@ export const complementaryWatchedOccurrences: TWATCH_COMPLEMENTARY_OCCURRENCES_R
 	return occurrence;
 };
 
-export type TWATCH_QUEUE_WATCHED_OCCURRENCES_FUN = (watches: OccurrenceList<Watch>) => void;
+export type TWATCH_QUEUE_WATCHED_OCCURRENCES_FUN = (watches: OccurrenceList<EWC>) => void;
 
 export const queueWatchedOccurrences: TWATCH_QUEUE_WATCHED_OCCURRENCES_FUN = (
-	watches: OccurrenceList<Watch>
+	watches: OccurrenceList<EWC>
 ) => {
 	getWatchesQueue().enqueue(watches);
 };
 
-export type TWATCH_WATCH_AT_FIRST_POSITION_FUN = (watch: Watch) => boolean;
+export type TWATCH_WATCH_AT_FIRST_POSITION_FUN = (watch: EWC) => boolean;
 
-export const watchAtFirstPosition: TWATCH_WATCH_AT_FIRST_POSITION_FUN = (watch: Watch) => {
-	const cLits: Literal[] = getClausePool().at(watch.cRef).getLiterals();
-	const currentWatch: OccurrenceList<Watch> = getCurrentWatch();
+export const watchAtFirstPosition: TWATCH_WATCH_AT_FIRST_POSITION_FUN = (watch: EWC) => {
+	const cRef: CRef = obtainCRef(watch);
+	const cLits: Literal[] = getClausePool().at(cRef).getLiterals();
+	const currentWatch: OccurrenceList<EWC> = getCurrentWatch();
 
 	// WATCH OUT: This condition is necessary. Empty clauses and unary clauses may also go through this state
 	// 	as at the beginning unary and empty clauses are retrieved.
@@ -404,10 +407,11 @@ export const watchAtFirstPosition: TWATCH_WATCH_AT_FIRST_POSITION_FUN = (watch: 
 	}
 };
 
-export type TWATCH_SWAP_WATCHES_FUN = (watch: Watch) => void;
+export type TWATCH_SWAP_WATCHES_FUN = (watch: EWC) => void;
 
-export const swapWatches: TWATCH_SWAP_WATCHES_FUN = (watch: Watch) => {
-	const clause: Clause = getClausePool().at(watch.cRef);
+export const swapWatches: TWATCH_SWAP_WATCHES_FUN = (watch: EWC) => {
+	const cRef: CRef = obtainCRef(watch);
+	const clause: Clause = getClausePool().at(cRef);
 	if (clause.size() < 2) {
 		logFatal('Swap issue', 'The clause you are trying to swap positions has less than 2 literals');
 	} else {
@@ -415,10 +419,11 @@ export const swapWatches: TWATCH_SWAP_WATCHES_FUN = (watch: Watch) => {
 	}
 };
 
-export type TWATCH_FIRST_LITERAL_SATISFIED_FUN = (watch: Watch) => boolean;
+export type TWATCH_FIRST_LITERAL_SATISFIED_FUN = (watch: EWC) => boolean;
 
-export const firstLiteralSatisfied: TWATCH_FIRST_LITERAL_SATISFIED_FUN = (watch: Watch) => {
-	const clause: Clause = getClausePool().at(watch.cRef);
+export const firstLiteralSatisfied: TWATCH_FIRST_LITERAL_SATISFIED_FUN = (watch: EWC) => {
+	const cRef: CRef = obtainCRef(watch);
+	const clause: Clause = getClausePool().at(cRef);
 
 	// This can happen if an empty clause reach this state which is not technically wrong
 	if (clause.size() < 1) {
@@ -429,10 +434,11 @@ export const firstLiteralSatisfied: TWATCH_FIRST_LITERAL_SATISFIED_FUN = (watch:
 };
 
 // It returns the positions where a non falsified literal is found
-export type TWATCH_LOOK_NON_FALSIFIED_LITERAL_FUN = (watch: Watch) => Maybe<number>;
+export type TWATCH_LOOK_NON_FALSIFIED_LITERAL_FUN = (watch: EWC) => Maybe<number>;
 
-export const lookNonFalsifiedLiteral: TWATCH_LOOK_NON_FALSIFIED_LITERAL_FUN = (watch: Watch) => {
-	const candidates: Literal[] = getClausePool().at(watch.cRef).getLiterals();
+export const lookNonFalsifiedLiteral: TWATCH_LOOK_NON_FALSIFIED_LITERAL_FUN = (watch: EWC) => {
+	const cRef: CRef = obtainCRef(watch);
+	const candidates: Literal[] = getClausePool().at(cRef).getLiterals();
 
 	let i = 2;
 	let selectedCandidate: Maybe<number> = makeNothing();
@@ -475,10 +481,11 @@ export const swapSecondKLiteralPos: TWATCH_SWAP_SECOND_K_LITERAL_POSITION_FUN = 
 	}
 };
 
-export type TWATCH_FIRST_LITERAL_FALSIFIED_FUN = (watch: Watch) => boolean;
+export type TWATCH_FIRST_LITERAL_FALSIFIED_FUN = (watch: EWC) => boolean;
 
-export const firstLiteralFalsified: TWATCH_FIRST_LITERAL_FALSIFIED_FUN = (watch: Watch) => {
-	const clause: Clause = getClausePool().at(watch.cRef);
+export const firstLiteralFalsified: TWATCH_FIRST_LITERAL_FALSIFIED_FUN = (watch: EWC) => {
+	const cRef: CRef = obtainCRef(watch);
+	const clause: Clause = getClausePool().at(cRef);
 	if (clause.size() < 2) {
 		return true;
 	} else {
@@ -516,3 +523,7 @@ export type TWATCH_FUN =
 	| TWATCH_NON_FALSIFIED_LITERAL_FOUND_FUN
 	| TWATCH_SWAP_SECOND_K_LITERAL_POSITION_FUN
 	| TWATCH_FIRST_LITERAL_FALSIFIED_FUN;
+
+const obtainCRef = (watch: EWC): CRef => {
+	return isLeft(watch) ? fromLeft(watch).cRef : fromRight(watch);
+};
