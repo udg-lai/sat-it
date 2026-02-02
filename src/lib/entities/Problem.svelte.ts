@@ -3,7 +3,7 @@ import { getConflictAnalysis } from '$lib/states/conflict-anlysis.svelte.ts';
 import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 import { logError } from '$lib/states/toasts.svelte.ts';
 import type { Either } from '$lib/types/either.ts';
-import { fromJust, makeJust, makeNothing, type Maybe } from '$lib/types/maybe.ts';
+import { fromJust, isNothing, makeJust, makeNothing, type Maybe } from '$lib/types/maybe.ts';
 import type { CRef, Lit } from '$lib/types/types.ts';
 import type Clause from './Clause.svelte.ts';
 import ClausePool from './ClausePool.svelte.ts';
@@ -130,10 +130,17 @@ export default class Problem {
 	// When in conflict analysis in CDCL, the focused assignment should be the one that is taking place in the current resolution.
 	private currentFocusedAssignment(): Maybe<Lit> {
 		if (!this.currentOccurrences.isEmpty()) {
-			const trailAssignment: Lit = Literal.complementary(
-				fromJust(this.currentOccurrences.getLiteral())
-			);
-			return makeJust(trailAssignment);
+			//Watch out, there is the possibility where the occurrence list has the unitary and empty clauses
+			const occurrenceListReason: Maybe<Lit> = this.currentOccurrences.getLiteral();
+			if(isNothing(occurrenceListReason)) {
+				return makeNothing()
+			} else {
+				const trailAssignment: Lit = Literal.complementary(
+					fromJust(this.currentOccurrences.getLiteral())
+				);
+				return makeJust(trailAssignment);
+			}
+	
 		} else if (getSolverMachine().onConflictState() && getSolverMachine().identify() === 'cdcl') {
 			const currentImplication: Lit = getConflictAnalysis().currentImplication().toLit();
 			return makeJust(currentImplication);
