@@ -2,25 +2,24 @@ import type Clause from '$lib/entities/Clause.svelte.ts';
 import type { ConflictAnalysis, VirtualResolution } from '$lib/entities/ConflictAnalysis.svelte.ts';
 import Literal from '$lib/entities/Literal.svelte.ts';
 import OccurrenceList from '$lib/entities/OccurrenceList.svelte.ts';
+import type { EWC } from '$lib/entities/Problem.svelte.ts';
 import type { Trail } from '$lib/entities/Trail.svelte.ts';
+import type { Watch } from '$lib/entities/WatchTable.svelte.ts';
 import {
 	conflictAnalysisFinishedEventBus,
 	conflictDetectedEventBus,
 	visitingComplementaryOccEventBus
 } from '$lib/events/events.ts';
 import { getConflictAnalysis } from '$lib/states/conflict-anlysis.svelte.ts';
-import {
-	getClausePool,
-	getCurrentOccurrences,
-	getOccurrenceListQueue
-} from '$lib/states/problem.svelte.ts';
+import { getClausePool, getCurrentWatch, getWatchesQueue } from '$lib/states/problem.svelte.ts';
 import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 import { increaseNoConflicts } from '$lib/states/statistics.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
 import { getLatestTrail } from '$lib/states/trails.svelte.ts';
-import { fromRight, isLeft } from '$lib/types/either.ts';
-import { makeJust, makeNothing } from '$lib/types/maybe.ts';
+import { fromLeft, fromRight, isLeft, makeLeft, makeRight } from '$lib/types/either.ts';
+import { makeJust, makeNothing, type Maybe } from '$lib/types/maybe.ts';
 import type { CRef, Lit } from '$lib/types/types.ts';
+import { obtainCRefFromEWC } from '../shared.svelte.ts';
 import { type NonFinalState } from '../StateMachine.svelte.ts';
 import type {
 	TWATCH_ALL_VARIABLES_ASSIGNED_FUN,
@@ -37,51 +36,75 @@ import type {
 	TWATCH_CHECK_PENDING_OCCURRENCES_INPUT,
 	TWATCH_COMPLEMENTARY_OCCURRENCES_RETRIEVE_FUN,
 	TWATCH_COMPLEMENTARY_OCCURRENCES_RETRIEVE_INPUT,
+	TWATCH_COMPLEMENTARY_WATCHED_OCCURRENCES_RETRIEVE_FUN,
+	TWATCH_COMPLEMENTARY_WATCHED_OCCURRENCES_RETRIEVE_INPUT,
 	TWATCH_DECIDE_FUN,
 	TWATCH_DECIDE_INPUT,
+	TWATCH_DEQUEUE_CURRENT_OCCURRENCES_FUN,
+	TWATCH_DEQUEUE_CURRENT_OCCURRENCES_INPUT,
+	TWATCH_FIRST_LITERAL_FALSIFIED_FUN,
+	TWATCH_FIRST_LITERAL_FALSIFIED_INPUT,
+	TWATCH_FIRST_LITERAL_SATISFIED_FUN,
+	TWATCH_FIRST_LITERAL_SATISFIED_INPUT,
 	TWATCH_LEARN_CONFLICT_CLAUSE_FUN,
 	TWATCH_LEARN_CONFLICT_CLAUSE_INPUT,
+	TWATCH_LOOK_NON_FALSIFIED_LITERAL_FUN,
+	TWATCH_LOOK_NON_FALSIFIED_LITERAL_INPUT,
 	TWATCH_NEXT_OCCURRENCE_FUN,
 	TWATCH_NEXT_OCCURRENCE_INPUT,
+	TWATCH_NON_FALSIFIED_LITERAL_FOUND_FUN,
+	TWATCH_NON_FALSIFIED_LITERAL_FOUND_INPUT,
 	TWATCH_PUSH_TRAIL_FUN,
 	TWATCH_PUSH_TRAIL_INPUT,
 	TWATCH_QUEUE_OCCURRENCES_FUN,
 	TWATCH_QUEUE_OCCURRENCES_INPUT,
+	TWATCH_QUEUE_WATCHED_OCCURRENCES_FUN,
+	TWATCH_QUEUE_WATCHED_OCCURRENCES_INPUT,
 	TWATCH_SECOND_HIGHEST_DL_FUN,
 	TWATCH_SECOND_HIGHEST_DL_INPUT,
+	TWATCH_SWAP_SECOND_K_LITERAL_POSITION_FUN,
+	TWATCH_SWAP_SECOND_K_LITERAL_POSITION_INPUT,
+	TWATCH_SWAP_WATCHES_FUN,
+	TWATCH_SWAP_WATCHES_INPUT,
 	TWATCH_TRAVERSED_CURRENT_OCCURRENCES_FUN,
 	TWATCH_TRAVERSED_CURRENT_OCCURRENCES_INPUT,
 	TWATCH_UNARY_EMPTY_CLAUSES_DETECTION_FUN,
 	TWATCH_UNARY_EMPTY_CLAUSES_DETECTION_INPUT,
-	TWATCH_UNIT_CLAUSE_FUN,
-	TWATCH_UNIT_CLAUSE_INPUT,
 	TWATCH_UNIT_PROPAGATION_FUN,
 	TWATCH_UNIT_PROPAGATION_INPUT,
-	TWATCH_DEQUEUE_CURRENT_OCCURRENCES_FUN,
-	TWATCH_DEQUEUE_CURRENT_OCCURRENCES_INPUT,
 	TWATCH_VIRTUAL_RESOLUTION_FUN,
 	TWATCH_VIRTUAL_RESOLUTION_INPUT,
+	TWATCH_WATCH_AT_FIRST_POSITION_FUN,
+	TWATCH_WATCH_AT_FIRST_POSITION_INPUT,
 	TWATCH_WIPE_OCCURRENCE_QUEUE_FUN,
 	TWATCH_WIPE_OCCURRENCE_QUEUE_INPUT
 } from './twatch-domain.svelte.ts';
-import type { Watch } from '$lib/entities/WatchTable.svelte.ts';
-import type { EWC } from '$lib/entities/Problem.svelte.ts';
 
 /* exported transitions */
 
 export const initialTransition = (): void => {
 	const unaryEmptyCRefs: Set<CRef> = unaryEmptyClausesTransition();
-	const occurrenceList: OccurrenceList<EWC> = new OccurrenceList<EWC>(makeNothing(), [
-		...unaryEmptyCRefs
+	const regularOccurrences = new OccurrenceList<CRef>(makeNothing(), [...unaryEmptyCRefs]);
+	queueOccurrenceListTransition(regularOccurrences, true);
+	const watchedOccurrences = new OccurrenceList<EWC>(makeNothing(), [
+		...Array.from(unaryEmptyCRefs).map(makeRight)
 	]);
-	afterComplementaryBlock(occurrenceList);
+	queueWatchedOccurrencesTransition(watchedOccurrences);
+	afterComplementaryBlock();
 };
 
 export const decide = (): void => {
 	const assignment: Lit = decideTransition();
-	const occurrenceList: OccurrenceList<Watch> =
+	queuesUpdateBlock(assignment);
+	afterComplementaryBlock();
+};
+
+const queuesUpdateBlock = (assignment: Lit): void => {
+	const fullOccurrences: OccurrenceList<CRef> =
 		complementaryOccurrencesDetectionTransition(assignment);
-	afterComplementaryBlock(occurrenceList);
+	queueOccurrenceListTransition(fullOccurrences);
+	const watchedOccurrences: OccurrenceList<EWC> = watchedOccurrencesDetectionTransition(assignment);
+	queueWatchedOccurrencesTransition(watchedOccurrences);
 };
 
 export const preConflictAnalysis = () => {
@@ -128,10 +151,8 @@ export const conflictAnalysisBlock = (): void => {
 		pushTrailTransition(trailAfterBJ);
 
 		const propagated: Lit = unitPropagationTransition(cRef, 'backjumping');
-		const occurrenceList: OccurrenceList<Watch> =
-			complementaryOccurrencesDetectionTransition(propagated);
-
-		afterComplementaryBlock(occurrenceList);
+		queuesUpdateBlock(propagated);
+		afterComplementaryBlock();
 
 		// After the conflict analysis finishes we notify it
 		conflictAnalysisFinishedEventBus.emit();
@@ -140,8 +161,7 @@ export const conflictAnalysisBlock = (): void => {
 
 /* General non-exported transitions */
 
-const afterComplementaryBlock = (occurrenceList: OccurrenceList<Watch>): void => {
-	queueOccurrenceListTransition(occurrenceList);
+const afterComplementaryBlock = (): void => {
 	const thereAreOccurrences: boolean = checkPendingOccurrenceListsTransition();
 	if (!thereAreOccurrences) {
 		allVariablesAssignedTransition();
@@ -155,24 +175,29 @@ const afterComplementaryBlock = (occurrenceList: OccurrenceList<Watch>): void =>
 export const conflictDetectionBlock = (): void => {
 	const traversedOccurrenceList = traversedOccurrenceListTransition();
 	if (traversedOccurrenceList) {
-		unstackOccurrenceListTransition();
+		dequeueCurrentOccurrencesTransition();
 		const pendingOcc: boolean = checkPendingOccurrenceListsTransition();
 		if (!pendingOcc) {
 			allVariablesAssignedTransition();
 		}
 	} else {
-		const cRef: CRef = nextOccurrenceTransition();
-		const isConflictive: boolean = conflictiveTransition(cRef);
-		if (isConflictive) {
-			getLatestTrail().attachConflictiveClause(getClausePool().at(cRef));
-			conflictDetectedEventBus.emit();
-		} else {
-			const unitClause: boolean = unitClauseTransition(cRef);
-			if (unitClause) {
-				const propagated: Lit = unitPropagationTransition(cRef, 'up');
-				const occurrenceList: OccurrenceList<Watch> =
-					complementaryOccurrencesDetectionTransition(propagated);
-				queueOccurrenceListTransition(occurrenceList);
+		const watch: EWC = nextOccurrenceTransition();
+		if (watchAtFirstPositionTransition(watch)) {
+			swapWatchesTransition(watch);
+		}
+		if (!firstLiteralSatisfiedTransition(watch)) {
+			const literalPos: Maybe<number> = lookNonFalsifiedLiteralTransition(watch);
+			if (nonFalsifiedLiteralFoundTransition(literalPos)) {
+				swapSecondKLiteralPosTransition(literalPos, watch);
+			} else {
+				const cRef: CRef = obtainCRefFromEWC(watch);
+				if (!firstLiteralFalsifiedTransition(watch)) {
+					const propagated: Lit = unitPropagationTransition(cRef, 'up');
+					queuesUpdateBlock(propagated);
+				} else {
+					getLatestTrail().attachConflictiveClause(getClausePool().at(cRef));
+					conflictDetectedEventBus.emit();
+				}
 			}
 		}
 	}
@@ -191,9 +216,9 @@ const unaryEmptyClausesTransition = (): Set<CRef> => {
 			'There should be a function in the Unary Empty Clauses  Transition state'
 		);
 	}
-	const units: Set<CRef> = state.run();
+	const unaryEmptyRefs: Set<CRef> = state.run();
 	getSolverMachine().transition('queue_occurrences_state');
-	return units;
+	return unaryEmptyRefs;
 };
 
 const allVariablesAssignedTransition = (): void => {
@@ -212,7 +237,10 @@ const allVariablesAssignedTransition = (): void => {
 	else getSolverMachine().transition('decide_state');
 };
 
-const queueOccurrenceListTransition = (occurrenceList: OccurrenceList<Watch>): void => {
+const queueOccurrenceListTransition = (
+	occurrenceList: OccurrenceList<CRef>,
+	fromEmptyUnary: boolean = false
+): void => {
 	const state = getSolverMachine().getActiveState() as NonFinalState<
 		TWATCH_QUEUE_OCCURRENCES_FUN,
 		TWATCH_QUEUE_OCCURRENCES_INPUT
@@ -224,17 +252,8 @@ const queueOccurrenceListTransition = (occurrenceList: OccurrenceList<Watch>): v
 		);
 	}
 	state.run(occurrenceList);
-	// NOTE: This transition is being used in two places in the cdcl solver diagram.
-	const queueSize = getOccurrenceListQueue().size();
-	if (queueSize > 1) {
-		// This means, we came from UP and complementary occurrence detection
-		getSolverMachine().transition('traversed_occurrences_state');
-	} else if (queueSize === 1) {
-		// This means we came from initial UPs or decide transitions
-		getSolverMachine().transition('are_remaining_occurrences_state');
-	} else {
-		logFatal('CDCL Solver Transition Error', "Occurrences Queue shouldn't be empty here");
-	}
+	if (fromEmptyUnary) getSolverMachine().transition('queue_watched_occurrences_state');
+	else getSolverMachine().transition('complementary_watched_occurrences_retrieve_state');
 };
 
 const checkPendingOccurrenceListsTransition = (): boolean => {
@@ -245,11 +264,11 @@ const checkPendingOccurrenceListsTransition = (): boolean => {
 	if (state.run === undefined) {
 		logFatal(
 			'Function call error',
-			'Function to check if there are pending occurrence lists is missing'
+			'Function to check if there are pending occurrences is missing'
 		);
 	}
 	const pendingOcc: boolean = state.run();
-	if (pendingOcc) getSolverMachine().transition('traversed_occurrences_state');
+	if (pendingOcc) getSolverMachine().transition('traversed_current_occurrences_state');
 	else getSolverMachine().transition('all_variables_assigned_state');
 	return pendingOcc;
 };
@@ -262,14 +281,14 @@ const traversedOccurrenceListTransition = (): boolean => {
 	if (state.run === undefined) {
 		logFatal('Function call error', 'A function that validates all occurrences checked is needed');
 	}
-	const occurrenceList: OccurrenceList<Watch> = getCurrentOccurrences();
-	const traversed: boolean = state.run(occurrenceList);
-	if (traversed) getSolverMachine().transition('dequeue_occurrence_list_state');
+	const occurrences: OccurrenceList<EWC> = getCurrentWatch();
+	const traversed: boolean = state.run(occurrences);
+	if (traversed) getSolverMachine().transition('dequeue_current_occurrences_state');
 	else getSolverMachine().transition('next_clause_state');
 	return traversed;
 };
 
-const nextOccurrenceTransition = (): CRef => {
+const nextOccurrenceTransition = (): EWC => {
 	// Takes from the `head` of the occurrencesQueue the set of clauses to be checked
 	const state = getSolverMachine().getActiveState() as NonFinalState<
 		TWATCH_NEXT_OCCURRENCE_FUN,
@@ -279,23 +298,9 @@ const nextOccurrenceTransition = (): CRef => {
 		logFatal('Function call error', 'There should be a function in the Next Clause state');
 	}
 	// Returns the next clause to be checked from the occurrence list at the head of the queue
-	const cRef: CRef = state.run();
-	getSolverMachine().transition('falsified_clause_state');
-	return cRef;
-};
-
-const conflictiveTransition = (cRef: CRef): boolean => {
-	const conflictDetectionState = getSolverMachine().getActiveState() as NonFinalState<
-		TWATCH_CONFLICT_DETECTION_FUN,
-		TWATCH_CONFLICT_DETECTION_INPUT
-	>;
-	if (conflictDetectionState.run === undefined) {
-		logFatal('Function call error', 'There should be a function in the Conflict Detection state');
-	}
-	const falsified: boolean = conflictDetectionState.run(cRef);
-	if (falsified) getSolverMachine().transition('wipe_occurrences_queue_state');
-	else getSolverMachine().transition('unit_clause_state');
-	return falsified;
+	const watch: EWC = state.run();
+	getSolverMachine().transition('watch_at_first_position_state');
+	return watch;
 };
 
 const dlZeroCheck = (): boolean => {
@@ -309,24 +314,7 @@ const dlZeroCheck = (): boolean => {
 	return decisionLevelState.run();
 };
 
-const unitClauseTransition = (cRef: CRef): boolean => {
-	const unitClauseState = getSolverMachine().getActiveState() as NonFinalState<
-		TWATCH_UNIT_CLAUSE_FUN,
-		TWATCH_UNIT_CLAUSE_INPUT
-	>;
-	if (unitClauseState.run === undefined) {
-		logFatal(
-			'Function call error',
-			'There should be a function in the Unit Clause Detection state'
-		);
-	}
-	const isUnit: boolean = unitClauseState.run(cRef);
-	if (isUnit) getSolverMachine().transition('unit_propagation_state');
-	else getSolverMachine().transition('traversed_occurrences_state');
-	return isUnit;
-};
-
-const unstackOccurrenceListTransition = (): void => {
+const dequeueCurrentOccurrencesTransition = (): void => {
 	// This transition removes the first Occurrence List from the occurrencesQueue.
 	// Of the CDCL_SolverMachine.
 	const state = getSolverMachine().getActiveState() as NonFinalState<
@@ -356,7 +344,7 @@ const unitPropagationTransition = (cRef: CRef, reason: 'up' | 'backjumping'): Li
 	return propagated;
 };
 
-const complementaryOccurrencesDetectionTransition = (assignment: Lit): OccurrenceList<Watch> => {
+const complementaryOccurrencesDetectionTransition = (assignment: Lit): OccurrenceList<CRef> => {
 	const state = getSolverMachine().getActiveState() as NonFinalState<
 		TWATCH_COMPLEMENTARY_OCCURRENCES_RETRIEVE_FUN,
 		TWATCH_COMPLEMENTARY_OCCURRENCES_RETRIEVE_INPUT
@@ -370,9 +358,25 @@ const complementaryOccurrencesDetectionTransition = (assignment: Lit): Occurrenc
 	const clauses: Set<CRef> = state.run(assignment);
 	getSolverMachine().transition('queue_occurrences_state');
 	const complementary: Lit = Literal.complementary(assignment);
-	return new OccurrenceList<Watch>(makeJust(complementary), [...clauses]);
+	return new OccurrenceList<CRef>(makeJust(complementary), [...clauses]);
 };
 
+const watchedOccurrencesDetectionTransition = (assignment: Lit): OccurrenceList<EWC> => {
+	const state = getSolverMachine().getActiveState() as NonFinalState<
+		TWATCH_COMPLEMENTARY_WATCHED_OCCURRENCES_RETRIEVE_FUN,
+		TWATCH_COMPLEMENTARY_WATCHED_OCCURRENCES_RETRIEVE_INPUT
+	>;
+	if (state.run === undefined) {
+		logFatal(
+			'Function call error',
+			'There should be a function in the Complementary Occurrences state'
+		);
+	}
+	const watches: Set<Watch> = state.run(assignment);
+	getSolverMachine().transition('queue_watched_occurrences_state');
+	const complementary: Lit = Literal.complementary(assignment);
+	return new OccurrenceList<EWC>(makeJust(complementary), [...Array.from(watches).map(makeLeft)]);
+};
 const decideTransition = (): number => {
 	const state = getSolverMachine().getActiveState() as NonFinalState<
 		TWATCH_DECIDE_FUN,
@@ -513,4 +517,139 @@ const pushTrailTransition = (trail: Trail): void => {
 	state.run(trail);
 
 	getSolverMachine().transition('unit_propagation_state');
+};
+
+const queueWatchedOccurrencesTransition = (occurrences: OccurrenceList<EWC>): void => {
+	const state = getSolverMachine().getActiveState() as NonFinalState<
+		TWATCH_QUEUE_WATCHED_OCCURRENCES_FUN,
+		TWATCH_QUEUE_WATCHED_OCCURRENCES_INPUT
+	>;
+	if (state.run === undefined) {
+		logFatal(
+			'Function call error',
+			'There should be a function in the Variable in the queue watched occurrences state'
+		);
+	}
+	state.run(occurrences);
+	const queueSize = getWatchesQueue().size();
+	if (queueSize > 1) {
+		// This means, we came from UP and complementary occurrence detection
+		getSolverMachine().transition('traversed_current_occurrences_state');
+	} else if (queueSize === 1) {
+		// This means we came from initial UPs or decide transitions
+		getSolverMachine().transition('are_remaining_occurrences_state');
+	} else {
+		logFatal('2WATCH Solver Transition Error', "Watched Occurrences Queue shouldn't be empty here");
+	}
+};
+
+const watchAtFirstPositionTransition = (watch: EWC): boolean => {
+	const state = getSolverMachine().getActiveState() as NonFinalState<
+		TWATCH_WATCH_AT_FIRST_POSITION_FUN,
+		TWATCH_WATCH_AT_FIRST_POSITION_INPUT
+	>;
+	if (state.run === undefined) {
+		logFatal(
+			'Function call error',
+			'There should be a function in the Watch at first position state'
+		);
+	}
+	const watchAtFirstPosition: boolean = state.run(watch);
+	if (watchAtFirstPosition) getSolverMachine().transition('swap_watches_state');
+	else getSolverMachine().transition('first_literal_satisfied_state');
+	return watchAtFirstPosition;
+};
+
+const swapWatchesTransition = (watch: EWC): void => {
+	const state = getSolverMachine().getActiveState() as NonFinalState<
+		TWATCH_SWAP_WATCHES_FUN,
+		TWATCH_SWAP_WATCHES_INPUT
+	>;
+	if (state.run === undefined) {
+		logFatal('Function call error', 'There should be a function in swap watches state');
+	}
+	state.run(watch);
+	getSolverMachine().transition('first_literal_satisfied_state');
+};
+
+const firstLiteralSatisfiedTransition = (watch: EWC): boolean => {
+	const state = getSolverMachine().getActiveState() as NonFinalState<
+		TWATCH_FIRST_LITERAL_SATISFIED_FUN,
+		TWATCH_FIRST_LITERAL_SATISFIED_INPUT
+	>;
+	if (state.run === undefined) {
+		logFatal('Function call error', 'There should be a function in First literal satisfied state');
+	}
+	const firstLiteralSatisfied: boolean = state.run(watch);
+	if (firstLiteralSatisfied) getSolverMachine().transition('traversed_current_occurrences_state');
+	else getSolverMachine().transition('look_non_falsified_literal_state');
+	return firstLiteralSatisfied;
+};
+
+const lookNonFalsifiedLiteralTransition = (watch: EWC): Maybe<number> => {
+	const state = getSolverMachine().getActiveState() as NonFinalState<
+		TWATCH_LOOK_NON_FALSIFIED_LITERAL_FUN,
+		TWATCH_LOOK_NON_FALSIFIED_LITERAL_INPUT
+	>;
+	if (state.run === undefined) {
+		logFatal(
+			'Function call error',
+			'There should be a function in Look up non falsified literal state'
+		);
+	}
+	const literalPos: Maybe<number> = state.run(watch);
+	getSolverMachine().transition('non_falsified_literal_found_state');
+	return literalPos;
+};
+
+const nonFalsifiedLiteralFoundTransition = (litPos: Maybe<number>): boolean => {
+	const state = getSolverMachine().getActiveState() as NonFinalState<
+		TWATCH_NON_FALSIFIED_LITERAL_FOUND_FUN,
+		TWATCH_NON_FALSIFIED_LITERAL_FOUND_INPUT
+	>;
+	if (state.run === undefined) {
+		logFatal(
+			'Function call error',
+			'There should be a function in Non falsified literal found state'
+		);
+	}
+	const posFound: boolean = state.run(litPos);
+	if (posFound) getSolverMachine().transition('swap_second_k_literal_position_state');
+	else getSolverMachine().transition('first_literal_falsified_state');
+	return posFound;
+};
+
+const swapSecondKLiteralPosTransition = (litPos: Maybe<number>, watch: EWC): void => {
+	const state = getSolverMachine().getActiveState() as NonFinalState<
+		TWATCH_SWAP_SECOND_K_LITERAL_POSITION_FUN,
+		TWATCH_SWAP_SECOND_K_LITERAL_POSITION_INPUT
+	>;
+	if (state.run === undefined) {
+		logFatal(
+			'Function call error',
+			'There should be a function in swap second k literal pos state'
+		);
+	}
+	if (!isLeft(watch)) {
+		logFatal('Type Error', 'The type of the Watch should be Watch not CRef');
+	}
+	state.run(litPos, fromLeft(watch));
+	getSolverMachine().transition('traversed_current_occurrences_state');
+};
+
+const firstLiteralFalsifiedTransition = (watch: EWC): boolean => {
+	const state = getSolverMachine().getActiveState() as NonFinalState<
+		TWATCH_FIRST_LITERAL_FALSIFIED_FUN,
+		TWATCH_FIRST_LITERAL_FALSIFIED_INPUT
+	>;
+	if (state.run === undefined) {
+		logFatal(
+			'Function call error',
+			'There should be a function in Look up non falsified literal state'
+		);
+	}
+	const firstLiteralFalsified: boolean = state.run(watch);
+	if (firstLiteralFalsified) getSolverMachine().transition('wipe_occurrences_queue_state');
+	else getSolverMachine().transition('unit_propagation_state');
+	return firstLiteralFalsified;
 };

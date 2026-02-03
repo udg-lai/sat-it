@@ -7,7 +7,7 @@ import { makeTWATCHSolver } from '$lib/solvers/twatch/twatch-solver-machine.svel
 import { logFatal } from '$lib/states/toasts.svelte.ts';
 import { type Algorithm } from '$lib/types/algorithm.ts';
 
-let solverMachine: SolverMachine<StateFun, StateInput> = $state(makeCDCLSolver());
+let solverMachine: SolverMachine<StateFun, StateInput> = $state(makeTWATCHSolver());
 
 export const stopSolverMachine = () => {
 	// This function stops the current solver machine if it's running

@@ -2,6 +2,7 @@ import type Clause from '$lib/entities/Clause.svelte.ts';
 import type { ClauseEval } from '$lib/entities/Clause.svelte.ts';
 import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
 import Literal from '$lib/entities/Literal.svelte.ts';
+import type { EWC } from '$lib/entities/Problem.svelte.ts';
 import { Trail } from '$lib/entities/Trail.svelte.ts';
 import type Variable from '$lib/entities/Variable.svelte.ts';
 import type { Assignment } from '$lib/entities/Variable.svelte.ts';
@@ -19,6 +20,7 @@ import {
 } from '$lib/states/statistics.svelte.ts';
 import { logBreakpoint, logFatal } from '$lib/states/toasts.svelte.ts';
 import { getLatestTrail, getTrails, stackTrail } from '$lib/states/trails.svelte.ts';
+import { fromLeft, fromRight, isLeft } from '$lib/types/either.ts';
 import type { CRef, Lit, Var } from '$lib/types/types.ts';
 import { fromJust, isJust, type Maybe } from '../types/maybe.ts';
 
@@ -220,4 +222,8 @@ export const finalStateControl = (): void => {
 	} else {
 		logFatal('Final state', 'Solver is not on final state');
 	}
+};
+
+export const obtainCRefFromEWC = (watch: EWC): CRef => {
+	return isLeft(watch) ? fromLeft(watch).cRef : fromRight(watch);
 };

@@ -25,7 +25,6 @@ import {
 	swapWatches,
 	traversedCurrentOccurrences,
 	unaryEmptyClausesDetection,
-	unitClause,
 	unitPropagation,
 	virtualResolution,
 	watchAtFirstPosition,
@@ -80,8 +79,6 @@ import {
 	type TWATCH_TRAVERSED_CURRENT_OCCURRENCES_INPUT,
 	type TWATCH_UNARY_EMPTY_CLAUSES_DETECTION_FUN,
 	type TWATCH_UNARY_EMPTY_CLAUSES_DETECTION_INPUT,
-	type TWATCH_UNIT_CLAUSE_FUN,
-	type TWATCH_UNIT_CLAUSE_INPUT,
 	type TWATCH_UNIT_PROPAGATION_FUN,
 	type TWATCH_UNIT_PROPAGATION_INPUT,
 	type TWATCH_VIRTUAL_RESOLUTION_FUN,
@@ -144,10 +141,10 @@ const unary_empty_clauses_detection_state: NonFinalState<
 > = {
 	id: twatch_stateName2StateId['unary_empty_clause_detection_state'],
 	run: unaryEmptyClausesDetection,
-	description: 'Seeks for the problem s unit clauses',
+	description: 'Seeks for the problems unit clauses',
 	transitions: new Map<TWATCH_UNARY_EMPTY_CLAUSES_DETECTION_INPUT, number>().set(
-		'queue_watched_occurrences_state',
-		twatch_stateName2StateId['queue_watched_occurrences_state']
+		'queue_occurrences_state',
+		twatch_stateName2StateId['queue_occurrences_state']
 	)
 };
 
@@ -213,18 +210,6 @@ const next_clause_state: NonFinalState<TWATCH_NEXT_OCCURRENCE_FUN, TWATCH_NEXT_O
 	)
 };
 
-const unit_clause_state: NonFinalState<TWATCH_UNIT_CLAUSE_FUN, TWATCH_UNIT_CLAUSE_INPUT> = {
-	id: twatch_stateName2StateId['unit_clause_state'],
-	run: unitClause,
-	description: 'Check if current clause is unit',
-	transitions: new Map<TWATCH_UNIT_CLAUSE_INPUT, number>()
-		.set(
-			'traversed_occurrences_state',
-			twatch_stateName2StateId['traversed_current_occurrences_state']
-		)
-		.set('unit_propagation_state', twatch_stateName2StateId['unit_propagation_state'])
-};
-
 const unit_propagation_state: NonFinalState<
 	TWATCH_UNIT_PROPAGATION_FUN,
 	TWATCH_UNIT_PROPAGATION_INPUT
@@ -258,10 +243,15 @@ const queue_occurrence_list_state: NonFinalState<
 	id: twatch_stateName2StateId['queue_occurrences_state'],
 	run: queueOccurrences,
 	description: 'Stack an occurrence list as pending',
-	transitions: new Map<TWATCH_QUEUE_OCCURRENCES_INPUT, number>().set(
-		'complementary_watched_occurrences_retrieve_state',
-		twatch_stateName2StateId['complementary_watched_occurrences_retrieve_state']
-	)
+	transitions: new Map<TWATCH_QUEUE_OCCURRENCES_INPUT, number>()
+		.set(
+			'complementary_watched_occurrences_retrieve_state',
+			twatch_stateName2StateId['complementary_watched_occurrences_retrieve_state']
+		)
+		.set(
+			'queue_watched_occurrences_state',
+			twatch_stateName2StateId['queue_watched_occurrences_state']
+		)
 };
 
 const dequeue_occurrence_list_state: NonFinalState<
@@ -402,7 +392,7 @@ const queue_watched_occurrences_state: NonFinalState<
 	TWATCH_QUEUE_WATCHED_OCCURRENCES_FUN,
 	TWATCH_QUEUE_WATCHED_OCCURRENCES_INPUT
 > = {
-	id: twatch_stateName2StateId['unary_empty_clause_detection_state'],
+	id: twatch_stateName2StateId['queue_watched_occurrences_state'],
 	run: queueWatchedOccurrences,
 	description: 'Queues the watched occurrences that need to be revised',
 	transitions: new Map<TWATCH_QUEUE_WATCHED_OCCURRENCES_INPUT, number>()
@@ -524,7 +514,6 @@ states.set(decide_state.id, decide_state);
 states.set(dequeue_occurrence_list_state.id, dequeue_occurrence_list_state);
 states.set(next_clause_state.id, next_clause_state);
 states.set(occurrence_list_traversed_state.id, occurrence_list_traversed_state);
-states.set(unit_clause_state.id, unit_clause_state);
 states.set(unit_propagation_state.id, unit_propagation_state);
 states.set(complementary_occurrences_state.id, complementary_occurrences_state);
 states.set(at_level_zero_state.id, at_level_zero_state);

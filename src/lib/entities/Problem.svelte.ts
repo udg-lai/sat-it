@@ -132,15 +132,14 @@ export default class Problem {
 		if (!this.currentOccurrences.isEmpty()) {
 			//Watch out, there is the possibility where the occurrence list has the unitary and empty clauses
 			const occurrenceListReason: Maybe<Lit> = this.currentOccurrences.getLiteral();
-			if(isNothing(occurrenceListReason)) {
-				return makeNothing()
+			if (isNothing(occurrenceListReason)) {
+				return makeNothing();
 			} else {
 				const trailAssignment: Lit = Literal.complementary(
 					fromJust(this.currentOccurrences.getLiteral())
 				);
 				return makeJust(trailAssignment);
 			}
-	
 		} else if (getSolverMachine().onConflictState() && getSolverMachine().identify() === 'cdcl') {
 			const currentImplication: Lit = getConflictAnalysis().currentImplication().toLit();
 			return makeJust(currentImplication);

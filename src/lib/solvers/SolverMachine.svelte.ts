@@ -2,7 +2,7 @@ import { solverSignalEventBus, type SolverCommand } from '$lib/events/events.ts'
 import { logFatal } from '$lib/states/toasts.svelte.ts';
 import type { State, StateFun, StateInput, StateMachine } from './StateMachine.svelte.ts';
 
-export type KnownSolver = 'bkt' | 'dpll' | 'cdcl' | 'twatch';
+export type KnownSolver = 'backtracking' | 'dpll' | 'cdcl' | 'twatch';
 
 export interface SolverStateInterface<F extends StateFun, I extends StateInput> {
 	transitionByEvent: (input: SolverCommand) => Promise<void>;
@@ -29,7 +29,7 @@ export abstract class SolverMachine<F extends StateFun, I extends StateInput>
 	protected stateMachine!: StateMachine<F, I>;
 	private runningOnAuto: boolean = $state(false);
 	private forcedStop: boolean = $state(false);
-	private solverId: KnownSolver = $state('bkt');
+	private solverId: KnownSolver = $state('backtracking');
 	private stepDelayMS: number = 0;
 
 	constructor(stateMachine: StateMachine<F, I>, solverId: KnownSolver, stepDelayMS: number = 0) {

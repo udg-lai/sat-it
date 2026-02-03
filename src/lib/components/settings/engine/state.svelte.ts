@@ -1,7 +1,7 @@
 import { type Algorithm } from '$lib/types/algorithm.ts';
 
 // Default algorithm for the engine settings
-let currentAlgorithm: Algorithm = $state('cdcl');
+let currentAlgorithm: Algorithm = $state('twatch');
 
 export const getConfiguredAlgorithm = () => currentAlgorithm;
 
