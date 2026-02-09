@@ -9,9 +9,20 @@
 	import type OccurrenceList from '$lib/entities/OccurrenceList.svelte.ts';
 	import type { EWC } from '$lib/entities/Problem.svelte.ts';
 	import { obtainCRefFromEWC } from '$lib/solvers/shared.svelte.ts';
-	import { getClausePool, getCurrentOccurrences, getCurrentWatch } from '$lib/states/problem.svelte.ts';
+	import {
+		getClausePool,
+		getCurrentOccurrences,
+		getCurrentWatch
+	} from '$lib/states/problem.svelte.ts';
 	import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
-	import { fromLeft, fromRight, isLeft, makeLeft, makeRight, type Either } from '$lib/types/either.ts';
+	import {
+		fromLeft,
+		fromRight,
+		isLeft,
+		makeLeft,
+		makeRight,
+		type Either
+	} from '$lib/types/either.ts';
 	import { isJust, makeJust, makeNothing, type Maybe } from '$lib/types/maybe.ts';
 	import type { CRef } from '$lib/types/types.ts';
 	import ClauseComponent from '../ClauseComponent.svelte';
@@ -19,23 +30,22 @@
 	import HeadTailComponent from './../HeadTailComponent.svelte';
 
 	type ClauseToVisit = {
-		clause: Clause,
-		toVisit: boolean
+		clause: Clause;
+		toVisit: boolean;
 	};
 
 	let clauses: Maybe<ClauseToVisit>[] = $derived.by(() => {
 		const cRefs: CRef[] = getCurrentOccurrences().getOccurrences();
 		const watches: EWC[] = getCurrentWatch().getOccurrences();
 		const watchedCRefs: Set<CRef> = new Set<CRef>(watches.map(obtainCRefFromEWC));
-		const realClauses: Maybe<ClauseToVisit>[] = cRefs.map((cRef) => 
-				makeJust({
-					clause: getClausePool().at(cRef),
-					toVisit: getSolverMachine().identify() === 'twatch' 
-						? watchedCRefs.has(cRef)
-						: true
-				}));
-			
-		console.log(realClauses)
+		const realClauses: Maybe<ClauseToVisit>[] = cRefs.map((cRef) =>
+			makeJust({
+				clause: getClausePool().at(cRef),
+				toVisit: getSolverMachine().identify() === 'twatch' ? watchedCRefs.has(cRef) : true
+			})
+		);
+
+		console.log(realClauses);
 		return [makeNothing(), ...realClauses];
 	});
 
@@ -53,25 +63,26 @@
 	}
 
 	type ECWL = Either<OccurrenceList<CRef>, OccurrenceList<EWC>>;
-	
-	const currentOccurrenceList: ECWL = 
-		$derived(getSolverMachine().identify() === 'twatch' 
-			? makeRight(getCurrentWatch()) 
-			: makeLeft(getCurrentOccurrences()));
-	
+
+	const currentOccurrenceList: ECWL = $derived(
+		getSolverMachine().identify() === 'twatch'
+			? makeRight(getCurrentWatch())
+			: makeLeft(getCurrentOccurrences())
+	);
+
 	function currentCRefs(): CRef[] {
-		if(isLeft(currentOccurrenceList)) {
-			return fromLeft(currentOccurrenceList).getOccurrences()
+		if (isLeft(currentOccurrenceList)) {
+			return fromLeft(currentOccurrenceList).getOccurrences();
 		} else {
-			return fromRight(currentOccurrenceList).getOccurrences().map(obtainCRefFromEWC)
+			return fromRight(currentOccurrenceList).getOccurrences().map(obtainCRefFromEWC);
 		}
 	}
 
 	function currentPointer(): number {
-		if(isLeft(currentOccurrenceList)) {
-			return fromLeft(currentOccurrenceList).getPointer()
+		if (isLeft(currentOccurrenceList)) {
+			return fromLeft(currentOccurrenceList).getPointer();
 		} else {
-			return fromRight(currentOccurrenceList).getPointer()
+			return fromRight(currentOccurrenceList).getPointer();
 		}
 	}
 </script>
@@ -80,18 +91,19 @@
 	{#each clauses as maybeClause, i}
 		<div class="occurrence-list-item">
 			<HeadTailComponent
-				display={isJust(maybeClause) 
-							? fromJust(maybeClause).clause.getCRef() === currentCRefs()[currentPointer()] 
-							: false
-				}
+				display={isJust(maybeClause)
+					? fromJust(maybeClause).clause.getCRef() === currentCRefs()[currentPointer()]
+					: false}
 				verticalList={true}
 			>
-				<div class="enumerate" class:inspecting={ isJust(maybeClause) 
-							? fromJust(maybeClause).clause.getCRef() === currentCRefs()[currentPointer()] 
-							: currentPointer() === -1 
-								? true
-								: false
-				}>
+				<div
+					class="enumerate"
+					class:inspecting={isJust(maybeClause)
+						? fromJust(maybeClause).clause.getCRef() === currentCRefs()[currentPointer()]
+						: currentPointer() === -1
+							? true
+							: false}
+				>
 					{#if isJust(maybeClause)}
 						<span>
 							{fromJust(maybeClause).clause.getCRef()}.
@@ -108,8 +120,9 @@
 					class:inspectedTrue={isSat(fromJust(maybeClause).clause)}
 					class:inspectedFalse={isUnSat(fromJust(maybeClause).clause)}
 					class:visited-clause={getCurrentOccurrences().getPointer() >= i &&
-						isPartial(fromJust(maybeClause).clause) && fromJust(maybeClause).toVisit}
-					class:willSkip={!fromJust(maybeClause).toVisit}  
+						isPartial(fromJust(maybeClause).clause) &&
+						fromJust(maybeClause).toVisit}
+					class:willSkip={!fromJust(maybeClause).toVisit}
 				>
 					<ClauseComponent clause={fromJust(maybeClause).clause} />
 				</div>
@@ -119,7 +132,6 @@
 </occurrence-list>
 
 <style>
-
 	.willSkip {
 		opacity: 0.3;
 	}
