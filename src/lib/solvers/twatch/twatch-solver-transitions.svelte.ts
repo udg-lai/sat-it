@@ -16,12 +16,14 @@ import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 import { increaseNoConflicts } from '$lib/states/statistics.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
 import { getLatestTrail } from '$lib/states/trails.svelte.ts';
-import { fromLeft, fromRight, isLeft, makeLeft, makeRight } from '$lib/types/either.ts';
+import { fromRight, isLeft, makeLeft, makeRight } from '$lib/types/either.ts';
 import { makeJust, makeNothing, type Maybe } from '$lib/types/maybe.ts';
 import type { CRef, Lit } from '$lib/types/types.ts';
 import { obtainCRefFromEWC } from '../shared.svelte.ts';
 import { type NonFinalState } from '../StateMachine.svelte.ts';
 import type {
+	TWATCH_ADD_WATCH_FUN,
+	TWATCH_ADD_WATCH_INPUT,
 	TWATCH_ALL_VARIABLES_ASSIGNED_FUN,
 	TWATCH_ALL_VARIABLES_ASSIGNED_INPUT,
 	TWATCH_ASSERTING_CLAUSE_FUN,
@@ -40,6 +42,8 @@ import type {
 	TWATCH_COMPLEMENTARY_WATCHED_OCCURRENCES_RETRIEVE_INPUT,
 	TWATCH_DECIDE_FUN,
 	TWATCH_DECIDE_INPUT,
+	TWATCH_DELETE_WATCH_FUN,
+	TWATCH_DELETE_WATCH_INPUT,
 	TWATCH_DEQUEUE_CURRENT_OCCURRENCES_FUN,
 	TWATCH_DEQUEUE_CURRENT_OCCURRENCES_INPUT,
 	TWATCH_FIRST_LITERAL_FALSIFIED_FUN,
@@ -188,7 +192,9 @@ export const conflictDetectionBlock = (): void => {
 		if (!firstLiteralSatisfiedTransition(watch)) {
 			const literalPos: Maybe<number> = lookNonFalsifiedLiteralTransition(watch);
 			if (nonFalsifiedLiteralFoundTransition(literalPos)) {
+				deleteWatchTransition(watch);
 				swapSecondKLiteralPosTransition(literalPos, watch);
+				addWatchTransition(watch);
 			} else {
 				const cRef: CRef = obtainCRefFromEWC(watch);
 				if (!firstLiteralFalsifiedTransition(watch)) {
@@ -614,9 +620,24 @@ const nonFalsifiedLiteralFoundTransition = (litPos: Maybe<number>): boolean => {
 		);
 	}
 	const posFound: boolean = state.run(litPos);
-	if (posFound) getSolverMachine().transition('swap_second_k_literal_position_state');
+	if (posFound) getSolverMachine().transition('delete_watch_state');
 	else getSolverMachine().transition('first_literal_falsified_state');
 	return posFound;
+};
+
+const deleteWatchTransition = (watch: EWC): void => {
+	const state = getSolverMachine().getActiveState() as NonFinalState<
+		TWATCH_DELETE_WATCH_FUN,
+		TWATCH_DELETE_WATCH_INPUT
+	>;
+	if (state.run === undefined) {
+		logFatal(
+			'Function call error',
+			'There should be a function in delete watch state'
+		);
+	}
+	state.run(watch);
+	getSolverMachine().transition('swap_second_k_literal_position_state');
 };
 
 const swapSecondKLiteralPosTransition = (litPos: Maybe<number>, watch: EWC): void => {
@@ -630,10 +651,22 @@ const swapSecondKLiteralPosTransition = (litPos: Maybe<number>, watch: EWC): voi
 			'There should be a function in swap second k literal pos state'
 		);
 	}
-	if (!isLeft(watch)) {
-		logFatal('Type Error', 'The type of the Watch should be Watch not CRef');
+	state.run(litPos, watch);
+	getSolverMachine().transition('add_watch_state');
+};
+
+const addWatchTransition = (watch: EWC): void => {
+	const state = getSolverMachine().getActiveState() as NonFinalState<
+		TWATCH_ADD_WATCH_FUN,
+		TWATCH_ADD_WATCH_INPUT
+	>;
+	if (state.run === undefined) {
+		logFatal(
+			'Function call error',
+			'There should be a function in add watch state'
+		);
 	}
-	state.run(litPos, fromLeft(watch));
+	state.run(watch);
 	getSolverMachine().transition('traversed_current_occurrences_state');
 };
 

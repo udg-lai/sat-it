@@ -1,6 +1,7 @@
 import type { FinalState, NonFinalState, State } from '../StateMachine.svelte.ts';
 import { DECIDE_STATE_ID, SAT_STATE_ID, UNSAT_STATE_ID } from '../reserved.ts';
 import {
+	addWatch,
 	allVariablesAssigned,
 	assertingClause,
 	atLevelZeroFun,
@@ -9,6 +10,7 @@ import {
 	complementaryOccurrences,
 	complementaryWatchedOccurrences,
 	decide,
+	deleteWatch,
 	dequeueCurrentOccurrences,
 	firstLiteralFalsified,
 	firstLiteralSatisfied,
@@ -29,6 +31,8 @@ import {
 	virtualResolution,
 	watchAtFirstPosition,
 	wipeOccurrenceQueue,
+	type TWATCH_ADD_WATCH_FUN,
+	type TWATCH_ADD_WATCH_INPUT,
 	type TWATCH_ALL_VARIABLES_ASSIGNED_FUN,
 	type TWATCH_ALL_VARIABLES_ASSIGNED_INPUT,
 	type TWATCH_ASSERTING_CLAUSE_FUN,
@@ -47,6 +51,8 @@ import {
 	type TWATCH_COMPLEMENTARY_WATCHED_OCCURRENCES_RETRIEVE_INPUT,
 	type TWATCH_DECIDE_FUN,
 	type TWATCH_DECIDE_INPUT,
+	type TWATCH_DELETE_WATCH_FUN,
+	type TWATCH_DELETE_WATCH_INPUT,
 	type TWATCH_DEQUEUE_CURRENT_OCCURRENCES_FUN,
 	type TWATCH_DEQUEUE_CURRENT_OCCURRENCES_INPUT,
 	type TWATCH_FIRST_LITERAL_FALSIFIED_FUN,
@@ -118,9 +124,11 @@ export const twatch_stateName2StateId = {
 	first_literal_satisfied_state: 22,
 	look_non_falsified_literal_state: 23,
 	non_falsified_literal_found_state: 24,
-	swap_second_k_literal_position_state: 25,
-	first_literal_falsified_state: 26,
-	complementary_watched_occurrences_retrieve_state: 27
+	delete_watch_state: 25,
+	swap_second_k_literal_position_state: 26,
+	add_watch_state: 27,
+	first_literal_falsified_state: 28,
+	complementary_watched_occurrences_retrieve_state: 29
 };
 
 // *** define state nodes ***
@@ -470,10 +478,24 @@ const non_falsified_literal_found_state: NonFinalState<
 	description: 'Returns true if a literal for swapping was found, false otherwise',
 	transitions: new Map<TWATCH_NON_FALSIFIED_LITERAL_FOUND_INPUT, number>()
 		.set(
+			'delete_watch_state',
+			twatch_stateName2StateId['delete_watch_state']
+		)
+		.set('first_literal_falsified_state', twatch_stateName2StateId['first_literal_falsified_state'])
+};
+
+const delete_watch_state: NonFinalState<
+	TWATCH_DELETE_WATCH_FUN,
+	TWATCH_DELETE_WATCH_INPUT
+> = {
+	id: twatch_stateName2StateId['delete_watch_state'],
+	run: deleteWatch,
+	description: 'Deletes the watch form the second position of the given watch from the watch table',
+	transitions: new Map<TWATCH_DELETE_WATCH_INPUT, number>()
+		.set(
 			'swap_second_k_literal_position_state',
 			twatch_stateName2StateId['swap_second_k_literal_position_state']
 		)
-		.set('first_literal_falsified_state', twatch_stateName2StateId['first_literal_falsified_state'])
 };
 
 const swap_second_k_literal_position_state: NonFinalState<
@@ -485,9 +507,23 @@ const swap_second_k_literal_position_state: NonFinalState<
 	description:
 		'Swaps the position of the literal that was found not falsified and the second position',
 	transitions: new Map<TWATCH_SWAP_SECOND_K_LITERAL_POSITION_INPUT, number>().set(
-		'traversed_current_occurrences_state',
-		twatch_stateName2StateId['traversed_current_occurrences_state']
+		'add_watch_state',
+		twatch_stateName2StateId['add_watch_state']
 	)
+};
+
+const add_watch_state: NonFinalState<
+	TWATCH_ADD_WATCH_FUN,
+	TWATCH_ADD_WATCH_INPUT
+> = {
+	id: twatch_stateName2StateId['add_watch_state'],
+	run: addWatch,
+	description: 'Deletes the watch form the second position of the given watch from the watch table',
+	transitions: new Map<TWATCH_ADD_WATCH_INPUT, number>()
+		.set(
+			'traversed_current_occurrences_state',
+			twatch_stateName2StateId['traversed_current_occurrences_state']
+		)
 };
 
 const first_literal_falsified_state: NonFinalState<
@@ -537,6 +573,8 @@ states.set(look_non_falsified_literal_state.id, look_non_falsified_literal_state
 states.set(non_falsified_literal_found_state.id, non_falsified_literal_found_state);
 states.set(swap_second_k_literal_position_state.id, swap_second_k_literal_position_state);
 states.set(first_literal_falsified_state.id, first_literal_falsified_state);
+states.set(delete_watch_state.id, delete_watch_state);
+states.set(add_watch_state.id, add_watch_state);
 
 export const initial = unary_empty_clauses_detection_state.id;
 

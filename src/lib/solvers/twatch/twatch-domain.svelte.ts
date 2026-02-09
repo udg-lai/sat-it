@@ -31,6 +31,7 @@ import {
 } from '$lib/states/problem.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
 import { getLatestTrail, stackTrail } from '$lib/states/trails.svelte.ts';
+import { fromLeft, isLeft } from '$lib/types/either.ts';
 import {
 	fromJust,
 	isJust,
@@ -111,10 +112,14 @@ export type TWATCH_FIRST_LITERAL_SATISFIED_INPUT =
 export type TWATCH_LOOK_NON_FALSIFIED_LITERAL_INPUT = 'non_falsified_literal_found_state';
 
 export type TWATCH_NON_FALSIFIED_LITERAL_FOUND_INPUT =
-	| 'swap_second_k_literal_position_state'
+	| 'delete_watch_state'
 	| 'first_literal_falsified_state';
 
-export type TWATCH_SWAP_SECOND_K_LITERAL_POSITION_INPUT = 'traversed_current_occurrences_state';
+export type TWATCH_DELETE_WATCH_INPUT = 'swap_second_k_literal_position_state';
+
+export type TWATCH_SWAP_SECOND_K_LITERAL_POSITION_INPUT = 'add_watch_state';
+
+export type TWATCH_ADD_WATCH_INPUT = 'traversed_current_occurrences_state'
 
 export type TWATCH_FIRST_LITERAL_FALSIFIED_INPUT =
 	| 'wipe_occurrences_queue_state'
@@ -149,7 +154,10 @@ export type TWATCH_INPUT =
 	| TWATCH_LOOK_NON_FALSIFIED_LITERAL_INPUT
 	| TWATCH_NON_FALSIFIED_LITERAL_FOUND_INPUT
 	| TWATCH_SWAP_SECOND_K_LITERAL_POSITION_INPUT
-	| TWATCH_FIRST_LITERAL_FALSIFIED_INPUT;
+	| TWATCH_FIRST_LITERAL_FALSIFIED_INPUT
+	| TWATCH_DELETE_WATCH_INPUT
+	| TWATCH_ADD_WATCH_INPUT;
+
 
 // ** state functions **
 
@@ -451,17 +459,22 @@ export const nonFalsifiedLiteralFound: TWATCH_NON_FALSIFIED_LITERAL_FOUND_FUN = 
 
 export type TWATCH_SWAP_SECOND_K_LITERAL_POSITION_FUN = (
 	candidate: Maybe<number>,
-	watch: Watch
+	watch: EWC
 ) => void;
 
 export const swapSecondKLiteralPos: TWATCH_SWAP_SECOND_K_LITERAL_POSITION_FUN = (
 	candidate: Maybe<number>,
-	watch: Watch
+	watch: EWC
 ) => {
+	if(!isLeft(watch)) {
+		logFatal("A watch type should be inside the ewc watch")
+	}
+	const currentWatch: Watch = fromLeft(watch);
+	
 	if (isNothing(candidate)) {
 		logFatal('Swapping issue', 'There is no candidate');
 	}
-	const clause: Clause = getClausePool().at(watch.cRef);
+	const clause: Clause = getClausePool().at(currentWatch.cRef);
 	const pos: number = fromJust(candidate);
 
 	if (clause.size() < pos) {
@@ -482,6 +495,30 @@ export const firstLiteralFalsified: TWATCH_FIRST_LITERAL_FALSIFIED_FUN = (watch:
 		return clause.getLiterals()[0].isFalse();
 	}
 };
+
+export type TWATCH_DELETE_WATCH_FUN = (watch: EWC) => void;
+
+// In this function, always the 2nd literal will be the one whose watch will be removed
+export const deleteWatch: TWATCH_DELETE_WATCH_FUN = (watch: EWC) => {
+	if(!isLeft(watch)) {
+		logFatal("Delete watch error", "It is only possible to delete a watch if you have a watch")
+	}
+	const cRef: CRef = obtainCRefFromEWC(watch);
+	const secondLiteral: Literal = getClausePool().at(cRef).getLiterals()[1];
+	getWatchTableMapping().deleteWatch(secondLiteral.toInt(), fromLeft(watch));
+}
+
+export type TWATCH_ADD_WATCH_FUN = (watch: EWC) => void;
+
+// In this function, always the 2nd literal will be the one whose watch will be added
+export const addWatch: TWATCH_ADD_WATCH_FUN = (watch: EWC) => {
+	if(!isLeft(watch)) {
+		logFatal("Add watch error", "It is only possible to add a watch if you have a watch")
+	}
+	const cRef: CRef = obtainCRefFromEWC(watch);
+	const secondLiteral: Literal = getClausePool().at(cRef).getLiterals()[1];
+	getWatchTableMapping().addWatch(secondLiteral.toInt(), fromLeft(watch));
+}
 
 export type TWATCH_FUN =
 	| TWATCH_UNARY_EMPTY_CLAUSES_DETECTION_FUN
@@ -510,5 +547,7 @@ export type TWATCH_FUN =
 	| TWATCH_FIRST_LITERAL_SATISFIED_FUN
 	| TWATCH_LOOK_NON_FALSIFIED_LITERAL_FUN
 	| TWATCH_NON_FALSIFIED_LITERAL_FOUND_FUN
+	| TWATCH_DELETE_WATCH_FUN
 	| TWATCH_SWAP_SECOND_K_LITERAL_POSITION_FUN
+	| TWATCH_ADD_WATCH_FUN
 	| TWATCH_FIRST_LITERAL_FALSIFIED_FUN;
