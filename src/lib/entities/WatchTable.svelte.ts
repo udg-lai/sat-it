@@ -59,7 +59,7 @@ export default class WatchTable {
 			this.table.set(lit, []);
 		}
 		const watches: Watch[] = this.table.get(lit) as Watch[];
-		
+
 		let low = 0;
 		let high = watches.length;
 
@@ -70,8 +70,8 @@ export default class WatchTable {
 			} else {
 				high = mid;
 			}
-    	}
-		
+		}
+
 		watches.splice(low, 0, watch);
 	}
 
