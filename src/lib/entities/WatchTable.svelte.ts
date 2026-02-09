@@ -58,7 +58,21 @@ export default class WatchTable {
 		if (!this.table.has(lit)) {
 			this.table.set(lit, []);
 		}
-		this.table.get(lit)?.push(watch);
+		const watches: Watch[] = this.table.get(lit) as Watch[];
+		
+		let low = 0;
+		let high = watches.length;
+
+		while (low < high) {
+			const mid = (low + high) >>> 1;
+			if (watches[mid].cRef < watch.cRef) {
+				low = mid + 1;
+			} else {
+				high = mid;
+			}
+    	}
+		
+		watches.splice(low, 0, watch);
 	}
 
 	retrieveWatchesFromLiteral(lit: Lit): Watch[] {

@@ -44,8 +44,6 @@
 				toVisit: getSolverMachine().identify() === 'twatch' ? watchedCRefs.has(cRef) : true
 			})
 		);
-
-		console.log(realClauses);
 		return [makeNothing(), ...realClauses];
 	});
 
@@ -85,25 +83,27 @@
 			return fromRight(currentOccurrenceList).getPointer();
 		}
 	}
+
+	function greaterThanCurrentCRef(clauseCRef: Maybe<ClauseToVisit>): boolean {
+		return isJust(clauseCRef)
+			? fromJust(clauseCRef).clause.getCRef() <= currentCRefs()[currentPointer()]
+			: false;
+	}
+
+	function inspectingClause(clauseCRef: Maybe<ClauseToVisit>): boolean {
+		return isJust(clauseCRef)
+			? fromJust(clauseCRef).clause.getCRef() === currentCRefs()[currentPointer()]
+			: currentPointer() === -1
+				? true
+				: false;
+	}
 </script>
 
 <occurrence-list>
-	{#each clauses as maybeClause, i}
+	{#each clauses as maybeClause}
 		<div class="occurrence-list-item">
-			<HeadTailComponent
-				display={isJust(maybeClause)
-					? fromJust(maybeClause).clause.getCRef() === currentCRefs()[currentPointer()]
-					: false}
-				verticalList={true}
-			>
-				<div
-					class="enumerate"
-					class:inspecting={isJust(maybeClause)
-						? fromJust(maybeClause).clause.getCRef() === currentCRefs()[currentPointer()]
-						: currentPointer() === -1
-							? true
-							: false}
-				>
+			<HeadTailComponent display={inspectingClause(maybeClause)} verticalList={true}>
+				<div class="enumerate" class:inspecting={inspectingClause(maybeClause)}>
 					{#if isJust(maybeClause)}
 						<span>
 							{fromJust(maybeClause).clause.getCRef()}.
@@ -119,7 +119,7 @@
 					class="clause-highlighter"
 					class:inspectedTrue={isSat(fromJust(maybeClause).clause)}
 					class:inspectedFalse={isUnSat(fromJust(maybeClause).clause)}
-					class:visited-clause={getCurrentOccurrences().getPointer() >= i &&
+					class:visited-clause={greaterThanCurrentCRef(maybeClause) &&
 						isPartial(fromJust(maybeClause).clause) &&
 						fromJust(maybeClause).toVisit}
 					class:willSkip={!fromJust(maybeClause).toVisit}
