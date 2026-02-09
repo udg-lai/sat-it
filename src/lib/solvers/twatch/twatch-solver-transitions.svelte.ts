@@ -631,10 +631,7 @@ const deleteWatchTransition = (watch: EWC): void => {
 		TWATCH_DELETE_WATCH_INPUT
 	>;
 	if (state.run === undefined) {
-		logFatal(
-			'Function call error',
-			'There should be a function in delete watch state'
-		);
+		logFatal('Function call error', 'There should be a function in delete watch state');
 	}
 	state.run(watch);
 	getSolverMachine().transition('swap_second_k_literal_position_state');
@@ -661,10 +658,7 @@ const addWatchTransition = (watch: EWC): void => {
 		TWATCH_ADD_WATCH_INPUT
 	>;
 	if (state.run === undefined) {
-		logFatal(
-			'Function call error',
-			'There should be a function in add watch state'
-		);
+		logFatal('Function call error', 'There should be a function in add watch state');
 	}
 	state.run(watch);
 	getSolverMachine().transition('traversed_current_occurrences_state');

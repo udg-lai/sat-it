@@ -477,25 +477,18 @@ const non_falsified_literal_found_state: NonFinalState<
 	run: nonFalsifiedLiteralFound,
 	description: 'Returns true if a literal for swapping was found, false otherwise',
 	transitions: new Map<TWATCH_NON_FALSIFIED_LITERAL_FOUND_INPUT, number>()
-		.set(
-			'delete_watch_state',
-			twatch_stateName2StateId['delete_watch_state']
-		)
+		.set('delete_watch_state', twatch_stateName2StateId['delete_watch_state'])
 		.set('first_literal_falsified_state', twatch_stateName2StateId['first_literal_falsified_state'])
 };
 
-const delete_watch_state: NonFinalState<
-	TWATCH_DELETE_WATCH_FUN,
-	TWATCH_DELETE_WATCH_INPUT
-> = {
+const delete_watch_state: NonFinalState<TWATCH_DELETE_WATCH_FUN, TWATCH_DELETE_WATCH_INPUT> = {
 	id: twatch_stateName2StateId['delete_watch_state'],
 	run: deleteWatch,
 	description: 'Deletes the watch form the second position of the given watch from the watch table',
-	transitions: new Map<TWATCH_DELETE_WATCH_INPUT, number>()
-		.set(
-			'swap_second_k_literal_position_state',
-			twatch_stateName2StateId['swap_second_k_literal_position_state']
-		)
+	transitions: new Map<TWATCH_DELETE_WATCH_INPUT, number>().set(
+		'swap_second_k_literal_position_state',
+		twatch_stateName2StateId['swap_second_k_literal_position_state']
+	)
 };
 
 const swap_second_k_literal_position_state: NonFinalState<
@@ -512,18 +505,14 @@ const swap_second_k_literal_position_state: NonFinalState<
 	)
 };
 
-const add_watch_state: NonFinalState<
-	TWATCH_ADD_WATCH_FUN,
-	TWATCH_ADD_WATCH_INPUT
-> = {
+const add_watch_state: NonFinalState<TWATCH_ADD_WATCH_FUN, TWATCH_ADD_WATCH_INPUT> = {
 	id: twatch_stateName2StateId['add_watch_state'],
 	run: addWatch,
 	description: 'Deletes the watch form the second position of the given watch from the watch table',
-	transitions: new Map<TWATCH_ADD_WATCH_INPUT, number>()
-		.set(
-			'traversed_current_occurrences_state',
-			twatch_stateName2StateId['traversed_current_occurrences_state']
-		)
+	transitions: new Map<TWATCH_ADD_WATCH_INPUT, number>().set(
+		'traversed_current_occurrences_state',
+		twatch_stateName2StateId['traversed_current_occurrences_state']
+	)
 };
 
 const first_literal_falsified_state: NonFinalState<

@@ -67,6 +67,7 @@ type ClauseOptions = {
 
 export default class Clause implements Comparable<Clause> {
 	private literals: Literal[] = [];
+	private originalLitOrd: Literal [] = [];
 	private comments: string[] = $state([]);
 	private cRef: number | undefined;
 	private learned: boolean = false;
@@ -75,7 +76,8 @@ export default class Clause implements Comparable<Clause> {
 		literals: Literal[],
 		{ comments = [], cRef = undefined, learned = false }: ClauseOptions = {}
 	) {
-		this.literals = literals;
+		this.literals = [...literals];
+		this.originalLitOrd = [...literals];
 		this.comments = comments;
 		this.cRef = cRef;
 		this.learned = learned;
@@ -90,10 +92,6 @@ export default class Clause implements Comparable<Clause> {
 			cRef: tag,
 			learned: false
 		});
-	}
-
-	addLiteral(lit: Literal) {
-		this.literals.push(lit);
 	}
 
 	getCRef(): CRef {
@@ -199,6 +197,10 @@ export default class Clause implements Comparable<Clause> {
 		return [...this.literals];
 	}
 
+	getOriginalLitOrder(): Literal[] {
+		return [...this.originalLitOrd];
+	}
+
 	resolution(other: Clause): Clause {
 		return logicResolution(this, other);
 	}
@@ -240,7 +242,7 @@ export default class Clause implements Comparable<Clause> {
 	}
 
 	[Symbol.iterator]() {
-		return this.literals.values();
+		return this.originalLitOrd.values();
 	}
 
 	map<T>(

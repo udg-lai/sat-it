@@ -35,7 +35,7 @@
 				const { reasonCRef, propagated }: UPContext = unwrapEither(c);
 				const clause: Clause = getClausePool().at(reasonCRef);
 				const visible: Literal[] = clause
-					.getLiterals()
+					.getOriginalLitOrder()
 					.filter((lit: Literal) => lit.toInt() !== propagated);
 				return makeLeft({
 					literals: visible

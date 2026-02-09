@@ -25,7 +25,7 @@ export const makeTWATCHSolver = (): TWATCH_SolverMachine => {
 export class TWATCH_SolverMachine extends SolverMachine<TWATCH_FUN, TWATCH_INPUT> {
 	constructor(stopTimeMS: number) {
 		const stateMachine: TWATCH_StateMachine = makeTWATCHStateMachine();
-		super(stateMachine, 'cdcl', stopTimeMS);
+		super(stateMachine, 'twatch', stopTimeMS);
 	}
 	// ** functions related to conflict analysis **
 
