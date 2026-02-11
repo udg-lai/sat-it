@@ -194,7 +194,7 @@ export default class Clause implements Comparable<Clause> {
 	}
 
 	getLiterals(sorted: boolean = false): Literal[] {
-		if (sorted) return [...this.sortedLiterals]
+		if (sorted) return [...this.sortedLiterals];
 		else return [...this.literals];
 	}
 

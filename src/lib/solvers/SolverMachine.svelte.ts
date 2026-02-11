@@ -3,7 +3,6 @@ import { logFatal } from '$lib/states/toasts.svelte.ts';
 import type { State, StateFun, StateInput, StateMachine } from './StateMachine.svelte.ts';
 import type { Algorithm } from '$lib/types/algorithm.ts';
 
-
 export interface SolverStateInterface<F extends StateFun, I extends StateInput> {
 	transitionByEvent: (input: SolverCommand) => Promise<void>;
 	transition: (input: I) => void;
