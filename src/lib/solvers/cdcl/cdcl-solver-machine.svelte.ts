@@ -1,4 +1,4 @@
-import type OccurrenceList from '$lib/entities/OccurrenceList.svelte.ts';
+import type ClauseList from '$lib/entities/OccurrenceList.svelte.ts';
 import { Queue } from '$lib/entities/Queue.svelte.ts';
 import { type SolverCommand } from '$lib/events/events.ts';
 import { getConflictAnalysis } from '$lib/states/conflict-anlysis.svelte.ts';
@@ -69,7 +69,7 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 		//	2. If the occurrence list has been analyzed, then we should upload the following occurrence list form the queue or go to the decision state.
 
 		// Get the current occurrence list
-		const occurrences: OccurrenceList<CRef> = getOccurrenceListQueue().element();
+		const occurrences: ClauseList<CRef> = getOccurrenceListQueue().element();
 
 		// Either traverse it or find a conflict.
 		await this.automaticStepByStep(() => !occurrences.traversed() && !this.onConflictState());
@@ -97,7 +97,7 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 	}
 
 	onDetectingConflict(): boolean {
-		const queueOccurrences: Queue<OccurrenceList<CRef>> = getOccurrenceListQueue();
+		const queueOccurrences: Queue<ClauseList<CRef>> = getOccurrenceListQueue();
 		return !queueOccurrences.isEmpty() && !this.stateMachine.onConflictState();
 	}
 }

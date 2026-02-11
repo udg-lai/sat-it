@@ -1,7 +1,7 @@
 import type Clause from '$lib/entities/Clause.svelte.ts';
 import type { ConflictAnalysis, VirtualResolution } from '$lib/entities/ConflictAnalysis.svelte.ts';
 import Literal from '$lib/entities/Literal.svelte.ts';
-import OccurrenceList from '$lib/entities/OccurrenceList.svelte.ts';
+import ClauseList from '$lib/entities/OccurrenceList.svelte.ts';
 import type { EWC } from '$lib/entities/Problem.svelte.ts';
 import type { Trail } from '$lib/entities/Trail.svelte.ts';
 import type { Watch } from '$lib/entities/WatchTable.svelte.ts';
@@ -88,9 +88,9 @@ import type {
 
 export const initialTransition = (): void => {
 	const unaryEmptyCRefs: Set<CRef> = unaryEmptyClausesTransition();
-	const regularOccurrences = new OccurrenceList<CRef>(makeNothing(), [...unaryEmptyCRefs]);
+	const regularOccurrences = new ClauseList<CRef>(makeNothing(), [...unaryEmptyCRefs]);
 	queueOccurrenceListTransition(regularOccurrences, true);
-	const watchedOccurrences = new OccurrenceList<EWC>(makeNothing(), [
+	const watchedOccurrences = new ClauseList<EWC>(makeNothing(), [
 		...Array.from(unaryEmptyCRefs).map(makeRight)
 	]);
 	queueWatchedOccurrencesTransition(watchedOccurrences);
@@ -104,10 +104,10 @@ export const decide = (): void => {
 };
 
 const queuesUpdateBlock = (assignment: Lit): void => {
-	const fullOccurrences: OccurrenceList<CRef> =
+	const fullOccurrences: ClauseList<CRef> =
 		complementaryOccurrencesDetectionTransition(assignment);
 	queueOccurrenceListTransition(fullOccurrences);
-	const watchedOccurrences: OccurrenceList<EWC> = watchedOccurrencesDetectionTransition(assignment);
+	const watchedOccurrences: ClauseList<EWC> = watchedOccurrencesDetectionTransition(assignment);
 	queueWatchedOccurrencesTransition(watchedOccurrences);
 };
 
@@ -244,7 +244,7 @@ const allVariablesAssignedTransition = (): void => {
 };
 
 const queueOccurrenceListTransition = (
-	occurrenceList: OccurrenceList<CRef>,
+	occurrenceList: ClauseList<CRef>,
 	fromEmptyUnary: boolean = false
 ): void => {
 	const state = getSolverMachine().getActiveState() as NonFinalState<
@@ -287,7 +287,7 @@ const traversedOccurrenceListTransition = (): boolean => {
 	if (state.run === undefined) {
 		logFatal('Function call error', 'A function that validates all occurrences checked is needed');
 	}
-	const occurrences: OccurrenceList<EWC> = getCurrentWatch();
+	const occurrences: ClauseList<EWC> = getCurrentWatch();
 	const traversed: boolean = state.run(occurrences);
 	if (traversed) getSolverMachine().transition('dequeue_current_occurrences_state');
 	else getSolverMachine().transition('next_clause_state');
@@ -350,7 +350,7 @@ const unitPropagationTransition = (cRef: CRef, reason: 'up' | 'backjumping'): Li
 	return propagated;
 };
 
-const complementaryOccurrencesDetectionTransition = (assignment: Lit): OccurrenceList<CRef> => {
+const complementaryOccurrencesDetectionTransition = (assignment: Lit): ClauseList<CRef> => {
 	const state = getSolverMachine().getActiveState() as NonFinalState<
 		TWATCH_COMPLEMENTARY_OCCURRENCES_RETRIEVE_FUN,
 		TWATCH_COMPLEMENTARY_OCCURRENCES_RETRIEVE_INPUT
@@ -364,10 +364,10 @@ const complementaryOccurrencesDetectionTransition = (assignment: Lit): Occurrenc
 	const clauses: Set<CRef> = state.run(assignment);
 	getSolverMachine().transition('queue_occurrences_state');
 	const complementary: Lit = Literal.complementary(assignment);
-	return new OccurrenceList<CRef>(makeJust(complementary), [...clauses]);
+	return new ClauseList<CRef>(makeJust(complementary), [...clauses]);
 };
 
-const watchedOccurrencesDetectionTransition = (assignment: Lit): OccurrenceList<EWC> => {
+const watchedOccurrencesDetectionTransition = (assignment: Lit): ClauseList<EWC> => {
 	const state = getSolverMachine().getActiveState() as NonFinalState<
 		TWATCH_COMPLEMENTARY_WATCHED_OCCURRENCES_RETRIEVE_FUN,
 		TWATCH_COMPLEMENTARY_WATCHED_OCCURRENCES_RETRIEVE_INPUT
@@ -381,7 +381,7 @@ const watchedOccurrencesDetectionTransition = (assignment: Lit): OccurrenceList<
 	const watches: Set<Watch> = state.run(assignment);
 	getSolverMachine().transition('queue_watched_occurrences_state');
 	const complementary: Lit = Literal.complementary(assignment);
-	return new OccurrenceList<EWC>(makeJust(complementary), [...Array.from(watches).map(makeLeft)]);
+	return new ClauseList<EWC>(makeJust(complementary), [...Array.from(watches).map(makeLeft)]);
 };
 const decideTransition = (): number => {
 	const state = getSolverMachine().getActiveState() as NonFinalState<
@@ -525,7 +525,7 @@ const pushTrailTransition = (trail: Trail): void => {
 	getSolverMachine().transition('unit_propagation_state');
 };
 
-const queueWatchedOccurrencesTransition = (occurrences: OccurrenceList<EWC>): void => {
+const queueWatchedOccurrencesTransition = (occurrences: ClauseList<EWC>): void => {
 	const state = getSolverMachine().getActiveState() as NonFinalState<
 		TWATCH_QUEUE_WATCHED_OCCURRENCES_FUN,
 		TWATCH_QUEUE_WATCHED_OCCURRENCES_INPUT

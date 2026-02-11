@@ -1,4 +1,4 @@
-import OccurrenceList from '$lib/entities/OccurrenceList.svelte.ts';
+import ClauseList from '$lib/entities/OccurrenceList.svelte.ts';
 import { getConfDelayMS } from '$lib/states/parameters.svelte.ts';
 import { getCurrentOccurrences } from '$lib/states/problem.svelte.ts';
 import type { CRef } from '$lib/types/types.ts';
@@ -54,7 +54,7 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 	}
 
 	onDetectingConflict(): boolean {
-		const occurrenceList: OccurrenceList<CRef> = getCurrentOccurrences();
+		const occurrenceList: ClauseList<CRef> = getCurrentOccurrences();
 		return !occurrenceList.isEmpty() && !this.stateMachine.onConflictState();
 	}
 }

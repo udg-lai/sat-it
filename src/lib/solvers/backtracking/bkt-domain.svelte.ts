@@ -1,6 +1,6 @@
 import Clause, { isUnsatisfiedEval, type ClauseEval } from '$lib/entities/Clause.svelte.ts';
 import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
-import OccurrenceList from '$lib/entities/OccurrenceList.svelte.ts';
+import ClauseList from '$lib/entities/OccurrenceList.svelte.ts';
 import type { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
 import {
 	atLevelZero,
@@ -84,10 +84,10 @@ export const complementaryOccurrences: BKT_COMPLEMENTARY_OCCURRENCES_FUN = (assi
 	return solverComplementaryOccurrences(mapping, assignment);
 };
 
-export type BKT_QUEUE_OCCURRENCE_LIST_FUN = (occurrenceList: OccurrenceList<CRef>) => void;
+export type BKT_QUEUE_OCCURRENCE_LIST_FUN = (occurrenceList: ClauseList<CRef>) => void;
 
 export const queueOccurrenceList: BKT_QUEUE_OCCURRENCE_LIST_FUN = (
-	occurrenceList: OccurrenceList<CRef>
+	occurrenceList: ClauseList<CRef>
 ) => {
 	getOccurrenceListQueue().enqueue(occurrenceList);
 };
@@ -98,10 +98,10 @@ export const dequeueOccurrenceList: BKT_DEQUEUE_OCCURRENCE_LIST_FUN = () => {
 	getOccurrenceListQueue().dequeue();
 };
 
-export type BKT_TRAVERSED_OCCURRENCE_LIST_FUN = (occurrenceList: OccurrenceList<CRef>) => boolean;
+export type BKT_TRAVERSED_OCCURRENCE_LIST_FUN = (occurrenceList: ClauseList<CRef>) => boolean;
 
 export const traversedOccurrenceList: BKT_TRAVERSED_OCCURRENCE_LIST_FUN = (
-	occurrenceList: OccurrenceList<CRef>
+	occurrenceList: ClauseList<CRef>
 ) => {
 	return occurrenceList.traversed();
 };
@@ -109,7 +109,7 @@ export const traversedOccurrenceList: BKT_TRAVERSED_OCCURRENCE_LIST_FUN = (
 export type BKT_NEXT_OCCURRENCE_FUN = () => CRef;
 
 export const nextClause: BKT_NEXT_OCCURRENCE_FUN = () => {
-	const occurrenceList: OccurrenceList<CRef> = getCurrentOccurrences();
+	const occurrenceList: ClauseList<CRef> = getCurrentOccurrences();
 	if (occurrenceList.isEmpty()) {
 		logFatal('A non empty set was expected');
 	}

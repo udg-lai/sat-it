@@ -1,13 +1,17 @@
 import { logError } from '$lib/states/toasts.svelte.ts';
 import { makeNothing, type Maybe } from '$lib/types/maybe.ts';
-import type { List, Lit } from '$lib/types/types.ts';
+import type { CRef, List, Lit } from '$lib/types/types.ts';
+import type { Watch } from './WatchTable.svelte.ts';
 
 // Kinda static structure that holds the occurrences of clauses for a given literal.
 // The occurrence list not necessary is provided by the assignment of a literal,
 // but because of the initial unit propagations
 // (i.e., no assignment triggered the visiting of the occurrences' complementary assignment)
 
-export default class OccurrenceList<T> {
+type OccurrenceList = ClauseList<CRef>;
+type WatchList = ClauseList<Watch>;
+
+export default class ClauseList<T> {
 	private literal: Maybe<Lit> = $state(makeNothing());
 	private cRefs: List<T>;
 	private pointer: number = $state(-1);
@@ -60,10 +64,10 @@ export default class OccurrenceList<T> {
 		return this.cRefs[this.pointer];
 	}
 
-	copy(): OccurrenceList<T> {
+	copy(): ClauseList<T> {
 		const copiedLiteral: Maybe<Lit> = this.literal;
 		const copiedClauses: List<T> = [...this.cRefs];
-		const newOccurrenceList = new OccurrenceList(copiedLiteral, copiedClauses);
+		const newOccurrenceList = new ClauseList(copiedLiteral, copiedClauses);
 		newOccurrenceList.pointer = this.pointer;
 		return newOccurrenceList;
 	}

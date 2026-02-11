@@ -1,4 +1,4 @@
-import type OccurrenceList from '$lib/entities/OccurrenceList.svelte.ts';
+import type ClauseList from '$lib/entities/OccurrenceList.svelte.ts';
 import type { EWC } from '$lib/entities/Problem.svelte.ts';
 import { Queue } from '$lib/entities/Queue.svelte.ts';
 import { type SolverCommand } from '$lib/events/events.ts';
@@ -69,7 +69,7 @@ export class TWATCH_SolverMachine extends SolverMachine<TWATCH_FUN, TWATCH_INPUT
 		//	2. If the occurrence list has been analyzed, then we should upload the following occurrence list form the queue or go to the decision state.
 
 		// Get the current occurrence list
-		const occurrences: OccurrenceList<EWC> = getWatchesQueue().element();
+		const occurrences: ClauseList<EWC> = getWatchesQueue().element();
 
 		// Either traverse it or find a conflict.
 		await this.automaticStepByStep(() => !occurrences.traversed() && !this.onConflictState());
@@ -97,7 +97,7 @@ export class TWATCH_SolverMachine extends SolverMachine<TWATCH_FUN, TWATCH_INPUT
 	}
 
 	onDetectingConflict(): boolean {
-		const queueOccurrences: Queue<OccurrenceList<EWC>> = getWatchesQueue();
+		const queueOccurrences: Queue<ClauseList<EWC>> = getWatchesQueue();
 		return !queueOccurrences.isEmpty() && !this.stateMachine.onConflictState();
 	}
 }

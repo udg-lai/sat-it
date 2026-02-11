@@ -1,6 +1,6 @@
 import { isUnitEval, isUnsatisfiedEval, type ClauseEval } from '$lib/entities/Clause.svelte.ts';
 import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
-import OccurrenceList from '$lib/entities/OccurrenceList.svelte.ts';
+import ClauseList from '$lib/entities/OccurrenceList.svelte.ts';
 import type { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
 import {
 	atLevelZero,
@@ -95,10 +95,10 @@ export const allAssigned: DPLL_ALL_VARIABLES_ASSIGNED_FUN = () => {
 	return solverAllAssigned(pool);
 };
 
-export type DPLL_QUEUE_OCCURRENCE_LIST_FUN = (occurrenceList: OccurrenceList<CRef>) => void;
+export type DPLL_QUEUE_OCCURRENCE_LIST_FUN = (occurrenceList: ClauseList<CRef>) => void;
 
 export const queueOccurrenceList: DPLL_QUEUE_OCCURRENCE_LIST_FUN = (
-	occurrenceList: OccurrenceList<CRef>
+	occurrenceList: ClauseList<CRef>
 ) => {
 	getOccurrenceListQueue().enqueue(occurrenceList);
 };
@@ -116,10 +116,10 @@ export const unitEmptyClauseDetection: DPLL_UNARY_EMPTY_CLAUSES_DETECTION_FUN = 
 	return solverUnitClauseDetection(pool);
 };
 
-export type DPLL_TRAVERSED_OCCURRENCE_LIST_FUN = (occurrenceList: OccurrenceList<CRef>) => boolean;
+export type DPLL_TRAVERSED_OCCURRENCE_LIST_FUN = (occurrenceList: ClauseList<CRef>) => boolean;
 
 export const traversedOccurrenceList: DPLL_TRAVERSED_OCCURRENCE_LIST_FUN = (
-	occurrenceList: OccurrenceList<CRef>
+	occurrenceList: ClauseList<CRef>
 ) => {
 	return occurrenceList.traversed();
 };
@@ -127,7 +127,7 @@ export const traversedOccurrenceList: DPLL_TRAVERSED_OCCURRENCE_LIST_FUN = (
 export type DPLL_NEXT_OCCURRENCE_FUN = () => CRef;
 
 export const nextClause: DPLL_NEXT_OCCURRENCE_FUN = () => {
-	const occurrenceList: OccurrenceList<CRef> = getCurrentOccurrences();
+	const occurrenceList: ClauseList<CRef> = getCurrentOccurrences();
 	if (occurrenceList.isEmpty()) {
 		logFatal('A non empty set was expected');
 	}

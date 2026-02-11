@@ -6,7 +6,7 @@ import Clause, {
 } from '$lib/entities/Clause.svelte.ts';
 import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
 import { ConflictAnalysis, type VirtualResolution } from '$lib/entities/ConflictAnalysis.svelte.ts';
-import OccurrenceList from '$lib/entities/OccurrenceList.svelte.ts';
+import ClauseList from '$lib/entities/OccurrenceList.svelte.ts';
 import type { Trail } from '$lib/entities/Trail.svelte.ts';
 import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
 import type { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
@@ -128,10 +128,10 @@ export const allAssigned: CDCL_ALL_VARIABLES_ASSIGNED_FUN = () => {
 	return solverAllAssigned(pool);
 };
 
-export type CDCL_QUEUE_OCCURRENCE_LIST_FUN = (occurrenceList: OccurrenceList<CRef>) => void;
+export type CDCL_QUEUE_OCCURRENCE_LIST_FUN = (occurrenceList: ClauseList<CRef>) => void;
 
 export const queueOccurrenceList: CDCL_QUEUE_OCCURRENCE_LIST_FUN = (
-	occurrenceList: OccurrenceList<CRef>
+	occurrenceList: ClauseList<CRef>
 ) => {
 	getOccurrenceListQueue().enqueue(occurrenceList);
 };
@@ -149,10 +149,10 @@ export const unaryEmptyClausesDetection: CDCL_UNARY_EMPTY_CLAUSES_DETECTION_FUN 
 	return solverUnitClauseDetection(pool);
 };
 
-export type CDCL_TRAVERSED_OCCURRENCE_LIST_FUN = (occurrenceList: OccurrenceList<CRef>) => boolean;
+export type CDCL_TRAVERSED_OCCURRENCE_LIST_FUN = (occurrenceList: ClauseList<CRef>) => boolean;
 
 export const traversedOccurrenceList: CDCL_TRAVERSED_OCCURRENCE_LIST_FUN = (
-	occurrenceList: OccurrenceList<CRef>
+	occurrenceList: ClauseList<CRef>
 ) => {
 	return occurrenceList.traversed();
 };
@@ -160,7 +160,7 @@ export const traversedOccurrenceList: CDCL_TRAVERSED_OCCURRENCE_LIST_FUN = (
 export type CDCL_NEXT_OCCURRENCE_FUN = () => CRef;
 
 export const nextClause: CDCL_NEXT_OCCURRENCE_FUN = () => {
-	const occurrenceList: OccurrenceList<CRef> = getCurrentOccurrences();
+	const occurrenceList: ClauseList<CRef> = getCurrentOccurrences();
 	if (occurrenceList.isEmpty()) {
 		logFatal('A non empty set was expected');
 	}

@@ -1,5 +1,5 @@
 import Literal from '$lib/entities/Literal.svelte.ts';
-import OccurrenceList from '$lib/entities/OccurrenceList.svelte.ts';
+import ClauseList from '$lib/entities/OccurrenceList.svelte.ts';
 import {
 	conflictAnalysisFinishedEventBus,
 	conflictDetectedEventBus,
@@ -41,7 +41,7 @@ import type {
 
 export const initialTransition = (): void => {
 	const emptyCRefs: Set<CRef> = ecTransition();
-	const occurrenceList: OccurrenceList<CRef> = new OccurrenceList<CRef>(makeNothing(), [
+	const occurrenceList: ClauseList<CRef> = new ClauseList<CRef>(makeNothing(), [
 		...emptyCRefs
 	]);
 	queueOccurrenceListTransition(occurrenceList);
@@ -65,7 +65,7 @@ export const backtracking = (): void => {
 };
 
 const afterAssignmentBlock = (assignment: Lit): void => {
-	const occurrenceList: OccurrenceList<CRef> = complementaryOccurrencesTransition(assignment);
+	const occurrenceList: ClauseList<CRef> = complementaryOccurrencesTransition(assignment);
 	queueOccurrenceListTransition(occurrenceList);
 
 	if (!getSolverMachine().runningOnAutomatic()) visitingComplementaryOccEventBus.emit();
@@ -186,7 +186,7 @@ const traversedOccurrenceListTransition = (): boolean => {
 	if (state.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the All Clauses Checked state');
 	}
-	const occurrenceList: OccurrenceList<CRef> = getCurrentOccurrences();
+	const occurrenceList: ClauseList<CRef> = getCurrentOccurrences();
 	const traversed: boolean = state.run(occurrenceList);
 	if (traversed) getSolverMachine().transition('dequeue_occurrence_list_state');
 	else getSolverMachine().transition('next_clause_state');
@@ -219,7 +219,7 @@ const backtrackingTransition = (): Lit => {
 	return assignment;
 };
 
-const complementaryOccurrencesTransition = (assignment: Lit): OccurrenceList<CRef> => {
+const complementaryOccurrencesTransition = (assignment: Lit): ClauseList<CRef> => {
 	const state = getSolverMachine().getActiveState() as NonFinalState<
 		BKT_COMPLEMENTARY_OCCURRENCES_FUN,
 		BKT_COMPLEMENTARY_OCCURRENCES_INPUT
@@ -233,10 +233,10 @@ const complementaryOccurrencesTransition = (assignment: Lit): OccurrenceList<CRe
 	const clauses: Set<CRef> = state.run(assignment);
 	getSolverMachine().transition('queue_occurrences_state');
 	const complementary: Lit = Literal.complementary(assignment);
-	return new OccurrenceList<CRef>(makeJust(complementary), [...clauses]);
+	return new ClauseList<CRef>(makeJust(complementary), [...clauses]);
 };
 
-const queueOccurrenceListTransition = (occurrenceList: OccurrenceList<CRef>): void => {
+const queueOccurrenceListTransition = (occurrenceList: ClauseList<CRef>): void => {
 	const state = getSolverMachine().getActiveState() as NonFinalState<
 		BKT_QUEUE_OCCURRENCE_LIST_FUN,
 		BKT_QUEUE_OCCURRENCE_LIST_INPUT

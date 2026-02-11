@@ -1,5 +1,5 @@
 import Literal from '$lib/entities/Literal.svelte.ts';
-import OccurrenceList from '$lib/entities/OccurrenceList.svelte.ts';
+import ClauseList from '$lib/entities/OccurrenceList.svelte.ts';
 import {
 	conflictAnalysisFinishedEventBus,
 	conflictDetectedEventBus,
@@ -53,7 +53,7 @@ import type {
 
 export const initialTransition = (): void => {
 	const unaryEmptyCRefs: Set<CRef> = unaryEmptyClausesTransition();
-	const occurrenceList: OccurrenceList<CRef> = new OccurrenceList<CRef>(makeNothing(), [
+	const occurrenceList: ClauseList<CRef> = new ClauseList<CRef>(makeNothing(), [
 		...unaryEmptyCRefs
 	]);
 	afterComplementaryBlock(occurrenceList);
@@ -61,7 +61,7 @@ export const initialTransition = (): void => {
 
 export const decide = (): void => {
 	const assignment: Lit = decideTransition();
-	const occurrenceList: OccurrenceList<CRef> = complementaryOccurrencesTransition(assignment);
+	const occurrenceList: ClauseList<CRef> = complementaryOccurrencesTransition(assignment);
 	afterComplementaryBlock(occurrenceList);
 };
 
@@ -83,7 +83,7 @@ export const conflictDetectionBlock = (): void => {
 			const unitClause: boolean = unitClauseTransition(cRef);
 			if (unitClause) {
 				const propagated: Lit = unitPropagationTransition(cRef);
-				const occurrenceList: OccurrenceList<CRef> = complementaryOccurrencesTransition(propagated);
+				const occurrenceList: ClauseList<CRef> = complementaryOccurrencesTransition(propagated);
 				queueOccurrenceListTransition(occurrenceList);
 			}
 		}
@@ -95,7 +95,7 @@ export const conflictiveState = (): void => {
 	const atLevelZero: boolean = dlZeroTransition();
 	if (!atLevelZero) {
 		const assignment = backtrackingTransition();
-		const occurrenceList: OccurrenceList<CRef> = complementaryOccurrencesTransition(assignment);
+		const occurrenceList: ClauseList<CRef> = complementaryOccurrencesTransition(assignment);
 		afterComplementaryBlock(occurrenceList);
 	}
 	conflictAnalysisFinishedEventBus.emit();
@@ -103,7 +103,7 @@ export const conflictiveState = (): void => {
 
 /* General non-exported transitions */
 
-const afterComplementaryBlock = (occurrenceList: OccurrenceList<CRef>): void => {
+const afterComplementaryBlock = (occurrenceList: ClauseList<CRef>): void => {
 	queueOccurrenceListTransition(occurrenceList);
 	const thereAreOccurrences: boolean = checkPendingOccurrenceListsTransition();
 	if (!thereAreOccurrences) {
@@ -146,7 +146,7 @@ const allVariablesAssignedTransition = (): void => {
 	else getSolverMachine().transition('decide_state');
 };
 
-const queueOccurrenceListTransition = (occurrenceList: OccurrenceList<CRef>): void => {
+const queueOccurrenceListTransition = (occurrenceList: ClauseList<CRef>): void => {
 	const state = getSolverMachine().getActiveState() as NonFinalState<
 		DPLL_QUEUE_OCCURRENCE_LIST_FUN,
 		DPLL_QUEUE_OCCURRENCE_LIST_INPUT
@@ -196,7 +196,7 @@ const traversedOccurrenceListTransition = (): boolean => {
 	if (state.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the All Clauses Checked state');
 	}
-	const occurrenceList: OccurrenceList<CRef> = getCurrentOccurrences();
+	const occurrenceList: ClauseList<CRef> = getCurrentOccurrences();
 	const traversed: boolean = state.run(occurrenceList);
 	if (traversed) getSolverMachine().transition('dequeue_occurrence_list_state');
 	else getSolverMachine().transition('next_clause_state');
@@ -289,7 +289,7 @@ const unitPropagationTransition = (cRef: CRef): number => {
 	return propagated;
 };
 
-const complementaryOccurrencesTransition = (assignment: Lit): OccurrenceList<CRef> => {
+const complementaryOccurrencesTransition = (assignment: Lit): ClauseList<CRef> => {
 	const state = getSolverMachine().getActiveState() as NonFinalState<
 		DPLL_COMPLEMENTARY_OCCURRENCES_FUN,
 		DPLL_COMPLEMENTARY_OCCURRENCES_INPUT
@@ -303,7 +303,7 @@ const complementaryOccurrencesTransition = (assignment: Lit): OccurrenceList<CRe
 	const cRefs: Set<CRef> = state.run(assignment);
 	getSolverMachine().transition('queue_occurrences_state');
 	const complementary: Lit = Literal.complementary(assignment);
-	return new OccurrenceList<CRef>(makeJust(complementary), [...cRefs]);
+	return new ClauseList<CRef>(makeJust(complementary), [...cRefs]);
 };
 
 const decideTransition = (): number => {

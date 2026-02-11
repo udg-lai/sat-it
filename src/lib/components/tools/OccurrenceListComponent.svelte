@@ -6,7 +6,7 @@
 		isUnresolvedEval,
 		isUnsatisfiedEval
 	} from '$lib/entities/Clause.svelte.ts';
-	import type OccurrenceList from '$lib/entities/OccurrenceList.svelte.ts';
+	import type ClauseList from '$lib/entities/OccurrenceList.svelte.ts';
 	import type { EWC } from '$lib/entities/Problem.svelte.ts';
 	import { obtainCRefFromEWC } from '$lib/solvers/shared.svelte.ts';
 	import {
@@ -60,7 +60,7 @@
 		return isUnresolvedEval(evaluation) || isUnitEval(evaluation);
 	}
 
-	type ECWL = Either<OccurrenceList<CRef>, OccurrenceList<EWC>>;
+	type ECWL = Either<ClauseList<CRef>, ClauseList<EWC>>;
 
 	const currentOccurrenceList: ECWL = $derived(
 		getSolverMachine().identify() === 'twatch'

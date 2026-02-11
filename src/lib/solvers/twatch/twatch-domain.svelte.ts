@@ -3,7 +3,7 @@ import Clause from '$lib/entities/Clause.svelte.ts';
 import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
 import { ConflictAnalysis, type VirtualResolution } from '$lib/entities/ConflictAnalysis.svelte.ts';
 import Literal from '$lib/entities/Literal.svelte.ts';
-import OccurrenceList from '$lib/entities/OccurrenceList.svelte.ts';
+import ClauseList from '$lib/entities/OccurrenceList.svelte.ts';
 import type { EWC } from '$lib/entities/Problem.svelte.ts';
 import type { Trail } from '$lib/entities/Trail.svelte.ts';
 import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
@@ -175,10 +175,10 @@ export const allVariablesAssigned: TWATCH_ALL_VARIABLES_ASSIGNED_FUN = () => {
 	return solverAllAssigned(pool);
 };
 
-export type TWATCH_QUEUE_OCCURRENCES_FUN = (occurrenceList: OccurrenceList<CRef>) => void;
+export type TWATCH_QUEUE_OCCURRENCES_FUN = (occurrenceList: ClauseList<CRef>) => void;
 
 export const queueOccurrences: TWATCH_QUEUE_OCCURRENCES_FUN = (
-	occurrenceList: OccurrenceList<CRef>
+	occurrenceList: ClauseList<CRef>
 ) => {
 	getOccurrenceListQueue().enqueue(occurrenceList);
 };
@@ -199,11 +199,11 @@ export const unaryEmptyClausesDetection: TWATCH_UNARY_EMPTY_CLAUSES_DETECTION_FU
 };
 
 export type TWATCH_TRAVERSED_CURRENT_OCCURRENCES_FUN = (
-	occurrenceList: OccurrenceList<EWC>
+	occurrenceList: ClauseList<EWC>
 ) => boolean;
 
 export const traversedCurrentOccurrences: TWATCH_TRAVERSED_CURRENT_OCCURRENCES_FUN = (
-	occurrenceList: OccurrenceList<EWC>
+	occurrenceList: ClauseList<EWC>
 ) => {
 	return occurrenceList.traversed();
 };
@@ -211,7 +211,7 @@ export const traversedCurrentOccurrences: TWATCH_TRAVERSED_CURRENT_OCCURRENCES_F
 export type TWATCH_NEXT_OCCURRENCE_FUN = () => EWC;
 
 export const nextClause: TWATCH_NEXT_OCCURRENCE_FUN = () => {
-	const occurrences: OccurrenceList<EWC> = getCurrentWatch();
+	const occurrences: ClauseList<EWC> = getCurrentWatch();
 	if (occurrences.isEmpty()) {
 		logFatal('A non empty set was expected');
 	}
@@ -377,10 +377,10 @@ export const complementaryWatchedOccurrences: TWATCH_COMPLEMENTARY_WATCHED_OCCUR
 		return new Set<Watch>(watches);
 	};
 
-export type TWATCH_QUEUE_WATCHED_OCCURRENCES_FUN = (watches: OccurrenceList<EWC>) => void;
+export type TWATCH_QUEUE_WATCHED_OCCURRENCES_FUN = (watches: ClauseList<EWC>) => void;
 
 export const queueWatchedOccurrences: TWATCH_QUEUE_WATCHED_OCCURRENCES_FUN = (
-	watches: OccurrenceList<EWC>
+	watches: ClauseList<EWC>
 ) => {
 	getWatchesQueue().enqueue(watches);
 };
@@ -390,7 +390,7 @@ export type TWATCH_WATCH_AT_FIRST_POSITION_FUN = (watch: EWC) => boolean;
 export const watchAtFirstPosition: TWATCH_WATCH_AT_FIRST_POSITION_FUN = (watch: EWC) => {
 	const cRef: CRef = obtainCRefFromEWC(watch);
 	const cLits: Literal[] = getClausePool().at(cRef).getLiterals();
-	const currentWatch: OccurrenceList<EWC> = getCurrentWatch();
+	const currentWatch: ClauseList<EWC> = getCurrentWatch();
 
 	// WATCH OUT: This condition is necessary. Empty clauses and unary clauses may also go through this state
 	// 	as at the beginning unary and empty clauses are retrieved.
