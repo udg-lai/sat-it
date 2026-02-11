@@ -58,7 +58,7 @@
 						<empty-clause></empty-clause>
 					{:else}
 						<PlainClauseComponent
-							literals={ctx.left.clause.getOriginalLitOrder()}
+							literals={ctx.left.clause.getLiterals(true)}
 							satisfiedClause={false}
 							satisfiedLiterals={false}
 						/>

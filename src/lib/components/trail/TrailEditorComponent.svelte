@@ -43,7 +43,7 @@
 
 	let showUPs: boolean = $derived.by(() => {
 		const identity = solver.identify();
-		return identity === 'cdcl' || identity === 'dpll';
+		return identity == 'twatch' || identity === 'cdcl' || identity === 'dpll';
 	});
 
 	const scrollToBottom = (editorElement: HTMLElement) => {
@@ -125,7 +125,7 @@
 		if (trail === undefined) {
 			logFatal('Trail not found for ID: ' + trailID);
 		}
-		if (solver.identify() === 'bkt' && trail.getConflictiveClause() === undefined) {
+		if (solver.identify() === 'backtracking' && trail.getConflictiveClause() === undefined) {
 			// If the trail is running or is a model, we do not allow toggling the view
 			return;
 		}
@@ -334,7 +334,7 @@
 							trailState={trail.getState()}
 							expanded={trail.showingContext()}
 							onToggleExpand={() => toggleTrailCtxView(id)}
-							disableClick={solver.identify() === 'bkt' &&
+							disableClick={solver.identify() === 'backtracking' &&
 								trail.getConflictiveClause() === undefined}
 						/>
 					</div>

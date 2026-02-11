@@ -374,7 +374,6 @@ export const complementaryWatchedOccurrences: TWATCH_COMPLEMENTARY_WATCHED_OCCUR
 		const complementary: Lit = Literal.complementary(assignment);
 		// For the moment this will be done like this... I don't know if a special "occurrence List for watches should be created"
 		const watches: Watch[] = getWatchTableMapping().retrieveWatchesFromLiteral(complementary);
-		console.log(watches);
 		return new Set<Watch>(watches);
 	};
 
@@ -410,7 +409,7 @@ export const swapWatches: TWATCH_SWAP_WATCHES_FUN = (watch: EWC) => {
 	if (clause.size() < 2) {
 		logFatal('Swap issue', 'The clause you are trying to swap positions has less than 2 literals');
 	} else {
-		clause.swapLiterals(0, 1);
+		clause.swapLiteralPositions(0, 1);
 	}
 };
 
@@ -477,7 +476,7 @@ export const swapSecondKLiteralPos: TWATCH_SWAP_SECOND_K_LITERAL_POSITION_FUN = 
 	if (clause.size() < pos) {
 		logFatal('Swap issue', 'The candidate access an out of bound positions from the clause');
 	} else {
-		clause.swapLiterals(1, pos);
+		clause.swapLiteralPositions(1, pos);
 	}
 };
 
