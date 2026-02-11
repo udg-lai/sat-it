@@ -79,8 +79,7 @@ export const initialTransition = (): void => {
 
 export const decide = (): void => {
 	const assignment: Lit = decideTransition();
-	const occurrenceList: ClauseList<CRef> =
-		complementaryOccurrencesDetectionTransition(assignment);
+	const occurrenceList: ClauseList<CRef> = complementaryOccurrencesDetectionTransition(assignment);
 	afterComplementaryBlock(occurrenceList);
 };
 

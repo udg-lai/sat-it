@@ -41,9 +41,7 @@ import type {
 
 export const initialTransition = (): void => {
 	const emptyCRefs: Set<CRef> = ecTransition();
-	const occurrenceList: ClauseList<CRef> = new ClauseList<CRef>(makeNothing(), [
-		...emptyCRefs
-	]);
+	const occurrenceList: ClauseList<CRef> = new ClauseList<CRef>(makeNothing(), [...emptyCRefs]);
 	queueOccurrenceListTransition(occurrenceList);
 
 	// This is for showing the up-1 and up-n view

@@ -104,8 +104,7 @@ export const decide = (): void => {
 };
 
 const queuesUpdateBlock = (assignment: Lit): void => {
-	const fullOccurrences: ClauseList<CRef> =
-		complementaryOccurrencesDetectionTransition(assignment);
+	const fullOccurrences: ClauseList<CRef> = complementaryOccurrencesDetectionTransition(assignment);
 	queueOccurrenceListTransition(fullOccurrences);
 	const watchedOccurrences: ClauseList<EWC> = watchedOccurrencesDetectionTransition(assignment);
 	queueWatchedOccurrencesTransition(watchedOccurrences);

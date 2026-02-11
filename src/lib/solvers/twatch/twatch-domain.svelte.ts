@@ -198,9 +198,7 @@ export const unaryEmptyClausesDetection: TWATCH_UNARY_EMPTY_CLAUSES_DETECTION_FU
 	return unaryEmptyClauseDetection(pool);
 };
 
-export type TWATCH_TRAVERSED_CURRENT_OCCURRENCES_FUN = (
-	occurrenceList: ClauseList<EWC>
-) => boolean;
+export type TWATCH_TRAVERSED_CURRENT_OCCURRENCES_FUN = (occurrenceList: ClauseList<EWC>) => boolean;
 
 export const traversedCurrentOccurrences: TWATCH_TRAVERSED_CURRENT_OCCURRENCES_FUN = (
 	occurrenceList: ClauseList<EWC>

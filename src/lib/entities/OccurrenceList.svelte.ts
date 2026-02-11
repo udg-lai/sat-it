@@ -1,4 +1,5 @@
 import { logError } from '$lib/states/toasts.svelte.ts';
+import type { Either } from '$lib/types/either.ts';
 import { makeNothing, type Maybe } from '$lib/types/maybe.ts';
 import type { CRef, List, Lit } from '$lib/types/types.ts';
 import type { Watch } from './WatchTable.svelte.ts';
@@ -8,16 +9,11 @@ import type { Watch } from './WatchTable.svelte.ts';
 // but because of the initial unit propagations
 // (i.e., no assignment triggered the visiting of the occurrences' complementary assignment)
 
-type OccurrenceList = ClauseList<CRef>;
-type WatchList = ClauseList<Watch>;
-
 export default class ClauseList<T> {
-	private literal: Maybe<Lit> = $state(makeNothing());
 	private cRefs: List<T>;
 	private pointer: number = $state(-1);
 
-	constructor(literal: Maybe<Lit> = makeNothing(), cRefs: List<T> = []) {
-		this.literal = literal;
+	constructor(cRefs: List<T> = []) {
 		this.cRefs = cRefs;
 		this.pointer = -1;
 	}
@@ -28,10 +24,6 @@ export default class ClauseList<T> {
 			logError('No more clauses to visit in this occurrence list.');
 		}
 		return this.cRefs[this.pointer];
-	}
-
-	getLiteral(): Maybe<Lit> {
-		return this.literal;
 	}
 
 	getOccurrences(): List<T> {
@@ -72,3 +64,34 @@ export default class ClauseList<T> {
 		return newOccurrenceList;
 	}
 }
+
+export class OccurrenceList extends ClauseList<CRef> {
+	private literal: Maybe<Lit> = $state(makeNothing());
+
+	constructor(literal: Maybe<Lit> = makeNothing(), cRefs: List<CRef> = []) {
+		super(cRefs);
+		this.literal = literal;
+	}
+
+	getLiteral(): Maybe<Lit> {
+		return this.literal;
+	}
+}
+
+export class WatchList extends ClauseList<Watch> {
+	private literal: Maybe<Lit> = $state(makeNothing());
+
+	constructor(literal: Maybe<Lit> = makeNothing(), cRefs: List<Watch> = []) {
+		super(cRefs);
+		this.literal = literal;
+	}
+
+	getLiteral(): Maybe<Lit> {
+		return this.literal;
+	}
+}
+
+export class PreprocessingList extends ClauseList<CRef> {}
+
+type VisitingOccurrenceList = Either<PreprocessingList, OccurrenceList>;
+type VisitingWatchList = Either<PreprocessingList, WatchList>;
