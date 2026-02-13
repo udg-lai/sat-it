@@ -1,11 +1,11 @@
-import type ClauseList from '$lib/entities/OccurrenceList.svelte.ts';
-import type { EWC } from '$lib/entities/Problem.svelte.ts';
+import type { VisitingWatchList } from '$lib/entities/OccurrenceList.svelte.ts';
 import { Queue } from '$lib/entities/Queue.svelte.ts';
 import { type SolverCommand } from '$lib/events/events.ts';
 import { getConflictAnalysis } from '$lib/states/conflict-anlysis.svelte.ts';
 import { getConfDelayMS } from '$lib/states/parameters.svelte.ts';
 import { getWatchesQueue } from '$lib/states/problem.svelte.ts';
 import { getNoUnitPropagations } from '$lib/states/statistics.svelte.ts';
+import { fromLeft, fromRight, isLeft } from '$lib/types/either.ts';
 import { SolverMachine } from '../SolverMachine.svelte.ts';
 import type { TWATCH_FUN, TWATCH_INPUT } from './twatch-domain.svelte.ts';
 import {
@@ -69,10 +69,18 @@ export class TWATCH_SolverMachine extends SolverMachine<TWATCH_FUN, TWATCH_INPUT
 		//	2. If the occurrence list has been analyzed, then we should upload the following occurrence list form the queue or go to the decision state.
 
 		// Get the current occurrence list
-		const occurrences: ClauseList<EWC> = getWatchesQueue().element();
+		const occurrences: VisitingWatchList = getWatchesQueue().element();
 
 		// Either traverse it or find a conflict.
-		await this.automaticStepByStep(() => !occurrences.traversed() && !this.onConflictState());
+		if (isLeft(occurrences)) {
+			await this.automaticStepByStep(
+				() => !fromLeft(occurrences).traversed() && !this.onConflictState()
+			);
+		} else {
+			await this.automaticStepByStep(
+				() => !fromRight(occurrences).traversed() && !this.onConflictState()
+			);
+		}
 
 		// If there is no conflict, then we need to do an extra step for either uploading the following occurrence list or continue to the decision state.
 		// Because of this, an extra step should be done.
@@ -97,7 +105,7 @@ export class TWATCH_SolverMachine extends SolverMachine<TWATCH_FUN, TWATCH_INPUT
 	}
 
 	onDetectingConflict(): boolean {
-		const queueOccurrences: Queue<ClauseList<EWC>> = getWatchesQueue();
+		const queueOccurrences: Queue<VisitingWatchList> = getWatchesQueue();
 		return !queueOccurrences.isEmpty() && !this.stateMachine.onConflictState();
 	}
 }

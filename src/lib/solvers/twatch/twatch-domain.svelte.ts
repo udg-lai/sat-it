@@ -3,7 +3,12 @@ import Clause from '$lib/entities/Clause.svelte.ts';
 import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
 import { ConflictAnalysis, type VirtualResolution } from '$lib/entities/ConflictAnalysis.svelte.ts';
 import Literal from '$lib/entities/Literal.svelte.ts';
-import ClauseList from '$lib/entities/OccurrenceList.svelte.ts';
+import {
+	WatchList,
+	type PreprocessingList,
+	type VisitingOccurrenceList,
+	type VisitingWatchList
+} from '$lib/entities/OccurrenceList.svelte.ts';
 import type { EWC } from '$lib/entities/Problem.svelte.ts';
 import type { Trail } from '$lib/entities/Trail.svelte.ts';
 import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
@@ -31,7 +36,7 @@ import {
 } from '$lib/states/problem.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
 import { getLatestTrail, stackTrail } from '$lib/states/trails.svelte.ts';
-import { fromLeft, isLeft } from '$lib/types/either.ts';
+import { fromLeft, fromRight, isLeft, makeLeft, makeRight } from '$lib/types/either.ts';
 import {
 	fromJust,
 	isJust,
@@ -175,10 +180,10 @@ export const allVariablesAssigned: TWATCH_ALL_VARIABLES_ASSIGNED_FUN = () => {
 	return solverAllAssigned(pool);
 };
 
-export type TWATCH_QUEUE_OCCURRENCES_FUN = (occurrenceList: ClauseList<CRef>) => void;
+export type TWATCH_QUEUE_OCCURRENCES_FUN = (occurrenceList: VisitingOccurrenceList) => void;
 
 export const queueOccurrences: TWATCH_QUEUE_OCCURRENCES_FUN = (
-	occurrenceList: ClauseList<CRef>
+	occurrenceList: VisitingOccurrenceList
 ) => {
 	getOccurrenceListQueue().enqueue(occurrenceList);
 };
@@ -198,22 +203,34 @@ export const unaryEmptyClausesDetection: TWATCH_UNARY_EMPTY_CLAUSES_DETECTION_FU
 	return unaryEmptyClauseDetection(pool);
 };
 
-export type TWATCH_TRAVERSED_CURRENT_OCCURRENCES_FUN = (occurrenceList: ClauseList<EWC>) => boolean;
+export type TWATCH_TRAVERSED_CURRENT_OCCURRENCES_FUN = (
+	visitingOccurrences: VisitingWatchList
+) => boolean;
 
 export const traversedCurrentOccurrences: TWATCH_TRAVERSED_CURRENT_OCCURRENCES_FUN = (
-	occurrenceList: ClauseList<EWC>
+	visitingOccurrences: VisitingWatchList
 ) => {
-	return occurrenceList.traversed();
+	if (isLeft(visitingOccurrences)) return fromLeft(visitingOccurrences).traversed();
+	else return fromRight(visitingOccurrences).traversed();
 };
 
 export type TWATCH_NEXT_OCCURRENCE_FUN = () => EWC;
 
 export const nextClause: TWATCH_NEXT_OCCURRENCE_FUN = () => {
-	const occurrences: ClauseList<EWC> = getCurrentWatch();
-	if (occurrences.isEmpty()) {
-		logFatal('A non empty set was expected');
+	const visitingWatches: VisitingWatchList = getCurrentWatch();
+	if (isLeft(visitingWatches)) {
+		const preprocessingList: PreprocessingList = fromLeft(visitingWatches);
+		if (!preprocessingList.isEmpty()) {
+			logFatal('The preprocessing list is empty');
+		}
+		return makeRight(preprocessingList.next());
+	} else {
+		const occurrenceList: WatchList = fromRight(visitingWatches);
+		if (occurrenceList.isEmpty()) {
+			logFatal('The occurrence list is empty');
+		}
+		return makeLeft(occurrenceList.next());
 	}
-	return occurrences.next();
 };
 
 export type TWATCH_CHECK_PENDING_OCCURRENCES_FUN = () => boolean;
@@ -375,10 +392,10 @@ export const complementaryWatchedOccurrences: TWATCH_COMPLEMENTARY_WATCHED_OCCUR
 		return new Set<Watch>(watches);
 	};
 
-export type TWATCH_QUEUE_WATCHED_OCCURRENCES_FUN = (watches: ClauseList<EWC>) => void;
+export type TWATCH_QUEUE_WATCHED_OCCURRENCES_FUN = (watches: VisitingWatchList) => void;
 
 export const queueWatchedOccurrences: TWATCH_QUEUE_WATCHED_OCCURRENCES_FUN = (
-	watches: ClauseList<EWC>
+	watches: VisitingWatchList
 ) => {
 	getWatchesQueue().enqueue(watches);
 };
@@ -388,14 +405,14 @@ export type TWATCH_WATCH_AT_FIRST_POSITION_FUN = (watch: EWC) => boolean;
 export const watchAtFirstPosition: TWATCH_WATCH_AT_FIRST_POSITION_FUN = (watch: EWC) => {
 	const cRef: CRef = obtainCRefFromEWC(watch);
 	const cLits: Literal[] = getClausePool().at(cRef).getLiterals();
-	const currentWatch: ClauseList<EWC> = getCurrentWatch();
+	const currentWatch: VisitingWatchList = getCurrentWatch();
 
 	// WATCH OUT: This condition is necessary. Empty clauses and unary clauses may also go through this state
 	// 	as at the beginning unary and empty clauses are retrieved.
-	if (!isJust(currentWatch.getLiteral())) {
+	if (isLeft(currentWatch)) {
 		return false;
 	} else {
-		return cLits[0].toInt() === fromJust(currentWatch.getLiteral());
+		return cLits[0].toInt() === fromRight(currentWatch).getLiteral();
 	}
 };
 

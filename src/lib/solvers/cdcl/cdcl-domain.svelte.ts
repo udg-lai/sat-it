@@ -6,7 +6,11 @@ import Clause, {
 } from '$lib/entities/Clause.svelte.ts';
 import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
 import { ConflictAnalysis, type VirtualResolution } from '$lib/entities/ConflictAnalysis.svelte.ts';
-import ClauseList from '$lib/entities/OccurrenceList.svelte.ts';
+import {
+	type OccurrenceList,
+	type PreprocessingList,
+	type VisitingOccurrenceList
+} from '$lib/entities/OccurrenceList.svelte.ts';
 import type { Trail } from '$lib/entities/Trail.svelte.ts';
 import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
 import type { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
@@ -31,6 +35,7 @@ import {
 } from '$lib/states/problem.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
 import { getLatestTrail, stackTrail } from '$lib/states/trails.svelte.ts';
+import { fromLeft, fromRight, isLeft } from '$lib/types/either.ts';
 import type { CRef, List, Lit } from '$lib/types/types.ts';
 
 // ** state inputs **
@@ -128,12 +133,12 @@ export const allAssigned: CDCL_ALL_VARIABLES_ASSIGNED_FUN = () => {
 	return solverAllAssigned(pool);
 };
 
-export type CDCL_QUEUE_OCCURRENCE_LIST_FUN = (occurrenceList: ClauseList<CRef>) => void;
+export type CDCL_QUEUE_OCCURRENCE_LIST_FUN = (occurrences: VisitingOccurrenceList) => void;
 
 export const queueOccurrenceList: CDCL_QUEUE_OCCURRENCE_LIST_FUN = (
-	occurrenceList: ClauseList<CRef>
+	occurrences: VisitingOccurrenceList
 ) => {
-	getOccurrenceListQueue().enqueue(occurrenceList);
+	getOccurrenceListQueue().enqueue(occurrences);
 };
 
 export type CDCL_UNSTACK_OCCURRENCE_LIST_FUN = () => void;
@@ -149,22 +154,34 @@ export const unaryEmptyClausesDetection: CDCL_UNARY_EMPTY_CLAUSES_DETECTION_FUN 
 	return solverUnitClauseDetection(pool);
 };
 
-export type CDCL_TRAVERSED_OCCURRENCE_LIST_FUN = (occurrenceList: ClauseList<CRef>) => boolean;
+export type CDCL_TRAVERSED_OCCURRENCE_LIST_FUN = (
+	visitingOccurrences: VisitingOccurrenceList
+) => boolean;
 
 export const traversedOccurrenceList: CDCL_TRAVERSED_OCCURRENCE_LIST_FUN = (
-	occurrenceList: ClauseList<CRef>
+	visitingOccurrences: VisitingOccurrenceList
 ) => {
-	return occurrenceList.traversed();
+	if (isLeft(visitingOccurrences)) return fromLeft(visitingOccurrences).traversed();
+	else return fromRight(visitingOccurrences).traversed();
 };
 
 export type CDCL_NEXT_OCCURRENCE_FUN = () => CRef;
 
 export const nextClause: CDCL_NEXT_OCCURRENCE_FUN = () => {
-	const occurrenceList: ClauseList<CRef> = getCurrentOccurrences();
-	if (occurrenceList.isEmpty()) {
-		logFatal('A non empty set was expected');
+	const visitingOccurrences: VisitingOccurrenceList = getCurrentOccurrences();
+	if (isLeft(visitingOccurrences)) {
+		const preprocessingList: PreprocessingList = fromLeft(visitingOccurrences);
+		if (!preprocessingList.isEmpty()) {
+			logFatal('The preprocessing list is empty');
+		}
+		return preprocessingList.next();
+	} else {
+		const occurrenceList: OccurrenceList = fromRight(visitingOccurrences);
+		if (occurrenceList.isEmpty()) {
+			logFatal('The occurrence list is empty');
+		}
+		return occurrenceList.next();
 	}
-	return occurrenceList.next();
 };
 
 export type CDCL_CONFLICT_DETECTION_FUN = (cRef: CRef) => boolean;

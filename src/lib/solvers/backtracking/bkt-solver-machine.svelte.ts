@@ -1,7 +1,7 @@
-import ClauseList from '$lib/entities/OccurrenceList.svelte.ts';
+import { type VisitingOccurrenceList } from '$lib/entities/OccurrenceList.svelte.ts';
+import type { Queue } from '$lib/entities/Queue.svelte.ts';
 import { getConfDelayMS } from '$lib/states/parameters.svelte.ts';
-import { getCurrentOccurrences } from '$lib/states/problem.svelte.ts';
-import type { CRef } from '$lib/types/types.ts';
+import { getOccurrenceListQueue } from '$lib/states/problem.svelte.ts';
 import { SolverMachine } from '../SolverMachine.svelte.ts';
 import type { BKT_FUN, BKT_INPUT } from './bkt-domain.svelte.ts';
 import {
@@ -20,7 +20,7 @@ export const makeBKTSolver = (): BKT_SolverMachine => {
 export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 	constructor(stopTimeMS: number) {
 		const stateMachine: BKT_StateMachine = makeBKTStateMachine();
-		super(stateMachine, 'bkt', stopTimeMS);
+		super(stateMachine, 'backtracking', stopTimeMS);
 	}
 
 	step(): void {
@@ -54,7 +54,7 @@ export class BKT_SolverMachine extends SolverMachine<BKT_FUN, BKT_INPUT> {
 	}
 
 	onDetectingConflict(): boolean {
-		const occurrenceList: ClauseList<CRef> = getCurrentOccurrences();
-		return !occurrenceList.isEmpty() && !this.stateMachine.onConflictState();
+		const occurrenceQueue: Queue<VisitingOccurrenceList> = getOccurrenceListQueue();
+		return !occurrenceQueue.isEmpty() && !this.stateMachine.onConflictState();
 	}
 }
