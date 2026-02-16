@@ -34,7 +34,15 @@ import {
 } from '$lib/states/problem.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
 import { getLatestTrail, stackTrail } from '$lib/states/trails.svelte.ts';
-import { fromLeft, fromRight, isLeft, isRight, makeLeft, makeRight, unwrapEither } from '$lib/types/either.ts';
+import {
+	fromLeft,
+	fromRight,
+	isLeft,
+	isRight,
+	makeLeft,
+	makeRight,
+	unwrapEither
+} from '$lib/types/either.ts';
 import {
 	fromJust,
 	isJust,
@@ -216,9 +224,9 @@ export type TWATCH_NEXT_OCCURRENCE_FUN = () => EWC;
 export const nextClause: TWATCH_NEXT_OCCURRENCE_FUN = () => {
 	const visitingWatches: VisitingWatchList = getCurrentWatch();
 	if (unwrapEither(visitingWatches).isEmpty()) {
-			logFatal('The watch list is empty');
-	}	
-	return isRight(visitingWatches) 
+		logFatal('The watch list is empty');
+	}
+	return isRight(visitingWatches)
 		? makeLeft(fromRight(visitingWatches).next())
 		: makeRight(fromLeft(visitingWatches).next());
 };

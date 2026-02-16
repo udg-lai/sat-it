@@ -117,7 +117,8 @@ export type BKT_NEXT_OCCURRENCE_FUN = () => CRef;
 
 export const nextClause: BKT_NEXT_OCCURRENCE_FUN = () => {
 	const visitingOccurrences: VisitingOccurrenceList = getCurrentOccurrences();
-	const unwrappedOccurrences: NonNullable<PreprocessingList | OccurrenceList> = unwrapEither(visitingOccurrences)
+	const unwrappedOccurrences: NonNullable<PreprocessingList | OccurrenceList> =
+		unwrapEither(visitingOccurrences);
 	if (!unwrappedOccurrences.isEmpty()) {
 		logFatal('The occurrence list is empty');
 	} else {

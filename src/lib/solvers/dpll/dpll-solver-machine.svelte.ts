@@ -67,7 +67,7 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 		await this.automaticStepByStep(
 			() => !unwrapEither(occurrences).traversed() && !this.onConflictState()
 		);
-		
+
 		// If there is no conflict, then we need to do an extra step for either uploading the following occurrence list or continue to the decision state.
 		// Because of this, an extra step should be done.
 		if (!this.onConflictState()) {
