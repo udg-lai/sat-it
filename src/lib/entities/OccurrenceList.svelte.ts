@@ -89,16 +89,7 @@ export class ComplementaryList<T> extends ClauseList<T> {
 	}
 }
 export type PreprocessingList = ClauseList<CRef>;
-//export class PreprocessingList extends ClauseList<CRef> {
-//
-//}
-
 export type OccurrenceList = ComplementaryList<CRef>;
-//export class OccurrenceList extends ComplementaryList<CRef> {
-//	constructor(literal: Lit, cRefs: List<CRef> = []) {
-//		super(literal ,cRefs);
-//	}
-//}
 
 export class WatchList extends ComplementaryList<Watch> {
 	constructor(literal: Lit, cRefs: List<Watch> = []) {
