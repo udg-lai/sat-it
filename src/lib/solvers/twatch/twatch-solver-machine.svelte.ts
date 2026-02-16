@@ -72,7 +72,7 @@ export class TWATCH_SolverMachine extends SolverMachine<TWATCH_FUN, TWATCH_INPUT
 		const occurrences: VisitingWatchList = getWatchesQueue().element();
 
 		// Either traverse it or find a conflict.
-		const unwrappedOccurrences = unwrapEither(occurrences)
+		const unwrappedOccurrences = unwrapEither(occurrences);
 		await this.automaticStepByStep(
 			() => !unwrappedOccurrences.traversed() && !this.onConflictState()
 		);

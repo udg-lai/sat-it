@@ -13,13 +13,13 @@
 	let { clause, classStyle }: Props = $props();
 
 	const watchedLiterals: Set<Lit> = $derived.by(() => {
-		if(getSolverMachine().identify() === 'twatch' && clause.size() >= 2) {
+		if (getSolverMachine().identify() === 'twatch' && clause.size() >= 2) {
 			const sortedLiterals = clause.getLiterals();
-			return new Set<Lit>([sortedLiterals[0].toInt(), sortedLiterals[1].toInt()])
+			return new Set<Lit>([sortedLiterals[0].toInt(), sortedLiterals[1].toInt()]);
 		} else {
 			return new Set<Lit>();
 		}
-	}) 
+	});
 </script>
 
 <clause class={classStyle ?? ''}>

@@ -64,7 +64,7 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 		const occurrences: VisitingOccurrenceList = getCurrentOccurrences();
 
 		// Either traverse it or find a conflict.
-		const unwrappedOccurrences = unwrapEither(occurrences)
+		const unwrappedOccurrences = unwrapEither(occurrences);
 		await this.automaticStepByStep(
 			() => !unwrappedOccurrences.traversed() && !this.onConflictState()
 		);

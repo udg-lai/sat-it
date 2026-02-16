@@ -72,7 +72,7 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 		const occurrences: VisitingOccurrenceList = getCurrentOccurrences();
 
 		// Either traverse it or find a conflict.
-		const unwrappedOccurrences = unwrapEither(occurrences)
+		const unwrappedOccurrences = unwrapEither(occurrences);
 		await this.automaticStepByStep(
 			() => !unwrappedOccurrences.traversed() && !this.onConflictState()
 		);

@@ -45,23 +45,24 @@
 		if (isLeft(occurrences) || getSolverMachine().identify() !== 'twatch') {
 			clausesToVisit = unwrapEither(occurrences)
 				.getOccurrences()
-				.map((cRef) =>
-					({
-						clause: getClausePool().at(cRef),
-						toVisit: true
-					})
-				);
+				.map((cRef) => ({
+					clause: getClausePool().at(cRef),
+					toVisit: true
+				}));
 		} else {
 			const watches: VisitingWatchList = getCurrentWatch();
 			if (isLeft(watches)) {
-				logFatal('Unexpected preprocessing list', 'This point is only accessible in the conflict detection state of two watch literals');
+				logFatal(
+					'Unexpected preprocessing list',
+					'This point is only accessible in the conflict detection state of two watch literals'
+				);
 			} else {
 				const watchedCRefs: CRef[] = fromRight(watches).getCRefs();
 				const complementaryCRefs: CRef[] = fromRight(occurrences).getOccurrences();
 				clausesToVisit = reorderCRefs(complementaryCRefs, watchedCRefs);
 			}
 		}
-		
+
 		return [makeNothing(), ...clausesToVisit.map(makeJust)];
 	});
 
@@ -71,7 +72,7 @@
 		const complementarySet: Set<CRef> = new Set(complementary);
 
 		// Then let's create a list of unwatched CRefs
-		
+
 		const unwatchedCRefs: CRef[] = [...complementarySet.difference(watchedSet)];
 
 		const result: ClauseToVisit[] = [];
@@ -81,29 +82,23 @@
 			// Each element form the unwatched list will be removed and added to the result list.
 			while (unwatchedCRefs.length > 0 && unwatchedCRefs[0] < watch) {
 				const unwatchedCRef: CRef = unwatchedCRefs.shift() as CRef;
-				result.push(
-					{
-						clause: getClausePool().at(unwatchedCRef),
-						toVisit: false
-					}
-				);
+				result.push({
+					clause: getClausePool().at(unwatchedCRef),
+					toVisit: false
+				});
 			}
 			// Once all the CRefs that comes previous to the watched CRef, the watched CRef is added.
-			result.push(
-				{
-					clause: getClausePool().at(watch),
-					toVisit: true
-				}
-			);
+			result.push({
+				clause: getClausePool().at(watch),
+				toVisit: true
+			});
 		}
 		// If all the watches have been added, the rest of the unwatchedCRefs are added.
 		result.push(
-			...unwatchedCRefs.map((cRef) =>
-				({
-					clause: getClausePool().at(cRef),
-					toVisit: false
-				})
-			)
+			...unwatchedCRefs.map((cRef) => ({
+				clause: getClausePool().at(cRef),
+				toVisit: false
+			}))
 		);
 		return result;
 	}
