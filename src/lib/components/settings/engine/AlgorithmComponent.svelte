@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { getConfiguredAlgorithm, setConfiguredAlgorithm } from './state.svelte.ts';
 	import DynamicRender from '$lib/components/DynamicRender.svelte';
 	import { changeAlgorithmEventBus } from '$lib/events/events.ts';
+	import { type Algorithm } from '$lib/types/algorithm.ts';
 	import { Modal } from 'flowbite-svelte';
 	import { CodePullRequestOutline, ExclamationCircleOutline } from 'flowbite-svelte-icons';
-	import { type Algorithm } from '$lib/types/algorithm.ts';
+	import { getConfiguredAlgorithm, setConfiguredAlgorithm } from './state.svelte.ts';
 
 	interface Props {
 		iconClass: { size: string };
@@ -12,25 +12,37 @@
 
 	let { iconClass }: Props = $props();
 
-	let algorithmSelected: Algorithm = $state(getConfiguredAlgorithm());
+	let initialAlgorithm = getConfiguredAlgorithm();
+
+	let algorithmSelected: Algorithm = $state(
+		initialAlgorithm === 'twatch' ? 'cdcl' : initialAlgorithm
+	);
+
+	let is2WatchEnabled: boolean = $state(initialAlgorithm === 'twatch');
 
 	const elementClass: string =
 		'rounded-lg bg-[var(--main-bg-color)] border border-[var(--border-color)] p-2';
 
-	const availableAlgorithms: Algorithm[] = ['backtracking', 'dpll', 'cdcl', 'twatch'];
-	const showCDCL: boolean = $derived(getConfiguredAlgorithm() === 'cdcl');
+	const availableAlgorithms: Algorithm[] = ['backtracking', 'dpll', 'cdcl'];
+	const showCDCL: boolean = $derived(algorithmSelected === 'cdcl');
 
 	let openModal: boolean = $state(false);
 
 	const cancelChange = () => {
 		openModal = false;
-		algorithmSelected = getConfiguredAlgorithm();
+		const currentAlgorithm = getConfiguredAlgorithm();
+		algorithmSelected = currentAlgorithm === 'twatch' ? 'cdcl' : currentAlgorithm;
+		is2WatchEnabled = currentAlgorithm === 'twatch';
 	};
 
 	const acceptChange = (algorithmSelected: Algorithm) => {
 		openModal = false;
-		setConfiguredAlgorithm(algorithmSelected);
-		changeAlgorithmEventBus.emit(getConfiguredAlgorithm());
+
+		const finalAlgorithm =
+			algorithmSelected === 'cdcl' && is2WatchEnabled ? 'twatch' : algorithmSelected;
+
+		setConfiguredAlgorithm(finalAlgorithm);
+		changeAlgorithmEventBus.emit(finalAlgorithm);
 	};
 </script>
 
@@ -44,7 +56,7 @@
 			<label for="algorithm">Algorithm:</label>
 			<select
 				id="algorithm"
-				class="flex-1 rounded-lg border-[var(--border-color)] text-right outline-none focus:outline-none focus:ring-0"
+				class="flex-1 cursor-pointer rounded-lg border-[var(--border-color)] text-right outline-none focus:outline-none focus:ring-0"
 				onchange={() => (openModal = true)}
 				bind:value={algorithmSelected}
 			>
@@ -59,7 +71,18 @@
 			class="overflow-hidden transition-all duration-300 ease-in-out"
 			style="max-height: {showCDCL ? '20rem' : '0'}"
 		>
-			<div class="mt-4 h-[20rem] w-full rounded-lg bg-[var(--main-bg-color)]"></div>
+			{#if showCDCL}
+				<div class="extra-options">
+					<label for="twatch-toggle">2-Watched Literals</label>
+					<input
+						id="twatch-toggle"
+						type="checkbox"
+						class="classic-checkbox"
+						bind:checked={is2WatchEnabled}
+						onchange={() => (openModal = true)}
+					/>
+				</div>
+			{/if}
 		</div>
 	</algorithm>
 </div>
@@ -89,5 +112,24 @@
 		border-radius: 0.5rem;
 		border-color: var(--border-color);
 		padding: 0.75rem;
+	}
+
+	.classic-checkbox {
+		width: 15px;
+		height: 15px;
+		cursor: pointer;
+		border: 1px solid var(--border-color);
+		border-radius: 0.5rem;
+	}
+
+	.extra-options {
+		margin-top: 10px;
+		padding: 10px;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		background-color: white;
+		border: 1px solid var(--border-color);
+		border-radius: 0.5rem;
 	}
 </style>

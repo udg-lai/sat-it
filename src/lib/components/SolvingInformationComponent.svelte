@@ -5,7 +5,11 @@
 
 	import { getConfiguredAlgorithm } from '$lib/components/settings/engine/state.svelte.ts';
 
-	const algorithm: string = $derived(getConfiguredAlgorithm());
+	const currentAlgorithm: string = $derived(getConfiguredAlgorithm());
+
+	const algorithm: string = $derived(
+		currentAlgorithm === 'twatch' ? 'cdcl + 2-watch' : currentAlgorithm
+	);
 
 	const instanceName: string = $derived.by(() => {
 		const instance: InteractiveInstance | undefined = getActiveInstance();
