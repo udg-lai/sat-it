@@ -4,8 +4,6 @@ import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
 import { ConflictAnalysis, type VirtualResolution } from '$lib/entities/ConflictAnalysis.svelte.ts';
 import Literal from '$lib/entities/Literal.svelte.ts';
 import {
-	WatchList,
-	type PreprocessingList,
 	type VisitingOccurrenceList,
 	type VisitingWatchList
 } from '$lib/entities/OccurrenceList.svelte.ts';
@@ -36,7 +34,7 @@ import {
 } from '$lib/states/problem.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
 import { getLatestTrail, stackTrail } from '$lib/states/trails.svelte.ts';
-import { fromLeft, fromRight, isLeft, makeLeft, makeRight } from '$lib/types/either.ts';
+import { fromLeft, fromRight, isLeft, isRight, makeLeft, makeRight, unwrapEither } from '$lib/types/either.ts';
 import {
 	fromJust,
 	isJust,
@@ -210,27 +208,19 @@ export type TWATCH_TRAVERSED_CURRENT_OCCURRENCES_FUN = (
 export const traversedCurrentOccurrences: TWATCH_TRAVERSED_CURRENT_OCCURRENCES_FUN = (
 	visitingOccurrences: VisitingWatchList
 ) => {
-	if (isLeft(visitingOccurrences)) return fromLeft(visitingOccurrences).traversed();
-	else return fromRight(visitingOccurrences).traversed();
+	return unwrapEither(visitingOccurrences).traversed();
 };
 
 export type TWATCH_NEXT_OCCURRENCE_FUN = () => EWC;
 
 export const nextClause: TWATCH_NEXT_OCCURRENCE_FUN = () => {
 	const visitingWatches: VisitingWatchList = getCurrentWatch();
-	if (isLeft(visitingWatches)) {
-		const preprocessingList: PreprocessingList = fromLeft(visitingWatches);
-		if (!preprocessingList.isEmpty()) {
-			logFatal('The preprocessing list is empty');
-		}
-		return makeRight(preprocessingList.next());
-	} else {
-		const occurrenceList: WatchList = fromRight(visitingWatches);
-		if (occurrenceList.isEmpty()) {
-			logFatal('The occurrence list is empty');
-		}
-		return makeLeft(occurrenceList.next());
-	}
+	if (unwrapEither(visitingWatches).isEmpty()) {
+			logFatal('The watch list is empty');
+	}	
+	return isRight(visitingWatches) 
+		? makeLeft(fromRight(visitingWatches).next())
+		: makeRight(fromLeft(visitingWatches).next());
 };
 
 export type TWATCH_CHECK_PENDING_OCCURRENCES_FUN = () => boolean;

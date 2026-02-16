@@ -104,6 +104,10 @@ export class WatchList extends ComplementaryList<Watch> {
 	constructor(literal: Lit, cRefs: List<Watch> = []) {
 		super(literal, cRefs);
 	}
+
+	getCRefs(): CRef[] {
+		return this.getOccurrences().map((watch) => watch.cRef);
+	}
 }
 
 export type VisitingOccurrenceList = Either<PreprocessingList, OccurrenceList>;

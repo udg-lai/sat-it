@@ -25,7 +25,7 @@ import {
 	wipeOccurrences
 } from '$lib/states/problem.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
-import { fromLeft, fromRight, isLeft } from '$lib/types/either.ts';
+import { unwrapEither } from '$lib/types/either.ts';
 import type { CRef, Lit } from '$lib/types/types.ts';
 
 // ** state inputs **
@@ -128,26 +128,18 @@ export type DPLL_TRAVERSED_OCCURRENCE_LIST_FUN = (
 export const traversedOccurrenceList: DPLL_TRAVERSED_OCCURRENCE_LIST_FUN = (
 	visitingOccurrences: VisitingOccurrenceList
 ) => {
-	if (isLeft(visitingOccurrences)) return fromLeft(visitingOccurrences).traversed();
-	else return fromRight(visitingOccurrences).traversed();
+	return unwrapEither(visitingOccurrences).traversed();
 };
 
 export type DPLL_NEXT_OCCURRENCE_FUN = () => CRef;
 
 export const nextClause: DPLL_NEXT_OCCURRENCE_FUN = () => {
 	const visitingOccurrences: VisitingOccurrenceList = getCurrentOccurrences();
-	if (isLeft(visitingOccurrences)) {
-		const preprocessingList: PreprocessingList = fromLeft(visitingOccurrences);
-		if (!preprocessingList.isEmpty()) {
-			logFatal('The preprocessing list is empty');
-		}
-		return preprocessingList.next();
+	const unwrappedOccurrences: NonNullable<PreprocessingList | OccurrenceList> = unwrapEither(visitingOccurrences)
+	if (unwrappedOccurrences.isEmpty()) {
+		logFatal('The occurrence list is empty');
 	} else {
-		const occurrenceList: OccurrenceList = fromRight(visitingOccurrences);
-		if (occurrenceList.isEmpty()) {
-			logFatal('The occurrence list is empty');
-		}
-		return occurrenceList.next();
+		return unwrappedOccurrences.next();
 	}
 };
 

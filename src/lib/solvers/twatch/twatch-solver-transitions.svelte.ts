@@ -3,6 +3,7 @@ import type { ConflictAnalysis, VirtualResolution } from '$lib/entities/Conflict
 import Literal from '$lib/entities/Literal.svelte.ts';
 import ClauseList, {
 	ComplementaryList,
+	WatchList,
 	type PreprocessingList,
 	type VisitingOccurrenceList,
 	type VisitingWatchList
@@ -384,7 +385,7 @@ const watchedOccurrencesDetectionTransition = (assignment: Lit): VisitingWatchLi
 	const watches: Set<Watch> = state.run(assignment);
 	getSolverMachine().transition('queue_watched_occurrences_state');
 	const complementary: Lit = Literal.complementary(assignment);
-	return makeRight(new ComplementaryList(complementary, [...watches]));
+	return makeRight(new WatchList(complementary, [...watches]));
 };
 const decideTransition = (): number => {
 	const state = getSolverMachine().getActiveState() as NonFinalState<

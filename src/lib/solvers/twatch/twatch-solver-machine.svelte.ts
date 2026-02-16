@@ -5,7 +5,7 @@ import { getConflictAnalysis } from '$lib/states/conflict-anlysis.svelte.ts';
 import { getConfDelayMS } from '$lib/states/parameters.svelte.ts';
 import { getWatchesQueue } from '$lib/states/problem.svelte.ts';
 import { getNoUnitPropagations } from '$lib/states/statistics.svelte.ts';
-import { fromLeft, fromRight, isLeft } from '$lib/types/either.ts';
+import { unwrapEither } from '$lib/types/either.ts';
 import { SolverMachine } from '../SolverMachine.svelte.ts';
 import type { TWATCH_FUN, TWATCH_INPUT } from './twatch-domain.svelte.ts';
 import {
@@ -72,15 +72,9 @@ export class TWATCH_SolverMachine extends SolverMachine<TWATCH_FUN, TWATCH_INPUT
 		const occurrences: VisitingWatchList = getWatchesQueue().element();
 
 		// Either traverse it or find a conflict.
-		if (isLeft(occurrences)) {
-			await this.automaticStepByStep(
-				() => !fromLeft(occurrences).traversed() && !this.onConflictState()
-			);
-		} else {
-			await this.automaticStepByStep(
-				() => !fromRight(occurrences).traversed() && !this.onConflictState()
-			);
-		}
+		await this.automaticStepByStep(
+			() => !unwrapEither(occurrences).traversed() && !this.onConflictState()
+		);
 
 		// If there is no conflict, then we need to do an extra step for either uploading the following occurrence list or continue to the decision state.
 		// Because of this, an extra step should be done.

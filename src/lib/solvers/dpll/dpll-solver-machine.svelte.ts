@@ -4,7 +4,7 @@ import type { SolverCommand } from '$lib/events/events.ts';
 import { getConfDelayMS } from '$lib/states/parameters.svelte.ts';
 import { getCurrentOccurrences, getOccurrenceListQueue } from '$lib/states/problem.svelte.ts';
 import { getNoUnitPropagations } from '$lib/states/statistics.svelte.ts';
-import { fromLeft, fromRight, isLeft } from '$lib/types/either.ts';
+import { unwrapEither } from '$lib/types/either.ts';
 import { SolverMachine } from '../SolverMachine.svelte.ts';
 import type { DPLL_FUN, DPLL_INPUT } from './dpll-domain.svelte.ts';
 import {
@@ -64,16 +64,10 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 		const occurrences: VisitingOccurrenceList = getCurrentOccurrences();
 
 		// Either traverse it or find a conflict.
-		if (isLeft(occurrences)) {
-			await this.automaticStepByStep(
-				() => !fromLeft(occurrences).traversed() && !this.onConflictState()
-			);
-		} else {
-			await this.automaticStepByStep(
-				() => !fromRight(occurrences).traversed() && !this.onConflictState()
-			);
-		}
-
+		await this.automaticStepByStep(
+			() => !unwrapEither(occurrences).traversed() && !this.onConflictState()
+		);
+		
 		// If there is no conflict, then we need to do an extra step for either uploading the following occurrence list or continue to the decision state.
 		// Because of this, an extra step should be done.
 		if (!this.onConflictState()) {
