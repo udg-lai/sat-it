@@ -39,14 +39,14 @@
 	};
 
 	let clauses: Maybe<ClauseToVisit>[] = $derived.by(() => {
-		let realClauses: Maybe<ClauseToVisit>[] = [];
+		let clausesToVisit: ClauseToVisit[] = [];
 		const occurrences: VisitingOccurrenceList = getCurrentOccurrences();
 		// If the occurrences contain a preprocessing list, this means that the watches will also contain one and there is no need to check further, they should have the same content.
 		if (isLeft(occurrences) || getSolverMachine().identify() !== 'twatch') {
-			realClauses = unwrapEither(occurrences)
+			clausesToVisit = unwrapEither(occurrences)
 				.getOccurrences()
 				.map((cRef) =>
-					makeJust({
+					({
 						clause: getClausePool().at(cRef),
 						toVisit: true
 					})
@@ -54,24 +54,27 @@
 		} else {
 			const watches: VisitingWatchList = getCurrentWatch();
 			if (isLeft(watches)) {
-				logFatal('Point that should not be accessible');
+				logFatal('Unexpected preprocessing list', 'This point is only accessible in the conflict detection state of two watch literals');
 			} else {
 				const watchedCRefs: CRef[] = fromRight(watches).getCRefs();
 				const complementaryCRefs: CRef[] = fromRight(occurrences).getOccurrences();
-				realClauses = reorderCRefs(complementaryCRefs, watchedCRefs);
+				clausesToVisit = reorderCRefs(complementaryCRefs, watchedCRefs);
 			}
 		}
-		return [makeNothing(), ...realClauses];
+		
+		return [makeNothing(), ...clausesToVisit.map(makeJust)];
 	});
 
-	function reorderCRefs(complementary: CRef[], watchedCRefs: CRef[]): Maybe<ClauseToVisit>[] {
-		// First let's create the a set of the watchedCRefs
+	function reorderCRefs(complementary: CRef[], watchedCRefs: CRef[]): ClauseToVisit[] {
+		// First let's create the a set of the watchedCRefs and occurrenceList
 		const watchedSet: Set<CRef> = new Set(watchedCRefs);
+		const complementarySet: Set<CRef> = new Set(complementary);
 
 		// Then let's create a list of unwatched CRefs
-		const unwatchedCRefs: CRef[] = [...complementary.filter((cRef) => !watchedSet.has(cRef))];
+		
+		const unwatchedCRefs: CRef[] = [...complementarySet.difference(watchedSet)];
 
-		const result: Maybe<ClauseToVisit>[] = [];
+		const result: ClauseToVisit[] = [];
 
 		// For each watch, we will add the CRefs that are not going to be visited that have a lower index.
 		for (const watch of watchedCRefs) {
@@ -79,24 +82,24 @@
 			while (unwatchedCRefs.length > 0 && unwatchedCRefs[0] < watch) {
 				const unwatchedCRef: CRef = unwatchedCRefs.shift() as CRef;
 				result.push(
-					makeJust({
+					{
 						clause: getClausePool().at(unwatchedCRef),
 						toVisit: false
-					})
+					}
 				);
 			}
 			// Once all the CRefs that comes previous to the watched CRef, the watched CRef is added.
 			result.push(
-				makeJust({
+				{
 					clause: getClausePool().at(watch),
 					toVisit: true
-				})
+				}
 			);
 		}
 		// If all the watches have been added, the rest of the unwatchedCRefs are added.
 		result.push(
 			...unwatchedCRefs.map((cRef) =>
-				makeJust({
+				({
 					clause: getClausePool().at(cRef),
 					toVisit: false
 				})
@@ -153,17 +156,12 @@
 				: false;
 	}
 
-	function visited(clause: Maybe<ClauseToVisit>): boolean {
-		if (isJust(clause)) {
-			const visitingClause: ClauseToVisit = fromJust(clause);
-			if (!visitingClause.toVisit) {
-				return false;
-			} else {
-				const cRefIndex: number = currentCRefs().indexOf(visitingClause.clause.getCRef());
-				return cRefIndex <= currentPointer();
-			}
-		} else {
+	function visited(visitingClause: ClauseToVisit): boolean {
+		if (!visitingClause.toVisit) {
 			return false;
+		} else {
+			const cRefIndex: number = currentCRefs().indexOf(visitingClause.clause.getCRef());
+			return cRefIndex <= currentPointer();
 		}
 	}
 </script>
@@ -188,9 +186,8 @@
 					class="clause-highlighter"
 					class:inspectedTrue={isSat(fromJust(maybeClause).clause)}
 					class:inspectedFalse={isUnSat(fromJust(maybeClause).clause)}
-					class:visited-clause={visited(maybeClause) &&
-						isPartial(fromJust(maybeClause).clause) &&
-						fromJust(maybeClause).toVisit}
+					class:visited-clause={visited(fromJust(maybeClause)) &&
+						isPartial(fromJust(maybeClause).clause)}
 					class:willSkip={!fromJust(maybeClause).toVisit}
 				>
 					<ClauseComponent clause={fromJust(maybeClause).clause} />
