@@ -1,6 +1,5 @@
 import { logError } from '$lib/states/toasts.svelte.ts';
 import type { Either } from '$lib/types/either.ts';
-import { makeNothing, type Maybe } from '$lib/types/maybe.ts';
 import type { CRef, List, Lit } from '$lib/types/types.ts';
 import type { Watch } from './WatchTable.svelte.ts';
 
@@ -45,6 +44,13 @@ export default class ClauseList<T> {
 		return this.pointer;
 	}
 
+	updatePointer(pointer: number): void {
+		if (pointer < -1 || pointer >= this.cRefs.length) {
+			logError('The pointer can take the value');
+		}
+		this.pointer = pointer;
+	}
+
 	traversed(): boolean {
 		return this.pointer >= this.cRefs.length - 1;
 	}
@@ -57,41 +63,43 @@ export default class ClauseList<T> {
 	}
 
 	copy(): ClauseList<T> {
-		const copiedLiteral: Maybe<Lit> = this.literal;
 		const copiedClauses: List<T> = [...this.cRefs];
-		const newOccurrenceList = new ClauseList(copiedLiteral, copiedClauses);
-		newOccurrenceList.pointer = this.pointer;
+		const newOccurrenceList = new ClauseList(copiedClauses);
+		newOccurrenceList.updatePointer(this.pointer);
 		return newOccurrenceList;
 	}
 }
 
-export class OccurrenceList extends ClauseList<CRef> {
-	private literal: Maybe<Lit> = $state(makeNothing());
+export class ComplementaryList<T> extends ClauseList<T> {
+	private literal: Lit;
 
-	constructor(literal: Maybe<Lit> = makeNothing(), cRefs: List<CRef> = []) {
+	constructor(literal: Lit, cRefs: List<T> = []) {
 		super(cRefs);
 		this.literal = literal;
 	}
 
-	getLiteral(): Maybe<Lit> {
+	getLiteral(): Lit {
 		return this.literal;
+	}
+
+	copy(): ComplementaryList<T> {
+		const newOccurrenceList = new ComplementaryList(this.literal, [...this.getOccurrences()]);
+		newOccurrenceList.updatePointer(this.getPointer());
+		return newOccurrenceList;
+	}
+}
+export type PreprocessingList = ClauseList<CRef>;
+export type OccurrenceList = ComplementaryList<CRef>;
+
+export class WatchList extends ComplementaryList<Watch> {
+	constructor(literal: Lit, cRefs: List<Watch> = []) {
+		super(literal, cRefs);
+	}
+
+	getCRefs(): CRef[] {
+		return this.getOccurrences().map((watch) => watch.cRef);
 	}
 }
 
-export class WatchList extends ClauseList<Watch> {
-	private literal: Maybe<Lit> = $state(makeNothing());
-
-	constructor(literal: Maybe<Lit> = makeNothing(), cRefs: List<Watch> = []) {
-		super(cRefs);
-		this.literal = literal;
-	}
-
-	getLiteral(): Maybe<Lit> {
-		return this.literal;
-	}
-}
-
-export class PreprocessingList extends ClauseList<CRef> {}
-
-type VisitingOccurrenceList = Either<PreprocessingList, OccurrenceList>;
-type VisitingWatchList = Either<PreprocessingList, WatchList>;
+export type VisitingOccurrenceList = Either<PreprocessingList, OccurrenceList>;
+export type VisitingWatchList = Either<PreprocessingList, WatchList>;

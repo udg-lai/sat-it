@@ -1,6 +1,10 @@
 import Clause, { isUnsatisfiedEval, type ClauseEval } from '$lib/entities/Clause.svelte.ts';
 import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
-import ClauseList from '$lib/entities/OccurrenceList.svelte.ts';
+import {
+	type OccurrenceList,
+	type PreprocessingList,
+	type VisitingOccurrenceList
+} from '$lib/entities/OccurrenceList.svelte.ts';
 import type { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
 import {
 	atLevelZero,
@@ -18,6 +22,7 @@ import {
 	getVariablePool
 } from '$lib/states/problem.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
+import { unwrapEither } from '$lib/types/either.ts';
 import type { CRef, Lit } from '$lib/types/types.ts';
 
 // **state inputs **
@@ -84,12 +89,12 @@ export const complementaryOccurrences: BKT_COMPLEMENTARY_OCCURRENCES_FUN = (assi
 	return solverComplementaryOccurrences(mapping, assignment);
 };
 
-export type BKT_QUEUE_OCCURRENCE_LIST_FUN = (occurrenceList: ClauseList<CRef>) => void;
+export type BKT_QUEUE_OCCURRENCE_LIST_FUN = (visitingOccurrences: VisitingOccurrenceList) => void;
 
 export const queueOccurrenceList: BKT_QUEUE_OCCURRENCE_LIST_FUN = (
-	occurrenceList: ClauseList<CRef>
+	visitingOccurrences: VisitingOccurrenceList
 ) => {
-	getOccurrenceListQueue().enqueue(occurrenceList);
+	getOccurrenceListQueue().enqueue(visitingOccurrences);
 };
 
 export type BKT_DEQUEUE_OCCURRENCE_LIST_FUN = () => void;
@@ -98,22 +103,27 @@ export const dequeueOccurrenceList: BKT_DEQUEUE_OCCURRENCE_LIST_FUN = () => {
 	getOccurrenceListQueue().dequeue();
 };
 
-export type BKT_TRAVERSED_OCCURRENCE_LIST_FUN = (occurrenceList: ClauseList<CRef>) => boolean;
+export type BKT_TRAVERSED_OCCURRENCE_LIST_FUN = (
+	visitingOccurrences: VisitingOccurrenceList
+) => boolean;
 
 export const traversedOccurrenceList: BKT_TRAVERSED_OCCURRENCE_LIST_FUN = (
-	occurrenceList: ClauseList<CRef>
+	visitingOccurrences: VisitingOccurrenceList
 ) => {
-	return occurrenceList.traversed();
+	return unwrapEither(visitingOccurrences).traversed();
 };
 
 export type BKT_NEXT_OCCURRENCE_FUN = () => CRef;
 
 export const nextClause: BKT_NEXT_OCCURRENCE_FUN = () => {
-	const occurrenceList: ClauseList<CRef> = getCurrentOccurrences();
-	if (occurrenceList.isEmpty()) {
-		logFatal('A non empty set was expected');
+	const visitingOccurrences: VisitingOccurrenceList = getCurrentOccurrences();
+	const unwrappedOccurrences: NonNullable<PreprocessingList | OccurrenceList> =
+		unwrapEither(visitingOccurrences);
+	if (!unwrappedOccurrences.isEmpty()) {
+		logFatal('The occurrence list is empty');
+	} else {
+		return unwrappedOccurrences.next();
 	}
-	return occurrenceList.next();
 };
 
 export type BKT_CONFLICT_DETECTION_FUN = (cRef: CRef) => boolean;

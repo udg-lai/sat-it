@@ -2,13 +2,17 @@ import type { DimacsInstance } from '$lib/instances/dimacs-instance.interface.ts
 import { getConflictAnalysis } from '$lib/states/conflict-anlysis.svelte.ts';
 import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 import { logError } from '$lib/states/toasts.svelte.ts';
-import type { Either } from '$lib/types/either.ts';
-import { fromJust, isNothing, makeJust, makeNothing, type Maybe } from '$lib/types/maybe.ts';
+import { fromRight, isLeft, makeLeft, type Either } from '$lib/types/either.ts';
+import { makeJust, makeNothing, type Maybe } from '$lib/types/maybe.ts';
 import type { CRef, Lit } from '$lib/types/types.ts';
 import type Clause from './Clause.svelte.ts';
 import ClausePool from './ClausePool.svelte.ts';
 import Literal from './Literal.svelte.ts';
-import ClauseList from './OccurrenceList.svelte.ts';
+import ClauseList, {
+	type PreprocessingList,
+	type VisitingOccurrenceList,
+	type VisitingWatchList
+} from './OccurrenceList.svelte.ts';
 import OccurrenceTable from './OccurrenceTable.svelte.ts';
 import { Queue } from './Queue.svelte.ts';
 import { VariablePool } from './VariablePool.svelte.ts';
@@ -22,13 +26,15 @@ export default class Problem {
 	private occurrencesTable: OccurrenceTable = $state(new OccurrenceTable());
 	private watchTable: WatchTable = $state(new WatchTable());
 
-	private occurrenceQueue: Queue<ClauseList<CRef>> = $state(new Queue<ClauseList<CRef>>());
-	private currentOccurrences: ClauseList<CRef> = $derived(this.currentOccurrenceList());
+	private occurrenceQueue: Queue<VisitingOccurrenceList> = $state(
+		new Queue<VisitingOccurrenceList>()
+	);
+	private currentOccurrences: VisitingOccurrenceList = $derived(this.visitingOccurrences());
 	private focusedAssignment: Maybe<Lit> = $derived(this.currentFocusedAssignment());
 
 	// The CRef is necessary at the inprocess step because unary and empty clauses do not have watches. :)
-	private watchesQueue: Queue<ClauseList<EWC>> = $state(new Queue<ClauseList<EWC>>());
-	private currentWatch: ClauseList<EWC> = $derived(this.currentWatchList());
+	private watchesQueue: Queue<VisitingWatchList> = $state(new Queue<VisitingWatchList>());
+	private currentWatch: VisitingWatchList = $derived(this.currentWatchList());
 
 	constructor(instance: DimacsInstance | undefined = undefined) {
 		if (instance !== undefined) this.syncWithDimacsInstance(instance);
@@ -54,19 +60,19 @@ export default class Problem {
 		return this.focusedAssignment;
 	}
 
-	getCurrentOccurrences(): ClauseList<CRef> {
+	getCurrentOccurrences(): VisitingOccurrenceList {
 		return this.currentOccurrences;
 	}
 
-	getOccurrenceListQueue(): Queue<ClauseList<CRef>> {
+	getOccurrenceListQueue(): Queue<VisitingOccurrenceList> {
 		return this.occurrenceQueue;
 	}
 
-	getCurrentWatch(): ClauseList<EWC> {
+	getCurrentWatch(): VisitingWatchList {
 		return this.currentWatch;
 	}
 
-	getWatchesQueue(): Queue<ClauseList<EWC>> {
+	getWatchesQueue(): Queue<VisitingWatchList> {
 		return this.watchesQueue;
 	}
 
@@ -107,21 +113,21 @@ export default class Problem {
 	}
 
 	dropOccurrences(): void {
-		this.occurrenceQueue = new Queue<ClauseList<CRef>>();
-		this.watchesQueue = new Queue<ClauseList<EWC>>();
+		this.occurrenceQueue = new Queue<VisitingOccurrenceList>();
+		this.watchesQueue = new Queue<VisitingWatchList>();
 	}
 
-	private currentOccurrenceList(): ClauseList<CRef> {
+	private visitingOccurrences(): VisitingOccurrenceList {
 		if (this.occurrenceQueue.isEmpty()) {
-			return new ClauseList();
+			return makeLeft(new ClauseList<CRef>() as PreprocessingList);
 		} else {
 			return this.occurrenceQueue.element();
 		}
 	}
 
-	private currentWatchList(): ClauseList<EWC> {
+	private currentWatchList(): VisitingWatchList {
 		if (this.watchesQueue.isEmpty()) {
-			return new ClauseList<EWC>();
+			return makeLeft(new ClauseList() as PreprocessingList);
 		} else {
 			return this.watchesQueue.element();
 		}
@@ -129,14 +135,12 @@ export default class Problem {
 
 	// When in conflict analysis in CDCL, the focused assignment should be the one that is taking place in the current resolution.
 	private currentFocusedAssignment(): Maybe<Lit> {
-		if (!this.currentOccurrences.isEmpty()) {
-			//Watch out, there is the possibility where the occurrence list has the unitary and empty clauses
-			const occurrenceListReason: Maybe<Lit> = this.currentOccurrences.getLiteral();
-			if (isNothing(occurrenceListReason)) {
+		if (!this.occurrenceQueue.isEmpty()) {
+			if (isLeft(this.currentOccurrences)) {
 				return makeNothing();
 			} else {
 				const trailAssignment: Lit = Literal.complementary(
-					fromJust(this.currentOccurrences.getLiteral())
+					fromRight(this.currentOccurrences).getLiteral()
 				);
 				return makeJust(trailAssignment);
 			}

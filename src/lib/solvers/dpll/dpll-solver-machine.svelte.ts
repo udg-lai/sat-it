@@ -1,10 +1,10 @@
-import type ClauseList from '$lib/entities/OccurrenceList.svelte.ts';
+import type { VisitingOccurrenceList } from '$lib/entities/OccurrenceList.svelte.ts';
 import { Queue } from '$lib/entities/Queue.svelte.ts';
 import type { SolverCommand } from '$lib/events/events.ts';
 import { getConfDelayMS } from '$lib/states/parameters.svelte.ts';
-import { getOccurrenceListQueue } from '$lib/states/problem.svelte.ts';
+import { getCurrentOccurrences, getOccurrenceListQueue } from '$lib/states/problem.svelte.ts';
 import { getNoUnitPropagations } from '$lib/states/statistics.svelte.ts';
-import type { CRef } from '$lib/types/types.ts';
+import { unwrapEither } from '$lib/types/either.ts';
 import { SolverMachine } from '../SolverMachine.svelte.ts';
 import type { DPLL_FUN, DPLL_INPUT } from './dpll-domain.svelte.ts';
 import {
@@ -61,10 +61,13 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 		//	2. If the occurrence list has been analyzed, then we should upload the following occurrence list form the queue or go to the decision state.
 
 		// Get the current occurrence list
-		const occurrences: ClauseList<CRef> = getOccurrenceListQueue().element();
+		const occurrences: VisitingOccurrenceList = getCurrentOccurrences();
 
 		// Either traverse it or find a conflict.
-		await this.automaticStepByStep(() => !occurrences.traversed() && !this.onConflictState());
+		const unwrappedOccurrences = unwrapEither(occurrences);
+		await this.automaticStepByStep(
+			() => !unwrappedOccurrences.traversed() && !this.onConflictState()
+		);
 
 		// If there is no conflict, then we need to do an extra step for either uploading the following occurrence list or continue to the decision state.
 		// Because of this, an extra step should be done.
@@ -85,7 +88,7 @@ export class DPLL_SolverMachine extends SolverMachine<DPLL_FUN, DPLL_INPUT> {
 	}
 
 	onDetectingConflict(): boolean {
-		const queueOccurrences: Queue<ClauseList<CRef>> = getOccurrenceListQueue();
+		const queueOccurrences: Queue<VisitingOccurrenceList> = getOccurrenceListQueue();
 		return !queueOccurrences.isEmpty() && !this.onConflictState();
 	}
 }

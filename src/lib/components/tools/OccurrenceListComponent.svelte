@@ -6,21 +6,25 @@
 		isUnresolvedEval,
 		isUnsatisfiedEval
 	} from '$lib/entities/Clause.svelte.ts';
-	import type ClauseList from '$lib/entities/OccurrenceList.svelte.ts';
-	import type { EWC } from '$lib/entities/Problem.svelte.ts';
-	import { obtainCRefFromEWC } from '$lib/solvers/shared.svelte.ts';
+	import type {
+		VisitingOccurrenceList,
+		VisitingWatchList
+	} from '$lib/entities/OccurrenceList.svelte.ts';
 	import {
 		getClausePool,
 		getCurrentOccurrences,
 		getCurrentWatch
 	} from '$lib/states/problem.svelte.ts';
 	import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
+	import { logFatal } from '$lib/states/toasts.svelte.ts';
 	import {
 		fromLeft,
 		fromRight,
 		isLeft,
+		isRight,
 		makeLeft,
 		makeRight,
+		unwrapEither,
 		type Either
 	} from '$lib/types/either.ts';
 	import { isJust, makeJust, makeNothing, type Maybe } from '$lib/types/maybe.ts';
@@ -35,17 +39,69 @@
 	};
 
 	let clauses: Maybe<ClauseToVisit>[] = $derived.by(() => {
-		const cRefs: CRef[] = getCurrentOccurrences().getOccurrences();
-		const watches: EWC[] = getCurrentWatch().getOccurrences();
-		const watchedCRefs: Set<CRef> = new Set<CRef>(watches.map(obtainCRefFromEWC));
-		const realClauses: Maybe<ClauseToVisit>[] = cRefs.map((cRef) =>
-			makeJust({
-				clause: getClausePool().at(cRef),
-				toVisit: getSolverMachine().identify() === 'twatch' ? watchedCRefs.has(cRef) : true
-			})
-		);
-		return [makeNothing(), ...realClauses];
+		let clausesToVisit: ClauseToVisit[] = [];
+		const occurrences: VisitingOccurrenceList = getCurrentOccurrences();
+		// If the occurrences contain a preprocessing list, this means that the watches will also contain one and there is no need to check further, they should have the same content.
+		if (isLeft(occurrences) || getSolverMachine().identify() !== 'twatch') {
+			clausesToVisit = unwrapEither(occurrences)
+				.getOccurrences()
+				.map((cRef) => ({
+					clause: getClausePool().at(cRef),
+					toVisit: true
+				}));
+		} else {
+			const watches: VisitingWatchList = getCurrentWatch();
+			if (isLeft(watches)) {
+				logFatal(
+					'Unexpected preprocessing list',
+					'This point is only accessible in the conflict detection state of two watch literals'
+				);
+			} else {
+				const watchedCRefs: CRef[] = fromRight(watches).getCRefs();
+				const complementaryCRefs: CRef[] = fromRight(occurrences).getOccurrences();
+				clausesToVisit = reorderCRefs(complementaryCRefs, watchedCRefs);
+			}
+		}
+
+		return [makeNothing(), ...clausesToVisit.map(makeJust)];
 	});
+
+	function reorderCRefs(complementary: CRef[], watchedCRefs: CRef[]): ClauseToVisit[] {
+		// First let's create the a set of the watchedCRefs and occurrenceList
+		const watchedSet: Set<CRef> = new Set(watchedCRefs);
+		const complementarySet: Set<CRef> = new Set(complementary);
+
+		// Then let's create a list of unwatched CRefs
+
+		const unwatchedCRefs: CRef[] = [...complementarySet.difference(watchedSet)];
+
+		const result: ClauseToVisit[] = [];
+
+		// For each watch, we will add the CRefs that are not going to be visited that have a lower index.
+		for (const watch of watchedCRefs) {
+			// Each element form the unwatched list will be removed and added to the result list.
+			while (unwatchedCRefs.length > 0 && unwatchedCRefs[0] < watch) {
+				const unwatchedCRef: CRef = unwatchedCRefs.shift() as CRef;
+				result.push({
+					clause: getClausePool().at(unwatchedCRef),
+					toVisit: false
+				});
+			}
+			// Once all the CRefs that comes previous to the watched CRef, the watched CRef is added.
+			result.push({
+				clause: getClausePool().at(watch),
+				toVisit: true
+			});
+		}
+		// If all the watches have been added, the rest of the unwatchedCRefs are added.
+		result.push(
+			...unwatchedCRefs.map((cRef) => ({
+				clause: getClausePool().at(cRef),
+				toVisit: false
+			}))
+		);
+		return result;
+	}
 
 	function isSat(clause: Clause): boolean {
 		return isSatisfiedEval(clause.eval());
@@ -60,34 +116,31 @@
 		return isUnresolvedEval(evaluation) || isUnitEval(evaluation);
 	}
 
-	type ECWL = Either<ClauseList<CRef>, ClauseList<EWC>>;
-
-	const currentOccurrenceList: ECWL = $derived(
+	const currentOccurrenceList: Either<VisitingWatchList, VisitingOccurrenceList> = $derived(
 		getSolverMachine().identify() === 'twatch'
-			? makeRight(getCurrentWatch())
-			: makeLeft(getCurrentOccurrences())
+			? makeLeft(getCurrentWatch())
+			: makeRight(getCurrentOccurrences())
 	);
 
 	function currentCRefs(): CRef[] {
-		if (isLeft(currentOccurrenceList)) {
-			return fromLeft(currentOccurrenceList).getOccurrences();
+		if (isRight(currentOccurrenceList)) {
+			return unwrapEither(fromRight(currentOccurrenceList)).getOccurrences();
 		} else {
-			return fromRight(currentOccurrenceList).getOccurrences().map(obtainCRefFromEWC);
+			const visitingWatches: VisitingWatchList = fromLeft(currentOccurrenceList);
+			if (isLeft(visitingWatches)) {
+				return fromLeft(visitingWatches).getOccurrences();
+			} else {
+				return fromRight(visitingWatches).getCRefs();
+			}
 		}
 	}
 
 	function currentPointer(): number {
 		if (isLeft(currentOccurrenceList)) {
-			return fromLeft(currentOccurrenceList).getPointer();
+			return unwrapEither(fromLeft(currentOccurrenceList)).getPointer();
 		} else {
-			return fromRight(currentOccurrenceList).getPointer();
+			return unwrapEither(fromRight(currentOccurrenceList)).getPointer();
 		}
-	}
-
-	function greaterThanCurrentCRef(clauseCRef: Maybe<ClauseToVisit>): boolean {
-		return isJust(clauseCRef)
-			? fromJust(clauseCRef).clause.getCRef() <= currentCRefs()[currentPointer()]
-			: false;
 	}
 
 	function inspectingClause(clauseCRef: Maybe<ClauseToVisit>): boolean {
@@ -97,10 +150,19 @@
 				? true
 				: false;
 	}
+
+	function visited(visitingClause: ClauseToVisit): boolean {
+		if (!visitingClause.toVisit) {
+			return false;
+		} else {
+			const cRefIndex: number = currentCRefs().indexOf(visitingClause.clause.getCRef());
+			return cRefIndex <= currentPointer();
+		}
+	}
 </script>
 
 <occurrence-list>
-	{#each clauses as maybeClause}
+	{#each clauses as maybeClause, i (i)}
 		<div class="occurrence-list-item">
 			<HeadTailComponent display={inspectingClause(maybeClause)} verticalList={true}>
 				<div class="enumerate" class:inspecting={inspectingClause(maybeClause)}>
@@ -119,9 +181,8 @@
 					class="clause-highlighter"
 					class:inspectedTrue={isSat(fromJust(maybeClause).clause)}
 					class:inspectedFalse={isUnSat(fromJust(maybeClause).clause)}
-					class:visited-clause={greaterThanCurrentCRef(maybeClause) &&
-						isPartial(fromJust(maybeClause).clause) &&
-						fromJust(maybeClause).toVisit}
+					class:visited-clause={visited(fromJust(maybeClause)) &&
+						isPartial(fromJust(maybeClause).clause)}
 					class:willSkip={!fromJust(maybeClause).toVisit}
 				>
 					<ClauseComponent clause={fromJust(maybeClause).clause} />
