@@ -12,15 +12,16 @@
 
 	let { iconClass }: Props = $props();
 
-	type LocalAlgorithm = 'backtracking' | 'dpll' | 'cdcl'
+	type LocalAlgorithm = 'backtracking' | 'dpll' | 'cdcl';
 
-	let configuredAlgorithm: LocalAlgorithm = $state(getConfiguredAlgorithm() === 'twatch' ? 'cdcl' : getConfiguredAlgorithm() as LocalAlgorithm);
+	let configuredAlgorithm: LocalAlgorithm = $state(
+		getConfiguredAlgorithm() === 'twatch' ? 'cdcl' : (getConfiguredAlgorithm() as LocalAlgorithm)
+	);
 
 	const showCDCL: boolean = $derived(configuredAlgorithm === 'cdcl');
 
 	let twatchActivated: boolean = $derived(getConfiguredAlgorithm() === 'twatch');
 	let twatchToggled: boolean = $state(getConfiguredAlgorithm() === 'twatch');
-
 
 	const elementClass: string =
 		'rounded-lg bg-[var(--main-bg-color)] border border-[var(--border-color)] p-2';
@@ -39,7 +40,7 @@
 		openModal = false;
 
 		if (algorithmSelected === 'cdcl' && twatchToggled) {
-			algorithmSelected = 'twatch'
+			algorithmSelected = 'twatch';
 		}
 
 		if (algorithmSelected !== 'twatch') {
@@ -56,7 +57,7 @@
 	<span class="pt-1">Algorithm</span>
 </div>
 <div class="body-class">
-				{configuredAlgorithm}
+	{configuredAlgorithm}
 
 	<algorithm class={elementClass}>
 		<selector class="flex items-center gap-4">
@@ -82,14 +83,14 @@
 				<div class="extra-options">
 					<div class="option">
 						<label for="chb-watches">2-watched literals</label>
-							<input
-								type="checkbox"
-								class="chb square"
-								class:tick={twatchActivated}
-								id="chb-watches"
-								onchange={() => (openModal = true)}
-								bind:checked={twatchToggled}
-							/>
+						<input
+							type="checkbox"
+							class="chb square"
+							class:tick={twatchActivated}
+							id="chb-watches"
+							onchange={() => (openModal = true)}
+							bind:checked={twatchToggled}
+						/>
 					</div>
 				</div>
 			{/if}
@@ -103,7 +104,8 @@
 		<h3 class="mb-5 text-lg font-normal text-gray-600">
 			By changing the algorithm, all the assignments made will be erased. Are you sure?
 		</h3>
-		<button class="btn mr-4" onclick={() => acceptChange(configuredAlgorithm)}>Yes, I'm sure</button>
+		<button class="btn mr-4" onclick={() => acceptChange(configuredAlgorithm)}>Yes, I'm sure</button
+		>
 		<button class="btn" onclick={cancelChange}>
 			<span>No, cancel</span>
 		</button>
@@ -153,7 +155,6 @@
 		height: 100%;
 		width: 20px;
 	}
-
 
 	.square::before {
 		position: absolute;
