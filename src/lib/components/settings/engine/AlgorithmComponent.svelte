@@ -12,37 +12,43 @@
 
 	let { iconClass }: Props = $props();
 
-	let initialAlgorithm = getConfiguredAlgorithm();
+	type LocalAlgorithm = 'backtracking' | 'dpll' | 'cdcl';
 
-	let algorithmSelected: Algorithm = $state(
-		initialAlgorithm === 'twatch' ? 'cdcl' : initialAlgorithm
+	let configuredAlgorithm: LocalAlgorithm = $state(
+		getConfiguredAlgorithm() === 'twatch' ? 'cdcl' : (getConfiguredAlgorithm() as LocalAlgorithm)
 	);
 
-	let is2WatchEnabled: boolean = $state(initialAlgorithm === 'twatch');
+	const showCDCL: boolean = $derived(configuredAlgorithm === 'cdcl');
+
+	let twatchActivated: boolean = $derived(getConfiguredAlgorithm() === 'twatch');
+	let twatchToggled: boolean = $state(getConfiguredAlgorithm() === 'twatch');
 
 	const elementClass: string =
 		'rounded-lg bg-[var(--main-bg-color)] border border-[var(--border-color)] p-2';
 
 	const availableAlgorithms: Algorithm[] = ['backtracking', 'dpll', 'cdcl'];
-	const showCDCL: boolean = $derived(algorithmSelected === 'cdcl');
 
 	let openModal: boolean = $state(false);
 
 	const cancelChange = () => {
 		openModal = false;
 		const currentAlgorithm = getConfiguredAlgorithm();
-		algorithmSelected = currentAlgorithm === 'twatch' ? 'cdcl' : currentAlgorithm;
-		is2WatchEnabled = currentAlgorithm === 'twatch';
+		configuredAlgorithm = currentAlgorithm === 'twatch' ? 'cdcl' : currentAlgorithm;
 	};
 
 	const acceptChange = (algorithmSelected: Algorithm) => {
 		openModal = false;
 
-		const finalAlgorithm =
-			algorithmSelected === 'cdcl' && is2WatchEnabled ? 'twatch' : algorithmSelected;
+		if (algorithmSelected === 'cdcl' && twatchToggled) {
+			algorithmSelected = 'twatch';
+		}
 
-		setConfiguredAlgorithm(finalAlgorithm);
-		changeAlgorithmEventBus.emit(finalAlgorithm);
+		if (algorithmSelected !== 'twatch') {
+			twatchToggled = false;
+		}
+
+		setConfiguredAlgorithm(algorithmSelected);
+		changeAlgorithmEventBus.emit(algorithmSelected);
 	};
 </script>
 
@@ -51,6 +57,8 @@
 	<span class="pt-1">Algorithm</span>
 </div>
 <div class="body-class">
+	{configuredAlgorithm}
+
 	<algorithm class={elementClass}>
 		<selector class="flex items-center gap-4">
 			<label for="algorithm">Algorithm:</label>
@@ -58,10 +66,10 @@
 				id="algorithm"
 				class="flex-1 cursor-pointer rounded-lg border-[var(--border-color)] text-right outline-none focus:outline-none focus:ring-0"
 				onchange={() => (openModal = true)}
-				bind:value={algorithmSelected}
+				bind:value={configuredAlgorithm}
 			>
 				{#each availableAlgorithms as algorithm}
-					<option value={algorithm} selected={algorithm === algorithmSelected}>
+					<option value={algorithm} selected={configuredAlgorithm === algorithm}>
 						{algorithm}
 					</option>
 				{/each}
@@ -73,14 +81,17 @@
 		>
 			{#if showCDCL}
 				<div class="extra-options">
-					<label for="twatch-toggle">2-Watched Literals</label>
-					<input
-						id="twatch-toggle"
-						type="checkbox"
-						class="classic-checkbox"
-						bind:checked={is2WatchEnabled}
-						onchange={() => (openModal = true)}
-					/>
+					<div class="option">
+						<label for="chb-watches">2-watched literals</label>
+						<input
+							type="checkbox"
+							class="chb square"
+							class:tick={twatchActivated}
+							id="chb-watches"
+							onchange={() => (openModal = true)}
+							bind:checked={twatchToggled}
+						/>
+					</div>
 				</div>
 			{/if}
 		</div>
@@ -93,7 +104,8 @@
 		<h3 class="mb-5 text-lg font-normal text-gray-600">
 			By changing the algorithm, all the assignments made will be erased. Are you sure?
 		</h3>
-		<button class="btn mr-4" onclick={() => acceptChange(algorithmSelected)}>Yes, I'm sure</button>
+		<button class="btn mr-4" onclick={() => acceptChange(configuredAlgorithm)}>Yes, I'm sure</button
+		>
 		<button class="btn" onclick={cancelChange}>
 			<span>No, cancel</span>
 		</button>
@@ -124,12 +136,65 @@
 
 	.extra-options {
 		margin-top: 10px;
-		padding: 10px;
+		padding: 0.5rem;
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
 		background-color: white;
 		border: 1px solid var(--border-color);
 		border-radius: 0.5rem;
+	}
+
+	label + .chb {
+		position: relative;
+	}
+
+	.chb {
+		visibility: hidden;
+		cursor: pointer;
+		height: 100%;
+		width: 20px;
+	}
+
+	.square::before {
+		position: absolute;
+		visibility: visible;
+		/*   text-align: center; */
+
+		border: 2px solid var(--icon-base);
+		content: ' ';
+		width: 16px;
+		height: 16px;
+
+		transition:
+			all 0.1s ease-in,
+			border-color 0.05s ease-in;
+		top: calc(50% - 8px);
+		left: calc(50% - 8px);
+	}
+
+	.tick::before {
+		position: absolute;
+		visibility: visible;
+		transform: rotate(40deg);
+		visibility: visible;
+		border: 2px solid var(--icon-base);
+		border-top-color: transparent;
+		border-left-color: transparent;
+		width: 8px;
+		height: 14px;
+		content: ' ';
+		top: calc(50% - 8px);
+		left: calc(50% - 4px);
+	}
+
+	.option {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		display: flex;
+		flex: 1;
+		height: 2rem;
+		position: relative;
 	}
 </style>

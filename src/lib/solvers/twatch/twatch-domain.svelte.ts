@@ -14,7 +14,6 @@ import type { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
 import type { Watch } from '$lib/entities/WatchTable.svelte.ts';
 import {
 	atLevelZero,
-	obtainCRefFromEWC,
 	allAssigned as solverAllAssigned,
 	complementaryOccurrences as solverComplementaryOccurrences,
 	decide as solverDecide,
@@ -73,7 +72,7 @@ export type TWATCH_TRAVERSED_CURRENT_OCCURRENCES_INPUT =
 	| 'next_clause_state'
 	| 'dequeue_current_occurrences_state';
 
-export type TWATCH_NEXT_OCCURRENCE_INPUT = 'watch_at_first_position_state';
+export type TWATCH_NEXT_OCCURRENCE_INPUT = 'is_it_a_watch_state';
 
 export type TWATCH_ALL_VARIABLES_ASSIGNED_INPUT = 'sat_state' | 'decide_state';
 
@@ -136,6 +135,12 @@ export type TWATCH_FIRST_LITERAL_FALSIFIED_INPUT =
 	| 'wipe_occurrences_queue_state'
 	| 'unit_propagation_state';
 
+export type TWATCH_IS_IT_A_WATCH_INPUT = 'watch_at_first_position_state' | 'clause_falsified_state';
+
+export type TWATCH_CLAUSE_FALSIFIED_INPUT =
+	| 'wipe_occurrences_queue_state'
+	| 'unit_propagation_state';
+
 export type TWATCH_INPUT =
 	| TWATCH_UNARY_EMPTY_CLAUSES_DETECTION_INPUT
 	| TWATCH_ALL_VARIABLES_ASSIGNED_INPUT
@@ -167,7 +172,9 @@ export type TWATCH_INPUT =
 	| TWATCH_SWAP_SECOND_K_LITERAL_POSITION_INPUT
 	| TWATCH_FIRST_LITERAL_FALSIFIED_INPUT
 	| TWATCH_DELETE_WATCH_INPUT
-	| TWATCH_ADD_WATCH_INPUT;
+	| TWATCH_ADD_WATCH_INPUT
+	| TWATCH_IS_IT_A_WATCH_INPUT
+	| TWATCH_CLAUSE_FALSIFIED_INPUT;
 
 // ** state functions **
 
@@ -398,54 +405,33 @@ export const queueWatchedOccurrences: TWATCH_QUEUE_WATCHED_OCCURRENCES_FUN = (
 	getWatchesQueue().enqueue(watches);
 };
 
-export type TWATCH_WATCH_AT_FIRST_POSITION_FUN = (watch: EWC) => boolean;
+export type TWATCH_WATCH_AT_FIRST_POSITION_FUN = (watch: Watch) => boolean;
 
-export const watchAtFirstPosition: TWATCH_WATCH_AT_FIRST_POSITION_FUN = (watch: EWC) => {
-	const cRef: CRef = obtainCRefFromEWC(watch);
-	const cLits: Literal[] = getClausePool().at(cRef).getLiterals();
+export const watchAtFirstPosition: TWATCH_WATCH_AT_FIRST_POSITION_FUN = (watch: Watch) => {
+	const cLits: Literal[] = getClausePool().at(watch.cRef).getLiterals();
 	const currentWatch: VisitingWatchList = getCurrentWatch();
-
-	// WATCH OUT: This condition is necessary. Empty clauses and unary clauses may also go through this state
-	// 	as at the beginning unary and empty clauses are retrieved.
-	if (isLeft(currentWatch)) {
-		return false;
-	} else {
-		return cLits[0].toInt() === fromRight(currentWatch).getLiteral();
-	}
+	return cLits[0].toInt() === fromRight(currentWatch).getLiteral();
 };
 
-export type TWATCH_SWAP_WATCHES_FUN = (watch: EWC) => void;
+export type TWATCH_SWAP_WATCHES_FUN = (watch: Watch) => void;
 
-export const swapWatches: TWATCH_SWAP_WATCHES_FUN = (watch: EWC) => {
-	const cRef: CRef = obtainCRefFromEWC(watch);
-	const clause: Clause = getClausePool().at(cRef);
-	if (clause.size() < 2) {
-		logFatal('Swap issue', 'The clause you are trying to swap positions has less than 2 literals');
-	} else {
-		clause.swapLiteralPositions(0, 1);
-	}
+export const swapWatches: TWATCH_SWAP_WATCHES_FUN = (watch: Watch) => {
+	const clause: Clause = getClausePool().at(watch.cRef);
+	clause.swapLiteralPositions(0, 1);
 };
 
-export type TWATCH_FIRST_LITERAL_SATISFIED_FUN = (watch: EWC) => boolean;
+export type TWATCH_FIRST_LITERAL_SATISFIED_FUN = (watch: Watch) => boolean;
 
-export const firstLiteralSatisfied: TWATCH_FIRST_LITERAL_SATISFIED_FUN = (watch: EWC) => {
-	const cRef: CRef = obtainCRefFromEWC(watch);
-	const clause: Clause = getClausePool().at(cRef);
-
-	// This can happen if an empty clause reach this state which is not technically wrong
-	if (clause.size() < 1) {
-		return false;
-	} else {
-		return clause.getLiterals()[0].isTrue();
-	}
+export const firstLiteralSatisfied: TWATCH_FIRST_LITERAL_SATISFIED_FUN = (watch: Watch) => {
+	const clause: Clause = getClausePool().at(watch.cRef);
+	return clause.getLiterals()[0].isTrue();
 };
 
 // It returns the positions where a non falsified literal is found
-export type TWATCH_LOOK_NON_FALSIFIED_LITERAL_FUN = (watch: EWC) => Maybe<number>;
+export type TWATCH_LOOK_NON_FALSIFIED_LITERAL_FUN = (watch: Watch) => Maybe<number>;
 
-export const lookNonFalsifiedLiteral: TWATCH_LOOK_NON_FALSIFIED_LITERAL_FUN = (watch: EWC) => {
-	const cRef: CRef = obtainCRefFromEWC(watch);
-	const candidates: Literal[] = getClausePool().at(cRef).getLiterals();
+export const lookNonFalsifiedLiteral: TWATCH_LOOK_NON_FALSIFIED_LITERAL_FUN = (watch: Watch) => {
+	const candidates: Literal[] = getClausePool().at(watch.cRef).getLiterals();
 
 	let i = 2;
 	let selectedCandidate: Maybe<number> = makeNothing();
@@ -468,22 +454,17 @@ export const nonFalsifiedLiteralFound: TWATCH_NON_FALSIFIED_LITERAL_FOUND_FUN = 
 
 export type TWATCH_SWAP_SECOND_K_LITERAL_POSITION_FUN = (
 	candidate: Maybe<number>,
-	watch: EWC
+	watch: Watch
 ) => void;
 
 export const swapSecondKLiteralPos: TWATCH_SWAP_SECOND_K_LITERAL_POSITION_FUN = (
 	candidate: Maybe<number>,
-	watch: EWC
+	watch: Watch
 ) => {
-	if (!isLeft(watch)) {
-		logFatal('A watch type should be inside the ewc watch');
-	}
-	const currentWatch: Watch = fromLeft(watch);
-
 	if (isNothing(candidate)) {
 		logFatal('Swapping issue', 'There is no candidate');
 	}
-	const clause: Clause = getClausePool().at(currentWatch.cRef);
+	const clause: Clause = getClausePool().at(watch.cRef);
 	const pos: number = fromJust(candidate);
 
 	if (clause.size() < pos) {
@@ -493,40 +474,39 @@ export const swapSecondKLiteralPos: TWATCH_SWAP_SECOND_K_LITERAL_POSITION_FUN = 
 	}
 };
 
-export type TWATCH_FIRST_LITERAL_FALSIFIED_FUN = (watch: EWC) => boolean;
+export type TWATCH_FIRST_LITERAL_FALSIFIED_FUN = (watch: Watch) => boolean;
 
-export const firstLiteralFalsified: TWATCH_FIRST_LITERAL_FALSIFIED_FUN = (watch: EWC) => {
-	const cRef: CRef = obtainCRefFromEWC(watch);
-	const clause: Clause = getClausePool().at(cRef);
-	if (clause.size() < 1) {
-		return true;
-	} else {
-		return clause.getLiterals()[0].isFalse();
-	}
+export const firstLiteralFalsified: TWATCH_FIRST_LITERAL_FALSIFIED_FUN = (watch: Watch) => {
+	const clause: Clause = getClausePool().at(watch.cRef);
+	return clause.getLiterals()[0].isFalse();
 };
 
-export type TWATCH_DELETE_WATCH_FUN = (watch: EWC) => void;
+export type TWATCH_DELETE_WATCH_FUN = (watch: Watch) => void;
 
 // In this function, always the 2nd literal will be the one whose watch will be removed
-export const deleteWatch: TWATCH_DELETE_WATCH_FUN = (watch: EWC) => {
-	if (!isLeft(watch)) {
-		logFatal('Delete watch error', 'It is only possible to delete a watch if you have a watch');
-	}
-	const cRef: CRef = obtainCRefFromEWC(watch);
-	const secondLiteral: Literal = getClausePool().at(cRef).getLiterals()[1];
-	getWatchTableMapping().deleteWatch(secondLiteral.toInt(), fromLeft(watch));
+export const deleteWatch: TWATCH_DELETE_WATCH_FUN = (watch: Watch) => {
+	const secondLiteral: Literal = getClausePool().at(watch.cRef).getLiterals()[1];
+	getWatchTableMapping().deleteWatch(secondLiteral.toInt(), watch);
 };
 
-export type TWATCH_ADD_WATCH_FUN = (watch: EWC) => void;
+export type TWATCH_ADD_WATCH_FUN = (watch: Watch) => void;
 
 // In this function, always the 2nd literal will be the one whose watch will be added
-export const addWatch: TWATCH_ADD_WATCH_FUN = (watch: EWC) => {
-	if (!isLeft(watch)) {
-		logFatal('Add watch error', 'It is only possible to add a watch if you have a watch');
-	}
-	const cRef: CRef = obtainCRefFromEWC(watch);
-	const secondLiteral: Literal = getClausePool().at(cRef).getLiterals()[1];
-	getWatchTableMapping().addWatch(secondLiteral.toInt(), fromLeft(watch));
+export const addWatch: TWATCH_ADD_WATCH_FUN = (watch: Watch) => {
+	const secondLiteral: Literal = getClausePool().at(watch.cRef).getLiterals()[1];
+	getWatchTableMapping().addWatch(secondLiteral.toInt(), watch);
+};
+
+export type TWATCH_IS_IT_A_WATCH_FUN = (watch: EWC) => boolean;
+
+export const isItAWatch: TWATCH_IS_IT_A_WATCH_FUN = (watch: EWC) => {
+	return isLeft(watch);
+};
+
+export type TWATCH_CLAUSE_FALSIFIED_FUN = (cRef: CRef) => boolean;
+
+export const clauseFalsified: TWATCH_CLAUSE_FALSIFIED_FUN = (cRef: CRef) => {
+	return getClausePool().at(cRef).falsified();
 };
 
 export type TWATCH_FUN =
@@ -559,4 +539,6 @@ export type TWATCH_FUN =
 	| TWATCH_DELETE_WATCH_FUN
 	| TWATCH_SWAP_SECOND_K_LITERAL_POSITION_FUN
 	| TWATCH_ADD_WATCH_FUN
-	| TWATCH_FIRST_LITERAL_FALSIFIED_FUN;
+	| TWATCH_FIRST_LITERAL_FALSIFIED_FUN
+	| TWATCH_IS_IT_A_WATCH_FUN
+	| TWATCH_CLAUSE_FALSIFIED_FUN;

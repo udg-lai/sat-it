@@ -7,6 +7,7 @@ import {
 	atLevelZeroFun,
 	backjumping,
 	buildConflictAnalysis,
+	clauseFalsified,
 	complementaryOccurrences,
 	complementaryWatchedOccurrences,
 	decide,
@@ -14,6 +15,7 @@ import {
 	dequeueCurrentOccurrences,
 	firstLiteralFalsified,
 	firstLiteralSatisfied,
+	isItAWatch,
 	learnConflictClause,
 	lookNonFalsifiedLiteral,
 	nextClause,
@@ -45,6 +47,8 @@ import {
 	type TWATCH_BUILD_CONFLICT_ANALYSIS_STRUCTURE_INPUT,
 	type TWATCH_CHECK_PENDING_OCCURRENCES_FUN,
 	type TWATCH_CHECK_PENDING_OCCURRENCES_INPUT,
+	type TWATCH_CLAUSE_FALSIFIED_FUN,
+	type TWATCH_CLAUSE_FALSIFIED_INPUT,
 	type TWATCH_COMPLEMENTARY_OCCURRENCES_RETRIEVE_FUN,
 	type TWATCH_COMPLEMENTARY_OCCURRENCES_RETRIEVE_INPUT,
 	type TWATCH_COMPLEMENTARY_WATCHED_OCCURRENCES_RETRIEVE_FUN,
@@ -61,6 +65,8 @@ import {
 	type TWATCH_FIRST_LITERAL_SATISFIED_INPUT,
 	type TWATCH_FUN,
 	type TWATCH_INPUT,
+	type TWATCH_IS_IT_A_WATCH_FUN,
+	type TWATCH_IS_IT_A_WATCH_INPUT,
 	type TWATCH_LEARN_CONFLICT_CLAUSE_FUN,
 	type TWATCH_LEARN_CONFLICT_CLAUSE_INPUT,
 	type TWATCH_LOOK_NON_FALSIFIED_LITERAL_FUN,
@@ -128,7 +134,9 @@ export const twatch_stateName2StateId = {
 	swap_second_k_literal_position_state: 26,
 	add_watch_state: 27,
 	first_literal_falsified_state: 28,
-	complementary_watched_occurrences_retrieve_state: 29
+	complementary_watched_occurrences_retrieve_state: 29,
+	is_it_a_watch_state: 30,
+	clause_falsified_state: 31
 };
 
 // *** define state nodes ***
@@ -213,8 +221,8 @@ const next_clause_state: NonFinalState<TWATCH_NEXT_OCCURRENCE_FUN, TWATCH_NEXT_O
 	description: 'Returns the next occurrence of the current watched list',
 	run: nextClause,
 	transitions: new Map<TWATCH_NEXT_OCCURRENCE_INPUT, number>().set(
-		'watch_at_first_position_state',
-		twatch_stateName2StateId['watch_at_first_position_state']
+		'is_it_a_watch_state',
+		twatch_stateName2StateId['is_it_a_watch_state']
 	)
 };
 
@@ -526,6 +534,27 @@ const first_literal_falsified_state: NonFinalState<
 		.set('wipe_occurrences_queue_state', twatch_stateName2StateId['wipe_occurrences_queue_state'])
 		.set('unit_propagation_state', twatch_stateName2StateId['unit_propagation_state'])
 };
+
+const is_it_a_watch_state: NonFinalState<TWATCH_IS_IT_A_WATCH_FUN, TWATCH_IS_IT_A_WATCH_INPUT> = {
+	id: twatch_stateName2StateId['is_it_a_watch_state'],
+	run: isItAWatch,
+	description: 'Returns true if it is a Watch. False if it is a CRef',
+	transitions: new Map<TWATCH_IS_IT_A_WATCH_INPUT, number>()
+		.set('watch_at_first_position_state', twatch_stateName2StateId['watch_at_first_position_state'])
+		.set('clause_falsified_state', twatch_stateName2StateId['clause_falsified_state'])
+};
+
+const is_clause_falsified_state: NonFinalState<
+	TWATCH_CLAUSE_FALSIFIED_FUN,
+	TWATCH_CLAUSE_FALSIFIED_INPUT
+> = {
+	id: twatch_stateName2StateId['clause_falsified_state'],
+	run: clauseFalsified,
+	description: 'Returns true if the clause is falsified. False otherwise.',
+	transitions: new Map<TWATCH_CLAUSE_FALSIFIED_INPUT, number>()
+		.set('wipe_occurrences_queue_state', twatch_stateName2StateId['wipe_occurrences_queue_state'])
+		.set('unit_propagation_state', twatch_stateName2StateId['unit_propagation_state'])
+};
 // *** adding states to the set of states ***
 export const states: Map<number, State<TWATCH_FUN, TWATCH_INPUT>> = new Map();
 
@@ -564,6 +593,8 @@ states.set(swap_second_k_literal_position_state.id, swap_second_k_literal_positi
 states.set(first_literal_falsified_state.id, first_literal_falsified_state);
 states.set(delete_watch_state.id, delete_watch_state);
 states.set(add_watch_state.id, add_watch_state);
+states.set(is_it_a_watch_state.id, is_it_a_watch_state);
+states.set(is_clause_falsified_state.id, is_clause_falsified_state);
 
 export const initial = unary_empty_clauses_detection_state.id;
 
