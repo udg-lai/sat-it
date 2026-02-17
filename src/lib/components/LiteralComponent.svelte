@@ -54,6 +54,6 @@
 		height: 0;
 		border-left: 3px solid transparent;
 		border-right: 3px solid transparent;
-		border-bottom: 4px solid black; /* Inherits the text color (true/false/undefined) */
+		border-bottom: 4px solid var(--inspecting-color);  /* Inherits the text color (true/false/undefined) */
 	}
 </style>

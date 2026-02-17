@@ -8,7 +8,7 @@
 	const currentAlgorithm: string = $derived(getConfiguredAlgorithm());
 
 	const algorithm: string = $derived(
-		currentAlgorithm === 'twatch' ? 'cdcl + 2-watch' : currentAlgorithm
+		currentAlgorithm === 'twatch' ? 'cdcl + 2-watched literals' : currentAlgorithm
 	);
 
 	const instanceName: string = $derived.by(() => {
