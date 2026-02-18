@@ -66,7 +66,7 @@ type ClauseOptions = {
 };
 
 export default class Clause implements Comparable<Clause> {
-	private literals: Literal[] = [];
+	private literals: Literal[] = $state([]);
 	private sortedLiterals: Literal[] = [];
 	private comments: string[] = $state([]);
 	private cRef: number | undefined;
