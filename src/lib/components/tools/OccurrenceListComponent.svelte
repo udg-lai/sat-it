@@ -36,10 +36,13 @@
 	const using2Watch: boolean = $derived(getSolverMachine().identify() === 'twatch');
 
 	function followActive(node: HTMLElement, isActive: boolean) {
+		// This first condition is needed to update the pointer when the view is created
 		if (isActive) {
 			node.scrollIntoView({ behavior: 'smooth', block: 'center' });
 		}
+		// This is where the reactivity happen
 		return {
+			//This is called by svelte when the value that was passed changes (in this case, the is active)
 			update(newIsActive: boolean) {
 				if (newIsActive) {
 					node.scrollIntoView({ behavior: 'smooth', block: 'center' });

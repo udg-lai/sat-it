@@ -5,6 +5,7 @@
 	import { Modal } from 'flowbite-svelte';
 	import { CodePullRequestOutline, ExclamationCircleOutline } from 'flowbite-svelte-icons';
 	import { getConfiguredAlgorithm, setConfiguredAlgorithm } from './state.svelte.ts';
+	import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 
 	interface Props {
 		iconClass: { size: string };
@@ -50,6 +51,13 @@
 		setConfiguredAlgorithm(algorithmSelected);
 		changeAlgorithmEventBus.emit(algorithmSelected);
 	};
+
+	const confirmUpdate = () => {
+		if(getSolverMachine().onInitialState())
+			acceptChange(configuredAlgorithm);
+		else
+			openModal = true;
+	}
 </script>
 
 <div class="heading-class">
@@ -65,7 +73,7 @@
 			<select
 				id="algorithm"
 				class="flex-1 cursor-pointer rounded-lg border-[var(--border-color)] text-right outline-none focus:outline-none focus:ring-0"
-				onchange={() => (openModal = true)}
+				onchange={confirmUpdate}
 				bind:value={configuredAlgorithm}
 			>
 				{#each availableAlgorithms as algorithm}
@@ -88,7 +96,7 @@
 							class="chb square"
 							class:tick={twatchActivated}
 							id="chb-watches"
-							onchange={() => (openModal = true)}
+							onchange={confirmUpdate}
 							bind:checked={twatchToggled}
 						/>
 					</div>

@@ -16,6 +16,7 @@
 		TrashBinOutline
 	} from 'flowbite-svelte-icons';
 	import ProblemSummaryComponent from './ProblemSummaryComponent.svelte';
+	import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 
 	let activeInstance: InteractiveInstance = $derived(getActiveInstance());
 	let previewingInstance: InteractiveInstance = $state(getActiveInstance());
@@ -27,9 +28,13 @@
 
 	function instanceClicked(instanceName: string) {
 		if (activeInstanceName === instanceName) return;
-		openModal = true;
-		instanceSelected = instanceName;
-		previewingInstance = getInteractiveInstance(instanceName);
+		if(getSolverMachine().onInitialState()) {
+			onAcceptUpdateInstance(instanceName);
+		} else {
+			openModal = true;
+			instanceSelected = instanceName;
+			previewingInstance = getInteractiveInstance(instanceName);
+		}
 	}
 
 	function onAcceptUpdateInstance(instanceName: string): void {
