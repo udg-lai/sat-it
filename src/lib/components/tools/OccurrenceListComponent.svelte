@@ -36,28 +36,27 @@
 	const using2Watch: boolean = $derived(getSolverMachine().identify() === 'twatch');
 
 	function followActive(node: HTMLElement, isActive: boolean) {
-        if (isActive) {
-            node.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-        return {
-            update(newIsActive: boolean) {
-                if (newIsActive) {
-                    node.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
-            }
-        };
-    }
+		if (isActive) {
+			node.scrollIntoView({ behavior: 'smooth', block: 'center' });
+		}
+		return {
+			update(newIsActive: boolean) {
+				if (newIsActive) {
+					node.scrollIntoView({ behavior: 'smooth', block: 'center' });
+				}
+			}
+		};
+	}
 
 	let clauses: Maybe<Clause>[] = $derived.by(() => {
 		let clausesToVisit: Clause[] = [];
 		const occurrences: VisitingOccurrenceList = getCurrentOccurrences();
-		
+
 		//If the occurrence list is a preprocessing list or if the 2-watch literals scheme is not being used, just inspect the occurrence list
 		if (isLeft(occurrences) || !using2Watch) {
 			clausesToVisit = unwrapEither(occurrences)
 				.getOccurrences()
-				.map((cRef) => getClausePool().at(cRef)
-			);
+				.map((cRef) => getClausePool().at(cRef));
 		} else {
 			const watches: VisitingWatchList = getCurrentWatch();
 			if (isLeft(watches)) {
@@ -76,15 +75,16 @@
 
 	const nonWatchedClauses: Clause[] = $derived.by(() => {
 		const occurrences: VisitingOccurrenceList = getCurrentOccurrences();
-		
+
 		//If the occurrence list is a preprocessing list or if the 2-watch literals scheme is not being used, just inspect the occurrence list
 		if (isLeft(occurrences) || !using2Watch) {
-			return  [];
-		} const watches: VisitingWatchList = getCurrentWatch();
-			const occurrencesCRefs: Set<CRef> = new Set<CRef>(unwrapEither(occurrences).getOccurrences());
-			const watchedCRefs: Set<CRef> = new Set<CRef>(fromRight(watches).getCRefs());
-			const nonWatchedCRefs: CRef[] = [...occurrencesCRefs.difference(watchedCRefs)];
-			return nonWatchedCRefs.map((cRef) => getClausePool().at(cRef));
+			return [];
+		}
+		const watches: VisitingWatchList = getCurrentWatch();
+		const occurrencesCRefs: Set<CRef> = new Set<CRef>(unwrapEither(occurrences).getOccurrences());
+		const watchedCRefs: Set<CRef> = new Set<CRef>(fromRight(watches).getCRefs());
+		const nonWatchedCRefs: CRef[] = [...occurrencesCRefs.difference(watchedCRefs)];
+		return nonWatchedCRefs.map((cRef) => getClausePool().at(cRef));
 	});
 
 	function isSat(clause: Clause): boolean {
@@ -140,12 +140,9 @@
 </script>
 
 <division class:invisible={!using2Watch}>Watched clauses</division>
-<occurrence-list class:main-list={using2Watch}>	
+<occurrence-list class:main-list={using2Watch}>
 	{#each clauses as maybeClause, i (i)}
-		<div 
-			class="occurrence-list-item"
-			use:followActive={inspectingClause(maybeClause)}
-		>
+		<div class="occurrence-list-item" use:followActive={inspectingClause(maybeClause)}>
 			<HeadTailComponent display={inspectingClause(maybeClause)} verticalList={true}>
 				<div class="enumerate" class:inspecting={inspectingClause(maybeClause)}>
 					{#if isJust(maybeClause)}
@@ -163,8 +160,7 @@
 					class="clause-highlighter"
 					class:inspectedTrue={isSat(fromJust(maybeClause))}
 					class:inspectedFalse={isUnSat(fromJust(maybeClause))}
-					class:visited-clause={visited(fromJust(maybeClause)) &&
-						isPartial(fromJust(maybeClause))}
+					class:visited-clause={visited(fromJust(maybeClause)) && isPartial(fromJust(maybeClause))}
 				>
 					<ClauseComponent clause={fromJust(maybeClause)} />
 				</div>
@@ -194,6 +190,7 @@
 		{/each}
 	</occurrence-list>
 {/if}
+
 <style>
 	.main-list {
 		height: 75%;
