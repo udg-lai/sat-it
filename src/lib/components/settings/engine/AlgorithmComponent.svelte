@@ -53,11 +53,9 @@
 	};
 
 	const confirmUpdate = () => {
-		if(getSolverMachine().onInitialState())
-			acceptChange(configuredAlgorithm);
-		else
-			openModal = true;
-	}
+		if (getSolverMachine().onInitialState()) acceptChange(configuredAlgorithm);
+		else openModal = true;
+	};
 </script>
 
 <div class="heading-class">

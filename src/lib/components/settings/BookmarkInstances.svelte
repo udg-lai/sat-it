@@ -28,7 +28,7 @@
 
 	function instanceClicked(instanceName: string) {
 		if (activeInstanceName === instanceName) return;
-		if(getSolverMachine().onInitialState()) {
+		if (getSolverMachine().onInitialState()) {
 			onAcceptUpdateInstance(instanceName);
 		} else {
 			openModal = true;
