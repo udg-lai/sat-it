@@ -142,7 +142,7 @@
 	}
 </script>
 
-<division class:invisible={!using2Watch}>Watched clauses</division>
+<division class:invisible={!using2Watch}>Watched clauses <span class:invisible={clauses.length-1 <= 0}>({clauses.length-1})</span></division>
 <occurrence-list class:main-list={using2Watch}>
 	{#each clauses as maybeClause, i (i)}
 		<div class="occurrence-list-item" use:followActive={inspectingClause(maybeClause)}>
@@ -172,7 +172,7 @@
 	{/each}
 </occurrence-list>
 
-<division class:invisible={!using2Watch}>Non watched clauses</division>
+<division class:invisible={!using2Watch}>Non watched clauses <span class:invisible={nonWatchedClauses.length === 0}>({nonWatchedClauses.length})</span></division>
 {#if using2Watch}
 	<occurrence-list class="secondary-list">
 		{#each nonWatchedClauses as skippedClause, i (i)}
