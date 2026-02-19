@@ -33,22 +33,33 @@
 	import { fromJust } from './../../types/maybe.ts';
 	import HeadTailComponent from './../HeadTailComponent.svelte';
 
-	type ClauseToVisit = {
-		clause: Clause;
-		toVisit: boolean;
-	};
+	const using2Watch: boolean = $derived(getSolverMachine().identify() === 'twatch');
 
-	let clauses: Maybe<ClauseToVisit>[] = $derived.by(() => {
-		let clausesToVisit: ClauseToVisit[] = [];
+	function followActive(node: HTMLElement, isActive: boolean) {
+		// This first condition is needed to update the pointer when the view is created
+		if (isActive) {
+			node.scrollIntoView({ behavior: 'smooth', block: 'center' });
+		}
+		// This is where the reactivity happen
+		return {
+			//This is called by svelte when the value that was passed changes (in this case, the is active)
+			update(newIsActive: boolean) {
+				if (newIsActive) {
+					node.scrollIntoView({ behavior: 'smooth', block: 'center' });
+				}
+			}
+		};
+	}
+
+	let clauses: Maybe<Clause>[] = $derived.by(() => {
+		let clausesToVisit: Clause[] = [];
 		const occurrences: VisitingOccurrenceList = getCurrentOccurrences();
-		// If the occurrences contain a preprocessing list, this means that the watches will also contain one and there is no need to check further, they should have the same content.
-		if (isLeft(occurrences) || getSolverMachine().identify() !== 'twatch') {
+
+		//If the occurrence list is a preprocessing list or if the 2-watch literals scheme is not being used, just inspect the occurrence list
+		if (isLeft(occurrences) || !using2Watch) {
 			clausesToVisit = unwrapEither(occurrences)
 				.getOccurrences()
-				.map((cRef) => ({
-					clause: getClausePool().at(cRef),
-					toVisit: true
-				}));
+				.map((cRef) => getClausePool().at(cRef));
 		} else {
 			const watches: VisitingWatchList = getCurrentWatch();
 			if (isLeft(watches)) {
@@ -58,50 +69,26 @@
 				);
 			} else {
 				const watchedCRefs: CRef[] = fromRight(watches).getCRefs();
-				const complementaryCRefs: CRef[] = fromRight(occurrences).getOccurrences();
-				clausesToVisit = reorderCRefs(complementaryCRefs, watchedCRefs);
+				clausesToVisit = watchedCRefs.map((cRef) => getClausePool().at(cRef));
 			}
 		}
 
 		return [makeNothing(), ...clausesToVisit.map(makeJust)];
 	});
 
-	function reorderCRefs(complementary: CRef[], watchedCRefs: CRef[]): ClauseToVisit[] {
-		// First let's create the a set of the watchedCRefs and occurrenceList
-		const watchedSet: Set<CRef> = new Set(watchedCRefs);
-		const complementarySet: Set<CRef> = new Set(complementary);
+	const nonWatchedClauses: Clause[] = $derived.by(() => {
+		const occurrences: VisitingOccurrenceList = getCurrentOccurrences();
 
-		// Then let's create a list of unwatched CRefs
-
-		const unwatchedCRefs: CRef[] = [...complementarySet.difference(watchedSet)];
-
-		const result: ClauseToVisit[] = [];
-
-		// For each watch, we will add the CRefs that are not going to be visited that have a lower index.
-		for (const watch of watchedCRefs) {
-			// Each element form the unwatched list will be removed and added to the result list.
-			while (unwatchedCRefs.length > 0 && unwatchedCRefs[0] < watch) {
-				const unwatchedCRef: CRef = unwatchedCRefs.shift() as CRef;
-				result.push({
-					clause: getClausePool().at(unwatchedCRef),
-					toVisit: false
-				});
-			}
-			// Once all the CRefs that comes previous to the watched CRef, the watched CRef is added.
-			result.push({
-				clause: getClausePool().at(watch),
-				toVisit: true
-			});
+		//If the occurrence list is a preprocessing list or if the 2-watch literals scheme is not being used, just inspect the occurrence list
+		if (isLeft(occurrences) || !using2Watch) {
+			return [];
 		}
-		// If all the watches have been added, the rest of the unwatchedCRefs are added.
-		result.push(
-			...unwatchedCRefs.map((cRef) => ({
-				clause: getClausePool().at(cRef),
-				toVisit: false
-			}))
-		);
-		return result;
-	}
+		const watches: VisitingWatchList = getCurrentWatch();
+		const occurrencesCRefs: Set<CRef> = new Set<CRef>(unwrapEither(occurrences).getOccurrences());
+		const watchedCRefs: Set<CRef> = new Set<CRef>(fromRight(watches).getCRefs());
+		const nonWatchedCRefs: CRef[] = [...occurrencesCRefs.difference(watchedCRefs)];
+		return nonWatchedCRefs.map((cRef) => getClausePool().at(cRef));
+	});
 
 	function isSat(clause: Clause): boolean {
 		return isSatisfiedEval(clause.eval());
@@ -117,9 +104,7 @@
 	}
 
 	const currentOccurrenceList: Either<VisitingWatchList, VisitingOccurrenceList> = $derived(
-		getSolverMachine().identify() === 'twatch'
-			? makeLeft(getCurrentWatch())
-			: makeRight(getCurrentOccurrences())
+		using2Watch ? makeLeft(getCurrentWatch()) : makeRight(getCurrentOccurrences())
 	);
 
 	function currentCRefs(): CRef[] {
@@ -143,32 +128,32 @@
 		}
 	}
 
-	function inspectingClause(clauseCRef: Maybe<ClauseToVisit>): boolean {
+	function inspectingClause(clauseCRef: Maybe<Clause>): boolean {
 		return isJust(clauseCRef)
-			? fromJust(clauseCRef).clause.getCRef() === currentCRefs()[currentPointer()]
+			? fromJust(clauseCRef).getCRef() === currentCRefs()[currentPointer()]
 			: currentPointer() === -1
 				? true
 				: false;
 	}
 
-	function visited(visitingClause: ClauseToVisit): boolean {
-		if (!visitingClause.toVisit) {
-			return false;
-		} else {
-			const cRefIndex: number = currentCRefs().indexOf(visitingClause.clause.getCRef());
-			return cRefIndex <= currentPointer();
-		}
+	function visited(visitingClause: Clause): boolean {
+		const cRefIndex: number = currentCRefs().indexOf(visitingClause.getCRef());
+		return cRefIndex <= currentPointer();
 	}
 </script>
 
-<occurrence-list>
+<division class:invisible={!using2Watch}
+	>Watched clauses <span class:invisible={clauses.length - 1 <= 0}>({clauses.length - 1})</span
+	></division
+>
+<occurrence-list class:main-list={using2Watch}>
 	{#each clauses as maybeClause, i (i)}
-		<div class="occurrence-list-item">
+		<div class="occurrence-list-item" use:followActive={inspectingClause(maybeClause)}>
 			<HeadTailComponent display={inspectingClause(maybeClause)} verticalList={true}>
 				<div class="enumerate" class:inspecting={inspectingClause(maybeClause)}>
 					{#if isJust(maybeClause)}
 						<span>
-							{fromJust(maybeClause).clause.getCRef()}.
+							{fromJust(maybeClause).getCRef()}.
 						</span>
 					{:else}
 						<span></span>
@@ -179,20 +164,54 @@
 			{#if isJust(maybeClause)}
 				<div
 					class="clause-highlighter"
-					class:inspectedTrue={isSat(fromJust(maybeClause).clause)}
-					class:inspectedFalse={isUnSat(fromJust(maybeClause).clause)}
-					class:visited-clause={visited(fromJust(maybeClause)) &&
-						isPartial(fromJust(maybeClause).clause)}
-					class:willSkip={!fromJust(maybeClause).toVisit}
+					class:inspectedTrue={isSat(fromJust(maybeClause))}
+					class:inspectedFalse={isUnSat(fromJust(maybeClause))}
+					class:visited-clause={visited(fromJust(maybeClause)) && isPartial(fromJust(maybeClause))}
 				>
-					<ClauseComponent clause={fromJust(maybeClause).clause} />
+					<ClauseComponent clause={fromJust(maybeClause)} />
 				</div>
 			{/if}
 		</div>
 	{/each}
 </occurrence-list>
 
+<division class:invisible={!using2Watch}
+	>Non watched clauses <span class:invisible={nonWatchedClauses.length === 0}
+		>({nonWatchedClauses.length})</span
+	></division
+>
+{#if using2Watch}
+	<occurrence-list class="secondary-list">
+		{#each nonWatchedClauses as skippedClause, i (i)}
+			<div class="occurrence-list-item">
+				<div class="enumerate">
+					<span>
+						{skippedClause.getCRef()}.
+					</span>
+				</div>
+				<div
+					class="clause-highlighter willSkip"
+					class:inspectedTrue={isSat(skippedClause)}
+					class:inspectedFalse={isUnSat(skippedClause)}
+				>
+					<ClauseComponent clause={skippedClause} />
+				</div>
+			</div>
+		{/each}
+	</occurrence-list>
+{/if}
+
 <style>
+	.main-list {
+		height: 75%;
+		overflow: scroll;
+	}
+
+	.secondary-list {
+		height: 25%;
+		overflow: scroll;
+	}
+
 	.willSkip {
 		opacity: 0.3;
 	}
@@ -235,5 +254,13 @@
 
 	.inspecting {
 		opacity: 1;
+	}
+
+	division {
+		text-align: center;
+		font-size: 12px;
+		border-top: 1px solid var(--border-color);
+		border-bottom: 1px solid var(--border-color);
+		padding: 2px;
 	}
 </style>
