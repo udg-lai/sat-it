@@ -13,13 +13,9 @@ import { getAssignment, type AssignmentEvent } from '$lib/states/assignment.svel
 import { isBreakpoint } from '$lib/states/breakpoints.svelte.ts';
 import { getVariablePool } from '$lib/states/problem.svelte.ts';
 import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
-import {
-	increaseNoConflicts,
-	increaseNoUnitPropagations,
-	updateClausesLeft
-} from '$lib/states/statistics.svelte.ts';
+import { increaseNoConflicts, increaseNoUnitPropagations } from '$lib/states/statistics.svelte.ts';
 import { logBreakpoint, logFatal } from '$lib/states/toasts.svelte.ts';
-import { getLatestTrail, getTrails, stackTrail } from '$lib/states/trails.svelte.ts';
+import { getLatestTrail, stackTrail } from '$lib/states/trails.svelte.ts';
 import { fromLeft, fromRight, isLeft } from '$lib/types/either.ts';
 import type { CRef, Lit, Var } from '$lib/types/types.ts';
 import { fromJust, isJust, type Maybe } from '../types/maybe.ts';
@@ -128,7 +124,6 @@ export const atLevelZero = (): boolean => {
 const doAssignment = (varId: Var, assignment: Assignment): void => {
 	// Notice that assignment \in { true, false, undefined }
 	getVariablePool().assign(varId, assignment);
-	updateClausesLeft(getTrails().length);
 	if (assignment !== undefined) {
 		// i.e., assignment is either true or false
 		// Here assignment is inverted as when creating the literal the second parameter indicates if it has hat or not

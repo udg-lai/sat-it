@@ -3,13 +3,12 @@
 	import { getClausePool } from '$lib/states/problem.svelte.ts';
 	import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 	import {
-		getClausesLeft,
 		getNoConflicts,
 		getNoDecisions,
 		getNoUnitPropagations,
-		type ClauseCountEntry
+		getVisitedClauses
 	} from '$lib/states/statistics.svelte.ts';
-	import { getLatestTrail, getTrails } from '$lib/states/trails.svelte.ts';
+	import { getLatestTrail } from '$lib/states/trails.svelte.ts';
 
 	const decisions: number = $derived(getNoDecisions());
 	const conflicts: number = $derived(getNoConflicts());
@@ -21,18 +20,7 @@
 		} else return 0;
 	});
 	const clausesLeft: number = $derived(getClausePool().leftToSatisfy());
-	const minimumClausesLeft: number | undefined = $derived.by(() => {
-		const collection: ClauseCountEntry = getClausesLeft();
-		let minimum: number | undefined = undefined;
-		for (let i = 0; i < getTrails().length; i++) {
-			if (
-				(collection[i] !== undefined && minimum === undefined) ||
-				(minimum !== undefined && collection[i] < minimum)
-			)
-				minimum = collection[i];
-		}
-		return minimum;
-	});
+	const visitedClauses: number = $derived(getVisitedClauses());
 	const unsat: boolean = $derived(getSolverMachine().onUnsatState());
 </script>
 
@@ -60,7 +48,7 @@
 	{#if unsat}
 		<div class="metric">
 			Minimum Clauses:
-			<span class="statistic-value">{minimumClausesLeft}</span>
+			<span class="statistic-value">{visitedClauses}</span>
 		</div>
 	{/if}
 </statistics>

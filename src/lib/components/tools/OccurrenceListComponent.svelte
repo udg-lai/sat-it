@@ -35,20 +35,12 @@
 
 	const using2Watch: boolean = $derived(getSolverMachine().identify() === 'twatch');
 
-	function followActive(node: HTMLElement, isActive: boolean) {
-		// This first condition is needed to update the pointer when the view is created
-		if (isActive) {
-			node.scrollIntoView({ behavior: 'smooth', block: 'center' });
-		}
-		// This is where the reactivity happen
-		return {
-			//This is called by svelte when the value that was passed changes (in this case, the is active)
-			update(newIsActive: boolean) {
-				if (newIsActive) {
-					node.scrollIntoView({ behavior: 'smooth', block: 'center' });
-				}
+	function followActive(node: HTMLElement, isActive: () => boolean) {
+		$effect(() => {
+			if (isActive()) {
+				node.scrollIntoView({ behavior: 'smooth', block: 'center' });
 			}
-		};
+		});
 	}
 
 	let clauses: Maybe<Clause>[] = $derived.by(() => {
@@ -143,12 +135,12 @@
 </script>
 
 <division class:invisible={!using2Watch}
-	>Watched clauses <span class:invisible={clauses.length - 1 <= 0}>({clauses.length - 1})</span
+	>Watched clauses <span class:invisible={clauses.length - 1 <= 0}>: {clauses.length - 1}</span
 	></division
 >
 <occurrence-list class:main-list={using2Watch}>
 	{#each clauses as maybeClause, i (i)}
-		<div class="occurrence-list-item" use:followActive={inspectingClause(maybeClause)}>
+		<div class="occurrence-list-item" use:followActive={() => inspectingClause(maybeClause)}>
 			<HeadTailComponent display={inspectingClause(maybeClause)} verticalList={true}>
 				<div class="enumerate" class:inspecting={inspectingClause(maybeClause)}>
 					{#if isJust(maybeClause)}
@@ -177,7 +169,7 @@
 
 <division class:invisible={!using2Watch}
 	>Non watched clauses <span class:invisible={nonWatchedClauses.length === 0}
-		>({nonWatchedClauses.length})</span
+		>: {nonWatchedClauses.length}</span
 	></division
 >
 {#if using2Watch}
