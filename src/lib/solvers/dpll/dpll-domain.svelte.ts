@@ -1,14 +1,13 @@
 import { isUnitEval, isUnsatisfiedEval, type ClauseEval } from '$lib/entities/Clause.svelte.ts';
 import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
 import {
-	type OccurrenceList,
-	type PreprocessingList,
 	type VisitingOccurrenceList
 } from '$lib/entities/OccurrenceList.svelte.ts';
 import type { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
 import {
 	atLevelZero,
 	clauseEvaluation,
+	getNextClause,
 	allAssigned as solverAllAssigned,
 	backtracking as solverBacktracking,
 	complementaryOccurrences as solverComplementaryOccurrences,
@@ -18,13 +17,11 @@ import {
 } from '$lib/solvers/shared.svelte.ts';
 import {
 	getClausePool,
-	getCurrentOccurrences,
 	getOccurrenceListQueue,
 	getOccurrencesTableMapping,
 	getVariablePool,
 	wipeOccurrences
 } from '$lib/states/problem.svelte.ts';
-import { logFatal } from '$lib/states/toasts.svelte.ts';
 import { unwrapEither } from '$lib/types/either.ts';
 import type { CRef, Lit } from '$lib/types/types.ts';
 
@@ -134,14 +131,7 @@ export const traversedOccurrenceList: DPLL_TRAVERSED_OCCURRENCE_LIST_FUN = (
 export type DPLL_NEXT_OCCURRENCE_FUN = () => CRef;
 
 export const nextClause: DPLL_NEXT_OCCURRENCE_FUN = () => {
-	const visitingOccurrences: VisitingOccurrenceList = getCurrentOccurrences();
-	const unwrappedOccurrences: NonNullable<PreprocessingList | OccurrenceList> =
-		unwrapEither(visitingOccurrences);
-	if (unwrappedOccurrences.isEmpty()) {
-		logFatal('The occurrence list is empty');
-	} else {
-		return unwrappedOccurrences.next();
-	}
+	return getNextClause();
 };
 
 export type DPLL_CONFLICT_DETECTION_FUN = (cRef: CRef) => boolean;

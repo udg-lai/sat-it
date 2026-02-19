@@ -85,15 +85,6 @@ class ClausePool implements IClausePool {
 		return p ? [...this.clauses.values()].filter(p) : [...this.clauses.values()];
 	}
 
-	leftToSatisfy(): number {
-		let leftToSatisfy: number = 0;
-		this.clauses.forEach((clause) => {
-			const evaluation: ClauseEval = clause.eval();
-			if (!isSatisfiedEval(evaluation)) leftToSatisfy += 1;
-		});
-		return leftToSatisfy;
-	}
-
 	size(): number {
 		return this.clauses.size;
 	}
