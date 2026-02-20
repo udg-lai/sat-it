@@ -1,8 +1,5 @@
 import { backjumping as backjumpingAlg } from '$lib/algorithms/backjumping.ts';
-import Clause, {
-	isUnitEval,
-	type ClauseEval
-} from '$lib/entities/Clause.svelte.ts';
+import Clause, { isUnitEval, type ClauseEval } from '$lib/entities/Clause.svelte.ts';
 import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
 import { ConflictAnalysis, type VirtualResolution } from '$lib/entities/ConflictAnalysis.svelte.ts';
 import { type VisitingOccurrenceList } from '$lib/entities/OccurrenceList.svelte.ts';
