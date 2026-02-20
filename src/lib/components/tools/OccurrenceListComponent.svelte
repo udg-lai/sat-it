@@ -235,8 +235,8 @@
 	}
 
 	.enumerate {
-		width: var(--assignment-width);
-		height: var(--assignment-width);
+		width: var(--cref-width);
+		height: var(--cref-width);
 		display: flex;
 		justify-content: center;
 		align-items: center;

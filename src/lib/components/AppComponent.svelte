@@ -51,7 +51,7 @@
 	} from '$lib/states/trails.svelte.ts';
 	import type { Algorithm } from '$lib/types/algorithm.ts';
 	import type { List, Lit } from '$lib/types/types.ts';
-	import { modifyLiteralWidth } from '$lib/utils.ts';
+	import { modifyCRefWidth, modifyLiteralWidth } from '$lib/utils.ts';
 	import { onMount } from 'svelte';
 	import DebuggerComponent from './debugger/DebuggerComponent.svelte';
 	import { getConfiguredAlgorithm } from './settings/engine/state.svelte.ts';
@@ -135,6 +135,7 @@
 		// We can not keep the breakpoints when the instance is changed
 		clearBreakpoints();
 		modifyLiteralWidth(instance.summary.varCount);
+		modifyCRefWidth(instance.summary.clauseCount);
 		shareReset(instance);
 	}
 
@@ -163,9 +164,6 @@
 		// Get the decisions that will be kept
 		const decision: Lit = event.decision.toLit();
 		const trailID: number = event.trailID;
-
-		console.log(`decision: ${decision}`);
-		console.log(`trailId: ${trailID}`);
 
 		// This are the decisions that will be reapplied
 		// As solvers are deterministic, reapplying them will lead to the same state.
