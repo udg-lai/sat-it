@@ -164,6 +164,9 @@
 		const decision: Lit = event.decision.toLit();
 		const trailID: number = event.trailID;
 
+		console.log(`decision: ${decision}`);
+		console.log(`trailId: ${trailID}`);
+
 		// This are the decisions that will be reapplied
 		// As solvers are deterministic, reapplying them will lead to the same state.
 		// PSS. It is mandatory to do it before onProblemReset as the the decisions are wiped there.

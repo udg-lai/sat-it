@@ -1,6 +1,5 @@
 import type Clause from '$lib/entities/Clause.svelte.ts';
 import { Trail } from '$lib/entities/Trail.svelte.ts';
-import { newTrailStackedEventBus } from '$lib/events/events.ts';
 import { logFatal, logWarning } from '$lib/states/toasts.svelte.ts';
 
 // This is an invariant, at least one trail must always exist
@@ -23,7 +22,6 @@ export const collapseTrailsContext = (): void => {
 
 export const stackTrail = (trail: Trail): void => {
 	trails = [...trails, trail];
-	newTrailStackedEventBus.emit();
 };
 
 export const shrinkTrails = (n: number): void => {

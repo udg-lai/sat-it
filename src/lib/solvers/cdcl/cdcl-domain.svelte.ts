@@ -6,9 +6,7 @@ import Clause, {
 } from '$lib/entities/Clause.svelte.ts';
 import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
 import { ConflictAnalysis, type VirtualResolution } from '$lib/entities/ConflictAnalysis.svelte.ts';
-import {
-	type VisitingOccurrenceList
-} from '$lib/entities/OccurrenceList.svelte.ts';
+import { type VisitingOccurrenceList } from '$lib/entities/OccurrenceList.svelte.ts';
 import type { Trail } from '$lib/entities/Trail.svelte.ts';
 import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
 import type { VariablePool } from '$lib/entities/VariablePool.svelte.ts';

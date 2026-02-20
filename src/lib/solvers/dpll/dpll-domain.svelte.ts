@@ -1,8 +1,6 @@
 import { isUnitEval, isUnsatisfiedEval, type ClauseEval } from '$lib/entities/Clause.svelte.ts';
 import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
-import {
-	type VisitingOccurrenceList
-} from '$lib/entities/OccurrenceList.svelte.ts';
+import { type VisitingOccurrenceList } from '$lib/entities/OccurrenceList.svelte.ts';
 import type { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
 import {
 	atLevelZero,
