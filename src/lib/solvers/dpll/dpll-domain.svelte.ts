@@ -1,4 +1,4 @@
-import { isUnitEval, isUnsatisfiedEval, type ClauseEval } from '$lib/entities/Clause.svelte.ts';
+import { isUnitEval, type ClauseEval } from '$lib/entities/Clause.svelte.ts';
 import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
 import { type VisitingOccurrenceList } from '$lib/entities/OccurrenceList.svelte.ts';
 import type { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
@@ -6,6 +6,7 @@ import {
 	atLevelZero,
 	clauseEvaluation,
 	getNextClause,
+	isClauseFalsified,
 	allAssigned as solverAllAssigned,
 	backtracking as solverBacktracking,
 	complementaryOccurrences as solverComplementaryOccurrences,
@@ -135,9 +136,7 @@ export const nextClause: DPLL_NEXT_OCCURRENCE_FUN = () => {
 export type DPLL_CONFLICT_DETECTION_FUN = (cRef: CRef) => boolean;
 
 export const unsatisfiedClause: DPLL_CONFLICT_DETECTION_FUN = (cRef: CRef) => {
-	const pool: ClausePool = getClausePool();
-	const evaluation: ClauseEval = clauseEvaluation(pool, cRef);
-	return isUnsatisfiedEval(evaluation);
+	return isClauseFalsified(cRef);
 };
 
 export type DPLL_CHECK_PENDING_OCCURRENCE_LISTS_FUN = () => boolean;

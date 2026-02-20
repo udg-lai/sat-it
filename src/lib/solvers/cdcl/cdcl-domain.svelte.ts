@@ -1,7 +1,6 @@
 import { backjumping as backjumpingAlg } from '$lib/algorithms/backjumping.ts';
 import Clause, {
 	isUnitEval,
-	isUnsatisfiedEval,
 	type ClauseEval
 } from '$lib/entities/Clause.svelte.ts';
 import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
@@ -14,6 +13,7 @@ import {
 	atLevelZero,
 	clauseEvaluation,
 	getNextClause,
+	isClauseFalsified,
 	allAssigned as solverAllAssigned,
 	complementaryOccurrences as solverComplementaryOccurrences,
 	decide as solverDecide,
@@ -169,9 +169,7 @@ export const nextClause: CDCL_NEXT_OCCURRENCE_FUN = () => {
 export type CDCL_CONFLICT_DETECTION_FUN = (cRef: CRef) => boolean;
 
 export const unsatisfiedClause: CDCL_CONFLICT_DETECTION_FUN = (cRef: CRef) => {
-	const pool: ClausePool = getClausePool();
-	const evaluation: ClauseEval = clauseEvaluation(pool, cRef);
-	return isUnsatisfiedEval(evaluation);
+	return isClauseFalsified(cRef);
 };
 
 export type CDCL_CHECK_PENDING_OCCURRENCE_LISTS_FUN = () => boolean;

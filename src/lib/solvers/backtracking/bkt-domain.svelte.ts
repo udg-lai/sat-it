@@ -1,13 +1,13 @@
-import Clause, { isUnsatisfiedEval, type ClauseEval } from '$lib/entities/Clause.svelte.ts';
+import Clause from '$lib/entities/Clause.svelte.ts';
 import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
 import { type VisitingOccurrenceList } from '$lib/entities/OccurrenceList.svelte.ts';
 import type { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
 import {
 	atLevelZero,
 	getNextClause,
+	isClauseFalsified,
 	allAssigned as solverAllAssigned,
 	backtracking as solverBacktracking,
-	clauseEvaluation as solverClauseEvaluation,
 	complementaryOccurrences as solverComplementaryOccurrences,
 	decide as solverDecide
 } from '$lib/solvers/shared.svelte.ts';
@@ -117,9 +117,7 @@ export const nextClause: BKT_NEXT_OCCURRENCE_FUN = () => {
 export type BKT_CONFLICT_DETECTION_FUN = (cRef: CRef) => boolean;
 
 export const unsatisfiedClause: BKT_CONFLICT_DETECTION_FUN = (cRef: CRef) => {
-	const pool: ClausePool = getClausePool();
-	const evaluation: ClauseEval = solverClauseEvaluation(pool, cRef);
-	return isUnsatisfiedEval(evaluation);
+	return isClauseFalsified(cRef);
 };
 
 export type BKT_AT_LEVEL_ZERO_FUN = () => boolean;

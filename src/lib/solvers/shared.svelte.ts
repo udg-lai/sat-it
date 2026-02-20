@@ -1,5 +1,5 @@
 import type Clause from '$lib/entities/Clause.svelte.ts';
-import type { ClauseEval } from '$lib/entities/Clause.svelte.ts';
+import { isUnsatisfiedEval, type ClauseEval } from '$lib/entities/Clause.svelte.ts';
 import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
 import Literal from '$lib/entities/Literal.svelte.ts';
 import type {
@@ -16,7 +16,11 @@ import type { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
 import { decisionMadeEventBus, newTrailStackedEventBus } from '$lib/events/events.ts';
 import { getAssignment, type AssignmentEvent } from '$lib/states/assignment.svelte.ts';
 import { isBreakpoint } from '$lib/states/breakpoints.svelte.ts';
-import { getCurrentOccurrences, getVariablePool } from '$lib/states/problem.svelte.ts';
+import {
+	getClausePool,
+	getCurrentOccurrences,
+	getVariablePool
+} from '$lib/states/problem.svelte.ts';
 import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 import {
 	increaseNoConflicts,
@@ -241,4 +245,10 @@ export const getNextClause: () => CRef = () => {
 	}
 	increaseNoVisitedClauses();
 	return unwrappedOccurrences.next();
+};
+
+export const isClauseFalsified = (cRef: CRef): boolean => {
+	const pool: ClausePool = getClausePool();
+	const evaluation: ClauseEval = clauseEvaluation(pool, cRef);
+	return isUnsatisfiedEval(evaluation);
 };

@@ -84,11 +84,7 @@ export default class WatchTable {
 
 	addWatches(clause: Clause): void {
 		// The invariant is that the watches appears on the very first two literals of the clause
-		if (clause.isTemporal()) {
-			logWarning('Add watches', 'Skipping temporal clause when adding watches');
-		} else if (clause.size() < 2) {
-			logWarning('Add watches', 'Skipping unit or empty clause when adding watches');
-		} else {
+		if (!clause.isTemporal() && clause.size() >= 2) {
 			const literals: Literal[] = clause.getLiterals();
 			const cRef = clause.getCRef();
 			// Watch the first two literals in the clause

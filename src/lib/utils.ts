@@ -18,11 +18,13 @@ export const modifyLiteralWidth = (varCount: number): void => {
 
 export const modifyCRefWidth = (clauseCount: number): void => {
 	const basePixels: number = 25;
-	const valueToAdd: number = 5;
-	const clauseCountLength: number = String(clauseCount).slice().length
-	document.documentElement.style.setProperty('--cref-width', (basePixels + valueToAdd * clauseCountLength).toString() + 'px');
+	const extraPixels: number = 5;
+	const clauseCountLength: number = String(clauseCount).slice().length;
+	document.documentElement.style.setProperty(
+		'--cref-width',
+		(basePixels + extraPixels * clauseCountLength).toString() + 'px'
+	);
 };
-
 
 // Check to see if Chrome or Chromium is the current user's browser.
 export const testNavigatorAgent = (): boolean => {
