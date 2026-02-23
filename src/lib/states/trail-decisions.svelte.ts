@@ -34,7 +34,6 @@ export function saveDecision(decision: Lit): void {
 		logError('Decision store', 'Missing last decisions list');
 	}
 	trailDecisions[trailDecisions.length - 1].decisions.push({ decision });
-	console.log(trailDecisions);
 }
 
 export function allocDecisionsTrail(): void {
@@ -44,7 +43,6 @@ export function allocDecisionsTrail(): void {
 export function retrieveEarlierDecisions(trailID: number, decision: Lit): List<SavedDecision> {
 	// This function retrieves the earlier decisions up to the given trailID,
 	// including the decisions made at trailID up to (but not including) the given decision.
-	console.log(trailDecisions);
 
 	if (trailID < 0 || trailID >= trailDecisions.length) {
 		logFatal(

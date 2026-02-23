@@ -231,7 +231,7 @@
 		flex-direction: row;
 		align-items: center;
 		gap: 0.5rem;
-		padding: 0.2rem 0.4rem;
+		padding: 0rem 0.4rem;
 	}
 
 	.enumerate {
