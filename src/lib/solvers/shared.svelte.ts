@@ -1,7 +1,12 @@
 import type Clause from '$lib/entities/Clause.svelte.ts';
-import type { ClauseEval } from '$lib/entities/Clause.svelte.ts';
+import { isUnsatisfiedEval, type ClauseEval } from '$lib/entities/Clause.svelte.ts';
 import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
 import Literal from '$lib/entities/Literal.svelte.ts';
+import type {
+	OccurrenceList,
+	PreprocessingList,
+	VisitingOccurrenceList
+} from '$lib/entities/OccurrenceList.svelte.ts';
 import type { EWC } from '$lib/entities/Problem.svelte.ts';
 import { Trail } from '$lib/entities/Trail.svelte.ts';
 import type Variable from '$lib/entities/Variable.svelte.ts';
@@ -11,16 +16,20 @@ import type { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
 import { decisionMadeEventBus, newTrailStackedEventBus } from '$lib/events/events.ts';
 import { getAssignment, type AssignmentEvent } from '$lib/states/assignment.svelte.ts';
 import { isBreakpoint } from '$lib/states/breakpoints.svelte.ts';
-import { getVariablePool } from '$lib/states/problem.svelte.ts';
+import {
+	getClausePool,
+	getCurrentOccurrences,
+	getVariablePool
+} from '$lib/states/problem.svelte.ts';
 import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 import {
 	increaseNoConflicts,
 	increaseNoUnitPropagations,
-	updateClausesLeft
+	increaseNoVisitedClauses
 } from '$lib/states/statistics.svelte.ts';
 import { logBreakpoint, logFatal } from '$lib/states/toasts.svelte.ts';
-import { getLatestTrail, getTrails, stackTrail } from '$lib/states/trails.svelte.ts';
-import { fromLeft, fromRight, isLeft } from '$lib/types/either.ts';
+import { getLatestTrail, stackTrail } from '$lib/states/trails.svelte.ts';
+import { fromLeft, fromRight, isLeft, unwrapEither } from '$lib/types/either.ts';
 import type { CRef, Lit, Var } from '$lib/types/types.ts';
 import { fromJust, isJust, type Maybe } from '../types/maybe.ts';
 
@@ -128,7 +137,6 @@ export const atLevelZero = (): boolean => {
 const doAssignment = (varId: Var, assignment: Assignment): void => {
 	// Notice that assignment \in { true, false, undefined }
 	getVariablePool().assign(varId, assignment);
-	updateClausesLeft(getTrails().length);
 	if (assignment !== undefined) {
 		// i.e., assignment is either true or false
 		// Here assignment is inverted as when creating the literal the second parameter indicates if it has hat or not
@@ -226,4 +234,21 @@ export const finalStateControl = (): void => {
 
 export const obtainCRefFromEWC = (watch: EWC): CRef => {
 	return isLeft(watch) ? fromLeft(watch).cRef : fromRight(watch);
+};
+
+export const getNextClause: () => CRef = () => {
+	const visitingOccurrences: VisitingOccurrenceList = getCurrentOccurrences();
+	const unwrappedOccurrences: NonNullable<PreprocessingList | OccurrenceList> =
+		unwrapEither(visitingOccurrences);
+	if (unwrappedOccurrences.isEmpty()) {
+		logFatal('The occurrence list is empty');
+	}
+	increaseNoVisitedClauses();
+	return unwrappedOccurrences.next();
+};
+
+export const isClauseFalsified = (cRef: CRef): boolean => {
+	const pool: ClausePool = getClausePool();
+	const evaluation: ClauseEval = clauseEvaluation(pool, cRef);
+	return isUnsatisfiedEval(evaluation);
 };

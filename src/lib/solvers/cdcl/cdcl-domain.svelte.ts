@@ -1,22 +1,16 @@
 import { backjumping as backjumpingAlg } from '$lib/algorithms/backjumping.ts';
-import Clause, {
-	isUnitEval,
-	isUnsatisfiedEval,
-	type ClauseEval
-} from '$lib/entities/Clause.svelte.ts';
+import Clause, { isUnitEval, type ClauseEval } from '$lib/entities/Clause.svelte.ts';
 import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
 import { ConflictAnalysis, type VirtualResolution } from '$lib/entities/ConflictAnalysis.svelte.ts';
-import {
-	type OccurrenceList,
-	type PreprocessingList,
-	type VisitingOccurrenceList
-} from '$lib/entities/OccurrenceList.svelte.ts';
+import { type VisitingOccurrenceList } from '$lib/entities/OccurrenceList.svelte.ts';
 import type { Trail } from '$lib/entities/Trail.svelte.ts';
 import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
 import type { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
 import {
 	atLevelZero,
 	clauseEvaluation,
+	getNextClause,
+	isClauseFalsified,
 	allAssigned as solverAllAssigned,
 	complementaryOccurrences as solverComplementaryOccurrences,
 	decide as solverDecide,
@@ -26,7 +20,6 @@ import {
 import { getConflictAnalysis, setConflictAnalysis } from '$lib/states/conflict-anlysis.svelte.ts';
 import {
 	getClausePool,
-	getCurrentOccurrences,
 	getOccurrenceListQueue,
 	getOccurrencesTableMapping,
 	getProblemStore,
@@ -167,22 +160,13 @@ export const traversedOccurrenceList: CDCL_TRAVERSED_OCCURRENCE_LIST_FUN = (
 export type CDCL_NEXT_OCCURRENCE_FUN = () => CRef;
 
 export const nextClause: CDCL_NEXT_OCCURRENCE_FUN = () => {
-	const visitingOccurrences: VisitingOccurrenceList = getCurrentOccurrences();
-	const unwrappedOccurrences: NonNullable<PreprocessingList | OccurrenceList> =
-		unwrapEither(visitingOccurrences);
-	if (unwrappedOccurrences.isEmpty()) {
-		logFatal('The occurrence list is empty');
-	} else {
-		return unwrappedOccurrences.next();
-	}
+	return getNextClause();
 };
 
 export type CDCL_CONFLICT_DETECTION_FUN = (cRef: CRef) => boolean;
 
 export const unsatisfiedClause: CDCL_CONFLICT_DETECTION_FUN = (cRef: CRef) => {
-	const pool: ClausePool = getClausePool();
-	const evaluation: ClauseEval = clauseEvaluation(pool, cRef);
-	return isUnsatisfiedEval(evaluation);
+	return isClauseFalsified(cRef);
 };
 
 export type CDCL_CHECK_PENDING_OCCURRENCE_LISTS_FUN = () => boolean;

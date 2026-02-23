@@ -16,6 +16,16 @@ export const modifyLiteralWidth = (varCount: number): void => {
 	document.documentElement.style.setProperty('--assignment-width', widthKind);
 };
 
+export const modifyCRefWidth = (clauseCount: number): void => {
+	const basePixels: number = 25;
+	const extraPixels: number = 5;
+	const clauseCountLength: number = String(clauseCount).slice().length;
+	document.documentElement.style.setProperty(
+		'--cref-width',
+		(basePixels + extraPixels * clauseCountLength).toString() + 'px'
+	);
+};
+
 // Check to see if Chrome or Chromium is the current user's browser.
 export const testNavigatorAgent = (): boolean => {
 	return /chrom(e|ium)/.test(navigator.userAgent.toLowerCase());

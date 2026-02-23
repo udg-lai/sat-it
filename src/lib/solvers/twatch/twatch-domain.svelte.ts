@@ -31,6 +31,7 @@ import {
 	getWatchTableMapping,
 	wipeOccurrences
 } from '$lib/states/problem.svelte.ts';
+import { increaseNoVisitedClauses } from '$lib/states/statistics.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
 import { getLatestTrail, stackTrail } from '$lib/states/trails.svelte.ts';
 import {
@@ -233,6 +234,7 @@ export const nextClause: TWATCH_NEXT_OCCURRENCE_FUN = () => {
 	if (unwrapEither(visitingWatches).isEmpty()) {
 		logFatal('The watch list is empty');
 	}
+	increaseNoVisitedClauses();
 	return isRight(visitingWatches)
 		? makeLeft(fromRight(visitingWatches).next())
 		: makeRight(fromLeft(visitingWatches).next());

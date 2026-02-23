@@ -14,6 +14,7 @@ import type { Watch } from '$lib/entities/WatchTable.svelte.ts';
 import {
 	conflictAnalysisFinishedEventBus,
 	conflictDetectedEventBus,
+	newTrailStackedEventBus,
 	visitingComplementaryOccEventBus
 } from '$lib/events/events.ts';
 import { getConflictAnalysis } from '$lib/states/conflict-anlysis.svelte.ts';
@@ -160,6 +161,9 @@ export const conflictAnalysisBlock = (): void => {
 
 		// Push the new trail after backjumping and notify
 		pushTrailTransition(trailAfterBJ);
+
+		// Now, we have no notify that a new trail was pushed
+		newTrailStackedEventBus.emit();
 
 		const propagated: Lit = unitPropagationTransition(cRef, 'backjumping');
 		queuesUpdateBlock(propagated);
