@@ -66,7 +66,7 @@
 	--context-max-height: calc(6 * var(--assignment-width));
 	--non-inspecting-opacity: 0.4;
 	--cref-width: 30px /*This variable is adapted to each instance in utils.ts modifyCRef function*/;
-	--clause-height: 40px
+	--clause-height: 40px;
 }
 
 html,

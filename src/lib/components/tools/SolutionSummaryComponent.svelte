@@ -13,7 +13,9 @@
 	} from '$lib/types/either.ts';
 	import VirtualList from 'svelte-tiny-virtual-list';
 
-	const rootStyle: string = window.getComputedStyle(document.documentElement).getPropertyValue('--clause-height');
+	const rootStyle: string = window
+		.getComputedStyle(document.documentElement)
+		.getPropertyValue('--clause-height');
 
 	const itemHeight: number = parseFloat(rootStyle.trim());
 
