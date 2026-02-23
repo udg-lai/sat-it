@@ -236,7 +236,7 @@
 
 	.enumerate {
 		width: var(--cref-width);
-		height: var(--cref-width);
+		height: var(--clause-height);
 		display: flex;
 		justify-content: center;
 		align-items: center;
