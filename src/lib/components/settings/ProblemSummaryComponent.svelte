@@ -11,9 +11,15 @@
 		itemHeight?: number;
 	}
 
-	let { instance, itemHeight = 50 }: Props = $props();
+	let { instance }: Props = $props();
 
 	let virtualHeight: number = $state(0);
+
+	const rootStyle: string = window
+		.getComputedStyle(document.documentElement)
+		.getPropertyValue('--clause-height');
+
+	const itemHeight: number = parseFloat(rootStyle.trim());
 
 	let claims: Claim[] = $derived(instance.summary.claims);
 	let varCount: number = $derived(instance.summary.varCount);
@@ -52,34 +58,33 @@
 			itemSize={itemHeight}
 		>
 			<div slot="item" class="item-list" let:index let:style {style}>
-				{#if isRight(summary[index])}
-					{@render renderComment(unwrapEither(summary[index]))}
-				{:else}
-					{@render renderLiterals(unwrapEither(summary[index]))}
-				{/if}
+				<div class="item-wrapper">
+					{#if isRight(summary[index])}
+						{@render renderComment(unwrapEither(summary[index]))}
+					{:else}
+						{@render renderLiterals(unwrapEither(summary[index]))}
+					{/if}
+				</div>
+				<hr />
 			</div>
 		</VirtualList>
 	</div>
 
 	<div class="dimacs-footer">
 		<div class="footer-statistics">
-			<p>Variables: <span class="ocurrences">{varCount}</span></p>
-			<p>Clauses: <span class="ocurrences">{clauseCount}</span></p>
+			<p>Variables: <span class="occurrences">{varCount}</span></p>
+			<p>Clauses: <span class="occurrences">{clauseCount}</span></p>
 		</div>
 	</div>
 </problem-summary>
 
 {#snippet renderLiterals(literals: Tuple<number, number[]>)}
-	<div class="item-wrapper">
-		<p class="enumerate">{literals.fst}.</p>
-		<LiteralsComponent literals={literals.snd} />
-	</div>
+			<p class="enumerate">{literals.fst}.</p>
+			<LiteralsComponent literals={literals.snd} />
 {/snippet}
 
 {#snippet renderComment(comment: string)}
-	<div class="item-wrapper">
 		<p class="comment">{comment}</p>
-	</div>
 {/snippet}
 
 <style>
@@ -127,7 +132,7 @@
 	.item-wrapper {
 		display: flex;
 		flex: 1;
-		align-items: end;
+		align-items: center;
 		height: 100%;
 	}
 
@@ -158,9 +163,10 @@
 		display: none;
 	}
 
-	.ocurrences {
-		width: 2rem;
+	.occurrences {
+		padding-left: 0.5rem;
 		display: inline-block;
 		text-align: right;
 	}
+
 </style>
