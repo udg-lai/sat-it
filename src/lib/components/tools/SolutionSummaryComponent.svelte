@@ -79,6 +79,7 @@
 			{:else}
 				{@render renderClause(unwrapEither(summary[index]))}
 			{/if}
+			<hr/>
 		</div>
 	</VirtualList>
 </solution-summary>

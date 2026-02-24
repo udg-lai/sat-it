@@ -134,10 +134,8 @@
 	}
 </script>
 
-<division class:invisible={!using2Watch}
-	>Watched clauses <span class:invisible={clauses.length - 1 <= 0}>: {clauses.length - 1}</span
-	></division
->
+<division>Watched clauses: <span>{clauses.length - 1}</span></division>
+
 <occurrence-list class:main-list={using2Watch}>
 	{#each clauses as maybeClause, i (i)}
 		<div class="occurrence-list-item" use:followActive={() => inspectingClause(maybeClause)}>
@@ -164,14 +162,15 @@
 				</div>
 			{/if}
 		</div>
+
+		{#if i > 0}
+			<hr/>
+		{/if}
 	{/each}
 </occurrence-list>
 
-<division class:invisible={!using2Watch}
-	>Non watched clauses <span class:invisible={nonWatchedClauses.length === 0}
-		>: {nonWatchedClauses.length}</span
-	></division
->
+<division>Non watched clauses: <span>{nonWatchedClauses.length}</span> </division>
+
 {#if using2Watch}
 	<occurrence-list class="secondary-list">
 		{#each nonWatchedClauses as skippedClause, i (i)}
@@ -189,6 +188,7 @@
 					<ClauseComponent clause={skippedClause} />
 				</div>
 			</div>
+			<hr/>
 		{/each}
 	</occurrence-list>
 {/if}
@@ -249,10 +249,23 @@
 	}
 
 	division {
-		text-align: center;
-		font-size: 12px;
+		text-align: left;
+		padding: 0.5rem 0rem;
+		padding-left: 0.75rem;
 		border-top: 1px solid var(--border-color);
 		border-bottom: 1px solid var(--border-color);
-		padding: 2px;
 	}
+
+	division span {
+		padding-left: 0.5rem;
+	}
+
+	.main-list .occurrence-list-item:first-child {
+		height: 0.5rem;
+	}
+
+	.main-list {
+		padding-top: 0.5rem;
+	}
+
 </style>

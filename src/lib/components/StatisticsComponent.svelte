@@ -53,13 +53,16 @@
 
 	.metric {
 		display: flex;
-		justify-content: space-around;
 		align-items: center;
 		padding: 1px 5px;
 		flex: 1;
 		min-width: 5rem;
 		max-width: 12rem;
 		border: none;
+	}
+
+	.metric span {
+		padding-left: 0.5rem;
 	}
 
 	.statistic-value {
