@@ -395,7 +395,7 @@ export const complementaryWatchedOccurrences: TWATCH_COMPLEMENTARY_WATCHED_OCCUR
 	(assignment) => {
 		const complementary: Lit = Literal.complementary(assignment);
 		// For the moment this will be done like this... I don't know if a special "occurrence List for watches should be created"
-		const watches: Watch[] = getWatchTableMapping().retrieveWatchesFromLiteral(complementary);
+		const watches: Watch[] = getWatchTableMapping().getWatchList(complementary);
 		return new Set<Watch>(watches);
 	};
 

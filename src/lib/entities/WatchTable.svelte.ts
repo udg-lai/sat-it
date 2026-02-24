@@ -61,13 +61,9 @@ export default class WatchTable {
 		this.table.get(lit)?.push(watch);
 	}
 
-	retrieveWatchesFromLiteral(lit: Lit): Watch[] {
+	getWatchList(lit: Lit): Watch[] {
 		const watches: Watch[] | undefined = this.table.get(lit);
-		if (!watches) {
-			return [];
-		} else {
-			return watches;
-		}
+		return watches ?? [];
 	}
 
 	private makeWatchTable(clauses: Clause[]): void {
