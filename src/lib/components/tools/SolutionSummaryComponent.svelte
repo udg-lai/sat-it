@@ -13,11 +13,11 @@
 	} from '$lib/types/either.ts';
 	import VirtualList from 'svelte-tiny-virtual-list';
 
-	interface Props {
-		itemHeight?: number;
-	}
+	const rootStyle: string = window
+		.getComputedStyle(document.documentElement)
+		.getPropertyValue('--clause-height');
 
-	let { itemHeight = 50 }: Props = $props();
+	const itemHeight: number = parseFloat(rootStyle.trim());
 
 	let virtualHeight: number = $state(0);
 
