@@ -1,31 +1,31 @@
-import type { VisitingOccurrenceList } from '$lib/entities/OccurrenceList.svelte.ts';
+import type { VisitingWatchList } from '$lib/entities/OccurrenceList.svelte.ts';
 import { Queue } from '$lib/entities/Queue.svelte.ts';
 import { type SolverCommand } from '$lib/events/events.ts';
 import { getConflictAnalysis } from '$lib/states/conflict-anlysis.svelte.ts';
 import { getConfDelayMS } from '$lib/states/parameters.svelte.ts';
-import { getCurrentOccurrences, getOccurrenceListQueue } from '$lib/states/problem.svelte.ts';
+import { getWatchesQueue } from '$lib/states/problem.svelte.ts';
 import { getNoUnitPropagations } from '$lib/states/statistics.svelte.ts';
 import { unwrapEither } from '$lib/types/either.ts';
 import { SolverMachine } from '../SolverMachine.svelte.ts';
-import type { CDCL_FUN, CDCL_INPUT } from './cdcl-domain.svelte.ts';
+import type { TWATCH_FUN, TWATCH_INPUT } from './twatch-domain.svelte.ts';
 import {
 	conflictAnalysisBlock,
 	conflictDetectionBlock,
 	decide,
 	initialTransition,
 	preConflictAnalysis
-} from './cdcl-solver-transitions.svelte.ts';
-import { CDCL_StateMachine, makeCDCLStateMachine } from './cdcl-state-machine.svelte.ts';
-import { cdcl_stateName2StateId } from './cdcl-states.svelte.ts';
+} from './twatch-solver-transitions.svelte.ts';
+import { TWATCH_StateMachine, makeTWATCHStateMachine } from './twatch-state-machine.svelte.ts';
+import { twatch_stateName2StateId } from './twatch-states.svelte.ts';
 
-export const makeCDCLSolver = (): CDCL_SolverMachine => {
-	return new CDCL_SolverMachine(getConfDelayMS());
+export const makeTWATCHSolver = (): TWATCH_SolverMachine => {
+	return new TWATCH_SolverMachine(getConfDelayMS());
 };
 
-export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
+export class TWATCH_SolverMachine extends SolverMachine<TWATCH_FUN, TWATCH_INPUT> {
 	constructor(stopTimeMS: number) {
-		const stateMachine: CDCL_StateMachine = makeCDCLStateMachine();
-		super(stateMachine, 'cdcl', stopTimeMS);
+		const stateMachine: TWATCH_StateMachine = makeTWATCHStateMachine();
+		super(stateMachine, 'twatch', stopTimeMS);
 	}
 	// ** functions related to conflict analysis **
 
@@ -42,23 +42,23 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 	step(): void {
 		const activeId: number = this.stateMachine.getActiveId();
 		//The initial state
-		if (activeId === cdcl_stateName2StateId.unary_empty_clause_detection_state) {
+		if (activeId === twatch_stateName2StateId.unary_empty_clause_detection_state) {
 			initialTransition();
 		}
 		//Waiting to enter or not the clause analysis
-		else if (activeId === cdcl_stateName2StateId.traversed_occurrences_state) {
+		else if (activeId === twatch_stateName2StateId.traversed_current_occurrences_state) {
 			conflictDetectionBlock();
 		}
 		//Waiting to decide a variables
-		else if (activeId === cdcl_stateName2StateId.decide_state) {
+		else if (activeId === twatch_stateName2StateId.decide_state) {
 			decide();
 		}
 		// Waiting to begin the conflict analysis process once a conflict has been found
-		else if (activeId === cdcl_stateName2StateId.wipe_occurrences_queue_state) {
+		else if (activeId === twatch_stateName2StateId.wipe_occurrences_queue_state) {
 			preConflictAnalysis();
 		}
 		// Waiting to analyze a conflict
-		else if (activeId === cdcl_stateName2StateId.virtual_resolution_state) {
+		else if (activeId === twatch_stateName2StateId.virtual_resolution_state) {
 			conflictAnalysisBlock();
 		}
 	}
@@ -69,7 +69,7 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 		//	2. If the occurrence list has been analyzed, then we should upload the following occurrence list form the queue or go to the decision state.
 
 		// Get the current occurrence list
-		const occurrences: VisitingOccurrenceList = getCurrentOccurrences();
+		const occurrences: VisitingWatchList = getWatchesQueue().element();
 
 		// Either traverse it or find a conflict.
 		const unwrappedOccurrences = unwrapEither(occurrences);
@@ -100,7 +100,7 @@ export class CDCL_SolverMachine extends SolverMachine<CDCL_FUN, CDCL_INPUT> {
 	}
 
 	onDetectingConflict(): boolean {
-		const queueOccurrences: Queue<VisitingOccurrenceList> = getOccurrenceListQueue();
+		const queueOccurrences: Queue<VisitingWatchList> = getWatchesQueue();
 		return !queueOccurrences.isEmpty() && !this.stateMachine.onConflictState();
 	}
 }

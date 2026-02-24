@@ -29,10 +29,10 @@
 	});
 
 	let chrome: boolean = $derived(onChrome());
-	let isOpen: boolean = $state(false);
+	let openOptions: boolean = $state(false);
 
 	const emitRevert = (): void => {
-		isOpen = !isOpen;
+		openOptions = !openOptions;
 		emitRevertUpToX?.();
 	};
 </script>
@@ -43,18 +43,21 @@
 			class="literal-style decision level-expanded childless {chrome ? 'pad-chrome' : 'pad-others'}"
 			class:previous-assignment={fromPreviousTrail}
 			onclick={() => {
-				isOpen = !isOpen;
+				openOptions = !openOptions;
 			}}
 		>
 			<MathTexComponent equation={assignment.toTeX()} />
 		</button>
-		{#if !fromPreviousTrail}
-			<Dropdown open={isOpen} placement="bottom" class="dropdownClass">
-				<DropdownItem onclick={emitRevert}>Revert up to here</DropdownItem>
-			</Dropdown>
-		{/if}
 	</childless-decision>
 </HeadTailComponent>
+
+{#if !fromPreviousTrail}
+	<Dropdown open={openOptions} class="dropdownClass">
+		<DropdownItem onclick={emitRevert}>
+			<button> Revert up to here </button>
+		</DropdownItem>
+	</Dropdown>
+{/if}
 
 <style>
 	.decision {
@@ -72,9 +75,5 @@
 
 	.previous-assignment {
 		color: color-mix(in srgb, var(--decision-color) 60%, transparent);
-	}
-
-	:global(.dropdownClass) {
-		overflow: visible;
 	}
 </style>

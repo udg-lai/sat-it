@@ -61,7 +61,7 @@ export const dpll_stateName2StateId = {
 	backtracking_state: BACKTRACKING_STATE_ID,
 	decide_state: DECIDE_STATE_ID,
 	unary_empty_clauses_detection_state: 0,
-	queue_occurrence_list_state: 1,
+	queue_occurrences_state: 1,
 	are_remaining_occurrences_state: 2,
 	all_variables_assigned_state: 3,
 	dequeue_occurrence_list_state: 4,
@@ -71,7 +71,7 @@ export const dpll_stateName2StateId = {
 	falsified_clause_state: 8,
 	unit_clause_state: 9,
 	unit_propagation_state: 10,
-	complementary_occurrences_state: 11,
+	complementary_occurrences_retrieve_state: 11,
 	at_level_zero_state: 12,
 	wipe_occurrence_queue_state: 13
 };
@@ -95,8 +95,8 @@ const unary_empty_clauses_detection_state: NonFinalState<
 	run: unitEmptyClauseDetection,
 	description: 'Seeks for the problem s unit clauses',
 	transitions: new Map<DPLL_UNARY_EMPTY_CLAUSES_DETECTION_INPUT, number>().set(
-		'queue_occurrence_list_state',
-		dpll_stateName2StateId['queue_occurrence_list_state']
+		'queue_occurrences_state',
+		dpll_stateName2StateId['queue_occurrences_state']
 	)
 };
 
@@ -105,8 +105,8 @@ const decide_state: NonFinalState<DPLL_DECIDE_FUN, DPLL_DECIDE_INPUT> = {
 	description: 'Executes a decide step',
 	run: decide,
 	transitions: new Map<DPLL_DECIDE_INPUT, number>().set(
-		'complementary_occurrences_state',
-		dpll_stateName2StateId['complementary_occurrences_state']
+		'complementary_occurrences_retrieve_state',
+		dpll_stateName2StateId['complementary_occurrences_retrieve_state']
 	)
 };
 
@@ -185,8 +185,8 @@ const unit_propagation_state: NonFinalState<
 	run: unitPropagation,
 	description: 'Propagates the unassigned literal of a clause',
 	transitions: new Map<DPLL_UNIT_PROPAGATION_INPUT, number>().set(
-		'complementary_occurrences_state',
-		dpll_stateName2StateId['complementary_occurrences_state']
+		'complementary_occurrences_retrieve_state',
+		dpll_stateName2StateId['complementary_occurrences_retrieve_state']
 	)
 };
 
@@ -194,12 +194,12 @@ const complementary_occurrences_state: NonFinalState<
 	DPLL_COMPLEMENTARY_OCCURRENCES_FUN,
 	DPLL_COMPLEMENTARY_OCCURRENCES_INPUT
 > = {
-	id: dpll_stateName2StateId['complementary_occurrences_state'],
+	id: dpll_stateName2StateId['complementary_occurrences_retrieve_state'],
 	run: complementaryOccurrences,
 	description: 'Get the clauses where the complementary of the last assigned literal appear',
 	transitions: new Map<DPLL_COMPLEMENTARY_OCCURRENCES_INPUT, number>().set(
-		'queue_occurrence_list_state',
-		dpll_stateName2StateId['queue_occurrence_list_state']
+		'queue_occurrences_state',
+		dpll_stateName2StateId['queue_occurrences_state']
 	)
 };
 
@@ -207,7 +207,7 @@ const queue_occurrence_list_state: NonFinalState<
 	DPLL_QUEUE_OCCURRENCE_LIST_FUN,
 	DPLL_QUEUE_OCCURRENCE_LIST_INPUT
 > = {
-	id: dpll_stateName2StateId['queue_occurrence_list_state'],
+	id: dpll_stateName2StateId['queue_occurrences_state'],
 	run: queueOccurrenceList,
 	description: 'Stack a set of clause as pending',
 	transitions: new Map<DPLL_QUEUE_OCCURRENCE_LIST_INPUT, number>()
@@ -245,8 +245,8 @@ const backtracking_state: NonFinalState<DPLL_BACKTRACKING_FUN, DPLL_BACKTRACKING
 	run: backtracking,
 	description: `Executes a backtracking step`,
 	transitions: new Map<DPLL_BACKTRACKING_INPUT, number>().set(
-		'complementary_occurrences_state',
-		dpll_stateName2StateId['complementary_occurrences_state']
+		'complementary_occurrences_retrieve_state',
+		dpll_stateName2StateId['complementary_occurrences_retrieve_state']
 	)
 };
 

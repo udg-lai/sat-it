@@ -85,15 +85,6 @@ class ClausePool implements IClausePool {
 		return p ? [...this.clauses.values()].filter(p) : [...this.clauses.values()];
 	}
 
-	leftToSatisfy(): number {
-		let leftToSatisfy: number = 0;
-		this.clauses.forEach((clause) => {
-			const evaluation: ClauseEval = clause.eval();
-			if (!isSatisfiedEval(evaluation)) leftToSatisfy += 1;
-		});
-		return leftToSatisfy;
-	}
-
 	size(): number {
 		return this.clauses.size;
 	}
@@ -109,16 +100,10 @@ class ClausePool implements IClausePool {
 		return learned;
 	}
 
-	pruneLearnedClauses(): Clause[] {
+	wipeLearnedClauses(): void {
 		// This functions removes all learned clauses from the pool
 		// and returns the removed clauses
-		const removedClauses: Clause[] = [];
-		for (const tag of this.learnedClauses) {
-			removedClauses.push(this.clauses.get(tag) as Clause);
-			this.clauses.delete(tag);
-		}
 		this.learnedClauses.clear();
-		return removedClauses;
 	}
 
 	private _addClause(clause: Clause): CRef {

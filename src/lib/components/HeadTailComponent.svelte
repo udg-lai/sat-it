@@ -78,6 +78,6 @@
 	}
 
 	.vertical-display::after {
-		bottom: 12px;
+		bottom: calc(50% - 2px);
 	}
 </style>

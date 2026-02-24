@@ -51,7 +51,7 @@ export const bkt_stateName2StateId = {
 	empty_clause_state: 0,
 	all_variables_assigned_state: 1,
 	complementary_occurrences_state: 2,
-	queue_occurrence_list_state: 3,
+	queue_occurrences_state: 3,
 	traversed_occurrences_state: 4,
 	next_clause_state: 5,
 	falsified_clause_state: 6,
@@ -79,8 +79,8 @@ const empty_clause_state: NonFinalState<
 	run: emptyClausesDetection,
 	description: 'Seeks for the empty clause in the clause pool',
 	transitions: new Map<BKT_EMPTY_CLAUSES_DETECTION_INPUT, number>().set(
-		'queue_occurrence_list_state',
-		bkt_stateName2StateId['queue_occurrence_list_state']
+		'queue_occurrences_state',
+		bkt_stateName2StateId['queue_occurrences_state']
 	)
 };
 
@@ -101,7 +101,7 @@ const decide_state: NonFinalState<BKT_DECIDE_FUN, BKT_DECIDE_INPUT> = {
 	description: 'Executes a decide step',
 	run: decide,
 	transitions: new Map<BKT_DECIDE_INPUT, number>().set(
-		'complementary_occurrences_state',
+		'complementary_occurrences_retrieve_state',
 		bkt_stateName2StateId['complementary_occurrences_state']
 	)
 };
@@ -114,8 +114,8 @@ const complementary_occurrences_state: NonFinalState<
 	run: complementaryOccurrences,
 	description: 'Get the clauses where the complementary of the last assigned literal appear',
 	transitions: new Map<BKT_COMPLEMENTARY_OCCURRENCES_INPUT, number>().set(
-		'queue_occurrence_list_state',
-		bkt_stateName2StateId['queue_occurrence_list_state']
+		'queue_occurrences_state',
+		bkt_stateName2StateId['queue_occurrences_state']
 	)
 };
 
@@ -123,7 +123,7 @@ const queue_occurrence_list_state: NonFinalState<
 	BKT_QUEUE_OCCURRENCE_LIST_FUN,
 	BKT_QUEUE_OCCURRENCE_LIST_INPUT
 > = {
-	id: bkt_stateName2StateId['queue_occurrence_list_state'],
+	id: bkt_stateName2StateId['queue_occurrences_state'],
 	run: queueOccurrenceList,
 	description: 'Stack an occurrence list as pending',
 	transitions: new Map<BKT_QUEUE_OCCURRENCE_LIST_INPUT, number>().set(
@@ -193,7 +193,7 @@ const backtracking_state: NonFinalState<BKT_BACKTRACKING_FUN, BKT_BACKTRACKING_I
 	run: backtracking,
 	description: `Executes a backtracking step`,
 	transitions: new Map<BKT_BACKTRACKING_INPUT, number>().set(
-		'complementary_occurrences_state',
+		'complementary_occurrences_retrieve_state',
 		bkt_stateName2StateId['complementary_occurrences_state']
 	)
 };

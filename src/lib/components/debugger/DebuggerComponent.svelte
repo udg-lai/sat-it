@@ -50,7 +50,7 @@
 				{#if currentAlgorithm !== 'backtracking'}
 					<UnitPropagationDebuggerComponent />
 				{/if}
-			{:else if onConflict && currentAlgorithm === 'cdcl'}
+			{:else if onConflict && currentAlgorithm !== 'dpll' && currentAlgorithm !== 'backtracking'}
 				<ConflictAnalysisDebugger />
 			{:else if !finished}
 				<DecisionDebugger

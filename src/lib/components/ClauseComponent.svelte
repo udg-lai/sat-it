@@ -1,5 +1,7 @@
 <script lang="ts">
 	import Clause from '$lib/entities/Clause.svelte.ts';
+	import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
+	import { Lit } from '$lib/types/types.ts';
 	import LiteralComponent from './LiteralComponent.svelte';
 	import MathTexComponent from './MathTexComponent.svelte';
 
@@ -9,6 +11,15 @@
 	}
 
 	let { clause, classStyle }: Props = $props();
+
+	const watchedLiterals: Set<Lit> = $derived.by(() => {
+		if (getSolverMachine().identify() === 'twatch' && clause.size() >= 2) {
+			const sortedLiterals = clause.getLiterals();
+			return new Set<Lit>([sortedLiterals[0].toInt(), sortedLiterals[1].toInt()]);
+		} else {
+			return new Set<Lit>();
+		}
+	});
 </script>
 
 <clause class={classStyle ?? ''}>
@@ -16,7 +27,7 @@
 		<empty-clause> </empty-clause>
 	{:else}
 		{#each clause as lit, i (i)}
-			<LiteralComponent literal={lit} />
+			<LiteralComponent literal={lit} watched={watchedLiterals.has(lit.toInt())} />
 			{#if i < clause.size() - 1}
 				<MathTexComponent equation={'\\lor'} fontSize={'1rem'} />
 			{/if}

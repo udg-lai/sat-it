@@ -1,1 +1,1 @@
-export type Algorithm = 'backtracking' | 'dpll' | 'cdcl';
+export type Algorithm = 'backtracking' | 'dpll' | 'cdcl' | 'twatch';

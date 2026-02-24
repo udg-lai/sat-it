@@ -66,7 +66,8 @@ type ClauseOptions = {
 };
 
 export default class Clause implements Comparable<Clause> {
-	private literals: Literal[] = [];
+	private literals: Literal[] = $state([]);
+	private sortedLiterals: Literal[] = [];
 	private comments: string[] = $state([]);
 	private cRef: number | undefined;
 	private learned: boolean = false;
@@ -75,7 +76,8 @@ export default class Clause implements Comparable<Clause> {
 		literals: Literal[],
 		{ comments = [], cRef = undefined, learned = false }: ClauseOptions = {}
 	) {
-		this.literals = literals;
+		this.literals = [...literals];
+		this.sortedLiterals = [...literals];
 		this.comments = comments;
 		this.cRef = cRef;
 		this.learned = learned;
@@ -90,10 +92,6 @@ export default class Clause implements Comparable<Clause> {
 			cRef: tag,
 			learned: false
 		});
-	}
-
-	addLiteral(lit: Literal) {
-		this.literals.push(lit);
 	}
 
 	getCRef(): CRef {
@@ -195,8 +193,9 @@ export default class Clause implements Comparable<Clause> {
 		return found;
 	}
 
-	getLiterals(): Literal[] {
-		return [...this.literals];
+	getLiterals(sorted: boolean = false): Literal[] {
+		if (sorted) return [...this.sortedLiterals];
+		else return [...this.literals];
 	}
 
 	resolution(other: Clause): Clause {
@@ -218,11 +217,21 @@ export default class Clause implements Comparable<Clause> {
 	}
 
 	copy(): Clause {
-		return new Clause(this.literals, {
+		return new Clause(this.sortedLiterals, {
 			comments: [...this.comments],
 			cRef: this.cRef,
 			learned: this.learned
 		});
+	}
+
+	swapLiteralPositions(i: number, j: number) {
+		if (this.size() <= i || this.size() <= j) {
+			logFatal('Swap issue', 'You are trying to change out of bound positions');
+		} else {
+			const aux: Literal = this.literals[i];
+			this.literals[i] = this.literals[j];
+			this.literals[j] = aux;
+		}
 	}
 
 	isEmpty(): boolean {
@@ -230,7 +239,7 @@ export default class Clause implements Comparable<Clause> {
 	}
 
 	[Symbol.iterator]() {
-		return this.literals.values();
+		return this.sortedLiterals.values();
 	}
 
 	map<T>(

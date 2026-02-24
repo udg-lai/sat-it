@@ -1,15 +1,12 @@
 <script lang="ts">
 	import type { Trail } from '$lib/entities/Trail.svelte.ts';
-	import { getClausePool } from '$lib/states/problem.svelte.ts';
-	import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 	import {
-		getClausesLeft,
 		getNoConflicts,
 		getNoDecisions,
 		getNoUnitPropagations,
-		type ClauseCountEntry
+		getVisitedClauses
 	} from '$lib/states/statistics.svelte.ts';
-	import { getLatestTrail, getTrails } from '$lib/states/trails.svelte.ts';
+	import { getLatestTrail } from '$lib/states/trails.svelte.ts';
 
 	const decisions: number = $derived(getNoDecisions());
 	const conflicts: number = $derived(getNoConflicts());
@@ -20,20 +17,7 @@
 			return latestTrail.getDL();
 		} else return 0;
 	});
-	const clausesLeft: number = $derived(getClausePool().leftToSatisfy());
-	const minimumClausesLeft: number | undefined = $derived.by(() => {
-		const collection: ClauseCountEntry = getClausesLeft();
-		let minimum: number | undefined = undefined;
-		for (let i = 0; i < getTrails().length; i++) {
-			if (
-				(collection[i] !== undefined && minimum === undefined) ||
-				(minimum !== undefined && collection[i] < minimum)
-			)
-				minimum = collection[i];
-		}
-		return minimum;
-	});
-	const unsat: boolean = $derived(getSolverMachine().onUnsatState());
+	const visitedClauses: number = $derived(getVisitedClauses());
 </script>
 
 <statistics>
@@ -53,16 +37,11 @@
 		<span>UPs:</span>
 		<span class="statistic-value">{unitPropagations}</span>
 	</div>
+
 	<div class="metric">
-		Clauses left:
-		<span class="statistic-value">{clausesLeft}</span>
+		Visited Clauses:
+		<span class="statistic-value">{visitedClauses}</span>
 	</div>
-	{#if unsat}
-		<div class="metric">
-			Minimum Clauses:
-			<span class="statistic-value">{minimumClausesLeft}</span>
-		</div>
-	{/if}
 </statistics>
 
 <style>
@@ -74,13 +53,16 @@
 
 	.metric {
 		display: flex;
-		justify-content: space-around;
 		align-items: center;
 		padding: 1px 5px;
 		flex: 1;
 		min-width: 5rem;
 		max-width: 12rem;
 		border: none;
+	}
+
+	.metric span {
+		padding-left: 0.5rem;
 	}
 
 	.statistic-value {

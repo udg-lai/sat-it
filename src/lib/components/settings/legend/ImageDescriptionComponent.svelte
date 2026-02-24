@@ -15,7 +15,11 @@
 		<ImageRender {icon} {alt} />
 	</div>
 	<div class="description-zone">
-		{description}
+		<div class="text-area">
+			<div class="text">
+				{description}
+			</div>
+		</div>
 	</div>
 </div>
 
@@ -40,16 +44,22 @@
 	}
 
 	.description-zone {
-		height: 100%;
-		display: flex;
 		flex: 1;
-		background-color: #ffffff;
+		height: 100%;
+		padding: 0.25rem;
+	}
+
+	.description-zone .text-area {
+		height: 100%;
+		width: 100%;
+		overflow-x: hidden;
+		overflow-y: auto;
+		padding: 0.4rem 0.25rem;
+		display: flex;
 		align-items: center;
-		white-space: nowrap;
-		overflow-x: auto;
-		overflow-y: hidden;
-		padding: 0 10px 0 10px;
-		border-bottom-right-radius: 6px;
-		border-top-right-radius: 6px;
+	}
+
+	.description-zone .text-area .text {
+		line-height: 1.2;
 	}
 </style>

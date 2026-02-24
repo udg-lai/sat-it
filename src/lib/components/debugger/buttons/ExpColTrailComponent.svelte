@@ -15,7 +15,6 @@
 	let collapseIcon = asset('/icons/Collapse.svg');
 
 	function expandCollapse() {
-		console.log('Toggling expand/collapse of decision levels');
 		setTrailsExpanded(!expanded);
 	}
 </script>
