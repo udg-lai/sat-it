@@ -28,7 +28,14 @@
 		font-size: var(--fontSize);
 		text-align: center;
 		display: flex;
-		align-items: center;
+		align-items: end;
 		justify-content: center;
+		padding-bottom: 10px;
+	}
+
+	@-moz-document url-prefix() {
+		span {
+			padding-bottom: 6px;
+		}
 	}
 </style>

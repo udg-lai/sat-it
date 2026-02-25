@@ -79,12 +79,12 @@
 </problem-summary>
 
 {#snippet renderLiterals(literals: Tuple<number, number[]>)}
-			<p class="enumerate">{literals.fst}.</p>
-			<LiteralsComponent literals={literals.snd} />
+	<p class="enumerate">{literals.fst}.</p>
+	<LiteralsComponent literals={literals.snd} />
 {/snippet}
 
 {#snippet renderComment(comment: string)}
-		<p class="comment">{comment}</p>
+	<p class="comment">{comment}</p>
 {/snippet}
 
 <style>
@@ -168,5 +168,4 @@
 		display: inline-block;
 		text-align: right;
 	}
-
 </style>

@@ -79,7 +79,7 @@
 			{:else}
 				{@render renderClause(unwrapEither(summary[index]))}
 			{/if}
-			<hr/>
+			<hr />
 		</div>
 	</VirtualList>
 </solution-summary>
@@ -87,7 +87,9 @@
 {#snippet renderClause(clause: Clause)}
 	<div class="tagged-clause">
 		<span class="enumerate">{clause.getCRef()}.</span>
-		<ClauseComponent {clause} />
+		<div class="clause-wrapper">
+			<ClauseComponent {clause} style="position: relative; transform: translate(0, 3px)" />
+		</div>
 	</div>
 {/snippet}
 
@@ -135,5 +137,9 @@
 		font-style: italic;
 		display: block;
 		width: fit-content;
+	}
+
+	.clause-wrapper {
+		position: relative;
 	}
 </style>
