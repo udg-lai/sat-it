@@ -6,11 +6,11 @@
 	import MathTexComponent from './MathTexComponent.svelte';
 
 	interface Props {
-		classStyle?: string;
+		style?: string;
 		clause: Clause;
 	}
 
-	let { clause, classStyle }: Props = $props();
+	let { clause, style }: Props = $props();
 
 	const watchedLiterals: Set<Lit> = $derived.by(() => {
 		if (getSolverMachine().identify() === 'twatch' && clause.size() >= 2) {
@@ -22,7 +22,7 @@
 	});
 </script>
 
-<clause class={classStyle ?? ''}>
+<clause style={style}>
 	{#if clause.isEmpty()}
 		<empty-clause> </empty-clause>
 	{:else}

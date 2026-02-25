@@ -50,17 +50,11 @@
 		position: absolute;
 		left: 50%;
 		bottom: 0;
-		transform: translate(-50%, 8px); /* move visually down */
+		transform: translate(-50%, 0px);
 		width: 0;
 		height: 0;
 		border-left: 3px solid transparent;
 		border-right: 3px solid transparent;
 		border-bottom: 4px solid var(--inspecting-color);
-	}
-
-	@-moz-document url-prefix() {
-		.watch::after {
-			transform: translate(-50%, 4px); /* move visually down */
-		}
 	}
 </style>

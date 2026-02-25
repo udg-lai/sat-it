@@ -153,12 +153,12 @@
 
 			{#if isJust(maybeClause)}
 				<div
-					class="clause-highlighter"
+					class="clause-wrapper"
 					class:inspectedTrue={isSat(fromJust(maybeClause))}
 					class:inspectedFalse={isUnSat(fromJust(maybeClause))}
 					class:visited-clause={visited(fromJust(maybeClause)) && isPartial(fromJust(maybeClause))}
 				>
-					<ClauseComponent clause={fromJust(maybeClause)} />
+					<ClauseComponent clause={fromJust(maybeClause)} style="position: relative; transform: translate(0, 3px)" />
 				</div>
 			{/if}
 		</div>
@@ -181,11 +181,11 @@
 					</span>
 				</div>
 				<div
-					class="clause-highlighter willSkip"
+					class="clause-wrapper willSkip"
 					class:inspectedTrue={isSat(skippedClause)}
 					class:inspectedFalse={isUnSat(skippedClause)}
 				>
-					<ClauseComponent clause={skippedClause} />
+					<ClauseComponent clause={skippedClause} style="position: relative; transform: translate(0, 3px)" />
 				</div>
 			</div>
 			<hr />
@@ -267,4 +267,9 @@
 	.main-list {
 		padding-top: 0.5rem;
 	}
+
+	.clause-wrapper {
+		position: relative;
+	}
+
 </style>
