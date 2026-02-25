@@ -164,7 +164,7 @@
 		</div>
 
 		{#if i > 0}
-			<hr/>
+			<hr />
 		{/if}
 	{/each}
 </occurrence-list>
@@ -188,7 +188,7 @@
 					<ClauseComponent clause={skippedClause} />
 				</div>
 			</div>
-			<hr/>
+			<hr />
 		{/each}
 	</occurrence-list>
 {/if}
@@ -267,5 +267,4 @@
 	.main-list {
 		padding-top: 0.5rem;
 	}
-
 </style>
