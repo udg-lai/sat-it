@@ -22,7 +22,7 @@
 	});
 </script>
 
-<clause style={style}>
+<clause {style}>
 	{#if clause.isEmpty()}
 		<empty-clause> </empty-clause>
 	{:else}

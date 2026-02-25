@@ -158,7 +158,10 @@
 					class:inspectedFalse={isUnSat(fromJust(maybeClause))}
 					class:visited-clause={visited(fromJust(maybeClause)) && isPartial(fromJust(maybeClause))}
 				>
-					<ClauseComponent clause={fromJust(maybeClause)} style="position: relative; transform: translate(0, 3px)" />
+					<ClauseComponent
+						clause={fromJust(maybeClause)}
+						style="position: relative; transform: translate(0, 3px)"
+					/>
 				</div>
 			{/if}
 		</div>
@@ -185,7 +188,10 @@
 					class:inspectedTrue={isSat(skippedClause)}
 					class:inspectedFalse={isUnSat(skippedClause)}
 				>
-					<ClauseComponent clause={skippedClause} style="position: relative; transform: translate(0, 3px)" />
+					<ClauseComponent
+						clause={skippedClause}
+						style="position: relative; transform: translate(0, 3px)"
+					/>
 				</div>
 			</div>
 			<hr />
@@ -271,5 +277,4 @@
 	.clause-wrapper {
 		position: relative;
 	}
-
 </style>
