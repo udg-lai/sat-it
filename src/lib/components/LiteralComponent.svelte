@@ -39,21 +39,28 @@
 		flex-direction: column;
 		justify-content: end;
 		position: relative;
-		padding-bottom: 0px;
+	}
+
+	.watch {
+		position: relative;
 	}
 
 	.watch::after {
 		content: '';
 		position: absolute;
-		bottom: -2px;
 		left: 50%;
-		transform: translateX(-50%);
-
-		/* Triangle logic: change the size or color as needed */
+		bottom: 0;
+		transform: translate(-50%, 8px); /* move visually down */
 		width: 0;
 		height: 0;
 		border-left: 3px solid transparent;
 		border-right: 3px solid transparent;
-		border-bottom: 4px solid var(--inspecting-color); /* Inherits the text color (true/false/undefined) */
+		border-bottom: 4px solid var(--inspecting-color);
+	}
+
+	@-moz-document url-prefix() {
+		.watch::after {
+			transform: translate(-50%, 4px); /* move visually down */
+		}
 	}
 </style>
