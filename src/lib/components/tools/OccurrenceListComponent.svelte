@@ -175,7 +175,6 @@
 </occurrence-list>
 
 {#if using2Watch}
-
 	<division>Non watched clauses: <span>{nonWatchedClauses.length}</span> </division>
 	<occurrence-list class="secondary-list">
 		{#each nonWatchedClauses as skippedClause, i (i)}
@@ -232,6 +231,7 @@
 		display: flex;
 		flex-direction: column;
 		width: 100%;
+		padding-top: 0.5rem;
 	}
 
 	occurrence-list .occurrence-list-item {
@@ -270,10 +270,6 @@
 
 	occurrence-list .occurrence-list-item:first-child {
 		height: 0.5rem;
-	}
-
-	occurrence-list {
-		padding-top: 0.5rem;
 	}
 
 	.clause-wrapper {
