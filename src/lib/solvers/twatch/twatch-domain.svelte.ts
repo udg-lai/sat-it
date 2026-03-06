@@ -146,7 +146,6 @@ export type TWATCH_CLAUSE_SATISFIED_INPUT =
 	| 'traversed_current_occurrence_list'
 	| 'unit_propagation_state';
 
-
 export type TWATCH_INPUT =
 	| TWATCH_UNARY_EMPTY_CLAUSES_DETECTION_INPUT
 	| TWATCH_ALL_VARIABLES_ASSIGNED_INPUT

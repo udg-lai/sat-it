@@ -140,7 +140,7 @@ export const twatch_stateName2StateId = {
 	complementary_watched_occurrences_retrieve_state: 29,
 	is_it_a_watch_state: 30,
 	clause_falsified_state: 31,
-	clause_satisfied_state: 32,
+	clause_satisfied_state: 32
 };
 
 // *** define state nodes ***
@@ -569,7 +569,10 @@ const is_clause_satisfied_state: NonFinalState<
 	description: 'Returns true if the clause is satisfied. False otherwise.',
 	transitions: new Map<TWATCH_CLAUSE_SATISFIED_INPUT, number>()
 		.set('unit_propagation_state', twatch_stateName2StateId['unit_propagation_state'])
-		.set('traversed_current_occurrence_list', twatch_stateName2StateId['traversed_current_occurrences_state'])
+		.set(
+			'traversed_current_occurrence_list',
+			twatch_stateName2StateId['traversed_current_occurrences_state']
+		)
 };
 // *** adding states to the set of states ***
 export const states: Map<number, State<TWATCH_FUN, TWATCH_INPUT>> = new Map();
@@ -611,7 +614,7 @@ states.set(delete_watch_state.id, delete_watch_state);
 states.set(add_watch_state.id, add_watch_state);
 states.set(is_it_a_watch_state.id, is_it_a_watch_state);
 states.set(is_clause_falsified_state.id, is_clause_falsified_state);
-states.set(is_clause_satisfied_state.id, is_clause_satisfied_state)
+states.set(is_clause_satisfied_state.id, is_clause_satisfied_state);
 
 export const initial = unary_empty_clauses_detection_state.id;
 

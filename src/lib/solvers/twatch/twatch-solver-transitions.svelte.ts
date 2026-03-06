@@ -225,7 +225,7 @@ export const conflictDetectionBlock = (): void => {
 			if (isClauseFalsifiedTransition(cRef)) {
 				getLatestTrail().attachConflictiveClause(getClausePool().at(cRef));
 				conflictDetectedEventBus.emit();
-			} else if(!isClauseSatisfiedTransition(cRef)) {
+			} else if (!isClauseSatisfiedTransition(cRef)) {
 				const propagated: Lit = unitPropagationTransition(cRef, 'up');
 				queuesUpdateBlock(propagated);
 			}
