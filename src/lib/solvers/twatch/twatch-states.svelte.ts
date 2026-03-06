@@ -8,6 +8,7 @@ import {
 	backjumping,
 	buildConflictAnalysis,
 	clauseFalsified,
+	clauseSatisfied,
 	complementaryOccurrences,
 	complementaryWatchedOccurrences,
 	decide,
@@ -49,6 +50,8 @@ import {
 	type TWATCH_CHECK_PENDING_OCCURRENCES_INPUT,
 	type TWATCH_CLAUSE_FALSIFIED_FUN,
 	type TWATCH_CLAUSE_FALSIFIED_INPUT,
+	type TWATCH_CLAUSE_SATISFIED_FUN,
+	type TWATCH_CLAUSE_SATISFIED_INPUT,
 	type TWATCH_COMPLEMENTARY_OCCURRENCES_RETRIEVE_FUN,
 	type TWATCH_COMPLEMENTARY_OCCURRENCES_RETRIEVE_INPUT,
 	type TWATCH_COMPLEMENTARY_WATCHED_OCCURRENCES_RETRIEVE_FUN,
@@ -136,7 +139,8 @@ export const twatch_stateName2StateId = {
 	first_literal_falsified_state: 28,
 	complementary_watched_occurrences_retrieve_state: 29,
 	is_it_a_watch_state: 30,
-	clause_falsified_state: 31
+	clause_falsified_state: 31,
+	clause_satisfied_state: 32,
 };
 
 // *** define state nodes ***
@@ -553,7 +557,19 @@ const is_clause_falsified_state: NonFinalState<
 	description: 'Returns true if the clause is falsified. False otherwise.',
 	transitions: new Map<TWATCH_CLAUSE_FALSIFIED_INPUT, number>()
 		.set('wipe_occurrences_queue_state', twatch_stateName2StateId['wipe_occurrences_queue_state'])
+		.set('clause_satisfied_state', twatch_stateName2StateId['clause_satisfied_state'])
+};
+
+const is_clause_satisfied_state: NonFinalState<
+	TWATCH_CLAUSE_SATISFIED_FUN,
+	TWATCH_CLAUSE_SATISFIED_INPUT
+> = {
+	id: twatch_stateName2StateId['clause_satisfied_state'],
+	run: clauseSatisfied,
+	description: 'Returns true if the clause is satisfied. False otherwise.',
+	transitions: new Map<TWATCH_CLAUSE_SATISFIED_INPUT, number>()
 		.set('unit_propagation_state', twatch_stateName2StateId['unit_propagation_state'])
+		.set('traversed_current_occurrence_list', twatch_stateName2StateId['traversed_current_occurrences_state'])
 };
 // *** adding states to the set of states ***
 export const states: Map<number, State<TWATCH_FUN, TWATCH_INPUT>> = new Map();
@@ -595,6 +611,7 @@ states.set(delete_watch_state.id, delete_watch_state);
 states.set(add_watch_state.id, add_watch_state);
 states.set(is_it_a_watch_state.id, is_it_a_watch_state);
 states.set(is_clause_falsified_state.id, is_clause_falsified_state);
+states.set(is_clause_satisfied_state.id, is_clause_satisfied_state)
 
 export const initial = unary_empty_clauses_detection_state.id;
 

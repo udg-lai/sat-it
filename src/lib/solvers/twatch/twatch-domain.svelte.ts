@@ -140,7 +140,12 @@ export type TWATCH_IS_IT_A_WATCH_INPUT = 'watch_at_first_position_state' | 'clau
 
 export type TWATCH_CLAUSE_FALSIFIED_INPUT =
 	| 'wipe_occurrences_queue_state'
+	| 'clause_satisfied_state';
+
+export type TWATCH_CLAUSE_SATISFIED_INPUT =
+	| 'traversed_current_occurrence_list'
 	| 'unit_propagation_state';
+
 
 export type TWATCH_INPUT =
 	| TWATCH_UNARY_EMPTY_CLAUSES_DETECTION_INPUT
@@ -175,7 +180,8 @@ export type TWATCH_INPUT =
 	| TWATCH_DELETE_WATCH_INPUT
 	| TWATCH_ADD_WATCH_INPUT
 	| TWATCH_IS_IT_A_WATCH_INPUT
-	| TWATCH_CLAUSE_FALSIFIED_INPUT;
+	| TWATCH_CLAUSE_FALSIFIED_INPUT
+	| TWATCH_CLAUSE_SATISFIED_INPUT;
 
 // ** state functions **
 
@@ -511,6 +517,12 @@ export const clauseFalsified: TWATCH_CLAUSE_FALSIFIED_FUN = (cRef: CRef) => {
 	return getClausePool().at(cRef).falsified();
 };
 
+export type TWATCH_CLAUSE_SATISFIED_FUN = (cRef: CRef) => boolean;
+
+export const clauseSatisfied: TWATCH_CLAUSE_SATISFIED_FUN = (cRef: CRef) => {
+	return getClausePool().at(cRef).satisfied();
+};
+
 export type TWATCH_FUN =
 	| TWATCH_UNARY_EMPTY_CLAUSES_DETECTION_FUN
 	| TWATCH_CHECK_PENDING_OCCURRENCES_FUN
@@ -543,4 +555,5 @@ export type TWATCH_FUN =
 	| TWATCH_ADD_WATCH_FUN
 	| TWATCH_FIRST_LITERAL_FALSIFIED_FUN
 	| TWATCH_IS_IT_A_WATCH_FUN
-	| TWATCH_CLAUSE_FALSIFIED_FUN;
+	| TWATCH_CLAUSE_FALSIFIED_FUN
+	| TWATCH_CLAUSE_SATISFIED_FUN;
