@@ -65,7 +65,7 @@
 				summary
 			};
 			notifySimplifiedCNF(summary);
-			addInstance(instance, true);
+			addInstance(instance);
 		} catch (error) {
 			const title = `Instance ${name} contains an error`;
 			const description = (error as Error).message;

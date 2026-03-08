@@ -34,7 +34,7 @@ export async function initializeInstances() {
 	try {
 		const fetchedInstances: DimacsInstance[] = await fetchInstances();
 		fetchedInstances.map((di) => {
-			addInstance(di);
+			addInstance(di, true);
 		});
 	} catch (error) {
 		const description = (error as Error)?.message;

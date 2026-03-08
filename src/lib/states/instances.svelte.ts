@@ -12,6 +12,11 @@ const newInstanceState: InteractiveInstanceState = {
 	active: false
 };
 
+const hardcodedInstanceState: InteractiveInstanceState = {
+	removable: false,
+	active: false
+};
+
 export function getInteractiveInstance(name: string): InteractiveInstance {
 	const instance: InteractiveInstance | undefined = instances.get(name);
 	if (!instance) {
@@ -28,15 +33,15 @@ export function getInstance(name: string): DimacsInstance {
 	return instance.getInstance();
 }
 
-export function addInstance(instance: DimacsInstance, notify: boolean = false): void {
+export function addInstance(instance: DimacsInstance, hardcoded: boolean = false): void {
 	const found = instances.has(instance.name);
 	if (found) {
 		const title = 'Duplicated instance';
 		const description = `Instance ${instance.name} already loaded`;
 		logWarning(title, description);
 	} else {
-		instances.set(instance.name, new InteractiveInstance(instance, newInstanceState));
-		if (notify) {
+		instances.set(instance.name, new InteractiveInstance(instance, hardcoded ? hardcodedInstanceState : newInstanceState));
+		if (!hardcoded) {
 			logInfo('Instance added', `Instance ${instance.name}`);
 		}
 	}
