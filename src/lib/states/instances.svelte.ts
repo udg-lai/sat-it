@@ -40,7 +40,10 @@ export function addInstance(instance: DimacsInstance, hardcoded: boolean = false
 		const description = `Instance ${instance.name} already loaded`;
 		logWarning(title, description);
 	} else {
-		instances.set(instance.name, new InteractiveInstance(instance, hardcoded ? hardcodedInstanceState : newInstanceState));
+		instances.set(
+			instance.name,
+			new InteractiveInstance(instance, hardcoded ? hardcodedInstanceState : newInstanceState)
+		);
 		if (!hardcoded) {
 			logInfo('Instance added', `Instance ${instance.name}`);
 		}
