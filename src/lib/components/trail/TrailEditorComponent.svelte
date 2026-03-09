@@ -279,6 +279,8 @@
 
 		subs.push(resetProblemEventBus.subscribe(asyncComputeComposedTrailCompanionPositions));
 
+		subs.push(algorithmicUndoEventBus.subscribe(asyncComputeComposedTrailCompanionPositions));
+
 		asyncComputeComposedTrailCompanionPositions();
 
 		return () => {
