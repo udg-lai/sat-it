@@ -1,4 +1,4 @@
-import"../chunks/Bzak7iHL.js";import{y as d,ac as p,af as r,A as m,C as i,D as $,W as y,ad as g,t as h,ai as v}from"../chunks/B9UyZnRg.js";import{i as w}from"../chunks/BNprnyMz.js";import{p as t,a as C,l as N,t as I,g as _,b,c as L}from"../chunks/9qpAZC71.js";const q=!0,T=!1,gn=Object.freeze(Object.defineProperty({__proto__:null,prerender:q,ssr:T},Symbol.toStringTag,{value:"Module"})),S="logarithmic.dimacs",k=`
+import"../chunks/Bzak7iHL.js";import{y as d,ac as p,af as r,A as m,C as i,D as $,W as y,ad as g,t as h,ai as v}from"../chunks/B9UyZnRg.js";import{i as w}from"../chunks/BNprnyMz.js";import{p as t,a as C,h as I,l as N,t as _,g as b,b as L,c as q}from"../chunks/C2uNLL1E.js";const S=!0,T=!1,hn=Object.freeze(Object.defineProperty({__proto__:null,prerender:S,ssr:T},Symbol.toStringTag,{value:"Module"})),k="logarithmic.dimacs",A=`
 p cnf 9 18
 c at most one among 1,2,..6, log encoding
 -1 -7 0
@@ -19,7 +19,7 @@ c at most one among 1,2,..6, log encoding
 -6 7 0
 -6 -8 0
 -6 9 0
-`,A=t(k),O={name:S.toLowerCase(),summary:A},D="pb.dimacs",j=`
+`,O=t(A),D={name:k.toLowerCase(),summary:O},j="pb.dimacs",z=`
 p cnf 12 15
 c unitary clauses
 5 0
@@ -43,7 +43,7 @@ c node v5
 c node v6
 11 -4 -10 0
 12 -10 0
-`,z=t(j),B={name:D.toLowerCase(),summary:z},E="NQueens3.dimacs",M=`
+`,B=t(z),E={name:j.toLowerCase(),summary:B},M="NQueens3.dimacs",P=`
 c SAT encoding for 3 queens
 c Chess board has 9 positions
 p cnf 9 34
@@ -81,7 +81,7 @@ p cnf 9 34
 -3 -7 0
 -5 -7 0
 -2 -4 0
-`,P=t(M),Q={name:E.toLowerCase(),summary:P},W="NQueens4.dimacs",x=`
+`,Q=t(P),W={name:M.toLowerCase(),summary:Q},x="NQueens4.dimacs",R=`
 c SAT encoding for 4queens
 p cnf 16 84
 c one queen per row
@@ -171,12 +171,12 @@ c One queen per diagonal right-left
 -8 -11 0
 -8 -14 0
 -11 -14 0
--12 -15 0`,R=t(x),F={name:W.toLowerCase(),summary:R},G="satback.dimacs",H=`
+-12 -15 0`,F=t(R),G={name:x.toLowerCase(),summary:F},H="satback.dimacs",J=`
 p cnf 2 3
 1 -2 0
 -1 2 0
 -1 -2 0
-`,J=t(H),K={name:G.toLowerCase(),summary:J},U="satdpll.dimacs",V=`
+`,K=t(J),U={name:H.toLowerCase(),summary:K},V="satdpll.dimacs",X=`
 p cnf 5 6
 3 4 -1 5 0
 -3 4 5 0
@@ -184,13 +184,13 @@ p cnf 5 6
 1 2 0
 -1 -5 0
 -3 -4 5 0
-`,X=t(V),Y={name:U.toLowerCase(),summary:X},Z="unsatback.dimacs",nn=`
+`,Y=t(X),Z={name:V.toLowerCase(),summary:Y},nn="unsatback.dimacs",en=`
 p cnf 2 4
 1 2 0
 1 -2 0
 -1 2 0
 -1 -2 0
-`,en=t(nn),tn={name:Z.toLowerCase(),summary:en},sn="unsatdpll.dimacs",an=`
+`,tn=t(en),sn={name:nn.toLowerCase(),summary:tn},an="unsatdpll.dimacs",on=`
 p cnf 5 7
 3 4 -1 5 0
 -3 4 5 0
@@ -199,4 +199,4 @@ p cnf 5 7
 1 -2 0
 -1 -5 0
 -3 -4 5 0
-`,on=t(an),cn={name:sn.toLowerCase(),summary:on};function rn(n){return new Promise(e=>setTimeout(e,n))}async function mn(){return await rn(300),[B,Q,F,O,tn,cn,Y,K]}async function un(){return await mn()}async function fn(){try{(await un()).map(e=>{C(e)})}catch(n){const e=n==null?void 0:n.message;N("Could not load instances",`Error: ${e??n}`)}}function ln(){if(I()){const[n]=_();b(n.getInstance().name)}else L("Can not set default instance from an empty set")}function hn(n,e){d(e,!0);let a=g(!1);p(()=>{fn().then(()=>{ln(),y(a,!0)}).catch(()=>console.error("There was an error during the loading process"))});var o=r(),u=m(o);{var f=s=>{var c=r(),l=m(c);v(l,()=>e.children),i(s,c)};w(u,s=>{h(a)&&s(f)})}i(n,o),$()}export{hn as component,gn as universal};
+`,cn=t(on),rn={name:an.toLowerCase(),summary:cn};function mn(n){return new Promise(e=>setTimeout(e,n))}async function un(){return await mn(300),[E,W,G,D,sn,rn,Z,U]}async function fn(){return await un()}async function ln(){try{(await fn()).map(e=>{C(e,I)})}catch(n){const e=n==null?void 0:n.message;N("Could not load instances",`Error: ${e??n}`)}}function dn(){if(_()){const[n]=b();L(n.getInstance().name)}else q("Can not set default instance from an empty set")}function vn(n,e){d(e,!0);let a=g(!1);p(()=>{ln().then(()=>{dn(),y(a,!0)}).catch(()=>console.error("There was an error during the loading process"))});var o=r(),u=m(o);{var f=s=>{var c=r(),l=m(c);v(l,()=>e.children),i(s,c)};w(u,s=>{h(a)&&s(f)})}i(n,o),$()}export{vn as component,hn as universal};
