@@ -11,7 +11,7 @@
 	} from 'flowbite-svelte-icons';
 	import { getActiveView, type ActiveView } from '../../states/settings.svelte.ts';
 	import { logError, logInfo } from '$lib/states/toasts.svelte.ts';
-	import { addInstance } from '$lib/states/instances.svelte.ts';
+	import { addInstance, newInstanceState } from '$lib/states/instances.svelte.ts';
 
 	export type OptionEmit = 'bookmark' | 'engine' | 'info' | 'close';
 
@@ -65,7 +65,8 @@
 				summary
 			};
 			notifySimplifiedCNF(summary);
-			addInstance(instance);
+			addInstance(instance, newInstanceState);
+			logInfo('Instance added', `Instance ${name} has been added`);
 		} catch (error) {
 			const title = `Instance ${name} contains an error`;
 			const description = (error as Error).message;

@@ -12,6 +12,7 @@ import {
 	activateInstanceByName,
 	addInstance,
 	getInstances,
+	hardcodedInstanceState,
 	thereAreInstances
 } from '$lib/states/instances.svelte.ts';
 import { logError, logWarning } from '$lib/states/toasts.svelte.ts';
@@ -34,7 +35,7 @@ export async function initializeInstances() {
 	try {
 		const fetchedInstances: DimacsInstance[] = await fetchInstances();
 		fetchedInstances.map((di) => {
-			addInstance(di, true);
+			addInstance(di, hardcodedInstanceState);
 		});
 	} catch (error) {
 		const description = (error as Error)?.message;

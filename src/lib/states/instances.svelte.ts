@@ -1,18 +1,22 @@
 import { InteractiveInstance } from '$lib/entities/InteractiveInstance.svelte.ts';
 import { changeInstanceEventBus } from '$lib/events/events.ts';
 import type { DimacsInstance } from '$lib/instances/dimacs-instance.interface.ts';
-import type { InteractiveInstanceState } from '$lib/interfaces/InteractiveInstanceState.ts';
 import { logError, logFatal, logInfo, logWarning } from '$lib/states/toasts.svelte.ts';
 import { SvelteMap } from 'svelte/reactivity';
 
 const instances: SvelteMap<string, InteractiveInstance> = new SvelteMap();
 
-const newInstanceState: InteractiveInstanceState = {
+interface InstanceInterface {
+	removable: boolean;
+	active: boolean;
+}
+
+export const newInstanceState: InstanceInterface = {
 	removable: true,
 	active: false
 };
 
-const hardcodedInstanceState: InteractiveInstanceState = {
+export const hardcodedInstanceState: InstanceInterface = {
 	removable: false,
 	active: false
 };
@@ -33,20 +37,14 @@ export function getInstance(name: string): DimacsInstance {
 	return instance.getInstance();
 }
 
-export function addInstance(instance: DimacsInstance, hardcoded: boolean = false): void {
+export function addInstance(instance: DimacsInstance, instanceInterface: InstanceInterface): void {
 	const found = instances.has(instance.name);
 	if (found) {
 		const title = 'Duplicated instance';
 		const description = `Instance ${instance.name} already loaded`;
 		logWarning(title, description);
 	} else {
-		instances.set(
-			instance.name,
-			new InteractiveInstance(instance, hardcoded ? hardcodedInstanceState : newInstanceState)
-		);
-		if (!hardcoded) {
-			logInfo('Instance added', `Instance ${instance.name}`);
-		}
+		instances.set(instance.name, new InteractiveInstance(instance, instanceInterface));
 	}
 }
 
