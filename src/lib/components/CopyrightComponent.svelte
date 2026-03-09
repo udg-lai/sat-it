@@ -1,4 +1,4 @@
-<copyright> © 2026 LAI / SAT-IT </copyright>
+<copyright> © 2026 LAI. </copyright>
 
 <style>
 	copyright {
