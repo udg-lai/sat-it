@@ -1,76 +1,24 @@
-# create-svelte
+# SAT-IT: The Interactive SAT Tracer
+The Interactive SAT Tracer (SAT-IT) is an open-access web environment designed to make the foundations of SAT solving highly visible and interactive.
+SAT-IT offers a staged pedagogical progression—from naive backtracking to DPLL and full CDCL with the two-watched literals scheme. 
+Users can clearly inspect fundamental data structures, search space trails, and solving statistics. 
+The tool interactive search space exploration is boosted with literal-level breakpoints for targeted inspection, alongside versatile automatic solving modes that offer both continuous real-time execution and state-based subroutine automation.
+Combined with a powerful “what-if” capability for stepping backward to explore alternative decisions, an instance manager, and an extensible architecture ready to support additional algorithms, SAT-IT serves as a practical, granular lens for experimenting with SAT solving algorithms and analysing encodings efficiency.
 
-Everything you need to build a Svelte library, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/main/packages/create-svelte).
+# Origins and Development
 
-Read more about creating a library [in the docs](https://svelte.dev/docs/kit/packaging).
+SAT-IT was an original idea of Dr. Jordi Coll Caballero and Dr. Mateu Villaret. The predecessor—a Java-based tool—was implemented alongside Marc Cané and Marc Rojo in 2020.
 
-## Creating a project
+To address a need of improvement in the user experience and the level of granularity, the application was completely redesigned in 2025. This modern version enhances accessibility by using web technologies and the reactive capabilities of the Svelte framework to provide a more robust and visua environment.
 
-If you're seeing this, you've probably already done this step. Congrats!
+# Roadmap
 
-```bash
-# create a new project in the current directory
-npx sv create
+Our primary objective is to integrate SAT-IT into the global SAT research and education communities. We plan to present future extensions at conferences and will continue to release updates to expand the tool's capabilities.
 
-# create a new project in my-app
-npx sv create my-app
-```
+# Authors
 
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```bash
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
-
-Everything inside `src/lib` is part of your library, everything inside `src/routes` can be used as a showcase or preview app.
-
-## Building
-
-To build your library:
-
-```bash
-npm run package
-```
-
-To create a production version of your showcase app:
-
-```bash
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
-
-## Deployment
-
-The app deployment depends on the `adapter`.
-If you are using the 'node' adapter you might run the app by:
-
-```bash
-node build
-```
-
-If you use the `static` adapter, you need a software to serve static files.
-
-```bash
-npx serve build
-```
-
-We have a mechanism to upload the aplication using GitHub pages,
-so we chosed to use the `static` adapter.
-
-To do so, the following workflow is triggered when a new Git tag is added:
-
-- project is build
-- tested
-- if tests passed, the app is published
-
-## Automatically lint and run tests at commit
-
-We use `Husky`, get started [here](https://typicode.github.io/husky/get-started.html)
+This applications was originaly developed by: 
+- Wilber Bermeo Quito
+- Dr. Jordi Coll
+- Pau Ferrer
+- Dr. Mateu Villaret 
