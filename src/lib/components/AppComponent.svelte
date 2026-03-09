@@ -56,6 +56,7 @@
 	import DebuggerComponent from './debugger/DebuggerComponent.svelte';
 	import { getConfiguredAlgorithm } from './settings/engine/state.svelte.ts';
 	import SolvingInformationComponent from './SolvingInformationComponent.svelte';
+	import CopyrightComponent from './CopyrightComponent.svelte';
 
 	let trails: Trail[] = $state([]);
 
@@ -245,6 +246,7 @@
 	<DebuggerComponent />
 	<TrailEditor {trails} />
 	<SolvingInformationComponent />
+	<CopyrightComponent />
 </app>
 
 <style>

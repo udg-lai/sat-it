@@ -63,8 +63,6 @@
 	<span class="pt-1">Algorithm</span>
 </div>
 <div class="body-class">
-	{configuredAlgorithm}
-
 	<algorithm class={elementClass}>
 		<selector class="flex items-center gap-4">
 			<label for="algorithm">Algorithm:</label>

@@ -19,7 +19,6 @@
 	let solve = asset('/icons/Solve.svg');
 	let reset = asset('/icons/Reset.svg');
 	let userUndo = asset('/icons/User Undo.svg');
-	let userRedo = asset('/icons/User Redo.svg');
 </script>
 
 <div class="heading-class">
@@ -96,13 +95,8 @@
 	/>
 	<ImageDescriptionComponent
 		icon={userUndo}
-		alt={'Undo user action'}
-		description={'Undo until the latest press button.'}
-	/>
-	<ImageDescriptionComponent
-		icon={userRedo}
-		alt={'Redo user action'}
-		description={'Redo the undone state.'}
+		alt={'Undo decisions'}
+		description={'Undo the latest decision in the train.'}
 	/>
 	<ImageDescriptionComponent
 		icon={expand}

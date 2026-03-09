@@ -160,6 +160,10 @@ export default class Clause implements Comparable<Clause> {
 		return state;
 	}
 
+	satisfied(): boolean {
+		return this.eval().type === 'SAT';
+	}
+
 	falsified(): boolean {
 		return this.isEmpty() || this.eval().type === 'UnSAT';
 	}

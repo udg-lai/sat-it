@@ -44,6 +44,8 @@ import type {
 	TWATCH_CHECK_PENDING_OCCURRENCES_INPUT,
 	TWATCH_CLAUSE_FALSIFIED_FUN,
 	TWATCH_CLAUSE_FALSIFIED_INPUT,
+	TWATCH_CLAUSE_SATISFIED_FUN,
+	TWATCH_CLAUSE_SATISFIED_INPUT,
 	TWATCH_COMPLEMENTARY_OCCURRENCES_RETRIEVE_FUN,
 	TWATCH_COMPLEMENTARY_OCCURRENCES_RETRIEVE_INPUT,
 	TWATCH_COMPLEMENTARY_WATCHED_OCCURRENCES_RETRIEVE_FUN,
@@ -220,12 +222,12 @@ export const conflictDetectionBlock = (): void => {
 			}
 		} else {
 			const cRef: CRef = fromRight(nextOccurrence);
-			if (!isClauseFalsifiedTransition(cRef)) {
-				const propagated: Lit = unitPropagationTransition(cRef, 'up');
-				queuesUpdateBlock(propagated);
-			} else {
+			if (isClauseFalsifiedTransition(cRef)) {
 				getLatestTrail().attachConflictiveClause(getClausePool().at(cRef));
 				conflictDetectedEventBus.emit();
+			} else if (!isClauseSatisfiedTransition(cRef)) {
+				const propagated: Lit = unitPropagationTransition(cRef, 'up');
+				queuesUpdateBlock(propagated);
 			}
 		}
 	}
@@ -727,6 +729,20 @@ const isClauseFalsifiedTransition = (cRef: CRef): boolean => {
 	}
 	const isFalsified: boolean = state.run(cRef);
 	if (isFalsified) getSolverMachine().transition('wipe_occurrence_queue_state');
-	else getSolverMachine().transition('unit_propagation_state');
+	else getSolverMachine().transition('clause_satisfied_state');
 	return isFalsified;
+};
+
+const isClauseSatisfiedTransition = (cRef: CRef): boolean => {
+	const state = getSolverMachine().getActiveState() as NonFinalState<
+		TWATCH_CLAUSE_SATISFIED_FUN,
+		TWATCH_CLAUSE_SATISFIED_INPUT
+	>;
+	if (state.run === undefined) {
+		logFatal('Function call error', 'There should be a function is the clause sayisfied state');
+	}
+	const isSatisfied: boolean = state.run(cRef);
+	if (!isSatisfied) getSolverMachine().transition('unit_propagation_state');
+	else getSolverMachine().transition('traversed_current_occurrence_list');
+	return isSatisfied;
 };

@@ -45,7 +45,7 @@
 	.selected-configuration {
 		align-items: center;
 		justify-content: center;
-		flex: 1;
+		flex: 0.5;
 		display: flex;
 	}
 </style>

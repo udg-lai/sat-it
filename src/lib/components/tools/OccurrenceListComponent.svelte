@@ -134,7 +134,9 @@
 	}
 </script>
 
-<division>Watched clauses: <span>{clauses.length - 1}</span></division>
+{#if using2Watch}
+	<division>Watched clauses: <span>{clauses.length - 1}</span></division>
+{/if}
 
 <occurrence-list class:main-list={using2Watch}>
 	{#each clauses as maybeClause, i (i)}
@@ -172,9 +174,8 @@
 	{/each}
 </occurrence-list>
 
-<division>Non watched clauses: <span>{nonWatchedClauses.length}</span> </division>
-
 {#if using2Watch}
+	<division>Non watched clauses: <span>{nonWatchedClauses.length}</span> </division>
 	<occurrence-list class="secondary-list">
 		{#each nonWatchedClauses as skippedClause, i (i)}
 			<div class="occurrence-list-item">
@@ -230,6 +231,7 @@
 		display: flex;
 		flex-direction: column;
 		width: 100%;
+		padding-top: 0.5rem;
 	}
 
 	occurrence-list .occurrence-list-item {
@@ -266,12 +268,8 @@
 		padding-left: 0.5rem;
 	}
 
-	.main-list .occurrence-list-item:first-child {
+	occurrence-list .occurrence-list-item:first-child {
 		height: 0.5rem;
-	}
-
-	.main-list {
-		padding-top: 0.5rem;
 	}
 
 	.clause-wrapper {
