@@ -14,6 +14,7 @@ import {
 	getOccurrenceListQueue
 } from '$lib/states/problem.svelte.ts';
 import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
+import { increaseNoConflicts } from '$lib/states/statistics.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
 import { getLatestTrail } from '$lib/states/trails.svelte.ts';
 import { makeLeft, makeRight } from '$lib/types/either.ts';
@@ -77,6 +78,7 @@ export const conflictDetectionBlock = (): void => {
 		const cRef: CRef = nextOccurrenceTransition();
 		const isConflictive: boolean = conflictDetectionTransition(cRef);
 		if (isConflictive) {
+			increaseNoConflicts();
 			getLatestTrail().attachConflictiveClause(getClausePool().at(cRef));
 			conflictDetectedEventBus.emit();
 		} else {
