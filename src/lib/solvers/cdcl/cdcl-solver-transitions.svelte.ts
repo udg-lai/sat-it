@@ -165,6 +165,7 @@ export const conflictDetectionBlock = (): void => {
 		const cRef: CRef = nextOccurrenceTransition();
 		const isConflictive: boolean = conflictiveTransition(cRef);
 		if (isConflictive) {
+			increaseNoConflicts();
 			getLatestTrail().attachConflictiveClause(getClausePool().at(cRef));
 			conflictDetectedEventBus.emit();
 		} else {
@@ -498,7 +499,6 @@ const backjumpingTransition = (trail: Trail, sndHighestDL: number): Trail => {
 		logFatal('Function call error', 'There should be a function in the Variable In CC state');
 	}
 	const bjTrail: Trail = state.run(trail, sndHighestDL);
-	increaseNoConflicts();
 	getSolverMachine().transition('push_trail_state');
 	return bjTrail;
 };

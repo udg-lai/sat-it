@@ -23,7 +23,6 @@ import {
 } from '$lib/states/problem.svelte.ts';
 import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 import {
-	increaseNoConflicts,
 	increaseNoUnitPropagations,
 	increaseNoVisitedClauses
 } from '$lib/states/statistics.svelte.ts';
@@ -193,8 +192,6 @@ export const backtracking = (pool: VariablePool): Lit => {
 		);
 	}
 	newTrail.push(VariableAssignment.newBacktrackingAssignment(variable));
-
-	increaseNoConflicts();
 	stackTrail(newTrail);
 
 	//Notify that a new trail has been pushed
