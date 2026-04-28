@@ -1,4 +1,4 @@
-import"../chunks/Bzak7iHL.js";import{y as d,ac as p,af as r,A as m,C as i,D as $,W as y,ad as g,t as h,ai as v}from"../chunks/B9UyZnRg.js";import{i as w}from"../chunks/BNprnyMz.js";import{p as t,a as C,h as I,l as N,t as _,g as b,b as L,c as q}from"../chunks/C2uNLL1E.js";const S=!0,T=!1,hn=Object.freeze(Object.defineProperty({__proto__:null,prerender:S,ssr:T},Symbol.toStringTag,{value:"Module"})),k="logarithmic.dimacs",A=`
+import"../chunks/Bzak7iHL.js";import{y as d,ac as p,af as r,A as m,C as i,D as $,W as y,ad as g,t as h,ai as v}from"../chunks/B9UyZnRg.js";import{i as w}from"../chunks/BNprnyMz.js";import{p as t,a as C,h as I,l as N,t as _,g as b,b as L,c as q}from"../chunks/CXPf645d.js";const S=!0,T=!1,hn=Object.freeze(Object.defineProperty({__proto__:null,prerender:S,ssr:T},Symbol.toStringTag,{value:"Module"})),k="logarithmic.dimacs",A=`
 p cnf 9 18
 c at most one among 1,2,..6, log encoding
 -1 -7 0
