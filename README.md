@@ -27,9 +27,9 @@ DPLL required five conflicts to demonstrate the unsatisfiability of the formula 
 
 ---
 
-Next, we detail how **learning from conflicts** leads to a more efficient way of finding a solution or demonstrating unsatisfiability. The execution of **CDCL** over the formula $F$ is shown in Figure (c). In this example, the assignments for trails one and two lead to two conflictive clauses. Due to these conflictive clauses, in order, conflict analysis was initiated, which resulted in the derivation of clauses $(\overline{3} \lor 5)$ and $(\, \overline{1}\,)$ through resolution. These two clauses are learnt, resulting in the update of the formula, i.e.:
+Next, we detail how **learning from conflicts** leads to a more efficient way of finding a solution or demonstrating unsatisfiability. The execution of **CDCL** over the formula $F$ is shown in Figure (c). In this example, the assignments for trails one and two lead to two conflictive clauses. Due to these conflictive clauses, in order, conflict analysis was initiated, which resulted in the derivation of clauses $(\overline{3} \lor 5)$ and $(\overline{1})$ through resolution. These two clauses are learnt, resulting in the update of the formula, i.e.:
 
-$$F' = F \land (\overline{3} \lor 5) \land (\,\overline{1}\,)$$
+$$F' = F \land (\overline{3} \lor 5) \land (\overline{1})$$
 
 From the last trail, we reached a dead end, where no decision can be undone, stating that $F$ is unsatisfiable. Also, in trail two of Figure (c), after the conflict analysis in trail one, not one but two decision levels were undone by **backjumping**.
 
@@ -50,7 +50,7 @@ From the last trail, we reached a dead end, where no decision can be undone, sta
 
 <img src="static/readme/what-if.png" alt="What-if scenario (Figure (e))" width="400"/>
 
-> **Caption:** Comparison of search processes over the formula $F$. Figures (a) and (b) represent the search space under different initial decisions, while Figure (c) displays the updated CNF due to the visited search space presented in Figure (c).
+> **Caption:** Comparison of search processes over the formula $F$. Figure (e) represent the search space under different initial decisions $\overline{3}$, while Figure (d) displays the updated CNF due to the visited search space presented in Figure (e).
 
 ---
 
@@ -62,11 +62,10 @@ Following the CDCL overview, we will show that most of the execution time is spe
 
 Furthermore, we will also demonstrate that even with the enhancements of 2WL in CDCL, certain structures like the **Pigeonhole Principle** became difficult to solve. The hardness of solving such problems is inherent in the proof system under which SAT-solvers are based (resolution). Such problems are difficult because counting for SAT is one of its limitations.
 
-We consider that ***what-if*** scenarios are one of the strengths of SAT-IT. A *what-if* scenario allows the application users to interact with the solving procedure by enabling manual assignments instead of the default assignment that would be done by the implemented heuristic. The assignment of one literal instead of another can lead to a totally different search space. For example, by using plain CDCL and the formula $F$, if the first literal decided is $\overline{3}$—instead of the literal $1$ given by the automatic assignment heuristic—as shown in Figure (e), a different search space would have been traversed to show the unsatisfiability of the formula.
+We consider that ***what-if*** scenarios are one of the strengths of SAT-IT. A *what-if* scenario allows the application users to interact with the solving procedure by enabling manual assignments instead of the default assignment that would be done by the implemented heuristic. The assignment of one literal instead of another can lead to a totally different search space. For example, by using plain CDCL and the formula $F$, if the first literal decided is $\overline{3}$---instead of the literal $1$ given by the automatic assignment heuristic---as shown in Figure (e), a different search space would have been traversed to show the unsatisfiability of the formula.
 
 Alongside the functionalities and the flow management of SAT-IT already presented, the tool presents other utilities that may be worth mentioning in the presentation, such as:
 *   Literal level breakpoints
 *   Statistics preview
-*   Implication graph view (for understanding conflicts in CDCL)
 
 As SAT-IT is in continuous development, other interesting features will appear in next releases.
