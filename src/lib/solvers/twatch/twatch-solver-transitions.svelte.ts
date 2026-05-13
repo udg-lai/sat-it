@@ -215,6 +215,7 @@ export const conflictDetectionBlock = (): void => {
 						const propagated: Lit = unitPropagationTransition(watch.cRef, 'up');
 						queuesUpdateBlock(propagated);
 					} else {
+						increaseNoConflicts();
 						getLatestTrail().attachConflictiveClause(getClausePool().at(watch.cRef));
 						conflictDetectedEventBus.emit();
 					}
@@ -223,6 +224,7 @@ export const conflictDetectionBlock = (): void => {
 		} else {
 			const cRef: CRef = fromRight(nextOccurrence);
 			if (isClauseFalsifiedTransition(cRef)) {
+				increaseNoConflicts();
 				getLatestTrail().attachConflictiveClause(getClausePool().at(cRef));
 				conflictDetectedEventBus.emit();
 			} else if (!isClauseSatisfiedTransition(cRef)) {
@@ -531,7 +533,6 @@ const backjumpingTransition = (trail: Trail, sndHighestDL: number): Trail => {
 		logFatal('Function call error', 'There should be a function in the Variable In CC state');
 	}
 	const bjTrail: Trail = state.run(trail, sndHighestDL);
-	increaseNoConflicts();
 	getSolverMachine().transition('push_trail_state');
 	return bjTrail;
 };
