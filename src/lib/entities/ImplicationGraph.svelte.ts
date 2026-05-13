@@ -4,12 +4,12 @@ import type VariableAssignment from './VariableAssignment.ts';
 import {
 	isDecisionReason,
 	isUnitPropagationReason,
-	getUnitPropagationCRef,
+	getUnitPropagationCRef
 } from './VariableAssignment.ts';
 import type ClausePool from './ClausePool.svelte.ts';
 import type Clause from './Clause.svelte.ts';
 import type { List } from '$lib/types/types.ts';
-import type {SimulationLinkDatum, SimulationNodeDatum} from 'd3';
+import type { SimulationLinkDatum, SimulationNodeDatum } from 'd3';
 
 type NodeGroup =
 	| 'conflict'
@@ -66,8 +66,8 @@ export class Node {
 		this.frontier = false;
 	}
 
-	toSimulationNode(): SimulationNodeDatum{
-		return{
+	toSimulationNode(): SimulationNodeDatum {
+		return {
 			index: this.index(),
 
 			x: 0,
@@ -78,7 +78,7 @@ export class Node {
 
 			fx: null,
 			fy: null
-		}
+		};
 	}
 
 	private _grup(): NodeGroup {
@@ -117,11 +117,11 @@ export class Link {
 		return this.target;
 	}
 
-	toSimulationLink(): SimulationLinkDatum<SimulationNodeDatum>{
-		return{
+	toSimulationLink(): SimulationLinkDatum<SimulationNodeDatum> {
+		return {
 			source: this.getSource(),
 			target: this.getTarget()
-		}
+		};
 	}
 }
 

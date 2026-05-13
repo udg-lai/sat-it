@@ -87,7 +87,10 @@
 		const levelWidth = maxDepth > 0 ? usableWidth / maxDepth : 0;
 
 		const forceNode = d3.forceManyBody<GraphNode>();
-		const forceLink = d3.forceLink<GraphNode, GraphLink>(links).id((d) => d.nodeIndex).strength(0.5);
+		const forceLink = d3
+			.forceLink<GraphNode, GraphLink>(links)
+			.id((d) => d.nodeIndex)
+			.strength(0.5);
 		const forceCollide = d3.forceCollide(nodeRadius * 2).strength(0.3);
 		const forceX = d3
 			.forceX<GraphNode>((d) => {
