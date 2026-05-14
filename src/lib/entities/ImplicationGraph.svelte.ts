@@ -138,11 +138,10 @@ export class ImplicationGraph {
 		this.nodes = new Map();
 		this.links = new Map();
 		assignments.map((assig) => {
+			if (isDecisionReason(assig.getReason()))level++;
 			const node = new Node(makeLeft(assig), level);
 			this.nodes.set(node.index(), node);
-			if (isDecisionReason(assig.getReason())) {
-				level++;
-			} else if (isUnitPropagationReason(assig.getReason())) {
+			if (isUnitPropagationReason(assig.getReason())) {
 				const clause = clauses.at(getUnitPropagationCRef(assig.getReason()));
 				const literals = clause.getLiterals();
 				if (literals.length > 1) {
