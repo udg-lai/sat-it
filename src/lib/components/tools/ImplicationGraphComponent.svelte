@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { getFocusedTrail } from '$lib/states/trails.svelte.ts';
 	import { ImplicationGraph } from '$lib/entities/ImplicationGraph.svelte.ts';
+	import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
 	import { getClausePool } from '$lib/states/problem.svelte.ts';
 	import { isLeft, fromLeft } from '$lib/types/either.ts';
 
@@ -21,14 +22,19 @@
 	$effect(() => {
 		if (!element) return;
 
-		const data: ImplicationGraph = new ImplicationGraph(assignments, getClausePool());
+		const cPool: ClausePool = getClausePool();
+
+		const data: ImplicationGraph = new ImplicationGraph(assignments, cPool);
 
 		if (trail.getState() === 'conflict') {
 			data.addConflict(trail.getConflictiveClause());
-
-			trail.getResolutionContext().forEach((ctx) => {
-				if (isLeft(ctx)) {
-					data.addCut(fromLeft(ctx).clause);
+			const ctx = trail.getResolutionContext();
+			const clauses = trail.getUPContext();
+			ctx.reverse().map((c, i) => {
+				if (isLeft(c) && i > 0) {
+					let j = clauses.length - i;
+					let clauseCut = cPool.at(fromLeft(clauses[j]).reasonCRef);
+					data.addCut(clauseCut);
 				}
 			});
 		}
@@ -36,12 +42,20 @@
 		const css = getComputedStyle(document.documentElement);
 
 		const chart = ForceGraph(data, {
-			nodeGroups: ['conflict', 'decision', 'propagation', 'conflictReason', 'learned'],
+			nodeGroups: [
+				'conflict',
+				'decision',
+				'propagation',
+				'conflictReason',
+				'cutFrontier',
+				'learned'
+			],
 			colors: [
-				css.getPropertyValue('--unsatisfied-color').trim(), // Conflict
+				css.getPropertyValue('--lemma-border-color').trim(), // Conflict
 				css.getPropertyValue('--secondary-font-color').trim(), // Decisio
 				css.getPropertyValue('--temporal-color').trim(), //UP
-				css.getPropertyValue('--unsatisfied-border-color-o').trim(), // Cut
+				css.getPropertyValue('--unsatisfied-color').trim(), // Cut (conflictReason)
+				css.getPropertyValue('--unsatisfied-color-o').trim(), // Cut frontier
 				css.getPropertyValue('--boolean-constraint-propagation').trim() // Learned
 			],
 			height: 600,

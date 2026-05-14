@@ -86,7 +86,9 @@ export class Node {
 			return 'conflict';
 		} else if (isDecisionReason(this.literal.left.getReason())) {
 			return 'decision';
-		} else if (this.cut) {
+		} else if (this.frontier && this.cut) {
+			return 'cutFrontier';
+		} else if (this.cut && !this.frontier) {
 			return 'conflictReason';
 		} else if (isUnitPropagationReason(this.literal.left.getReason())) {
 			return 'propagation';
@@ -128,7 +130,7 @@ export class Link {
 export class ImplicationGraph {
 	private nodes: Map<number, Node>;
 	private links: Map<number, List<Link>>; // Map CRef -> list of links
-	// private cut: List<number>;
+	private cut: Set<number>;
 	private currentLevel: number;
 
 	constructor(assignments: VariableAssignment[], clauses: ClausePool) {
@@ -158,13 +160,14 @@ export class ImplicationGraph {
 			}
 		});
 		this.currentLevel = level;
-		//this.cut = [];
+		this.cut = new Set();
 	}
 
 	addConflict(conflictClause: Clause | undefined): void {
 		const conflictNode = new Node(makeRight(null), this.currentLevel);
 		conflictNode.addToCut();
 		this.nodes.set(conflictNode.index(), conflictNode);
+		this.cut.add(conflictNode.index());
 		if (conflictClause) {
 			conflictClause.getLiterals().map((l) => {
 				const lsource = l.toInt() * -1;
@@ -175,6 +178,7 @@ export class ImplicationGraph {
 				this.links
 					.get(conflictClause.getCRef())!
 					.push(new Link(lsource, ltarget, conflictClause.getCRef()));
+				this.cut.add(lsource);
 				this.nodes.get(lsource)?.addToCut();
 			});
 		}
@@ -189,22 +193,15 @@ export class ImplicationGraph {
 	}
 
 	addCut(clause: Clause): void {
-		//this.cut.map((nodeId) => {
-		//  this.nodes.get(nodeId)?.delveIntoCut;
-		//});
-		if (clause.isTemporal()) {
-			clause.getLiterals().forEach((literal) => {
-				const intLit = literal.toInt() * -1;
-				this.nodes.get(intLit)?.addToCut();
-				//this.cut.push(intLit);
-			});
-			return;
-		}
+		this.cut.forEach((n) => {
+			this.nodes.get(n)?.delveIntoCut();
+		});
 
-		this.links.get(clause.getCRef())?.forEach((link) => {
-			const intLit = link.getTarget();
-			this.nodes.get(intLit)?.addToCut();
-			//this.cut.push(intLit);
+		clause.getLiterals().map((l) => {
+			let litInt = l.toInt();
+			if (l.isFalse()) litInt = litInt * -1;
+			this.nodes.get(litInt)?.addToCut();
+			this.cut.add(litInt);
 		});
 	}
 }
