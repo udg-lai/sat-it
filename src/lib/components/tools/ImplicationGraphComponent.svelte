@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { getLatestTrail } from '$lib/states/trails.svelte.ts';
+	import { getFocusedTrail } from '$lib/states/trails.svelte.ts';
 	import { ImplicationGraph } from '$lib/entities/ImplicationGraph.svelte.ts';
 	import { getClausePool } from '$lib/states/problem.svelte.ts';
 	import { isLeft, fromLeft } from '$lib/types/either.ts';
 
 	import * as d3 from 'd3';
 
-	let trail = $derived(getLatestTrail());
+	let trail = $derived(getFocusedTrail());
 	let assignments = $derived(trail.getAssignments());
 	let element: HTMLDivElement | null = null;
 
