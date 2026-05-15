@@ -4,7 +4,8 @@ import type VariableAssignment from './VariableAssignment.ts';
 import {
 	isDecisionReason,
 	isUnitPropagationReason,
-	getUnitPropagationCRef
+	getUnitPropagationCRef,
+	isBackJumpingReason
 } from './VariableAssignment.ts';
 import type ClausePool from './ClausePool.svelte.ts';
 import type Clause from './Clause.svelte.ts';
@@ -86,13 +87,14 @@ export class Node {
 			return 'conflict';
 		} else if (isDecisionReason(this.literal.left.getReason())) {
 			return 'decision';
-		} else if (this.frontier && this.cut) {
+		}else if(isBackJumpingReason(this.literal.left.getReason())) {
+			return 'learned';
+		}else if (this.frontier && this.cut) {
 			return 'cutFrontier';
 		} else if (this.cut && !this.frontier) {
 			return 'conflictReason';
-		} else if (isUnitPropagationReason(this.literal.left.getReason())) {
-			return 'propagation';
-		} else return 'learned';
+		} else return 'propagation';
+		
 	}
 }
 

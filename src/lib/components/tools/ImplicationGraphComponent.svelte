@@ -99,19 +99,38 @@
 		const horizontalPadding = Math.max(nodeRadius * 6, 40);
 		const usableWidth = Math.max(width - horizontalPadding * 2, 1);
 		const levelWidth = maxDepth > 0 ? usableWidth / maxDepth : 0;
+		const verticalPadding = Math.max(nodeRadius * 6, 40);
+		const verticalSeparation = height / 2 - verticalPadding;
 
 		const forceNode = d3.forceManyBody<GraphNode>();
 		const forceLink = d3
 			.forceLink<GraphNode, GraphLink>(links)
 			.id((d) => d.nodeIndex)
-			.strength(0.5);
-		const forceCollide = d3.forceCollide(nodeRadius * 2).strength(0.3);
+			.strength(1);
+		const forceCollide = d3.forceCollide(nodeRadius * 2).strength(1);
 		const forceX = d3
 			.forceX<GraphNode>((d) => {
+				if (d.group === 'learned') return d.x ?? 0;
 				const depth = nodeDepths.get(d.nodeIndex) ?? 0;
 				return -width / 2 + horizontalPadding + depth * levelWidth;
 			})
 			.strength(1);
+
+		const forceY = d3
+			.forceY<GraphNode>((d) => {
+				if (d.group === 'decision' || d.group === 'learned') {
+					const currentY = d.y ?? 0;
+					if (currentY < 0) {
+						return -verticalSeparation;
+					}
+					return verticalSeparation;
+				}
+				return 0;
+			})
+			.strength((d) => {
+				if (d.group === 'decision' || d.group === 'learned') return 0.6;
+				return 0.1;
+			});
 
 		const simulation = d3
 			.forceSimulation<GraphNode>(nodes)
@@ -119,12 +138,22 @@
 			.force('charge', forceNode)
 			.force('collide', forceCollide)
 			.force('x', forceX)
+			.force('y', forceY)
 			.force('center', d3.forceCenter())
 			.on('tick', ticked);
 
 		nodes.forEach((node) => {
+			if (node.group === 'decision' || node.group === 'learned') return;
 			const depth = nodeDepths.get(node.nodeIndex) ?? 0;
 			node.x = -width / 2 + horizontalPadding + depth * levelWidth;
+		});
+
+		nodes.forEach((node, index) => {
+			if (node.group !== 'decision' && node.group !== 'learned') return;
+
+			node.y = index % 2 === 0
+				? -verticalSeparation * 0.6
+				: verticalSeparation * 0.6;
 		});
 
 		const svg = d3
@@ -189,6 +218,8 @@
 			const incoming = new Map<number, number>();
 			const depths = new Map<number, number>();
 
+			let stack: number[] = [];
+
 			nodes.forEach((node) => {
 				const index = node.nodeIndex;
 				adjacency.set(index, []);
@@ -203,27 +234,31 @@
 				incoming.set(target, (incoming.get(target) ?? 0) + 1);
 			});
 
-			const queue = nodes
-				.map((node) => node.nodeIndex)
-				.filter((index) => (incoming.get(index) ?? 0) === 0);
-
-			while (queue.length > 0) {
-				const current = queue.shift();
-				if (current === undefined) continue;
-
-				for (const next of adjacency.get(current) ?? []) {
-					const nextDepth = (depths.get(current) ?? 0) + 1;
-					if (nextDepth > (depths.get(next) ?? 0)) {
-						depths.set(next, nextDepth);
+			function recursiveStack(stackRec : number[]) : number[] {
+				let current = stackRec.pop();
+				if (current === undefined) return [];
+				let currentLvl = (depths.get(current) ?? 0) + 1;
+				adjacency.get(current)?.map(adj => {
+					if(depths.has(adj)){
+						if((depths.get(adj) ?? 0) < (currentLvl)) {
+							depths.set(adj, currentLvl + 1)
+							stackRec.push(adj);
+						}
 					}
-
-					const remainingIncoming = (incoming.get(next) ?? 0) - 1;
-					incoming.set(next, remainingIncoming);
-					if (remainingIncoming === 0) {
-						queue.push(next);
-					}
-				}
+					depths.set(adj, currentLvl)
+					stackRec.push(adj);
+				});
+				return recursiveStack(stackRec);
 			}
+
+			nodes.map((n) => {
+				if (n.group == 'decision' || n.group == 'learned'){
+					let id = n.nodeIndex;
+					depths.set(id, 1);
+					stack.push(id);
+					stack = recursiveStack(stack);
+				}
+			});
 
 			return depths;
 		}
