@@ -87,14 +87,13 @@ export class Node {
 			return 'conflict';
 		} else if (isDecisionReason(this.literal.left.getReason())) {
 			return 'decision';
-		}else if(isBackJumpingReason(this.literal.left.getReason())) {
+		} else if (isBackJumpingReason(this.literal.left.getReason())) {
 			return 'learned';
-		}else if (this.frontier && this.cut) {
+		} else if (this.frontier && this.cut) {
 			return 'cutFrontier';
 		} else if (this.cut && !this.frontier) {
 			return 'conflictReason';
 		} else return 'propagation';
-		
 	}
 }
 
@@ -140,7 +139,7 @@ export class ImplicationGraph {
 		this.nodes = new Map();
 		this.links = new Map();
 		assignments.map((assig) => {
-			if (isDecisionReason(assig.getReason()))level++;
+			if (isDecisionReason(assig.getReason())) level++;
 			const node = new Node(makeLeft(assig), level);
 			this.nodes.set(node.index(), node);
 			if (isUnitPropagationReason(assig.getReason())) {

@@ -10,6 +10,7 @@
 	let trail = $derived(getFocusedTrail());
 	let assignments = $derived(trail.getAssignments());
 	let element: HTMLDivElement | null = null;
+	let previousPositions: Map<number, { x: number; y: number }> = new Map();
 
 	type GraphNode = d3.SimulationNodeDatum & {
 		nodeIndex: number;
@@ -85,7 +86,9 @@
 		const nodes: GraphNode[] = implicationGraph.getNodes().map((n) => ({
 			nodeIndex: n.index(),
 			group: n.group(),
-			title: n.title()
+			title: n.title(),
+			x: previousPositions.get(n.index())?.x,
+			y: previousPositions.get(n.index())?.y
 		}));
 
 		const links: GraphLink[] = implicationGraph.getLinks().map((l) => ({
@@ -106,8 +109,8 @@
 		const forceLink = d3
 			.forceLink<GraphNode, GraphLink>(links)
 			.id((d) => d.nodeIndex)
-			.strength(1);
-		const forceCollide = d3.forceCollide(nodeRadius * 2).strength(1);
+			.strength(0.7);
+		const forceCollide = d3.forceCollide(nodeRadius * 2).strength(0.7);
 		const forceX = d3
 			.forceX<GraphNode>((d) => {
 				if (d.group === 'learned') return d.x ?? 0;
@@ -145,15 +148,17 @@
 		nodes.forEach((node) => {
 			if (node.group === 'decision' || node.group === 'learned') return;
 			const depth = nodeDepths.get(node.nodeIndex) ?? 0;
-			node.x = -width / 2 + horizontalPadding + depth * levelWidth;
+			if (node.x === undefined) {
+				node.x = -width / 2 + horizontalPadding + depth * levelWidth;
+			}
 		});
 
 		nodes.forEach((node, index) => {
 			if (node.group !== 'decision' && node.group !== 'learned') return;
 
-			node.y = index % 2 === 0
-				? -verticalSeparation * 0.6
-				: verticalSeparation * 0.6;
+			if (node.y === undefined) {
+				node.y = index % 2 === 0 ? -verticalSeparation * 0.6 : verticalSeparation * 0.6;
+			}
 		});
 
 		const svg = d3
@@ -234,25 +239,25 @@
 				incoming.set(target, (incoming.get(target) ?? 0) + 1);
 			});
 
-			function recursiveStack(stackRec : number[]) : number[] {
+			function recursiveStack(stackRec: number[]): number[] {
 				let current = stackRec.pop();
 				if (current === undefined) return [];
 				let currentLvl = (depths.get(current) ?? 0) + 1;
-				adjacency.get(current)?.map(adj => {
-					if(depths.has(adj)){
-						if((depths.get(adj) ?? 0) < (currentLvl)) {
-							depths.set(adj, currentLvl + 1)
+				adjacency.get(current)?.map((adj) => {
+					if (depths.has(adj)) {
+						if ((depths.get(adj) ?? 0) < currentLvl) {
+							depths.set(adj, currentLvl + 1);
 							stackRec.push(adj);
 						}
 					}
-					depths.set(adj, currentLvl)
+					depths.set(adj, currentLvl);
 					stackRec.push(adj);
 				});
 				return recursiveStack(stackRec);
 			}
 
 			nodes.map((n) => {
-				if (n.group == 'decision' || n.group == 'learned'){
+				if (n.group == 'decision' || n.group == 'learned') {
 					let id = n.nodeIndex;
 					depths.set(id, 1);
 					stack.push(id);
@@ -269,10 +274,12 @@
 			node
 				.attr('cx', (d) => {
 					d.x = Math.max(-width / 2 + margin, Math.min(width / 2 - margin, d.x ?? 0));
+					previousPositions.set(d.nodeIndex, { x: d.x ?? 0, y: d.y ?? 0 });
 					return d.x;
 				})
 				.attr('cy', (d) => {
 					d.y = Math.max(-height / 2 + margin, Math.min(height / 2 - margin, d.y ?? 0));
+					previousPositions.set(d.nodeIndex, { x: d.x ?? 0, y: d.y ?? 0 });
 					return d.y;
 				});
 
