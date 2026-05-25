@@ -1,9 +1,12 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import { getFocusedTrail } from '$lib/states/trails.svelte.ts';
 	import { ImplicationGraph } from '$lib/entities/ImplicationGraph.svelte.ts';
 	import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
 	import { getClausePool } from '$lib/states/problem.svelte.ts';
 	import { isLeft, fromLeft } from '$lib/types/either.ts';
+	import Button from './Button.svelte';
+	import { CirclePlusSolid, CircleMinusSolid } from 'flowbite-svelte-icons';
 
 	import * as d3 from 'd3';
 
@@ -20,14 +23,42 @@
 
 	type GraphLink = d3.SimulationLinkDatum<GraphNode>;
 
+	type ForceGraphResult = {
+		svg: SVGSVGElement;
+		updateRadius: (radius: number) => void;
+	};
+
+	const BASE_NODE_RADIUS = 15;
+	const MIN_ZOOM = 0.4;
+	const MAX_ZOOM = 3;
+	const ZOOM_STEP = 0.2;
+	const NODE_DISTANCE_RADIUS_FACTOR = 1;
+
+	let zoom = 1;
+	let updateGraphRadius: ((radius: number) => void) | null = null;
+
+	function addZoom(): void {
+		updateZoom(zoom + ZOOM_STEP);
+	}
+
+	function subtractZoom(): void {
+		updateZoom(zoom - ZOOM_STEP);
+	}
+
+	function updateZoom(nextZoom: number): void {
+		zoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, Number(nextZoom.toFixed(2))));
+		updateGraphRadius?.(BASE_NODE_RADIUS * zoom);
+	}
+
 	$effect(() => {
 		if (!element) return;
+		if (trail.getState() === 'conflict') {
 
 		const cPool: ClausePool = getClausePool();
 
 		const data: ImplicationGraph = new ImplicationGraph(assignments, cPool);
 
-		if (trail.getState() === 'conflict') {
+		{
 			data.addConflict(trail.getConflictiveClause());
 			const ctx = trail.getResolutionContext();
 			const clauses = trail.getUPContext();
@@ -60,12 +91,14 @@
 				css.getPropertyValue('--boolean-constraint-propagation').trim() // Learned
 			],
 			height: 600,
-			width: element?.clientWidth ?? 800
+			width: element?.clientWidth ?? 800,
+			initialNodeRadius: BASE_NODE_RADIUS * untrack(() => zoom)
 		});
 
 		element.innerHTML = '';
-		element.appendChild(chart);
-	});
+		element.appendChild(chart.svg);
+		updateGraphRadius = chart.updateRadius;
+	}});
 
 	function ForceGraph(
 		implicationGraph: ImplicationGraph,
@@ -73,15 +106,18 @@
 			nodeGroups,
 			colors,
 			width,
-			height
+			height,
+			initialNodeRadius
 		}: {
 			nodeGroups: string[];
 			colors: readonly string[];
 			width: number;
 			height: number;
+			initialNodeRadius: number;
 		}
-	): SVGSVGElement {
-		const nodeRadius = 15;
+	): ForceGraphResult {
+		let nodeRadius = initialNodeRadius;
+		const nodeDistance = () => nodeRadius / NODE_DISTANCE_RADIUS_FACTOR;
 
 		const nodes: GraphNode[] = implicationGraph.getNodes().map((n) => ({
 			nodeIndex: n.index(),
@@ -109,8 +145,9 @@
 		const forceLink = d3
 			.forceLink<GraphNode, GraphLink>(links)
 			.id((d) => d.nodeIndex)
+			.distance(nodeDistance)
 			.strength(0.7);
-		const forceCollide = d3.forceCollide(nodeRadius * 2).strength(0.7);
+		const forceCollide = d3.forceCollide<GraphNode>(nodeRadius * 2).strength(0.7);
 		const forceX = d3
 			.forceX<GraphNode>((d) => {
 				if (d.group === 'learned') return d.x ?? 0;
@@ -269,16 +306,14 @@
 		}
 
 		function ticked() {
-			const margin = nodeRadius;
-
 			node
 				.attr('cx', (d) => {
-					d.x = Math.max(-width / 2 + margin, Math.min(width / 2 - margin, d.x ?? 0));
+					d.x = d.x ?? 0;
 					previousPositions.set(d.nodeIndex, { x: d.x ?? 0, y: d.y ?? 0 });
 					return d.x;
 				})
 				.attr('cy', (d) => {
-					d.y = Math.max(-height / 2 + margin, Math.min(height / 2 - margin, d.y ?? 0));
+					d.y = d.y ?? 0;
 					previousPositions.set(d.nodeIndex, { x: d.x ?? 0, y: d.y ?? 0 });
 					return d.y;
 				});
@@ -350,7 +385,20 @@
 				.on('end', dragended);
 		}
 
-		return svg.node() as SVGSVGElement;
+		function updateRadius(radius: number): void {
+			nodeRadius = radius;
+			forceLink.distance(nodeDistance);
+			forceCollide.radius(nodeRadius * 2);
+			node.attr('r', nodeRadius);
+			nodeText.style('font-size', `${Math.max(Math.floor(nodeRadius * 0.65), 8)}px`);
+			simulation.alpha(0.3).restart();
+			ticked();
+		}
+
+		return {
+			svg: svg.node() as SVGSVGElement,
+			updateRadius
+		};
 	}
 </script>
 
@@ -358,6 +406,10 @@
 	bind:this={element}
 	style="width: 100%; height: 600px; border: 1px solid #ccc; background: white; overflow: auto;"
 ></div>
+<div class="zoom-controls">
+	<Button onClick={() => addZoom()} icon={CirclePlusSolid} title="Clauses" />
+	<Button onClick={() => subtractZoom()} icon={CircleMinusSolid} title="Clauses" />
+</div>
 
 <style>
 	div {
