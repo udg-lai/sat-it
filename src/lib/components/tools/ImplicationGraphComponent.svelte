@@ -2,16 +2,12 @@
 	import { untrack } from 'svelte';
 	import { getFocusedTrail } from '$lib/states/trails.svelte.ts';
 	import { ImplicationGraph } from '$lib/entities/ImplicationGraph.svelte.ts';
-	import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
-	import { getClausePool } from '$lib/states/problem.svelte.ts';
-	import { isLeft, fromLeft } from '$lib/types/either.ts';
 	import Button from './Button.svelte';
 	import { CirclePlusSolid, CircleMinusSolid } from 'flowbite-svelte-icons';
 
 	import * as d3 from 'd3';
 
 	let trail = $derived(getFocusedTrail());
-	let assignments = $derived(trail.getAssignments());
 	let element: HTMLDivElement | null = null;
 	let previousPositions: Map<number, { x: number; y: number }> = new Map();
 
@@ -53,52 +49,37 @@
 	$effect(() => {
 		if (!element) return;
 		if (trail.getState() === 'conflict') {
+			const data: ImplicationGraph = new ImplicationGraph(trail);
 
-		const cPool: ClausePool = getClausePool();
+			const css = getComputedStyle(document.documentElement);
 
-		const data: ImplicationGraph = new ImplicationGraph(assignments, cPool);
-
-		{
-			data.addConflict(trail.getConflictiveClause());
-			const ctx = trail.getResolutionContext();
-			const clauses = trail.getUPContext();
-			ctx.reverse().map((c, i) => {
-				if (isLeft(c) && i > 0) {
-					let j = clauses.length - i;
-					let clauseCut = cPool.at(fromLeft(clauses[j]).reasonCRef);
-					data.addCut(clauseCut);
-				}
+			const chart = ForceGraph(data, {
+				nodeGroups: [
+					'conflict',
+					'decision',
+					'propagation',
+					'conflictReason',
+					'cutFrontier',
+					'learned'
+				],
+				colors: [
+					css.getPropertyValue('--lemma-border-color').trim(), // Conflict
+					css.getPropertyValue('--secondary-font-color').trim(), // Decisio
+					css.getPropertyValue('--temporal-color').trim(), //UP
+					css.getPropertyValue('--unsatisfied-color').trim(), // Cut (conflictReason)
+					css.getPropertyValue('--unsatisfied-color-o').trim(), // Cut frontier
+					css.getPropertyValue('--boolean-constraint-propagation').trim() // Learned
+				],
+				height: 600,
+				width: element?.clientWidth ?? 800,
+				initialNodeRadius: BASE_NODE_RADIUS * untrack(() => zoom)
 			});
+
+			element.innerHTML = '';
+			element.appendChild(chart.svg);
+			updateGraphRadius = chart.updateRadius;
 		}
-
-		const css = getComputedStyle(document.documentElement);
-
-		const chart = ForceGraph(data, {
-			nodeGroups: [
-				'conflict',
-				'decision',
-				'propagation',
-				'conflictReason',
-				'cutFrontier',
-				'learned'
-			],
-			colors: [
-				css.getPropertyValue('--lemma-border-color').trim(), // Conflict
-				css.getPropertyValue('--secondary-font-color').trim(), // Decisio
-				css.getPropertyValue('--temporal-color').trim(), //UP
-				css.getPropertyValue('--unsatisfied-color').trim(), // Cut (conflictReason)
-				css.getPropertyValue('--unsatisfied-color-o').trim(), // Cut frontier
-				css.getPropertyValue('--boolean-constraint-propagation').trim() // Learned
-			],
-			height: 600,
-			width: element?.clientWidth ?? 800,
-			initialNodeRadius: BASE_NODE_RADIUS * untrack(() => zoom)
-		});
-
-		element.innerHTML = '';
-		element.appendChild(chart.svg);
-		updateGraphRadius = chart.updateRadius;
-	}});
+	});
 
 	function ForceGraph(
 		implicationGraph: ImplicationGraph,

@@ -1,13 +1,15 @@
 import type { Either } from '$lib/types/either.ts';
-import { isLeft, isRight, makeLeft, makeRight } from '../types/either.ts';
+import { fromLeft, isLeft, isRight, makeLeft, makeRight } from '../types/either.ts';
 import type VariableAssignment from './VariableAssignment.ts';
+import { getUnitPropagationCRef } from './VariableAssignment.ts';
+import { getClausePool } from '$lib/states/problem.svelte.ts';
 import {
 	isDecisionReason,
+	isBackJumpingReason,
 	isUnitPropagationReason,
-	getUnitPropagationCRef,
-	isBackJumpingReason
+	type Reason
 } from './VariableAssignment.ts';
-import type ClausePool from './ClausePool.svelte.ts';
+import type { Trail } from './Trail.svelte.ts';
 import type Clause from './Clause.svelte.ts';
 import type { List } from '$lib/types/types.ts';
 import type { SimulationLinkDatum, SimulationNodeDatum } from 'd3';
@@ -42,7 +44,7 @@ export class Node {
 							.map((char) => `${char}\u0305`)
 							.join('')
 					)}`
-			: `⊥ / ${this.level}`;
+			: `${this.level} / ⊥`;
 	}
 
 	index(): number {
@@ -51,6 +53,14 @@ export class Node {
 
 	group(): NodeGroup {
 		return this._grup();
+	}
+
+	getReason(): Either<Reason, null> {
+		if (isLeft(this.literal)) {
+			return makeLeft(this.literal.left.getReason());
+		} else {
+			return makeRight(null);
+		}
 	}
 
 	addToCut(): void {
@@ -132,56 +142,107 @@ export class ImplicationGraph {
 	private nodes: Map<number, Node>;
 	private links: Map<number, List<Link>>; // Map CRef -> list of links
 	private cut: Set<number>;
-	private currentLevel: number;
 
-	constructor(assignments: VariableAssignment[], clauses: ClausePool) {
-		let level = 0;
+	constructor(trail: Trail) {
 		this.nodes = new Map();
 		this.links = new Map();
-		assignments.map((assig) => {
-			if (isDecisionReason(assig.getReason())) level++;
-			const node = new Node(makeLeft(assig), level);
-			this.nodes.set(node.index(), node);
-			if (isUnitPropagationReason(assig.getReason())) {
-				const clause = clauses.at(getUnitPropagationCRef(assig.getReason()));
-				const literals = clause.getLiterals();
-				if (literals.length > 1) {
-					literals.map((lit) => {
-						const lsource = lit.toInt() * -1;
-						const ltarget = assig.toLit() as number;
-						if (lsource != ltarget && lsource != -ltarget) {
-							if (!this.links.has(clause.getCRef())) {
-								this.links.set(clause.getCRef(), []);
-							}
-							this.links.get(clause.getCRef())!.push(new Link(lsource, ltarget, clause.getCRef()));
-						}
-					});
+		this.cut = new Set();
+
+		const clausePool = getClausePool();
+
+		const variableAssignments = trail.getAssignments();
+
+		const variablesInCut = new Set<number>();
+
+		const litToAssignmentMap = new Map<number, VariableAssignment>();
+
+		const litLvl = new Map<number, number>();
+
+		let currentLvl = 0;
+
+		variableAssignments.forEach((va) => {
+			litToAssignmentMap.set(va.toLit(), va);
+			if (isDecisionReason(va.getReason())) {
+				currentLvl++;
+			}
+			litLvl.set(va.toLit(), currentLvl);
+		});
+
+		this.addNode(new Node(makeRight(null), currentLvl));
+
+		// Cerca de les variables que estan en el cut
+		trail.getResolutionContext().forEach((ctx, i) => {
+			if (isRight(ctx)) return;
+			if (i === 0) return;
+			fromLeft(ctx)
+				.clause.getLiterals()
+				.forEach((l) => {
+					variablesInCut.add(l.toInt() > 0 ? l.toInt() : l.toInt() * -1);
+				});
+		});
+
+		const assignmentsInCut = variableAssignments.filter((va) =>
+			variablesInCut.has(va.toLit() > 0 ? va.toLit() : va.toLit() * -1)
+		);
+
+		trail
+			.getConflictiveClause()
+			?.getLiterals()
+			.forEach((l) => {
+				const reasonAs = litToAssignmentMap.get(l.toInt() * -1);
+				const conflictClause = trail.getConflictiveClause();
+				if (reasonAs && conflictClause) {
+					const cRefConflict = conflictClause.getCRef();
+					this.addLink(new Link(reasonAs.toLit(), 0, cRefConflict));
 				}
+			});
+
+		assignmentsInCut.forEach((as) =>
+			this.addNode(new Node(makeLeft(as), litLvl.get(as.toLit()) || 0))
+		);
+
+		assignmentsInCut.forEach((as) => {
+			if (isUnitPropagationReason(as.getReason())) {
+				const cRef = getUnitPropagationCRef(as.getReason());
+				const clause = clausePool.at(cRef);
+
+				clause.getLiterals().forEach((l) => {
+					const reasonAs = litToAssignmentMap.get(l.toInt() * -1);
+					if (reasonAs) {
+						this.addNode(new Node(makeLeft(reasonAs), litLvl.get(reasonAs.toLit()) || 0));
+						this.addLink(new Link(reasonAs.toLit(), as.toLit(), cRef));
+					}
+				});
 			}
 		});
-		this.currentLevel = level;
-		this.cut = new Set();
-	}
 
-	addConflict(conflictClause: Clause | undefined): void {
-		const conflictNode = new Node(makeRight(null), this.currentLevel);
-		conflictNode.addToCut();
-		this.nodes.set(conflictNode.index(), conflictNode);
-		this.cut.add(conflictNode.index());
-		if (conflictClause) {
-			conflictClause.getLiterals().map((l) => {
-				const lsource = l.toInt() * -1;
-				const ltarget = 0;
-				if (!this.links.has(conflictClause.getCRef())) {
-					this.links.set(conflictClause.getCRef(), []);
-				}
-				this.links
-					.get(conflictClause.getCRef())!
-					.push(new Link(lsource, ltarget, conflictClause.getCRef()));
-				this.cut.add(lsource);
-				this.nodes.get(lsource)?.addToCut();
+		if (trail.getConflictiveClause()) {
+			let anteriorClause = trail.getConflictiveClause() as Clause;
+
+			trail.getResolutionContext().forEach((ctx) => {
+				if (isRight(ctx)) return;
+				const clause = fromLeft(ctx).clause;
+				this.addCut(clause);
+				this.addCut(anteriorClause);
+				anteriorClause = clause;
 			});
 		}
+	}
+
+	addNode(node: Node): void {
+		if (!this.nodes.has(node.index())) {
+			this.nodes.set(node.index(), node);
+		}
+	}
+
+	addLink(link: Link): void {
+		const id = link.getClauseId();
+
+		if (!this.links.has(id)) {
+			this.links.set(id, []);
+		}
+
+		this.links.get(id)?.push(link);
 	}
 
 	getNodes(): List<Node> {
@@ -200,8 +261,12 @@ export class ImplicationGraph {
 		clause.getLiterals().map((l) => {
 			let litInt = l.toInt();
 			if (l.isFalse()) litInt = litInt * -1;
-			this.nodes.get(litInt)?.addToCut();
-			this.cut.add(litInt);
+			this.addLitIntoCut(litInt);
 		});
+	}
+
+	private addLitIntoCut(literal: number): void {
+		this.nodes.get(literal)?.addToCut();
+		this.cut.add(literal);
 	}
 }
