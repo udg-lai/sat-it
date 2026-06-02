@@ -62,8 +62,10 @@
 	"dependencies": {
 		"@types/d3": "^7.4.3",
 		"d3": "^7.9.0",
+		"graphology": "^0.26.0",
 		"katex": "^0.16.21",
 		"serve": "^14.2.4",
+		"sigma": "^3.0.3",
 		"svelte-tiny-virtual-list": "^2.1.2"
 	}
 }
