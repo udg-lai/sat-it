@@ -53,13 +53,9 @@
 	}
 
 	$effect(() => {
-		trail;
 		trail.getState();
 		trail.nAssignments();
 		trail.hasConflictiveClause();
-		if (trail.hasConflictiveClause()) {
-			trail.getResolutionContext().length;
-		}
 		createGraph();
 	});
 

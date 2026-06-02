@@ -122,13 +122,13 @@ export class ImplicationGraph {
 	private nodes: Map<number, Node>; // Map Lit -> Node
 	private links: Map<number, List<Link>>; // Map CRef -> list of links
 	private cuts: List<number>; // Set Cref cutted
-	private depths: List<List<number>>;
+	//private depths: List<List<number>>;
 
 	constructor(trail: Trail) {
 		this.nodes = new Map();
 		this.links = new Map();
 		this.cuts = [];
-		this.depths = [];
+		//this.depths = [];
 		const clausePool = getClausePool();
 
 		const variableAssignments = trail.getAssignments();
@@ -159,7 +159,7 @@ export class ImplicationGraph {
 		this.addNode(new Node(null, currentLvl, 0));
 
 		// Cerca de les variables que estan en el cut
-		trail.getResolutionContext().forEach((ctx, i) => {
+		trail.getResolutionContext().forEach((ctx) => {
 			if (isRight(ctx)) return;
 			fromLeft(ctx)
 				.clause.getLiterals()
@@ -211,8 +211,6 @@ export class ImplicationGraph {
 				anteriorClause = clause;
 			});
 		}
-
-
 	}
 
 	addNode(node: Node): void {
@@ -229,12 +227,13 @@ export class ImplicationGraph {
 		}
 
 		this.links.get(id)?.push(link);
-		const antDepth = this.nodes.get(link.getSource())?.getDepth() ?? 0;
+		//const antDepth = this.nodes.get(link.getSource())?.getDepth() ?? 0;
 		const posDepth = (this.nodes.get(link.getTarget())?.getDepth() ?? 0) + 1;
 		/*if(this.nodes.get(link.getSource())?.updateDepth(posDepth)){
 			this.depths[antDepth].filter(n => n !== link.getSource());
 			this.depths[posDepth].push(link.getSource());
 		}*/
+		this.nodes.get(link.getSource())?.updateDepth(posDepth);
 	}
 
 	getNodes(): List<Node> {
@@ -249,9 +248,10 @@ export class ImplicationGraph {
 		if (clause.isTemporal()) return;
 
 		clause.getLiterals().map((l) => {
-			let litInt = l.toInt();
-			if (l.isFalse()) litInt = litInt * -1;
-			this.addLitIntoCut(clause.getCRef());
+			//let litInt = l.toInt();
+			if (l.isFalse())
+				//litInt = litInt * -1;
+				this.addLitIntoCut(clause.getCRef());
 		});
 	}
 
@@ -278,11 +278,11 @@ export class ImplicationGraph {
 	}
 
 	private toSigmaNode(node: Node): NodeAttributes {
-		let posY = this.depths[node.getDepth()]?.indexOf(node.index()) ?? -1;
+		//let posY = this.depths[node.getDepth()]?.indexOf(node.index()) ?? -1;
 		return {
 			label: node.title(),
 			x: node.getDepth() * -5,
-			y: node.index(),//posY * 5, //TEMPORAL
+			y: node.index(), //posY * 5, //TEMPORAL
 			size: 10,
 			color: '#e74c3c', //TEMPORAL
 			cut: 0
