@@ -69,3 +69,16 @@ Alongside the functionalities and the flow management of SAT-IT already presente
 *   Statistics preview
 
 As SAT-IT is in continuous development, other interesting features will appear in next releases.
+
+
+## Instructions to run the code
+
+- Clone the repository
+
+- Install nodejs and npm
+
+- Install vite
+
+- Run `npm install` in the root of the repository
+
+- Run `npm run dev` to start the application
