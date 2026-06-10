@@ -22,7 +22,6 @@ DPLL required five conflicts to demonstrate the unsatisfiability of the formula 
 
 <img src="static/readme/dpll-using-dpll.png" alt="Comparison of search processes over the formula F (Figure (b))" width="400"/>
 
-
 > **Caption:** Figures (a) and (b) represent the search space of the Backtracking and DPLL algorithms.
 
 ---
@@ -36,7 +35,6 @@ From the last trail, we reached a dead end, where no decision can be undone, sta
 ---
 
 ### Figure 2: CDCL Search and CNF Update
-
 
 **Figure (c) - CDCL search space.**
 
@@ -56,16 +54,29 @@ From the last trail, we reached a dead end, where no decision can be undone, sta
 
 Following the CDCL overview, we will show that most of the execution time is spent traversing occurrence lists to visit clauses that can potentially trigger a UP or be falsified. Hence, it is of the upmost importance to optimize this process. To address this, we will present the **2WL scheme** for minimizing the number of visited clauses. By watching two literals in every clause, it is possible to ensure that a clause has not become unit or falsified.
 
-*   For the formula $F$, enabling the 2WL scheme in CDCL avoids visiting **five less clauses** than basic CDCL.
-*   For such a small instance, this is already a notable boost in performance.
-*   The effect of enabling 2WL is appreciated by the statistics that appear in the bottom part of the application.
+- For the formula $F$, enabling the 2WL scheme in CDCL avoids visiting **five less clauses** than basic CDCL.
+- For such a small instance, this is already a notable boost in performance.
+- The effect of enabling 2WL is appreciated by the statistics that appear in the bottom part of the application.
 
 Furthermore, we will also demonstrate that even with the enhancements of 2WL in CDCL, certain structures like the **Pigeonhole Principle** became difficult to solve. The hardness of solving such problems is inherent in the proof system under which SAT-solvers are based (resolution). Such problems are difficult because counting for SAT is one of its limitations.
 
-We consider that ***what-if*** scenarios are one of the strengths of SAT-IT. A *what-if* scenario allows the application users to interact with the solving procedure by enabling manual assignments instead of the default assignment that would be done by the implemented heuristic. The assignment of one literal instead of another can lead to a totally different search space. For example, by using plain CDCL and the formula $F$, if the first literal decided is $\overline{3}$---instead of the literal $1$ given by the automatic assignment heuristic---as shown in Figure (e), a different search space would have been traversed to show the unsatisfiability of the formula.
+We consider that **_what-if_** scenarios are one of the strengths of SAT-IT. A _what-if_ scenario allows the application users to interact with the solving procedure by enabling manual assignments instead of the default assignment that would be done by the implemented heuristic. The assignment of one literal instead of another can lead to a totally different search space. For example, by using plain CDCL and the formula $F$, if the first literal decided is $\overline{3}$---instead of the literal $1$ given by the automatic assignment heuristic---as shown in Figure (e), a different search space would have been traversed to show the unsatisfiability of the formula.
 
 Alongside the functionalities and the flow management of SAT-IT already presented, the tool presents other utilities that may be worth mentioning in the presentation, such as:
-*   Literal level breakpoints
-*   Statistics preview
+
+- Literal level breakpoints
+- Statistics preview
 
 As SAT-IT is in continuous development, other interesting features will appear in next releases.
+
+## Instructions to run the code
+
+- Clone the repository
+
+- Install nodejs and npm
+
+- Install vite
+
+- Run `npm install` in the root of the repository
+
+- Run `npm run dev` to start the application
