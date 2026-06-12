@@ -15,6 +15,7 @@ import {
 	conflictAnalysisFinishedEventBus,
 	conflictDetectedEventBus,
 	newTrailStackedEventBus,
+	resolutionStepEventBus,
 	visitingComplementaryOccEventBus
 } from '$lib/events/events.ts';
 import { getConflictAnalysis } from '$lib/states/conflict-anlysis.svelte.ts';
@@ -148,9 +149,11 @@ export const conflictAnalysisBlock = (): void => {
 	if (isLeft(virtualResolution)) {
 		// No job done by the resolution procedure, the clause remains the same
 		getLatestTrail().updateResolutionContext(undefined);
+		resolutionStepEventBus.emit(undefined);
 	} else {
 		const { resolvent } = fromRight(virtualResolution);
 		getLatestTrail().updateResolutionContext(resolvent.clause);
+		resolutionStepEventBus.emit(resolvent.clause);
 	}
 
 	const asserting: boolean = assertingClauseInConflictAnalysis();
