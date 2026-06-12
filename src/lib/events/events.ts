@@ -1,4 +1,5 @@
 import type { Trail } from '$lib/entities/Trail.svelte.ts';
+import type Clause from '$lib/entities/Clause.svelte.ts';
 import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
 import type { LiteralBreakpoint } from '$lib/states/breakpoints.svelte.ts';
 import type { Algorithm } from '$lib/types/algorithm.ts';
@@ -61,6 +62,9 @@ export const conflictDetectedEventBus = createEventBus<void>();
 
 // event bus for notify when a conflict analysis is finished
 export const conflictAnalysisFinishedEventBus = createEventBus<void>();
+
+// event bus for notify each virtual resolution step during conflict analysis
+export const resolutionStepEventBus = createEventBus<Clause | undefined>();
 
 export type UndoToDecisionEvent = {
 	decision: VariableAssignment;

@@ -1,18 +1,20 @@
 import type { Either } from '$lib/types/either.ts';
-import { fromLeft, isLeft, isRight, makeLeft, makeRight } from '../types/either.ts';
+import { isLeft, isRight, makeLeft, makeRight } from '../types/either.ts';
 import type VariableAssignment from './VariableAssignment.ts';
-import { getUnitPropagationCRef } from './VariableAssignment.ts';
 import { getClausePool } from '$lib/states/problem.svelte.ts';
 import {
 	isDecisionReason,
 	isBackJumpingReason,
-	isUnitPropagationReason,
-	type Reason
+	type Reason,
+	getPropagationCRef
 } from './VariableAssignment.ts';
 import type { Trail } from './Trail.svelte.ts';
-import type Clause from './Clause.svelte.ts';
-import type { List } from '$lib/types/types.ts';
+import type { CRef, List, Var } from '$lib/types/types.ts';
 import { DirectedGraph } from 'graphology';
+import { ConflictAnalysis, type VirtualResolution } from './ConflictAnalysis.svelte.ts';
+import type Clause from './Clause.svelte.ts';
+import type ClausePool from './ClausePool.svelte.ts';
+import { fromLeft } from '$lib/types/either.ts';
 
 type NodeGroup = 'conflict' | 'decision' | 'propagation' | 'conflictReason' | 'learned';
 
@@ -22,7 +24,9 @@ type NodeAttributes = {
 	y: number;
 	size: number;
 	color: string;
-	cut: 0;
+	cut: number;
+	group: NodeGroup;
+	forceLabel: boolean;
 };
 
 type EdgeAttributes = {
@@ -33,184 +37,186 @@ type EdgeAttributes = {
 };
 
 export class Node {
-	private literal: Either<VariableAssignment, null>;
+	private varAsig: Either<VariableAssignment, null>;
 	private level: number;
-	private depth: number;
+	private inCut: number;
 
-	constructor(literal: VariableAssignment | null = null, level: number, depth: number) {
-		this.literal = literal ? makeLeft(literal) : makeRight(null);
+	constructor(literal: VariableAssignment | null = null, level: number) {
+		this.varAsig = literal ? makeLeft(literal) : makeRight(null);
 		this.level = level;
-		this.depth = depth;
+		this.inCut = 0;
 	}
 
 	title(): string {
-		return isLeft(this.literal)
-			? `${this.level} / ${this.literal.left
-					.toTeX()
-					.replace(/\\overline\{([^}]+)\}/g, (_, content: string) =>
-						Array.from(content)
-							.map((char) => `${char}\u0305`)
-							.join('')
-					)}`
+		return isLeft(this.varAsig)
+			? `${this.level} / ${this.varAsig.left.toLit()}`
 			: `${this.level} / ⊥`;
 	}
 
-	index(): number {
-		return isLeft(this.literal) ? this.literal.left.toLit() : 0;
+	index(): Var {
+		return isLeft(this.varAsig) ? fromLeft(this.varAsig).variable.toInt() : 0;
 	}
 
 	group(): NodeGroup {
 		return this._grup();
 	}
 
+	cut(order: number): void {
+		if (this.inCut === 0) this.inCut = order;
+	}
+
+	getCut(): number {
+		return this.inCut;
+	}
+
 	getReason(): Either<Reason, null> {
-		if (isLeft(this.literal)) {
-			return makeLeft(this.literal.left.getReason());
+		if (isLeft(this.varAsig)) {
+			return makeLeft(this.varAsig.left.getReason());
 		} else {
 			return makeRight(null);
 		}
 	}
 
-	updateDepth(newDepth: number): boolean {
-		if (this.depth < newDepth) {
-			this.depth = newDepth;
-			return true;
-		}
-		return false;
-	}
-
-	getDepth(): number {
-		return this.depth;
-	}
-
 	private _grup(): NodeGroup {
-		if (isRight(this.literal)) {
+		if (isRight(this.varAsig)) {
 			return 'conflict';
-		} else if (isDecisionReason(this.literal.left.getReason())) {
+		} else if (isDecisionReason(this.varAsig.left.getReason())) {
 			return 'decision';
-		} else if (isBackJumpingReason(this.literal.left.getReason())) {
+		} else if (isBackJumpingReason(this.varAsig.left.getReason())) {
 			return 'learned';
 		} else return 'propagation';
 	}
 }
 
 export class Link {
-	private source: number;
-	private target: number;
+	private source: Var;
+	private target: Var;
 	private cRef: number;
+	private cutted: boolean;
 
-	constructor(source: number, target: number, clauseId: number) {
+	constructor(target: number, source: number, clauseId: number) {
 		this.source = source;
 		this.target = target;
 		this.cRef = clauseId;
+		this.cutted = false;
+	}
+
+	cut(): void {
+		this.cutted = true;
+	}
+
+	isCut(): boolean {
+		return this.cutted;
 	}
 
 	getSource(): number {
 		return this.source;
 	}
 
-	getcRef(): number {
+	getcRef(): Var {
 		return this.cRef;
 	}
 
-	getTarget(): number {
+	getTarget(): Var {
 		return this.target;
 	}
 }
 
 export class ImplicationGraph {
-	private nodes: Map<number, Node>; // Map Lit -> Node
-	private links: Map<number, List<Link>>; // Map CRef -> list of links
-	private cuts: List<number>; // Set Cref cutted
-	//private depths: List<List<number>>;
+	private nodes: Map<Var, Node>; // Map Lit -> Node
+	private links: Map<CRef, List<Link>>; // Map CRef -> list of links
+	private cuts: List<[CRef, Var] | undefined>; // List of nodes in each cut
+	private currentCut: number;
 
 	constructor(trail: Trail) {
+		if (trail.getConflictiveClause() === undefined)
+			throw new Error('To generate the Implication Graph trail must have the Conflictive Clause');
+
 		this.nodes = new Map();
 		this.links = new Map();
 		this.cuts = [];
-		//this.depths = [];
-		const clausePool = getClausePool();
+		this.currentCut = 0;
 
-		const variableAssignments = trail.getAssignments();
+		const variableAssignments: VariableAssignment[] = trail.getAssignments();
 
-		const conflictClause = trail.getConflictiveClause();
+		const conflictClause: Clause = trail.getConflictiveClause()!;
 
-		const variablesInCut = new Set<number>();
+		const varToAssignmentMap = new Map<Var, VariableAssignment>();
 
-		const litToAssignmentMap = new Map<number, VariableAssignment>();
+		const clausePool: ClausePool = getClausePool();
 
-		const litLvl = new Map<number, number>();
-
-		let currentLvl = 0;
-
-		console.log(variableAssignments);
-		console.log(trail.getResolutionContext());
+		const currentLvl: number = trail.getDL();
 
 		// Establi els nivells dels literals
 		variableAssignments.forEach((va) => {
-			litToAssignmentMap.set(va.toLit(), va);
-			if (isDecisionReason(va.getReason())) {
-				currentLvl++;
-			}
-			litLvl.set(va.toLit(), currentLvl);
+			varToAssignmentMap.set(va.variable.toInt(), va);
 		});
 
 		// Afegim el node conflicte
-		this.addNode(new Node(null, currentLvl, 0));
+		this.addNode(new Node(null, currentLvl));
 
-		// Cerca de les variables que estan en el cut
-		trail.getResolutionContext().forEach((ctx) => {
-			if (isRight(ctx)) return;
-			fromLeft(ctx)
-				.clause.getLiterals()
-				.forEach((l) => {
-					variablesInCut.add(l.toInt() > 0 ? l.toInt() : l.toInt() * -1);
-				});
-		});
+		this.cuts.push([conflictClause.getCRef(), 0]);
 
-		// Passem de variables a assignacions
-		const assignmentsInCut = variableAssignments.filter((va) =>
-			variablesInCut.has(va.toLit() > 0 ? va.toLit() : va.toLit() * -1)
+		// Precalculem el conflictAnalisis
+		const conflictAnalisis: ConflictAnalysis = new ConflictAnalysis(
+			conflictClause,
+			trail.lastDecision(),
+			trail.getPropagationsAtLevel(currentLvl)
 		);
 
-		// Creem links per els literals que connecten amb conflicte
-		conflictClause?.getLiterals().forEach((l) => {
-			const reasonAs = litToAssignmentMap.get(l.toInt() * -1);
-			if (reasonAs && conflictClause && !conflictClause.isTemporal()) {
-				const cRefConflict = conflictClause.getCRef();
-				this.addNode(new Node(reasonAs, litLvl.get(reasonAs.toLit()) ?? 0, 0));
-				this.addLink(new Link(reasonAs.toLit(), 0, cRefConflict));
-			}
+		const conflictVariablesToCut: Set<Var> = new Set(
+			conflictClause.getLiterals().map((l) => l.getVariable().toInt())
+		);
+
+		conflictVariablesToCut.forEach((v) => {
+			const variable = varToAssignmentMap.get(v)!;
+			this.addNode(new Node(variable, trail.getVariableDL(variable.toVar())));
+			this.addLink(new Link(variable.toVar(), 0, conflictClause.getCRef()));
 		});
 
-		assignmentsInCut.forEach((as) => {
-			this.addNode(new Node(as, litLvl.get(as.toLit()) ?? 0, 0));
+		let trailPtr: number = variableAssignments.length - 1;
 
-			if (isUnitPropagationReason(as.getReason())) {
-				const cRef = getUnitPropagationCRef(as.getReason());
-				const clause = clausePool.at(cRef);
+		while (!conflictAnalisis.finished()) {
+			const currentImplication: VariableAssignment = conflictAnalisis.currentImplication();
+			const virtualResolution: VirtualResolution = conflictAnalisis.virtualResolution();
 
-				clause.getLiterals().forEach((l) => {
-					const reasonAs = litToAssignmentMap.get(l.toInt() * -1);
-					if (reasonAs) {
-						this.addNode(new Node(reasonAs, litLvl.get(reasonAs.toLit()) ?? 0, 0));
-						this.addLink(new Link(reasonAs.toLit(), as.toLit(), cRef));
-					}
-				});
+			if (isLeft(virtualResolution)) continue;
+
+			const currentImplicationVar: Var = currentImplication.toVar();
+
+			while (currentImplicationVar !== variableAssignments[trailPtr].toVar()) {
+				this.cuts.push(undefined);
+				trailPtr--;
 			}
-		});
+			trailPtr--;
 
-		if (trail.getConflictiveClause()) {
-			let anteriorClause = trail.getConflictiveClause() as Clause;
+			let addToCut = true;
 
-			trail.getResolutionContext().forEach((ctx) => {
-				if (isRight(ctx)) return;
-				const clause = fromLeft(ctx).clause;
-				this.addCut(clause);
-				this.addCut(anteriorClause);
-				anteriorClause = clause;
-			});
+			if (this.nodes.has(currentImplicationVar)) {
+				if (conflictVariablesToCut.has(currentImplicationVar)) {
+					this.cuts.push([conflictClause.getCRef(), currentImplicationVar]);
+					conflictVariablesToCut.delete(currentImplicationVar);
+					addToCut = false;
+				}
+
+				const cRefReason: CRef = getPropagationCRef(
+					varToAssignmentMap.get(currentImplicationVar)!.reason
+				);
+				clausePool
+					.at(cRefReason)
+					.getLiterals()
+					.filter((l) => l.getVariable().toInt() !== currentImplicationVar)
+					.forEach((l) => {
+						const newVar = l.getVariable().toInt();
+						this.addNode(new Node(varToAssignmentMap.get(newVar), trail.getVariableDL(newVar)));
+						this.addLink(new Link(newVar, currentImplicationVar, cRefReason));
+					});
+				if (addToCut) this.cuts.push([cRefReason, currentImplicationVar]);
+			}
 		}
+
+		console.log(this.cuts);
+		this.cut();
 	}
 
 	addNode(node: Node): void {
@@ -227,13 +233,6 @@ export class ImplicationGraph {
 		}
 
 		this.links.get(id)?.push(link);
-		//const antDepth = this.nodes.get(link.getSource())?.getDepth() ?? 0;
-		const posDepth = (this.nodes.get(link.getTarget())?.getDepth() ?? 0) + 1;
-		/*if(this.nodes.get(link.getSource())?.updateDepth(posDepth)){
-			this.depths[antDepth].filter(n => n !== link.getSource());
-			this.depths[posDepth].push(link.getSource());
-		}*/
-		this.nodes.get(link.getSource())?.updateDepth(posDepth);
 	}
 
 	getNodes(): List<Node> {
@@ -244,55 +243,86 @@ export class ImplicationGraph {
 		return Array.from(this.links.values()).flat();
 	}
 
-	addCut(clause: Clause): void {
-		if (clause.isTemporal()) return;
+	cut(): boolean {
+		if (this.currentCut >= this.cuts.length) return false;
 
-		clause.getLiterals().map((l) => {
-			//let litInt = l.toInt();
-			if (l.isFalse())
-				//litInt = litInt * -1;
-				this.addLitIntoCut(clause.getCRef());
-		});
+		let makeCut = false;
+
+		const cut = this.cuts[this.currentCut];
+		if (cut !== undefined) {
+			this.links.get(cut[0])?.forEach((link) => link.cut());
+			this.nodes.get(cut[1])?.cut(this.currentCut + 1);
+			makeCut = true;
+		}
+		this.currentCut = this.currentCut + 1;
+		return makeCut;
 	}
 
 	toSigmaDirectedGraph(): DirectedGraph<NodeAttributes, EdgeAttributes> {
 		const graph = new DirectedGraph<NodeAttributes, EdgeAttributes>();
 
-		this.nodes.forEach((n) => graph.addNode(`${n.index()}`, this.toSigmaNode(n)));
-		this.links.forEach((clauseLinks) =>
-			clauseLinks.forEach((l, index) =>
-				graph.addDirectedEdgeWithKey(
-					`${l.getSource()}-${l.getTarget()}-${l.getcRef()}-${index}`,
-					`${l.getSource()}`,
-					`${l.getTarget()}`,
-					this.toSigmaLink(l)
-				)
-			)
-		);
+		const nodes = this.getNodesOrderedByCuts();
+		nodes.forEach((node, i) => {
+			graph.addNode(`${node.index()}`, this.toSigmaNode(node, i, nodes.length));
+		});
+
+		this.getLinks().forEach((l, index) => {
+			const source = `${l.getSource()}`;
+			const target = `${l.getTarget()}`;
+
+			if (!graph.hasNode(source) || !graph.hasNode(target)) return;
+
+			graph.addDirectedEdgeWithKey(
+				`${l.getTarget()}-${l.getSource()}-${l.getcRef()}-${index}`,
+				target,
+				source,
+				this.toSigmaLink(l)
+			);
+		});
 
 		return graph;
 	}
 
-	private addLitIntoCut(cRef: number): void {
-		this.cuts.push(cRef);
+	private getNodesOrderedByCuts(): List<Node> {
+		const orderedNodeIds: Var[] = [];
+
+		this.cuts.forEach((cut) => {
+			if (cut === undefined) return;
+			if (!orderedNodeIds.includes(cut[1])) orderedNodeIds.push(cut[1]);
+		});
+
+		this.nodes.forEach((_, nodeId) => {
+			if (!orderedNodeIds.includes(nodeId)) orderedNodeIds.push(nodeId);
+		});
+
+		return orderedNodeIds
+			.map((nodeId) => this.nodes.get(nodeId))
+			.filter((node) => node !== undefined);
 	}
 
-	private toSigmaNode(node: Node): NodeAttributes {
-		//let posY = this.depths[node.getDepth()]?.indexOf(node.index()) ?? -1;
+	private toSigmaNode(node: Node, index: number, totalNodes: number): NodeAttributes {
+		const deg = (2 / Math.max(totalNodes, 1)) * index;
+		const rad = totalNodes === 1 ? 0 : 6;
+		const posX = Math.cos(deg * Math.PI) * rad;
+		const posY = Math.sin(deg * Math.PI) * rad;
+
 		return {
 			label: node.title(),
-			x: node.getDepth() * -5,
-			y: node.index(), //posY * 5, //TEMPORAL
+			x: posX,
+			y: posY,
 			size: 10,
-			color: '#e74c3c', //TEMPORAL
-			cut: 0
+			color: 'main-bg-color',
+			cut: node.getCut(),
+			group: node.group(),
+			forceLabel: true
 		};
 	}
 
 	private toSigmaLink(link: Link): EdgeAttributes {
 		return {
 			size: 2,
-			label: `${link.getcRef()}`
+			label: `${link.getcRef()}`,
+			color: link.isCut() ? 'unsatisfied-color' : 'inspecting-color'
 		};
 	}
 }

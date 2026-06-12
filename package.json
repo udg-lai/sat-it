@@ -60,6 +60,7 @@
 		"vitest": "^3.0.0"
 	},
 	"dependencies": {
+		"@sigma/layer-webgl": "^3.0.0",
 		"@types/d3": "^7.4.3",
 		"d3": "^7.9.0",
 		"graphology": "^0.26.0",
