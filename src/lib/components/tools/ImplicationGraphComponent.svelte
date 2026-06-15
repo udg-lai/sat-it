@@ -163,7 +163,7 @@
 					`cut-${cut}`,
 					currentRenderer,
 					createContoursProgram(nodes, {
-						radius: 150,
+						radius: 90,
 						border: {
 							color: appColor('unsatisfied-color'),
 							thickness: 8

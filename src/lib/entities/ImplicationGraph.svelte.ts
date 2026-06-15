@@ -40,11 +40,13 @@ export class Node {
 	private varAsig: Either<VariableAssignment, null>;
 	private level: number;
 	private inCut: number;
+	private depth: number;
 
-	constructor(literal: VariableAssignment | null = null, level: number) {
+	constructor(literal: VariableAssignment | null = null, level: number, depth: number) {
 		this.varAsig = literal ? makeLeft(literal) : makeRight(null);
 		this.level = level;
 		this.inCut = 0;
+		this.depth = depth;
 	}
 
 	title(): string {
@@ -67,6 +69,10 @@ export class Node {
 
 	getCut(): number {
 		return this.inCut;
+	}
+
+	getDepth(): number {
+		return this.depth;
 	}
 
 	getReason(): Either<Reason, null> {
@@ -127,6 +133,7 @@ export class ImplicationGraph {
 	private links: Map<CRef, List<Link>>; // Map CRef -> list of links
 	private cuts: List<[CRef, Var] | undefined>; // List of nodes in each cut
 	private currentCut: number;
+	private depths: List<List<Var>>;
 
 	constructor(trail: Trail) {
 		if (trail.getConflictiveClause() === undefined)
@@ -135,6 +142,7 @@ export class ImplicationGraph {
 		this.nodes = new Map();
 		this.links = new Map();
 		this.cuts = [];
+		this.depths = [];
 		this.currentCut = 0;
 
 		const variableAssignments: VariableAssignment[] = trail.getAssignments();
@@ -153,7 +161,7 @@ export class ImplicationGraph {
 		});
 
 		// Afegim el node conflicte
-		this.addNode(new Node(null, currentLvl));
+		this.addNode(new Node(null, currentLvl, 0));
 
 		this.cuts.push([conflictClause.getCRef(), 0]);
 
@@ -170,7 +178,7 @@ export class ImplicationGraph {
 
 		conflictVariablesToCut.forEach((v) => {
 			const variable = varToAssignmentMap.get(v)!;
-			this.addNode(new Node(variable, trail.getVariableDL(variable.toVar())));
+			this.addNode(new Node(variable, trail.getVariableDL(variable.toVar()), 1));
 			this.addLink(new Link(variable.toVar(), 0, conflictClause.getCRef()));
 		});
 
@@ -207,8 +215,11 @@ export class ImplicationGraph {
 					.getLiterals()
 					.filter((l) => l.getVariable().toInt() !== currentImplicationVar)
 					.forEach((l) => {
-						const newVar = l.getVariable().toInt();
-						this.addNode(new Node(varToAssignmentMap.get(newVar), trail.getVariableDL(newVar)));
+						const newVar: Var = l.getVariable().toInt();
+						const sourceDepth: number = this.nodes.get(currentImplicationVar)!.getDepth();
+						this.addNode(
+							new Node(varToAssignmentMap.get(newVar), trail.getVariableDL(newVar), sourceDepth + 1)
+						);
 						this.addLink(new Link(newVar, currentImplicationVar, cRefReason));
 					});
 				if (addToCut) this.cuts.push([cRefReason, currentImplicationVar]);
@@ -220,9 +231,13 @@ export class ImplicationGraph {
 	}
 
 	addNode(node: Node): void {
-		if (!this.nodes.has(node.index())) {
-			this.nodes.set(node.index(), node);
-		}
+		if (!this.nodes.has(node.index())) this.nodes.set(node.index(), node);
+
+		const nodeDepth: number = node.getDepth();
+
+		if (nodeDepth >= this.depths.length) this.depths.push([]);
+
+		this.depths[nodeDepth].push(node.index());
 	}
 
 	addLink(link: Link): void {
@@ -262,8 +277,8 @@ export class ImplicationGraph {
 		const graph = new DirectedGraph<NodeAttributes, EdgeAttributes>();
 
 		const nodes = this.getNodesOrderedByCuts();
-		nodes.forEach((node, i) => {
-			graph.addNode(`${node.index()}`, this.toSigmaNode(node, i, nodes.length));
+		nodes.forEach((node) => {
+			graph.addNode(`${node.index()}`, this.toSigmaNode(node));
 		});
 
 		this.getLinks().forEach((l, index) => {
@@ -300,11 +315,11 @@ export class ImplicationGraph {
 			.filter((node) => node !== undefined);
 	}
 
-	private toSigmaNode(node: Node, index: number, totalNodes: number): NodeAttributes {
-		const deg = (2 / Math.max(totalNodes, 1)) * index;
-		const rad = totalNodes === 1 ? 0 : 6;
-		const posX = Math.cos(deg * Math.PI) * rad;
-		const posY = Math.sin(deg * Math.PI) * rad;
+	private toSigmaNode(node: Node): NodeAttributes {
+		const rad = node.getDepth();
+
+		const posX = -rad;
+		const posY = -this.depths[node.getDepth()].indexOf(node.index());
 
 		return {
 			label: node.title(),
