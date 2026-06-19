@@ -29,6 +29,12 @@ export type Backtracking = {
 	type: 'backtracking';
 };
 
+export const getPropagationCRef = (r: Reason): number => {
+	if (!isPropagationReason(r))
+		logFatal('Reason is not Propagation', 'Onley Propagation Reasons can have Propagation CRef');
+	return r.cRef;
+};
+
 export type Reason = Decision | Propagation | Backtracking;
 
 export const isDecisionReason = (r: Reason): r is Decision => {

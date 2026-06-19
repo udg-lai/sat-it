@@ -3,11 +3,17 @@
 		visitingComplementaryOccEventBus,
 		openSettingsViewEventBus
 	} from '$lib/events/events.ts';
-	import { ArrowUpFromBracketOutline, BookOutline, ClipboardOutline } from 'flowbite-svelte-icons';
+	import {
+		ArrowUpFromBracketOutline,
+		BookOutline,
+		ClipboardOutline,
+		ShareNodesSolid
+	} from 'flowbite-svelte-icons';
 	import { onMount } from 'svelte';
 	import Button from './Button.svelte';
 	import OccurrenceListComponent from './OccurrenceListComponent.svelte';
 	import SolutionSummaryComponent from './SolutionSummaryComponent.svelte';
+	import ImplicationGraphComponent from './ImplicationGraphComponent.svelte';
 	import './style.css';
 
 	let toolsViewRef: HTMLElement;
@@ -31,6 +37,10 @@
 			},
 			{
 				name: 'viewB',
+				active: false
+			},
+			{
+				name: 'viewC',
 				active: false
 			}
 		];
@@ -180,6 +190,8 @@
 						{@render toolA(id)}
 					{:else if name === 'viewB'}
 						{@render toolB(id)}
+					{:else if name === 'viewC'}
+						{@render toolC(id)}
 					{:else}
 						{@render notImplementedYet()}
 					{/if}
@@ -203,6 +215,8 @@
 							<SolutionSummaryComponent />
 						{:else if name === 'viewB'}
 							{@render snippetOccurrenceList()}
+						{:else if name === 'viewC'}
+							<ImplicationGraphComponent />
 						{:else}
 							{@render notImplementedYet()}
 						{/if}
@@ -233,6 +247,15 @@
 		icon={ClipboardOutline}
 		active={tools[id].active}
 		title="Occurrence list"
+	/>
+{/snippet}
+
+{#snippet toolC(id: number)}
+	<Button
+		onClick={() => activateTool(id)}
+		icon={ShareNodesSolid}
+		active={tools[id].active}
+		title="Implication graph"
 	/>
 {/snippet}
 

@@ -12,6 +12,13 @@ export const getLatestTrail = (): Trail => {
 	return trails[trails.length - 1];
 };
 
+export const getFocusedTrail = (): Trail => {
+	// If a trail context is expanded in the editor, tools should reflect that trail.
+	// When all contexts are collapsed, fall back to the latest trail.
+	const expandedTrail = trails.find((trail) => trail.isContextExpanded());
+	return expandedTrail ?? getLatestTrail();
+};
+
 export const nTrails = (): number => {
 	return trails.length;
 };
