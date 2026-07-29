@@ -33,10 +33,7 @@ export class ConflictAnalysis {
 		skipFakeResolutions: boolean = true
 	) {
 		if (conflictClause.isEmpty()) {
-			logError(
-				'Conflict Analysis Error',
-				'Conflictive clause can not contain the empty clause'
-			);
+			logError('Conflict Analysis Error', 'Conflictive clause can not contain the empty clause');
 		}
 		if (!conflictClause.violated()) {
 			logError(
@@ -113,19 +110,15 @@ export class ConflictAnalysis {
 		// Where the pointer was before the resolution/s steps
 		const sPointer: number = this.pointer;
 
-		if (this.skipFakeResolutions)
-		{
+		if (this.skipFakeResolutions) {
 			// Find next reason to apply resolution with the current conflictive clause
 			let reasonFound: boolean = false;
-			while (!reasonFound && this.pointer >= 0)
-			{
+			while (!reasonFound && this.pointer >= 0) {
 				const propagation: VariableAssignment = this.currentImplication();
 				const complementary: Lit = Literal.complementary(propagation.toLit());
 
-				if (this.conflictiveClause.contains(complementary))
-					reasonFound = true;
-				else
-					this.pointer -= 1;
+				if (this.conflictiveClause.contains(complementary)) reasonFound = true;
+				else this.pointer -= 1;
 			}
 		}
 
@@ -133,8 +126,7 @@ export class ConflictAnalysis {
 		const complementary: Lit = Literal.complementary(propagation.toLit());
 		let resolution: VirtualResolution;
 
-		if (this.conflictiveClause.contains(complementary))
-		{
+		if (this.conflictiveClause.contains(complementary)) {
 			const r: Propagation = propagation.getReason() as Propagation;
 			const reason: Clause = getClausePool().at(r.cRef);
 			const resolvent: Clause = this.conflictiveClause.resolution(reason);
@@ -152,9 +144,7 @@ export class ConflictAnalysis {
 					asserting: this._clauseContainsAssertiveLiteral(resolvent)
 				}
 			});
-		}
-		else
-		{
+		} else {
 			// No resolution is performed, the clause remains the same
 			resolution = makeLeft(this.conflictiveClause.copy());
 		}

@@ -143,7 +143,6 @@ export const preConflictAnalysis = () => {
 	}
 };
 
-
 export const conflictAnalysisBlock = (): void => {
 	const virtualResolution: VirtualResolution = virtualResolutionTransition();
 	const latestTrail: Trail = getLatestTrail();
@@ -153,8 +152,7 @@ export const conflictAnalysisBlock = (): void => {
 		resolutionStepEventBus.emit(undefined);
 	} else {
 		const { resolvent, nSkippedResolutions } = fromRight(virtualResolution);
-		for (let i = 0; i < nSkippedResolutions; i++)
-			latestTrail.updateResolutionContext(undefined);
+		for (let i = 0; i < nSkippedResolutions; i++) latestTrail.updateResolutionContext(undefined);
 		latestTrail.updateResolutionContext(resolvent.clause);
 		resolutionStepEventBus.emit(resolvent.clause);
 	}
