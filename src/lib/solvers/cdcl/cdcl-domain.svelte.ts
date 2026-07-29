@@ -253,7 +253,7 @@ export type CDCL_ASSERTING_CLAUSE_FUN = () => boolean;
 
 export const assertingClause: CDCL_ASSERTING_CLAUSE_FUN = () => {
 	// Checks if the clause of the conflict analysis is assertive
-	return getConflictAnalysis().hasAssertiveClause();
+	return getConflictAnalysis().resolventContainsAssertiveLiteral();
 };
 
 export type CDCL_VIRTUAL_RESOLUTION_FUN = () => VirtualResolution;

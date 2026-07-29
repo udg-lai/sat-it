@@ -30,7 +30,7 @@ export type Backtracking = {
 };
 
 export const getPropagationCRef = (r: Reason): number => {
-	if (!isPropagationReason(r))
+	if (!isImpliedReason(r))
 		logFatal('Reason is not Propagation', 'Onley Propagation Reasons can have Propagation CRef');
 	return r.cRef;
 };
@@ -57,7 +57,7 @@ export const isBackJumpingReason = (r: Reason): r is BackJumping => {
 	return r.type === 'backjumping';
 };
 
-export const isPropagationReason = (r: Reason): r is Propagation => {
+export const isImpliedReason = (r: Reason): r is Propagation => {
 	return r.type === 'propagated' || r.type === 'backjumping';
 };
 
@@ -151,8 +151,10 @@ export default class VariableAssignment {
 		return isBacktrackingReason(this.reason);
 	}
 
-	wasPropagated(): boolean {
-		return isPropagationReason(this.reason);
+	isImplied(): boolean {
+		// A literal is implied if it was propagated after backjumping
+		// or it was propagated because it occurs into a unit clause
+		return isImpliedReason(this.reason);
 	}
 
 	getReason(): Reason {

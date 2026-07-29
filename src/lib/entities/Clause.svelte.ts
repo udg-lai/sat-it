@@ -164,7 +164,7 @@ export default class Clause implements Comparable<Clause> {
 		return this.eval().type === 'SAT';
 	}
 
-	falsified(): boolean {
+	violated(): boolean {
 		return this.isEmpty() || this.eval().type === 'UnSAT';
 	}
 

@@ -420,7 +420,7 @@ export class Trail {
 
 	private _computeUPContext(): Either<UPContext, NeverFn>[] {
 		return this.assignments.map((a: VariableAssignment) => {
-			if (a.wasPropagated()) {
+			if (a.isImplied()) {
 				const reason = a.getReason() as UnitPropagation;
 				return makeLeft({
 					reasonCRef: reason.cRef,

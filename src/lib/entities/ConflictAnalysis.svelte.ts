@@ -1,13 +1,14 @@
+import { getClausePool } from '$lib/states/problem.svelte.ts';
 import { logError } from '$lib/states/toasts.svelte.ts';
+import { makeLeft, makeRight, type Either } from '$lib/types/either.ts';
 import type { Lit } from '$lib/types/types.ts';
 import Clause from './Clause.svelte.ts';
-import type VariableAssignment from './VariableAssignment.ts';
-import { isPropagationReason, type Propagation, type Reason } from './VariableAssignment.ts';
-import { getClausePool } from '$lib/states/problem.svelte.ts';
 import Literal from './Literal.svelte.ts';
-import { makeLeft, makeRight, type Either } from '$lib/types/either.ts';
+import type VariableAssignment from './VariableAssignment.ts';
+import { type Propagation } from './VariableAssignment.ts';
 
 export interface Resolution {
+	nSkippedResolutions: number;
 	conflictClause: Clause;
 	reason: Clause;
 	resolvent: {
@@ -19,20 +20,28 @@ export interface Resolution {
 export type VirtualResolution = Either<Clause, Resolution>;
 
 export class ConflictAnalysis {
-	clause: Clause;
+	conflictiveClause: Clause;
 	decision: VariableAssignment;
 	ldlPropagations: VariableAssignment[];
 	pointer: number;
+	skipFakeResolutions: boolean;
 
 	constructor(
 		conflictClause: Clause,
 		decision: VariableAssignment,
-		ldlPropagations: VariableAssignment[]
+		ldlPropagations: VariableAssignment[],
+		skipFakeResolutions: boolean = true
 	) {
-		if (!conflictClause.falsified()) {
+		if (conflictClause.isEmpty()) {
 			logError(
 				'Conflict Analysis Error',
-				'The conflict clause must be falsified to start conflict analysis'
+				'Conflictive clause can not contain the empty clause'
+			);
+		}
+		if (!conflictClause.violated()) {
+			logError(
+				'Conflict Analysis Error',
+				'The conflict clause must be violated to start conflict analysis'
 			);
 		}
 		if (ldlPropagations.length === 0) {
@@ -41,41 +50,44 @@ export class ConflictAnalysis {
 				'There must be at least one literal from the last decision level in the propagations'
 			);
 		}
+
 		if (!decision.isD()) {
 			logError('Conflict Analysis Error', 'The provided decision assignment is not a decision');
 		}
+
 		for (const lit of ldlPropagations) {
-			if (!lit.wasPropagated()) {
+			if (!lit.isImplied()) {
 				logError(
 					'Conflict Analysis Error',
-					'All literals in the last decision level propagations must be propagated literals'
+					'All literals in the last decision level propagations must be implied literals'
 				);
 			}
 		}
-		this.clause = conflictClause;
+		this.conflictiveClause = conflictClause;
 		this.decision = decision;
 		this.ldlPropagations = ldlPropagations;
 		this.pointer = ldlPropagations.length - 1;
+		this.skipFakeResolutions = skipFakeResolutions;
 	}
 
 	// Conflict analysis finished when the clause has only one literal from the current decision level
 
 	finished(): boolean {
-		return this.pointer < 0 || this.hasAssertiveClause();
+		return this.pointer < 0 || this._clauseContainsAssertiveLiteral(this.conflictiveClause);
 	}
 
-	hasAssertiveClause(): boolean {
-		return this._resolventIsAssertive(this.clause);
+	resolventContainsAssertiveLiteral(): boolean {
+		return this._clauseContainsAssertiveLiteral(this.conflictiveClause);
 	}
 
-	private _resolventIsAssertive(resolvent: Clause): boolean {
+	_clauseContainsAssertiveLiteral(clause: Clause): boolean {
 		const literals: Lit[] = this.ldlPropagations.map((lit: VariableAssignment) => lit.toLit());
 		literals.push(this.decision.toLit());
-		return resolvent.isAssertive(literals);
+		return clause.isAssertive(literals);
 	}
 
-	getClause(): Clause {
-		return this.clause;
+	getConflictiveClause(): Clause {
+		return this.conflictiveClause;
 	}
 
 	currentImplication(): VariableAssignment {
@@ -98,47 +110,69 @@ export class ConflictAnalysis {
 			);
 		}
 
+		// Where the pointer was before the resolution/s steps
+		const sPointer: number = this.pointer;
+
+		if (this.skipFakeResolutions)
+		{
+			// Find next reason to apply resolution with the current conflictive clause
+			let reasonFound: boolean = false;
+			while (!reasonFound && this.pointer >= 0)
+			{
+				const propagation: VariableAssignment = this.currentImplication();
+				const complementary: Lit = Literal.complementary(propagation.toLit());
+
+				if (this.conflictiveClause.contains(complementary))
+					reasonFound = true;
+				else
+					this.pointer -= 1;
+			}
+		}
+
 		const propagation: VariableAssignment = this.currentImplication();
 		const complementary: Lit = Literal.complementary(propagation.toLit());
+		let resolution: VirtualResolution;
 
-		// Next literal to consider in the conflict analysis
-		this.pointer -= 1;
+		if (this.conflictiveClause.contains(complementary))
+		{
+			const r: Propagation = propagation.getReason() as Propagation;
+			const reason: Clause = getClausePool().at(r.cRef);
+			const resolvent: Clause = this.conflictiveClause.resolution(reason);
 
-		// Checks if the complementary of the propagated literal is in the clause being analyzed
-		if (this.clause.contains(complementary)) {
-			const r: Reason = propagation.getReason();
-			if (!isPropagationReason(r)) {
-				logError(
-					'Conflict Analysis Error',
-					'The reason must be a propagation reason to continue conflict analysis'
-				);
-			}
-			const reason: Clause = getClausePool().at((r as Propagation).cRef);
-			const resolvent: Clause = this.clause.resolution(reason);
 			this.updateConflictiveClause(resolvent);
 
-			return makeRight({
-				conflictClause: this.clause.copy(),
+			console.debug(`Number of skipped resolutions: ${sPointer - this.pointer}`);
+
+			resolution = makeRight({
+				nSkippedResolutions: sPointer - this.pointer,
+				conflictClause: this.conflictiveClause.copy(),
 				reason: reason,
 				resolvent: {
 					clause: resolvent,
-					asserting: this._resolventIsAssertive(resolvent)
+					asserting: this._clauseContainsAssertiveLiteral(resolvent)
 				}
 			});
-		} else {
-			// No resolution is performed, the clause remains the same
-			return makeLeft(this.clause.copy());
 		}
+		else
+		{
+			// No resolution is performed, the clause remains the same
+			resolution = makeLeft(this.conflictiveClause.copy());
+		}
+
+		// Move the pointer to the next implication to consider
+		this.pointer -= 1;
+
+		return resolution;
 	}
 
 	private updateConflictiveClause(resolvent: Clause): void {
-		if (!resolvent.falsified()) {
+		if (!resolvent.violated()) {
 			logError(
 				'Conflict Analysis Error',
 				'The resolvent clause must be falsified to continue conflict analysis'
 			);
 		}
 		// Updates the clause being analyzed
-		this.clause = resolvent;
+		this.conflictiveClause = resolvent;
 	}
 }

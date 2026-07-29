@@ -108,14 +108,16 @@ export const preConflictAnalysis = () => {
 
 export const conflictAnalysisBlock = (): void => {
 	const virtualResolution: VirtualResolution = virtualResolutionTransition();
-
+	const latestTrail: Trail = getLatestTrail();
 	if (isLeft(virtualResolution)) {
 		// No job done by the resolution procedure, the clause remains the same
-		getLatestTrail().updateResolutionContext(undefined);
+		latestTrail.updateResolutionContext(undefined);
 		resolutionStepEventBus.emit(undefined);
 	} else {
-		const { resolvent } = fromRight(virtualResolution);
-		getLatestTrail().updateResolutionContext(resolvent.clause);
+		const { resolvent, nSkippedResolutions } = fromRight(virtualResolution);
+		for (let i = 0; i < nSkippedResolutions; i++)
+			latestTrail.updateResolutionContext(undefined);
+		latestTrail.updateResolutionContext(resolvent.clause);
 		resolutionStepEventBus.emit(resolvent.clause);
 	}
 
@@ -464,14 +466,14 @@ const learnConflictClauseTransition = (): CRef => {
 
 	const conflictAnalysis: ConflictAnalysis = getConflictAnalysis();
 
-	if (!conflictAnalysis.hasAssertiveClause()) {
+	if (!conflictAnalysis.resolventContainsAssertiveLiteral()) {
 		logFatal(
 			'CDCL Conflict Analysis',
 			'The conflict clause should be assertive before learning it'
 		);
 	}
 
-	const resolvent: Clause = conflictAnalysis.getClause();
+	const resolvent: Clause = conflictAnalysis.getConflictiveClause();
 	state.run(resolvent);
 	getSolverMachine().transition('second_highest_dl_state');
 	return resolvent.getCRef();

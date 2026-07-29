@@ -321,7 +321,7 @@ export type TWATCH_ASSERTING_CLAUSE_FUN = () => boolean;
 
 export const assertingClause: TWATCH_ASSERTING_CLAUSE_FUN = () => {
 	// Checks if the clause of the conflict analysis is assertive
-	return getConflictAnalysis().hasAssertiveClause();
+	return getConflictAnalysis().resolventContainsAssertiveLiteral();
 };
 
 export type TWATCH_VIRTUAL_RESOLUTION_FUN = () => VirtualResolution;
@@ -513,7 +513,7 @@ export const isItAWatch: TWATCH_IS_IT_A_WATCH_FUN = (watch: EWC) => {
 export type TWATCH_CLAUSE_FALSIFIED_FUN = (cRef: CRef) => boolean;
 
 export const clauseFalsified: TWATCH_CLAUSE_FALSIFIED_FUN = (cRef: CRef) => {
-	return getClausePool().at(cRef).falsified();
+	return getClausePool().at(cRef).violated();
 };
 
 export type TWATCH_CLAUSE_SATISFIED_FUN = (cRef: CRef) => boolean;
