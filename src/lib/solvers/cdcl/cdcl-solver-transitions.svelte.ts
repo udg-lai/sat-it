@@ -24,8 +24,7 @@ import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 import { increaseNoConflicts } from '$lib/states/statistics.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
 import { getLatestTrail } from '$lib/states/trails.svelte.ts';
-import { fromRight, isLeft, makeLeft, makeRight } from '$lib/types/either.ts';
-import { fromJust, isJust } from '$lib/types/maybe.ts';
+import { makeLeft, makeRight } from '$lib/types/either.ts';
 import type { CRef, Lit } from '$lib/types/types.ts';
 import { type NonFinalState } from '../StateMachine.svelte.ts';
 import type {
