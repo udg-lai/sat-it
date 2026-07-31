@@ -144,11 +144,12 @@ export default class Problem {
 				);
 				return makeJust(trailAssignment);
 			}
-		} else if (getSolverMachine().onConflictState() && getSolverMachine().identify() === 'cdcl') {
-			const currentImplication: Lit = getConflictAnalysis().currentImplication().toLit();
-			return makeJust(currentImplication);
-		} else {
-			return makeNothing();
+		} else if (getSolverMachine().onConflictState()) {
+			if (getSolverMachine().identify() === 'cdcl' || getSolverMachine().identify() === 'twatch') {
+				const currentImplication: Lit = getConflictAnalysis().currentImplication().toLit();
+				return makeJust(currentImplication);
+			}
 		}
+		return makeNothing();
 	}
 }

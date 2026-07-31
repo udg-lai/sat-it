@@ -1,7 +1,7 @@
 import { backjumping as backjumpingAlg } from '$lib/algorithms/backjumping.ts';
 import Clause, { isUnitEval, type ClauseEval } from '$lib/entities/Clause.svelte.ts';
 import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
-import { ConflictAnalysis, type VirtualResolution } from '$lib/entities/ConflictAnalysis.svelte.ts';
+import { ConflictAnalysis, type Resolution } from '$lib/entities/ConflictAnalysis.svelte.ts';
 import { type VisitingOccurrenceList } from '$lib/entities/OccurrenceList.svelte.ts';
 import type { Trail } from '$lib/entities/Trail.svelte.ts';
 import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
@@ -256,10 +256,10 @@ export const assertingClause: CDCL_ASSERTING_CLAUSE_FUN = () => {
 	return getConflictAnalysis().resolventContainsAssertiveLiteral();
 };
 
-export type CDCL_VIRTUAL_RESOLUTION_FUN = () => VirtualResolution;
+export type CDCL_VIRTUAL_RESOLUTION_FUN = () => Resolution;
 
-export const virtualResolution: CDCL_VIRTUAL_RESOLUTION_FUN = () => {
-	return getConflictAnalysis().virtualResolution();
+export const resolution: CDCL_VIRTUAL_RESOLUTION_FUN = () => {
+	return getConflictAnalysis().resolution();
 };
 
 export type CDCL_LEARN_CONFLICT_CLAUSE_FUN = (lemma: Clause) => number;

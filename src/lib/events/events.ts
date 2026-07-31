@@ -94,3 +94,6 @@ export const ctrlZEventBus = createEventBus<void>();
 
 // A individual DL from the trail has been expanded or collapsed by the user
 export const decisionLevelToggledEventBus = createEventBus<void>();
+
+// Number of skipped steps (resolutions) during conflict analysis
+export const skippedResolutionsEventBus = createEventBus<number>();

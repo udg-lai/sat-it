@@ -20,7 +20,7 @@ import {
 	unaryEmptyClausesDetection,
 	unitPropagation,
 	unsatisfiedClause,
-	virtualResolution,
+	resolution,
 	wipeOccurrenceQueue,
 	type CDCL_ALL_VARIABLES_ASSIGNED_FUN,
 	type CDCL_ALL_VARIABLES_ASSIGNED_INPUT,
@@ -280,7 +280,7 @@ const virtual_resolution_state: NonFinalState<
 	CDCL_VIRTUAL_RESOLUTION_INPUT
 > = {
 	id: cdcl_stateName2StateId['virtual_resolution_state'],
-	run: virtualResolution,
+	run: resolution,
 	description: `A single resolution step`,
 	transitions: new Map<CDCL_VIRTUAL_RESOLUTION_INPUT, number>().set(
 		'asserting_clause_state',

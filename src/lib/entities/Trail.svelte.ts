@@ -148,11 +148,15 @@ export class Trail {
 		return this.conflictiveClause;
 	}
 
-	getResolutionContext(): Either<ResolutionContext, NeverFn>[] {
+	getConflictAnalysisContext(): Either<ResolutionContext, NeverFn>[] {
 		return this._makeResolutionContext();
 	}
 
-	updateResolutionContext(clause: Clause | undefined = undefined): void {
+	skipResolutions(nResolutions: number): void {
+		for (let i = 0; i < nResolutions; i++) this.updateConflictAnalysisContext(undefined);
+	}
+
+	updateConflictAnalysisContext(clause: Clause | undefined = undefined): void {
 		const ca: Either<ResolutionContext, NeverFn> =
 			clause === undefined ? makeRight(error) : makeLeft({ clause });
 		this.resolutionCtx = [ca, ...this.resolutionCtx];

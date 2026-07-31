@@ -13,6 +13,7 @@
 		newTrailStackedEventBus,
 		renderTrailsEventBus,
 		resetProblemEventBus,
+		skippedResolutionsEventBus,
 		solverCommandEventBus,
 		solverSignalEventBus,
 		stepDelayEventBus,
@@ -53,10 +54,10 @@
 	import type { List, Lit } from '$lib/types/types.ts';
 	import { modifyCRefWidth, modifyLiteralWidth } from '$lib/utils.ts';
 	import { onMount } from 'svelte';
+	import CopyrightComponent from './CopyrightComponent.svelte';
 	import DebuggerComponent from './debugger/DebuggerComponent.svelte';
 	import { getConfiguredAlgorithm } from './settings/engine/state.svelte.ts';
 	import SolvingInformationComponent from './SolvingInformationComponent.svelte';
-	import CopyrightComponent from './CopyrightComponent.svelte';
 
 	let trails: Trail[] = $state([]);
 
@@ -199,6 +200,14 @@
 		trails = [...xs];
 	}
 
+	function skippedResolutions(n: number): void {
+		// This function is called when the conflict analysis has skipped some resolutions
+		// It is important to update the trails to reflect the skipped resolutions in the UI.
+		if (n > 0) {
+			getLatestTrail().skipResolutions(n);
+		}
+	}
+
 	function init() {
 		onInstanceChanged(getActiveInstance().getInstanceName());
 		onAlgorithmChanged(getConfiguredAlgorithm());
@@ -235,6 +244,8 @@
 		subs.push(newTrailStackedEventBus.subscribe(onTrailStacked));
 		// undo the last decision that was done
 		subs.push(ctrlZEventBus.subscribe(singleUndo));
+
+		subs.push(skippedResolutionsEventBus.subscribe(skippedResolutions));
 
 		return () => {
 			subs.forEach((f) => f());

@@ -31,7 +31,7 @@
 	}
 
 	let context: Either<ResolutionContext, NeverFn>[] = $derived.by(() =>
-		computeVisibleContext(trail.getResolutionContext())
+		computeVisibleContext(trail.getConflictAnalysisContext())
 	);
 
 	let { trail }: Props = $props();

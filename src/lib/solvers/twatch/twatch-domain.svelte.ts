@@ -1,7 +1,7 @@
 import { backjumping as backjumpingAlg } from '$lib/algorithms/backjumping.ts';
 import Clause from '$lib/entities/Clause.svelte.ts';
 import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
-import { ConflictAnalysis, type VirtualResolution } from '$lib/entities/ConflictAnalysis.svelte.ts';
+import { ConflictAnalysis, type Resolution } from '$lib/entities/ConflictAnalysis.svelte.ts';
 import Literal from '$lib/entities/Literal.svelte.ts';
 import {
 	type VisitingOccurrenceList,
@@ -324,10 +324,10 @@ export const assertingClause: TWATCH_ASSERTING_CLAUSE_FUN = () => {
 	return getConflictAnalysis().resolventContainsAssertiveLiteral();
 };
 
-export type TWATCH_VIRTUAL_RESOLUTION_FUN = () => VirtualResolution;
+export type TWATCH_VIRTUAL_RESOLUTION_FUN = () => Resolution;
 
-export const virtualResolution: TWATCH_VIRTUAL_RESOLUTION_FUN = () => {
-	return getConflictAnalysis().virtualResolution();
+export const resolution: TWATCH_VIRTUAL_RESOLUTION_FUN = () => {
+	return getConflictAnalysis().resolution();
 };
 
 export type TWATCH_LEARN_CONFLICT_CLAUSE_FUN = (lemma: Clause) => number;

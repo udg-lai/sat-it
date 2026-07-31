@@ -1,5 +1,5 @@
 import type Clause from '$lib/entities/Clause.svelte.ts';
-import type { ConflictAnalysis, VirtualResolution } from '$lib/entities/ConflictAnalysis.svelte.ts';
+import type { ConflictAnalysis, Resolution } from '$lib/entities/ConflictAnalysis.svelte.ts';
 import Literal from '$lib/entities/Literal.svelte.ts';
 import ClauseList, {
 	ComplementaryList,
@@ -11,6 +11,7 @@ import {
 	conflictDetectedEventBus,
 	newTrailStackedEventBus,
 	resolutionStepEventBus,
+	skippedResolutionsEventBus,
 	visitingComplementaryOccEventBus
 } from '$lib/events/events.ts';
 import { getConflictAnalysis } from '$lib/states/conflict-anlysis.svelte.ts';
@@ -24,6 +25,7 @@ import { increaseNoConflicts } from '$lib/states/statistics.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
 import { getLatestTrail } from '$lib/states/trails.svelte.ts';
 import { fromRight, isLeft, makeLeft, makeRight } from '$lib/types/either.ts';
+import { fromJust, isJust } from '$lib/types/maybe.ts';
 import type { CRef, Lit } from '$lib/types/types.ts';
 import { type NonFinalState } from '../StateMachine.svelte.ts';
 import type {
@@ -107,18 +109,16 @@ export const preConflictAnalysis = () => {
 };
 
 export const conflictAnalysisBlock = (): void => {
-	const virtualResolution: VirtualResolution = virtualResolutionTransition();
+	const resolution: Resolution = resolutionTransition();
 	const latestTrail: Trail = getLatestTrail();
-	if (isLeft(virtualResolution)) {
-		// No job done by the resolution procedure, the clause remains the same
-		latestTrail.updateResolutionContext(undefined);
-		resolutionStepEventBus.emit(undefined);
-	} else {
-		const { resolvent, nSkippedResolutions } = fromRight(virtualResolution);
-		for (let i = 0; i < nSkippedResolutions; i++) latestTrail.updateResolutionContext(undefined);
-		latestTrail.updateResolutionContext(resolvent.clause);
-		resolutionStepEventBus.emit(resolvent.clause);
-	}
+
+	const { resolvent, next } = resolution;
+
+	latestTrail.updateConflictAnalysisContext(resolvent.clause);
+
+	skippedResolutionsEventBus.emit(next.nSkip);
+
+	resolutionStepEventBus.emit(resolvent.clause);
 
 	const asserting: boolean = assertingClauseInConflictAnalysis();
 
@@ -441,7 +441,7 @@ const assertingClauseInConflictAnalysis = (): boolean => {
 	return isAsserting;
 };
 
-const virtualResolutionTransition = () => {
+const resolutionTransition = () => {
 	const state = getSolverMachine().getActiveState() as NonFinalState<
 		CDCL_VIRTUAL_RESOLUTION_FUN,
 		CDCL_VIRTUAL_RESOLUTION_INPUT
@@ -449,9 +449,9 @@ const virtualResolutionTransition = () => {
 	if (state.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Pick Last Assignment state');
 	}
-	const virtualResolution: VirtualResolution = state.run();
+	const resolution: Resolution = state.run();
 	getSolverMachine().transition('asserting_clause_state');
-	return virtualResolution;
+	return resolution;
 };
 
 const learnConflictClauseTransition = (): CRef => {
