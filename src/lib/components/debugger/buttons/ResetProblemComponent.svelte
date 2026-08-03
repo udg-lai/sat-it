@@ -29,7 +29,6 @@
 	<ImageRender icon={resetIcon} alt="Reset Problem icon" />
 </button>
 
-
 <Modal open={modalOpened} size="xs" class="modal-style" dismissable={false}>
 	<div class="text-center">
 		<ExclamationCircleOutline class="mx-auto mb-4 h-12 w-12 text-red-600" />
@@ -40,7 +39,6 @@
 		<button class="btn btn-modal" onclick={cancelReset}>No, cancel</button>
 	</div>
 </Modal>
-
 
 <style>
 	.btn-modal {
