@@ -101,34 +101,39 @@ export const makeBacktrackingReason = (): Backtracking => {
 export default class VariableAssignment {
 	variable: Variable;
 	reason: Reason;
+	dl: number = -1;
 
-	private constructor(variable: Variable, kind: Reason) {
+	private constructor(variable: Variable, kind: Reason, dl: number = -1) {
 		this.variable = variable;
 		this.reason = kind;
+		this.dl = dl;
+
+		console.debug(`VariableAssignment created: ${this.variable.toInt()} with reason ${this.reason.type} at decision level ${this.dl}`
+		);
 	}
 
-	static newAutomatedAssignment(variable: Variable, algorithm: string) {
-		return new VariableAssignment(variable, makeAutomatedReason(algorithm));
+	static newAutomatedAssignment(variable: Variable, algorithm: string, dl: number = -1) {
+		return new VariableAssignment(variable, makeAutomatedReason(algorithm), dl);
 	}
 
-	static newManualAssignment(variable: Variable) {
-		return new VariableAssignment(variable, makeManualReason());
+	static newManualAssignment(variable: Variable, dl: number = -1) {
+		return new VariableAssignment(variable, makeManualReason(), dl);
 	}
 
-	static newUnitPropagationAssignment(variable: Variable, clauseTag: number) {
-		return new VariableAssignment(variable, makeUnitPropagationReason(clauseTag));
+	static newUnitPropagationAssignment(variable: Variable, clauseTag: number, dl: number = -1) {
+		return new VariableAssignment(variable, makeUnitPropagationReason(clauseTag), dl);
 	}
 
-	static newBackJumpingAssignment(variable: Variable, clauseTag: number) {
-		return new VariableAssignment(variable, makeBackJumpingReason(clauseTag));
+	static newBackJumpingAssignment(variable: Variable, clauseTag: number, dl: number = -1) {
+		return new VariableAssignment(variable, makeBackJumpingReason(clauseTag), dl);
 	}
 
-	static newBacktrackingAssignment(variable: Variable) {
-		return new VariableAssignment(variable, makeBacktrackingReason());
+	static newBacktrackingAssignment(variable: Variable, dl: number = -1) {
+		return new VariableAssignment(variable, makeBacktrackingReason(), dl);
 	}
 
 	copy(): VariableAssignment {
-		return new VariableAssignment(this.variable, this.reason);
+		return new VariableAssignment(this.variable, this.reason, this.dl);
 	}
 
 	getVariable(): Variable {

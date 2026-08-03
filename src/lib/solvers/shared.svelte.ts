@@ -64,9 +64,11 @@ export const decide = (pool: VariablePool, algorithm: string): Lit => {
 	// This variable should contain the updated assignment done in `doAssignment`
 	const variable: Variable = pool.getVariable(varId).copy();
 
+	const dl = trail.getDL() + 1;
+
 	const varAssignment: VariableAssignment = manualAssignment
-		? VariableAssignment.newManualAssignment(variable)
-		: VariableAssignment.newAutomatedAssignment(variable, algorithm);
+		? VariableAssignment.newManualAssignment(variable, dl)
+		: VariableAssignment.newAutomatedAssignment(variable, algorithm, dl);
 
 	trail.push(varAssignment);
 
@@ -103,10 +105,12 @@ export const unitPropagation = (
 
 	const variable: Variable = variables.getVariable(varId).copy();
 
+	const dl = trail.getDL();
+
 	const varAssignment: VariableAssignment =
 		assignmentReason === 'up'
-			? VariableAssignment.newUnitPropagationAssignment(variable, cRef)
-			: VariableAssignment.newBackJumpingAssignment(variable, cRef);
+			? VariableAssignment.newUnitPropagationAssignment(variable, cRef, dl)
+			: VariableAssignment.newBackJumpingAssignment(variable, cRef, dl);
 
 	trail.push(varAssignment);
 
@@ -191,7 +195,8 @@ export const backtracking = (pool: VariablePool): Lit => {
 			`Variable ${variable.toInt()} has no assigned value after backtracking`
 		);
 	}
-	newTrail.push(VariableAssignment.newBacktrackingAssignment(variable));
+	const dl: number = lastAssignment.dl - 1;
+	newTrail.push(VariableAssignment.newBacktrackingAssignment(variable, dl));
 	stackTrail(newTrail);
 
 	//Notify that a new trail has been pushed
