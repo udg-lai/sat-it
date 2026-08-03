@@ -56,8 +56,14 @@
 		isScrollable = scrollEl.scrollHeight > scrollEl.clientHeight;
 	}
 
+	function scrollBottom() {
+		if (!scrollEl) return;
+		scrollEl.scrollTop = scrollEl.scrollHeight;
+	}
+
 	onMount(() => {
 		updateScrollable();
+		scrollBottom();
 	});
 </script>
 
