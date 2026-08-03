@@ -14,16 +14,13 @@ export interface UPContext {
 	propagated: Lit;
 }
 
-export interface ResolutionContext {
-	clause: Clause;
-}
 
 export class Trail {
 	private assignments: VariableAssignment[] = $state([]);
 	private bookmarkDLs: number[] = $state([-1]);
 	private dl: number = 0;
 	// Steps of resolution context of a trail. Empty spaces are represented as NeverFn
-	private resolutionCtx: Either<ResolutionContext, NeverFn>[] = $state([]);
+	private resolutionCtx: Either<Clause, NeverFn>[] = $state([]);
 	// State that indicates if `this` was required to show the context information
 	private expandedContext: boolean = $state(false);
 	private lemma: Clause | undefined = $state(undefined);
@@ -148,8 +145,8 @@ export class Trail {
 		return this.conflictiveClause;
 	}
 
-	getConflictAnalysisContext(): Either<ResolutionContext, NeverFn>[] {
-		return this._makeResolutionContext();
+	getConflictAnalysisContext(): Either<Clause, NeverFn>[] {
+		return this._makeConflictAnalysis();
 	}
 
 	skipResolutions(nResolutions: number): void {
@@ -157,8 +154,8 @@ export class Trail {
 	}
 
 	updateConflictAnalysisContext(clause: Clause | undefined = undefined): void {
-		const ca: Either<ResolutionContext, NeverFn> =
-			clause === undefined ? makeRight(error) : makeLeft({ clause });
+		const ca: Either<Clause, NeverFn> =
+			clause === undefined ? makeRight(error) : makeLeft(clause);
 		this.resolutionCtx = [ca, ...this.resolutionCtx];
 	}
 
@@ -436,27 +433,21 @@ export class Trail {
 		});
 	}
 
-	private _makeResolutionContext(): Either<ResolutionContext, NeverFn>[] {
-		const nAssignments: number = this.assignments.length;
-		const gaps: number = Math.max(nAssignments - this.resolutionCtx.length, 0);
-		const ctx: Either<ResolutionContext, NeverFn>[] = [
-			...Array<Either<ResolutionContext, NeverFn>>(gaps).fill(makeRight(error)),
-			...this.resolutionCtx,
-			this._makeConflictAnalysisCtxTail()
-		];
-		return ctx;
-	}
+	private _makeConflictAnalysis(): Either<Clause, NeverFn>[] {
 
-	private _makeConflictAnalysisCtxTail(): Either<ResolutionContext, NeverFn> {
-		if (this.getConflictiveClause() === undefined) {
+		if (!this.hasConflictiveClause()) {
 			logFatal(
-				'Trail',
-				'Can not generate conflict analysis context when there is no conflictive declared'
+				'Conflict analysis context',
+				'Trying to get the conflict analysis context without a conflictive clause'
 			);
 		}
-		return makeLeft({
-			clause: this.getConflictiveClause() as Clause,
-			literal: 0
-		});
+		const nAssignments: number = this.assignments.length;
+		const gaps: number = Math.max(nAssignments - this.resolutionCtx.length, 0);
+		const ctx: Either<Clause, NeverFn>[] = [
+			...Array<Either<Clause, NeverFn>>(gaps).fill(makeRight(error)),
+			...this.resolutionCtx,
+			makeLeft(this.conflictiveClause) as Either<Clause, NeverFn>
+		];
+		return ctx;
 	}
 }
