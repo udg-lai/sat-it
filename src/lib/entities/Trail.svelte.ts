@@ -434,7 +434,6 @@ export class Trail {
 	}
 
 	private _makeConflictAnalysis(): Either<Clause, NeverFn>[] {
-
 		if (!this.hasConflictiveClause()) {
 			logFatal(
 				'Conflict analysis context',

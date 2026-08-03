@@ -6,14 +6,16 @@
 		literals: Literal[];
 		satisfiedClause: boolean;
 		satisfiedLiterals: boolean;
+		isLemma?: boolean;
 	}
 
-	let { literals, satisfiedClause, satisfiedLiterals }: Props = $props();
+	let { literals, satisfiedClause, satisfiedLiterals, isLemma }: Props = $props();
 </script>
 
 <plain-clause
 	class:satisfied-background={satisfiedClause}
 	class:unsatisfied-background={!satisfiedClause}
+	class:isLemma={isLemma}
 >
 	{#each literals as lit, i (i)}
 		<PlainLiteralComponent literal={lit} state={satisfiedLiterals ? 'satisfied' : 'unsatisfied'} />
@@ -63,4 +65,11 @@
 		border-color: var(--unsatisfied-border-color-o);
 		content: '';
 	}
+
+	.isLemma {
+		border: solid;
+		border-width: 1px;
+		border-color: var(--unsatisfied-color);
+	}
+
 </style>

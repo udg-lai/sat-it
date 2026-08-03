@@ -62,6 +62,7 @@
 							literals={fromLeft(ctx).getLiterals(true)}
 							satisfiedClause={false}
 							satisfiedLiterals={false}
+							isLemma={fromLeft(ctx).isLemma()}
 						/>
 					{/if}
 				{:else}
