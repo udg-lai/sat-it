@@ -14,7 +14,7 @@ import {
 	skippedResolutionsEventBus,
 	visitingComplementaryOccEventBus
 } from '$lib/events/events.ts';
-import { getConflictAnalysis } from '$lib/states/conflict-anlysis.svelte.ts';
+import { getConflictAnalysis } from '$lib/states/conflict-analysis.svelte.ts';
 import {
 	getClausePool,
 	getCurrentOccurrences,

@@ -17,7 +17,7 @@ import {
 	unaryEmptyClauseDetection as solverUnitClauseDetection,
 	unitPropagation as solverUnitPropagation
 } from '$lib/solvers/shared.svelte.ts';
-import { getConflictAnalysis, setConflictAnalysis } from '$lib/states/conflict-anlysis.svelte.ts';
+import { getConflictAnalysis, setConflictAnalysis } from '$lib/states/conflict-analysis.svelte.ts';
 import {
 	getClausePool,
 	getOccurrenceListQueue,

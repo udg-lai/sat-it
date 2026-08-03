@@ -19,7 +19,7 @@ import {
 	skippedResolutionsEventBus,
 	visitingComplementaryOccEventBus
 } from '$lib/events/events.ts';
-import { getConflictAnalysis } from '$lib/states/conflict-anlysis.svelte.ts';
+import { getConflictAnalysis } from '$lib/states/conflict-analysis.svelte.ts';
 import { getClausePool, getCurrentWatch, getWatchesQueue } from '$lib/states/problem.svelte.ts';
 import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 import { increaseNoConflicts } from '$lib/states/statistics.svelte.ts';

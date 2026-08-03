@@ -1,8 +1,10 @@
 <script lang="ts">
 	import {
-		visitingComplementaryOccEventBus,
-		openSettingsViewEventBus
+	conflictDetectedEventBus,
+		openSettingsViewEventBus,
+		visitingComplementaryOccEventBus
 	} from '$lib/events/events.ts';
+	import { logFatal } from '$lib/states/toasts.svelte.ts';
 	import {
 		ArrowUpFromBracketOutline,
 		BookOutline,
@@ -11,17 +13,19 @@
 	} from 'flowbite-svelte-icons';
 	import { onMount } from 'svelte';
 	import Button from './Button.svelte';
+	import ImplicationGraphComponent from './ImplicationGraphComponent.svelte';
 	import OccurrenceListComponent from './OccurrenceListComponent.svelte';
 	import SolutionSummaryComponent from './SolutionSummaryComponent.svelte';
-	import ImplicationGraphComponent from './ImplicationGraphComponent.svelte';
 	import './style.css';
 
 	let toolsViewRef: HTMLElement;
 
 	let isResizing = $state(false);
 
+	type ToolName = 'clause-database' | 'ow-list' | 'implication-graph'
+
 	interface Tool {
-		name: string;
+		name: ToolName;
 		active: boolean;
 	}
 
@@ -32,15 +36,15 @@
 	onMount(() => {
 		tools = [
 			{
-				name: 'viewA',
+				name: 'clause-database',
 				active: true
 			},
 			{
-				name: 'viewB',
+				name: 'ow-list',
 				active: false
 			},
 			{
-				name: 'viewC',
+				name: 'implication-graph',
 				active: false
 			}
 		];
@@ -53,14 +57,22 @@
 		}
 	});
 
-	function activateTool(what: number): void {
-		const alreadyActive = tools[what].active;
-		if (alreadyActive) {
-			tools[what].active = false;
-		} else {
-			tools = tools.map((v) => ({ ...v, active: false }));
-			tools[what].active = true;
-			toolsViewRef.style.width = 'var(--max-width-tools)';
+	function activateTool(toolName: ToolName): void {
+		const tool = tools.find((v) => v.name === toolName);
+		if (!tool)
+			logFatal('activateTool', `Tool ${toolName} not found.`);
+
+		for (const t of tools) {
+			if (t.name === toolName) {
+				if (t.active) {
+					toolsViewRef.style.width = '0px';
+				} else {
+					toolsViewRef.style.width = 'var(--max-width-tools)';
+				}
+				t.active = !t.active;
+			} else {
+				t.active = false;
+			}
 		}
 		tools = [...tools];
 	}
@@ -73,12 +85,6 @@
 		toolsViewRef.style.width = 'var(--max-width-tools)';
 		tools = [...tools];
 	}
-
-	/*
-	function openGutHubRepository() {
-		window.open('https://github.com/udg-lai/edu.satit', '_blank');
-	}
-	*/
 
 	function closeAllViews(): void {
 		tools = tools.map((v) => ({ ...v, active: false }));
@@ -163,20 +169,28 @@
 		openSettingsViewEventBus.emit();
 	}
 
-	function openConflictDetectionView() {
-		const alreadyActive = tools[1].active;
-		if (alreadyActive) return;
-		tools = tools.map((v) => ({ ...v, active: false }));
-		tools[1].active = true;
-		toolsViewRef.style.width = 'var(--max-width-tools)';
+	function focusOnToolView(toolName: ToolName): void {
+		const tool = tools.find((v) => v.name === toolName);
+		if (!tool)
+			logFatal('focusOnToolView', `Tool ${toolName} not found.`);
+
+		for (const t of tools) {
+			if (t.name === toolName) {
+				t.active = true;
+				toolsViewRef.style.width = 'var(--max-width-tools)';
+			} else {
+				t.active = false;
+			}
+		}
 		tools = [...tools];
 	}
 
 	onMount(() => {
-		const unsubscribeConflictDetection =
-			visitingComplementaryOccEventBus.subscribe(openConflictDetectionView);
+		const subs: (() => void)[] = [];
+		subs.push(visitingComplementaryOccEventBus.subscribe(() => focusOnToolView('ow-list')));
+		subs.push(conflictDetectedEventBus.subscribe(() => focusOnToolView('implication-graph')));
 		return () => {
-			unsubscribeConflictDetection();
+			subs.forEach((f) => f())
 		};
 	});
 </script>
@@ -186,12 +200,12 @@
 		<div class="options-tools">
 			{#each tools as { name }, id}
 				<div class="toggle-button">
-					{#if name === 'viewA'}
-						{@render toolA(id)}
-					{:else if name === 'viewB'}
-						{@render toolB(id)}
-					{:else if name === 'viewC'}
-						{@render toolC(id)}
+					{#if name === 'clause-database'}
+						{@render clauseDatabase(id)}
+					{:else if name === 'ow-list'}
+						{@render owList(id)}
+					{:else if name === 'implication-graph'}
+						{@render implicationGraph(id)}
 					{:else}
 						{@render notImplementedYet()}
 					{/if}
@@ -211,11 +225,11 @@
 			{#each tools as { name, active } (name)}
 				{#if active}
 					<div class="view">
-						{#if name === 'viewA'}
+						{#if name === 'clause-database'}
 							<SolutionSummaryComponent />
-						{:else if name === 'viewB'}
+						{:else if name === 'ow-list'}
 							{@render snippetOccurrenceList()}
-						{:else if name === 'viewC'}
+						{:else if name === 'implication-graph'}
 							<ImplicationGraphComponent />
 						{:else}
 							{@render notImplementedYet()}
@@ -232,27 +246,27 @@
 	</div>
 </tools>
 
-{#snippet toolA(id: number)}
+{#snippet clauseDatabase(id: number)}
 	<Button
-		onClick={() => activateTool(id)}
+		onClick={() => activateTool('clause-database')}
 		icon={BookOutline}
 		active={tools[id].active}
 		title="Clauses"
 	/>
 {/snippet}
 
-{#snippet toolB(id: number)}
+{#snippet owList(id: number)}
 	<Button
-		onClick={() => activateTool(id)}
+		onClick={() => activateTool('ow-list')}
 		icon={ClipboardOutline}
 		active={tools[id].active}
 		title="Occurrence list"
 	/>
 {/snippet}
 
-{#snippet toolC(id: number)}
+{#snippet implicationGraph(id: number)}
 	<Button
-		onClick={() => activateTool(id)}
+		onClick={() => activateTool('implication-graph')}
 		icon={ShareNodesSolid}
 		active={tools[id].active}
 		title="Implication graph"
@@ -266,12 +280,6 @@
 {#snippet snippetOccurrenceList()}
 	<OccurrenceListComponent />
 {/snippet}
-
-<!--
-{#snippet btnGitHub()}
-	<Button onClick={() => openGutHubRepository()} icon={GithubSolid} />
-{/snippet}
--->
 
 {#snippet notImplementedYet(what?: string)}
 	<p>Missing {what}</p>

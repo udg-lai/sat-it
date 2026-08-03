@@ -20,7 +20,7 @@ import {
 	unitPropagation as solverUnitPropagation,
 	unaryEmptyClauseDetection
 } from '$lib/solvers/shared.svelte.ts';
-import { getConflictAnalysis, setConflictAnalysis } from '$lib/states/conflict-anlysis.svelte.ts';
+import { getConflictAnalysis, setConflictAnalysis } from '$lib/states/conflict-analysis.svelte.ts';
 import {
 	getClausePool,
 	getCurrentWatch,

@@ -1,5 +1,5 @@
 import type { DimacsInstance } from '$lib/instances/dimacs-instance.interface.ts';
-import { getConflictAnalysis } from '$lib/states/conflict-anlysis.svelte.ts';
+import { getConflictAnalysis } from '$lib/states/conflict-analysis.svelte.ts';
 import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 import { logError } from '$lib/states/toasts.svelte.ts';
 import { fromRight, isLeft, makeLeft, type Either } from '$lib/types/either.ts';
