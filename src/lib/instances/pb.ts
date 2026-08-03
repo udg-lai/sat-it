@@ -5,7 +5,7 @@ const fileName = 'pb.dimacs';
 
 const content = `
 p cnf 12 15
-c unitary clauses
+c unit clauses
 5 0
 -11 0
 12 0
