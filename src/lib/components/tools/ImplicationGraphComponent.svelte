@@ -316,8 +316,8 @@
 	//
 </script>
 
-// // // <div bind:this={container} class="graph"></div>
-// // //
+<!--
+ <div bind:this={container} class="graph"></div>
 
 <style>
 // 	.graph {
@@ -329,3 +329,5 @@
 // 	}
 //
 </style>
+
+-->
