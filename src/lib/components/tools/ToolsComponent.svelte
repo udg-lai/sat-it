@@ -1,6 +1,6 @@
 <script lang="ts">
 	import {
-	conflictDetectedEventBus,
+		conflictDetectedEventBus,
 		openSettingsViewEventBus,
 		visitingComplementaryOccEventBus
 	} from '$lib/events/events.ts';
@@ -22,7 +22,7 @@
 
 	let isResizing = $state(false);
 
-	type ToolName = 'clause-database' | 'ow-list' | 'implication-graph'
+	type ToolName = 'clause-database' | 'ow-list' | 'implication-graph';
 
 	interface Tool {
 		name: ToolName;
@@ -59,8 +59,7 @@
 
 	function activateTool(toolName: ToolName): void {
 		const tool = tools.find((v) => v.name === toolName);
-		if (!tool)
-			logFatal('activateTool', `Tool ${toolName} not found.`);
+		if (!tool) logFatal('activateTool', `Tool ${toolName} not found.`);
 
 		for (const t of tools) {
 			if (t.name === toolName) {
@@ -171,8 +170,7 @@
 
 	function focusOnToolView(toolName: ToolName): void {
 		const tool = tools.find((v) => v.name === toolName);
-		if (!tool)
-			logFatal('focusOnToolView', `Tool ${toolName} not found.`);
+		if (!tool) logFatal('focusOnToolView', `Tool ${toolName} not found.`);
 
 		for (const t of tools) {
 			if (t.name === toolName) {
@@ -190,7 +188,7 @@
 		subs.push(visitingComplementaryOccEventBus.subscribe(() => focusOnToolView('ow-list')));
 		subs.push(conflictDetectedEventBus.subscribe(() => focusOnToolView('implication-graph')));
 		return () => {
-			subs.forEach((f) => f())
+			subs.forEach((f) => f());
 		};
 	});
 </script>
