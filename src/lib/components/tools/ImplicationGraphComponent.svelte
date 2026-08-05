@@ -5,11 +5,9 @@
 
 	const implicationGraph = $derived(getImplicationGraph());
 
-
 	$effect(() => {
 		console.log('Implication graph changed:', implicationGraph);
-	})
-
+	});
 
 	let svg;
 
@@ -66,9 +64,6 @@
 	}
 
 	layout(nodes);
-
-
-
 
 	onMount(() => {
 		const root = d3.select(svg);

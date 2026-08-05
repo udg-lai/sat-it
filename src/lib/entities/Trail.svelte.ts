@@ -160,8 +160,7 @@ export class Trail {
 	}
 
 	updateConflictAnalysisContext(clause: Clause | undefined = undefined): void {
-		const ca: Either<Clause, NeverFn> =
-			clause === undefined ? makeRight(error) : makeLeft(clause);
+		const ca: Either<Clause, NeverFn> = clause === undefined ? makeRight(error) : makeLeft(clause);
 		this.resolutionCtx = [ca, ...this.resolutionCtx];
 	}
 

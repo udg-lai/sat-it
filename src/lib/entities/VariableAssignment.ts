@@ -108,7 +108,8 @@ export default class VariableAssignment {
 		this._reason = kind;
 		this._dl = dl;
 
-		console.debug(`VariableAssignment created: ${this._variable.toInt()} with reason ${this._reason.type} at decision level ${this._dl}`
+		console.debug(
+			`VariableAssignment created: ${this._variable.toInt()} with reason ${this._reason.type} at decision level ${this._dl}`
 		);
 	}
 

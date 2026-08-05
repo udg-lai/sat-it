@@ -35,7 +35,7 @@ export const makeJust = <T>(value: T): Just<T> => ({
 	},
 	isNothing: function (this: Just<T>) {
 		return isNothing(this);
-	},
+	}
 });
 
 export const makeNothing = (): Nothing => ({
@@ -48,7 +48,7 @@ export const makeNothing = (): Nothing => ({
 	},
 	isNothing: function (this: Nothing) {
 		return true;
-	},
+	}
 });
 
 export type UnwrapMaybe = <T>(e: Maybe<T>) => NonNullable<T>;

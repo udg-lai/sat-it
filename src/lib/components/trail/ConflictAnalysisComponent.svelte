@@ -10,24 +10,17 @@
 		trail: Trail;
 	}
 
-	function computeVisibleContext(
-		context: Either<Clause, NeverFn>[]
-	): Either<Clause, NeverFn>[] {
-		const alignedContext: Either<Clause, NeverFn>[] = context.slice(
-			0,
-			trail.nAssignments()
-		);
+	function computeVisibleContext(context: Either<Clause, NeverFn>[]): Either<Clause, NeverFn>[] {
+		const alignedContext: Either<Clause, NeverFn>[] = context.slice(0, trail.nAssignments());
 		const conflictiveClause: Either<Clause, NeverFn> = context[context.length - 1];
 
-		const visibleContext: Either<Clause, NeverFn>[] = alignedContext.filter(
-			(_, pos: number) => {
-				const dl: number = trail.dlOfPosition(pos);
-				// Any decision or expanded decision level shows its resolution context
-				// The context of a decision is always shown
-				// Any propagation before any decision is always shown
-				return dl == 0 || trail.isDecision(pos) || trail.isDLExpanded(dl);
-			}
-		);
+		const visibleContext: Either<Clause, NeverFn>[] = alignedContext.filter((_, pos: number) => {
+			const dl: number = trail.dlOfPosition(pos);
+			// Any decision or expanded decision level shows its resolution context
+			// The context of a decision is always shown
+			// Any propagation before any decision is always shown
+			return dl == 0 || trail.isDecision(pos) || trail.isDLExpanded(dl);
+		});
 		return [...visibleContext, conflictiveClause];
 	}
 

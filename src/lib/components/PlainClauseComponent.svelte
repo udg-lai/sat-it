@@ -15,7 +15,7 @@
 <plain-clause
 	class:satisfied-background={satisfiedClause}
 	class:unsatisfied-background={!satisfiedClause}
-	class:isLemma={isLemma}
+	class:isLemma
 >
 	{#each literals as lit, i (i)}
 		<PlainLiteralComponent literal={lit} state={satisfiedLiterals ? 'satisfied' : 'unsatisfied'} />
@@ -71,5 +71,4 @@
 		border-width: 1px;
 		border-color: var(--unsatisfied-color);
 	}
-
 </style>
