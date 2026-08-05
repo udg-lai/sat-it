@@ -5,22 +5,22 @@ import { ConflictAnalysis } from './ConflictAnalysis.svelte.ts';
 import type { Trail } from './Trail.svelte.ts';
 import type VariableAssignment from './VariableAssignment.ts';
 
-type Node = {
+export type IG_Node = {
 	id: string;
 	content: VariableAssignment | Clause;
 	dl: number;
+	index?: number;
 };
 
-type Edge = {
-	from: Node;
-	to: Node;
+export type IG_Edge = {
+	from: IG_Node;
+	to: IG_Node;
 };
 
 export class ImplicationGraph {
-	trail: Trail;
-
-	nodes: Node[] = [];
-	edges: Edge[] = [];
+	_trail: Trail;
+	_nodes: IG_Node[] = $state([]);
+	_edges: IG_Edge[] = $state([]);
 
 	constructor(trail: Trail) {
 		if (!trail.hasConflictiveClause())
@@ -29,17 +29,25 @@ export class ImplicationGraph {
 				'Cannot create an ImplicationGraph from a trail without a conflictive clause'
 			);
 
-		this.trail = trail;
+		this._trail = trail;
 		this._makeImplicationGraph();
 	}
 
+	nodes(): IG_Node[] {
+		return this._nodes;
+	}
+
+	edges(): IG_Edge[] {
+		return this._edges;
+	}
+
 	private _makeImplicationGraph(): void {
-		const dl = this.trail.getDL();
-		const lastDecision = this.trail.lastDecision();
-		const propagations = this.trail.getPropagationsAtLevel(dl);
+		const dl = this._trail.getDL();
+		const lastDecision = this._trail.lastDecision();
+		const propagations = this._trail.getPropagationsAtLevel(dl);
 
 		const conflictAnalysis: ConflictAnalysis = new ConflictAnalysis(
-			this.trail.getConflictiveClause()!,
+			this._trail.getConflictiveClause()!,
 			lastDecision,
 			propagations
 		);
@@ -47,23 +55,23 @@ export class ImplicationGraph {
 		const cc: Clause = conflictAnalysis.getConflictiveClause();
 
 		// Adds the empty clause to the graph, it has its own dl, which is the last decision level + 1, since it is a lemma
-		const falsum: Node = {
+		const falsum: IG_Node = {
 			id: 'falsum',
 			content: Clause.falsum(),
-			dl: dl + 1
+			dl: dl
 		};
-		this.nodes.push(falsum);
+		this._nodes.push(falsum);
 
 		for (const literal of cc.getLiterals()) {
 			const variable = literal.getVariable();
 
-			const trailSize = this.trail.size();
+			const trailSize = this._trail.size();
 			let j = trailSize - 1;
 			let assignmentFound = false;
 
 			// Search the literal in the trail
 			while (j >= 0 && !assignmentFound) {
-				const assignment: VariableAssignment | undefined = this.trail.get(j);
+				const assignment: VariableAssignment | undefined = this._trail.get(j);
 				if (assignment == undefined) {
 					logFatal(
 						'ImplicationGraph Error',
@@ -81,18 +89,22 @@ export class ImplicationGraph {
 					`Literal ${literal.toString()} in conflict clause not found in trail`
 				);
 			}
-			const assignment: VariableAssignment = this.trail.get(j) as VariableAssignment;
-			const node: Node = {
+			const assignment: VariableAssignment = this._trail.get(j) as VariableAssignment;
+			const node: IG_Node = {
 				id: assignment.toLit().toString(),
 				content: assignment,
-				dl: assignment.dl()
+				dl: assignment.dl(),
+				index: this._trail.findIndexOfAssignment(assignment)
 			};
-			this.nodes.push(node);
+			this._nodes.push(node);
 
-			this.edges.push({
+			this._edges.push({
 				from: node,
 				to: falsum
 			});
+
+			this._nodes = [...this._nodes];
+			this._edges = [...this._edges];
 		}
 	}
 }

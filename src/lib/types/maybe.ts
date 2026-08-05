@@ -2,7 +2,7 @@ type Just<T> = {
 	kind: 'just';
 	value: T;
 	fromJust: () => NonNullable<T>;
-	isJust: () => boolean;
+	isJust: () => this is Just<T>;
 	isNothing: () => boolean;
 };
 
@@ -30,7 +30,7 @@ export const makeJust = <T>(value: T): Just<T> => ({
 	fromJust: function (this: Just<T>) {
 		return fromJust(this);
 	},
-	isJust: function (this: Just<T>) {
+	isJust: function <T>(this: Maybe<T>): this is Just<T> {
 		return isJust(this);
 	},
 	isNothing: function (this: Just<T>) {

@@ -348,6 +348,11 @@ export class Trail {
 		return this.expandedContext;
 	}
 
+	findIndexOfAssignment(varAssignment: VariableAssignment): number {
+		const index = this.assignments.findIndex((a) => a.toLit() === varAssignment.toLit());
+		return index;
+	}
+
 	[Symbol.iterator]() {
 		return this.assignments.values();
 	}
