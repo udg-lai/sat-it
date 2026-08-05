@@ -195,7 +195,7 @@ export const backtracking = (pool: VariablePool): Lit => {
 			`Variable ${variable.toInt()} has no assigned value after backtracking`
 		);
 	}
-	const dl: number = lastAssignment.dl - 1;
+	const dl: number = lastAssignment._dl - 1;
 	newTrail.push(VariableAssignment.newBacktrackingAssignment(variable, dl));
 	stackTrail(newTrail);
 

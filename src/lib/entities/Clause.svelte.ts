@@ -94,6 +94,10 @@ export default class Clause implements Comparable<Clause> {
 		});
 	}
 
+	static falsum(): Clause {
+		return new Clause([], { comments: ['Falsum'], cRef: undefined, learned: false });
+	}
+
 	getCRef(): CRef {
 		// cRef can be undefined for temporal clauses, check if it is a temporal clause before using this method
 		if (this.isTemporal()) {

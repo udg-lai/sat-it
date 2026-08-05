@@ -2,6 +2,7 @@ import { backjumping as backjumpingAlg } from '$lib/algorithms/backjumping.ts';
 import Clause, { isUnitEval, type ClauseEval } from '$lib/entities/Clause.svelte.ts';
 import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
 import { ConflictAnalysis, type Resolution } from '$lib/entities/ConflictAnalysis.svelte.ts';
+import { ImplicationGraph, setImplicationGraph } from '$lib/entities/ImplicationGraph.svelte.ts';
 import { type VisitingOccurrenceList } from '$lib/entities/OccurrenceList.svelte.ts';
 import type { Trail } from '$lib/entities/Trail.svelte.ts';
 import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
@@ -247,6 +248,7 @@ export const buildConflictAnalysis: CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN =
 	const cc: Clause = getClausePool().at(cRef).copy();
 	const conflictAnalysis: ConflictAnalysis = new ConflictAnalysis(cc, ld, propagations);
 	setConflictAnalysis(conflictAnalysis);
+	setImplicationGraph(new ImplicationGraph(trail));
 };
 
 export type CDCL_ASSERTING_CLAUSE_FUN = () => boolean;

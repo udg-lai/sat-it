@@ -99,16 +99,16 @@ export const makeBacktrackingReason = (): Backtracking => {
 };
 
 export default class VariableAssignment {
-	variable: Variable;
-	reason: Reason;
-	dl: number = -1;
+	_variable: Variable;
+	_reason: Reason;
+	_dl: number = -1;
 
 	private constructor(variable: Variable, kind: Reason, dl: number = -1) {
-		this.variable = variable;
-		this.reason = kind;
-		this.dl = dl;
+		this._variable = variable;
+		this._reason = kind;
+		this._dl = dl;
 
-		console.debug(`VariableAssignment created: ${this.variable.toInt()} with reason ${this.reason.type} at decision level ${this.dl}`
+		console.debug(`VariableAssignment created: ${this._variable.toInt()} with reason ${this._reason.type} at decision level ${this._dl}`
 		);
 	}
 
@@ -133,71 +133,75 @@ export default class VariableAssignment {
 	}
 
 	copy(): VariableAssignment {
-		return new VariableAssignment(this.variable, this.reason, this.dl);
+		return new VariableAssignment(this._variable, this._reason, this._dl);
 	}
 
 	getVariable(): Variable {
-		return this.variable;
+		return this._variable;
+	}
+
+	dl(): number {
+		return this._dl;
 	}
 
 	isD(): boolean {
-		return isDecisionReason(this.reason);
+		return isDecisionReason(this._reason);
 	}
 
 	isUP(): boolean {
-		return isUnitPropagationReason(this.reason);
+		return isUnitPropagationReason(this._reason);
 	}
 
 	isBJ(): boolean {
-		return isBackJumpingReason(this.reason);
+		return isBackJumpingReason(this._reason);
 	}
 
 	isK(): boolean {
-		return isBacktrackingReason(this.reason);
+		return isBacktrackingReason(this._reason);
 	}
 
 	isImplied(): boolean {
 		// A literal is implied if it was propagated after backjumping
 		// or it was propagated because it occurs into a unit clause
-		return isImpliedReason(this.reason);
+		return isImpliedReason(this._reason);
 	}
 
 	getReason(): Reason {
-		return this.reason;
+		return this._reason;
 	}
 
 	unassign(): void {
-		this.variable.unassign();
+		this._variable.unassign();
 	}
 
 	toLit(): Lit {
-		if (!this.variable.hasTruthValue()) {
+		if (!this._variable.hasTruthValue()) {
 			logFatal(
 				'Evaluating a variable assignment with not assigned value',
 				'The evaluation is given by its variable which is not yet assigned'
 			);
 		}
-		const assignment = this.variable.getAssignment();
+		const assignment = this._variable.getAssignment();
 		if (assignment) {
-			return this.variable.toInt();
+			return this._variable.toInt();
 		} else {
-			return this.variable.toInt() * -1;
+			return this._variable.toInt() * -1;
 		}
 	}
 
 	toVar(): Var {
-		return this.variable.toInt();
+		return this._variable.toInt();
 	}
 
 	toTeX(): string {
-		if (!this.variable.hasTruthValue()) {
+		if (!this._variable.hasTruthValue()) {
 			logFatal(
 				'Evaluating a variable assignment with not assigned value',
 				'The evaluation is given by its variable which is not yet assigned'
 			);
 		}
-		const truthValue: boolean = this.variable.getAssignment() as boolean;
-		const variableId = this.variable.toInt();
+		const truthValue: boolean = this._variable.getAssignment() as boolean;
+		const variableId = this._variable.toInt();
 		let text: string;
 		if (truthValue) {
 			text = variableId.toString();

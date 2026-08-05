@@ -14,7 +14,6 @@ export interface UPContext {
 	propagated: Lit;
 }
 
-
 export class Trail {
 	private assignments: VariableAssignment[] = $state([]);
 	private bookmarkDLs: number[] = $state([-1]);
@@ -64,6 +63,13 @@ export class Trail {
 
 	getDL(): number {
 		return this.dl;
+	}
+
+	get(index: number): VariableAssignment | undefined {
+		if (index < 0 || index >= this.assignments.length) {
+			return undefined;
+		}
+		return this.assignments[index];
 	}
 
 	getAssignments(): VariableAssignment[] {
