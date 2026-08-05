@@ -17,7 +17,7 @@ export default class Literal implements Comparable<Literal> {
 
 	static buildFrom(literal: number, variables: VariablePool) {
 		const variable = Math.abs(literal);
-		return new Literal(variables.getVariable(variable), Literal.hatted(literal));
+		return new Literal(variables.get(variable), Literal.hatted(literal));
 	}
 
 	static complementary(literal: number): Lit {
@@ -68,6 +68,10 @@ export default class Literal implements Comparable<Literal> {
 
 	toInt(): number {
 		return this.variable.toInt() * (this.hat ? -1 : 1);
+	}
+
+	toVar(): Var {
+		return this.variable.toInt();
 	}
 
 	private evaluate(): boolean {

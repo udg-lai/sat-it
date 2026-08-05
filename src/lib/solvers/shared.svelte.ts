@@ -62,7 +62,7 @@ export const decide = (pool: VariablePool, algorithm: string): Lit => {
 	doAssignment(varId, truthValue);
 
 	// This variable should contain the updated assignment done in `doAssignment`
-	const variable: Variable = pool.getVariable(varId).copy();
+	const variable: Variable = pool.get(varId).copy();
 
 	const dl = trail.getDL() + 1;
 
@@ -103,7 +103,7 @@ export const unitPropagation = (
 
 	doAssignment(varId, truthValue);
 
-	const variable: Variable = variables.getVariable(varId).copy();
+	const variable: Variable = variables.get(varId).copy();
 
 	const dl = trail.getDL();
 
@@ -187,7 +187,7 @@ export const backtracking = (pool: VariablePool): Lit => {
 	variable.negate();
 	doAssignment(variable.toInt(), variable.getAssignment());
 
-	variable = pool.getVariable(variable.toInt()).copy();
+	variable = pool.get(variable.toInt()).copy();
 
 	if (!variable.hasTruthValue()) {
 		logFatal(

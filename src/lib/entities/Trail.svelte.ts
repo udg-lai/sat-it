@@ -65,7 +65,7 @@ export class Trail {
 		return this.dl;
 	}
 
-	get(index: number): VariableAssignment | undefined {
+	at(index: number): VariableAssignment | undefined {
 		if (index < 0 || index >= this.assignments.length) {
 			return undefined;
 		}
