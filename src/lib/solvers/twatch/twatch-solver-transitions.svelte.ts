@@ -16,7 +16,7 @@ import {
 	conflictDetectedEventBus,
 	newTrailStackedEventBus,
 	resolutionStepEventBus,
-	skippedResolutionsEventBus,
+	fillResolutionGapsEventBus,
 	visitingComplementaryOccEventBus
 } from '$lib/events/events.ts';
 import { getConflictAnalysis } from '$lib/states/conflict-analysis.svelte.ts';
@@ -148,11 +148,11 @@ export const conflictAnalysisBlock = (): void => {
 	const resolution: Resolution = resolutionTransition();
 	const latestTrail: Trail = getLatestTrail();
 
-	const { resolvent, next } = resolution;
+	const { resolvent } = resolution;
 
 	latestTrail.updateConflictAnalysisContext(resolvent.clause);
-
-	skippedResolutionsEventBus.emit(next.nSkip);
+	const resolutionGap: number = getConflictAnalysis().getResolutionGap();
+	fillResolutionGapsEventBus.emit(resolutionGap);
 
 	resolutionStepEventBus.emit(resolvent.clause);
 

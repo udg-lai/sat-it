@@ -7,6 +7,7 @@ import { type VisitingOccurrenceList } from '$lib/entities/OccurrenceList.svelte
 import type { Trail } from '$lib/entities/Trail.svelte.ts';
 import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
 import type { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
+import { fillResolutionGapsEventBus } from '$lib/events/events.ts';
 import {
 	atLevelZero,
 	clauseEvaluation,
@@ -247,6 +248,11 @@ export const buildConflictAnalysis: CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN =
 
 	const cc: Clause = getClausePool().at(cRef).copy();
 	const conflictAnalysis: ConflictAnalysis = new ConflictAnalysis(cc, ld, propagations);
+
+	// Obtain the resolution to gap to the next implication to consider
+	const resolutionGap: number = conflictAnalysis.getResolutionGap();
+	fillResolutionGapsEventBus.emit(resolutionGap);
+
 	setConflictAnalysis(conflictAnalysis);
 	setImplicationGraph(new ImplicationGraph(trail));
 };

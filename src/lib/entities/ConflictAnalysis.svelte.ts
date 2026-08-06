@@ -1,7 +1,5 @@
-import { skippedResolutionsEventBus } from '$lib/events/events.ts';
 import { getClausePool } from '$lib/states/problem.svelte.ts';
 import { logError } from '$lib/states/toasts.svelte.ts';
-import { makeJust, makeNothing, type Maybe } from '$lib/types/maybe.ts';
 import type { Lit } from '$lib/types/types.ts';
 import Clause from './Clause.svelte.ts';
 import Literal from './Literal.svelte.ts';
@@ -10,10 +8,6 @@ import type VariableAssignment from './VariableAssignment.ts';
 import { type Propagation } from './VariableAssignment.ts';
 
 export interface Resolution {
-	next: {
-		over: Maybe<Variable>;
-		nSkip: number;
-	};
 	over: Variable;
 	nth: number;
 	conflictClause: Clause;
@@ -35,6 +29,9 @@ export class ConflictAnalysis {
 	ldlPropagations: VariableAssignment[];
 	pointer: number;
 	nth: number;
+
+	// This is the distance till the next implication to consider in the conflict analysis
+	resolutionGap: number = 0;
 
 	constructor(
 		conflictClause: Clause,
@@ -78,8 +75,7 @@ export class ConflictAnalysis {
 		const { nextPointer, nSteps } = this._nextImplicationIndex();
 		this.pointer = nextPointer;
 
-		// Inform the number of steps to the application to fill the gaps
-		skippedResolutionsEventBus.emit(nSteps);
+		this.resolutionGap = nSteps;
 
 		// The nth position of the resolution from right-to-left
 		this.nth = 0;
@@ -175,20 +171,12 @@ export class ConflictAnalysis {
 
 		// Move the pointer to the next implication to consider
 		const { nextPointer, nSteps }: PointerUpdate = this._nextImplicationIndex();
-		this.pointer = nextPointer;
 
-		// If after updating the pointer, no asserting literal or no more implications are left
-		// There is no next variable to resolve with
-		const next: Maybe<Variable> = this.finished()
-			? makeNothing()
-			: makeJust(this.getImplication(this.pointer).getVariable());
+		this.pointer = nextPointer;
+		this.resolutionGap = nSteps;
 
 		const resolution: Resolution = {
 			nth: this.nth,
-			next: {
-				over: next,
-				nSkip: nSteps
-			},
 			over: propagation.getVariable(),
 			conflictClause: this.conflictiveClause.copy(),
 			reason: reason,
@@ -199,6 +187,10 @@ export class ConflictAnalysis {
 		};
 
 		return resolution;
+	}
+
+	getResolutionGap(): number {
+		return this.resolutionGap;
 	}
 
 	private updateConflictiveClause(resolvent: Clause): void {

@@ -13,7 +13,7 @@
 		newTrailStackedEventBus,
 		renderTrailsEventBus,
 		resetProblemEventBus,
-		skippedResolutionsEventBus,
+		fillResolutionGapsEventBus,
 		solverCommandEventBus,
 		solverSignalEventBus,
 		stepDelayEventBus,
@@ -245,7 +245,7 @@
 		// undo the last decision that was done
 		subs.push(ctrlZEventBus.subscribe(singleUndo));
 
-		subs.push(skippedResolutionsEventBus.subscribe(skippedResolutions));
+		subs.push(fillResolutionGapsEventBus.subscribe(skippedResolutions));
 
 		return () => {
 			subs.forEach((f) => f());

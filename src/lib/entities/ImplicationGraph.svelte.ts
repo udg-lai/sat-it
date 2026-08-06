@@ -5,6 +5,7 @@ import Clause from './Clause.svelte.ts';
 import { ConflictAnalysis } from './ConflictAnalysis.svelte.ts';
 import type Literal from './Literal.svelte.ts';
 import type { Trail } from './Trail.svelte.ts';
+import type Variable from './Variable.svelte.ts';
 import { isImpliedReason, type Propagation, type Reason } from './VariableAssignment.ts';
 import type VariableAssignment from './VariableAssignment.ts';
 
@@ -66,7 +67,7 @@ export class ImplicationGraph {
 		this._nodes.push(falsum);
 
 		for (const literal of cc.getLiterals()) {
-			const variable = literal.getVariable();
+			const variable: Variable = literal.getVariable();
 
 			const trailSize = this._trail.size();
 			let j = trailSize - 1;
@@ -106,9 +107,9 @@ export class ImplicationGraph {
 				from: node,
 				to: falsum
 			});
-
 		}
 
+		//
 		while (!conflictAnalysis.finished()) {
 			const implication: VariableAssignment = conflictAnalysis.currentImplication();
 			if (!implication.isImplied()) {
@@ -118,8 +119,9 @@ export class ImplicationGraph {
 				);
 			}
 
-
-			let toNode: IG_Node | undefined = this._nodes.find((n) => n.id === implication.toLit().toString());
+			let toNode: IG_Node | undefined = this._nodes.find(
+				(n) => n.id === implication.toLit().toString()
+			);
 			if (toNode === undefined) {
 				toNode = {
 					id: implication.toLit().toString(),
@@ -134,15 +136,15 @@ export class ImplicationGraph {
 			const reason: Clause = getClausePool().at(cRef);
 
 			// Makes no sense to take into account itself
-			const others: Literal[] = reason.getLiterals().filter((l) => l.toVar() !== implication.toVar());
+			const others: Literal[] = reason
+				.getLiterals()
+				.filter((l) => l.toVar() !== implication.toVar());
 
 			for (const literal of others) {
-
 				let fromNode: IG_Node | undefined = this._nodes.find((n) => n.id === literal.toString());
 
 				if (fromNode === undefined) {
-					const variable = literal.getVariable();
-
+					const variable: Variable = literal.getVariable();
 
 					const trailSize = this._trail.size();
 					let j = trailSize - 1;
@@ -177,7 +179,6 @@ export class ImplicationGraph {
 						dl: assignment.dl(),
 						index: this._trail.findIndexOfAssignment(assignment)
 					};
-
 				}
 
 				this._edges.push({
@@ -192,13 +193,9 @@ export class ImplicationGraph {
 		this._nodes = [...this._nodes];
 		this._edges = [...this._edges];
 
-
-
 		console.log($state.snapshot(this._nodes));
 		console.log($state.snapshot(this._edges));
-
 	}
-
 }
 
 let implicationGraph: Maybe<ImplicationGraph> = $state(makeNothing());

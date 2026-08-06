@@ -12,6 +12,7 @@ import type { Trail } from '$lib/entities/Trail.svelte.ts';
 import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
 import type { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
 import type { Watch } from '$lib/entities/WatchTable.svelte.ts';
+import { fillResolutionGapsEventBus } from '$lib/events/events.ts';
 import {
 	atLevelZero,
 	allAssigned as solverAllAssigned,
@@ -314,6 +315,10 @@ export const buildConflictAnalysis: TWATCH_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN
 
 	const cc: Clause = getClausePool().at(cRef).copy();
 	const conflictAnalysis: ConflictAnalysis = new ConflictAnalysis(cc, ld, propagations);
+
+	const resolutionGap: number = conflictAnalysis.getResolutionGap();
+	fillResolutionGapsEventBus.emit(resolutionGap);
+
 	setConflictAnalysis(conflictAnalysis);
 };
 

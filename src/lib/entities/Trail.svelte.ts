@@ -18,8 +18,8 @@ export class Trail {
 	private assignments: VariableAssignment[] = $state([]);
 	private bookmarkDLs: number[] = $state([-1]);
 	private dl: number = 0;
-	// Steps of resolution context of a trail. Empty spaces are represented as NeverFn
-	private resolutionCtx: Either<Clause, NeverFn>[] = $state([]);
+	// Steps of conflict analysis context of a trail. Empty spaces are represented as NeverFn
+	private conflictAnalysisCtx: Either<Clause, NeverFn>[] = $state([]);
 	// State that indicates if `this` was required to show the context information
 	private expandedContext: boolean = $state(false);
 	private lemma: Clause | undefined = $state(undefined);
@@ -36,7 +36,7 @@ export class Trail {
 		newTrail.dl = this.dl;
 		newTrail.lemma = this.lemma;
 		newTrail.conflictiveClause = this.conflictiveClause;
-		newTrail.resolutionCtx = [...this.resolutionCtx];
+		newTrail.conflictAnalysisCtx = [...this.conflictAnalysisCtx];
 		newTrail.state = this.state;
 		newTrail.expandedDLs = [...this.expandedDLs];
 		return newTrail;
@@ -56,7 +56,7 @@ export class Trail {
 
 	cleanConflict(): void {
 		this.conflictiveClause = undefined;
-		this.resolutionCtx = [];
+		this.conflictAnalysisCtx = [];
 		this.lemma = undefined;
 		this.state = 'running';
 	}
@@ -156,12 +156,16 @@ export class Trail {
 	}
 
 	skipResolutions(nResolutions: number): void {
+		console.debug(`Skipping ${nResolutions} resolutions in conflict analysis context`);
 		for (let i = 0; i < nResolutions; i++) this.updateConflictAnalysisContext(undefined);
 	}
 
 	updateConflictAnalysisContext(clause: Clause | undefined = undefined): void {
 		const ca: Either<Clause, NeverFn> = clause === undefined ? makeRight(error) : makeLeft(clause);
-		this.resolutionCtx = [ca, ...this.resolutionCtx];
+		this.conflictAnalysisCtx = [ca, ...this.conflictAnalysisCtx];
+		console.debug(
+			`Resolution context updated. Current length: ${$state.snapshot(this.conflictAnalysisCtx).length}`
+		);
 	}
 
 	hasPropagations(level: number): boolean {
@@ -451,10 +455,10 @@ export class Trail {
 			);
 		}
 		const nAssignments: number = this.assignments.length;
-		const gaps: number = Math.max(nAssignments - this.resolutionCtx.length, 0);
+		const gaps: number = Math.max(nAssignments - this.conflictAnalysisCtx.length, 0);
 		const ctx: Either<Clause, NeverFn>[] = [
 			...Array<Either<Clause, NeverFn>>(gaps).fill(makeRight(error)),
-			...this.resolutionCtx,
+			...this.conflictAnalysisCtx,
 			makeLeft(this.conflictiveClause) as Either<Clause, NeverFn>
 		];
 		return ctx;

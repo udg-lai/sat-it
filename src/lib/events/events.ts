@@ -96,4 +96,4 @@ export const ctrlZEventBus = createEventBus<void>();
 export const decisionLevelToggledEventBus = createEventBus<void>();
 
 // Number of skipped steps (resolutions) during conflict analysis
-export const skippedResolutionsEventBus = createEventBus<number>();
+export const fillResolutionGapsEventBus = createEventBus<number>();
