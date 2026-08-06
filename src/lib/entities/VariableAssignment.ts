@@ -107,10 +107,6 @@ export default class VariableAssignment {
 		this._variable = variable;
 		this._reason = kind;
 		this._dl = dl;
-
-		console.debug(
-			`VariableAssignment created: ${this._variable.toInt()} with reason ${this._reason.type} at decision level ${this._dl}`
-		);
 	}
 
 	static newAutomatedAssignment(variable: Variable, algorithm: string, dl: number = -1) {
@@ -131,6 +127,16 @@ export default class VariableAssignment {
 
 	static newBacktrackingAssignment(variable: Variable, dl: number = -1) {
 		return new VariableAssignment(variable, makeBacktrackingReason(), dl);
+	}
+
+	eval(): boolean {
+		if (!this._variable.hasTruthValue()) {
+			logFatal(
+				'Evaluating a variable assignment with not assigned value',
+				'The evaluation is given by its variable which is not yet assigned'
+			);
+		}
+		return this._variable.getAssignment() as boolean;
 	}
 
 	copy(): VariableAssignment {
@@ -210,5 +216,15 @@ export default class VariableAssignment {
 			text = `\\overline{${variableId}}`;
 		}
 		return text;
+	}
+
+	toString(): string {
+		if (!this._variable.hasTruthValue()) {
+			logFatal(
+				'Evaluating a variable assignment with not assigned value',
+				'The evaluation is given by its variable which is not yet assigned'
+			);
+		}
+		return this.toLit().toString();
 	}
 }
