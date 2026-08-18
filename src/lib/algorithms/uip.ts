@@ -12,10 +12,7 @@ import type { Lit } from '$lib/types/types.ts';
 // If the clause is assertive it returns the non violated literal by the assignment, otherwise nothing
 export const getUIPAlgorithm = (clause: Clause, dlAssignments: Lit[]): Maybe<Lit> => {
 	if (dlAssignments.length === 0) {
-		logFatal(
-			'First UIP Algorithm',
-			'The set of literals cannot be empty when checking first UIP'
-		);
+		logFatal('First UIP Algorithm', 'The set of literals cannot be empty when checking first UIP');
 	}
 	let matches = 0;
 	let i = 0;

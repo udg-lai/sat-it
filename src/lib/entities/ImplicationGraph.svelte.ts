@@ -12,7 +12,6 @@ import { type Propagation } from './VariableAssignment.ts';
 
 import { SvelteMap } from 'svelte/reactivity';
 
-
 export type IG_Node = {
 	entity: VariableAssignment | Clause;
 	dl: number;
@@ -35,7 +34,7 @@ export class ImplicationGraph {
 	_nodes: SvelteMap<string, IG_Node> = new SvelteMap();
 	_edges: SvelteMap<string, string[]> = new SvelteMap();
 
-	_falsum_id = "falsum";
+	_falsum_id = 'falsum';
 
 	constructor(trail: Trail) {
 		if (!trail.hasConflictiveClause())
@@ -55,10 +54,7 @@ export class ImplicationGraph {
 	edges(node: string): string[] {
 		const edges: string[] | undefined = this._edges.get(node);
 		if (edges === undefined) {
-			logFatal(
-				'ImplicationGraph Error',
-				`Node ${node} not found in the implication graph`
-			);
+			logFatal('ImplicationGraph Error', `Node ${node} not found in the implication graph`);
 		}
 		return edges;
 	}
@@ -123,7 +119,7 @@ export class ImplicationGraph {
 					value: assignment.eval(),
 					index: this._trail.findIndexOfAssignment(assignment),
 					uip: false,
-					fuip: false,
+					fuip: false
 				}
 			};
 
@@ -193,7 +189,7 @@ export class ImplicationGraph {
 							value: assignment.eval(),
 							index: index,
 							uip: false,
-							fuip: false,
+							fuip: false
 						}
 					};
 
@@ -204,7 +200,6 @@ export class ImplicationGraph {
 					...(this._edges.get(complementary.toString()) ?? []),
 					implication.toString()
 				]);
-
 			}
 
 			conflictAnalysis.resolution();
@@ -216,7 +211,6 @@ export class ImplicationGraph {
 
 		this._nodes.get(id)!.assignment!.uip = true;
 		this._nodes.get(id)!.assignment!.fuip = true;
-
 
 		console.log($state.snapshot(this._nodes));
 		console.log($state.snapshot(this._edges));
