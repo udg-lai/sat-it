@@ -464,7 +464,7 @@ const learnConflictClauseTransition = (): CRef => {
 
 	const conflictAnalysis: ConflictAnalysis = getConflictAnalysis();
 
-	if (!conflictAnalysis.resolventContainsAssertiveLiteral()) {
+	if (!conflictAnalysis.reachedFirstUIP()) {
 		logFatal(
 			'CDCL Conflict Analysis',
 			'The conflict clause should be assertive before learning it'

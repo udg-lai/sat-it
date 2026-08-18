@@ -1,5 +1,6 @@
 import { getClausePool } from '$lib/states/problem.svelte.ts';
 import { logError } from '$lib/states/toasts.svelte.ts';
+import type { Maybe } from '$lib/types/maybe.ts';
 import type { Lit } from '$lib/types/types.ts';
 import Clause from './Clause.svelte.ts';
 import Literal from './Literal.svelte.ts';
@@ -25,10 +26,12 @@ interface PointerUpdate {
 
 export class ConflictAnalysis {
 	conflictiveClause: Clause;
-	decision: VariableAssignment;
-	ldlPropagations: VariableAssignment[];
+	dlAssignments: VariableAssignment[];
 	pointer: number;
 	nth: number;
+
+	// first UIP pointer
+	firstUIPPointer: number | undefined = undefined;
 
 	// This is the distance till the next implication to consider in the conflict analysis
 	resolutionGap: number = 0;
@@ -36,7 +39,7 @@ export class ConflictAnalysis {
 	constructor(
 		conflictClause: Clause,
 		decision: VariableAssignment,
-		ldlPropagations: VariableAssignment[]
+		dlPropagations: VariableAssignment[]
 	) {
 		if (conflictClause.isEmpty()) {
 			logError('Conflict Analysis Error', 'Conflictive clause can not contain the empty clause');
@@ -47,7 +50,7 @@ export class ConflictAnalysis {
 				'The conflict clause must be violated to start conflict analysis'
 			);
 		}
-		if (ldlPropagations.length === 0) {
+		if (dlPropagations.length === 0) {
 			logError(
 				'Conflict Analysis Error',
 				'There must be at least one literal from the last decision level in the propagations'
@@ -58,7 +61,7 @@ export class ConflictAnalysis {
 			logError('Conflict Analysis Error', 'The provided decision assignment is not a decision');
 		}
 
-		for (const lit of ldlPropagations) {
+		for (const lit of dlPropagations) {
 			if (!lit.isImplied()) {
 				logError(
 					'Conflict Analysis Error',
@@ -67,11 +70,10 @@ export class ConflictAnalysis {
 			}
 		}
 		this.conflictiveClause = conflictClause;
-		this.decision = decision;
-		this.ldlPropagations = ldlPropagations;
+		this.dlAssignments = [decision, ...dlPropagations];
 
 		// Out of the last propagation
-		this.pointer = this.ldlPropagations.length;
+		this.pointer = this.dlAssignments.length;
 		const { nextPointer, nSteps } = this._nextImplicationIndex();
 		this.pointer = nextPointer;
 
@@ -81,19 +83,23 @@ export class ConflictAnalysis {
 		this.nth = 0;
 	}
 
-	// Conflict analysis finished when the clause has only one literal from the current decision level
 	finished(): boolean {
-		return this.pointer < 0 || this._clauseContainsAssertiveLiteral(this.conflictiveClause);
+		// Conflict analysis finished when there is
+		// no more implications to consider or the current conflictive clause contains the first UIP
+		return this.pointer < 1 || this._reachedFirstUIP();
 	}
 
-	resolventContainsAssertiveLiteral(): boolean {
-		return this._clauseContainsAssertiveLiteral(this.conflictiveClause);
+	reachedFirstUIP(): boolean {
+		const uip: Maybe<Lit> = this._getFirstUIP(this.conflictiveClause);
+		return uip.isJust();
 	}
 
-	_clauseContainsAssertiveLiteral(clause: Clause): boolean {
-		const literals: Lit[] = this.ldlPropagations.map((lit: VariableAssignment) => lit.toLit());
-		literals.push(this.decision.toLit());
-		return clause.isAssertive(literals);
+	_reachedFirstUIP(): boolean {
+		return this.reachedFirstUIP();
+	}
+
+	_getFirstUIP(clause: Clause): Maybe<Lit> {
+		return clause.getUIP(this.dlAssignments.map((assignment) => assignment.toLit()));
 	}
 
 	getConflictiveClause(): Clause {
@@ -107,17 +113,17 @@ export class ConflictAnalysis {
 				'No more implications left to consider in conflict analysis'
 			);
 		}
-		return this.ldlPropagations[this.pointer];
+		return this.dlAssignments[this.pointer];
 	}
 
 	getImplication(pointer: number): VariableAssignment {
-		if (pointer < 0 || pointer >= this.ldlPropagations.length) {
+		if (pointer < 0 || pointer >= this.dlAssignments.length) {
 			logError(
 				'Conflict Analysis Error',
 				'No more implications left to consider in conflict analysis'
 			);
 		}
-		return this.ldlPropagations[pointer];
+		return this.dlAssignments[pointer];
 	}
 
 	_nextImplicationIndex(): PointerUpdate {
@@ -167,6 +173,14 @@ export class ConflictAnalysis {
 		const resolvent: Clause = this.conflictiveClause.resolution(reason);
 
 		this.updateConflictiveClause(resolvent);
+
+		const uip: Maybe<Lit> = this._getFirstUIP(resolvent);
+		const asserting: boolean = uip.isJust();
+
+		if (asserting && this.firstUIPPointer === undefined) {
+			this.firstUIPPointer = this.pointer;
+		}
+
 		this.nth += 1;
 
 		// Move the pointer to the next implication to consider
@@ -182,11 +196,27 @@ export class ConflictAnalysis {
 			reason: reason,
 			resolvent: {
 				clause: resolvent,
-				asserting: this._clauseContainsAssertiveLiteral(resolvent)
+				asserting: asserting
 			}
 		};
 
 		return resolution;
+	}
+
+	getFirstUIP(): VariableAssignment {
+		if (!this.reachedFirstUIP()) {
+			logError(
+				'Conflict Analysis Error',
+				'The conflictive clause does not contain a first UIP, cannot return it'
+			);
+		}
+		if (this.firstUIPPointer === undefined) {
+			logError(
+				'Conflict Analysis Error',
+				'The first UIP pointer is undefined, cannot return the first UIP'
+			);
+		}
+		return this.getImplication(this.firstUIPPointer as number);
 	}
 
 	getResolutionGap(): number {

@@ -279,7 +279,7 @@ export class ImplicationGraph {
 		);
 		currentDecisionLevelLiterals.push(lastDecision.toLit());
 
-		return pointer < 0 || clause.isAssertive(currentDecisionLevelLiterals);
+		return pointer < 0 || clause.getUIP(currentDecisionLevelLiterals);
 	}
 
 	getNodes(): List<Node> {

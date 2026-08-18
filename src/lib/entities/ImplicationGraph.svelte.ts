@@ -10,14 +10,18 @@ import type Variable from './Variable.svelte.ts';
 import type VariableAssignment from './VariableAssignment.ts';
 import { type Propagation } from './VariableAssignment.ts';
 
+import { SvelteMap } from 'svelte/reactivity';
+
+
 export type IG_Node = {
 	entity: VariableAssignment | Clause;
 	dl: number;
-	id: string;
 	assignment?: {
 		id: string;
 		value: boolean;
 		index: number; // Index that occur in the trail, used to order the nodes in the graph
+		uip: boolean; // Whether the node is a UIP or not, used to highlight the node in the graph
+		fuip: boolean; // Whether the node is a First UIP or not, used to highlight the node in the graph
 	};
 };
 
@@ -28,8 +32,10 @@ export type IG_Edge = {
 
 export class ImplicationGraph {
 	_trail: Trail;
-	_nodes: IG_Node[] = $state([]);
-	_edges: IG_Edge[] = $state([]);
+	_nodes: SvelteMap<string, IG_Node> = new SvelteMap();
+	_edges: SvelteMap<string, string[]> = new SvelteMap();
+
+	_falsum_id = "falsum";
 
 	constructor(trail: Trail) {
 		if (!trail.hasConflictiveClause())
@@ -42,12 +48,19 @@ export class ImplicationGraph {
 		this._makeImplicationGraph();
 	}
 
-	nodes(): IG_Node[] {
-		return this._nodes;
+	nodes(): string[] {
+		return Array.from(this._nodes.keys());
 	}
 
-	edges(): IG_Edge[] {
-		return this._edges;
+	edges(node: string): string[] {
+		const edges: string[] | undefined = this._edges.get(node);
+		if (edges === undefined) {
+			logFatal(
+				'ImplicationGraph Error',
+				`Node ${node} not found in the implication graph`
+			);
+		}
+		return edges;
 	}
 
 	private _makeImplicationGraph(): void {
@@ -65,12 +78,14 @@ export class ImplicationGraph {
 
 		// Adds the empty clause to the graph, it has its own dl, which is the last decision level + 1, since it is a lemma
 		const falsum: IG_Node = {
-			id: 'falsum',
 			entity: Clause.falsum(),
 			dl: dl
 		};
-		this._nodes.push(falsum);
 
+		// Adds the conflict as node
+		this._nodes.set(this._falsum_id, falsum);
+
+		// All falsified literals on the conflict clause are added to the graph, with an edge to the falsum node
 		for (const literal of cc.getLiterals()) {
 			const variable: Variable = literal.getVariable();
 
@@ -101,24 +116,22 @@ export class ImplicationGraph {
 			const assignment: VariableAssignment = this._trail.at(j) as VariableAssignment;
 
 			const node: IG_Node = {
-				id: assignment.toString(), // Literal representation of the variable assignment
 				entity: assignment,
 				dl: assignment.dl(),
 				assignment: {
 					id: assignment.toVar().toString(),
 					value: assignment.eval(),
-					index: this._trail.findIndexOfAssignment(assignment)
+					index: this._trail.findIndexOfAssignment(assignment),
+					uip: false,
+					fuip: false,
 				}
 			};
-			this._nodes.push(node);
 
-			this._edges.push({
-				from: node,
-				to: falsum
-			});
+			this._nodes.set(assignment.toString(), node);
+
+			this._edges.set(assignment.toString(), [this._falsum_id]);
 		}
 
-		//
 		while (!conflictAnalysis.finished()) {
 			const implication: VariableAssignment = conflictAnalysis.currentImplication();
 			if (!implication.isImplied()) {
@@ -126,23 +139,6 @@ export class ImplicationGraph {
 					'ImplicationGraph Error',
 					`Implication ${implication.toLit().toString()} is not implied, cannot build implication graph`
 				);
-			}
-
-			// I think probably the search and conditional are not necessary as previously
-			// all literals that implied the conflictive clause were added to the graph....
-			let toNode: IG_Node | undefined = this._nodes.find((n) => n.id === implication.toString());
-			if (toNode === undefined) {
-				toNode = {
-					id: implication.toString(), // Literal representation of the variable assignment
-					entity: implication,
-					dl: implication.dl(),
-					assignment: {
-						id: implication.toVar().toString(),
-						value: implication.eval(),
-						index: this._trail.findIndexOfAssignment(implication)
-					}
-				};
-				this._nodes.push(toNode);
 			}
 
 			// I can do this because previously I checked that the variable assignment was implied
@@ -157,11 +153,7 @@ export class ImplicationGraph {
 			for (const literal of others) {
 				const complementary: Lit = Literal.complementary(literal.toInt());
 
-				let fromNode: IG_Node | undefined = this._nodes.find(
-					(n) => n.id === complementary.toString()
-				);
-
-				if (fromNode === undefined) {
+				if (!this._nodes.has(complementary.toString())) {
 					const variable: Variable = literal.getVariable();
 
 					const trailSize = this._trail.size();
@@ -190,32 +182,41 @@ export class ImplicationGraph {
 					}
 
 					const assignment: VariableAssignment = this._trail.at(j) as VariableAssignment;
+					// Where this assignment occurs in the trail, used to order the nodes in the graph
+					const index: number = this._trail.findIndexOfAssignment(assignment);
 
-					fromNode = {
-						id: complementary.toString(), // Literal representation of the variable assignment
+					const fromNode: IG_Node = {
 						entity: assignment,
 						dl: assignment.dl(),
 						assignment: {
 							id: assignment.toVar().toString(),
 							value: assignment.eval(),
-							index: this._trail.findIndexOfAssignment(assignment)
+							index: index,
+							uip: false,
+							fuip: false,
 						}
 					};
 
-					this._nodes.push(fromNode);
+					this._nodes.set(complementary.toString(), fromNode);
 				}
 
-				this._edges.push({
-					from: fromNode,
-					to: toNode
-				});
+				this._edges.set(complementary.toString(), [
+					...(this._edges.get(complementary.toString()) ?? []),
+					implication.toString()
+				]);
+
 			}
 
 			conflictAnalysis.resolution();
 		}
 
-		this._nodes = [...this._nodes];
-		this._edges = [...this._edges];
+		// Update the nodes that are UIPs and the first UIP
+		const firstUIP: VariableAssignment = conflictAnalysis.getFirstUIP();
+		const id: string = firstUIP.toString();
+
+		this._nodes.get(id)!.assignment!.uip = true;
+		this._nodes.get(id)!.assignment!.fuip = true;
+
 
 		console.log($state.snapshot(this._nodes));
 		console.log($state.snapshot(this._edges));

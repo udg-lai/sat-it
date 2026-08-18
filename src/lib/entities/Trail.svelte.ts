@@ -156,16 +156,12 @@ export class Trail {
 	}
 
 	skipResolutions(nResolutions: number): void {
-		console.debug(`Skipping ${nResolutions} resolutions in conflict analysis context`);
 		for (let i = 0; i < nResolutions; i++) this.updateConflictAnalysisContext(undefined);
 	}
 
 	updateConflictAnalysisContext(clause: Clause | undefined = undefined): void {
 		const ca: Either<Clause, NeverFn> = clause === undefined ? makeRight(error) : makeLeft(clause);
 		this.conflictAnalysisCtx = [ca, ...this.conflictAnalysisCtx];
-		console.debug(
-			`Resolution context updated. Current length: ${$state.snapshot(this.conflictAnalysisCtx).length}`
-		);
 	}
 
 	hasPropagations(level: number): boolean {

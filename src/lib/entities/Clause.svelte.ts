@@ -1,6 +1,7 @@
-import { assertiveAlgorithm } from '$lib/algorithms/assertive.ts';
+import { getUIPAlgorithm as getUIPAlgorithm } from '$lib/algorithms/uip.ts';
 import logicResolution from '$lib/algorithms/resolution.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
+import type { Maybe } from '$lib/types/maybe.ts';
 import type { CRef, Lit } from '$lib/types/types.ts';
 import type { Comparable } from '../interfaces/Comparable.ts';
 import type { Claim } from '../parsers/dimacs.ts';
@@ -122,8 +123,8 @@ export default class Clause implements Comparable<Clause> {
 		return this.cRef === undefined;
 	}
 
-	isAssertive(literals: Lit[]): boolean {
-		return assertiveAlgorithm(this, literals);
+	getUIP(assignment: Lit[]): Maybe<Lit> {
+		return getUIPAlgorithm(this, assignment);
 	}
 
 	fstUnassignedLiteral(): Literal {
