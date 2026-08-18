@@ -12,8 +12,10 @@ import { type Propagation } from './VariableAssignment.ts';
 
 import { SvelteMap } from 'svelte/reactivity';
 
+type Entity = 'VariableAssignment' | 'Clause';
+
 export type IG_Node = {
-	entity: VariableAssignment | Clause;
+	entity: Entity;
 	dl: number;
 	assignment?: {
 		id: string;
@@ -59,6 +61,20 @@ export class ImplicationGraph {
 		return edges;
 	}
 
+	node(id: string): IG_Node {
+		const node = this._nodes.get(id);
+
+		if (node === undefined) {
+			logFatal('ImplicationGraph Error', `Node ${id} not found in the implication graph`);
+		}
+
+		return node;
+	}
+
+	falsumId(): string {
+		return this._falsum_id;
+	}
+
 	private _makeImplicationGraph(): void {
 		const dl = this._trail.getDL();
 		const lastDecision = this._trail.lastDecision();
@@ -74,7 +90,7 @@ export class ImplicationGraph {
 
 		// Adds the empty clause to the graph, it has its own dl, which is the last decision level + 1, since it is a lemma
 		const falsum: IG_Node = {
-			entity: Clause.falsum(),
+			entity: 'Clause',
 			dl: dl
 		};
 
@@ -112,7 +128,7 @@ export class ImplicationGraph {
 			const assignment: VariableAssignment = this._trail.at(j) as VariableAssignment;
 
 			const node: IG_Node = {
-				entity: assignment,
+				entity: 'VariableAssignment',
 				dl: assignment.dl(),
 				assignment: {
 					id: assignment.toVar().toString(),
@@ -123,9 +139,12 @@ export class ImplicationGraph {
 				}
 			};
 
+			// Adds the falsified literal as node
 			this._nodes.set(assignment.toString(), node);
-
+			// Adds an edge from the falsified literal to the falsum node
 			this._edges.set(assignment.toString(), [this._falsum_id]);
+			// Adds an empty edge list for the falsum node
+			this._edges.set(this._falsum_id, []);
 		}
 
 		while (!conflictAnalysis.finished()) {
@@ -182,7 +201,7 @@ export class ImplicationGraph {
 					const index: number = this._trail.findIndexOfAssignment(assignment);
 
 					const fromNode: IG_Node = {
-						entity: assignment,
+						entity: 'VariableAssignment',
 						dl: assignment.dl(),
 						assignment: {
 							id: assignment.toVar().toString(),

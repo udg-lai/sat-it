@@ -1,504 +1,369 @@
 <script lang="ts">
-	// 	import { getImplicationGraph, type IG_Node, type IG_Edge } from '$lib/entities/ImplicationGraph.svelte.ts';
-	//
-	// 	import ELK from 'elkjs/lib/elk.bundled.js';
-	//
-	// 	import * as d3 from 'd3';
-	//
-	// 	import { onMount } from 'svelte';
-	//
-	//
-	//
-	// 	const maybeImplicationGraph = $derived(getImplicationGraph());
-	//
-	// 	const ElkConstructor = ELK as unknown as {
-	//
-	// 		new (): {
-	//
-	// 			layout: (graph: any) => Promise<any>;
-	//
-	// 		};
-	//
-	// 	};
-	//
-	// 	const elk = new ElkConstructor();
-	//
-	// 	const elkInstance = elk as {
-	//
-	// 		layout: (graph: any) => Promise<any>;
-	//
-	// 	};
-	//
-	//
-	//
-	// 	let nodes: IG_Node[] = $derived.by(() => {
-	//
-	// 		if (maybeImplicationGraph.isJust()) {
-	//
-	// 			const implicationGraph = maybeImplicationGraph.fromJust();
-	//
-	// 			return implicationGraph.nodes();
-	//
-	// 		}
-	//
-	// 		return [];
-	//
-	// 	});
-	//
-	//
-	//
-	// 	let edges: IG_Edge[] = $derived.by(() => {
-	//
-	// 		if (maybeImplicationGraph.isJust()) {
-	//
-	// 			const implicationGraph = maybeImplicationGraph.fromJust();
-	//
-	// 			return implicationGraph.edges();
-	//
-	// 		}
-	//
-	// 		return [];
-	//
-	// 	});
-	//
-	//
-	//
-	// 	type LayoutNode = IG_Node & { x: number; y: number; width: number; height: number };
-	//
-	//
-	//
-	// 	let layout: LayoutNode[] = $state([]);
-	//
-	// 	let edgePaths: string[] = $state([]);
-	//
-	// 	let layoutRunId = 0;
-	//
-	//
-	//
-	//
-	//
-	// 	let svg: SVGSVGElement;
-	//
-	// 	let graphLayer: any;
-	//
-	//
-	//
-	// 	const width = 1200;
-	//
-	// 	let height = $state(700);
-	//
-	//
-	//
-	// 	function edgePathFromSections(edge: { sections?: Array<{ startPoint: { x: number; y: number }; endPoint: { x: number; y: number }; bendPoints?: Array<{ x: number; y: number }> }> }): string {
-	//
-	// 		const section = edge.sections?.[0];
-	//
-	//
-	//
-	// 		if (!section) return '';
-	//
-	//
-	//
-	// 		const points = [section.startPoint, ...(section.bendPoints ?? []), section.endPoint];
-	//
-	// 		return points.reduce((path, point, index) => {
-	//
-	// 			return `${path}${index === 0 ? 'M' : 'L'} ${point.x} ${point.y} `;
-	//
-	// 		}, '').trim();
-	//
-	// 	}
-	//
-	//
-	//
-	// 	async function updateLayout(): Promise<void> {
-	//
-	// 		const runId = ++layoutRunId;
-	//
-	//
-	//
-	// 		if (nodes.length === 0) {
-	//
-	// 			layout = [];
-	//
-	// 			edgePaths = [];
-	//
-	// 			return;
-	//
-	// 		}
-	//
-	//
-	//
-	// 		const dlGroups: Map<number, IG_Node[]> = new Map();
-	//
-	//
-	//
-	// 		for (const n of nodes) {
-	//
-	// 			if (!dlGroups.has(n.dl)) dlGroups.set(n.dl, []);
-	//
-	// 			dlGroups.get(n.dl)?.push(n);
-	//
-	//
-	//
-	// 		}
-	//
-	//
-	//
-	// 		function sortNodes(nodes: IG_Node[]): void {
-	//
-	// 			nodes.sort((a, b) => {
-	//
-	// 				if (a.index === undefined) {
-	//
-	// 					return 1;
-	//
-	// 				}
-	//
-	// 				if (b.index === undefined) {
-	//
-	// 					return -1;
-	//
-	// 				}
-	//
-	// 				return a.index - b.index;
-	//
-	// 			});
-	//
-	// 		}
-	//
-	//
-	//
-	// 		// Sort inner groups by index
-	//
-	// 		for (const group of dlGroups.values()) {
-	//
-	// 			sortNodes(group);
-	//
-	// 		}
-	//
-	//
-	//
-	// 		const levels: number[] = Array.from(dlGroups.keys()).sort((a, b) => a - b);
-	//
-	// 		const levelIndexByNodeId = new Map<string, number>();
-	//
-	// 		for (const [levelIndex, dl] of levels.entries()) {
-	//
-	// 			const group = dlGroups.get(dl) ?? [];
-	//
-	// 			for (const node of group) {
-	//
-	// 				levelIndexByNodeId.set(node.id, node.id === 'falsum' ? levels.length : levelIndex);
-	//
-	// 			}
-	//
-	// 		}
-	//
-	//
-	//
-	// 		const inLayerPredecessorByNodeId = new Map<string, string>();
-	//
-	// 		for (const dl of levels) {
-	//
-	// 			const group = dlGroups.get(dl) ?? [];
-	//
-	// 			for (let i = 1; i < group.length; i++) {
-	//
-	// 				inLayerPredecessorByNodeId.set(group[i].id, group[i - 1].id);
-	//
-	// 			}
-	//
-	// 		}
-	//
-	//
-	//
-	// 		const elkGraph = {
-	//
-	// 			id: 'root',
-	//
-	// 			layoutOptions: {
-	//
-	// 				'elk.algorithm': 'layered',
-	//
-	// 				'elk.direction': 'RIGHT',
-	//
-	// 				'elk.edgeRouting': 'SPLINES',
-	//
-	// 				'elk.spacing.nodeNode': '30',
-	//
-	// 				'elk.layered.spacing.nodeNodeBetweenLayers': '80',
-	//
-	// 				'elk.layered.edgeRouting.splines.mode': 'SLOPPY',
-	//
-	// 				'elk.layered.edgeRouting.splines.sloppy.layerSpacingFactor': '0.3',
-	//
-	// 				'elk.layered.considerModelOrder.strategy': 'NODES_AND_EDGES',
-	//
-	// 				'elk.layered.crossingMinimization.semiInteractive': 'true',
-	//
-	// 				'elk.layered.crossingMinimization.forceNodeModelOrder': 'true',
-	//
-	// 				'elk.layered.crossingMinimization.strategy': 'LAYER_SWEEP',
-	//
-	// 				'elk.layered.nodePlacement.strategy': 'BRANDES_KOEPF',
-	//
-	// 				'elk.layered.layering.strategy': 'NETWORK_SIMPLEX'
-	//
-	// 			},
-	//
-	// 			children: [...nodes]
-	//
-	// 				.sort((a, b) => {
-	//
-	// 					if (a.dl !== b.dl) return a.dl - b.dl;
-	//
-	// 					if (a.index === undefined) return 1;
-	//
-	// 					if (b.index === undefined) return -1;
-	//
-	// 					return a.index - b.index;
-	//
-	// 				})
-	//
-	// 				.map((node) => ({
-	//
-	// 					id: node.id,
-	//
-	// 					width: 56,
-	//
-	// 					height: 56,
-	//
-	// 					layoutOptions: {
-	//
-	// 						layerId: String(levelIndexByNodeId.get(node.id) ?? 0),
-	//
-	// 						positionId: String(node.index ?? Number.MAX_SAFE_INTEGER),
-	//
-	// 						...(inLayerPredecessorByNodeId.has(node.id)
-	//
-	// 							? {
-	//
-	// 								'org.eclipse.elk.layered.crossingMinimization.inLayerPredOf':
-	//
-	// 									inLayerPredecessorByNodeId.get(node.id)
-	//
-	// 							}
-	//
-	// 							: {})
-	//
-	// 					}
-	//
-	// 				})),
-	//
-	// 			edges: edges.map((edge, index) => ({
-	//
-	// 				id: `e-${index}`,
-	//
-	// 				sources: [edge.from.id],
-	//
-	// 				targets: [edge.to.id]
-	//
-	// 			}))
-	//
-	// 		};
-	//
-	//
-	//
-	// 		const result = await elkInstance.layout(elkGraph);
-	//
-	// 		if (runId !== layoutRunId) return;
-	//
-	//
-	//
-	// 		const nextLayout = (result.children ?? []).map((child: any) => {
-	//
-	// 			const original = nodes.find((node) => node.id === child.id);
-	//
-	// 			return {
-	//
-	// 				...(original as IG_Node),
-	//
-	// 				x: (child.x ?? 0) + (child.width ?? 56) / 2,
-	//
-	// 				y: (child.y ?? 0) + (child.height ?? 56) / 2,
-	//
-	// 				width: child.width ?? 56,
-	//
-	// 				height: child.height ?? 56
-	//
-	// 			};
-	//
-	// 		});
-	//
-	//
-	//
-	// 		layout = nextLayout;
-	//
-	// 		edgePaths = (result.edges ?? []).map((edge: any) => {
-	//
-	// 			const sections = edge.sections ?? [];
-	//
-	// 			if (sections.length > 0) {
-	//
-	// 				return edgePathFromSections({ sections: sections as any });
-	//
-	// 			}
-	//
-	//
-	//
-	// 			const source = nextLayout.find((node: LayoutNode) => node.id === edge.sources?.[0]);
-	//
-	// 			const target = nextLayout.find((node: LayoutNode) => node.id === edge.targets?.[0]);
-	//
-	// 			if (!source || !target) return '';
-	//
-	// 			return `M ${source.x} ${source.y} L ${target.x} ${target.y}`;
-	//
-	// 		});
-	//
-	//
-	//
-	// 		renderGraph();
-	//
-	// 	}
-	//
-	//
-	//
-	// 	function renderGraph(): void {
-	//
-	// 		if (!graphLayer) return;
-	//
-	//
-	//
-	// 		graphLayer.selectAll('*').remove();
-	//
-	//
-	//
-	// 		graphLayer
-	//
-	// 			.selectAll('path.edge')
-	//
-	// 			.data(edgePaths)
-	//
-	// 			.join('path')
-	//
-	// 			.attr('d', (d: string) => d)
-	//
-	// 			.attr('stroke', '#777')
-	//
-	// 			.attr('stroke-width', 2)
-	//
-	// 			.attr('fill', 'none')
-	//
-	// 			.attr('stroke-linecap', 'round');
-	//
-	//
-	//
-	// 		const node = graphLayer
-	//
-	// 			.selectAll('g.node')
-	//
-	// 			.data(layout)
-	//
-	// 			.join('g')
-	//
-	// 			.attr('transform', (d: LayoutNode) => `translate(${d.x},${d.y})`);
-	//
-	//
-	//
-	// 		node
-	//
-	// 			.append('circle')
-	//
-	// 			.attr('r', 28)
-	//
-	// 			.attr('fill', (d: LayoutNode) => (d.id === 'falsum' ? '#ffdddd' : '#ddd'));
-	//
-	//
-	//
-	// 		node
-	//
-	// 			.append('text')
-	//
-	// 			.text((d: LayoutNode) => d.id)
-	//
-	// 			.attr('text-anchor', 'middle')
-	//
-	// 			.attr('dy', 5);
-	//
-	// 	}
-	//
-	//
-	//
-	// 	$effect(() => {
-	//
-	// 		layout;
-	//
-	// 		edges;
-	//
-	//
-	//
-	// 		void updateLayout();
-	//
-	// 	});
-	//
-	//
-	//
-	//
-	//
-	// 	onMount(() => {
-	//
-	// 		const updateHeight = () => {
-	//
-	// 			height = window.innerHeight;
-	//
-	// 		};
-	//
-	//
-	//
-	// 		updateHeight();
-	//
-	// 		window.addEventListener('resize', updateHeight);
-	//
-	//
-	//
-	// 		const root = d3.select(svg);
-	//
-	// 		root.selectAll('*').remove();
-	//
-	//
-	//
-	// 		graphLayer = root.append('g');
-	//
-	//
-	//
-	// 		root.call(
-	//
-	// 			d3.zoom().on('zoom', (e: any) => {
-	//
-	// 				graphLayer.attr('transform', e.transform);
-	//
-	// 			})
-	//
-	// 		);
-	//
-	//
-	//
-	// 		renderGraph();
-	//
-	//
-	//
-	// 		return () => {
-	//
-	// 			window.removeEventListener('resize', updateHeight);
-	//
-	// 		};
-	//
-	// 	});
-	//
+	import { onMount } from 'svelte';
+	import cytoscape, { type Core, type ElementDefinition } from 'cytoscape';
+	import dagre from 'cytoscape-dagre';
+	import { getImplicationGraph, ImplicationGraph } from '$lib/entities/ImplicationGraph.svelte.ts';
+	import type { Maybe } from '$lib/types/maybe.ts';
+
+	cytoscape.use(dagre);
+
+	let container: HTMLDivElement;
+	let cy: Core | undefined;
+
+	let selectedNode: string | undefined = $state(undefined);
+
+	let graph: Maybe<ImplicationGraph> = $derived(getImplicationGraph());
+
+	function buildElements(graph: ImplicationGraph): ElementDefinition[] {
+		const elements: ElementDefinition[] = [];
+
+		/*
+		 * Nodes
+		 */
+		for (const nodeId of graph.nodes()) {
+			elements.push({
+				group: 'nodes',
+				data: {
+					id: nodeId,
+					label: nodeId
+				}
+			});
+		}
+
+		/*
+		 * Edges
+		 *
+		 * Your _edges map is:
+		 *
+		 *   source -> [target1, target2, ...]
+		 *
+		 * So for every source node we create one Cytoscape edge
+		 * for each target.
+		 */
+		for (const source of graph.nodes()) {
+			for (const target of graph.edges(source)) {
+				elements.push({
+					group: 'edges',
+					data: {
+						id: `${source}->${target}`,
+						source,
+						target
+					}
+				});
+			}
+		}
+
+		return elements;
+	}
+
+	function createGraph() {
+		if (!container) return;
+
+		if (graph.isNothing()) return;
+
+		// In case this function is called again.
+		cy?.destroy();
+
+		cy = cytoscape({
+			container,
+
+			elements: buildElements(graph.fromJust()),
+
+			layout: {
+				name: 'dagre',
+				rankDir: 'LR',
+				nodeSep: 60,
+				rankSep: 100,
+				edgeSep: 30,
+				padding: 40
+			},
+
+			style: [
+				/*
+				 * Normal node
+				 */
+				{
+					selector: 'node',
+					style: {
+						shape: 'roundrectangle',
+
+						label: 'data(label)',
+
+						'text-valign': 'center',
+						'text-halign': 'center',
+
+						'font-size': 14,
+						'font-weight': 500,
+
+						'background-color': '#ffffff',
+
+						'border-width': 2,
+						'border-color': '#444',
+
+						width: 'label',
+						height: 40,
+
+						'padding-left': 16,
+						'padding-right': 16
+					}
+				},
+
+				/*
+				 * Falsum / conflict node
+				 */
+				{
+					selector: `node[id = "${graph.fromJust().falsumId()}"]`,
+					style: {
+						shape: 'ellipse',
+
+						label: '⊥',
+
+						'background-color': '#fee2e2',
+						'border-color': '#dc2626',
+						'border-width': 3,
+
+						'font-size': 24,
+						'font-weight': 'bold',
+
+						width: 50,
+						height: 50
+					}
+				},
+
+				/*
+				 * Edges
+				 */
+				{
+					selector: 'edge',
+					style: {
+						width: 2,
+
+						'line-color': '#64748b',
+
+						'target-arrow-color': '#64748b',
+						'target-arrow-shape': 'triangle',
+
+						'curve-style': 'bezier'
+					}
+				},
+
+				/*
+				 * Selected node
+				 */
+				{
+					selector: 'node:selected',
+					style: {
+						'border-color': '#2563eb',
+						'border-width': 4
+					}
+				},
+
+				/*
+				 * Highlighted edges
+				 */
+				{
+					selector: '.highlighted',
+					style: {
+						'line-color': '#2563eb',
+						'target-arrow-color': '#2563eb',
+						width: 4
+					}
+				}
+			],
+
+			/*
+			 * General interaction settings
+			 */
+			minZoom: 0.2,
+			maxZoom: 3,
+
+			wheelSensitivity: 0.2,
+
+			boxSelectionEnabled: false,
+
+			/*
+			 * Disable automatic node movement if you only want
+			 * to use the Dagre layout.
+			 *
+			 * Set this to true if you want users to rearrange nodes.
+			 */
+			autoungrabify: false
+		});
+
+		/*
+		 * Node click
+		 */
+		cy.on('tap', 'node', (event) => {
+			const node = event.target;
+
+			selectedNode = node.id();
+
+			/*
+			 * Highlight incoming/outgoing relationships
+			 */
+			cy!.elements().removeClass('highlighted');
+
+			node.connectedEdges().addClass('highlighted');
+		});
+
+		/*
+		 * Click empty space
+		 */
+		cy.on('tap', (event) => {
+			if (event.target === cy) {
+				selectedNode = null;
+
+				cy!.elements().removeClass('highlighted');
+
+				cy!.nodes().unselect();
+			}
+		});
+
+		/*
+		 * Double click -> center/zoom around node
+		 */
+		cy.on('dbltap', 'node', (event) => {
+			const node = event.target;
+
+			cy!.animate({
+				fit: {
+					eles: node,
+					padding: 120
+				},
+				duration: 300
+			});
+		});
+	}
+
+	function fitGraph() {
+		cy?.animate({
+			fit: {
+				eles: cy.elements(),
+				padding: 40
+			},
+			duration: 300
+		});
+	}
+
+	function resetLayout() {
+		cy?.layout({
+			name: 'dagre',
+			rankDir: 'LR',
+			nodeSep: 60,
+			rankSep: 100,
+			edgeSep: 30,
+			padding: 40,
+			animate: true,
+			animationDuration: 300
+		}).run();
+	}
+
+	function zoomIn() {
+		if (!cy) return;
+
+		cy.zoom({
+			level: cy.zoom() * 1.2,
+			renderedPosition: {
+				x: container.clientWidth / 2,
+				y: container.clientHeight / 2
+			}
+		});
+	}
+
+	function zoomOut() {
+		if (!cy) return;
+
+		cy.zoom({
+			level: cy.zoom() / 1.2,
+			renderedPosition: {
+				x: container.clientWidth / 2,
+				y: container.clientHeight / 2
+			}
+		});
+	}
+
+	onMount(() => {
+		createGraph();
+
+		return () => {
+			cy?.destroy();
+		};
+	});
 </script>
 
-<!--
-<svg bind:this={svg} {width} {height} />
--->
+<div class={`graph-wrapper`}>
+	<div class="toolbar">
+		<button onclick={zoomIn}>+</button>
+		<button onclick={zoomOut}>−</button>
+		<button onclick={fitGraph}>Fit</button>
+		<button onclick={resetLayout}>Layout</button>
+
+		{#if selectedNode}
+			<span class="selected">
+				Selected: <strong>{selectedNode}</strong>
+			</span>
+		{/if}
+	</div>
+
+	<div bind:this={container} class="graph"></div>
+</div>
+
+<style>
+	.graph-wrapper {
+		position: relative;
+		width: 100%;
+		height: 100%;
+		min-height: 500px;
+		overflow: hidden;
+		background: #f8fafc;
+	}
+
+	.graph {
+		width: 100%;
+		height: 100%;
+	}
+
+	.toolbar {
+		position: absolute;
+		z-index: 10;
+
+		top: 12px;
+		left: 12px;
+
+		display: flex;
+		align-items: center;
+		gap: 6px;
+
+		padding: 8px;
+
+		background: rgba(255, 255, 255, 0.95);
+		border: 1px solid #e2e8f0;
+		border-radius: 8px;
+
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+	}
+
+	button {
+		width: 34px;
+		height: 30px;
+
+		border: 1px solid #cbd5e1;
+		border-radius: 6px;
+
+		background: white;
+
+		cursor: pointer;
+	}
+
+	button:hover {
+		background: #f1f5f9;
+	}
+
+	.selected {
+		margin-left: 8px;
+		padding-left: 10px;
+		border-left: 1px solid #e2e8f0;
+
+		font-size: 13px;
+	}
+</style>

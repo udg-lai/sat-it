@@ -1,7 +1,7 @@
 import { getClausePool } from '$lib/states/problem.svelte.ts';
 import { logError } from '$lib/states/toasts.svelte.ts';
 import type { Maybe } from '$lib/types/maybe.ts';
-import type { Lit } from '$lib/types/types.ts';
+import type { Lit, Var } from '$lib/types/types.ts';
 import Clause from './Clause.svelte.ts';
 import Literal from './Literal.svelte.ts';
 import type Variable from './Variable.svelte.ts';
@@ -30,8 +30,8 @@ export class ConflictAnalysis {
 	pointer: number;
 	nth: number;
 
-	// first UIP pointer
-	firstUIPPointer: number | undefined = undefined;
+	// first UIP (assignment)
+	firstUIP: VariableAssignment | undefined = undefined;
 
 	// This is the distance till the next implication to consider in the conflict analysis
 	resolutionGap: number = 0;
@@ -90,7 +90,7 @@ export class ConflictAnalysis {
 	}
 
 	reachedFirstUIP(): boolean {
-		const uip: Maybe<Lit> = this._getFirstUIP(this.conflictiveClause);
+		const uip: Maybe<Lit> = this._getUIP(this.conflictiveClause);
 		return uip.isJust();
 	}
 
@@ -98,7 +98,7 @@ export class ConflictAnalysis {
 		return this.reachedFirstUIP();
 	}
 
-	_getFirstUIP(clause: Clause): Maybe<Lit> {
+	_getUIP(clause: Clause): Maybe<Lit> {
 		return clause.getUIP(this.dlAssignments.map((assignment) => assignment.toLit()));
 	}
 
@@ -174,11 +174,31 @@ export class ConflictAnalysis {
 
 		this.updateConflictiveClause(resolvent);
 
-		const uip: Maybe<Lit> = this._getFirstUIP(resolvent);
-		const asserting: boolean = uip.isJust();
+		const uip: Maybe<Lit> = this._getUIP(resolvent);
+		const isUIP: boolean = uip.isJust();
 
-		if (asserting && this.firstUIPPointer === undefined) {
-			this.firstUIPPointer = this.pointer;
+		// Seek for the first UIP in the last decision level propagations
+		if (isUIP && this.firstUIP === undefined) {
+			// Search the assignment of the first UIP in the last decision assignment level
+			const variable: Var = Literal.var(uip.fromJust());
+			let p: number = this.pointer;
+			let found: boolean = false;
+			while (p >= 0 && !found) {
+				const assignment: VariableAssignment = this.getImplication(p);
+				if (assignment.toVar() === variable) {
+					this.firstUIP = assignment;
+					found = true;
+				} else {
+					p -= 1;
+				}
+			}
+
+			if (!found) {
+				logError(
+					'Conflict Analysis Error',
+					'The first UIP literal is not found in the last decision level propagations'
+				);
+			}
 		}
 
 		this.nth += 1;
@@ -196,7 +216,7 @@ export class ConflictAnalysis {
 			reason: reason,
 			resolvent: {
 				clause: resolvent,
-				asserting: asserting
+				asserting: isUIP
 			}
 		};
 
@@ -210,13 +230,13 @@ export class ConflictAnalysis {
 				'The conflictive clause does not contain a first UIP, cannot return it'
 			);
 		}
-		if (this.firstUIPPointer === undefined) {
+		if (this.firstUIP === undefined) {
 			logError(
 				'Conflict Analysis Error',
 				'The first UIP pointer is undefined, cannot return the first UIP'
 			);
 		}
-		return this.getImplication(this.firstUIPPointer as number);
+		return this.firstUIP as VariableAssignment;
 	}
 
 	getResolutionGap(): number {
