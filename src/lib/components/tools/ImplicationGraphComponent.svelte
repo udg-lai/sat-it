@@ -3,7 +3,12 @@
 	import cytoscape, { type Core, type ElementDefinition } from 'cytoscape';
 	import dagre from 'cytoscape-dagre';
 	import { getImplicationGraph, ImplicationGraph } from '$lib/entities/ImplicationGraph.svelte.ts';
-	import type { Maybe } from '$lib/types/maybe.ts';
+	import { makeJust, makeNothing, type Maybe } from '$lib/types/maybe.ts';
+	import type { ConflictAnalysis } from '$lib/entities/ConflictAnalysis.svelte.ts';
+	import {
+		obtainConflictAnalysis
+	} from '$lib/states/conflict-analysis.svelte.ts';
+	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
 
 	cytoscape.use(dagre);
 
@@ -13,6 +18,44 @@
 	let selectedNode: string | undefined = $state(undefined);
 
 	let graph: Maybe<ImplicationGraph> = $derived(getImplicationGraph());
+
+	let ca: Maybe<VariableAssignment> = $derived.by(() => {
+		if (graph.isNothing()) return makeNothing();
+		const ca: Maybe<ConflictAnalysis> = obtainConflictAnalysis();
+		if (ca.isNothing()) return makeNothing();
+		const conflictAnalysis: ConflictAnalysis = ca.fromJust();
+		if (conflictAnalysis.finished()) return makeNothing();
+		return makeJust(conflictAnalysis.currentImplication());
+	});
+
+	$effect(() => {
+		if (ca.isJust()) {
+			selectedNode = ca.fromJust().toString();
+			selectNode(selectedNode);
+		}
+	});
+
+	function selectNode(nodeId: string) {
+		if (!cy) return;
+
+		selectedNode = nodeId;
+
+		// Clear previous highlighting
+		cy.elements().removeClass('highlighted');
+
+		// Select the Cytoscape node
+		const node = cy.getElementById(nodeId);
+
+		if (node.empty()) {
+			console.warn(`Node ${nodeId} not found in Cytoscape`);
+			return;
+		}
+
+		node.select();
+
+		// Highlight incoming/outgoing edges
+		node.connectedEdges().addClass('highlighted');
+	}
 
 	function buildElements(graph: ImplicationGraph): ElementDefinition[] {
 		const elements: ElementDefinition[] = [];
@@ -196,14 +239,9 @@
 		cy.on('tap', 'node', (event) => {
 			const node = event.target;
 
-			selectedNode = node.id();
+			console.debug('Node', node);
 
-			/*
-			 * Highlight incoming/outgoing relationships
-			 */
-			cy!.elements().removeClass('highlighted');
-
-			node.connectedEdges().addClass('highlighted');
+			selectNode(node.id());
 		});
 
 		/*
@@ -211,7 +249,7 @@
 		 */
 		cy.on('tap', (event) => {
 			if (event.target === cy) {
-				selectedNode = null;
+				selectedNode = undefined;
 
 				cy!.elements().removeClass('highlighted');
 

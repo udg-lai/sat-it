@@ -14,3 +14,7 @@ export const getConflictAnalysis = (): ConflictAnalysis => {
 	}
 	return fromJust(conflictAnalysis);
 };
+
+export const obtainConflictAnalysis = (): Maybe<ConflictAnalysis> => {
+	return conflictAnalysis;
+};

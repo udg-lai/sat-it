@@ -27,7 +27,7 @@ interface PointerUpdate {
 export class ConflictAnalysis {
 	conflictiveClause: Clause;
 	dlAssignments: VariableAssignment[];
-	pointer: number;
+	pointer: number = $state(-1);
 	nth: number;
 
 	// first UIP (assignment)
