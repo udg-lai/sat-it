@@ -156,6 +156,14 @@
 		incomingEdges.addClass('highlighted');
 
 		/*
+		 * Highlight only incoming nodes.
+		 */
+		const incomingNodes = node.incomers('node');
+		for (const incomingNode of incomingNodes) {
+			incomingNode.select();
+		}
+
+		/*
 		 * Update Svelte components.
 		 */
 		updateOverlayPositions();
@@ -519,7 +527,9 @@
 				 */
 
 				{
-					selector: Array.from(uipIds.values()).map((id) => `node[id = "${id}"]`).join(', '),
+					selector: Array.from(uipIds.values())
+						.map((id) => `node[id = "${id}"]`)
+						.join(', '),
 
 					style: {
 						width: w,
@@ -604,9 +614,9 @@
 					selector: '.highlighted',
 
 					style: {
-						'line-color': inspectedColor,
+						'line-color': satisfiedColor,
 
-						'target-arrow-color': inspectedColor,
+						'target-arrow-color': satisfiedColor,
 
 						width: inspectingBorderWidth
 					}

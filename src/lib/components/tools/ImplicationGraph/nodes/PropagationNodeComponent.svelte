@@ -58,7 +58,7 @@
 	}
 
 	.g-propagation.selected .literal-node {
-		animation: pulse 1s ease-in-out infinite;
+		color: var(--satisfied-color);
 	}
 
 	.g-propagation {

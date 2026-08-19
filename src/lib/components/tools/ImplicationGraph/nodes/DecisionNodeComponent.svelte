@@ -1,9 +1,8 @@
 <script lang="ts">
-	import { onChrome } from "$lib/app.svelte.ts";
-	import MathTexComponent from "$lib/components/MathTexComponent.svelte";
-	import Literal from "$lib/entities/Literal.svelte.ts";
-	import type { Lit } from "$lib/types/types.ts";
-
+	import { onChrome } from '$lib/app.svelte.ts';
+	import MathTexComponent from '$lib/components/MathTexComponent.svelte';
+	import Literal from '$lib/entities/Literal.svelte.ts';
+	import type { Lit } from '$lib/types/types.ts';
 
 	let {
 		id,
@@ -13,20 +12,16 @@
 		selected: boolean;
 	} = $props();
 
-
 	let chrome: boolean = $derived(onChrome());
 
 	let literal: Lit = $derived(Number(id));
 </script>
 
-
 <div class="g-decision" class:selected>
-	<div  class="literal-node {chrome ? 'pad-chrome' : 'pad-others'}">
+	<div class="literal-node {chrome ? 'pad-chrome' : 'pad-others'}">
 		<MathTexComponent equation={Literal.toTeX(literal)} />
 	</div>
-
 </div>
-
 
 <style>
 	.literal-node {
@@ -37,7 +32,6 @@
 		min-height: var(--assignment-width);
 		max-height: var(--assignment-width);
 		height: var(--assignment-width);
-
 
 		display: flex;
 		align-items: end;
@@ -65,7 +59,7 @@
 	}
 
 	.g-decision.selected .literal-node {
-		animation: pulse 1s ease-in-out infinite;
+		color: var(--satisfied-color);
 	}
 
 	.g-decision {
@@ -73,7 +67,4 @@
 		border: 0px solid var(--inspecting-color);
 		border-radius: 10%;
 	}
-
 </style>
-
-
