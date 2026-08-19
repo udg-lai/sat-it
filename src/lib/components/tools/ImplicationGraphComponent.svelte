@@ -77,7 +77,6 @@
 			depth(nodeId);
 		}
 
-
 		const inverseDepths = new Map<number, string[]>();
 		for (const [nodeId, depth] of depths.entries()) {
 			if (!inverseDepths.has(depth)) {
@@ -98,7 +97,6 @@
 				normedDepths.set(nodeId, d);
 			}
 		}
-
 
 		return normedDepths;
 	}

@@ -264,4 +264,4 @@ export const getImplicationGraph = (): Maybe<ImplicationGraph> => {
 
 export const clearImplicationGraph = (): void => {
 	implicationGraph = makeNothing();
-}
+};

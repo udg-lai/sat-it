@@ -17,7 +17,7 @@ export const getConflictAnalysis = (): ConflictAnalysis => {
 
 export const clearConflictAnalysis = (): void => {
 	conflictAnalysis = makeNothing();
-}
+};
 
 export const obtainConflictAnalysis = (): Maybe<ConflictAnalysis> => {
 	return conflictAnalysis;
