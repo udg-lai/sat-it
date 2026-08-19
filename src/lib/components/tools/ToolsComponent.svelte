@@ -13,7 +13,7 @@
 	} from 'flowbite-svelte-icons';
 	import { onMount } from 'svelte';
 	import Button from './Button.svelte';
-	import ImplicationGraphComponent from './ImplicationGraphComponent.svelte';
+	import ImplicationGraphComponent from './ImplicationGraph/ImplicationGraphComponent.svelte';
 	import OccurrenceListComponent from './OccurrenceListComponent.svelte';
 	import SolutionSummaryComponent from './SolutionSummaryComponent.svelte';
 	import './style.css';

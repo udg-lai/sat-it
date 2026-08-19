@@ -38,13 +38,14 @@
 		content: '';
 		position: absolute;
 
-		width: 6px;
-		height: 2px;
+		width: 4px;
+		height: 4px;
 
 		transform: translateX(-50%);
 		background-color: var(--color);
-		border-radius: 75%;
+		border-radius: 50%;
 		pointer-events: none;
+
 		opacity: var(--inspecting-opacity);
 	}
 
