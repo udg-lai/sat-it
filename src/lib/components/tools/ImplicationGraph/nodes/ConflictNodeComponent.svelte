@@ -1,4 +1,10 @@
 <script lang="ts">
+	import { onChrome } from "$lib/app.svelte.ts";
+	import MathTexComponent from "$lib/components/MathTexComponent.svelte";
+	import Literal from "$lib/entities/Literal.svelte.ts";
+	import type { Lit } from "$lib/types/types.ts";
+
+
 	let {
 		id,
 		selected
@@ -6,30 +12,52 @@
 		id: string;
 		selected: boolean;
 	} = $props();
+
+
+	let chrome: boolean = $derived(onChrome());
+
+	let literal: Lit = $derived(Number(id));
 </script>
 
-<div class:selected class="conflict-node">⊥</div>
+
+<div class="g-conflict" class:selected>
+	<div  class="conflict-node {chrome ? 'pad-chrome' : 'pad-others'}">
+		<MathTexComponent equation={"\\square"} color="--unsatisfied-color" />
+	</div>
+
+</div>
+
 
 <style>
 	.conflict-node {
-		width: 30px;
-		height: 30px;
+		min-width: var(--assignment-width);
+		max-width: var(--assignment-width);
+		width: var(--assignment-width);
+
+		min-height: var(--assignment-width);
+		max-height: var(--assignment-width);
+		height: var(--assignment-width);
+
 
 		display: flex;
-		align-items: center;
+		align-items: end;
 		justify-content: center;
 
-		background: #fee2e2;
-
-		border: 2px solid #dc2626;
-
-		border-radius: 50%;
-
-		font-size: 24px;
-		font-weight: bold;
+		color: var(--unsatisfied-color);
 	}
 
-	.conflict-node.selected {
-		border-width: 4px;
+	.g-conflict .conflict-node {
+		scale: 1;
 	}
+
+
+	.g-conflict {
+		padding: 10px;
+		border: 0px solid var(--inspecting-color);
+		border-radius: 10%;
+		color: var(--conflict-color);
+	}
+
 </style>
+
+

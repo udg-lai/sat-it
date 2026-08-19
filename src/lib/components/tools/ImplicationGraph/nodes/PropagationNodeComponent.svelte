@@ -53,7 +53,7 @@
 		}
 
 		50% {
-			scale: 1.25;
+			scale: 1.2;
 		}
 	}
 
@@ -66,7 +66,6 @@
 		padding: 10px;
 
 		scale: 1;
-
 		transition: scale 0.2s ease-in-out;
 	}
 </style>

@@ -20,7 +20,7 @@
 </script>
 
 
-<div class="g-propagation" class:selected>
+<div class="g-decision" class:selected>
 	<div  class="literal-node {chrome ? 'pad-chrome' : 'pad-others'}">
 		<MathTexComponent equation={Literal.toTeX(literal)} />
 	</div>
@@ -49,11 +49,26 @@
 		font-size: var(--font-size);
 	}
 
-	.g-propagation.selected {
-		border-width: 2px;
+	.g-decision .literal-node {
+		scale: 1;
 	}
 
-	.g-propagation {
+	@keyframes pulse {
+		0%,
+		100% {
+			scale: 1;
+		}
+
+		50% {
+			scale: 1.2;
+		}
+	}
+
+	.g-decision.selected .literal-node {
+		animation: pulse 1s ease-in-out infinite;
+	}
+
+	.g-decision {
 		padding: 10px;
 		border: 0px solid var(--inspecting-color);
 		border-radius: 10%;
