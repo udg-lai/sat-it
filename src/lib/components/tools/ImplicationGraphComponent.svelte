@@ -62,7 +62,7 @@
 
 			const incoming = graph.nodes().filter((source) => graph.edges(source).includes(nodeId));
 
-			// Should be the learned clause
+			// Should be the literals of the learned clause
 			if (incoming.length === 0) {
 				depths.set(nodeId, 0);
 				return 0;
@@ -77,7 +77,30 @@
 			depth(nodeId);
 		}
 
-		return depths;
+
+		const inverseDepths = new Map<number, string[]>();
+		for (const [nodeId, depth] of depths.entries()) {
+			if (!inverseDepths.has(depth)) {
+				inverseDepths.set(depth, []);
+			}
+			inverseDepths.get(depth)!.push(nodeId);
+		}
+
+		// This is for not doing big skips on axis X when painting the nodes
+		const normedDepths = new Map<string, number>();
+		const dls: number[] = Array.from(inverseDepths.keys()).sort((a, b) => a - b);
+
+		for (let d = 0; d < dls.length; d++) {
+			const dl = dls[d];
+			const nodesAtDepth = inverseDepths.get(dl)!;
+
+			for (const nodeId of nodesAtDepth) {
+				normedDepths.set(nodeId, d);
+			}
+		}
+
+
+		return normedDepths;
 	}
 
 	function orderNodes(graph: ImplicationGraph): Map<string, number> {
@@ -115,7 +138,6 @@
 	}
 
 	function computeSlots(depths: Map<string, number>): Map<string, number> {
-		const slotMappings = new Map<string, number>();
 		// Group nodes by depth
 		const nodesByDepth = new Map<number, string[]>();
 
@@ -126,24 +148,33 @@
 			nodesByDepth.get(depth)!.push(nodeId);
 		}
 
-		for (const nodes of nodesByDepth.values()) {
-			// Create available slots
-			const slots = Array.from({ length: nodes.length }, (_, i) => i);
+		// Mapping node to slot in its group
+		const slotMappings = new Map<string, number>();
+		const SCARCITY_FACTOR = 0.75; // 75% of the nodes will have unique slots
+		const LEMMA_FACTOR = 1; // Need to keep all the slots (otherwise literals will overlap with the learned clause)
+		const SEED = 1000; // Fixed seed for reproducibility
 
-			// Set random seed for reproducibility
-			const random = mulberry32(1000);
+		for (const [depth, nodes] of nodesByDepth.entries()) {
+			// Create available slots
+			const factor = depth === 0 ? LEMMA_FACTOR : SCARCITY_FACTOR;
+			const slots = Array.from({ length: Math.ceil(nodes.length * factor) }, (_, i) => i);
+
+			const random = mulberry32(SEED);
 
 			// Shuffle slots randomly
 			for (let i = slots.length - 1; i > 0; i--) {
 				const j = Math.floor(random() * (i + 1));
-
 				[slots[i], slots[j]] = [slots[j], slots[i]];
 			}
 
 			for (let i = 0; i < nodes.length; i++) {
-				const nodeId = nodes[i];
-				const slot = slots[i];
-				slotMappings.set(nodeId, slot);
+				if (i < slots.length) {
+					slotMappings.set(nodes[i], slots[i]);
+				} else {
+					// Pick slot randomly
+					const randomSlot = Math.floor(random() * slots.length);
+					slotMappings.set(nodes[i], slots[randomSlot]);
+				}
 			}
 		}
 
@@ -155,9 +186,8 @@
 		const orders = orderNodes(graph);
 		const slots = computeSlots(depths);
 
-		const X_SPACING = 150;
-		const ORDER_X_SPACING = 75;
-		const Y_SPACING = 100;
+		const X_SPACING = 100;
+		const Y_SPACING = 70;
 
 		const positions = new Map<string, { x: number; y: number }>();
 
@@ -165,12 +195,11 @@
 			const depth = depths.get(nodeId)!;
 			const order = orders.get(nodeId)!;
 			const slot = slots.get(nodeId)!;
-			console.debug(`Node ${nodeId}: depth=${depth}, order=${order}`);
 
-			const innerOrder = depth == 0 ? 0 : order * ORDER_X_SPACING;
+			const X_ORDER_SPACING = depth == 0 ? 0 : order * X_SPACING;
 
 			positions.set(nodeId, {
-				x: depth * X_SPACING + innerOrder,
+				x: depth * X_SPACING + X_ORDER_SPACING,
 				y: slot * Y_SPACING
 			});
 		}
@@ -229,7 +258,7 @@
 		const uipIds = graph.fromJust().uipIds();
 		const fuipId = graph.fromJust().fuipId();
 
-		const [w, h] = [40, 40];
+		const [w, h] = [30, 30];
 
 		// Colors
 		const booleanPropagationColor = getCssVariable(container, '--boolean-constraint-propagation');
