@@ -63,7 +63,7 @@ export class ImplicationGraph {
 		return edges;
 	}
 
-	node(id: string): IG_Node {
+	getNode(id: string): IG_Node {
 		const node = this._nodes.get(id);
 
 		if (node === undefined) {
@@ -261,3 +261,7 @@ export const setImplicationGraph = (ig: ImplicationGraph): void => {
 export const getImplicationGraph = (): Maybe<ImplicationGraph> => {
 	return implicationGraph;
 };
+
+export const clearImplicationGraph = (): void => {
+	implicationGraph = makeNothing();
+}

@@ -5,19 +5,17 @@
 	import { getImplicationGraph, ImplicationGraph } from '$lib/entities/ImplicationGraph.svelte.ts';
 	import { makeJust, makeNothing, type Maybe } from '$lib/types/maybe.ts';
 	import type { ConflictAnalysis } from '$lib/entities/ConflictAnalysis.svelte.ts';
-	import {
-		obtainConflictAnalysis
-	} from '$lib/states/conflict-analysis.svelte.ts';
+	import { obtainConflictAnalysis } from '$lib/states/conflict-analysis.svelte.ts';
 	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
 
-	import { getCssVariable } from '$lib/utils.ts';
+	import { getCssVariable, mulberry32 } from '$lib/utils.ts';
 
 	cytoscape.use(dagre);
 
 	let container: HTMLDivElement;
 	let cy: Core | undefined;
 
-	let selectedNode: string | undefined = $state(undefined);
+	let inspectingNode: string | undefined = $state(undefined);
 
 	let graph: Maybe<ImplicationGraph> = $derived(getImplicationGraph());
 
@@ -30,17 +28,10 @@
 		return makeJust(conflictAnalysis.currentImplication());
 	});
 
-	$effect(() => {
-		if (ca.isJust()) {
-			selectedNode = ca.fromJust().toString();
-			selectNode(selectedNode);
-		}
-	});
-
 	function selectNode(nodeId: string) {
 		if (!cy) return;
 
-		selectedNode = nodeId;
+		inspectingNode = nodeId;
 
 		// Clear previous highlighting
 		cy.elements().removeClass('highlighted');
@@ -62,7 +53,128 @@
 		node.connectedEdges().addClass('highlighted');
 	}
 
+	function calculateDepths(graph: ImplicationGraph): Map<string, number> {
+		const depths = new Map<string, number>();
+
+		function depth(nodeId: string): number {
+			const cached = depths.get(nodeId);
+			if (cached !== undefined) return cached;
+
+			const incoming = graph.nodes().filter((source) => graph.edges(source).includes(nodeId));
+
+			// Should be the learned clause
+			if (incoming.length === 0) {
+				depths.set(nodeId, 0);
+				return 0;
+			}
+
+			const dl = graph.getNode(nodeId).dl;
+			depths.set(nodeId, dl);
+			return dl;
+		}
+
+		for (const nodeId of graph.nodes()) {
+			depth(nodeId);
+		}
+
+		return depths;
+	}
+
+	function orderNodes(graph: ImplicationGraph): Map<string, number> {
+		const depths = calculateDepths(graph);
+
+		const groups = new Map<number, string[]>();
+
+		for (const nodeId of graph.nodes()) {
+			const depth = depths.get(nodeId)!;
+
+			const group = groups.get(depth) ?? [];
+			group.push(nodeId);
+			groups.set(depth, group);
+		}
+
+		const order = new Map<string, number>();
+
+		for (const nodes of groups.values()) {
+			nodes.sort((a, b) => {
+				const na = graph.getNode(a);
+				const nb = graph.getNode(b);
+
+				const ia = na.assignment?.index ?? Number.MAX_SAFE_INTEGER;
+				const ib = nb.assignment?.index ?? Number.MAX_SAFE_INTEGER;
+
+				return ia - ib;
+			});
+
+			nodes.forEach((nodeId, index) => {
+				order.set(nodeId, index);
+			});
+		}
+
+		return order;
+	}
+
+	function computeSlots(depths: Map<string, number>): Map<string, number> {
+		const slotMappings = new Map<string, number>();
+		// Group nodes by depth
+		const nodesByDepth = new Map<number, string[]>();
+
+		for (const [nodeId, depth] of depths.entries()) {
+			if (!nodesByDepth.has(depth)) {
+				nodesByDepth.set(depth, []);
+			}
+			nodesByDepth.get(depth)!.push(nodeId);
+		}
+
+		for (const nodes of nodesByDepth.values()) {
+			// Create available slots
+			const slots = Array.from({ length: nodes.length }, (_, i) => i);
+
+			// Set random seed for reproducibility
+			const random = mulberry32(1000);
+
+			// Shuffle slots randomly
+			for (let i = slots.length - 1; i > 0; i--) {
+				const j = Math.floor(random() * (i + 1));
+
+				[slots[i], slots[j]] = [slots[j], slots[i]];
+			}
+
+			for (let i = 0; i < nodes.length; i++) {
+				const nodeId = nodes[i];
+				const slot = slots[i];
+				slotMappings.set(nodeId, slot);
+			}
+		}
+
+		return slotMappings;
+	}
+
 	function buildElements(graph: ImplicationGraph): ElementDefinition[] {
+		const depths = calculateDepths(graph);
+		const orders = orderNodes(graph);
+		const slots = computeSlots(depths);
+
+		const X_SPACING = 150;
+		const ORDER_X_SPACING = 75;
+		const Y_SPACING = 100;
+
+		const positions = new Map<string, { x: number; y: number }>();
+
+		for (const nodeId of graph.nodes()) {
+			const depth = depths.get(nodeId)!;
+			const order = orders.get(nodeId)!;
+			const slot = slots.get(nodeId)!;
+			console.debug(`Node ${nodeId}: depth=${depth}, order=${order}`);
+
+			const innerOrder = depth == 0 ? 0 : order * ORDER_X_SPACING;
+
+			positions.set(nodeId, {
+				x: depth * X_SPACING + innerOrder,
+				y: slot * Y_SPACING
+			});
+		}
+
 		const elements: ElementDefinition[] = [];
 
 		/*
@@ -74,7 +186,8 @@
 				data: {
 					id: nodeId,
 					label: nodeId
-				}
+				},
+				position: positions.get(nodeId)
 			});
 		}
 
@@ -113,7 +226,7 @@
 		cy?.destroy();
 
 		const falsumId = graph.fromJust().falsumId();
-		const uipIds = graph.fromJust().uipIds()
+		const uipIds = graph.fromJust().uipIds();
 		const fuipId = graph.fromJust().fuipId();
 
 		const [w, h] = [40, 40];
@@ -130,11 +243,15 @@
 			elements: buildElements(graph.fromJust()),
 
 			layout: {
-				name: 'dagre',
-				rankDir: 'LR',
-				nodeSep: 60,
-				rankSep: 100,
-				edgeSep: 30,
+				//				name: 'dagre',
+				//				rankDir: 'LR',
+				//	nodeSep: 60,
+				// 	rankSep: 100,
+				// 	edgeSep: 30,
+				// 	padding: 40
+
+				name: 'preset',
+				fit: true,
 				padding: 40
 			},
 
@@ -190,7 +307,6 @@
 					}
 				},
 
-
 				/*
 				 * UIP nodes
 				 */
@@ -216,7 +332,6 @@
 						height: h
 					}
 				},
-
 
 				/*
 				 * FUIP nodes
@@ -264,7 +379,7 @@
 					selector: 'node:selected',
 					style: {
 						'border-color': inspectedColor,
-						'border-width': inspectingBorderWidth,
+						'border-width': inspectingBorderWidth
 					}
 				},
 
@@ -316,7 +431,7 @@
 		 */
 		cy.on('tap', (event) => {
 			if (event.target === cy) {
-				selectedNode = undefined;
+				inspectingNode = undefined;
 
 				cy!.elements().removeClass('highlighted');
 
@@ -395,18 +510,30 @@
 		};
 	});
 
+	$effect(() => {
+		if (graph.isNothing()) {
+			cy?.destroy();
+			cy = undefined;
+			return;
+		}
+
+		if (ca.isJust()) {
+			inspectingNode = ca.fromJust().toString();
+			selectNode(inspectingNode);
+		}
+	});
 </script>
 
 <div class={`graph-wrapper`}>
 	<div class="toolbar">
-		<button onclick={zoomIn}>+</button>
-		<button onclick={zoomOut}>−</button>
-		<button onclick={fitGraph}>Fit</button>
-		<button onclick={resetLayout}>Layout</button>
+		<button class="btn" onclick={zoomIn}>+</button>
+		<button class="btn" onclick={zoomOut}>−</button>
+		<button class="btn" onclick={fitGraph}>Fit</button>
+		<button class="btn" onclick={resetLayout}>Layout</button>
 
-		{#if selectedNode}
+		{#if inspectingNode}
 			<span class="selected">
-				Selected: <strong>{selectedNode}</strong>
+				Inspecting: <strong>{inspectingNode}</strong>
 			</span>
 		{/if}
 	</div>
@@ -450,8 +577,11 @@
 	}
 
 	button {
-		width: 34px;
+		min-width: 30px;
+		width: fit-content;
 		height: 30px;
+
+		padding: 0.5rem 0.75rem;
 
 		border: 1px solid #cbd5e1;
 		border-radius: 6px;

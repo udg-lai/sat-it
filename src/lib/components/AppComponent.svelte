@@ -58,6 +58,8 @@
 	import DebuggerComponent from './debugger/DebuggerComponent.svelte';
 	import { getConfiguredAlgorithm } from './settings/engine/state.svelte.ts';
 	import SolvingInformationComponent from './SolvingInformationComponent.svelte';
+	import { clearConflictAnalysis } from '$lib/states/conflict-analysis.svelte.ts';
+	import { clearImplicationGraph } from '$lib/entities/ImplicationGraph.svelte.ts';
 
 	let trails: Trail[] = $state([]);
 
@@ -112,6 +114,10 @@
 		resetStatistics();
 		wipeDecisions();
 		wipeDifferSequence();
+
+		// Reset the data structures like conflict analysis and implication graph
+		clearConflictAnalysis();
+		clearImplicationGraph();
 
 		// Sync the problem with the new instance, meaning we create
 		// a new set of variables and clauses from the instance.

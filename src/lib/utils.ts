@@ -35,12 +35,18 @@ export const error = (): never => {
 	throw new Error('This function should not be called');
 };
 
-
 export function getCssVariable(container: HTMLDivElement, property: string): string {
 	// Extract the value of the CSS variable from the container's computed style
-	const value = getComputedStyle(container)
-		.getPropertyValue(property)
-		.trim();
+	const value = getComputedStyle(container).getPropertyValue(property).trim();
 
 	return value;
+}
+
+export function mulberry32(seed: number) {
+	return function () {
+		let t = (seed += 0x6d2b79f5);
+		t = Math.imul(t ^ (t >>> 15), t | 1);
+		t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+		return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+	};
 }

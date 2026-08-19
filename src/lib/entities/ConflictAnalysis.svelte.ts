@@ -240,7 +240,7 @@ export class ConflictAnalysis {
 	}
 
 	getUIPs(): VariableAssignment[] {
-		logError("Conflict Analysis Error", "This method is not implemented yet");
+		logError('Conflict Analysis Error', 'This method is not implemented yet');
 		return [];
 	}
 

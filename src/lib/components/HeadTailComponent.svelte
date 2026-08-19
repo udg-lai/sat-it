@@ -34,8 +34,6 @@
 		display: block;
 	}
 
-
-
 	head-tail::after {
 		content: '';
 		position: absolute;
