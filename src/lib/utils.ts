@@ -34,3 +34,13 @@ export const testNavigatorAgent = (): boolean => {
 export const error = (): never => {
 	throw new Error('This function should not be called');
 };
+
+
+export function getCssVariable(container: HTMLDivElement, property: string): string {
+	// Extract the value of the CSS variable from the container's computed style
+	const value = getComputedStyle(container)
+		.getPropertyValue(property)
+		.trim();
+
+	return value;
+}

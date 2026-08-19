@@ -10,6 +10,8 @@
 	} from '$lib/states/conflict-analysis.svelte.ts';
 	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
 
+	import { getCssVariable } from '$lib/utils.ts';
+
 	cytoscape.use(dagre);
 
 	let container: HTMLDivElement;
@@ -43,6 +45,8 @@
 		// Clear previous highlighting
 		cy.elements().removeClass('highlighted');
 
+		cy.nodes().unselect();
+
 		// Select the Cytoscape node
 		const node = cy.getElementById(nodeId);
 
@@ -51,6 +55,7 @@
 			return;
 		}
 
+		// This adds the .selected class
 		node.select();
 
 		// Highlight incoming/outgoing edges
@@ -107,6 +112,18 @@
 		// In case this function is called again.
 		cy?.destroy();
 
+		const falsumId = graph.fromJust().falsumId();
+		const uipIds = graph.fromJust().uipIds()
+		const fuipId = graph.fromJust().fuipId();
+
+		const [w, h] = [40, 40];
+
+		// Colors
+		const booleanPropagationColor = getCssVariable(container, '--boolean-constraint-propagation');
+		const inspectedColor = getCssVariable(container, '--inspecting-color');
+		const inspectingBorderWidth = 4;
+		const baseBorderWidth = 2;
+
 		cy = cytoscape({
 			container,
 
@@ -140,11 +157,11 @@
 
 						'background-color': '#ffffff',
 
-						'border-width': 2,
-						'border-color': '#444',
+						'border-width': baseBorderWidth,
+						'border-color': inspectedColor,
 
-						width: 'label',
-						height: 40,
+						width: w,
+						height: h,
 
 						'padding-left': 16,
 						'padding-right': 16
@@ -155,7 +172,7 @@
 				 * Falsum / conflict node
 				 */
 				{
-					selector: `node[id = "${graph.fromJust().falsumId()}"]`,
+					selector: `node[id = "${falsumId}"]`,
 					style: {
 						shape: 'ellipse',
 
@@ -163,13 +180,63 @@
 
 						'background-color': '#fee2e2',
 						'border-color': '#dc2626',
-						'border-width': 3,
+						'border-width': baseBorderWidth,
 
 						'font-size': 24,
 						'font-weight': 'bold',
 
-						width: 50,
-						height: 50
+						width: w,
+						height: h
+					}
+				},
+
+
+				/*
+				 * UIP nodes
+				 */
+				{
+					selector: uipIds.map((id) => `node[id = "${id}"]`).join(', '),
+					style: {
+						shape: 'heptagon',
+
+						label: 'data(label)',
+
+						'text-valign': 'center',
+						'text-halign': 'center',
+
+						'font-size': 14,
+						'font-weight': 500,
+
+						'background-color': '#ffffff',
+
+						'border-width': baseBorderWidth,
+						'border-color': '#444',
+
+						width: w,
+						height: h
+					}
+				},
+
+
+				/*
+				 * FUIP nodes
+				 */
+				{
+					selector: `node[id = "${fuipId}"]`,
+					style: {
+						shape: 'heptagon',
+
+						label: 'data(label)',
+
+						'background-color': '#fee2e2',
+						'border-color': booleanPropagationColor,
+						'border-width': baseBorderWidth,
+
+						'font-size': 14,
+						'font-weight': 500,
+
+						width: w,
+						height: h
 					}
 				},
 
@@ -196,8 +263,8 @@
 				{
 					selector: 'node:selected',
 					style: {
-						'border-color': '#2563eb',
-						'border-width': 4
+						'border-color': inspectedColor,
+						'border-width': inspectingBorderWidth,
 					}
 				},
 
@@ -207,9 +274,9 @@
 				{
 					selector: '.highlighted',
 					style: {
-						'line-color': '#2563eb',
-						'target-arrow-color': '#2563eb',
-						width: 4
+						'line-color': inspectedColor,
+						'target-arrow-color': inspectedColor,
+						width: inspectingBorderWidth
 					}
 				}
 			],
@@ -327,6 +394,7 @@
 			cy?.destroy();
 		};
 	});
+
 </script>
 
 <div class={`graph-wrapper`}>

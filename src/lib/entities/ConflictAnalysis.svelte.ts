@@ -239,6 +239,11 @@ export class ConflictAnalysis {
 		return this.firstUIP as VariableAssignment;
 	}
 
+	getUIPs(): VariableAssignment[] {
+		logError("Conflict Analysis Error", "This method is not implemented yet");
+		return [];
+	}
+
 	getResolutionGap(): number {
 		return this.resolutionGap;
 	}

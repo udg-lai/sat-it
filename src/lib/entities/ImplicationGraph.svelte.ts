@@ -37,6 +37,8 @@ export class ImplicationGraph {
 	_edges: SvelteMap<string, string[]> = new SvelteMap();
 
 	_falsum_id = 'falsum';
+	_uip_ids: string[] = [];
+	_fuip_id: string | undefined;
 
 	constructor(trail: Trail) {
 		if (!trail.hasConflictiveClause())
@@ -73,6 +75,14 @@ export class ImplicationGraph {
 
 	falsumId(): string {
 		return this._falsum_id;
+	}
+
+	uipIds(): string[] {
+		return this._uip_ids;
+	}
+
+	fuipId(): string | undefined {
+		return this._fuip_id;
 	}
 
 	private _makeImplicationGraph(): void {
@@ -228,8 +238,14 @@ export class ImplicationGraph {
 		const firstUIP: VariableAssignment = conflictAnalysis.getFirstUIP();
 		const id: string = firstUIP.toString();
 
-		this._nodes.get(id)!.assignment!.uip = true;
-		this._nodes.get(id)!.assignment!.fuip = true;
+		// Set the UIPs and the first UIP in the graph
+		this._uip_ids.push(id);
+		this._fuip_id = id;
+
+		for (const uipId of this._uip_ids) {
+			this._nodes.get(uipId)!.assignment!.uip = true;
+		}
+		this._nodes.get(this._fuip_id)!.assignment!.fuip = true;
 
 		console.log($state.snapshot(this._nodes));
 		console.log($state.snapshot(this._edges));

@@ -29,47 +29,29 @@
 </head-tail>
 
 <style>
-	@keyframes blink {
-		0% {
-			opacity: 0.7;
-			transform: translateX(-50%) scale(0.9);
-		}
-		50% {
-			opacity: 1;
-			transform: translateX(-50%) scale(1);
-		}
-		100% {
-			opacity: 0.7;
-			transform: translateX(-50%) scale(0.9);
-		}
-	}
-
 	head-tail {
 		position: relative;
 		display: block;
 	}
 
+
+
 	head-tail::after {
 		content: '';
 		position: absolute;
 
-		width: 4px;
-		height: 4px;
+		width: 6px;
+		height: 2px;
 
 		transform: translateX(-50%);
 		background-color: var(--color);
-		border-radius: 50%;
+		border-radius: 75%;
 		pointer-events: none;
-
 		opacity: var(--inspecting-opacity);
-		transition: opacity 0.15s ease;
-
-		animation: blink 2s infinite ease-in-out;
-		animation-play-state: paused;
 	}
 
 	head-tail[style*='--inspecting-opacity: 1']::after {
-		animation-play-state: runninsg;
+		animation-play-state: running;
 	}
 
 	.horizontal-display::after {
