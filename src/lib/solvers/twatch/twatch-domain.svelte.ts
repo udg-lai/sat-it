@@ -356,7 +356,7 @@ export type TWATCH_SECOND_HIGHEST_DL_FUN = (lemma: Clause) => number;
 
 export const sndHighestDL: TWATCH_SECOND_HIGHEST_DL_FUN = (lemma: Clause) => {
 	const variables: number[] = lemma.getLiterals().map((literal) => {
-		return literal.getVariable().toInt();
+		return literal.getVariable().toNumber();
 	});
 
 	if (variables.length < 1) logFatal('sndHighestDL', 'Dealing with an empty clause');
@@ -422,7 +422,7 @@ export type TWATCH_WATCH_AT_FIRST_POSITION_FUN = (watch: Watch) => boolean;
 export const watchAtFirstPosition: TWATCH_WATCH_AT_FIRST_POSITION_FUN = (watch: Watch) => {
 	const cLits: Literal[] = getClausePool().at(watch.cRef).getLiterals();
 	const currentWatch: VisitingWatchList = getCurrentWatch();
-	return cLits[0].toInt() === fromRight(currentWatch).getLiteral();
+	return cLits[0].toNumber() === fromRight(currentWatch).getLiteral();
 };
 
 export type TWATCH_SWAP_WATCHES_FUN = (watch: Watch) => void;
@@ -498,7 +498,7 @@ export type TWATCH_DELETE_WATCH_FUN = (watch: Watch) => void;
 // In this function, always the 2nd literal will be the one whose watch will be removed
 export const deleteWatch: TWATCH_DELETE_WATCH_FUN = (watch: Watch) => {
 	const secondLiteral: Literal = getClausePool().at(watch.cRef).getLiterals()[1];
-	getWatchTableMapping().deleteWatch(secondLiteral.toInt(), watch);
+	getWatchTableMapping().deleteWatch(secondLiteral.toNumber(), watch);
 };
 
 export type TWATCH_ADD_WATCH_FUN = (watch: Watch) => void;
@@ -506,7 +506,7 @@ export type TWATCH_ADD_WATCH_FUN = (watch: Watch) => void;
 // In this function, always the 2nd literal will be the one whose watch will be added
 export const addWatch: TWATCH_ADD_WATCH_FUN = (watch: Watch) => {
 	const secondLiteral: Literal = getClausePool().at(watch.cRef).getLiterals()[1];
-	getWatchTableMapping().addWatch(secondLiteral.toInt(), watch);
+	getWatchTableMapping().addWatch(secondLiteral.toNumber(), watch);
 };
 
 export type TWATCH_IS_IT_A_WATCH_FUN = (watch: EWC) => boolean;

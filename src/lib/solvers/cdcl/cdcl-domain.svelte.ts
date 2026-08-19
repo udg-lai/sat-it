@@ -291,7 +291,7 @@ export type CDCL_SECOND_HIGHEST_DL_FUN = (lemma: Clause) => number;
 
 export const sndHighestDL: CDCL_SECOND_HIGHEST_DL_FUN = (lemma: Clause) => {
 	const variables: number[] = lemma.getLiterals().map((literal) => {
-		return literal.getVariable().toInt();
+		return literal.getVariable().toNumber();
 	});
 
 	if (variables.length < 1) logFatal('sndHighestDL', 'Dealing with an empty clause');

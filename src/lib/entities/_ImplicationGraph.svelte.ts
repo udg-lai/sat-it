@@ -56,7 +56,7 @@ export class Node {
 	}
 
 	index(): Var {
-		return isLeft(this.varAsig) ? fromLeft(this.varAsig)._variable.toInt() : 0;
+		return isLeft(this.varAsig) ? fromLeft(this.varAsig)._variable.toNumber() : 0;
 	}
 
 	group(): NodeGroup {
@@ -157,7 +157,7 @@ export class ImplicationGraph {
 
 		// Establi els nivells dels literals
 		variableAssignments.forEach((va) => {
-			varToAssignmentMap.set(va._variable.toInt(), va);
+			varToAssignmentMap.set(va._variable.toNumber(), va);
 		});
 
 		// Afegim el node conflicte
@@ -172,7 +172,7 @@ export class ImplicationGraph {
 		let analysisPointer: number = ldlPropagations.length - 1;
 
 		const conflictVariablesToCut: Set<Var> = new Set(
-			conflictClause.getLiterals().map((l) => l.getVariable().toInt())
+			conflictClause.getLiterals().map((l) => l.getVariable().toNumber())
 		);
 
 		conflictVariablesToCut.forEach((v) => {
@@ -218,9 +218,9 @@ export class ImplicationGraph {
 				clausePool
 					.at(cRefReason)
 					.getLiterals()
-					.filter((l) => l.getVariable().toInt() !== currentImplicationVar)
+					.filter((l) => l.getVariable().toNumber() !== currentImplicationVar)
 					.forEach((l) => {
-						const newVar: Var = l.getVariable().toInt();
+						const newVar: Var = l.getVariable().toNumber();
 						this.addNode(new Node(varToAssignmentMap.get(newVar), trail.getVariableDL(newVar)));
 						this.addLink(new Link(newVar, currentImplicationVar, cRefReason));
 					});
@@ -256,9 +256,9 @@ export class ImplicationGraph {
 
 		return new Clause(
 			clause.getLiterals().map((literal) => {
-				const variableId = literal.getVariable().toInt();
+				const variableId = literal.getVariable().toNumber();
 				const variable = new Variable(variableId, assignments.get(variableId));
-				return new Literal(variable, Literal.hatted(literal.toInt()));
+				return new Literal(variable, Literal.hatted(literal.toNumber()));
 			}),
 			{
 				comments: clause.getComments(),
@@ -412,7 +412,7 @@ export class ImplicationGraph {
 		degrees.set(0, 0);
 
 		conflictLiterals.forEach((l, i) => {
-			degrees.set(l.getVariable().toInt(), conflictLiterals.length > 1 ? partition * i : 45);
+			degrees.set(l.getVariable().toNumber(), conflictLiterals.length > 1 ? partition * i : 45);
 		});
 
 		this.getLinks().forEach((link) => {

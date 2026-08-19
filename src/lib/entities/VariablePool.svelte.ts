@@ -69,7 +69,7 @@ export class VariablePool implements IVariablePool {
 	private _assignedTruthValue(): Set<number> {
 		const assigned: number[] = this.variables
 			.filter((v) => v.hasTruthValue())
-			.map((v) => v.toInt());
+			.map((v) => v.toNumber());
 		return new Set([...assigned]);
 	}
 
@@ -106,7 +106,7 @@ export class VariablePool implements IVariablePool {
 				this.nvPointer++;
 			}
 		}
-		return nextFound ? makeJust(this.variables[this.nvPointer].toInt()) : makeNothing();
+		return nextFound ? makeJust(this.variables[this.nvPointer].toNumber()) : makeNothing();
 	}
 
 	private checkIndex(variableId: number): number {

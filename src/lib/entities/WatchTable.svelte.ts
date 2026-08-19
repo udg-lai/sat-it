@@ -42,7 +42,7 @@ export default class WatchTable {
 			// Iterate over the two first positions where the watches are ensured to be
 			for (let i = 0; i < 2; i++) {
 				const literal: Literal = literals[i];
-				const lit: number = literal.toInt();
+				const lit: number = literal.toNumber();
 				if (!this.table.has(lit)) {
 					logFatal(
 						'Deleting watches',
@@ -90,7 +90,7 @@ export default class WatchTable {
 					cRef: cRef,
 					blocker: undefined
 				};
-				const lit: number = literal.toInt();
+				const lit: number = literal.toNumber();
 				if (!this.table.has(lit)) {
 					this.table.set(lit, []);
 				}

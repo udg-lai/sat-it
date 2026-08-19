@@ -6,12 +6,12 @@ export default function logicResolution(c1: Clause, c2: Clause): Clause {
 
 	//The first clause literals are inserted in the map.
 	for (const lit of c1) {
-		resolvedLiterals.set(lit.toInt(), lit);
+		resolvedLiterals.set(lit.toNumber(), lit);
 	}
 
 	let foundComplementary = false;
 	for (const lit of c2) {
-		const litId = lit.toInt();
+		const litId = lit.toNumber();
 		// Only the first complementary is dropped.
 		if (resolvedLiterals.has(litId * -1) && !foundComplementary) {
 			resolvedLiterals.delete(litId * -1);

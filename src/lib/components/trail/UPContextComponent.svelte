@@ -36,7 +36,7 @@
 				const clause: Clause = getClausePool().at(reasonCRef);
 				const visible: Literal[] = clause
 					.getLiterals(true)
-					.filter((lit: Literal) => lit.toInt() !== propagated);
+					.filter((lit: Literal) => lit.toNumber() !== propagated);
 				return makeLeft({
 					literals: visible
 				});

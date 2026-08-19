@@ -12,9 +12,9 @@
 
 	import { makeJust, makeNothing, type Maybe } from '$lib/types/maybe.ts';
 
-	import LiteralNode from './LiteralNodeComponent.svelte';
-	import UIPNode from './UIPNodeComponent.svelte';
-	import ConflictNode from './ConflictNodeComponent.svelte';
+	import PropagationNode from './nodes/PropagationNodeComponent.svelte';
+	import DecisionNode from './nodes/DecisionNodeComponent.svelte';
+	import ConflictNode from './nodes/ConflictNodeComponent.svelte';
 
 	import type { ConflictAnalysis } from '$lib/entities/ConflictAnalysis.svelte.ts';
 	import { obtainConflictAnalysis } from '$lib/states/conflict-analysis.svelte.ts';
@@ -74,21 +74,17 @@
 	 * Select which Svelte component should render a given Cytoscape node.
 	 */
 	function getNodeComponent(nodeId: string): Component {
-		if (graph.isNothing()) {
-			return LiteralNode;
-		}
-
 		const g = graph.fromJust();
 
-		if (nodeId === g.falsumId()) {
+		if (g.falsumId() === nodeId) {
 			return ConflictNode;
 		}
 
-		if (g.uipIds().includes(nodeId)) {
-			return UIPNode;
+		if (g.decisionsIds().has(nodeId)) {
+			return DecisionNode;
 		}
 
-		return LiteralNode;
+		return PropagationNode;
 	}
 
 	/*
@@ -441,12 +437,7 @@
 			getCssVariable(container, '--satisfied-border-color-o')
 		);
 
-		console.debug('Colors', {
-			booleanPropagationColor,
-			inspectedColor,
-			satisfiedBackgroundColor,
-			satisfiedColor
-		});
+		const visitedColor = getCssVariable(container, '--visited-color');
 
 		/*
 		 * --------------------------------------------------------------------
@@ -454,8 +445,7 @@
 		 * --------------------------------------------------------------------
 		 */
 
-		const inspectingBorderWidth = 4;
-		const baseBorderWidth = 2;
+		const inspectingBorderWidth = 2;
 
 		/*
 		 * --------------------------------------------------------------------
@@ -529,7 +519,7 @@
 				 */
 
 				{
-					selector: uipIds.map((id) => `node[id = "${id}"]`).join(', '),
+					selector: Array.from(uipIds.values()).map((id) => `node[id = "${id}"]`).join(', '),
 
 					style: {
 						width: w,
@@ -576,13 +566,13 @@
 					style: {
 						width: 2,
 
-						'line-color': '#64748b',
+						'line-color': visitedColor,
 
-						'target-arrow-color': '#64748b',
+						'target-arrow-color': visitedColor,
 
 						'target-arrow-shape': 'triangle',
 
-						'curve-style': 'bezier'
+						'curve-style': 'round-segments'
 					}
 				},
 

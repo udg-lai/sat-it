@@ -37,8 +37,11 @@ export class ImplicationGraph {
 	_edges: SvelteMap<string, string[]> = new SvelteMap();
 
 	_falsum_id = 'falsum';
-	_uip_ids: string[] = [];
+	_uip_ids = new Set<string>();
 	_fuip_id: string | undefined;
+
+	_propagations_ids = new Set<string>();
+	_decisions_ids = new Set<string>();
 
 	constructor(trail: Trail) {
 		if (!trail.hasConflictiveClause())
@@ -77,8 +80,16 @@ export class ImplicationGraph {
 		return this._falsum_id;
 	}
 
-	uipIds(): string[] {
-		return this._uip_ids;
+	uipIds(): Set<string> {
+		return new Set(this._uip_ids);
+	}
+
+	decisionsIds(): Set<string> {
+		return new Set(this._decisions_ids);
+	}
+
+	propagationsIds(): Set<string> {
+		return new Set(this._propagations_ids);
 	}
 
 	fuipId(): string | undefined {
@@ -87,8 +98,14 @@ export class ImplicationGraph {
 
 	private _makeImplicationGraph(): void {
 		const dl = this._trail.getDL();
-		const lastDecision = this._trail.lastDecision();
-		const propagations = this._trail.getPropagationsAtLevel(dl);
+		const lastDecision: VariableAssignment = this._trail.lastDecision();
+		const propagations: VariableAssignment[] = this._trail.getPropagationsAtLevel(dl);
+
+		// Adding this information to the graph
+		this._decisions_ids.add(lastDecision.toString());
+		for (const propagation of propagations) {
+			this._propagations_ids.add(propagation.toString());
+		}
 
 		const conflictAnalysis: ConflictAnalysis = new ConflictAnalysis(
 			this._trail.getConflictiveClause()!,
@@ -125,7 +142,7 @@ export class ImplicationGraph {
 					);
 				}
 				// Var assignment found in the trail
-				if (assignment.toVar() === variable.toInt()) assignmentFound = true;
+				if (assignment.toVar() === variable.toNumber()) assignmentFound = true;
 				else j--;
 			}
 
@@ -176,7 +193,7 @@ export class ImplicationGraph {
 				.filter((l) => l.toVar() !== implication.toVar());
 
 			for (const literal of others) {
-				const complementary: Lit = Literal.complementary(literal.toInt());
+				const complementary: Lit = Literal.complementary(literal.toNumber());
 
 				if (!this._nodes.has(complementary.toString())) {
 					const variable: Variable = literal.getVariable();
@@ -195,7 +212,7 @@ export class ImplicationGraph {
 							);
 						}
 						// Var assignment found in the trail
-						if (assignment.toVar() === variable.toInt()) assignmentFound = true;
+						if (assignment.toVar() === variable.toNumber()) assignmentFound = true;
 						else j--;
 					}
 
@@ -239,7 +256,7 @@ export class ImplicationGraph {
 		const id: string = firstUIP.toString();
 
 		// Set the UIPs and the first UIP in the graph
-		this._uip_ids.push(id);
+		this._uip_ids.add(id);
 		this._fuip_id = id;
 
 		for (const uipId of this._uip_ids) {

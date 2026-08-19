@@ -152,7 +152,7 @@ export default class Clause implements Comparable<Clause> {
 			const lit: Literal = this.literals[i];
 			if (lit.isTrue()) satisfied = true;
 			else {
-				if (!lit.hasTruthValue()) unassignedLiterals.push(lit.toInt());
+				if (!lit.hasTruthValue()) unassignedLiterals.push(lit.toNumber());
 				i++;
 			}
 		}
@@ -194,7 +194,7 @@ export default class Clause implements Comparable<Clause> {
 	contains(literal: Lit): boolean {
 		let found = false;
 		for (const lit of this.literals) {
-			if (lit.toInt() === literal) {
+			if (lit.toNumber() === literal) {
 				found = true;
 				break;
 			}
@@ -212,8 +212,8 @@ export default class Clause implements Comparable<Clause> {
 	}
 
 	equals(other: Clause): boolean {
-		const c1 = this.literals.map((l) => l.toInt());
-		const c2 = other.literals.map((l) => l.toInt());
+		const c1 = this.literals.map((l) => l.toNumber());
+		const c2 = other.literals.map((l) => l.toNumber());
 		return arraysEqual(c1.sort(), c2.sort());
 	}
 

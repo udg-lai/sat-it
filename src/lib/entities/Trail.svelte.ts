@@ -119,7 +119,7 @@ export class Trail {
 	}
 
 	getVariableDL(varId: Var): number {
-		const varIdx = this.assignments.findIndex((a) => a.getVariable().toInt() === varId);
+		const varIdx = this.assignments.findIndex((a) => a.getVariable().toNumber() === varId);
 		if (varIdx === -1) {
 			logFatal(`Variable ${varId} not found in trail`);
 		}

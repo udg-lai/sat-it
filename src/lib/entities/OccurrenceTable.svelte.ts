@@ -15,7 +15,7 @@ export default class OccurrenceTable {
 		}
 		const cRef: CRef = clause.getCRef();
 		for (const literal of clause.getLiterals()) {
-			const lit: Lit = literal.toInt();
+			const lit: Lit = literal.toNumber();
 			if (!this.table.has(lit)) {
 				this.table.set(lit, new Set<CRef>());
 			}
@@ -32,7 +32,7 @@ export default class OccurrenceTable {
 	removeOccurrences(clause: Clause): void {
 		const cRef: CRef = clause.getCRef();
 		for (const literal of clause.getLiterals()) {
-			const lit: Lit = literal.toInt();
+			const lit: Lit = literal.toNumber();
 			this.table.get(lit)?.delete(cRef);
 			if (this.table.get(lit)?.size === 0) {
 				logFatal(

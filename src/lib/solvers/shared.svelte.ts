@@ -98,8 +98,8 @@ export const unitPropagation = (
 	}
 
 	const propagate: Literal = clause.fstUnassignedLiteral();
-	const varId: Var = Literal.var(propagate.toInt());
-	const truthValue: boolean = !Literal.hatted(propagate.toInt());
+	const varId: Var = Literal.var(propagate.toNumber());
+	const truthValue: boolean = !Literal.hatted(propagate.toNumber());
 
 	doAssignment(varId, truthValue);
 
@@ -116,7 +116,7 @@ export const unitPropagation = (
 
 	increaseNoUnitPropagations();
 
-	return propagate.toInt();
+	return propagate.toNumber();
 };
 
 export const complementaryOccurrences = (
@@ -180,19 +180,19 @@ export const backtracking = (pool: VariablePool): Lit => {
 	if (!variable.hasTruthValue()) {
 		logFatal(
 			'Backtracking Assignment',
-			`Variable ${variable.toInt()} has no assigned value before backtracking`
+			`Variable ${variable.toNumber()} has no assigned value before backtracking`
 		);
 	}
 
 	variable.negate();
-	doAssignment(variable.toInt(), variable.getAssignment());
+	doAssignment(variable.toNumber(), variable.getAssignment());
 
-	variable = pool.get(variable.toInt()).copy();
+	variable = pool.get(variable.toNumber()).copy();
 
 	if (!variable.hasTruthValue()) {
 		logFatal(
 			'Backtracking Assignment',
-			`Variable ${variable.toInt()} has no assigned value after backtracking`
+			`Variable ${variable.toNumber()} has no assigned value after backtracking`
 		);
 	}
 	const dl: number = lastAssignment._dl - 1;
@@ -208,7 +208,7 @@ export const backtracking = (pool: VariablePool): Lit => {
 const disposeUntilDecision = (trail: Trail, variables: VariablePool): VariableAssignment => {
 	let last = trail.pop();
 	while (last && !last.isD()) {
-		variables.unassign(last.getVariable().toInt());
+		variables.unassign(last.getVariable().toNumber());
 		last = trail.pop();
 	}
 	if (!last) {
