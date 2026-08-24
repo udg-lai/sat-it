@@ -1,5 +1,5 @@
 import type { DimacsInstance } from '$lib/instances/dimacs-instance.interface.ts';
-import { getConflictAnalysis } from '$lib/states/conflict-anlysis.svelte.ts';
+import { getConflictAnalysis } from '$lib/states/conflict-analysis.svelte.ts';
 import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 import { logError } from '$lib/states/toasts.svelte.ts';
 import { fromRight, isLeft, makeLeft, type Either } from '$lib/types/either.ts';
@@ -144,11 +144,12 @@ export default class Problem {
 				);
 				return makeJust(trailAssignment);
 			}
-		} else if (getSolverMachine().onConflictState() && getSolverMachine().identify() === 'cdcl') {
-			const currentImplication: Lit = getConflictAnalysis().currentImplication().toLit();
-			return makeJust(currentImplication);
-		} else {
-			return makeNothing();
+		} else if (getSolverMachine().onConflictState()) {
+			if (getSolverMachine().identify() === 'cdcl' || getSolverMachine().identify() === 'twatch') {
+				const currentImplication: Lit = getConflictAnalysis().getPivotingAssignment().toLit();
+				return makeJust(currentImplication);
+			}
 		}
+		return makeNothing();
 	}
 }

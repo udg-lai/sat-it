@@ -1,5 +1,5 @@
 import type Clause from '$lib/entities/Clause.svelte.ts';
-import type { ConflictAnalysis, VirtualResolution } from '$lib/entities/ConflictAnalysis.svelte.ts';
+import type { ConflictAnalysis, Resolution } from '$lib/entities/ConflictAnalysis.svelte.ts';
 import Literal from '$lib/entities/Literal.svelte.ts';
 import ClauseList, {
 	ComplementaryList,
@@ -16,15 +16,16 @@ import {
 	conflictDetectedEventBus,
 	newTrailStackedEventBus,
 	resolutionStepEventBus,
+	fillResolutionGapsEventBus,
 	visitingComplementaryOccEventBus
 } from '$lib/events/events.ts';
-import { getConflictAnalysis } from '$lib/states/conflict-anlysis.svelte.ts';
+import { getConflictAnalysis } from '$lib/states/conflict-analysis.svelte.ts';
 import { getClausePool, getCurrentWatch, getWatchesQueue } from '$lib/states/problem.svelte.ts';
 import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 import { increaseNoConflicts } from '$lib/states/statistics.svelte.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
 import { getLatestTrail } from '$lib/states/trails.svelte.ts';
-import { fromLeft, fromRight, isLeft, makeLeft, makeRight } from '$lib/types/either.ts';
+import { fromLeft, fromRight, makeLeft, makeRight } from '$lib/types/either.ts';
 import { type Maybe } from '$lib/types/maybe.ts';
 import type { CRef, Lit } from '$lib/types/types.ts';
 import { type NonFinalState } from '../StateMachine.svelte.ts';
@@ -144,17 +145,16 @@ export const preConflictAnalysis = () => {
 };
 
 export const conflictAnalysisBlock = (): void => {
-	const virtualResolution: VirtualResolution = virtualResolutionTransition();
+	const resolution: Resolution = resolutionTransition();
+	const latestTrail: Trail = getLatestTrail();
 
-	if (isLeft(virtualResolution)) {
-		// No job done by the resolution procedure, the clause remains the same
-		getLatestTrail().updateResolutionContext(undefined);
-		resolutionStepEventBus.emit(undefined);
-	} else {
-		const { resolvent } = fromRight(virtualResolution);
-		getLatestTrail().updateResolutionContext(resolvent.clause);
-		resolutionStepEventBus.emit(resolvent.clause);
-	}
+	const { resolvent } = resolution;
+
+	latestTrail.updateConflictAnalysisContext(resolvent.clause);
+	const resolutionGap: number = getConflictAnalysis().getResolutionGap();
+	fillResolutionGapsEventBus.emit(resolutionGap);
+
+	resolutionStepEventBus.emit(resolvent.clause);
 
 	const asserting: boolean = assertingClauseInConflictAnalysis();
 
@@ -474,7 +474,7 @@ const assertingClauseInConflictAnalysis = (): boolean => {
 	return isAsserting;
 };
 
-const virtualResolutionTransition = () => {
+const resolutionTransition = () => {
 	const state = getSolverMachine().getActiveState() as NonFinalState<
 		TWATCH_VIRTUAL_RESOLUTION_FUN,
 		TWATCH_VIRTUAL_RESOLUTION_INPUT
@@ -482,9 +482,9 @@ const virtualResolutionTransition = () => {
 	if (state.run === undefined) {
 		logFatal('Function call error', 'There should be a function in the Pick Last Assignment state');
 	}
-	const virtualResolution: VirtualResolution = state.run();
+	const resolution: Resolution = state.run();
 	getSolverMachine().transition('asserting_clause_state');
-	return virtualResolution;
+	return resolution;
 };
 
 const learnConflictClauseTransition = (): CRef => {
@@ -498,14 +498,14 @@ const learnConflictClauseTransition = (): CRef => {
 
 	const conflictAnalysis: ConflictAnalysis = getConflictAnalysis();
 
-	if (!conflictAnalysis.hasAssertiveClause()) {
+	if (!conflictAnalysis.reachedFirstUIP()) {
 		logFatal(
 			'CDCL Conflict Analysis',
 			'The conflict clause should be assertive before learning it'
 		);
 	}
 
-	const resolvent: Clause = conflictAnalysis.getClause();
+	const resolvent: Clause = conflictAnalysis.getConflictiveClause();
 	state.run(resolvent);
 	getSolverMachine().transition('second_highest_dl_state');
 	return resolvent.getCRef();

@@ -15,7 +15,7 @@
 	const watchedLiterals: Set<Lit> = $derived.by(() => {
 		if (getSolverMachine().identify() === 'twatch' && clause.size() >= 2) {
 			const sortedLiterals = clause.getLiterals();
-			return new Set<Lit>([sortedLiterals[0].toInt(), sortedLiterals[1].toInt()]);
+			return new Set<Lit>([sortedLiterals[0].toNumber(), sortedLiterals[1].toNumber()]);
 		} else {
 			return new Set<Lit>();
 		}
@@ -27,7 +27,7 @@
 		<empty-clause> </empty-clause>
 	{:else}
 		{#each clause as lit, i (i)}
-			<LiteralComponent literal={lit} watched={watchedLiterals.has(lit.toInt())} />
+			<LiteralComponent literal={lit} watched={watchedLiterals.has(lit.toNumber())} />
 			{#if i < clause.size() - 1}
 				<MathTexComponent equation={'\\lor'} fontSize={'1rem'} />
 			{/if}

@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { solverCommandEventBus } from '$lib/events/events.ts';
 	import ImageRender from '$lib/components/tools/ImageRender.svelte';
 	import '../style.css';
 
@@ -7,17 +6,12 @@
 		myClass?: string;
 		icon: string;
 		alt: string;
+		onClick?: () => void;
 	}
 
-	let { myClass = '', icon, alt }: Props = $props();
+	let { myClass = '', icon, alt, onClick }: Props = $props();
 </script>
 
-<button
-	class="btn general-btn {myClass}"
-	onclick={() => {
-		solverCommandEventBus.emit('step');
-	}}
-	title="Step"
->
+<button class="btn general-btn {myClass}" onclick={onClick} title="Step">
 	<ImageRender {icon} {alt} />
 </button>

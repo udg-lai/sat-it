@@ -1,6 +1,7 @@
 <script lang="ts">
-	import type { ResolutionContext, Trail } from '$lib/entities/Trail.svelte.ts';
-	import { isLeft, type Either } from '$lib/types/either.ts';
+	import type Clause from '$lib/entities/Clause.svelte.ts';
+	import type { Trail } from '$lib/entities/Trail.svelte.ts';
+	import { fromLeft, isLeft, type Either } from '$lib/types/either.ts';
 	import type { NeverFn } from '$lib/types/types.ts';
 	import { onMount } from 'svelte';
 	import PlainClauseComponent from '../PlainClauseComponent.svelte';
@@ -9,29 +10,22 @@
 		trail: Trail;
 	}
 
-	function computeVisibleContext(
-		context: Either<ResolutionContext, NeverFn>[]
-	): Either<ResolutionContext, NeverFn>[] {
-		const alignedContext: Either<ResolutionContext, NeverFn>[] = context.slice(
-			0,
-			trail.nAssignments()
-		);
-		const conflictiveClause: Either<ResolutionContext, NeverFn> = context[context.length - 1];
+	function computeVisibleContext(context: Either<Clause, NeverFn>[]): Either<Clause, NeverFn>[] {
+		const alignedContext: Either<Clause, NeverFn>[] = context.slice(0, trail.nAssignments());
+		const conflictiveClause: Either<Clause, NeverFn> = context[context.length - 1];
 
-		const visibleContext: Either<ResolutionContext, NeverFn>[] = alignedContext.filter(
-			(_, pos: number) => {
-				const dl: number = trail.dlOfPosition(pos);
-				// Any decision or expanded decision level shows its resolution context
-				// The context of a decision is always shown
-				// Any propagation before any decision is always shown
-				return dl == 0 || trail.isDecision(pos) || trail.isDLExpanded(dl);
-			}
-		);
+		const visibleContext: Either<Clause, NeverFn>[] = alignedContext.filter((_, pos: number) => {
+			const dl: number = trail.dlOfPosition(pos);
+			// Any decision or expanded decision level shows its resolution context
+			// The context of a decision is always shown
+			// Any propagation before any decision is always shown
+			return dl == 0 || trail.isDecision(pos) || trail.isDLExpanded(dl);
+		});
 		return [...visibleContext, conflictiveClause];
 	}
 
-	let context: Either<ResolutionContext, NeverFn>[] = $derived.by(() =>
-		computeVisibleContext(trail.getResolutionContext())
+	let context: Either<Clause, NeverFn>[] = $derived.by(() =>
+		computeVisibleContext(trail.getConflictAnalysisContext())
 	);
 
 	let { trail }: Props = $props();
@@ -54,13 +48,14 @@
 		<resolution-context>
 			{#each context as ctx, index (index)}
 				{#if isLeft(ctx)}
-					{#if ctx.left.clause.isEmpty()}
+					{#if fromLeft(ctx).isEmpty()}
 						<empty-clause></empty-clause>
 					{:else}
 						<PlainClauseComponent
-							literals={ctx.left.clause.getLiterals(true)}
+							literals={fromLeft(ctx).getLiterals(true)}
 							satisfiedClause={false}
 							satisfiedLiterals={false}
+							isLemma={fromLeft(ctx).isLemma()}
 						/>
 					{/if}
 				{:else}

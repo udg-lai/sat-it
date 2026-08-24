@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { asset } from '$app/paths';
 	import type { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
+	import { solverCommandEventBus, visitingComplementaryOccEventBus } from '$lib/events/events.ts';
 	import type { SolverMachine } from '$lib/solvers/SolverMachine.svelte.ts';
 	import type { StateFun, StateInput } from '$lib/solvers/StateMachine.svelte.ts';
 	import { getBaselinePolarity } from '$lib/states/parameters.svelte.ts';
@@ -34,6 +35,11 @@
 	let inAutoMode = $derived(solverMachine.runningOnAutomatic());
 
 	let emptyClauseIcon = asset('/icons/Empty Clause.svg');
+
+	function initStep(): void {
+		solverCommandEventBus.emit('step');
+		visitingComplementaryOccEventBus.emit();
+	}
 </script>
 
 <debugger>
@@ -42,7 +48,7 @@
 			<AutoModeComponent />
 		{:else if enablePreprocess}
 			<init-step>
-				<StepComponent icon={emptyClauseIcon} alt="Check Empty Clause" />
+				<StepComponent icon={emptyClauseIcon} alt="Check Empty Clause" onClick={initStep} />
 			</init-step>
 		{:else}
 			{#if onConflictDetection}

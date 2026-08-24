@@ -30,8 +30,8 @@
 	--temporal-color: #cacaca70;
 	--lemma-color: #fff0191c;
 	--lemma-border-color: #fff0198c;
-	--visited-clause-color: #bdbdbd2b;
-	--inspecting-color: #727272;
+	--inspecting-color: #5a5a5a;
+	--visited-color: #bbb8b8;
 	--assignment-width-large: 40px;
 	--assignment-width-normal: 35px;
 	--assignment-width-small: 30px;

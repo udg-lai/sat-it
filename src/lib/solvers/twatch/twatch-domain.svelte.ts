@@ -1,7 +1,7 @@
 import { backjumping as backjumpingAlg } from '$lib/algorithms/backjumping.ts';
 import Clause from '$lib/entities/Clause.svelte.ts';
 import type ClausePool from '$lib/entities/ClausePool.svelte.ts';
-import { ConflictAnalysis, type VirtualResolution } from '$lib/entities/ConflictAnalysis.svelte.ts';
+import { ConflictAnalysis, type Resolution } from '$lib/entities/ConflictAnalysis.svelte.ts';
 import Literal from '$lib/entities/Literal.svelte.ts';
 import {
 	type VisitingOccurrenceList,
@@ -12,6 +12,7 @@ import type { Trail } from '$lib/entities/Trail.svelte.ts';
 import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
 import type { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
 import type { Watch } from '$lib/entities/WatchTable.svelte.ts';
+import { fillResolutionGapsEventBus } from '$lib/events/events.ts';
 import {
 	atLevelZero,
 	allAssigned as solverAllAssigned,
@@ -20,7 +21,7 @@ import {
 	unitPropagation as solverUnitPropagation,
 	unaryEmptyClauseDetection
 } from '$lib/solvers/shared.svelte.ts';
-import { getConflictAnalysis, setConflictAnalysis } from '$lib/states/conflict-anlysis.svelte.ts';
+import { getConflictAnalysis, setConflictAnalysis } from '$lib/states/conflict-analysis.svelte.ts';
 import {
 	getClausePool,
 	getCurrentWatch,
@@ -314,6 +315,10 @@ export const buildConflictAnalysis: TWATCH_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN
 
 	const cc: Clause = getClausePool().at(cRef).copy();
 	const conflictAnalysis: ConflictAnalysis = new ConflictAnalysis(cc, ld, propagations);
+
+	const resolutionGap: number = conflictAnalysis.getResolutionGap();
+	fillResolutionGapsEventBus.emit(resolutionGap);
+
 	setConflictAnalysis(conflictAnalysis);
 };
 
@@ -321,13 +326,13 @@ export type TWATCH_ASSERTING_CLAUSE_FUN = () => boolean;
 
 export const assertingClause: TWATCH_ASSERTING_CLAUSE_FUN = () => {
 	// Checks if the clause of the conflict analysis is assertive
-	return getConflictAnalysis().hasAssertiveClause();
+	return getConflictAnalysis().reachedFirstUIP();
 };
 
-export type TWATCH_VIRTUAL_RESOLUTION_FUN = () => VirtualResolution;
+export type TWATCH_VIRTUAL_RESOLUTION_FUN = () => Resolution;
 
-export const virtualResolution: TWATCH_VIRTUAL_RESOLUTION_FUN = () => {
-	return getConflictAnalysis().virtualResolution();
+export const resolution: TWATCH_VIRTUAL_RESOLUTION_FUN = () => {
+	return getConflictAnalysis().resolution();
 };
 
 export type TWATCH_LEARN_CONFLICT_CLAUSE_FUN = (lemma: Clause) => number;
@@ -351,7 +356,7 @@ export type TWATCH_SECOND_HIGHEST_DL_FUN = (lemma: Clause) => number;
 
 export const sndHighestDL: TWATCH_SECOND_HIGHEST_DL_FUN = (lemma: Clause) => {
 	const variables: number[] = lemma.getLiterals().map((literal) => {
-		return literal.getVariable().toInt();
+		return literal.getVariable().toNumber();
 	});
 
 	if (variables.length < 1) logFatal('sndHighestDL', 'Dealing with an empty clause');
@@ -417,7 +422,7 @@ export type TWATCH_WATCH_AT_FIRST_POSITION_FUN = (watch: Watch) => boolean;
 export const watchAtFirstPosition: TWATCH_WATCH_AT_FIRST_POSITION_FUN = (watch: Watch) => {
 	const cLits: Literal[] = getClausePool().at(watch.cRef).getLiterals();
 	const currentWatch: VisitingWatchList = getCurrentWatch();
-	return cLits[0].toInt() === fromRight(currentWatch).getLiteral();
+	return cLits[0].toNumber() === fromRight(currentWatch).getLiteral();
 };
 
 export type TWATCH_SWAP_WATCHES_FUN = (watch: Watch) => void;
@@ -493,7 +498,7 @@ export type TWATCH_DELETE_WATCH_FUN = (watch: Watch) => void;
 // In this function, always the 2nd literal will be the one whose watch will be removed
 export const deleteWatch: TWATCH_DELETE_WATCH_FUN = (watch: Watch) => {
 	const secondLiteral: Literal = getClausePool().at(watch.cRef).getLiterals()[1];
-	getWatchTableMapping().deleteWatch(secondLiteral.toInt(), watch);
+	getWatchTableMapping().deleteWatch(secondLiteral.toNumber(), watch);
 };
 
 export type TWATCH_ADD_WATCH_FUN = (watch: Watch) => void;
@@ -501,7 +506,7 @@ export type TWATCH_ADD_WATCH_FUN = (watch: Watch) => void;
 // In this function, always the 2nd literal will be the one whose watch will be added
 export const addWatch: TWATCH_ADD_WATCH_FUN = (watch: Watch) => {
 	const secondLiteral: Literal = getClausePool().at(watch.cRef).getLiterals()[1];
-	getWatchTableMapping().addWatch(secondLiteral.toInt(), watch);
+	getWatchTableMapping().addWatch(secondLiteral.toNumber(), watch);
 };
 
 export type TWATCH_IS_IT_A_WATCH_FUN = (watch: EWC) => boolean;
@@ -513,7 +518,7 @@ export const isItAWatch: TWATCH_IS_IT_A_WATCH_FUN = (watch: EWC) => {
 export type TWATCH_CLAUSE_FALSIFIED_FUN = (cRef: CRef) => boolean;
 
 export const clauseFalsified: TWATCH_CLAUSE_FALSIFIED_FUN = (cRef: CRef) => {
-	return getClausePool().at(cRef).falsified();
+	return getClausePool().at(cRef).violated();
 };
 
 export type TWATCH_CLAUSE_SATISFIED_FUN = (cRef: CRef) => boolean;

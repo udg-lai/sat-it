@@ -31,7 +31,7 @@ import {
 	traversedCurrentOccurrences,
 	unaryEmptyClausesDetection,
 	unitPropagation,
-	virtualResolution,
+	resolution,
 	watchAtFirstPosition,
 	wipeOccurrenceQueue,
 	type TWATCH_ADD_WATCH_FUN,
@@ -314,7 +314,7 @@ const virtual_resolution_state: NonFinalState<
 	TWATCH_VIRTUAL_RESOLUTION_INPUT
 > = {
 	id: twatch_stateName2StateId['virtual_resolution_state'],
-	run: virtualResolution,
+	run: resolution,
 	description: `A single resolution step`,
 	transitions: new Map<TWATCH_VIRTUAL_RESOLUTION_INPUT, number>().set(
 		'asserting_clause_state',

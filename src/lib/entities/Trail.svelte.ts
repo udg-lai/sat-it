@@ -14,16 +14,12 @@ export interface UPContext {
 	propagated: Lit;
 }
 
-export interface ResolutionContext {
-	clause: Clause;
-}
-
 export class Trail {
 	private assignments: VariableAssignment[] = $state([]);
 	private bookmarkDLs: number[] = $state([-1]);
 	private dl: number = 0;
-	// Steps of resolution context of a trail. Empty spaces are represented as NeverFn
-	private resolutionCtx: Either<ResolutionContext, NeverFn>[] = $state([]);
+	// Steps of conflict analysis context of a trail. Empty spaces are represented as NeverFn
+	private conflictAnalysisCtx: Either<Clause, NeverFn>[] = $state([]);
 	// State that indicates if `this` was required to show the context information
 	private expandedContext: boolean = $state(false);
 	private lemma: Clause | undefined = $state(undefined);
@@ -40,7 +36,7 @@ export class Trail {
 		newTrail.dl = this.dl;
 		newTrail.lemma = this.lemma;
 		newTrail.conflictiveClause = this.conflictiveClause;
-		newTrail.resolutionCtx = [...this.resolutionCtx];
+		newTrail.conflictAnalysisCtx = [...this.conflictAnalysisCtx];
 		newTrail.state = this.state;
 		newTrail.expandedDLs = [...this.expandedDLs];
 		return newTrail;
@@ -60,13 +56,20 @@ export class Trail {
 
 	cleanConflict(): void {
 		this.conflictiveClause = undefined;
-		this.resolutionCtx = [];
+		this.conflictAnalysisCtx = [];
 		this.lemma = undefined;
 		this.state = 'running';
 	}
 
 	getDL(): number {
 		return this.dl;
+	}
+
+	at(index: number): VariableAssignment | undefined {
+		if (index < 0 || index >= this.assignments.length) {
+			return undefined;
+		}
+		return this.assignments[index];
 	}
 
 	getAssignments(): VariableAssignment[] {
@@ -116,7 +119,7 @@ export class Trail {
 	}
 
 	getVariableDL(varId: Var): number {
-		const varIdx = this.assignments.findIndex((a) => a.getVariable().toInt() === varId);
+		const varIdx = this.assignments.findIndex((a) => a.getVariable().toNumber() === varId);
 		if (varIdx === -1) {
 			logFatal(`Variable ${varId} not found in trail`);
 		}
@@ -148,14 +151,17 @@ export class Trail {
 		return this.conflictiveClause;
 	}
 
-	getResolutionContext(): Either<ResolutionContext, NeverFn>[] {
-		return this._makeResolutionContext();
+	getConflictAnalysisContext(): Either<Clause, NeverFn>[] {
+		return this._makeConflictAnalysis();
 	}
 
-	updateResolutionContext(clause: Clause | undefined = undefined): void {
-		const ca: Either<ResolutionContext, NeverFn> =
-			clause === undefined ? makeRight(error) : makeLeft({ clause });
-		this.resolutionCtx = [ca, ...this.resolutionCtx];
+	skipResolutions(nResolutions: number): void {
+		for (let i = 0; i < nResolutions; i++) this.updateConflictAnalysisContext(undefined);
+	}
+
+	updateConflictAnalysisContext(clause: Clause | undefined = undefined): void {
+		const ca: Either<Clause, NeverFn> = clause === undefined ? makeRight(error) : makeLeft(clause);
+		this.conflictAnalysisCtx = [ca, ...this.conflictAnalysisCtx];
 	}
 
 	hasPropagations(level: number): boolean {
@@ -342,6 +348,11 @@ export class Trail {
 		return this.expandedContext;
 	}
 
+	findIndexOfAssignment(varAssignment: VariableAssignment): number {
+		const index = this.assignments.findIndex((a) => a.toLit() === varAssignment.toLit());
+		return index;
+	}
+
 	[Symbol.iterator]() {
 		return this.assignments.values();
 	}
@@ -420,7 +431,7 @@ export class Trail {
 
 	private _computeUPContext(): Either<UPContext, NeverFn>[] {
 		return this.assignments.map((a: VariableAssignment) => {
-			if (a.wasPropagated()) {
+			if (a.isImplied()) {
 				const reason = a.getReason() as UnitPropagation;
 				return makeLeft({
 					reasonCRef: reason.cRef,
@@ -432,27 +443,20 @@ export class Trail {
 		});
 	}
 
-	private _makeResolutionContext(): Either<ResolutionContext, NeverFn>[] {
-		const nAssignments: number = this.assignments.length;
-		const gaps: number = Math.max(nAssignments - this.resolutionCtx.length, 0);
-		const ctx: Either<ResolutionContext, NeverFn>[] = [
-			...Array<Either<ResolutionContext, NeverFn>>(gaps).fill(makeRight(error)),
-			...this.resolutionCtx,
-			this._makeConflictAnalysisCtxTail()
-		];
-		return ctx;
-	}
-
-	private _makeConflictAnalysisCtxTail(): Either<ResolutionContext, NeverFn> {
-		if (this.getConflictiveClause() === undefined) {
+	private _makeConflictAnalysis(): Either<Clause, NeverFn>[] {
+		if (!this.hasConflictiveClause()) {
 			logFatal(
-				'Trail',
-				'Can not generate conflict analysis context when there is no conflictive declared'
+				'Conflict analysis context',
+				'Trying to get the conflict analysis context without a conflictive clause'
 			);
 		}
-		return makeLeft({
-			clause: this.getConflictiveClause() as Clause,
-			literal: 0
-		});
+		const nAssignments: number = this.assignments.length;
+		const gaps: number = Math.max(nAssignments - this.conflictAnalysisCtx.length, 0);
+		const ctx: Either<Clause, NeverFn>[] = [
+			...Array<Either<Clause, NeverFn>>(gaps).fill(makeRight(error)),
+			...this.conflictAnalysisCtx,
+			makeLeft(this.conflictiveClause) as Either<Clause, NeverFn>
+		];
+		return ctx;
 	}
 }

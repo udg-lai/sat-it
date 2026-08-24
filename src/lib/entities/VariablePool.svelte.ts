@@ -8,7 +8,7 @@ export interface IVariablePool {
 	nextVariableToAssign(): Maybe<number>;
 	assign(variableId: number, assignment: Assignment): void;
 	unassign(variableId: number): void;
-	getVariable(variable: number): void;
+	get(variable: number): Variable;
 	wipe(): void;
 	allAssigned(): boolean;
 	size(): number;
@@ -49,7 +49,7 @@ export class VariablePool implements IVariablePool {
 		this._assign(varId, assignment);
 	}
 
-	getVariable(variable: number): Variable {
+	get(variable: number): Variable {
 		const idx = this.checkIndex(variable);
 		return this.variables[idx];
 	}
@@ -69,7 +69,7 @@ export class VariablePool implements IVariablePool {
 	private _assignedTruthValue(): Set<number> {
 		const assigned: number[] = this.variables
 			.filter((v) => v.hasTruthValue())
-			.map((v) => v.toInt());
+			.map((v) => v.toNumber());
 		return new Set([...assigned]);
 	}
 
@@ -106,7 +106,7 @@ export class VariablePool implements IVariablePool {
 				this.nvPointer++;
 			}
 		}
-		return nextFound ? makeJust(this.variables[this.nvPointer].toInt()) : makeNothing();
+		return nextFound ? makeJust(this.variables[this.nvPointer].toNumber()) : makeNothing();
 	}
 
 	private checkIndex(variableId: number): number {

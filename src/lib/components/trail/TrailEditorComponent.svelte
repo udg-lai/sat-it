@@ -234,6 +234,10 @@
 	}
 
 	function openConflictiveContext(): void {
+		if (trails.length <= 0) {
+			logFatal('openConflictiveContext', 'No trails available upon conflict detection.');
+		}
+
 		// When a conflict is detected, open the context of the last trail that has the conflictive clause
 		for (let i = 0; i < trails.length - 1; i++) {
 			const trail = trails[i];

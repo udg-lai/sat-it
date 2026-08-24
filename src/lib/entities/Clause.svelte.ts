@@ -1,6 +1,7 @@
-import { assertiveAlgorithm } from '$lib/algorithms/assertive.ts';
+import { getUIPAlgorithm as getUIPAlgorithm } from '$lib/algorithms/uip.ts';
 import logicResolution from '$lib/algorithms/resolution.ts';
 import { logFatal } from '$lib/states/toasts.svelte.ts';
+import type { Maybe } from '$lib/types/maybe.ts';
 import type { CRef, Lit } from '$lib/types/types.ts';
 import type { Comparable } from '../interfaces/Comparable.ts';
 import type { Claim } from '../parsers/dimacs.ts';
@@ -94,6 +95,10 @@ export default class Clause implements Comparable<Clause> {
 		});
 	}
 
+	static falsum(): Clause {
+		return new Clause([], { comments: ['Falsum'], cRef: undefined, learned: false });
+	}
+
 	getCRef(): CRef {
 		// cRef can be undefined for temporal clauses, check if it is a temporal clause before using this method
 		if (this.isTemporal()) {
@@ -118,8 +123,8 @@ export default class Clause implements Comparable<Clause> {
 		return this.cRef === undefined;
 	}
 
-	isAssertive(literals: Lit[]): boolean {
-		return assertiveAlgorithm(this, literals);
+	getUIP(assignment: Lit[]): Maybe<Lit> {
+		return getUIPAlgorithm(this, assignment);
 	}
 
 	fstUnassignedLiteral(): Literal {
@@ -147,7 +152,7 @@ export default class Clause implements Comparable<Clause> {
 			const lit: Literal = this.literals[i];
 			if (lit.isTrue()) satisfied = true;
 			else {
-				if (!lit.hasTruthValue()) unassignedLiterals.push(lit.toInt());
+				if (!lit.hasTruthValue()) unassignedLiterals.push(lit.toNumber());
 				i++;
 			}
 		}
@@ -164,7 +169,7 @@ export default class Clause implements Comparable<Clause> {
 		return this.eval().type === 'SAT';
 	}
 
-	falsified(): boolean {
+	violated(): boolean {
 		return this.isEmpty() || this.eval().type === 'UnSAT';
 	}
 
@@ -189,7 +194,7 @@ export default class Clause implements Comparable<Clause> {
 	contains(literal: Lit): boolean {
 		let found = false;
 		for (const lit of this.literals) {
-			if (lit.toInt() === literal) {
+			if (lit.toNumber() === literal) {
 				found = true;
 				break;
 			}
@@ -207,8 +212,8 @@ export default class Clause implements Comparable<Clause> {
 	}
 
 	equals(other: Clause): boolean {
-		const c1 = this.literals.map((l) => l.toInt());
-		const c2 = other.literals.map((l) => l.toInt());
+		const c1 = this.literals.map((l) => l.toNumber());
+		const c2 = other.literals.map((l) => l.toNumber());
 		return arraysEqual(c1.sort(), c2.sort());
 	}
 
