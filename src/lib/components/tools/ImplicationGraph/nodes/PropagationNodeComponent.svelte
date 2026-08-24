@@ -6,10 +6,12 @@
 
 	let {
 		id,
-		selected
+		selected,
+		pivoting = false
 	}: {
 		id: string;
 		selected: boolean;
+		pivoting: boolean;
 	} = $props();
 
 	let chrome: boolean = $derived(onChrome());
@@ -17,7 +19,7 @@
 	let literal: Lit = $derived(Number(id));
 </script>
 
-<div class="g-propagation" class:selected>
+<div class="g-propagation" class:selected class:pivoting>
 	<div class="literal-node {chrome ? 'pad-chrome' : 'pad-others'}">
 		<MathTexComponent equation={Literal.toTeX(literal)} />
 	</div>
@@ -53,12 +55,25 @@
 		}
 
 		50% {
-			scale: 1.2;
+			scale: 1.5;
 		}
 	}
 
 	.g-propagation.selected .literal-node {
 		color: var(--satisfied-color);
+	}
+
+	.g-propagation.pivoting .literal-node::after {
+		content: '';
+		position: absolute;
+		width: 100%;
+		height: 100%;
+		border-radius: 10%;
+		background-color: var(--satisfied-border-color-o);
+		opacity: 0.5;
+		pointer-events: none;
+
+		animation: pulse 1s infinite;
 	}
 
 	.g-propagation {

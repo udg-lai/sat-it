@@ -65,6 +65,7 @@
 		props: {
 			id: string;
 			selected: boolean;
+			pivoting: boolean;
 		};
 	};
 
@@ -106,7 +107,8 @@
 
 				props: {
 					id: node.id(),
-					selected: node.selected()
+					selected: node.selected(),
+					pivoting: node.id() === inspectingNode
 				}
 			};
 		});
@@ -883,6 +885,11 @@
 				<div class="node-component" style={`left: ${node.x}px; top: ${node.y}px;`}>
 					<Component {...node.props} />
 				</div>
+
+				<!-- The cut line at the right of the node -->
+				{#if node.id === inspectingNode}
+					<div class="cut-line" style={`left: ${node.x}px;`}></div>
+				{/if}
 			{/each}
 		</div>
 	</div>
@@ -1018,5 +1025,21 @@
 		border-left: 1px solid #e2e8f0;
 
 		font-size: 13px;
+	}
+
+	.cut-line {
+		position: absolute;
+
+		top: 0;
+		bottom: 0;
+
+		width: 0;
+
+		border-left: 1px dashed var(--visited-color);
+
+		transform: translateX(20px);
+
+		pointer-events: none;
+		z-index: 10;
 	}
 </style>
