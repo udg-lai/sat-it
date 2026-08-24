@@ -2,6 +2,7 @@
 	import {
 		conflictDetectedEventBus,
 		openSettingsViewEventBus,
+		toolPanelResizedEventBus,
 		visitingComplementaryOccEventBus
 	} from '$lib/events/events.ts';
 	import { logFatal } from '$lib/states/toasts.svelte.ts';
@@ -32,6 +33,10 @@
 	let tools: Tool[] = $state([]);
 	let lastActiveViewIndex: number = $state(0);
 	let closed: boolean = $derived(tools.every((v) => v.active === false));
+
+	const windowWidth = $state(window.innerWidth);
+	const maxWidthTools = $derived(windowWidth / 3);
+	const minWidthTools = $derived(windowWidth / 7);
 
 	onMount(() => {
 		tools = [
@@ -66,7 +71,7 @@
 				if (t.active) {
 					toolsViewRef.style.width = '0px';
 				} else {
-					toolsViewRef.style.width = 'var(--max-width-tools)';
+					toolsViewRef.style.width = maxWidthTools + 'px';
 				}
 				t.active = !t.active;
 			} else {
@@ -81,7 +86,7 @@
 		if (alreadyActive) return;
 		tools = tools.map((v) => ({ ...v, active: false }));
 		tools[1].active = true;
-		toolsViewRef.style.width = 'var(--max-width-tools)';
+		toolsViewRef.style.width = maxWidthTools + 'px';
 		tools = [...tools];
 	}
 
@@ -126,7 +131,7 @@
 		function onMouseMove(event: MouseEvent) {
 			if (isResizing) {
 				const barWidth = 66;
-				const minWidthTool = 300;
+				const minWidthTool = minWidthTools;
 				let newX = event.clientX;
 				if (newX < barWidth + minWidthTool / 2) {
 					closeAllViews();
@@ -149,6 +154,9 @@
 			document.removeEventListener('mouseup', onMouseUp);
 			disableResizeCursor();
 			enableSelection();
+
+			console.debug('ToolsComponent: toolPanelResizedEventBus emitted');
+			toolPanelResizedEventBus.emit();
 		}
 
 		htmlElement.addEventListener('mousedown', onMouseDown);
@@ -175,12 +183,17 @@
 		for (const t of tools) {
 			if (t.name === toolName) {
 				t.active = true;
-				toolsViewRef.style.width = 'var(--max-width-tools)';
+				toolsViewRef.style.width = maxWidthTools + 'px';
 			} else {
 				t.active = false;
 			}
 		}
 		tools = [...tools];
+	}
+
+	function useHalfWidthResize(): void {
+		toolsViewRef.style.width = `${maxWidthTools}px`;
+		toolPanelResizedEventBus.emit();
 	}
 
 	onMount(() => {
@@ -219,6 +232,7 @@
 			bind:this={toolsViewRef}
 			class="tool-content scrollable-content"
 			class:hide-tools-view={closed}
+			style="--tools-width: {maxWidthTools}px"
 		>
 			{#each tools as { name, active } (name)}
 				{#if active}
@@ -226,7 +240,7 @@
 						{#if name === 'clause-database'}
 							<SolutionSummaryComponent />
 						{:else if name === 'ow-list'}
-							{@render snippetOccurrenceList()}
+							<OccurrenceListComponent />
 						{:else if name === 'implication-graph'}
 							<ImplicationGraphComponent />
 						{:else}
@@ -238,6 +252,7 @@
 		</div>
 		<div
 			use:resizeHandle
+			on:dblclick={useHalfWidthResize}
 			class="draggable-bar vertical-separator cursor-col-resize"
 			class:resizing={isResizing}
 		></div>
@@ -273,10 +288,6 @@
 
 {#snippet settings()}
 	<Button onClick={onOpenViewMoreEvent} icon={ArrowUpFromBracketOutline} title="Settings" />
-{/snippet}
-
-{#snippet snippetOccurrenceList()}
-	<OccurrenceListComponent />
 {/snippet}
 
 {#snippet notImplementedYet(what?: string)}

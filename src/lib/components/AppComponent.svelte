@@ -250,7 +250,7 @@
 		subs.push(newTrailStackedEventBus.subscribe(onTrailStacked));
 		// undo the last decision that was done
 		subs.push(ctrlZEventBus.subscribe(singleUndo));
-
+		// update the trails when some resolutions have been skipped
 		subs.push(fillResolutionGapsEventBus.subscribe(skippedResolutions));
 
 		return () => {

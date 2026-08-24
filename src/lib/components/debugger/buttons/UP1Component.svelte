@@ -1,5 +1,9 @@
 <script lang="ts">
-	import { solverCommandEventBus, expandEditorTrailsEventBus } from '$lib/events/events.ts';
+	import {
+		solverCommandEventBus,
+		expandEditorTrailsEventBus,
+		visitingComplementaryOccEventBus
+	} from '$lib/events/events.ts';
 	import '../style.css';
 	import { getSolverMachine } from '$lib/states/solver-machine.svelte.ts';
 	import ImageRender from '$lib/components/tools/ImageRender.svelte';
@@ -9,6 +13,7 @@
 
 	function finishConflictDetection(): void {
 		getSolverMachine().disableStepDelay();
+		visitingComplementaryOccEventBus.emit();
 		solverCommandEventBus.emit('up1');
 		expandEditorTrailsEventBus.emit(true);
 	}

@@ -152,8 +152,8 @@ const afterComplementaryBlock = (occurrenceList: VisitingOccurrenceList): void =
 	if (!thereAreOccurrences) {
 		allVariablesAssignedTransition();
 	}
-	// This is for showing the up-1 and up-n view
-	if (!getSolverMachine().runningOnAutomatic()) visitingComplementaryOccEventBus.emit();
+	//	// This is for showing the up-1 and up-n view
+	//	if (!getSolverMachine().runningOnAutomatic()) visitingComplementaryOccEventBus.emit();
 };
 
 export const conflictDetectionBlock = (): void => {

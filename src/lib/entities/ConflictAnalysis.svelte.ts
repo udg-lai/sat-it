@@ -106,7 +106,7 @@ export class ConflictAnalysis {
 		return this.conflictiveClause;
 	}
 
-	currentImplication(): VariableAssignment {
+	getPivotingAssignment(): VariableAssignment {
 		if (this.pointer < 0) {
 			logError(
 				'Conflict Analysis Error',
@@ -158,7 +158,7 @@ export class ConflictAnalysis {
 			);
 		}
 
-		const propagation: VariableAssignment = this.currentImplication();
+		const propagation: VariableAssignment = this.getPivotingAssignment();
 		const complementary: Lit = Literal.complementary(propagation.toLit());
 
 		if (!this.conflictiveClause.contains(complementary)) {

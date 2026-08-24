@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { learnClauses } from './../../../states/problem.svelte.ts';
 	import { onMount, type Component } from 'svelte';
 	import cytoscape, { type Core, type ElementDefinition, type NodeSingular } from 'cytoscape';
 	import dagre from 'cytoscape-dagre';
@@ -19,6 +20,9 @@
 	import type { ConflictAnalysis } from '$lib/entities/ConflictAnalysis.svelte.ts';
 	import { obtainConflictAnalysis } from '$lib/states/conflict-analysis.svelte.ts';
 	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
+	import type Clause from '$lib/entities/Clause.svelte.ts';
+	import Literal from '$lib/entities/Literal.svelte.ts';
+	import { toolPanelResizedEventBus } from '$lib/events/events.ts';
 
 	/*
 	 * Svelte components that will be rendered inside the Cytoscape nodes.
@@ -35,18 +39,18 @@
 
 	let graph: Maybe<ImplicationGraph> = $derived(getImplicationGraph());
 
-	let ca: Maybe<VariableAssignment> = $derived.by(() => {
+	let conflictAnalysis: Maybe<ConflictAnalysis> = $derived(obtainConflictAnalysis());
+
+	let pivotingVariableAssignment: Maybe<VariableAssignment> = $derived.by(() => {
 		if (graph.isNothing()) return makeNothing();
 
-		const ca: Maybe<ConflictAnalysis> = obtainConflictAnalysis();
+		if (conflictAnalysis.isNothing()) return makeNothing();
 
-		if (ca.isNothing()) return makeNothing();
+		const ca: ConflictAnalysis = conflictAnalysis.fromJust();
 
-		const conflictAnalysis: ConflictAnalysis = ca.fromJust();
+		if (ca.finished()) return makeNothing();
 
-		if (conflictAnalysis.finished()) return makeNothing();
-
-		return makeJust(conflictAnalysis.currentImplication());
+		return makeJust(ca.getPivotingAssignment());
 	});
 
 	/*
@@ -163,6 +167,53 @@
 		const incomingNodes = node.incomers('node');
 		for (const incomingNode of incomingNodes) {
 			incomingNode.select();
+		}
+
+		/*
+		 * Update Svelte components.
+		 */
+		updateOverlayPositions();
+	}
+
+	function finishConflictAnalysis() {
+		if (graph.isNothing()) return;
+
+		if (conflictAnalysis.isNothing()) return;
+
+		inspectingNode = undefined;
+
+		/*
+		 * Clear previous highlighting.
+		 */
+		cy.elements().removeClass('highlighted');
+
+		/*
+		 * Clear previous selection.
+		 */
+		cy.nodes().unselect();
+
+		/*
+		 * Get nodes.
+		 */
+
+		const g: ImplicationGraph = graph.fromJust();
+		const ca: ConflictAnalysis = conflictAnalysis.fromJust();
+		const learnClause: Clause = ca.getConflictiveClause();
+
+		for (const literal of learnClause) {
+			const nodeId = Literal.complementary(literal.toNumber()).toString();
+
+			const node = cy.getElementById(nodeId);
+
+			if (node.empty()) {
+				console.warn(`Node ${nodeId} not found in Cytoscape`);
+				continue;
+			}
+
+			/*
+			 * Select Cytoscape node.
+			 */
+			node.select();
 		}
 
 		/*
@@ -666,9 +717,6 @@
 
 		cy.on('tap', 'node', (event) => {
 			const node: NodeSingular = event.target;
-
-			console.debug('Node', node);
-
 			selectNode(node.id());
 		});
 
@@ -807,12 +855,22 @@
 	onMount(() => {
 		createGraph();
 
+		const sub = toolPanelResizedEventBus.subscribe(() => {
+			console.debug('ImplicationGraphComponent: toolPanelResizedEventBus received');
+			if (graph.isNothing()) return;
+			createGraph();
+			fitGraph();
+		});
+
 		return () => {
 			cy?.destroy();
 
 			cy = undefined;
 
 			overlayNodes = [];
+
+			// Subscriptions
+			sub();
 		};
 	});
 
@@ -833,10 +891,13 @@
 			return;
 		}
 
-		if (ca.isJust()) {
-			inspectingNode = ca.fromJust().toString();
-
+		if (pivotingVariableAssignment.isJust()) {
+			inspectingNode = pivotingVariableAssignment.fromJust().toString();
 			selectNode(inspectingNode);
+		}
+
+		if (conflictAnalysis.isJust() && conflictAnalysis.fromJust().finished()) {
+			finishConflictAnalysis();
 		}
 	});
 </script>

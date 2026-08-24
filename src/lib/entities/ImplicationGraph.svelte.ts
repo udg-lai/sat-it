@@ -175,7 +175,7 @@ export class ImplicationGraph {
 		}
 
 		while (!conflictAnalysis.finished()) {
-			const implication: VariableAssignment = conflictAnalysis.currentImplication();
+			const implication: VariableAssignment = conflictAnalysis.getPivotingAssignment();
 			if (!implication.isImplied()) {
 				logFatal(
 					'ImplicationGraph Error',
@@ -263,9 +263,6 @@ export class ImplicationGraph {
 			this._nodes.get(uipId)!.assignment!.uip = true;
 		}
 		this._nodes.get(this._fuip_id)!.assignment!.fuip = true;
-
-		console.log($state.snapshot(this._nodes));
-		console.log($state.snapshot(this._edges));
 	}
 }
 

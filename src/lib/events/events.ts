@@ -97,3 +97,6 @@ export const decisionLevelToggledEventBus = createEventBus<void>();
 
 // Number of skipped steps (resolutions) during conflict analysis
 export const fillResolutionGapsEventBus = createEventBus<number>();
+
+// The tool panel has been resized
+export const toolPanelResizedEventBus = createEventBus<void>();

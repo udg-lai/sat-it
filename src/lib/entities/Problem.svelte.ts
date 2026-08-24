@@ -146,7 +146,7 @@ export default class Problem {
 			}
 		} else if (getSolverMachine().onConflictState()) {
 			if (getSolverMachine().identify() === 'cdcl' || getSolverMachine().identify() === 'twatch') {
-				const currentImplication: Lit = getConflictAnalysis().currentImplication().toLit();
+				const currentImplication: Lit = getConflictAnalysis().getPivotingAssignment().toLit();
 				return makeJust(currentImplication);
 			}
 		}
