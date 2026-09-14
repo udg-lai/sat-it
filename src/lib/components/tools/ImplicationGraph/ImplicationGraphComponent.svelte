@@ -871,7 +871,14 @@
 		if (!cy) return;
 
 		cy.layout({
-			name: 'implication-graph'
+			name: 'dagre',
+			rankDir: 'LR',
+			nodeSep: 60,
+			rankSep: 100,
+			edgeSep: 30,
+			padding: 40,
+			animate: true,
+			animationDuration: 300
 		}).run();
 
 		setTimeout(() => {
@@ -1104,7 +1111,7 @@
 	.toolbar {
 		position: absolute;
 
-		z-index: 20;
+		z-index: 10;
 
 		top: 12px;
 		left: 12px;
@@ -1124,7 +1131,6 @@
 		border-style: solid;
 		border-width: 1px;
 		border-radius: 6px;
-
 	}
 
 	button {
@@ -1178,6 +1184,22 @@
 		transform: translateX(20px);
 
 		pointer-events: none;
-		z-index: 10;
+		z-index: 1;
+	}
+
+	.dl-line {
+		position: absolute;
+
+		top: 0;
+		bottom: 0;
+
+		width: 0;
+
+		border-left: 1px dashed rgba(0, 0, 0, 0.1);
+
+		transform: translateX(-20px);
+
+		pointer-events: none;
+		z-index: 1;
 	}
 </style>
