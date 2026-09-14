@@ -53,7 +53,7 @@
 		return makeJust(ca.getPivotingAssignment());
 	});
 
-    let cuttingNodes: string[] = $derived.by(() => 
+    let cuttingNodes: string[] = $derived.by(() =>
         {
             if (graph.isNothing()) return [];
             if (conflictAnalysis.isNothing()) return [];
@@ -130,41 +130,78 @@
 	}
 
 
-    function updateCuttingNodes(nodeIds: string[]) {
-        console.log(nodeIds)
-
-        if (nodeIds.length == 0) return;
-
-		if (!cy) return;
-
-        // Remove edges class
-		cy.elements().removeClass('cut');
-
-        for (const nodeId of nodeIds)
-        {
-            console.log(nodeId)
-            const node = cy.getElementById(nodeId);
-            if (node.empty()) {
-                console.warn(`Node ${nodeId} not found in Cytoscape`);
-                return;
-            }
-
-            const outgoingEdges = node.outgoers('edge');
-            outgoingEdges.addClass('cut');
-        }
-    }
-
 	/*
 	 * ------------------------------------------------------------------------
 	 * Selection
 	 * ------------------------------------------------------------------------
 	 */
 
-    function updateCut(nodeId: string) {
+    function updateCut(inspectingNode: string) {
 		if (!cy) return;
 
-		const node = cy.getElementById(nodeId);
+        const highlightCuttingNodes = (cutNode, nodeIds: string[])  => {
+            if (nodeIds.length == 0) return;
+			if (cutNode == undefined || cutNode.length == 0) return;
+
+			console.log(cutNode)
+
+            if (!cy) return;
+
+            cy.elements().removeClass('cut');
+
+            const cutData = cutNode.data()
+            const cutDL = cutData['dl']
+            const cutIndex = cutData['indexAtDL']
+
+            for (const nodeId of nodeIds)
+            {
+				const node = cy.getElementById(nodeId);
+                if (node.empty()) {
+                    console.warn(`Node ${nodeId} not found in Cytoscape`);
+                    return;
+                }
+                const outgoingEdges = node.outgoers('edge')
+
+                const filterEdges = outgoingEdges
+                    .filter(edge =>
+                        {
+                            const target = edge.target();
+                            const data = target.data();
+                            const targetID = data['id'];
+                            const targetDL = data['dl'];
+                            const targetIndex = data['indexAtDL'];
+
+//							let sameID = false;
+							let targetIsFalsum = false;
+
+							let targetIsAtLeastSameDL = false;
+							let targetIndexIsBeyond = false
+
+							if (targetID == 'falsum')
+								targetIsFalsum = true
+
+							if (cutDL <= targetDL)
+								targetIsAtLeastSameDL = true
+							if (targetIndex > cutIndex)
+								targetIndexIsBeyond = true
+
+							return targetIsFalsum || (targetIsAtLeastSameDL && targetIndexIsBeyond);
+                        }
+                    )
+                filterEdges.addClass('cut');
+            }
+        }
+
+
+		const node = cy.getElementById(inspectingNode);
         node.select();
+
+        if (cuttingNodes.length > 0)
+        {
+            highlightCuttingNodes(node, cuttingNodes)
+        }
+
+
         updateOverlayPositions();
 
     }
@@ -471,7 +508,9 @@
 				group: 'nodes',
 
 				data: {
-					id: nodeId
+					id: nodeId,
+                    dl: graph.getNode(nodeId).dl,
+                    indexAtDL: graph.getNode(nodeId)?.assignment?.index
 				},
 
 				position: positions.get(nodeId)
@@ -955,11 +994,10 @@
             updateCut(inspectingNode);
 		}
 
+
 		if (conflictAnalysis.isJust() && conflictAnalysis.fromJust().finished()) {
 			finishConflictAnalysis();
 		}
-
-        if (cuttingNodes.length > 0) updateCuttingNodes(cuttingNodes)
 	});
 </script>
 
