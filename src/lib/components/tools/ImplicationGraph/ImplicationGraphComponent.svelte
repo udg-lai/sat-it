@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { learnClauses } from './../../../states/problem.svelte.ts';
 	import { onMount, type Component } from 'svelte';
 	import cytoscape, { type Core, type ElementDefinition, type NodeSingular } from 'cytoscape';
 	import dagre from 'cytoscape-dagre';
@@ -22,7 +21,8 @@
 	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
 	import type Clause from '$lib/entities/Clause.svelte.ts';
 	import Literal from '$lib/entities/Literal.svelte.ts';
-	import { toolPanelResizedEventBus } from '$lib/events/events.ts';
+	import { toolPanelResizedEventBus, updatedImplicationGraph } from '$lib/events/events.ts';
+	import { logFatal } from '$lib/states/toasts.svelte.ts';
 
 	/*
 	 * Svelte components that will be rendered inside the Cytoscape nodes.
@@ -179,6 +179,10 @@
 		if (graph.isNothing()) return;
 
 		if (conflictAnalysis.isNothing()) return;
+
+		if (!cy) {
+			logFatal('Implication Graph Error', 'There should be an implication graph created');
+		}
 
 		inspectingNode = undefined;
 
@@ -465,6 +469,7 @@
 	 */
 
 	function createGraph() {
+		console.log('Entered the ');
 		if (!container) return;
 
 		if (graph.isNothing()) return;
@@ -792,21 +797,7 @@
 		if (!cy) return;
 
 		cy.layout({
-			name: 'dagre',
-
-			rankDir: 'LR',
-
-			nodeSep: 60,
-
-			rankSep: 100,
-
-			edgeSep: 30,
-
-			padding: 40,
-
-			animate: true,
-
-			animationDuration: 300
+			name: 'implication-graph'
 		}).run();
 
 		setTimeout(() => {
@@ -852,25 +843,30 @@
 	 * ------------------------------------------------------------------------
 	 */
 
+	function resizeGraph() {
+		console.debug('ImplicationGraphComponent: toolPanelResizedEventBus received');
+		if (graph.isNothing()) return;
+		createGraph();
+		fitGraph();
+	}
+
 	onMount(() => {
+		// When the view is created, a graph should be created as well
 		createGraph();
 
-		const sub = toolPanelResizedEventBus.subscribe(() => {
-			console.debug('ImplicationGraphComponent: toolPanelResizedEventBus received');
-			if (graph.isNothing()) return;
-			createGraph();
-			fitGraph();
-		});
+		const subs: (() => void)[] = [];
+		//If, for some reason the view is opened and a conflict is found, create a new graph
+		// COMMENT: I think that in the future this should be changed into creating the graph of the opened ca view.
+		subs.push(updatedImplicationGraph.subscribe(createGraph));
+		subs.push(toolPanelResizedEventBus.subscribe(resizeGraph));
 
 		return () => {
 			cy?.destroy();
-
 			cy = undefined;
-
 			overlayNodes = [];
 
-			// Subscriptions
-			sub();
+			// Unsubscribe
+			subs.forEach((s) => s());
 		};
 	});
 
