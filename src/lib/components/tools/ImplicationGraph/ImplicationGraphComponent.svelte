@@ -1104,6 +1104,8 @@
 	.toolbar {
 		position: absolute;
 
+		z-index: 20;
+
 		top: 12px;
 		left: 12px;
 
@@ -1115,15 +1117,14 @@
 
 		padding: 8px;
 
+		background: var(--main-bg-color);
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
 		border-color: var(--button-border-color);
 		border-style: solid;
 		border-width: 1px;
 		border-radius: 6px;
 
-		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-		background-color: var(--button-color);
-
-		z-index: 1;
 	}
 
 	button {
