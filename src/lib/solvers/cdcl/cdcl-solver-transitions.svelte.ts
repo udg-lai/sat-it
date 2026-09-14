@@ -9,10 +9,9 @@ import type { Trail } from '$lib/entities/Trail.svelte.ts';
 import {
 	conflictAnalysisFinishedEventBus,
 	conflictDetectedEventBus,
-	newTrailStackedEventBus,
-	resolutionStepEventBus,
 	fillResolutionGapsEventBus,
-	visitingComplementaryOccEventBus
+	newTrailStackedEventBus,
+	resolutionStepEventBus
 } from '$lib/events/events.ts';
 import { getConflictAnalysis } from '$lib/states/conflict-analysis.svelte.ts';
 import {

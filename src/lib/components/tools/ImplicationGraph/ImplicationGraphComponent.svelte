@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { learnClauses } from './../../../states/problem.svelte.ts';
-	import { onMount, type Component } from 'svelte';
 	import cytoscape, { type Core, type ElementDefinition, type NodeSingular } from 'cytoscape';
 	import dagre from 'cytoscape-dagre';
+	import { onMount, type Component } from 'svelte';
 
 	import {
 		getImplicationGraph,
+		type IG_Node,
 		type ImplicationGraph
 	} from '$lib/entities/ImplicationGraph.svelte.ts';
 
@@ -13,16 +13,15 @@
 
 	import { makeJust, makeNothing, type Maybe } from '$lib/types/maybe.ts';
 
-	import PropagationNode from './nodes/PropagationNodeComponent.svelte';
-	import DecisionNode from './nodes/DecisionNodeComponent.svelte';
 	import ConflictNode from './nodes/ConflictNodeComponent.svelte';
+	import DecisionNode from './nodes/DecisionNodeComponent.svelte';
+	import PropagationNode from './nodes/PropagationNodeComponent.svelte';
 
 	import type { ConflictAnalysis } from '$lib/entities/ConflictAnalysis.svelte.ts';
-	import { obtainConflictAnalysis } from '$lib/states/conflict-analysis.svelte.ts';
-	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
-	import type Clause from '$lib/entities/Clause.svelte.ts';
 	import Literal from '$lib/entities/Literal.svelte.ts';
+	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
 	import { toolPanelResizedEventBus } from '$lib/events/events.ts';
+	import { obtainConflictAnalysis } from '$lib/states/conflict-analysis.svelte.ts';
 
 	/*
 	 * Svelte components that will be rendered inside the Cytoscape nodes.
@@ -35,7 +34,7 @@
 	let container: HTMLDivElement;
 	let cy: Core | undefined;
 
-	let inspectingNode: string | undefined = $state(undefined);
+	let visitingNodeId: string | undefined = $state(undefined);
 
 	let graph: Maybe<ImplicationGraph> = $derived(getImplicationGraph());
 
@@ -52,17 +51,6 @@
 
 		return makeJust(ca.getPivotingAssignment());
 	});
-
-    let cuttingNodes: string[] = $derived.by(() =>
-        {
-            if (graph.isNothing()) return [];
-            if (conflictAnalysis.isNothing()) return [];
-
-            const conflictiveClause: Clause = conflictAnalysis.fromJust().getConflictiveClause()
-
-            return conflictiveClause.getLiterals().map(lit => Literal.complementary(lit).toString())
-        }
-    )
 
 	/*
 	 * ------------------------------------------------------------------------
@@ -123,12 +111,11 @@
 				props: {
 					id: node.id(),
 					selected: node.selected(),
-					pivoting: node.id() === inspectingNode
+					pivoting: node.id() === visitingNodeId
 				}
 			};
 		});
 	}
-
 
 	/*
 	 * ------------------------------------------------------------------------
@@ -136,80 +123,98 @@
 	 * ------------------------------------------------------------------------
 	 */
 
-    function updateCut(inspectingNode: string) {
+	function visitNode(visitingNodeID: string) {
 		if (!cy) return;
 
-        const highlightCuttingNodes = (cutNode, nodeIds: string[])  => {
-            if (nodeIds.length == 0) return;
-			if (cutNode == undefined || cutNode.length == 0) return;
+		if (graph.isNothing()) return;
 
-			console.log(cutNode)
+		graph.fromJust().visit(visitingNodeID);
 
-            if (!cy) return;
+		const highlighCrossingEdges = (visitingNode, sourceNodesIDs: string[]) => {
+			if (visitingNode == undefined || visitingNode.empty()) {
+				console.warn(`Visiting node ${visitingNodeID} not found in Cytoscape`);
+				return;
+			}
+			if (sourceNodesIDs.length == 0) return;
 
-            cy.elements().removeClass('cut');
+			if (!cy) return;
 
-            const cutData = cutNode.data()
-            const cutDL = cutData['dl']
-            const cutIndex = cutData['indexAtDL']
+			const cutEdges = cy.edges('.crossing-cut');
 
-            for (const nodeId of nodeIds)
-            {
+			for (let i = 0; i < cutEdges.length; i++) {
+				const edge = cutEdges[i];
+				const source = edge.source();
+				const sourceID = source.data('id');
+
+				// Skip the visited nodes
+				if (graph.fromJust().getNode(sourceID).visited) continue;
+
+				edge.removeClass('crossing-cut');
+			}
+
+			const visitingNodeId = visitingNode.data('id');
+			const visitingDL = graph.fromJust().getNode(visitingNodeId).dl;
+			const visitingIndex =
+				graph.fromJust().getNode(visitingNodeId)?.assignment?.index ?? Number.MAX_SAFE_INTEGER;
+
+			for (const nodeId of sourceNodesIDs) {
 				const node = cy.getElementById(nodeId);
-                if (node.empty()) {
-                    console.warn(`Node ${nodeId} not found in Cytoscape`);
-                    return;
-                }
-                const outgoingEdges = node.outgoers('edge')
+				if (node.empty()) {
+					console.warn(`Node ${nodeId} not found in Cytoscape`);
+					return;
+				}
+				const outgoingEdges = node.outgoers('edge');
 
-                const filterEdges = outgoingEdges
-                    .filter(edge =>
-                        {
-                            const target = edge.target();
-                            const data = target.data();
-                            const targetID = data['id'];
-                            const targetDL = data['dl'];
-                            const targetIndex = data['indexAtDL'];
+				const filterEdges = outgoingEdges.filter((edge) => {
+					const target = edge.target();
+					const data = target.data();
+					const targetID = data['id'];
+					const targetNode = graph.fromJust().getNode(targetID);
+					const targetDL = targetNode.dl;
+					const targetIndex = targetNode.assignment?.index ?? Number.MIN_SAFE_INTEGER;
 
-//							let sameID = false;
-							let targetIsFalsum = false;
+					let targetIsFalsum = false;
 
-							let targetIsAtLeastSameDL = false;
-							let targetIndexIsBeyond = false
+					let targetIsAtLeastSameDL = false;
+					let targetIndexIsBeyond = false;
 
-							if (targetID == 'falsum')
-								targetIsFalsum = true
+					if (targetID == 'falsum') targetIsFalsum = true;
 
-							if (cutDL <= targetDL)
-								targetIsAtLeastSameDL = true
-							if (targetIndex > cutIndex)
-								targetIndexIsBeyond = true
+					if (visitingDL <= targetDL) targetIsAtLeastSameDL = true;
+					if (targetIndex > visitingIndex) targetIndexIsBeyond = true;
 
-							return targetIsFalsum || (targetIsAtLeastSameDL && targetIndexIsBeyond);
-                        }
-                    )
-                filterEdges.addClass('cut');
-            }
-        }
+					return targetIsFalsum || (targetIsAtLeastSameDL && targetIndexIsBeyond);
+				});
+				filterEdges.addClass('crossing-cut');
+			}
+		};
 
+		// Highlight the visiting node
+		const node = cy.getElementById(visitingNodeID);
+		node.select();
 
-		const node = cy.getElementById(inspectingNode);
-        node.select();
+		const computeSourceNodes = (): string[] => {
+			if (graph.isNothing()) return [];
+			if (conflictAnalysis.isNothing()) return [];
+			return conflictAnalysis
+				.fromJust()
+				.getConflictiveClause()
+				.getLiterals()
+				.map((lit) => Literal.complementary(lit.toNumber()).toString());
+		};
 
-        if (cuttingNodes.length > 0)
-        {
-            highlightCuttingNodes(node, cuttingNodes)
-        }
+		const sourceNodes = computeSourceNodes();
+		if (sourceNodes.length > 0) {
+			highlighCrossingEdges(node, sourceNodes);
+		}
 
-
-        updateOverlayPositions();
-
-    }
+		updateOverlayPositions();
+	}
 
 	function selectNode(nodeId: string) {
 		if (!cy) return;
 
-        inspectingNode = nodeId;
+		visitingNodeId = nodeId;
 
 		/*
 		 * Clear previous highlighting.
@@ -257,50 +262,21 @@
 		updateOverlayPositions();
 	}
 
-	function finishConflictAnalysis() {
+	function afterFinishingConflictAnalysis() {
 		if (graph.isNothing()) return;
 
 		if (conflictAnalysis.isNothing()) return;
 
-		inspectingNode = undefined;
+		visitingNodeId = undefined;
 
 		/*
-		 * Clear previous highlighting.
+		 * All the elements have crossed every cut
 		 */
-		cy.elements().removeClass('highlighted');
-
-		/*
-		 * Clear previous selection.
-		 */
-		cy.nodes().unselect();
-
-		/*
-		 * Get nodes.
-		 */
-
-		const g: ImplicationGraph = graph.fromJust();
-		const ca: ConflictAnalysis = conflictAnalysis.fromJust();
-		const learnClause: Clause = ca.getConflictiveClause();
-
-		for (const literal of learnClause) {
-			const nodeId = Literal.complementary(literal.toNumber()).toString();
-
-			const node = cy.getElementById(nodeId);
-
-			if (node.empty()) {
-				console.warn(`Node ${nodeId} not found in Cytoscape`);
-				continue;
-			}
-
-			/*
-			 * Select Cytoscape node.
-			 */
-			node.select();
+		for (const node of cy?.nodes() ?? []) {
+			const outgoingEdges = node.outgoers('edge');
+			outgoingEdges.addClass('crossing-cut');
 		}
-
-		/*
-		 * Update Svelte components.
-		 */
+		// Update the positions of the overlay elements.
 		updateOverlayPositions();
 	}
 
@@ -504,13 +480,12 @@
 		 */
 
 		for (const nodeId of graph.nodes()) {
+			const node: IG_Node = graph.getNode(nodeId);
 			elements.push({
 				group: 'nodes',
 
 				data: {
-					id: nodeId,
-                    dl: graph.getNode(nodeId).dl,
-                    indexAtDL: graph.getNode(nodeId)?.assignment?.index
+					id: nodeId
 				},
 
 				position: positions.get(nodeId)
@@ -578,7 +553,7 @@
 
 		const satisfiedColor = getCssVariable(container, '--satisfied-color');
 
-	    const unsatisfiedColor = getCssVariable(container, '--unsatisfied-color');
+		const unsatisfiedColor = getCssVariable(container, '--unsatisfied-color');
 
 		const satisfiedBackgroundColor = hex8ToRgba(
 			getCssVariable(container, '--satisfied-border-color-o')
@@ -762,7 +737,7 @@
 				},
 
 				{
-					selector: '.cut',
+					selector: '.crossing-cut',
 
 					style: {
 						'line-color': unsatisfiedColor,
@@ -826,7 +801,7 @@
 
 		cy.on('tap', (event) => {
 			if (event.target === cy) {
-				inspectingNode = undefined;
+				visitingNodeId = undefined;
 
 				cy!.elements().removeClass('highlighted');
 
@@ -990,13 +965,12 @@
 		}
 
 		if (pivotingVariableAssignment.isJust()) {
-			inspectingNode = pivotingVariableAssignment.fromJust().toString();
-            updateCut(inspectingNode);
+			visitingNodeId = pivotingVariableAssignment.fromJust().toString();
+			visitNode(visitingNodeId);
 		}
 
-
 		if (conflictAnalysis.isJust() && conflictAnalysis.fromJust().finished()) {
-			finishConflictAnalysis();
+			afterFinishingConflictAnalysis();
 		}
 	});
 </script>
@@ -1015,10 +989,10 @@
 
 		<button class="btn" onclick={resetLayout}> Layout </button>
 
-		{#if inspectingNode}
+		{#if visitingNodeId}
 			<span class="selected">
 				Inspecting:
-				<strong>{inspectingNode}</strong>
+				<strong>{visitingNodeId}</strong>
 			</span>
 		{/if}
 	</div>
@@ -1047,7 +1021,7 @@
 				</div>
 
 				<!-- The cut line at the right of the node -->
-				{#if node.id === inspectingNode}
+				{#if node.id === visitingNodeId}
 					<div class="cut-line" style={`left: ${node.x}px;`}></div>
 				{/if}
 			{/each}
