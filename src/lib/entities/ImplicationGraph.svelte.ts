@@ -24,6 +24,7 @@ export type IG_Node = {
 		uip: boolean; // Whether the node is a UIP or not, used to highlight the node in the graph
 		fuip: boolean; // Whether the node is a First UIP or not, used to highlight the node in the graph
 	};
+	visited: boolean; // Whether the node has been visited or not
 };
 
 export type IG_Edge = {
@@ -74,6 +75,38 @@ export class ImplicationGraph {
 		}
 
 		return node;
+	}
+
+	visited(id: string): boolean {
+		const node = this._nodes.get(id);
+
+		if (node === undefined) {
+			logFatal('ImplicationGraph Error', `Node ${id} not found in the implication graph`);
+		}
+
+		return node.visited;
+	}
+
+	visit(id: string): void {
+		const node = this._nodes.get(id);
+
+		if (node === undefined) {
+			logFatal('ImplicationGraph Error', `Node ${id} not found in the implication graph`);
+		}
+
+		node.visited = true;
+		this._nodes.set(id, node);
+	}
+
+	unvisit(id: string): void {
+		const node = this._nodes.get(id);
+
+		if (node === undefined) {
+			logFatal('ImplicationGraph Error', `Node ${id} not found in the implication graph`);
+		}
+
+		node.visited = false;
+		this._nodes.set(id, node);
 	}
 
 	falsumId(): string {

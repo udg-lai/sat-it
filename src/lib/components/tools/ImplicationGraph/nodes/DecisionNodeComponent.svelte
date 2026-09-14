@@ -58,10 +58,6 @@
 		}
 	}
 
-	.g-decision.selected .literal-node {
-		color: var(--satisfied-color);
-	}
-
 	.g-decision {
 		padding: 10px;
 		border: 0px solid var(--inspecting-color);

@@ -13,8 +13,6 @@
 	} = $props();
 
 	let chrome: boolean = $derived(onChrome());
-
-	let literal: Lit = $derived(Number(id));
 </script>
 
 <div class="g-conflict" class:selected>

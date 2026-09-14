@@ -59,18 +59,14 @@
 		}
 	}
 
-	.g-propagation.selected .literal-node {
-		color: var(--satisfied-color);
-	}
-
 	.g-propagation.pivoting .literal-node::after {
 		content: '';
 		position: absolute;
 		width: 100%;
 		height: 100%;
 		border-radius: 10%;
-		background-color: var(--satisfied-border-color-o);
-		opacity: 0.5;
+		background-color: var(--border-color);
+		opacity: 0.3;
 		pointer-events: none;
 
 		animation: pulse 1s infinite;

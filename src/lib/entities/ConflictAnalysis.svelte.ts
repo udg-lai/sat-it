@@ -25,7 +25,7 @@ interface PointerUpdate {
 }
 
 export class ConflictAnalysis {
-	conflictiveClause: Clause;
+	conflictiveClause: Clause = $state(Clause.empty());
 	dlAssignments: VariableAssignment[];
 	pointer: number = $state(-1);
 	nth: number;
