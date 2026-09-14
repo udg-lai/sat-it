@@ -1,0 +1,16 @@
+services:
+  edusatit:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        GIT_REPO: ${GIT_REPO:-https://github.com/udg-lai/sat-it.git}
+        GIT_REF: ${GIT_REF:-main}
+
+    image: udgsatit:latest
+    container_name: udgsatit
+
+    ports:
+      - "8080:80"
+
+    restart: unless-stopped
