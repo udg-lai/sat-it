@@ -99,6 +99,11 @@ export default class Clause implements Comparable<Clause> {
 		return new Clause([], { comments: ['Falsum'], cRef: undefined, learned: false });
 	}
 
+	static empty(): Clause {
+		return new Clause([], { comments: ['Falsum'], cRef: undefined, learned: false });
+	}
+
+
 	getCRef(): CRef {
 		// cRef can be undefined for temporal clauses, check if it is a temporal clause before using this method
 		if (this.isTemporal()) {
@@ -268,4 +273,5 @@ export default class Clause implements Comparable<Clause> {
 	toString(): string {
 		return '{' + this.literals.map((lit: Literal) => lit.toString()).join(', ') + '}';
 	}
+
 }

@@ -53,6 +53,17 @@
 		return makeJust(ca.getPivotingAssignment());
 	});
 
+    let cuttingNodes: string[] = $derived.by(() => 
+        {
+            if (graph.isNothing()) return [];
+            if (conflictAnalysis.isNothing()) return [];
+
+            const conflictiveClause: Clause = conflictAnalysis.fromJust().getConflictiveClause()
+
+            return conflictiveClause.getLiterals().map(lit => Literal.complementary(lit).toString())
+        }
+    )
+
 	/*
 	 * ------------------------------------------------------------------------
 	 * Svelte overlay nodes
@@ -118,16 +129,50 @@
 		});
 	}
 
+
+    function updateCuttingNodes(nodeIds: string[]) {
+        console.log(nodeIds)
+
+        if (nodeIds.length == 0) return;
+
+		if (!cy) return;
+
+        // Remove edges class
+		cy.elements().removeClass('cut');
+
+        for (const nodeId of nodeIds)
+        {
+            console.log(nodeId)
+            const node = cy.getElementById(nodeId);
+            if (node.empty()) {
+                console.warn(`Node ${nodeId} not found in Cytoscape`);
+                return;
+            }
+
+            const outgoingEdges = node.outgoers('edge');
+            outgoingEdges.addClass('cut');
+        }
+    }
+
 	/*
 	 * ------------------------------------------------------------------------
 	 * Selection
 	 * ------------------------------------------------------------------------
 	 */
 
+    function updateCut(nodeId: string) {
+		if (!cy) return;
+
+		const node = cy.getElementById(nodeId);
+        node.select();
+        updateOverlayPositions();
+
+    }
+
 	function selectNode(nodeId: string) {
 		if (!cy) return;
 
-		inspectingNode = nodeId;
+        inspectingNode = nodeId;
 
 		/*
 		 * Clear previous highlighting.
@@ -494,6 +539,8 @@
 
 		const satisfiedColor = getCssVariable(container, '--satisfied-color');
 
+	    const unsatisfiedColor = getCssVariable(container, '--unsatisfied-color');
+
 		const satisfiedBackgroundColor = hex8ToRgba(
 			getCssVariable(container, '--satisfied-border-color-o')
 		);
@@ -670,6 +717,18 @@
 						'line-color': satisfiedColor,
 
 						'target-arrow-color': satisfiedColor,
+
+						width: inspectingBorderWidth
+					}
+				},
+
+				{
+					selector: '.cut',
+
+					style: {
+						'line-color': unsatisfiedColor,
+
+						'target-arrow-color': unsatisfiedColor,
 
 						width: inspectingBorderWidth
 					}
@@ -893,12 +952,14 @@
 
 		if (pivotingVariableAssignment.isJust()) {
 			inspectingNode = pivotingVariableAssignment.fromJust().toString();
-			selectNode(inspectingNode);
+            updateCut(inspectingNode);
 		}
 
 		if (conflictAnalysis.isJust() && conflictAnalysis.fromJust().finished()) {
 			finishConflictAnalysis();
 		}
+
+        if (cuttingNodes.length > 0) updateCuttingNodes(cuttingNodes)
 	});
 </script>
 
