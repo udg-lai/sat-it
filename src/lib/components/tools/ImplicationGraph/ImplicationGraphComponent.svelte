@@ -1034,8 +1034,6 @@
 	.toolbar {
 		position: absolute;
 
-		z-index: 20;
-
 		top: 12px;
 		left: 12px;
 
@@ -1047,35 +1045,43 @@
 
 		padding: 8px;
 
-		background: rgba(255, 255, 255, 0.95);
+		border-color: var(--button-border-color);
+		border-style: solid;
+		border-width: 1px;
+		border-radius: 6px;
 
-		border: 1px solid #e2e8f0;
+		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+		background-color: var(--button-color);
 
-		border-radius: 8px;
-
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+		z-index: 1;
 	}
 
 	button {
-		min-width: 30px;
-
-		width: fit-content;
-
-		height: 30px;
-
+		height: var(--button-size) / 1.5;
+		width: var(--button-size) / 1.5;
+		min-width: fit-content;
 		padding: 0.5rem 0.75rem;
 
-		border: 1px solid #cbd5e1;
-
+		border-color: var(--button-border-color);
+		border-style: solid;
+		border-width: 1px;
 		border-radius: 6px;
 
-		background: white;
+		align-items: center;
+		justify-content: center;
+
+		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+		background-color: var(--button-color);
 
 		cursor: pointer;
 	}
 
 	button:hover {
-		background: #f1f5f9;
+		background-color: var(--button-hover-color);
+	}
+
+	button:active {
+		background-color: var(--button-color);
 	}
 
 	.selected {
@@ -1083,7 +1089,7 @@
 
 		padding-left: 10px;
 
-		border-left: 1px solid #e2e8f0;
+		border-left: 1px solid var(--button-border-color);
 
 		font-size: 13px;
 	}
