@@ -92,10 +92,8 @@
 		return PropagationNode;
 	}
 
-	/*
-	 * Update the Svelte overlay so that every component follows
-	 * the actual rendered Cytoscape position.
-	 */
+	// Update the Svelte overlay so that every component follows
+	// the actual rendered Cytoscape position.
 	function updateOverlayPositions() {
 		if (!cy) return;
 
@@ -209,57 +207,6 @@
 			highlighCrossingEdges(node, sourceNodes);
 		}
 
-		updateOverlayPositions();
-	}
-
-	function selectNode(nodeId: string) {
-		if (!cy) return;
-
-		visitingNodeId = nodeId;
-
-		/*
-		 * Clear previous highlighting.
-		 */
-		cy.elements().removeClass('highlighted');
-
-		/*
-		 * Clear previous selection.
-		 */
-		cy.nodes().unselect();
-
-		/*
-		 * Get node.
-		 */
-		const node = cy.getElementById(nodeId);
-
-		if (node.empty()) {
-			console.warn(`Node ${nodeId} not found in Cytoscape`);
-			return;
-		}
-
-		/*
-		 * Select Cytoscape node.
-		 */
-		node.select();
-
-		/*
-		 * Highlight only incoming edges.
-		 */
-		const incomingEdges = node.incomers('edge');
-
-		incomingEdges.addClass('highlighted');
-
-		/*
-		 * Highlight only incoming nodes.
-		 */
-		const incomingNodes = node.incomers('node');
-		for (const incomingNode of incomingNodes) {
-			incomingNode.select();
-		}
-
-		/*
-		 * Update Svelte components.
-		 */
 		updateOverlayPositions();
 	}
 
@@ -390,9 +337,7 @@
 	}
 
 	function computeSlots(depths: Map<string, number>): Map<string, number> {
-		/*
-		 * Group nodes by depth.
-		 */
+		// Group nodes by depth.
 		const nodesByDepth = new Map<number, string[]>();
 
 		for (const [nodeId, depth] of depths.entries()) {
@@ -403,11 +348,10 @@
 			nodesByDepth.get(depth)!.push(nodeId);
 		}
 
-		/*
-		 * Mapping node -> slot.
-		 */
+		// Mapping node -> slot.
 		const slotMappings = new Map<string, number>();
 
+		// Factors for slot allocation.
 		const SCARCITY_FACTOR = 0.75;
 		const LEMMA_FACTOR = 1;
 		const SEED = 1000;
@@ -424,15 +368,14 @@
 
 			const random = mulberry32(SEED);
 
-			/*
-			 * Shuffle slots randomly.
-			 */
+			// Shuffle slots randomly.
 			for (let i = slots.length - 1; i > 0; i--) {
 				const j = Math.floor(random() * (i + 1));
 
 				[slots[i], slots[j]] = [slots[j], slots[i]];
 			}
 
+			// Assign slots to nodes.
 			for (let i = 0; i < nodes.length; i++) {
 				if (i < slots.length) {
 					slotMappings.set(nodes[i], slots[i]);
@@ -454,9 +397,9 @@
 	 */
 
 	function buildElements(graph: ImplicationGraph): ElementDefinition[] {
-		const depths = calculateDepths(graph);
-		const orders = orderNodes(graph);
-		const slots = computeSlots(depths);
+		const depths: Map<string, number> = calculateDepths(graph);
+		const orders: Map<string, number> = orderNodes(graph);
+		const slots: Map<string, number> = computeSlots(depths);
 
 		const X_SPACING = 100;
 		const Y_SPACING = 70;
@@ -476,16 +419,11 @@
 			});
 		}
 
+		// Define the nodes and edges for Cytoscape.
 		const elements: ElementDefinition[] = [];
 
-		/*
-		 * --------------------------------------------------------------------
-		 * Nodes
-		 * --------------------------------------------------------------------
-		 */
-
+		// Nodes definition
 		for (const nodeId of graph.nodes()) {
-			const node: IG_Node = graph.getNode(nodeId);
 			elements.push({
 				group: 'nodes',
 
@@ -497,14 +435,7 @@
 			});
 		}
 
-		/*
-		 * --------------------------------------------------------------------
-		 * Edges
-		 *
-		 * source -> target
-		 * --------------------------------------------------------------------
-		 */
-
+		// Edges definition (source -> target)
 		for (const source of graph.nodes()) {
 			for (const target of graph.edges(source)) {
 				elements.push({
@@ -522,37 +453,25 @@
 		return elements;
 	}
 
-	/*
-	 * ------------------------------------------------------------------------
-	 * Create Cytoscape
-	 * ------------------------------------------------------------------------
-	 */
-
+	// Create the Cytoscape graph and set up event listeners.
 	function createGraph() {
-		console.log('Entered the ');
 		if (!container) return;
 
 		if (graph.isNothing()) return;
 
-		/*
-		 * Destroy old graph if necessary.
-		 */
+		// Destroy whatever Cytoscape instance was previously created.
 		cy?.destroy();
 
-		const graphValue = graph.fromJust();
+		const g: ImplicationGraph = graph.fromJust();
 
-		const falsumId = graphValue.falsumId();
-		const uipIds = graphValue.uipIds();
-		const fuipId = graphValue.fuipId();
+		const falsumId = g.falsumId();
+		const uipIds = g.uipIds();
+		const fuipId = g.fuipId();
 
-		const [w, h] = [30, 30];
+		const FACTOR = 4;
+		const [nodeWith, nodeHeight] = [10, 10].map(x => x * FACTOR);
 
-		/*
-		 * --------------------------------------------------------------------
-		 * Colors
-		 * --------------------------------------------------------------------
-		 */
-
+		// Colors definition
 		const booleanPropagationColor = getCssVariable(container, '--boolean-constraint-propagation');
 
 		const inspectedColor = getCssVariable(container, '--inspecting-color');
@@ -567,24 +486,15 @@
 
 		const visitedColor = getCssVariable(container, '--visited-color');
 
-		/*
-		 * --------------------------------------------------------------------
-		 * Shape widths
-		 * --------------------------------------------------------------------
-		 */
+		// Edge width when the outgoing edges of the literals has passed the cut line (i.e., they are part of the conflict clause).
+		const baseEdgeWidth = 2;
+		const crossingOutEdgeWidth = 2;
 
-		const inspectingBorderWidth = 2;
-
-		/*
-		 * --------------------------------------------------------------------
-		 * Cytoscape
-		 * --------------------------------------------------------------------
-		 */
-
+		// Create the Cytoscape instance.
 		cy = cytoscape({
 			container,
 
-			elements: buildElements(graphValue),
+			elements: buildElements(g),
 
 			layout: {
 				name: 'preset',
@@ -593,96 +503,31 @@
 			},
 
 			style: [
-				/*
-				 * ------------------------------------------------------------
-				 * Normal node
-				 *
-				 * Cytoscape keeps the node geometry, but Svelte renders
-				 * the visible content.
-				 * ------------------------------------------------------------
-				 */
+ 				/*
+ 				 * ------------------------------------------------------------
+ 				 * Normal node
+ 				 *
+ 				 * Cytoscape keeps the node geometry, but Svelte renders
+ 				 * the visible content.
+ 				 * ------------------------------------------------------------
+ 				 */
 
-				{
-					selector: 'node',
+ 				{
+ 					selector: 'node',
 
-					style: {
-						shape: 'roundrectangle',
+ 					style: {
+ 						shape: 'roundrectangle',
 
-						label: '',
+ 						label: '',
 
-						'background-opacity': 0,
+ 						'background-opacity': 0,
 
-						'border-width': 0,
+ 						'border-width': 0,
 
-						width: w,
-						height: h
-					}
-				},
-
-				/*
-				 * ------------------------------------------------------------
-				 * Falsum / conflict node
-				 * ------------------------------------------------------------
-				 */
-
-				{
-					selector: `node[id = "${falsumId}"]`,
-
-					style: {
-						width: w,
-						height: h,
-
-						label: '',
-
-						'background-opacity': 0,
-
-						'border-width': 0
-					}
-				},
-
-				/*
-				 * ------------------------------------------------------------
-				 * UIP nodes
-				 * ------------------------------------------------------------
-				 */
-
-				{
-					selector: Array.from(uipIds.values())
-						.map((id) => `node[id = "${id}"]`)
-						.join(', '),
-
-					style: {
-						width: w,
-						height: h,
-
-						label: '',
-
-						'background-opacity': 0,
-
-						'border-width': 0
-					}
-				},
-
-				/*
-				 * ------------------------------------------------------------
-				 * FUIP node
-				 * ------------------------------------------------------------
-				 */
-
-				{
-					selector: `node[id = "${fuipId}"]`,
-
-					style: {
-						width: w,
-						height: h,
-
-						label: '',
-
-						'background-opacity': 0,
-
-						'border-width': 0
-					}
-				},
+ 						width: nodeWith,
+ 						height: nodeHeight,
+ 					}
+ 				},
 
 				/*
 				 * ------------------------------------------------------------
@@ -694,7 +539,7 @@
 					selector: 'edge',
 
 					style: {
-						width: 2,
+						width: baseEdgeWidth,
 
 						'line-color': visitedColor,
 
@@ -705,43 +550,6 @@
 						'curve-style': 'round-segments'
 					}
 				},
-
-				/*
-				 * ------------------------------------------------------------
-				 * Selected node
-				 *
-				 * We don't visually style the node because the Svelte
-				 * component itself is responsible for rendering selection.
-				 *
-				 * ------------------------------------------------------------
-				 */
-
-				{
-					selector: 'node:selected',
-
-					style: {
-						'border-width': 0
-					}
-				},
-
-				/*
-				 * ------------------------------------------------------------
-				 * Highlighted incoming edges
-				 * ------------------------------------------------------------
-				 */
-
-				{
-					selector: '.highlighted',
-
-					style: {
-						'line-color': satisfiedColor,
-
-						'target-arrow-color': satisfiedColor,
-
-						width: inspectingBorderWidth
-					}
-				},
-
 				{
 					selector: '.crossing-cut',
 
@@ -750,7 +558,7 @@
 
 						'target-arrow-color': unsatisfiedColor,
 
-						width: inspectingBorderWidth
+						width: crossingOutEdgeWidth
 					}
 				}
 			],
@@ -765,94 +573,61 @@
 			autoungrabify: false
 		});
 
-		/*
-		 * --------------------------------------------------------------------
-		 * Initial overlay position
-		 * --------------------------------------------------------------------
-		 */
 
+		// Initial overlay positions
 		updateOverlayPositions();
 
-		/*
-		 * --------------------------------------------------------------------
-		 * Keep Svelte components synchronized with Cytoscape.
-		 *
-		 * render -> repaint
-		 * pan    -> pan
-		 * zoom   -> zoom
-		 * position -> layout / node movement
-		 * --------------------------------------------------------------------
-		 */
-
+		// --------------------------------------------------------------------
+		// Keep Svelte components synchronized with Cytoscape.
+		//
+		// render -> repaint
+		// pan    -> pan
+		// zoom   -> zoom
+		// position -> layout / node movement
+		// --------------------------------------------------------------------
 		cy.on('render pan zoom position', () => {
 			updateOverlayPositions();
 		});
 
-		/*
-		 * --------------------------------------------------------------------
-		 * Node click
-		 * --------------------------------------------------------------------
-		 */
-
+		// --------------------------------------------------------------------
+		// Node click
+		// --------------------------------------------------------------------
 		cy.on('tap', 'node', (event) => {
-			const node: NodeSingular = event.target;
-			selectNode(node.id());
+			console.debug(`ImplicationGraphComponent: Node ${event.target.id()} clicked`);
 		});
 
-		/*
-		 * --------------------------------------------------------------------
-		 * Click empty space
-		 * --------------------------------------------------------------------
-		 */
-
-		cy.on('tap', (event) => {
+		// --------------------------------------------------------------------
+		// Fit graph when clicking on empty space
+		// --------------------------------------------------------------------
+		cy.on('dbltap', (event) => {
 			if (event.target === cy) {
-				visitingNodeId = undefined;
-
-				cy!.elements().removeClass('highlighted');
-
-				cy!.nodes().unselect();
-
-				updateOverlayPositions();
+				fitGraph();
 			}
 		});
 
-		/*
-		 * --------------------------------------------------------------------
-		 * Double click -> center/zoom around node
-		 * --------------------------------------------------------------------
-		 */
-
+		// --------------------------------------------------------------------
+		// Double click -> center/zoom around node
+		// --------------------------------------------------------------------
 		cy.on('dbltap', 'node', (event) => {
 			const node = event.target;
 
 			cy!.animate({
 				fit: {
 					eles: node,
-					padding: 120
+					padding: 256
 				},
 
 				duration: 300
 			});
 		});
 
-		/*
-		 * --------------------------------------------------------------------
-		 * Make sure positions are correct after the initial layout.
-		 * --------------------------------------------------------------------
-		 */
-
+		// Make sure the overlay positions are updated after the layout is finished.
 		requestAnimationFrame(() => {
 			updateOverlayPositions();
 		});
 	}
 
-	/*
-	 * ------------------------------------------------------------------------
-	 * Controls
-	 * ------------------------------------------------------------------------
-	 */
-
+	// Fit the graph to the viewport, keeping all nodes visible.
 	function fitGraph() {
 		if (!cy) return;
 
@@ -865,25 +640,6 @@
 
 			duration: 300
 		});
-	}
-
-	function resetLayout() {
-		if (!cy) return;
-
-		cy.layout({
-			name: 'dagre',
-			rankDir: 'LR',
-			nodeSep: 60,
-			rankSep: 100,
-			edgeSep: 30,
-			padding: 40,
-			animate: true,
-			animationDuration: 300
-		}).run();
-
-		setTimeout(() => {
-			updateOverlayPositions();
-		}, 350);
 	}
 
 	function zoomIn() {
@@ -988,10 +744,6 @@
 		<button class="btn" onclick={zoomIn}> + </button>
 
 		<button class="btn" onclick={zoomOut}> − </button>
-
-		<button class="btn" onclick={fitGraph}> Fit </button>
-
-		<button class="btn" onclick={resetLayout}> Layout </button>
 
 		{#if visitingNodeId}
 			<span class="selected">
@@ -1103,10 +855,6 @@
 
 		pointer-events: none;
 	}
-
-	/*
-	 * Toolbar must be above everything.
-	 */
 
 	.toolbar {
 		position: absolute;

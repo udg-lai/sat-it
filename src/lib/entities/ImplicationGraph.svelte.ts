@@ -12,7 +12,7 @@ import { type Propagation } from './VariableAssignment.ts';
 
 import { SvelteMap } from 'svelte/reactivity';
 
-type Entity = 'VariableAssignment' | 'Clause';
+type Entity = 'VariableAssignment' | 'EmptyClause';
 
 export type IG_Node = {
 	entity: Entity;
@@ -150,7 +150,7 @@ export class ImplicationGraph {
 
 		// Adds the empty clause to the graph, it has its own dl, which is the last decision level + 1, since it is a lemma
 		const falsum: IG_Node = {
-			entity: 'Clause',
+			entity: 'EmptyClause',
 			dl: dl
 		};
 
