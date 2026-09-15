@@ -17,7 +17,7 @@ export default class Literal implements Comparable<Literal> {
 
 	static buildFrom(literal: number, variables: VariablePool) {
 		const variable = Math.abs(literal);
-		return new Literal(variables.getVariable(variable), Literal.hatted(literal));
+		return new Literal(variables.get(variable), Literal.hatted(literal));
 	}
 
 	static complementary(literal: number): Lit {
@@ -40,6 +40,11 @@ export default class Literal implements Comparable<Literal> {
 		return hat ? -1 * varId : varId;
 	}
 
+	static toTeX(literal: Lit): string {
+		const varNumber = Math.abs(literal);
+		return literal < 0 ? `\\overline{${varNumber}}` : `${varNumber}`;
+	}
+
 	getVariable(): Variable {
 		return this.variable.copy();
 	}
@@ -58,16 +63,20 @@ export default class Literal implements Comparable<Literal> {
 	}
 
 	toTeX(): string {
-		const variable = this.variable.toInt();
-		return this.hat ? `\\overline{${variable}}` : `${variable}`;
+		const varNumber = this.variable.toNumber();
+		return this.hat ? `\\overline{${varNumber}}` : `${varNumber}`;
 	}
 
 	equals(other: Literal): boolean {
-		return this.toInt() === other.toInt();
+		return this.toNumber() === other.toNumber();
 	}
 
-	toInt(): number {
-		return this.variable.toInt() * (this.hat ? -1 : 1);
+	toNumber(): number {
+		return this.variable.toNumber() * (this.hat ? -1 : 1);
+	}
+
+	toVar(): Var {
+		return this.variable.toNumber();
 	}
 
 	private evaluate(): boolean {
@@ -83,6 +92,6 @@ export default class Literal implements Comparable<Literal> {
 	}
 
 	toString(): string {
-		return this.toInt().toString();
+		return this.toNumber().toString();
 	}
 }

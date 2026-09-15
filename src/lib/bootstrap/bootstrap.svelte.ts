@@ -23,7 +23,7 @@ function timeout(ms: number): Promise<void> {
 
 async function fakeRequest(): Promise<DimacsInstance[]> {
 	await timeout(300);
-	return [pb, queens3, queens4, logarithmic, unsatback, unsatdpll, satdpll, satbkt];
+	return [queens4, queens3, pb, logarithmic, unsatback, unsatdpll, satdpll, satbkt];
 }
 
 export default async function fetchInstances(): Promise<DimacsInstance[]> {

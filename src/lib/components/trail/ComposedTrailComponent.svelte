@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
 	import type { ComposedTrail } from '$lib/types/types.ts';
-	import ResolutionContextComponent from './ResolutionContextComponent.svelte';
+	import ConflictAnalysisComponent from './ConflictAnalysisComponent.svelte';
 	import TrailComponent from './TrailComponent.svelte';
 	import UPContextComponent from './UPContextComponent.svelte';
 
@@ -26,7 +26,7 @@
 		<div class="empty-slot"></div>
 	</div>
 	{#if trail.showCA}
-		<ResolutionContextComponent trail={trail.trail} />
+		<ConflictAnalysisComponent trail={trail.trail} />
 	{/if}
 </composed-trail>
 

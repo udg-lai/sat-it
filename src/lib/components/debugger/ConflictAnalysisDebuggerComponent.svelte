@@ -2,6 +2,7 @@
 	import ConflictAnalysisComponent from './buttons/ConflictAnalysisComponent.svelte';
 	import ResolutionComponent from './buttons/StepComponent.svelte';
 	import { asset } from '$app/paths';
+	import { solverCommandEventBus } from '$lib/events/events.ts';
 
 	let resolutionIcon = asset('/icons/Resolution.svg');
 </script>
@@ -11,6 +12,9 @@
 		myClass={'conflict-btn'}
 		icon={resolutionIcon}
 		alt="Resolve following clause"
+		onClick={() => {
+			solverCommandEventBus.emit('step');
+		}}
 	/>
 
 	<ConflictAnalysisComponent />

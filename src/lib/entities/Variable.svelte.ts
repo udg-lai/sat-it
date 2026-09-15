@@ -14,7 +14,7 @@ export default class Variable implements Comparable<Variable> {
 		this.assignment = assignment;
 	}
 
-	toInt(): Var {
+	toNumber(): Var {
 		return this.id;
 	}
 

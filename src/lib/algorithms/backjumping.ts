@@ -17,7 +17,7 @@ export const backjumping = (variables: VariablePool, trail: Trail, dl: number): 
 
 	while (bjTrail.size() > shrinkTo) {
 		const last: VariableAssignment = bjTrail.pop() as VariableAssignment;
-		variables.unassign(last.getVariable().toInt());
+		variables.unassign(last.getVariable().toNumber());
 	}
 
 	return bjTrail;

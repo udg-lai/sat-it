@@ -30,7 +30,7 @@ export type Backtracking = {
 };
 
 export const getPropagationCRef = (r: Reason): number => {
-	if (!isPropagationReason(r))
+	if (!isImpliedReason(r))
 		logFatal('Reason is not Propagation', 'Onley Propagation Reasons can have Propagation CRef');
 	return r.cRef;
 };
@@ -57,7 +57,7 @@ export const isBackJumpingReason = (r: Reason): r is BackJumping => {
 	return r.type === 'backjumping';
 };
 
-export const isPropagationReason = (r: Reason): r is Propagation => {
+export const isImpliedReason = (r: Reason): r is Propagation => {
 	return r.type === 'propagated' || r.type === 'backjumping';
 };
 
@@ -99,98 +99,116 @@ export const makeBacktrackingReason = (): Backtracking => {
 };
 
 export default class VariableAssignment {
-	variable: Variable;
-	reason: Reason;
+	_variable: Variable;
+	_reason: Reason;
+	_dl: number = -1;
 
-	private constructor(variable: Variable, kind: Reason) {
-		this.variable = variable;
-		this.reason = kind;
+	private constructor(variable: Variable, kind: Reason, dl: number = -1) {
+		this._variable = variable;
+		this._reason = kind;
+		this._dl = dl;
 	}
 
-	static newAutomatedAssignment(variable: Variable, algorithm: string) {
-		return new VariableAssignment(variable, makeAutomatedReason(algorithm));
+	static newAutomatedAssignment(variable: Variable, algorithm: string, dl: number = -1) {
+		return new VariableAssignment(variable, makeAutomatedReason(algorithm), dl);
 	}
 
-	static newManualAssignment(variable: Variable) {
-		return new VariableAssignment(variable, makeManualReason());
+	static newManualAssignment(variable: Variable, dl: number = -1) {
+		return new VariableAssignment(variable, makeManualReason(), dl);
 	}
 
-	static newUnitPropagationAssignment(variable: Variable, clauseTag: number) {
-		return new VariableAssignment(variable, makeUnitPropagationReason(clauseTag));
+	static newUnitPropagationAssignment(variable: Variable, clauseTag: number, dl: number = -1) {
+		return new VariableAssignment(variable, makeUnitPropagationReason(clauseTag), dl);
 	}
 
-	static newBackJumpingAssignment(variable: Variable, clauseTag: number) {
-		return new VariableAssignment(variable, makeBackJumpingReason(clauseTag));
+	static newBackJumpingAssignment(variable: Variable, clauseTag: number, dl: number = -1) {
+		return new VariableAssignment(variable, makeBackJumpingReason(clauseTag), dl);
 	}
 
-	static newBacktrackingAssignment(variable: Variable) {
-		return new VariableAssignment(variable, makeBacktrackingReason());
+	static newBacktrackingAssignment(variable: Variable, dl: number = -1) {
+		return new VariableAssignment(variable, makeBacktrackingReason(), dl);
 	}
 
-	copy(): VariableAssignment {
-		return new VariableAssignment(this.variable, this.reason);
-	}
-
-	getVariable(): Variable {
-		return this.variable;
-	}
-
-	isD(): boolean {
-		return isDecisionReason(this.reason);
-	}
-
-	isUP(): boolean {
-		return isUnitPropagationReason(this.reason);
-	}
-
-	isBJ(): boolean {
-		return isBackJumpingReason(this.reason);
-	}
-
-	isK(): boolean {
-		return isBacktrackingReason(this.reason);
-	}
-
-	wasPropagated(): boolean {
-		return isPropagationReason(this.reason);
-	}
-
-	getReason(): Reason {
-		return this.reason;
-	}
-
-	unassign(): void {
-		this.variable.unassign();
-	}
-
-	toLit(): Lit {
-		if (!this.variable.hasTruthValue()) {
+	eval(): boolean {
+		if (!this._variable.hasTruthValue()) {
 			logFatal(
 				'Evaluating a variable assignment with not assigned value',
 				'The evaluation is given by its variable which is not yet assigned'
 			);
 		}
-		const assignment = this.variable.getAssignment();
+		return this._variable.getAssignment() as boolean;
+	}
+
+	copy(): VariableAssignment {
+		return new VariableAssignment(this._variable, this._reason, this._dl);
+	}
+
+	getVariable(): Variable {
+		return this._variable;
+	}
+
+	dl(): number {
+		return this._dl;
+	}
+
+	isD(): boolean {
+		return isDecisionReason(this._reason);
+	}
+
+	isUP(): boolean {
+		return isUnitPropagationReason(this._reason);
+	}
+
+	isBJ(): boolean {
+		return isBackJumpingReason(this._reason);
+	}
+
+	isK(): boolean {
+		return isBacktrackingReason(this._reason);
+	}
+
+	isImplied(): boolean {
+		// A literal is implied if it was propagated after backjumping
+		// or it was propagated because it occurs into a unit clause
+		return isImpliedReason(this._reason);
+	}
+
+	getReason(): Reason {
+		return this._reason;
+	}
+
+	unassign(): void {
+		this._variable.unassign();
+	}
+
+	toLit(): Lit {
+		if (!this._variable.hasTruthValue()) {
+			logFatal(
+				'Evaluating a variable assignment with not assigned value',
+				'The evaluation is given by its variable which is not yet assigned'
+			);
+		}
+		const assignment = this._variable.getAssignment();
 		if (assignment) {
-			return this.variable.toInt();
+			return this._variable.toNumber();
 		} else {
-			return this.variable.toInt() * -1;
+			return this._variable.toNumber() * -1;
 		}
 	}
 
 	toVar(): Var {
-		return this.variable.toInt();
+		return this._variable.toNumber();
 	}
 
 	toTeX(): string {
-		if (!this.variable.hasTruthValue()) {
+		if (!this._variable.hasTruthValue()) {
 			logFatal(
 				'Evaluating a variable assignment with not assigned value',
 				'The evaluation is given by its variable which is not yet assigned'
 			);
 		}
-		const truthValue: boolean = this.variable.getAssignment() as boolean;
-		const variableId = this.variable.toInt();
+		const truthValue: boolean = this._variable.getAssignment() as boolean;
+		const variableId = this._variable.toNumber();
 		let text: string;
 		if (truthValue) {
 			text = variableId.toString();
@@ -198,5 +216,15 @@ export default class VariableAssignment {
 			text = `\\overline{${variableId}}`;
 		}
 		return text;
+	}
+
+	toString(): string {
+		if (!this._variable.hasTruthValue()) {
+			logFatal(
+				'Evaluating a variable assignment with not assigned value',
+				'The evaluation is given by its variable which is not yet assigned'
+			);
+		}
+		return this.toLit().toString();
 	}
 }

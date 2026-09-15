@@ -24,7 +24,15 @@ export const nTrails = (): number => {
 };
 
 export const collapseTrailsContext = (): void => {
-	trails.forEach((trail) => trail.collapseContext());
+	// Collapse all trails except the last one
+	for (let i = 0; i < trails.length; i++) {
+		trails[i].collapseContext();
+	}
+
+	// Let the previous trail open to see the conflict analysis content
+	if (trails.length > 1) {
+		trails[trails.length - 2].expandContext();
+	}
 };
 
 export const stackTrail = (trail: Trail): void => {

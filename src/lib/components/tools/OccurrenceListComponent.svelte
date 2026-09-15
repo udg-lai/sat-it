@@ -224,7 +224,7 @@
 	}
 
 	.visited-clause {
-		background-color: var(--visited-clause-color);
+		background-color: var(--visited-color);
 	}
 
 	occurrence-list {

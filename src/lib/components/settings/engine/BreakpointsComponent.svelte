@@ -120,7 +120,7 @@
 					<li>
 						<button
 							onclick={() => {
-								removeBreakpoint(literal.toInt());
+								removeBreakpoint(literal.toNumber());
 							}}
 							class="variable-text"
 						>

@@ -62,11 +62,13 @@ export const decide = (pool: VariablePool, algorithm: string): Lit => {
 	doAssignment(varId, truthValue);
 
 	// This variable should contain the updated assignment done in `doAssignment`
-	const variable: Variable = pool.getVariable(varId).copy();
+	const variable: Variable = pool.get(varId).copy();
+
+	const dl = trail.getDL() + 1;
 
 	const varAssignment: VariableAssignment = manualAssignment
-		? VariableAssignment.newManualAssignment(variable)
-		: VariableAssignment.newAutomatedAssignment(variable, algorithm);
+		? VariableAssignment.newManualAssignment(variable, dl)
+		: VariableAssignment.newAutomatedAssignment(variable, algorithm, dl);
 
 	trail.push(varAssignment);
 
@@ -96,23 +98,25 @@ export const unitPropagation = (
 	}
 
 	const propagate: Literal = clause.fstUnassignedLiteral();
-	const varId: Var = Literal.var(propagate.toInt());
-	const truthValue: boolean = !Literal.hatted(propagate.toInt());
+	const varId: Var = Literal.var(propagate.toNumber());
+	const truthValue: boolean = !Literal.hatted(propagate.toNumber());
 
 	doAssignment(varId, truthValue);
 
-	const variable: Variable = variables.getVariable(varId).copy();
+	const variable: Variable = variables.get(varId).copy();
+
+	const dl = trail.getDL();
 
 	const varAssignment: VariableAssignment =
 		assignmentReason === 'up'
-			? VariableAssignment.newUnitPropagationAssignment(variable, cRef)
-			: VariableAssignment.newBackJumpingAssignment(variable, cRef);
+			? VariableAssignment.newUnitPropagationAssignment(variable, cRef, dl)
+			: VariableAssignment.newBackJumpingAssignment(variable, cRef, dl);
 
 	trail.push(varAssignment);
 
 	increaseNoUnitPropagations();
 
-	return propagate.toInt();
+	return propagate.toNumber();
 };
 
 export const complementaryOccurrences = (
@@ -176,22 +180,23 @@ export const backtracking = (pool: VariablePool): Lit => {
 	if (!variable.hasTruthValue()) {
 		logFatal(
 			'Backtracking Assignment',
-			`Variable ${variable.toInt()} has no assigned value before backtracking`
+			`Variable ${variable.toNumber()} has no assigned value before backtracking`
 		);
 	}
 
 	variable.negate();
-	doAssignment(variable.toInt(), variable.getAssignment());
+	doAssignment(variable.toNumber(), variable.getAssignment());
 
-	variable = pool.getVariable(variable.toInt()).copy();
+	variable = pool.get(variable.toNumber()).copy();
 
 	if (!variable.hasTruthValue()) {
 		logFatal(
 			'Backtracking Assignment',
-			`Variable ${variable.toInt()} has no assigned value after backtracking`
+			`Variable ${variable.toNumber()} has no assigned value after backtracking`
 		);
 	}
-	newTrail.push(VariableAssignment.newBacktrackingAssignment(variable));
+	const dl: number = lastAssignment._dl - 1;
+	newTrail.push(VariableAssignment.newBacktrackingAssignment(variable, dl));
 	stackTrail(newTrail);
 
 	//Notify that a new trail has been pushed
@@ -203,7 +208,7 @@ export const backtracking = (pool: VariablePool): Lit => {
 const disposeUntilDecision = (trail: Trail, variables: VariablePool): VariableAssignment => {
 	let last = trail.pop();
 	while (last && !last.isD()) {
-		variables.unassign(last.getVariable().toInt());
+		variables.unassign(last.getVariable().toNumber());
 		last = trail.pop();
 	}
 	if (!last) {

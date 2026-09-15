@@ -1,10 +1,17 @@
 type Just<T> = {
 	kind: 'just';
 	value: T;
+	fromJust: () => NonNullable<T>;
+	isJust: () => this is Just<T>;
+	isNothing: () => boolean;
 };
+
 type Nothing = {
 	kind: 'nothing';
 	value?: never;
+	fromJust: () => never;
+	isJust: () => boolean;
+	isNothing: () => boolean;
 };
 
 export type Maybe<T> = NonNullable<Just<T> | Nothing>;
@@ -17,9 +24,32 @@ export const isNothing = <T>(m: Maybe<T>): m is Nothing => {
 	return m.kind == 'nothing';
 };
 
-export const makeJust = <T>(value: T): Just<T> => ({ kind: 'just', value: value });
+export const makeJust = <T>(value: T): Just<T> => ({
+	kind: 'just',
+	value,
+	fromJust: function (this: Just<T>) {
+		return fromJust(this);
+	},
+	isJust: function <T>(this: Maybe<T>): this is Just<T> {
+		return isJust(this);
+	},
+	isNothing: function (this: Just<T>) {
+		return isNothing(this);
+	}
+});
 
-export const makeNothing = (): Nothing => ({ kind: 'nothing' });
+export const makeNothing = (): Nothing => ({
+	kind: 'nothing',
+	fromJust: function (this: Nothing) {
+		throw new Error('Attempted to unwrap a nothing value');
+	},
+	isJust: function (this: Nothing) {
+		return false;
+	},
+	isNothing: function (this: Nothing) {
+		return true;
+	}
+});
 
 export type UnwrapMaybe = <T>(e: Maybe<T>) => NonNullable<T>;
 

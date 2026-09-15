@@ -145,7 +145,7 @@ export abstract class StateMachine<F extends StateFun, I extends StateInput>
 		} else {
 			const nextState: State<F, I> = this.getNextState(input);
 
-			console.debug(`Transitioning ${this.active} ~> ${nextState.id} with input ${input}`);
+			// console.debug(`Transitioning ${this.active} ~> ${nextState.id} with input ${input}`);
 
 			this.active = nextState.id;
 			if (this.onFinalState()) {
