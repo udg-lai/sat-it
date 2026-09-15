@@ -2,6 +2,8 @@
 
 set -e
 
-podman compose build \
+podman compose down
+podman compose build --no-cache \
     && podman compose up -d
+podman image prune
 
