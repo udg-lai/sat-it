@@ -100,3 +100,6 @@ export const fillResolutionGapsEventBus = createEventBus<number>();
 
 // The tool panel has been resized
 export const toolPanelResizedEventBus = createEventBus<void>();
+
+// Notification for the creation of a new implication graph
+export const updatedImplicationGraph = createEventBus<void>();

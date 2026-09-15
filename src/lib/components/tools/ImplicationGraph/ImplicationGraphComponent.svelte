@@ -19,8 +19,9 @@
 
 	import type { ConflictAnalysis } from '$lib/entities/ConflictAnalysis.svelte.ts';
 	import Literal from '$lib/entities/Literal.svelte.ts';
+	import { toolPanelResizedEventBus, updatedImplicationGraph } from '$lib/events/events.ts';
+	import { logFatal } from '$lib/states/toasts.svelte.ts';
 	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
-	import { toolPanelResizedEventBus } from '$lib/events/events.ts';
 	import { obtainConflictAnalysis } from '$lib/states/conflict-analysis.svelte.ts';
 
 	/*
@@ -266,6 +267,10 @@
 		if (graph.isNothing()) return;
 
 		if (conflictAnalysis.isNothing()) return;
+
+		if (!cy) {
+			logFatal('Implication Graph Error', 'There should be an implication graph created');
+		}
 
 		visitingNodeId = undefined;
 
@@ -524,6 +529,7 @@
 	 */
 
 	function createGraph() {
+		console.log('Entered the ');
 		if (!container) return;
 
 		if (graph.isNothing()) return;
@@ -866,19 +872,12 @@
 
 		cy.layout({
 			name: 'dagre',
-
 			rankDir: 'LR',
-
 			nodeSep: 60,
-
 			rankSep: 100,
-
 			edgeSep: 30,
-
 			padding: 40,
-
 			animate: true,
-
 			animationDuration: 300
 		}).run();
 
@@ -925,25 +924,30 @@
 	 * ------------------------------------------------------------------------
 	 */
 
+	function resizeGraph() {
+		console.debug('ImplicationGraphComponent: toolPanelResizedEventBus received');
+		if (graph.isNothing()) return;
+		createGraph();
+		fitGraph();
+	}
+
 	onMount(() => {
+		// When the view is created, a graph should be created as well
 		createGraph();
 
-		const sub = toolPanelResizedEventBus.subscribe(() => {
-			console.debug('ImplicationGraphComponent: toolPanelResizedEventBus received');
-			if (graph.isNothing()) return;
-			createGraph();
-			fitGraph();
-		});
+		const subs: (() => void)[] = [];
+		//If, for some reason the view is opened and a conflict is found, create a new graph
+		// COMMENT: I think that in the future this should be changed into creating the graph of the opened ca view.
+		subs.push(updatedImplicationGraph.subscribe(createGraph));
+		subs.push(toolPanelResizedEventBus.subscribe(resizeGraph));
 
 		return () => {
 			cy?.destroy();
-
 			cy = undefined;
-
 			overlayNodes = [];
 
-			// Subscriptions
-			sub();
+			// Unsubscribe
+			subs.forEach((s) => s());
 		};
 	});
 
@@ -1107,7 +1111,7 @@
 	.toolbar {
 		position: absolute;
 
-		z-index: 20;
+		z-index: 10;
 
 		top: 12px;
 		left: 12px;
@@ -1120,35 +1124,41 @@
 
 		padding: 8px;
 
-		background: rgba(255, 255, 255, 0.95);
-
-		border: 1px solid #e2e8f0;
-
-		border-radius: 8px;
-
+		background: var(--main-bg-color);
 		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+		border-color: var(--button-border-color);
+		border-style: solid;
+		border-width: 1px;
+		border-radius: 6px;
 	}
 
 	button {
-		min-width: 30px;
-
-		width: fit-content;
-
-		height: 30px;
-
+		height: var(--button-size) / 1.5;
+		width: var(--button-size) / 1.5;
+		min-width: fit-content;
 		padding: 0.5rem 0.75rem;
 
-		border: 1px solid #cbd5e1;
-
+		border-color: var(--button-border-color);
+		border-style: solid;
+		border-width: 1px;
 		border-radius: 6px;
 
-		background: white;
+		align-items: center;
+		justify-content: center;
+
+		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+		background-color: var(--button-color);
 
 		cursor: pointer;
 	}
 
 	button:hover {
-		background: #f1f5f9;
+		background-color: var(--button-hover-color);
+	}
+
+	button:active {
+		background-color: var(--button-color);
 	}
 
 	.selected {
@@ -1156,7 +1166,7 @@
 
 		padding-left: 10px;
 
-		border-left: 1px solid #e2e8f0;
+		border-left: 1px solid var(--button-border-color);
 
 		font-size: 13px;
 	}
@@ -1174,6 +1184,22 @@
 		transform: translateX(20px);
 
 		pointer-events: none;
-		z-index: 10;
+		z-index: 1;
+	}
+
+	.dl-line {
+		position: absolute;
+
+		top: 0;
+		bottom: 0;
+
+		width: 0;
+
+		border-left: 1px dashed rgba(0, 0, 0, 0.1);
+
+		transform: translateX(-20px);
+
+		pointer-events: none;
+		z-index: 1;
 	}
 </style>

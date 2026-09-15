@@ -7,7 +7,7 @@ import { type VisitingOccurrenceList } from '$lib/entities/OccurrenceList.svelte
 import type { Trail } from '$lib/entities/Trail.svelte.ts';
 import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
 import type { VariablePool } from '$lib/entities/VariablePool.svelte.ts';
-import { fillResolutionGapsEventBus } from '$lib/events/events.ts';
+import { fillResolutionGapsEventBus, updatedImplicationGraph } from '$lib/events/events.ts';
 import {
 	atLevelZero,
 	clauseEvaluation,
@@ -255,6 +255,7 @@ export const buildConflictAnalysis: CDCL_BUILD_CONFLICT_ANALYSIS_STRUCTURE_FUN =
 
 	setConflictAnalysis(conflictAnalysis);
 	setImplicationGraph(new ImplicationGraph(trail));
+	updatedImplicationGraph.emit();
 };
 
 export type CDCL_ASSERTING_CLAUSE_FUN = () => boolean;
