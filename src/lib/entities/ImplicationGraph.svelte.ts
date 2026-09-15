@@ -148,10 +148,11 @@ export class ImplicationGraph {
 
 		const cc: Clause = conflictAnalysis.getConflictiveClause();
 
-		// Adds the empty clause to the graph, it has its own dl, which is the last decision level + 1, since it is a lemma
+		// Adds the empty clause to the graph, it has its own dl, which is the last decision level
 		const falsum: IG_Node = {
 			entity: 'EmptyClause',
-			dl: dl
+			dl: dl,
+			visited: false
 		};
 
 		// Adds the conflict as node
@@ -190,6 +191,7 @@ export class ImplicationGraph {
 			const node: IG_Node = {
 				entity: 'VariableAssignment',
 				dl: assignment.dl(),
+				visited: false,
 				assignment: {
 					id: assignment.toVar().toString(),
 					value: assignment.eval(),
@@ -269,7 +271,8 @@ export class ImplicationGraph {
 							index: index,
 							uip: false,
 							fuip: false
-						}
+						},
+						visited: false
 					};
 
 					this._nodes.set(complementary.toString(), fromNode);
