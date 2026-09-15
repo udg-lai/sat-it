@@ -1,5 +1,5 @@
 <script lang="ts">
-	import cytoscape, { type Core, type ElementDefinition, type NodeSingular } from 'cytoscape';
+	import cytoscape, { type Core, type ElementDefinition } from 'cytoscape';
 	import dagre from 'cytoscape-dagre';
 	import { onMount, type Component } from 'svelte';
 
@@ -9,7 +9,7 @@
 		type ImplicationGraph
 	} from '$lib/entities/ImplicationGraph.svelte.ts';
 
-	import { getCssVariable, hex8ToRgba, mulberry32 } from '$lib/utils.ts';
+	import { getCssVariable, mulberry32 } from '$lib/utils.ts';
 
 	import { makeJust, makeNothing, type Maybe } from '$lib/types/maybe.ts';
 
@@ -19,10 +19,10 @@
 
 	import type { ConflictAnalysis } from '$lib/entities/ConflictAnalysis.svelte.ts';
 	import Literal from '$lib/entities/Literal.svelte.ts';
-	import { toolPanelResizedEventBus, updatedImplicationGraph } from '$lib/events/events.ts';
-	import { logFatal } from '$lib/states/toasts.svelte.ts';
 	import type VariableAssignment from '$lib/entities/VariableAssignment.ts';
+	import { toolPanelResizedEventBus, updatedImplicationGraph } from '$lib/events/events.ts';
 	import { obtainConflictAnalysis } from '$lib/states/conflict-analysis.svelte.ts';
+	import { logFatal } from '$lib/states/toasts.svelte.ts';
 
 	/*
 	 * Svelte components that will be rendered inside the Cytoscape nodes.
@@ -116,83 +116,15 @@
 		});
 	}
 
-	/*
-	 * ------------------------------------------------------------------------
-	 * Selection
-	 * ------------------------------------------------------------------------
-	 */
+	// Highligh edges
+	function highlighCrossingEdges(node: cytoscape.CollectionReturnValue) {
+		if (node == undefined || node.empty()) {
+			console.warn(`Node to visit is not defined`);
+			return;
+		}
 
-	function visitNode(visitingNodeID: string) {
-		if (!cy) return;
-
-		if (graph.isNothing()) return;
-
-		graph.fromJust().visit(visitingNodeID);
-
-		const highlighCrossingEdges = (visitingNode, sourceNodesIDs: string[]) => {
-			if (visitingNode == undefined || visitingNode.empty()) {
-				console.warn(`Visiting node ${visitingNodeID} not found in Cytoscape`);
-				return;
-			}
-			if (sourceNodesIDs.length == 0) return;
-
-			if (!cy) return;
-
-			const cutEdges = cy.edges('.crossing-cut');
-
-			for (let i = 0; i < cutEdges.length; i++) {
-				const edge = cutEdges[i];
-				const source = edge.source();
-				const sourceID = source.data('id');
-
-				// Skip the visited nodes
-				if (graph.fromJust().getNode(sourceID).visited) continue;
-
-				edge.removeClass('crossing-cut');
-			}
-
-			const visitingNodeId = visitingNode.data('id');
-			const visitingDL = graph.fromJust().getNode(visitingNodeId).dl;
-			const visitingIndex =
-				graph.fromJust().getNode(visitingNodeId)?.assignment?.index ?? Number.MAX_SAFE_INTEGER;
-
-			for (const nodeId of sourceNodesIDs) {
-				const node = cy.getElementById(nodeId);
-				if (node.empty()) {
-					console.warn(`Node ${nodeId} not found in Cytoscape`);
-					return;
-				}
-				const outgoingEdges = node.outgoers('edge');
-
-				const filterEdges = outgoingEdges.filter((edge) => {
-					const target = edge.target();
-					const data = target.data();
-					const targetID = data['id'];
-					const targetNode = graph.fromJust().getNode(targetID);
-					const targetDL = targetNode.dl;
-					const targetIndex = targetNode.assignment?.index ?? Number.MIN_SAFE_INTEGER;
-
-					let targetIsFalsum = false;
-
-					let targetIsAtLeastSameDL = false;
-					let targetIndexIsBeyond = false;
-
-					if (targetID == 'falsum') targetIsFalsum = true;
-
-					if (visitingDL <= targetDL) targetIsAtLeastSameDL = true;
-					if (targetIndex > visitingIndex) targetIndexIsBeyond = true;
-
-					return targetIsFalsum || (targetIsAtLeastSameDL && targetIndexIsBeyond);
-				});
-				filterEdges.addClass('crossing-cut');
-			}
-		};
-
-		// Highlight the visiting node
-		const node = cy.getElementById(visitingNodeID);
-		node.select();
-
-		const computeSourceNodes = (): string[] => {
+		// The source nodes are the complementary of the literals occurring on the falsified clause
+		const computeSourceNodesIDs = (): string[] => {
 			if (graph.isNothing()) return [];
 			if (conflictAnalysis.isNothing()) return [];
 			return conflictAnalysis
@@ -202,10 +134,70 @@
 				.map((lit) => Literal.complementary(lit.toNumber()).toString());
 		};
 
-		const sourceNodes = computeSourceNodes();
-		if (sourceNodes.length > 0) {
-			highlighCrossingEdges(node, sourceNodes);
+		const sourceNodesIDs = computeSourceNodesIDs();
+
+		if (sourceNodesIDs.length == 0) return;
+
+		if (!cy) return;
+
+		const cutEdges = cy.edges('.crossing-cut');
+
+		for (let i = 0; i < cutEdges.length; i++) {
+			const edge = cutEdges[i];
+			const source = edge.source();
+			const sourceID = source.data('id');
+
+			// Skip the visited nodes
+			if (graph.fromJust().getNode(sourceID).visited) continue;
+
+			edge.removeClass('crossing-cut');
 		}
+
+		const visitingNodeId = node.data('id');
+		const visitingDL = graph.fromJust().getNode(visitingNodeId).dl;
+		const visitingIndex =
+			graph.fromJust().getNode(visitingNodeId)?.assignment?.index ?? Number.MAX_SAFE_INTEGER;
+
+		for (const nodeId of sourceNodesIDs) {
+			const node = cy.getElementById(nodeId);
+			if (node.empty()) {
+				console.warn(`Node ${nodeId} not found in Cytoscape`);
+				return;
+			}
+			const outgoingEdges = node.outgoers('edge');
+
+			const filterEdges = outgoingEdges.filter((edge) => {
+				const target = edge.target();
+				const data = target.data();
+				const targetID = data['id'];
+				const targetNode = graph.fromJust().getNode(targetID);
+				const targetDL = targetNode.dl;
+				const targetIndex = targetNode.assignment?.index ?? Number.MIN_SAFE_INTEGER;
+
+				let targetIsFalsum = false;
+
+				let targetIsAtLeastSameDL = false;
+				let targetIndexIsBeyond = false;
+
+				if (targetID == 'falsum') targetIsFalsum = true;
+
+				if (visitingDL <= targetDL) targetIsAtLeastSameDL = true;
+				if (targetIndex > visitingIndex) targetIndexIsBeyond = true;
+
+				return targetIsFalsum || (targetIsAtLeastSameDL && targetIndexIsBeyond);
+			});
+			filterEdges.addClass('crossing-cut');
+		}
+	}
+
+	function visitNode(visitingNodeID: string) {
+		if (!cy) return;
+
+		if (graph.isNothing()) return;
+
+		graph.fromJust().visit(visitingNodeID);
+		const node: cytoscape.CollectionReturnValue = cy.getElementById(visitingNodeID);
+		highlighCrossingEdges(node);
 
 		updateOverlayPositions();
 	}
@@ -464,29 +456,12 @@
 
 		const g: ImplicationGraph = graph.fromJust();
 
-		const falsumId = g.falsumId();
-		const uipIds = g.uipIds();
-		const fuipId = g.fuipId();
-
 		const FACTOR = 4;
-		const [nodeWith, nodeHeight] = [10, 10].map(x => x * FACTOR);
+		const [nodeWith, nodeHeight] = [10, 10].map((x) => x * FACTOR);
 
-		// Colors definition
-		const booleanPropagationColor = getCssVariable(container, '--boolean-constraint-propagation');
+		const baseEdgeColor = getCssVariable(container, '--visited-color');
+		const crossingOutEdgeColor = getCssVariable(container, '--unsatisfied-color');
 
-		const inspectedColor = getCssVariable(container, '--inspecting-color');
-
-		const satisfiedColor = getCssVariable(container, '--satisfied-color');
-
-		const unsatisfiedColor = getCssVariable(container, '--unsatisfied-color');
-
-		const satisfiedBackgroundColor = hex8ToRgba(
-			getCssVariable(container, '--satisfied-border-color-o')
-		);
-
-		const visitedColor = getCssVariable(container, '--visited-color');
-
-		// Edge width when the outgoing edges of the literals has passed the cut line (i.e., they are part of the conflict clause).
 		const baseEdgeWidth = 2;
 		const crossingOutEdgeWidth = 2;
 
@@ -503,31 +478,31 @@
 			},
 
 			style: [
- 				/*
- 				 * ------------------------------------------------------------
- 				 * Normal node
- 				 *
- 				 * Cytoscape keeps the node geometry, but Svelte renders
- 				 * the visible content.
- 				 * ------------------------------------------------------------
- 				 */
+				/*
+				 * ------------------------------------------------------------
+				 * Normal node
+				 *
+				 * Cytoscape keeps the node geometry, but Svelte renders
+				 * the visible content.
+				 * ------------------------------------------------------------
+				 */
 
- 				{
- 					selector: 'node',
+				{
+					selector: 'node',
 
- 					style: {
- 						shape: 'roundrectangle',
+					style: {
+						shape: 'roundrectangle',
 
- 						label: '',
+						label: '',
 
- 						'background-opacity': 0,
+						'background-opacity': 0,
 
- 						'border-width': 0,
+						'border-width': 0,
 
- 						width: nodeWith,
- 						height: nodeHeight,
- 					}
- 				},
+						width: nodeWith,
+						height: nodeHeight
+					}
+				},
 
 				/*
 				 * ------------------------------------------------------------
@@ -541,9 +516,9 @@
 					style: {
 						width: baseEdgeWidth,
 
-						'line-color': visitedColor,
+						'line-color': baseEdgeColor,
 
-						'target-arrow-color': visitedColor,
+						'target-arrow-color': baseEdgeColor,
 
 						'target-arrow-shape': 'triangle',
 
@@ -554,9 +529,9 @@
 					selector: '.crossing-cut',
 
 					style: {
-						'line-color': unsatisfiedColor,
+						'line-color': crossingOutEdgeColor,
 
-						'target-arrow-color': unsatisfiedColor,
+						'target-arrow-color': crossingOutEdgeColor,
 
 						width: crossingOutEdgeWidth
 					}
@@ -572,7 +547,6 @@
 
 			autoungrabify: false
 		});
-
 
 		// Initial overlay positions
 		updateOverlayPositions();
@@ -620,6 +594,30 @@
 				duration: 300
 			});
 		});
+
+		if (!conflictAnalysis.fromJust().finished()) {
+			// I am in conflict analysis
+			// Paint the outgoing edges all the nodes at the right of the cut
+			// and the outgoing edges of the nodes that cross from left to right of the cut.
+
+			for (const nodeId of g.nodes()) {
+				const node: IG_Node = g.getNode(nodeId);
+				if (node.entity === 'EmptyClause') continue;
+
+				if (node.visited) {
+					const outgoingEdges = cy.getElementById(nodeId).outgoers('edge');
+					outgoingEdges.addClass('crossing-cut');
+				}
+			}
+			if (pivotingVariableAssignment.isJust()) {
+				const nodeId = pivotingVariableAssignment.fromJust().toString();
+				const node: cytoscape.CollectionReturnValue = cy.getElementById(nodeId);
+				highlighCrossingEdges(node);
+			}
+		} else {
+			// Paint every outgoing edge as the conflict analysis has finished
+			afterFinishingConflictAnalysis();
+		}
 
 		// Make sure the overlay positions are updated after the layout is finished.
 		requestAnimationFrame(() => {
@@ -681,7 +679,6 @@
 	 */
 
 	function resizeGraph() {
-		console.debug('ImplicationGraphComponent: toolPanelResizedEventBus received');
 		if (graph.isNothing()) return;
 		createGraph();
 		fitGraph();

@@ -1,8 +1,6 @@
 <script lang="ts">
 	import { onChrome } from '$lib/app.svelte.ts';
 	import MathTexComponent from '$lib/components/MathTexComponent.svelte';
-	import Literal from '$lib/entities/Literal.svelte.ts';
-	import type { Lit } from '$lib/types/types.ts';
 
 	let {
 		id,
